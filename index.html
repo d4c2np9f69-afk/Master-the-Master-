@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Toro TimeMaster 21200</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TimeMaster">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:#f5f5f7;overscroll-behavior:none;-webkit-tap-highlight-color:transparent;}
+:root{--tr:#CC0000;--trd:#8B0000;--trl:#fff0f0;--bg1:#fff;--bg2:#f5f5f7;--bg3:#ebebf0;--tx1:#111;--tx2:#6e6e73;--bd1:#c7c7cc;--bd2:#d1d1d6;--bd3:#e5e5ea;}
+@media(prefers-color-scheme:dark){:root{--bg1:#1c1c1e;--bg2:#2c2c2e;--bg3:#111;--tx1:#f5f5f5;--tx2:#8e8e93;--bd1:#3a3a3c;--bd2:#3a3a3c;--bd3:#2c2c2e;}}
+/* layout */
+#shell{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;}
+#scroller{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bg3);}
+#tabbar{display:flex;flex-shrink:0;background:var(--bg1);border-top:0.5px solid var(--bd2);padding:6px 0 max(4px,env(safe-area-inset-bottom));}
+.ti{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;cursor:pointer;padding:4px 0;font-family:-apple-system,sans-serif;}
+.ti .ic{font-size:21px;line-height:1;}
+.ti .lb{font-size:9px;font-weight:600;color:var(--tx2);letter-spacing:.2px;}
+.ti.on .lb{color:var(--tr);}
+/* app chrome */
+#hdr{background:linear-gradient(135deg,#111 0%,#2d0000 55%,#111 100%);padding:max(10px,env(safe-area-inset-top)) 14px 10px;border-bottom:2px solid #CC0000;display:flex;justify-content:space-between;align-items:center;}
+/* cards & common */
+.card{background:var(--bg1);border-radius:12px;border:0.5px solid var(--bd3);padding:14px 16px;margin-bottom:10px;border-top:3px solid var(--tr);}
+.card.nt{border-top:0.5px solid var(--bd3);}
+.sec{font-size:10px;font-weight:700;color:var(--tx2);letter-spacing:.7px;text-transform:uppercase;margin-bottom:8px;padding-bottom:7px;border-bottom:0.5px solid var(--bd3);display:flex;justify-content:space-between;align-items:center;}
+.row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid var(--bd3);font-size:12px;color:var(--tx1);}
+.row:last-child{border-bottom:none;}
+.btn{border-radius:7px;border:none;background:var(--tr);color:#fff;font-size:12px;font-weight:600;padding:5px 13px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;}
+.btn.sm{font-size:11px;padding:3px 9px;}
+.btn.ghost{background:transparent;border:1.5px solid var(--tr);color:var(--tr);}
+.btn.grn{background:#16a34a;}
+.btn.gry{background:var(--bg2);color:var(--tx1);border:0.5px solid var(--bd2);}
+.btn.yt{background:#FF0000;color:#fff;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:700;text-decoration:none;}
+.mi{background:var(--bg2);border:0.5px solid var(--bd2);border-radius:7px;padding:6px 10px;font-size:12px;color:var(--tx1);font-family:inherit;width:100%;outline:none;}
+.mi:focus{border-color:var(--tr);}
+.pbar{height:4px;background:var(--bg2);border-radius:99px;overflow:hidden;margin-top:4px;}
+.pbar-f{height:100%;border-radius:99px;}
+.stab{border-radius:7px;border:0.5px solid var(--bd2);background:var(--bg1);color:var(--tx2);font-size:11px;font-weight:500;padding:4px 10px;cursor:pointer;font-family:inherit;}
+.stab.on{background:var(--tr);color:#fff;border-color:var(--tr);}
+.prow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:0.5px solid var(--bd3);cursor:pointer;}
+.prow:last-child{border-bottom:none;}
+.rlink{display:flex;flex-direction:column;gap:3px;padding:9px 11px;border-radius:8px;margin-bottom:6px;text-decoration:none;border:0.5px solid;}
+input[type=range]{accent-color:var(--tr);width:100%;cursor:pointer;}
+input[type=checkbox]{accent-color:var(--tr);cursor:pointer;width:14px;height:14px;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.pulse{animation:pulse 1.6s ease-in-out infinite;}
+#pg{padding:12px 12px 24px;}
+</style>
+
+<link rel="manifest" href="manifest.json">
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js');
+  });
+}
+</script>
+
+</head>
+<body>
+<div id="shell">
+  <div id="scroller"><div id="hdr">
+    <div style="display:flex;align-items:center;gap:8px">
+      <svg viewBox="0 0 88 30" style="height:24px"><rect width="88" height="30" rx="4" fill="#CC0000"/><text x="44" y="21" text-anchor="middle" fill="white" font-weight="900" font-size="17" font-family="Arial Black,sans-serif" letter-spacing="2.5">TORO</text></svg>
+      <span style="color:rgba(255,255,255,.85);font-size:13px;font-weight:600">TimeMaster 21200</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span id="stMsg" style="font-size:11px;color:#4ade80;font-weight:500;opacity:0;transition:opacity .4s"></span>
+      <span id="hdrBadge"></span>
+    </div>
+  </div><div id="pg"></div></div>
+  <div id="tabbar">
+    <button class="ti on" id="t0" onclick="go(0)"><span class="ic">⊞</span><span class="lb">Dashboard</span></button>
+    <button class="ti"    id="t1" onclick="go(1)"><span class="ic">🔧</span><span class="lb">Maintain</span></button>
+    <button class="ti"    id="t2" onclick="go(2)"><span class="ic">⚙️</span><span class="lb">Parts</span></button>
+    <button class="ti"    id="t3" onclick="go(3)"><span class="ic">⚠️</span><span class="lb">Diagnose</span></button>
+    <button class="ti"    id="t4" onclick="go(4)"><span class="ic">＋</span><span class="lb">Log</span></button>
+    <button class="ti"    id="t5" onclick="go(5)"><span class="ic">🛒</span><span class="lb" id="shoplbl">Shop</span></button>
+  </div>
+</div>
+<script>
+// ── state ──────────────────────────────────────────────────────────────────
+const SK="toro-v2";
+let R=null,view=0,stab="schedule",editHrs=false,shopCat="all";
+let nHrs="",nDate=today(),nType="service",nTitle="",nItems="",nIssue="",nNote="";
+let stT;
+
+function today(){return new Date().toISOString().slice(0,10);}
+
+// ── storage ─────────────────────────────────────────────────────────────────
+function save(){
+  try{localStorage.setItem(SK,JSON.stringify(R));flash("Saved ✓");}catch(e){flash("Save failed");}
+}
+function flash(m){
+  const el=document.getElementById("stMsg");
+  if(!el)return;
+  el.textContent=m;el.style.opacity="1";
+  clearTimeout(stT);stT=setTimeout(()=>el.style.opacity="0",2200);
+}
+function patch(o){Object.assign(R,o);save();render();}
+
+// ── data ────────────────────────────────────────────────────────────────────
+const VIDEOS={
+  "133-8062":{url:"https://www.youtube.com/watch?v=8w7e514iKWE",title:"Blade Replacement Step-by-Step",yr:2024},
+  "117-1196":{url:"https://www.youtube.com/watch?v=fZPRLCmubho",title:"Spindle, Shaft & Bearing Repair",yr:2022},
+  "106-9171":{url:"https://www.youtube.com/watch?v=tkmyzy4QBK0",title:"Transmission Pulley Replacement",yr:2024},
+  "121-5956":{url:"https://www.youtube.com/watch?v=_N7EARDA-6A",title:"Belt Replacement — Save Half the Time",yr:2024},
+  "121-5957":{url:"https://www.youtube.com/watch?v=FaO4RPcyVdE",title:"Sync Belt & PTO Belt Replacement",yr:2025},
+  "117-5976":{url:"https://www.youtube.com/watch?v=bOae3hAWA4E",title:"TimeMaster Full Tune-Up",yr:2023},
+  "119-8891":{url:"https://www.youtube.com/watch?v=KPaANBznWY8",title:"Blade Engagement Cable Replacement",yr:2022},
+  "117-5975":{url:"https://www.youtube.com/watch?v=bM7zYGjnpP0",title:"Transmission Replacement",yr:2024},
+  "117-5968":{url:"https://www.youtube.com/watch?v=bOae3hAWA4E",title:"TimeMaster Full Tune-Up",yr:2023},
+  "117-9127":{url:"https://www.youtube.com/watch?v=c-62VDD1tO8",title:"Pull Rope Replace & Rewind",yr:2021},
+  "110-0836":{url:"https://www.youtube.com/watch?v=bOae3hAWA4E",title:"Tune-Up: Oil, Plug & Air Filter",yr:2023},
+  "125-5271":{url:"https://www.youtube.com/watch?v=ylvs9z-xts8",title:"Oil Change & Air Filter",yr:2026},
+  "125-4451":{url:"https://www.youtube.com/watch?v=KGVEHuIZRUc",title:"Fuel Shut-Off Valve Install"},
+  "(Aftermarket)":{url:"https://www.youtube.com/watch?v=KIUVqpzvXxA",title:"Ignition Coil Replacement Fix",yr:2021},
+  "RJ19LM":{url:"https://www.youtube.com/watch?v=Avrf5PQvgp8",title:"Spark Plug & Gap Setting",yr:2024},
+  "(OEM)":{url:"https://www.youtube.com/watch?v=Avrf5PQvgp8",title:"Spark Plug & Boot Replacement",yr:2024},
+};
+
+const RETS=[
+  {name:"Amazon",      icon:"🛒",btnBg:"#FF9900",btnTc:"#111",type:"OEM+AFM",note:"Fastest ship",       url:q=>`https://www.amazon.com/s?k=toro+${q}&s=price-asc-rank`},
+  {name:"eBay",        icon:"🔖",btnBg:"#0064D2",btnTc:"#fff",type:"OEM+AFM",note:"Sort lowest price",  url:q=>`https://www.ebay.com/sch/i.html?_nkw=toro+${q}&_sop=15`},
+  {name:"eReplacementParts",icon:"🔩",btnBg:"#CC0000",btnTc:"#fff",type:"OEM",note:"OEM verified",      url:q=>`https://www.ereplacementparts.com/search.aspx?q=${q}`},
+  {name:"PartsTree",   icon:"🌲",btnBg:"#16a34a",btnTc:"#fff",type:"OEM",note:"Exploded diagrams",      url:q=>`https://www.partstree.com/parts/search/?q=${q}`},
+  {name:"Jack's SE",   icon:"⚙",btnBg:"#f97316",btnTc:"#fff",type:"OEM+AFM",note:"Engine specialist",  url:q=>`https://www.jackssmallengines.com/JacksSmallEngines/ProductSearch?search=${q}`},
+  {name:"ProvenPart",  icon:"✅",btnBg:"#7c3aed",btnTc:"#fff",type:"OEM+AFM",note:"Tune-up kits",       url:q=>`https://provenpart.com/search?q=${q}`},
+];
+
+const BEST={"133-8062":[0,1,2,3,4,5],"117-1196":[2,3,1,4],"106-9171":[0,1,2,3],"121-5956":[0,1,2,3,4],"121-5957":[0,1,2,3,4],"117-5976":[2,3,1,4],"119-8891":[2,3,1],"117-5975":[2,3,1,4],"117-5968":[2,3,1],"117-9127":[2,3,0,1,4],"110-0836":[0,1,2,3,4,5],"125-5271":[0,1,2,3,4],"125-4451":[2,3,1,4],"(Aftermarket)":[0,1,4],"RJ19LM":[0,1,2,4],"(OEM)":[2,3,0,1]};
+
+const PARTS=[
+  {c:"Blades",            p:"133-8062",     s:"ok",d:"2026-05-09",cat:"Cutting"},
+  {c:"Blade Spindles",    p:"117-1196",     s:"ok",d:"2026-05-09",cat:"Cutting"},
+  {c:"Pulleys",           p:"106-9171",     s:"ok",d:"2026-05-09",cat:"Drive"},
+  {c:"Blade Drive Belt",  p:"121-5956",     s:"ok",d:"2026-05-09",cat:"Drive"},
+  {c:"Trans. Drive Belt", p:"121-5957",     s:"ok",d:"2026-05-09",cat:"Drive"},
+  {c:"Wheels",            p:"117-5976",     s:"ok",d:"2026-05-09",cat:"Chassis"},
+  {c:"Cables",            p:"119-8891",     s:"ok",d:"2026-05-09",cat:"Controls"},
+  {c:"Transmission",      p:"117-5975",     s:"ok",d:"2026-05-09",cat:"Drive"},
+  {c:"Deck Height Adj.",  p:"117-5968",     s:"ok",d:"2026-05-09",cat:"Chassis"},
+  {c:"Pull Cord",         p:"117-9127",     s:"ok",d:"2026-05-09",cat:"Engine"},
+  {c:"Air Filter",        p:"110-0836",     s:"ok",d:"2026-05-09",cat:"Engine"},
+  {c:"Fuel Filter",       p:"125-5271",     s:"ok",d:"2026-05-09",cat:"Fuel"},
+  {c:"Fuel Shutoff Valve",p:"125-4451",     s:"ok",d:"2026-05-09",cat:"Fuel"},
+  {c:"Ignition Coil",     p:"(Aftermarket)",s:"ok",d:"2026-05-13",cat:"Engine"},
+  {c:"Spark Plug",        p:"RJ19LM",       s:"ok",d:"2026-05-13",cat:"Engine"},
+  {c:"Spark Plug Boot",   p:"(OEM)",        s:"ok",d:"2026-05-13",cat:"Engine"},
+];
+const CATC={"Cutting":"#ef4444","Drive":"#3b82f6","Chassis":"#22c55e","Controls":"#f59e0b","Engine":"#8b5cf6","Fuel":"#f97316"};
+
+const SCHED=[
+  {id:"oil_5",    label:"Engine Oil — Break-In",    interval:5, oneTime:true, critical:true, part:"SAE 30/10W-30",  detail:"Required after first 5 hrs"},
+  {id:"oil_50",   label:"Engine Oil — Change",       interval:50,oneTime:false,critical:true, part:"SAE 30/10W-30",  detail:"Standard interval"},
+  {id:"air_clean",label:"Air Filter — Clean",        interval:50,oneTime:false,critical:false,part:"110-0836",        detail:"Tap or blow <30 psi"},
+  {id:"belt_50",  label:"Blade-Drive Belt — Inspect",interval:50,oneTime:false,critical:false,part:"121-5956",        detail:"Check tension & condition"},
+  {id:"spark_100",label:"Spark Plug — Inspect",      interval:100,oneTime:false,critical:true,part:"RJ19LM",         detail:'Gap: 0.030"'},
+  {id:"bolts_100",label:"Fasteners — Tighten",       interval:100,oneTime:false,critical:false,part:"—",             detail:"Blade bolt: 60 ft-lb"},
+  {id:"air_rep",  label:"Air Filter — Replace",      interval:200,oneTime:false,critical:false,part:"110-0836",       detail:"Full replacement"},
+];
+const ANNUAL=[
+  {id:"a1",label:"Engine Oil Change",    critical:true, detail:"Drain and refill 0.53 L"},
+  {id:"a2",label:"Air Filter Service",   critical:false,detail:"Clean or replace"},
+  {id:"a3",label:"Blades — Sharpen/Replace",critical:true,detail:"Check cracks & balance"},
+  {id:"a4",label:"Spark Plug — Service", critical:false,detail:'Inspect, gap 0.030"'},
+  {id:"a5",label:"Fuel System — Drain",  critical:true, detail:"Run dry before storage"},
+  {id:"a6",label:"Deep Clean & Inspect", critical:false,detail:"Underside and deck"},
+  {id:"a7",label:"All Fasteners — Tighten",critical:false,detail:"Blade bolt 60 ft-lb"},
+];
+const TLC={"purchase":"#3b82f6","service":"#CC0000","oil":"#f59e0b","ignition":"#8b5cf6","other":"#22c55e"};
+const TLI={"purchase":"🏷","service":"🔧","oil":"🛢","ignition":"⚡","other":"📋"};
+
+const INIT={
+  asset:{model:"Toro TimeMaster 21200",serial:"401338948",purchase_date:"2018-04-11",engine:"Briggs & Stratton 223cc OHV",cut_width:'30"',drive:"Personal Pace Self-Propel",condition:"Strong · Fully Rebuilt"},
+  hour_meter:{reading:1.1,last_updated:"2026-05-13",notes:"Hour meter newly installed"},
+  condition_scores:{deck:90,engine:95,transmission:95,ignition:95,overall:92},
+  parts:PARTS.map(p=>({...p})),
+  timeline:[
+    {date:"2018-04-11",type:"purchase",title:"Purchased New",items:["Toro TimeMaster 21200 purchased new"]},
+    {date:"2023-01-01",type:"service", title:"Major Service",items:["Replaced belts, blades, cables","Transmission serviced"]},
+    {date:"2026-04-09",type:"oil",     title:"Oil Change",   items:["5W-30 Full synthetic","Filter inspected"]},
+    {date:"2026-05-09",type:"service", title:"Full Restoration",items:["All belts, blades, spindles, pulleys replaced","Deck painted, wheels, cables, pull cord replaced","Fuel filter & shutoff replaced"]},
+    {date:"2026-05-13",type:"ignition",title:"Ignition Complete",items:["Aftermarket ignition coil installed","Champion RJ19LM — 0.030 gap","Spark plug boot replaced","Hour meter — 1.1 hrs"]},
+  ],
+  diagnostics:{current_issues:[],notes:["Hour meter newly installed · 1.1 hrs logged","Spark Plug: Champion RJ19LM · 0.030 gap","Ignition coil installed — running strong"]},
+  maint_last_done:{},maint_dismissed:[],annual_done:{},annual_year:2026,
+  shopping_list:[],
+};
+
+// ── helpers ─────────────────────────────────────────────────────────────────
+const WARN=5;
+function gi(v){return v>=90?{l:"Excellent",c:"#16a34a"}:v>=75?{l:"Good",c:"#d97706"}:v>=60?{l:"Fair",c:"#ea580c"}:{l:"Poor",c:"#CC0000"};}
+function ring(val,color,sz=54){
+  const r=(sz-8)/2,circ=2*Math.PI*r,dash=(val/100)*circ;
+  return`<svg width="${sz}" height="${sz}" style="transform:rotate(-90deg)"><circle cx="${sz/2}" cy="${sz/2}" r="${r}" fill="none" stroke="#e5e7eb" stroke-width="5"/><circle cx="${sz/2}" cy="${sz/2}" r="${r}" fill="none" stroke="${color}" stroke-width="5" stroke-dasharray="${dash.toFixed(1)} ${circ.toFixed(1)}" stroke-linecap="round"/></svg>`;
+}
+function yt(p,sm){const v=VIDEOS[p];if(!v)return"";return`<a href="${v.url}" target="_blank" class="btn yt${sm?" sm":""}">▶ ${v.yr?"'"+String(v.yr).slice(2)+" ":""}How-To</a>`;}
+function crit(show){return show?`<span style="background:#fee2e2;color:#CC0000;font-size:9px;font-weight:700;border-radius:4px;padding:1px 5px">CRITICAL</span>`:"";}
+function gAlerts(hrs,dm,ld){
+  const o=[];
+  for(const t of SCHED){
+    if(t.oneTime){if(hrs>=t.interval&&!dm.includes(t.id))o.push({...t,dueAt:t.interval,overdue:true,dismissKey:t.id});}
+    else{const last=ld[t.id]??0,next=last+t.interval,diff=next-hrs;
+      if(diff<=0&&!dm.includes(t.id+"_"+next))o.push({...t,dueAt:next,overdue:true,dismissKey:t.id+"_"+next});
+      else if(diff>0&&diff<=WARN&&!dm.includes(t.id+"_w_"+next))o.push({...t,dueAt:next,dueSoon:true,hoursLeft:Math.round(diff*10)/10,dismissKey:t.id+"_w_"+next});}
+  }return o;
+}
+function gUpcoming(hrs,ld){
+  return SCHED.map(t=>{const last=ld[t.id]??0,next=t.oneTime?t.interval:last+t.interval;return{...t,nextAt:next,hoursLeft:next-hrs};})
+    .filter(t=>t.hoursLeft>0).sort((a,b)=>a.hoursLeft-b.hoursLeft).slice(0,5);
+}
+function markDone(tid){
+  const ld={...(R.maint_last_done||{})};ld[tid]=R.hour_meter.reading;
+  const dm=(R.maint_dismissed||[]).filter(d=>d!==tid);
+  patch({maint_last_done:ld,maint_dismissed:dm});
+}
+function dismissA(key){patch({maint_dismissed:[...(R.maint_dismissed||[]),key]});}
+function scoreChg(k,v){const sc={...R.condition_scores,[k]:parseInt(v)};const a=[sc.deck,sc.engine,sc.transmission,sc.ignition];sc.overall=Math.round(a.reduce((x,y)=>x+y,0)/4);patch({condition_scores:sc});}
+function toggleCart(i){const l=[...(R.shopping_list||[])];const p=l.indexOf(i);p===-1?l.push(i):l.splice(p,1);patch({shopping_list:l});}
+
+// ── pages ────────────────────────────────────────────────────────────────────
+function pgDash(hrs,al,ov,wn,up,ld){
+  const g=gi(R.condition_scores.overall);
+  return`
+  ${al.length?`<div style="background:#fff0f0;border:0.5px solid #fecaca;border-radius:10px;padding:11px 14px;margin-bottom:10px;border-left:4px solid #CC0000">
+    <div style="font-size:11px;font-weight:700;color:#CC0000;margin-bottom:5px">⚠ ${ov} overdue · ${wn} due soon</div>
+    ${[...al.filter(a=>a.overdue),...al.filter(a=>a.dueSoon)].slice(0,3).map((a,i)=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;${i>0?'border-top:0.5px solid #fee2e2':''}">
+        <span style="font-size:12px;color:${a.overdue?'#CC0000':'#d97706'}">${a.label} — ${a.overdue?`overdue at ${a.dueAt} hrs`:`${a.hoursLeft} hrs left`}</span>
+        <button class="btn grn sm" onclick="markDone('${a.id}')">Done</button>
+      </div>`).join("")}
+  </div>`:""}
+  <div class="card">
+    <div class="sec">Asset Information</div>
+    ${[["Model",R.asset.model],["Serial",R.asset.serial],["Purchased",R.asset.purchase_date],["Engine",R.asset.engine],["Cut Width",R.asset.cut_width],["Drive",R.asset.drive],["Condition",R.asset.condition]]
+      .map(([k,v])=>`<div class="row"><span style="color:var(--tx2);font-size:11px">${k}</span><span style="font-size:11px;font-weight:600;text-align:right;max-width:60%">${v}</span></div>`).join("")}
+  </div>
+  <div class="card">
+    <div class="sec">Hour Meter <button class="btn ghost sm" onclick="editHrs=!editHrs;render()">${editHrs?"Cancel":"Edit"}</button></div>
+    <div style="text-align:center;padding:6px 0">
+      <div style="font-size:52px;font-weight:700;color:var(--tx1);line-height:1;letter-spacing:-2px">${hrs}</div>
+      <div style="font-size:10px;color:var(--tx2);letter-spacing:2px;text-transform:uppercase;margin-top:2px">hours</div>
+      <div style="font-size:11px;color:var(--tx2);margin-top:4px">${R.hour_meter.notes}</div>
+    </div>
+    ${editHrs?`<div style="display:flex;gap:6px;margin-top:6px">
+      <input class="mi" type="number" step="0.1" placeholder="New reading" oninput="nHrs=this.value" value="${nHrs}">
+      <button class="btn" onclick="const v=parseFloat(nHrs);if(!isNaN(v)){R.hour_meter.reading=v;R.hour_meter.last_updated=today();nHrs='';editHrs=false;save();render();}">Set</button>
+    </div>`:""}
+    ${up.length?`<div style="margin-top:8px;background:#fff0f0;border-radius:8px;padding:8px 10px;border:0.5px solid #fecaca">
+      <div style="font-size:10px;color:#CC0000;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Next service</div>
+      <div style="font-size:12px;font-weight:600;color:var(--tx1)">${up[0].label}</div>
+      <div style="font-size:11px;color:#CC0000">${Math.round(up[0].hoursLeft*10)/10} hrs away</div>
+    </div>`:""}
+  </div>
+  <div class="card">
+    <div class="sec">Condition Scores</div>
+    <div style="display:flex;justify-content:space-around;padding:4px 0 8px">
+      ${[["deck","Deck","#ef4444"],["engine","Engine","#16a34a"],["transmission","Trans","#3b82f6"],["ignition","Ign","#8b5cf6"]].map(([k,l,c])=>`
+        <div style="text-align:center">
+          <div style="position:relative;display:inline-block">${ring(R.condition_scores[k],c)}
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--tx1)">${R.condition_scores[k]}</div>
+          </div>
+          <div style="font-size:9px;color:var(--tx2);margin-top:1px">${l}</div>
+        </div>`).join("")}
+    </div>
+    <div style="text-align:center;padding:8px;background:var(--bg2);border-radius:8px;margin-bottom:10px">
+      <span style="font-size:24px;font-weight:700;color:${g.c}">${R.condition_scores.overall}</span>
+      <span style="font-size:13px;color:${g.c};font-weight:600;margin-left:5px">${g.l}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px">
+      ${[["deck","Deck","#ef4444"],["engine","Engine","#16a34a"],["transmission","Trans","#3b82f6"],["ignition","Ign","#8b5cf6"]].map(([k,l,c])=>`
+        <div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--tx2)"><span>${l}</span><span style="color:${c}">${R.condition_scores[k]}</span></div>
+        <input type="range" min="0" max="100" value="${R.condition_scores[k]}" style="accent-color:${c}" oninput="scoreChg('${k}',this.value)"></div>`).join("")}
+    </div>
+  </div>
+  <div class="card">
+    <div class="sec">Service Timeline <button class="btn sm" onclick="go(4)">＋ Log service</button></div>
+    ${[...R.timeline].reverse().map((e,i)=>`
+      <div style="display:flex;gap:10px;padding:8px 0;${i<R.timeline.length-1?'border-bottom:0.5px solid var(--bd3)':''}">
+        <div style="width:28px;height:28px;border-radius:50%;background:${TLC[e.type]||'#6b7280'};display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">${TLI[e.type]||'📋'}</div>
+        <div><div style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap">
+          <span style="font-size:12px;font-weight:600;color:var(--tx1)">${e.title}</span>
+          <span style="font-size:10px;color:var(--tx2)">${e.date}</span>
+        </div>
+        <ul style="margin:3px 0 0 14px;padding:0;font-size:11px;color:var(--tx2);line-height:1.7">${e.items.map(it=>`<li>${it}</li>`).join("")}</ul>
+        </div>
+      </div>`).join("")}
+  </div>`;
+}
+
+function pgMaint(hrs,al,ov,wn,up,ld){
+  const tabs=[["schedule","📋 Schedule"],["upcoming",`⏰ Alerts${al.length?" ("+al.length+")":""}`],["annual","📅 Annual"]];
+  const hdr=`<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">${tabs.map(([k,l])=>`<button class="stab${stab===k?" on":""}" onclick="stab='${k}';render()">${l}</button>`).join("")}</div>`;
+
+  if(stab==="schedule") return hdr+`
+    <div class="card">
+      <div class="sec">Before Each Use</div>
+      ${[["Engine Oil Level","Check & add — dipstick full"],["Blade-Brake-Clutch","Test — blades stop within 3 sec"],["Cutting Blades","Inspect for nicks & cracks"],["Air Filter","Check / tap clean"],["Under Deck","Washout port — run blades 1 min"]]
+        .map((r,i)=>`<div style="display:flex;gap:10px;padding:8px 0;${i<4?'border-bottom:0.5px solid var(--bd3)':''}">
+          <div style="width:22px;height:22px;border-radius:50%;background:#fff0f0;border:1.5px solid #fecaca;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#CC0000;flex-shrink:0;margin-top:1px">${i+1}</div>
+          <div><div style="font-size:12px;font-weight:600;color:var(--tx1)">${r[0]}</div>
+          <div style="font-size:11px;color:var(--tx2)">${r[1]}</div></div>
+        </div>`).join("")}
+    </div>
+    <div class="card">
+      <div class="sec">Hour-Based Schedule</div>
+      ${SCHED.map((t,i)=>{const last=ld[t.id]??0,next=t.oneTime?t.interval:last+t.interval,pct=Math.min(100,t.oneTime?(hrs/t.interval)*100:((hrs-last)/t.interval)*100),isO=hrs>=next,isS=!isO&&(next-hrs)<=WARN,sc=isO?"#CC0000":isS?"#d97706":"#16a34a";
+        return`<div style="padding:9px 0;${i<SCHED.length-1?'border-bottom:0.5px solid var(--bd3)':''}">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div style="flex:1"><div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-bottom:2px">
+              <span style="font-size:10px;color:var(--tx2);font-weight:600">${t.oneTime?"@":"/"} ${t.interval} hrs</span>
+              <span style="font-size:12px;font-weight:600;color:var(--tx1)">${t.label}</span>${crit(t.critical)}</div>
+              <div style="font-size:11px;color:var(--tx2)">${t.detail}</div>
+              ${t.part!=="—"?`<div style="font-size:10px;color:var(--tx2);margin-top:1px">Part: <b>${t.part}</b></div>`:""}
+              <div class="pbar"><div class="pbar-f" style="width:${Math.round(pct)}%;background:${sc}"></div></div>
+              <div style="font-size:9px;color:var(--tx2);margin-top:2px">${Math.round(pct)}% · next @ ${Math.round(next*10)/10} hrs</div>
+              <div style="margin-top:5px">${yt(t.part)}</div>
+            </div>
+            <div style="flex-shrink:0;margin-left:10px;text-align:right">
+              <div style="font-size:10px;font-weight:700;color:${sc};text-transform:uppercase;margin-bottom:5px">${isO?"Overdue":isS?"Due soon":"OK"}</div>
+              <button class="btn grn sm" onclick="markDone('${t.id}')">✓ Done</button>
+            </div>
+          </div>
+        </div>`;}).join("")}
+    </div>
+    <div class="card">
+      <div class="sec">Engine Specs</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px">
+        ${[["Engine","B&S 223cc OHV"],["Oil Capacity","0.53 L (18 fl oz)"],["Oil Type","SAE 30 or 10W-30"],["Spark Plug","Champion RJ19LM"],["Plug Gap",'0.030"'],["Blade Bolt","60 ft-lb"],["Fuel","Unleaded 87"],["Coil Gap",'0.010"']]
+          .map(([k,v])=>`<div style="padding:6px 0;border-bottom:0.5px solid var(--bd3)"><div style="font-size:10px;color:var(--tx2);font-weight:600">${k}</div><div style="font-size:11px;font-weight:500;color:var(--tx1)">${v}</div></div>`).join("")}
+      </div>
+    </div>`;
+
+  if(stab==="upcoming") return hdr+`
+    ${!al.length?`<div style="background:#f0fdf4;border:0.5px solid #bbf7d0;border-radius:10px;padding:12px 16px;color:#16a34a;font-size:13px;font-weight:600">✓ All current at ${hrs} hrs</div>`:""}
+    ${al.filter(a=>a.overdue).map(a=>`
+      <div style="background:#fff0f0;border:0.5px solid #fecaca;border-radius:10px;padding:12px;margin-bottom:8px">
+        <div style="font-size:12px;font-weight:700;color:#CC0000;margin-bottom:2px">⚠ ${a.label}</div>
+        <div style="font-size:11px;color:#CC0000">Overdue at ${a.dueAt} hrs</div>
+        <div style="display:flex;gap:7px;margin-top:8px">
+          <button class="btn grn sm" onclick="markDone('${a.id}')">✓ Done</button>
+          <button class="btn gry sm" onclick="dismissA('${a.dismissKey}')">Dismiss</button>
+          ${yt(a.part)}
+        </div>
+      </div>`).join("")}
+    <div class="card">
+      <div class="sec">Next Scheduled</div>
+      ${up.map(t=>{const c=t.hoursLeft<=0?"#CC0000":t.hoursLeft<=WARN?"#d97706":"#16a34a";return`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--bd3)">
+          <div><div style="font-size:12px;font-weight:600;color:var(--tx1)">${t.label}</div>
+            <div style="font-size:10px;color:var(--tx2)">Due @ ${Math.round(t.nextAt*10)/10} hrs</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span style="font-size:12px;font-weight:700;color:${c}">${t.hoursLeft<=0?"NOW":Math.round(t.hoursLeft*10)/10}</span>
+            <button class="btn grn sm" onclick="markDone('${t.id}')">✓</button>
+          </div>
+        </div>`;}).join("")}
+    </div>`;
+
+  const yr=R.annual_year||2026,done=ANNUAL.filter(t=>(R.annual_done||{})[t.id]===yr).length,pct=Math.round((done/ANNUAL.length)*100);
+  return hdr+`
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+      <select class="mi" style="width:90px" onchange="patch({annual_year:parseInt(this.value)})">${[2024,2025,2026,2027,2028].map(y=>`<option${y===yr?" selected":""}>${y}</option>`).join("")}</select>
+      <div style="flex:1"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tx2);margin-bottom:3px"><span>${done}/${ANNUAL.length}</span><span style="color:${done===ANNUAL.length?"#16a34a":"#CC0000"};font-weight:700">${pct}%</span></div>
+      <div class="pbar"><div class="pbar-f" style="width:${pct}%;background:${done===ANNUAL.length?"#16a34a":"#CC0000"}"></div></div></div>
+    </div>
+    <div class="card">
+      <div class="sec">End-of-Season — ${yr}</div>
+      ${ANNUAL.map((t,i)=>{const d=(R.annual_done||{})[t.id]===yr;return`
+        <div style="display:flex;gap:10px;padding:8px 0;${i<ANNUAL.length-1?'border-bottom:0.5px solid var(--bd3)':''}">
+          <input type="checkbox" ${d?"checked":""} onchange="const ad={...R.annual_done};d?delete ad['${t.id}']:ad['${t.id}']=${yr};patch({annual_done:ad})" style="margin-top:2px">
+          <div><span style="font-size:12px;font-weight:600;color:var(--tx1);${d?'text-decoration:line-through;opacity:.5':''}">${t.label}</span>
+          ${crit(t.critical&&!d)}${d?`<span style="font-size:10px;color:#16a34a;font-weight:600;margin-left:5px">✓ Done</span>`:""}
+          <div style="font-size:11px;color:var(--tx2);margin-top:1px">${t.detail}</div></div>
+        </div>`;}).join("")}
+    </div>`;
+}
+
+function pgParts(){return`
+  <div class="card">
+    <div class="sec">Parts Status — ${R.parts.length} components</div>
+    ${R.parts.map((p,i)=>{
+      const sc=p.s==="ok"?"#16a34a":p.s==="warn"?"#d97706":"#CC0000";
+      const sl=p.s==="ok"?"✓ OK":p.s==="warn"?"⚠ Warn":"✕ Replace";
+      const cc=CATC[p.cat]||"#888";
+      const br=RETS[BEST[p.p]?.[0]??0];
+      const q=encodeURIComponent(p.p);
+      return`<div style="padding:10px 0;border-bottom:${i<R.parts.length-1?'0.5px solid var(--bd3)':'none'}">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <div style="width:8px;height:8px;border-radius:50%;background:${sc};flex-shrink:0;margin-top:5px"></div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px">
+              <span style="font-size:13px;font-weight:700;color:var(--tx1)">${p.c}</span>
+              <span style="font-size:9px;font-weight:700;color:#fff;background:${cc};border-radius:3px;padding:0 4px">${p.cat}</span>
+              <span style="background:${sc}22;color:${sc};border:0.5px solid ${sc}66;font-size:10px;border-radius:4px;padding:1px 5px">${sl}</span>
+            </div>
+            <div style="font-size:10px;color:var(--tx2);font-family:monospace;margin-bottom:6px">Part # ${p.p} · ${p.d}</div>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+              ${yt(p.p,true)}
+              <a href="${br.url(q)}" target="_blank" class="btn sm" style="background:${br.btnBg};color:${br.btnTc};font-size:10px">${br.icon} ${br.name}</a>
+              <a href="https://www.ebay.com/sch/i.html?_nkw=toro+${q}&_sop=15" target="_blank" class="btn sm" style="background:#0064D2;color:#fff;font-size:10px">🔖 eBay</a>
+            </div>
+          </div>
+          <select class="mi" style="width:auto;padding:3px 6px;font-size:11px;flex-shrink:0" onchange="R.parts[${i}].s=this.value;save();render()">
+            <option value="ok"${p.s==="ok"?" selected":""}>✓ OK</option>
+            <option value="warn"${p.s==="warn"?" selected":""}>⚠ Warn</option>
+            <option value="bad"${p.s==="bad"?" selected":""}>✕ Replace</option>
+          </select>
+        </div>
+      </div>`;
+    }).join("")}
+  </div>`;}
+
+function pgDiag(){return`
+  <div class="card">
+    <div class="sec">Current Issues</div>
+    ${R.diagnostics.current_issues.length===0?`<div style="background:#f0fdf4;border:0.5px solid #bbf7d0;border-radius:8px;padding:9px 12px;font-size:12px;color:#16a34a;font-weight:600">✓ No current issues</div>`
+    :R.diagnostics.current_issues.map((iss,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid var(--bd3)">
+      <span style="font-size:12px;color:var(--tx1)">⚠ ${iss}</span>
+      <button class="btn grn sm" onclick="R.diagnostics.current_issues.splice(${i},1);save();render()">Resolve</button>
+    </div>`).join("")}
+    <div style="display:flex;gap:7px;margin-top:10px">
+      <input class="mi" id="issInput" placeholder="Describe issue…" value="${nIssue}" oninput="nIssue=this.value">
+      <button class="btn" onclick="if(nIssue.trim()){R.diagnostics.current_issues.push(nIssue.trim());nIssue='';save();render();}">Add</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="sec">Notes</div>
+    ${R.diagnostics.notes.map(n=>`<div style="display:flex;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--bd3)">
+      <span style="color:#CC0000;font-size:14px;flex-shrink:0">›</span><span style="font-size:12px;line-height:1.5;color:var(--tx1)">${n}</span>
+    </div>`).join("")}
+    <div style="display:flex;gap:7px;margin-top:10px">
+      <input class="mi" placeholder="Add note…" value="${nNote}" oninput="nNote=this.value">
+      <button class="btn" onclick="if(nNote.trim()){R.diagnostics.notes.push(nNote.trim());nNote='';save();render();}">Add</button>
+    </div>
+  </div>`;}
+
+function pgLog(){return`
+  <div class="card">
+    <div class="sec">Log New Service Entry</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div><div style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Date</div>
+        <input class="mi" type="date" value="${nDate}" onchange="nDate=this.value"></div>
+      <div><div style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Type</div>
+        <select class="mi" onchange="nType=this.value">
+          <option value="service"${nType==="service"?" selected":""}>Service / Repair</option>
+          <option value="oil"${nType==="oil"?" selected":""}>Oil Change</option>
+          <option value="ignition"${nType==="ignition"?" selected":""}>Ignition Work</option>
+          <option value="other"${nType==="other"?" selected":""}>Other</option>
+        </select></div>
+    </div>
+    <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Title</div>
+      <input class="mi" placeholder="e.g. Annual Blade Sharpening" value="${nTitle}" oninput="nTitle=this.value"></div>
+    <div style="margin-bottom:14px"><div style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Work Performed (one per line)</div>
+      <textarea class="mi" style="height:90px;resize:vertical" placeholder="Sharpened blades&#10;Replaced air filter" oninput="nItems=this.value">${nItems}</textarea></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn" onclick="
+        if(!nDate||!nTitle.trim())return;
+        const items=nItems.split('\n').map(s=>s.trim()).filter(Boolean);
+        R.timeline.push({date:nDate,type:nType,title:nTitle.trim(),items});
+        R.timeline.sort((a,b)=>a.date.localeCompare(b.date));
+        nDate=today();nTitle='';nItems='';
+        go(0);save();render();">Save Entry</button>
+      <button class="btn gry" onclick="go(0);render()">Cancel</button>
+    </div>
+  </div>`;}
+
+function pgShop(){
+  const cart=R.shopping_list||[];
+  const cats=["all","Cutting","Drive","Engine","Fuel","Chassis","Controls"];
+  return`
+  <div style="background:linear-gradient(135deg,#111 0%,#2d0000 55%,#111 100%);border-radius:12px;padding:14px;margin-bottom:12px;border:0.5px solid #CC0000">
+    <div style="color:#CC0000;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Parts Shopping List</div>
+    <div style="color:#fff;font-size:16px;font-weight:700">Toro TimeMaster 21200</div>
+    <div style="color:rgba(255,255,255,.45);font-size:11px;margin-top:2px">${cart.length} parts selected · prices across 6 retailers</div>
+  </div>
+  <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">
+    ${cats.map(v=>`<button class="stab${shopCat===v?" on":""}" onclick="shopCat='${v}';render()" style="font-size:10px;padding:3px 9px">${v==="all"?"All":v}</button>`).join("")}
+  </div>
+  <div class="card" style="padding:10px 12px">
+    <div class="sec" style="margin-bottom:8px">Select Parts ${cart.length>0?`<button class="btn gry sm" onclick="patch({shopping_list:[]})">Clear all</button>`:""}</div>
+    ${PARTS.map((p,i)=>{
+      const show=shopCat==="all"||p.cat===shopCat;
+      if(!show)return"";
+      const inCart=cart.includes(i);const cc=CATC[p.cat]||"#888";
+      return`<div class="prow" onclick="toggleCart(${i})">
+        <input type="checkbox" ${inCart?"checked":""} onclick="event.stopPropagation();toggleCart(${i})">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:600;color:var(--tx1)">${p.c}</div>
+          <div style="display:flex;gap:5px;align-items:center;margin-top:2px">
+            <span style="font-size:9px;font-weight:700;color:#fff;background:${cc};border-radius:3px;padding:0 4px">${p.cat}</span>
+            <span style="font-size:9px;color:var(--tx2);font-family:monospace">${p.p}</span>
+          </div>
+        </div>
+        ${inCart?`<span style="color:#CC0000;font-size:14px;font-weight:700">✓</span>`:""}
+      </div>`;}).join("")}
+    <div style="margin-top:8px;padding-top:8px;border-top:0.5px solid var(--bd3);display:flex;gap:6px">
+      <button class="btn sm" onclick="patch({shopping_list:PARTS.map((_,i)=>i)})">Select all</button>
+      <button class="btn ghost sm" onclick="patch({shopping_list:[]})">Clear all</button>
+    </div>
+  </div>
+  ${cart.length>0?cart.map(i=>{
+    const p=PARTS[i];if(!p)return"";
+    const retailers=(BEST[p.p]||[0,1,2,3]).map(idx=>RETS[idx]);
+    const q=encodeURIComponent(p.p);
+    const v=VIDEOS[p.p];const cc=CATC[p.cat]||"#888";
+    return`<div class="card" style="padding:12px 14px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+          <span style="font-size:14px;font-weight:700;color:var(--tx1)">${p.c}</span>
+          <span style="font-size:9px;font-weight:700;color:#fff;background:${cc};border-radius:3px;padding:1px 5px">${p.cat}</span>
+        </div><div style="font-size:11px;color:var(--tx2);margin-top:2px;font-family:monospace">Part # ${p.p}</div></div>
+        <button class="btn gry sm" onclick="toggleCart(${i})">Remove ✕</button>
+      </div>
+      ${v?`<div style="background:#fff0f0;border:0.5px solid #fecaca;border-radius:8px;padding:9px 12px;margin-bottom:10px">
+        <div style="font-size:10px;font-weight:700;color:#CC0000;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">▶ YouTube How-To${v.yr?" · "+v.yr:""}</div>
+        <div style="font-size:11px;font-weight:600;color:var(--tx1);margin-bottom:6px">${v.title}</div>
+        <a href="${v.url}" target="_blank" class="btn yt sm">▶ Watch on YouTube</a>
+      </div>`:""}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        ${retailers.map(r=>`<a href="${r.url(q)}" target="_blank" style="display:flex;flex-direction:column;gap:3px;padding:9px 11px;border-radius:8px;border:0.5px solid ${r.btnBg};text-decoration:none;background:${r.btnBg}18">
+          <span style="font-size:12px;font-weight:700;color:${r.btnBg}">${r.icon} ${r.name}</span>
+          <span style="font-size:10px;color:var(--tx2)">${r.note}</span>
+          <span style="font-size:10px;color:${r.btnBg};font-weight:600">Search now ↗</span>
+        </a>`).join("")}
+      </div>
+    </div>`;}).join(""):""}`;
+}
+
+// ── nav & render ──────────────────────────────────────────────────────────────
+function go(n){
+  view=n;
+  document.querySelectorAll('.ti').forEach((el,i)=>el.classList.toggle('on',i===n));
+  document.getElementById('scroller').scrollTop=0;
+  render();
+}
+
+function render(){
+  if(!R)return;
+  const hrs=R.hour_meter.reading,ld=R.maint_last_done||{},dm=R.maint_dismissed||[];
+  const al=gAlerts(hrs,dm,ld),up=gUpcoming(hrs,ld);
+  const ov=al.filter(a=>a.overdue).length,wn=al.filter(a=>a.dueSoon).length;
+  const cart=R.shopping_list||[];
+
+  // header badge
+  const badge=document.getElementById('hdrBadge');
+  if(badge){
+    badge.innerHTML=ov>0?`<span class="pulse" style="background:#CC0000;color:#fff;border-radius:5px;padding:1px 7px;font-size:10px;font-weight:600">⚠ ${ov} overdue</span>`
+      :`<span style="background:#16a34a;color:#fff;border-radius:5px;padding:1px 7px;font-size:10px;font-weight:600">✓ All current</span>`;
+  }
+  // shop tab label
+  const sl=document.getElementById('shoplbl');
+  if(sl)sl.textContent=cart.length>0?`Shop(${cart.length})`:'Shop';
+
+  let html="";
+  if(view===0)html=pgDash(hrs,al,ov,wn,up,ld);
+  if(view===1)html=pgMaint(hrs,al,ov,wn,up,ld);
+  if(view===2)html=pgParts();
+  if(view===3)html=pgDiag();
+  if(view===4)html=pgLog();
+  if(view===5)html=pgShop();
+
+  document.getElementById('pg').innerHTML=html+`<div style="text-align:center;padding:14px 0 6px;font-size:9px;color:var(--tx2);letter-spacing:1px">TORO TIMEMASTER 21200 · SN 401338948 · MAINTAINED TO WIN</div>`;
+}
+
+// ── init ──────────────────────────────────────────────────────────────────────
+try{const s=localStorage.getItem(SK);R=s?JSON.parse(s):JSON.parse(JSON.stringify(INIT));}catch(e){R=JSON.parse(JSON.stringify(INIT));}
+if(!R.shopping_list)R.shopping_list=[];
+render();
+</script>
+</body>
+</html>
