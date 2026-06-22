@@ -963,10 +963,11 @@ html,body{
       <span class="hcc-section-hdr-title">Security &bull; Cameras</span>
     </div>
 
-    <div class="hcc-cta-card" style="border-color:rgba(74,158,255,.25);background:rgba(74,158,255,.06)">
-      <div class="hcc-cta-title">&#128274; System Status</div>
-      <div class="hcc-cta-desc">Blink integration — coming next session. Home Assistant will connect your cameras automatically once the brain is set up on your PC.</div>
-      <div style="display:flex;gap:8px;margin-top:12px">
+    <div class="hcc-cta-card" style="border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.07)">
+      <div class="hcc-cta-title" style="color:#22c55e">&#129303; Beehive Online &mdash; Home Assistant Running</div>
+      <div class="hcc-cta-desc">Your Beehive brain is live. Add Blink cameras in Home Assistant to see them here.</div>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <button class="hcc-arm-btn" style="background:#4a9eff" onclick="window.open('http://homeassistant.local:8123','_blank')">OPEN BEEHIVE &#8599;</button>
         <button class="hcc-arm-btn" style="background:#22c55e;opacity:.4;cursor:default">ARM ALL</button>
         <button class="hcc-arm-btn" style="background:#ef4444;opacity:.4;cursor:default">DISARM ALL</button>
       </div>
@@ -998,13 +999,13 @@ html,body{
 
     <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">MODULES</div>
     <div class="hcc-module-list">
-      <div class="hcc-module-row hcc-module-next">
+      <div class="hcc-module-row" style="border-color:rgba(74,158,255,.25);background:rgba(74,158,255,.06);cursor:pointer" onclick="window.open('http://homeassistant.local:8123','_blank')">
         <span class="hcc-module-icon">&#128247;</span>
         <div class="hcc-module-info">
           <div class="hcc-module-name">Blink Camera Integration</div>
-          <div class="hcc-module-desc">Arm/disarm, live snapshots, motion events via Home Assistant</div>
+          <div class="hcc-module-desc">Tap to open Beehive &rarr; Settings &rarr; Add Integration &rarr; Blink</div>
         </div>
-        <span class="hcc-badge-next">NEXT</span>
+        <span class="hcc-badge-next">SETUP &#8599;</span>
       </div>
       <div class="hcc-module-row hcc-module-future">
         <span class="hcc-module-icon">&#128692;</span>
@@ -1069,13 +1070,14 @@ html,body{
     </div>
 
     <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">BRAIN STATUS</div>
-    <div class="hcc-cta-card">
-      <div class="hcc-cta-title">&#129504; Home Assistant — Not Set Up Yet</div>
-      <div class="hcc-cta-desc">Your PC (always-on, gigabit fiber) will run Home Assistant in Docker. Once installed, all ESP32 devices connect automatically via ESPHome. Alexa integration is built in.</div>
+    <div class="hcc-cta-card" style="border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.07)">
+      <div class="hcc-cta-title" style="color:#22c55e">&#129303; Beehive Online &mdash; Home Assistant 18.0</div>
+      <div class="hcc-cta-desc">Your dedicated Beehive brain PC is running Home Assistant OS. All ESP32 devices connect automatically via ESPHome once added.</div>
       <div style="margin-top:10px;background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px">
-        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Install steps when ready</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.6);line-height:1.7">1. Install Docker Desktop on your PC<br>2. Run Home Assistant container<br>3. Open HA on port 8123<br>4. Add Blink &amp; ESPHome integrations</div>
+        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Connect your ESP32 mower sensor</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.6);line-height:1.7">1. Open Beehive at homeassistant.local:8123<br>2. Settings &rarr; Add-ons &rarr; ESPHome Device Builder<br>3. Your mower sensor appears automatically<br>4. All telemetry syncs to this app</div>
       </div>
+      <button class="hcc-arm-btn" style="background:#4a9eff;margin-top:12px" onclick="window.open('http://homeassistant.local:8123','_blank')">OPEN BEEHIVE &#8599;</button>
     </div>
   </div>
 </div>
@@ -2601,9 +2603,17 @@ function hccSection(id, btn) {
 }
 
 function hccPanic() {
-  if (confirm('EMERGENCY ALERT\n\nThis will (once fully wired):\n• Flash smart lights\n• Send push notification to Jeff & Angela\n• Log event with timestamp\n\nProceed?')) {
-    alert('\u26a0\ufe0f Panic logged at ' + new Date().toLocaleTimeString() + '\n\nFull automation coming once Home Assistant is set up.');
-  }
+  if (!confirm('EMERGENCY ALERT\n\nThis will:\n\u2022 Trigger Beehive panic automation\n\u2022 Flash all smart lights\n\u2022 Log event with timestamp\n\nProceed?')) return;
+  var t = new Date().toLocaleTimeString();
+  fetch('http://homeassistant.local:8123/api/webhook/hcc-panic-button', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({triggered: t, source: 'HCC App'})
+  }).then(function() {
+    alert('\u26a0\ufe0f PANIC TRIGGERED at ' + t + '\n\nBeehive notified. Lights flashing.');
+  }).catch(function() {
+    alert('\u26a0\ufe0f Panic logged at ' + t + '\n\nNote: Beehive not reachable from this network.\nIf emergency, call 911.');
+  });
 }
 
 </script>
