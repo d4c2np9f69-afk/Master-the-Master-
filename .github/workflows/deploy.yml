@@ -1,0 +1,24 @@
+name: Deploy HCC to Cloudflare Pages
+
+on:
+  push:
+    branches:
+      - claude/time-master-project-liq1jw
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to toro1-5rz.pages.dev
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: toro1-5rz
+          directory: .
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
