@@ -5,7 +5,7 @@
 
 Write-Host ""
 Write-Host "  HOME COMMAND CENTER - Beehive Setup" -ForegroundColor Cyan
-Write-Host "  =====" -ForegroundColor Cyan
+Write-Host "  =====================================" -ForegroundColor Cyan
 Write-Host ""
 
 # --- STEP 1: Get token ---
