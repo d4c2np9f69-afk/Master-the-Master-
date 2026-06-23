@@ -565,7 +565,7 @@ html,body{
           <div style="width:20px;height:20px;border-radius:50%;background:#1a5fb4;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">2</div>
           <div style="flex:1">
             <div style="font-size:11px;font-weight:700;color:#e8e8f0;margin-bottom:4px">Open Beehive in browser &rarr; Settings &rarr; Add-ons &rarr; Terminal &rarr; OPEN</div>
-            <button onclick="window.open('http://homeassistant.local:8123/hassio/addon/a0d7b954_ssh/info','_blank')" style="padding:8px 14px;border:1px solid rgba(74,158,255,.35);border-radius:8px;background:rgba(74,158,255,.08);color:#4a9eff;font-size:11px;font-weight:800;font-family:inherit">OPEN BEEHIVE &#8599;</button>
+            <button onclick="openBeehive('/hassio/addon/a0d7b954_ssh/info')" style="padding:8px 14px;border:1px solid rgba(74,158,255,.35);border-radius:8px;background:rgba(74,158,255,.08);color:#4a9eff;font-size:11px;font-weight:800;font-family:inherit">OPEN BEEHIVE &#8599;</button>
           </div>
         </div>
 
@@ -607,7 +607,7 @@ html,body{
 
     <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">MODULES</div>
     <div class="hcc-module-list">
-      <div class="hcc-module-row" style="border-color:rgba(74,158,255,.25);background:rgba(74,158,255,.06);cursor:pointer" onclick="window.open('http://homeassistant.local:8123','_blank')">
+      <div class="hcc-module-row" style="border-color:rgba(74,158,255,.25);background:rgba(74,158,255,.06);cursor:pointer" onclick="openBeehive()">
         <span class="hcc-module-icon">&#128247;</span>
         <div class="hcc-module-info">
           <div class="hcc-module-name">Blink Camera Integration</div>
@@ -685,7 +685,7 @@ html,body{
         <div style="font-size:12px;color:var(--muted);text-align:center;padding:8px 0">&#128260; Checking Beehive&hellip;</div>
       </div>
       <div style="margin-top:8px">
-        <button onclick="window.open('http://homeassistant.local:8123','_blank')" style="width:100%;padding:9px;border:1px solid rgba(74,158,255,.3);border-radius:9px;background:rgba(74,158,255,.07);color:#4a9eff;font-size:11px;font-weight:800;font-family:inherit">OPEN BEEHIVE &#8599;</button>
+        <button onclick="openBeehive()" style="width:100%;padding:9px;border:1px solid rgba(74,158,255,.3);border-radius:9px;background:rgba(74,158,255,.07);color:#4a9eff;font-size:11px;font-weight:800;font-family:inherit">OPEN BEEHIVE &#8599;</button>
       </div>
     </div>
   </div>
@@ -2672,7 +2672,7 @@ function hccSection(id, btn) {
 function hccPanic() {
   if (!confirm('EMERGENCY ALERT\n\nThis will:\n\u2022 Trigger Beehive panic automation\n\u2022 Flash all smart lights\n\u2022 Log event with timestamp\n\nProceed?')) return;
   var t = new Date().toLocaleTimeString();
-  fetch('http://homeassistant.local:8123/api/webhook/hcc-panic-button', {
+  fetch(HA_BASE + '/api/webhook/hcc-panic-button', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({triggered: t, source: 'HCC App'})
@@ -2736,7 +2736,8 @@ window.hccSection = function(id, btn) {
 };
 
 // ── BEEHIVE STATUS CHECK ─────────────────────────────────────────────────────
-var HA_BASE = 'http://homeassistant.local:8123';
+var HA_BASE = localStorage.getItem('ha_base') || 'http://homeassistant.local:8123';
+var HA_IP   = 'http://192.168.1.66:8123';
 
 function copyCmd(el, text) {
   navigator.clipboard.writeText(text).then(function() {
@@ -2752,31 +2753,58 @@ function copyCmd(el, text) {
   });
 }
 
-function checkBeehive(manual) {
+function openBeehive(path) {
+  path = path || '';
+  var base = localStorage.getItem('ha_base') || null;
+  // Try stored base first, then hostname, then direct IP
+  var urls = base ? [base] : ['http://homeassistant.local:8123', HA_IP];
+  window.open(urls[0] + path, '_blank');
+}
+
+function beehiveOnline(base, d) {
+  localStorage.setItem('ha_base', base);
+  HA_BASE = base;
   var dot   = document.getElementById('beehiveDot');
   var title = document.getElementById('beehiveTitle');
   var ver   = document.getElementById('beehiveVersion');
   var steps = document.getElementById('beehiveSetupSteps');
   var b2    = document.getElementById('beehive2Body');
+  if (dot)   dot.style.background = '#22c55e';
+  if (title) { title.textContent = '🪴 Beehive Online'; title.style.color = '#22c55e'; }
+  if (ver)   ver.textContent = 'Home Assistant ' + d.version + ' — ' + base.replace('http://','');
+  if (steps) steps.style.display = 'none';
+  if (b2)    b2.innerHTML = '<div style="font-size:12px;color:#22c55e;font-weight:700">&#129303; Beehive online &bull; HA ' + d.version + '</div><div style="font-size:11px;color:var(--muted);margin-top:4px">All automations active. ESPHome devices appear automatically.</div>';
+}
+
+function checkBeehive(manual) {
+  var dot   = document.getElementById('beehiveDot');
+  var title = document.getElementById('beehiveTitle');
+  var ver   = document.getElementById('beehiveVersion');
+  var b2    = document.getElementById('beehive2Body');
   if (dot) dot.style.background = '#ffd24a';
-  fetch(HA_BASE + '/api/', { signal: AbortSignal.timeout(3000) })
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      var online = !!(d && d.version);
-      if (dot)   dot.style.background = online ? '#22c55e' : '#e01c1c';
-      if (title) { title.textContent = online ? '🪴 Beehive Online' : 'Beehive Offline'; title.style.color = online ? '#22c55e' : '#ff6262'; }
-      if (ver)   ver.textContent = 'Home Assistant ' + (d.version || '--');
-      if (steps) steps.style.display = online ? 'none' : 'block';
-      if (b2) b2.innerHTML = online
-        ? '<div style="font-size:12px;color:#22c55e;font-weight:700">&#129303; Beehive online &bull; HA ' + d.version + '</div><div style="font-size:11px;color:var(--muted);margin-top:4px">All automations active. ESPHome devices appear automatically.</div>'
-        : '<div style="font-size:12px;color:#ff6262;font-weight:700">&#128308; Beehive offline — boot it up</div>';
-    })
-    .catch(function() {
+
+  // Try hostname, then fall back to direct IP
+  var candidates = [HA_BASE];
+  if (HA_BASE !== HA_IP) candidates.push(HA_IP);
+
+  function tryNext(list) {
+    if (!list.length) {
       if (dot)   dot.style.background = '#e01c1c';
       if (title) { title.textContent = 'Beehive Offline'; title.style.color = '#ff6262'; }
-      if (ver)   ver.textContent = 'Not reachable from this network';
+      if (ver)   ver.textContent = 'Not reachable — must be on home WiFi';
       if (b2)    b2.innerHTML = '<div style="font-size:12px;color:#ff6262;font-weight:700">&#128308; Beehive offline — boot it up</div>';
-    });
+      return;
+    }
+    var base = list[0];
+    fetch(base + '/api/', { signal: AbortSignal.timeout(2500) })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d && d.version) { beehiveOnline(base, d); }
+        else { tryNext(list.slice(1)); }
+      })
+      .catch(function() { tryNext(list.slice(1)); });
+  }
+  tryNext(candidates);
 }
 
 setTimeout(function() { checkBeehive(false); }, 800);
