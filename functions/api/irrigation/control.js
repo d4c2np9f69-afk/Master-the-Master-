@@ -1,6 +1,6 @@
 // /api/irrigation/control — POST: controls B-Hyve zones (start/stop/rain_delay)
 // Body: { pin, action, station?, minutes?, hours? }
-// B-Hyve zone control uses their WebSocket events API (wss://api.orbitonline.com/v1/events)
+// B-Hyve protocol: send auth → wait for server confirmation → send command → wait for ack
 const API = 'https://api.orbitonline.com/v1';
 
 async function bhyveLogin(email, password) {
@@ -25,11 +25,9 @@ async function getTimerDevice(userId, token) {
   );
 }
 
-async function sendWsCommand(token, deviceId, message) {
-  // Cloudflare Workers support outbound WebSockets via fetch with Upgrade header
+async function sendWsCommand(token, message) {
   const wsResp = await fetch('https://api.orbitonline.com/v1/events', {
     headers: {
-      'Authorization': `Bearer ${token}`,
       'orbit-session-token': token,
       'Upgrade': 'websocket',
       'Connection': 'Upgrade',
@@ -39,7 +37,6 @@ async function sendWsCommand(token, deviceId, message) {
   });
 
   if (wsResp.status !== 101) {
-    // WebSocket upgrade failed — try a REST fallback
     throw new Error('ws_upgrade_failed: ' + wsResp.status);
   }
 
@@ -48,35 +45,46 @@ async function sendWsCommand(token, deviceId, message) {
 
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
-      ws.close();
+      try { ws.close(); } catch (_) {}
       reject(new Error('ws_timeout'));
-    }, 8000);
+    }, 9000);
+
+    let commandSent = false;
 
     ws.addEventListener('message', (evt) => {
       try {
         const msg = JSON.parse(evt.data);
-        if (msg.event === 'app_connection' || msg.event === 'connected') {
-          // Connected — send our command
-          ws.send(JSON.stringify({ event: 'app_connection', orbit_session_token: token }));
+
+        // Server confirmed our auth — send the actual command exactly once
+        if (!commandSent && (msg.event === 'app_connection' || msg.status === 'connected')) {
+          commandSent = true;
           ws.send(JSON.stringify(message));
-        } else if (msg.event === 'watering_in_progress' || msg.event === 'change_mode' || msg.event === 'program_changed') {
+          return;
+        }
+
+        // Server acknowledged the command
+        if (msg.event === 'watering_in_progress' || msg.event === 'change_mode' ||
+            msg.event === 'program_changed' || msg.event === 'rain_delay') {
           clearTimeout(timeout);
-          ws.close();
+          try { ws.close(); } catch (_) {}
           resolve({ ok: true, event: msg.event });
-        } else if (msg.event === 'error') {
+          return;
+        }
+
+        if (msg.event === 'error') {
           clearTimeout(timeout);
-          ws.close();
+          try { ws.close(); } catch (_) {}
           reject(new Error(msg.message || 'ws_error'));
         }
       } catch (_) {}
     });
 
-    ws.addEventListener('error', (err) => {
+    ws.addEventListener('error', () => {
       clearTimeout(timeout);
       reject(new Error('ws_error'));
     });
 
-    // Send initial connection ping
+    // Step 1: authenticate — send once, wait for server to confirm before sending command
     ws.send(JSON.stringify({ event: 'app_connection', orbit_session_token: token }));
   });
 }
@@ -95,7 +103,6 @@ export async function onRequestPost({ request, env }) {
     return Response.json({ ok: false, error: 'invalid_json' }, { status: 400 });
   }
 
-  // PIN check (CONTROL_PIN must be set in Cloudflare Pages env)
   if (pin && body.pin !== pin) {
     return Response.json({ ok: false, error: 'unauthorized' }, { status: 403 });
   }
@@ -137,7 +144,7 @@ export async function onRequestPost({ request, env }) {
       return Response.json({ ok: false, error: 'unknown_action: ' + action }, { status: 400 });
     }
 
-    const result = await sendWsCommand(token, timer.id, message);
+    const result = await sendWsCommand(token, message);
     return Response.json(result);
 
   } catch (e) {
