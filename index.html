@@ -1316,6 +1316,7 @@ if(typeof S.miles!=='number') S.miles=0;
 if(typeof S.sensorMiles!=='number') S.sensorMiles=0;
 if(typeof S.sensorSpeedMph!=='number') S.sensorSpeedMph=0;
 if(!S.purchases) S.purchases=[];
+if(!Array.isArray(S.sensorTrack)) S.sensorTrack=[];
 function uid(){ return 'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 // backfill ids on any pre-existing log entries
 if(S.log) S.log.forEach(function(x){ if(!x.id) x.id=uid(); });
@@ -2614,7 +2615,12 @@ loadAlerts();
         } else {
           setMsg('Sensor: '+total.toFixed(1)+' hrs \u00b7 '+(distMi>0?distMi.toFixed(2)+' mi GPS \u00b7 ':'')+'last sync '+when, '#aaa');
         }
-        if(typeof drawYardMap==='function') drawYardMap(Array.isArray(d.track)?d.track:[]);
+        // Save track when we get real points; fall back to last saved track so a
+        // heartbeat post (no track) doesn't wipe the map.
+        var freshTrack = Array.isArray(d.track) && d.track.length >= 2 ? d.track : null;
+        if(freshTrack && typeof S!=='undefined'){ S.sensorTrack = freshTrack; if(typeof save==='function') save(); }
+        var trackToShow = freshTrack || (typeof S!=='undefined' && S.sensorTrack.length>=2 ? S.sensorTrack : []);
+        if(typeof drawYardMap==='function') drawYardMap(trackToShow);
         if(manual && typeof toast==='function') toast(changed ? '\u2713 Hours updated from sensor' : '\u2713 Sensor read \u2014 no change');
       })
       .catch(function(){
