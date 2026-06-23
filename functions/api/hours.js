@@ -2,15 +2,10 @@
 // GET  → returns latest sensor data (from KV) or zeroed stub
 // POST → stores reading from ESP32, forwards to Beehive HA webhook
 
-function getKV(env) {
-  return env.HCC_KV || env.MOWER_KV || null;
-}
-
 export async function onRequestGet({ env }) {
-  const kv = getKV(env);
-  if (kv) {
+  if (env.HCC_KV) {
     try {
-      const raw = await kv.get('hours_data');
+      const raw = await env.HCC_KV.get('hours_data');
       if (raw) return Response.json(JSON.parse(raw));
     } catch (_) {}
   }
@@ -30,13 +25,10 @@ export async function onRequestPost({ request, env }) {
 
   const data = { ...body, lastSync: new Date().toISOString() };
 
-  const kv = getKV(env);
-  if (kv) {
-    await kv.put('hours_data', JSON.stringify(data));
+  if (env.HCC_KV) {
+    await env.HCC_KV.put('hours_data', JSON.stringify(data));
   }
 
-  // Forward to Beehive HA webhook so HA entities stay in sync
-  // HA_WEBHOOK_BASE = e.g. https://your-ha-cloud.ui.nabu.casa  (or blank for local-only)
   if (env.HA_WEBHOOK_BASE) {
     try {
       await fetch(`${env.HA_WEBHOOK_BASE}/api/webhook/hcc-mower-sensor`, {
@@ -44,7 +36,7 @@ export async function onRequestPost({ request, env }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-    } catch (_) {}  // non-fatal — HA may be offline
+    } catch (_) {}
   }
 
   return Response.json({ ok: true });
