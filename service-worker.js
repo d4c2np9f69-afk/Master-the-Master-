@@ -1,10 +1,13 @@
-const CACHE_NAME = "hcc-v2";
+const CACHE_NAME = "hcc-v3";
 const STATIC_ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
   "./icons/icon-192.png",
-  "./icons/icon-512.png"
+  "./icons/icon-512.png",
+  "./images/hero-home.jpg",
+  "./images/hero-irr.jpg",
+  "./images/hero-yard.jpg"
 ];
 
 self.addEventListener("install", event => {
