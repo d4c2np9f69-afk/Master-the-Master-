@@ -327,6 +327,7 @@ html,body{
   font-family:inherit;
 }
 .btn-red{background:linear-gradient(135deg,#c01010,#780000);color:#fff;box-shadow:0 2px 12px rgba(180,0,0,.28)}
+.btn-green{background:linear-gradient(135deg,#166534,#14532d);color:#fff}
 .btn-gray{background:rgba(255,255,255,.07);color:var(--muted);border:1px solid var(--border)}
 .hcc-arm-btn{flex:1;padding:10px;border:none;border-radius:9px;color:#fff;font-size:12px;font-weight:800;letter-spacing:.8px;font-family:inherit}
 .hdr-btns{display:flex;gap:8px;margin-top:8px}
@@ -443,13 +444,15 @@ html,body{
 .log-title{font-size:13px;font-weight:800;color:var(--text)}
 .log-note{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.45}
 /* Mbtn (modal) */
-.mbtn{padding:11px;border:none;border-radius:10px;font-size:12px;font-weight:800;letter-spacing:.8px;font-family:inherit;cursor:pointer;width:100%}
+.mbtns{display:flex;gap:8px;margin-top:14px}
+.mbtn{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:inherit;letter-spacing:.4px}
 .mbtn.primary{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff}
+.mbtn.secondary{background:rgba(255,255,255,.06);color:#ccc;border:1px solid var(--border)!important}
 .fbtn{background:var(--card2);border:1px solid var(--border);color:var(--muted);padding:8px;border-radius:8px;font-size:11px;font-weight:800;font-family:inherit;cursor:pointer}
 /* Modal */
 .modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;align-items:flex-end;justify-content:center}
 .modal-ov.show{display:flex}
-.modal{background:linear-gradient(180deg,#111118,#0b0b12);border:1px solid var(--border);border-radius:20px 20px 0 0;padding:20px 18px 36px;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;box-shadow:0 -8px 40px rgba(0,0,0,.7)}
+.modal-box{background:linear-gradient(180deg,#111118,#0b0b12);border:1px solid var(--border);border-radius:20px 20px 0 0;padding:20px 18px 36px;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;box-shadow:0 -8px 40px rgba(0,0,0,.7)}
 .modal-title{font-size:15px;font-weight:900;letter-spacing:.5px;margin-bottom:16px;color:var(--text)}
 .mlabel{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;display:block}
 .minput{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(224,0,0,.3);background:rgba(14,14,18,.97);color:#fff;font-size:14px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:8px}
