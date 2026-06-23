@@ -2,10 +2,15 @@
 // GET  → returns latest sensor data (from KV) or zeroed stub
 // POST → stores reading from ESP32, forwards to Beehive HA webhook
 
+function getKV(env) {
+  return env.HCC_KV || env.MOWER_KV || null;
+}
+
 export async function onRequestGet({ env }) {
-  if (env.HCC_KV) {
+  const kv = getKV(env);
+  if (kv) {
     try {
-      const raw = await env.HCC_KV.get('hours_data');
+      const raw = await kv.get('hours_data');
       if (raw) return Response.json(JSON.parse(raw));
     } catch (_) {}
   }
@@ -25,9 +30,9 @@ export async function onRequestPost({ request, env }) {
 
   const data = { ...body, lastSync: new Date().toISOString() };
 
-  // Store in KV so the GET can serve it to the HCC app
-  if (env.HCC_KV) {
-    await env.HCC_KV.put('hours_data', JSON.stringify(data));
+  const kv = getKV(env);
+  if (kv) {
+    await kv.put('hours_data', JSON.stringify(data));
   }
 
   // Forward to Beehive HA webhook so HA entities stay in sync
