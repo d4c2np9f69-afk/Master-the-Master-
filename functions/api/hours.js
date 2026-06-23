@@ -2,10 +2,17 @@
 // GET  → returns latest sensor data (from KV) or zeroed stub
 // POST → stores reading from ESP32, forwards to Beehive HA webhook
 
+// KV binding: Cloudflare Pages may expose it as HCC_KV or MOWER_KV depending
+// on how the binding was named in the dashboard. Try both so either works.
+function getKV(env) {
+  return env.HCC_KV || env.MOWER_KV || null;
+}
+
 export async function onRequestGet({ env }) {
-  if (env.HCC_KV) {
+  const kv = getKV(env);
+  if (kv) {
     try {
-      const raw = await env.HCC_KV.get('hours_data');
+      const raw = await kv.get('hours_data');
       if (raw) return Response.json(JSON.parse(raw));
     } catch (_) {}
   }
@@ -25,8 +32,9 @@ export async function onRequestPost({ request, env }) {
 
   const data = { ...body, lastSync: new Date().toISOString() };
 
-  if (env.HCC_KV) {
-    await env.HCC_KV.put('hours_data', JSON.stringify(data));
+  const kv = getKV(env);
+  if (kv) {
+    await kv.put('hours_data', JSON.stringify(data));
   }
 
   if (env.HA_WEBHOOK_BASE) {
