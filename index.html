@@ -536,7 +536,7 @@ html,body{
     </div>
 
     <div id="beehiveCard" class="hcc-cta-card" style="border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.03)">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
         <span id="beehiveDot" style="width:10px;height:10px;border-radius:50%;background:#444;flex-shrink:0;transition:background .3s"></span>
         <div>
           <div id="beehiveTitle" style="font-size:13px;font-weight:800;color:#e8e8f0">Beehive — Checking&hellip;</div>
@@ -544,16 +544,39 @@ html,body{
         </div>
         <button onclick="checkBeehive(true)" style="margin-left:auto;background:none;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:var(--muted);padding:5px 10px;font-size:10px;font-weight:800;font-family:inherit">&#128260;</button>
       </div>
-      <div id="beehiveSetupPanel" style="display:none">
-        <div style="font-size:10px;color:var(--muted);margin-bottom:8px;line-height:1.55">Paste a Long-Lived Access Token from HA to enable one-tap setup. <b style="color:#4a9eff">Profile &rarr; scroll to bottom &rarr; Create Token.</b></div>
-        <input id="haTokenInput" type="password" placeholder="Paste HA token here&hellip;" style="width:100%;padding:9px 12px;border-radius:9px;border:1px solid rgba(74,158,255,.35);background:rgba(0,0,0,.4);color:#fff;font-size:13px;font-family:inherit;box-sizing:border-box;margin-bottom:8px">
-        <button onclick="saveHaToken()" style="width:100%;padding:10px;border:none;border-radius:9px;background:linear-gradient(135deg,#1a5fb4,#0d3a7d);color:#fff;font-size:12px;font-weight:800;letter-spacing:.8px;font-family:inherit">SAVE &amp; SETUP BEEHIVE</button>
-      </div>
-      <div id="beehiveProgress" style="display:none;font-size:11px;color:var(--muted);line-height:2"></div>
-      <div id="beehiveActions" style="display:none;margin-top:10px">
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button onclick="beehiveSetup()" style="flex:1;padding:10px;border:none;border-radius:9px;background:linear-gradient(135deg,#1a5fb4,#0d3a7d);color:#fff;font-size:11px;font-weight:800;font-family:inherit">&#9881; SETUP BEEHIVE</button>
-          <button onclick="window.open('http://homeassistant.local:8123','_blank')" style="flex:1;padding:10px;border:1px solid rgba(74,158,255,.35);border-radius:9px;background:rgba(74,158,255,.08);color:#4a9eff;font-size:11px;font-weight:800;font-family:inherit">OPEN &#8599;</button>
+
+      <!-- 3-step setup instructions — always visible until Beehive is confirmed online -->
+      <div id="beehiveSetupSteps">
+        <div style="font-size:10px;font-weight:800;color:rgba(255,255,255,.35);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:10px">HOW TO ACTIVATE BEEHIVE</div>
+
+        <!-- Step 1 -->
+        <div style="display:flex;gap:10px;margin-bottom:10px;align-items:flex-start">
+          <div style="width:20px;height:20px;border-radius:50%;background:#1a5fb4;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">1</div>
+          <div style="flex:1">
+            <div style="font-size:11px;font-weight:700;color:#e8e8f0;margin-bottom:4px">At the <code style="background:rgba(255,255,255,.1);padding:1px 5px;border-radius:4px;font-size:10px">ha &gt;</code> screen — run these two commands:</div>
+            <div onclick="copyCmd(this,'ha addons install a0d7b954_ssh')" style="font-family:monospace;font-size:11px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;color:#4aff9e;cursor:pointer;margin-bottom:4px;word-break:break-all" title="Tap to copy">ha addons install a0d7b954_ssh</div>
+            <div onclick="copyCmd(this,'ha addons start a0d7b954_ssh')" style="font-family:monospace;font-size:11px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;color:#4aff9e;cursor:pointer;word-break:break-all" title="Tap to copy">ha addons start a0d7b954_ssh</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px">&#128203; Tap either line to copy it</div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div style="display:flex;gap:10px;margin-bottom:10px;align-items:flex-start">
+          <div style="width:20px;height:20px;border-radius:50%;background:#1a5fb4;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">2</div>
+          <div style="flex:1">
+            <div style="font-size:11px;font-weight:700;color:#e8e8f0;margin-bottom:4px">Open Beehive in browser &rarr; Settings &rarr; Add-ons &rarr; Terminal &rarr; OPEN</div>
+            <button onclick="window.open('http://homeassistant.local:8123/hassio/addon/a0d7b954_ssh/info','_blank')" style="padding:8px 14px;border:1px solid rgba(74,158,255,.35);border-radius:8px;background:rgba(74,158,255,.08);color:#4a9eff;font-size:11px;font-weight:800;font-family:inherit">OPEN BEEHIVE &#8599;</button>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <div style="width:20px;height:20px;border-radius:50%;background:#1a5fb4;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">3</div>
+          <div style="flex:1">
+            <div style="font-size:11px;font-weight:700;color:#e8e8f0;margin-bottom:4px">In the Terminal — paste this one command and hit Enter:</div>
+            <div onclick="copyCmd(this,'curl -fsSL https://toro1-5rz.pages.dev/beehive/install.sh | bash')" style="font-family:monospace;font-size:10px;background:rgba(0,0,0,.5);border:1px solid rgba(74,158,255,.3);border-radius:6px;padding:7px 10px;color:#4aff9e;cursor:pointer;word-break:break-all" title="Tap to copy">curl -fsSL https://toro1-5rz.pages.dev/beehive/install.sh | bash</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px">&#128203; Tap to copy &bull; Runs everything automatically</div>
+          </div>
         </div>
       </div>
     </div>
@@ -660,6 +683,9 @@ html,body{
     <div id="beehiveCard2" class="hcc-cta-card" style="border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.03)">
       <div id="beehive2Body">
         <div style="font-size:12px;color:var(--muted);text-align:center;padding:8px 0">&#128260; Checking Beehive&hellip;</div>
+      </div>
+      <div style="margin-top:8px">
+        <button onclick="window.open('http://homeassistant.local:8123','_blank')" style="width:100%;padding:9px;border:1px solid rgba(74,158,255,.3);border-radius:9px;background:rgba(74,158,255,.07);color:#4a9eff;font-size:11px;font-weight:800;font-family:inherit">OPEN BEEHIVE &#8599;</button>
       </div>
     </div>
   </div>
@@ -2709,118 +2735,50 @@ window.hccSection = function(id, btn) {
   window.scrollTo({top:0, behavior:'smooth'});
 };
 
-// ── BEEHIVE AUTO-SETUP ──────────────────────────────────────────────────────
+// ── BEEHIVE STATUS CHECK ─────────────────────────────────────────────────────
 var HA_BASE = 'http://homeassistant.local:8123';
 
-function haHeaders() {
-  var t = localStorage.getItem('ha_token');
-  return t ? { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+function copyCmd(el, text) {
+  navigator.clipboard.writeText(text).then(function() {
+    var orig = el.style.borderColor;
+    el.style.borderColor = '#22c55e';
+    el.style.color = '#fff';
+    setTimeout(function() { el.style.borderColor = orig; el.style.color = '#4aff9e'; }, 1200);
+  }).catch(function() {
+    var r = document.createRange();
+    r.selectNode(el);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(r);
+  });
 }
 
 function checkBeehive(manual) {
-  var card  = document.getElementById('beehiveCard');
-  var card2 = document.getElementById('beehiveCard2');
   var dot   = document.getElementById('beehiveDot');
   var title = document.getElementById('beehiveTitle');
   var ver   = document.getElementById('beehiveVersion');
-  var acts  = document.getElementById('beehiveActions');
-  var panel = document.getElementById('beehiveSetupPanel');
+  var steps = document.getElementById('beehiveSetupSteps');
+  var b2    = document.getElementById('beehive2Body');
   if (dot) dot.style.background = '#ffd24a';
-  fetch(HA_BASE + '/api/', { headers: haHeaders(), signal: AbortSignal.timeout(4000) })
+  fetch(HA_BASE + '/api/', { signal: AbortSignal.timeout(3000) })
     .then(function(r) { return r.json(); })
     .then(function(d) {
       var online = !!(d && d.version);
       if (dot)   dot.style.background = online ? '#22c55e' : '#e01c1c';
-      if (title) title.textContent = online ? '🪴 Beehive Online' : 'Beehive Offline';
-      if (title) title.style.color = online ? '#22c55e' : '#ff6262';
-      if (ver)   ver.textContent   = 'Home Assistant ' + (d.version || '--');
-      if (acts)  acts.style.display = online ? 'block' : 'none';
-      if (card2) card2.querySelector('#beehive2Body').innerHTML = online
-        ? '<div style="font-size:12px;color:#22c55e;font-weight:700">&#129303; Beehive online &bull; HA ' + d.version + '</div>'
-          + '<div style="font-size:11px;color:var(--muted);margin-top:4px">ESPHome devices will appear automatically. <a href="http://homeassistant.local:8123" target="_blank" style="color:#4a9eff;font-weight:700">Open Beehive &#8599;</a></div>'
+      if (title) { title.textContent = online ? '🪴 Beehive Online' : 'Beehive Offline'; title.style.color = online ? '#22c55e' : '#ff6262'; }
+      if (ver)   ver.textContent = 'Home Assistant ' + (d.version || '--');
+      if (steps) steps.style.display = online ? 'none' : 'block';
+      if (b2) b2.innerHTML = online
+        ? '<div style="font-size:12px;color:#22c55e;font-weight:700">&#129303; Beehive online &bull; HA ' + d.version + '</div><div style="font-size:11px;color:var(--muted);margin-top:4px">All automations active. ESPHome devices appear automatically.</div>'
         : '<div style="font-size:12px;color:#ff6262;font-weight:700">&#128308; Beehive offline — boot it up</div>';
-      if (!online && panel) panel.style.display = 'none';
-      if (online && !localStorage.getItem('ha_token') && panel) panel.style.display = 'block';
     })
     .catch(function() {
       if (dot)   dot.style.background = '#e01c1c';
       if (title) { title.textContent = 'Beehive Offline'; title.style.color = '#ff6262'; }
-      if (ver)   ver.textContent = 'Not reachable — must be on home WiFi';
-      if (acts)  acts.style.display = 'none';
-      if (card2) { var b = card2.querySelector('#beehive2Body'); if(b) b.innerHTML = '<div style="font-size:12px;color:#ff6262;font-weight:700">&#128308; Beehive offline — boot it up</div>'; }
+      if (ver)   ver.textContent = 'Not reachable from this network';
+      if (b2)    b2.innerHTML = '<div style="font-size:12px;color:#ff6262;font-weight:700">&#128308; Beehive offline — boot it up</div>';
     });
 }
 
-function saveHaToken() {
-  var inp = document.getElementById('haTokenInput');
-  if (!inp || !inp.value.trim()) return;
-  localStorage.setItem('ha_token', inp.value.trim());
-  var panel = document.getElementById('beehiveSetupPanel');
-  if (panel) panel.style.display = 'none';
-  beehiveSetup();
-}
-
-function beehiveSetupStep(label, ok) {
-  var el = document.getElementById('beehiveProgress');
-  if (!el) return;
-  el.style.display = 'block';
-  el.innerHTML += '<div>' + (ok ? '&#10003;' : '&#9888;') + ' ' + label + '</div>';
-}
-
-function beehiveSetup() {
-  var token = localStorage.getItem('ha_token');
-  if (!token) {
-    var panel = document.getElementById('beehiveSetupPanel');
-    if (panel) panel.style.display = 'block';
-    return;
-  }
-  var prog = document.getElementById('beehiveProgress');
-  if (prog) { prog.style.display = 'block'; prog.innerHTML = '<div style="font-weight:800;color:#4a9eff;margin-bottom:4px">Setting up Beehive&hellip;</div>'; }
-  var H = haHeaders();
-
-  var automations = [
-    {
-      id: 'hcc_panic_button',
-      alias: 'HCC — Panic Button',
-      description: 'Emergency alert from HCC app',
-      mode: 'single',
-      trigger: [{ platform: 'webhook', webhook_id: 'hcc-panic-button', allowed_methods: ['POST','GET'], local_only: false }],
-      action: [
-        { service: 'light.turn_on', target: { entity_id: 'all' }, data: { flash: 'long' } },
-        { service: 'persistent_notification.create', data: { title: '🚨 EMERGENCY', message: 'Panic triggered at {{ now().strftime(\'%I:%M %p\') }}', notification_id: 'hcc_panic' } }
-      ]
-    },
-    {
-      id: 'hcc_freeze_warning',
-      alias: 'HCC — Freeze Warning',
-      description: 'Remind to winterize irrigation',
-      mode: 'single',
-      trigger: [{ platform: 'numeric_state', entity_id: 'sensor.outdoor_temperature', below: 34 }],
-      condition: [{ condition: 'template', value_template: '{{ now().month >= 9 }}' }],
-      action: [{ service: 'persistent_notification.create', data: { title: '🥶 Freeze Warning', message: 'Temp below 34°F — consider winterizing your irrigation.', notification_id: 'hcc_freeze' } }]
-    }
-  ];
-
-  var steps = automations.map(function(auto) {
-    return fetch(HA_BASE + '/api/config/automation/config/' + auto.id, {
-      method: 'POST', headers: H, body: JSON.stringify(auto)
-    })
-    .then(function(r) { beehiveSetupStep(auto.alias, r.ok); })
-    .catch(function() { beehiveSetupStep(auto.alias + ' (offline?)', false); });
-  });
-
-  // Reload automations after creating them
-  Promise.all(steps).then(function() {
-    return fetch(HA_BASE + '/api/services/automation/reload', { method: 'POST', headers: H });
-  }).then(function() {
-    beehiveSetupStep('Automations reloaded', true);
-    beehiveSetupStep('Beehive setup complete! Open HA to finish Blink + ESPHome.', true);
-  }).catch(function() {
-    beehiveSetupStep('Reload failed — restart HA manually', false);
-  });
-}
-
-// Auto-check on page load (HOME is active by default)
 setTimeout(function() { checkBeehive(false); }, 800);
 </script>
 

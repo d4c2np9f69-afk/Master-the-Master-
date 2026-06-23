@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 # ═══════════════════════════════════════════════════════════════════════════
 #  HOME COMMAND CENTER — BEEHIVE BRAIN SETUP
-#  Run this INSIDE the Beehive Terminal (HA → Settings → Add-ons → Terminal)
-#  No Windows. No PowerShell. Runs entirely on Beehive itself.
-#  Usage:  bash /config/beehive/install.sh
+#  Run INSIDE the HA Terminal add-on:
+#    curl -fsSL https://toro1-5rz.pages.dev/beehive/install.sh | bash
 # ═══════════════════════════════════════════════════════════════════════════
-set -e
 
-R='\033[0;31m' G='\033[0;32m' C='\033[0;36m' Y='\033[1;33m' W='\033[1;37m' N='\033[0m'
+HCC_BASE="https://toro1-5rz.pages.dev"
+R='\033[0;31m' G='\033[0;32m' C='\033[0;36m' Y='\033[1;33m' N='\033[0m'
 OK="${G}✓${N}" ERR="${R}✗${N}" INFO="${C}→${N}"
 
 banner() { echo -e "\n${C}══ $1 ══${N}"; }
@@ -17,10 +16,10 @@ warn()   { echo -e "  ${Y}⚠${N}  $1"; }
 die()    { echo -e "  ${ERR}  $1"; exit 1; }
 
 echo ""
-echo -e "${C}╔═══════════════════════════════════════════════════╗${NC}"
-echo -e "${C}║     HOME COMMAND CENTER — BEEHIVE BRAIN SETUP    ║${NC}"
-echo -e "${C}║         Standalone · No Windows Required          ║${NC}"
-echo -e "${C}╚═══════════════════════════════════════════════════╝${NC}"
+echo -e "${C}╔═══════════════════════════════════════════════════╗${N}"
+echo -e "${C}║     HOME COMMAND CENTER — BEEHIVE BRAIN SETUP    ║${N}"
+echo -e "${C}║         Standalone · No Windows Required          ║${N}"
+echo -e "${C}╚═══════════════════════════════════════════════════╝${N}"
 echo ""
 
 # ── Verify we are running inside Home Assistant ─────────────────────────────
@@ -31,8 +30,8 @@ banner "STEP 1 — HACS"
 if [[ -d /config/custom_components/hacs ]]; then
   ok "HACS already installed — skipping"
 else
-  info "Downloading and installing HACS..."
-  wget -q -O - https://get.hacs.xyz | bash - && ok "HACS installed" || warn "HACS install returned non-zero (may already exist)"
+  info "Installing HACS..."
+  curl -fsSL https://get.hacs.xyz | bash - && ok "HACS installed" || warn "HACS install returned non-zero (may already exist)"
 fi
 
 # ── STEP 2: Create HCC package directory ────────────────────────────────────
@@ -46,7 +45,6 @@ cat > /config/packages/hcc.yaml << 'HCCPKG'
 # ═══════════════════════════════════════════════════════════════════════════
 #  HCC — Home Command Center Package
 #  Loaded automatically via homeassistant.packages in configuration.yaml
-#  Controls: Panic, Irrigation alerts, Weather alerts, Mower sensor sync
 # ═══════════════════════════════════════════════════════════════════════════
 
 # ── Input helpers ────────────────────────────────────────────────────────────
@@ -96,9 +94,8 @@ template:
           {% set h = states('input_number.mower_hours') | float(0) %}
           {% if h > 0 %}{{ h }} hrs{% else %}Unknown{% endif %}
 
-# ── Webhooks ─────────────────────────────────────────────────────────────────
+# ── Automations ───────────────────────────────────────────────────────────────
 automation:
-  # ── Panic Button ────────────────────────────────────────────────────────────
   - id: hcc_panic_button
     alias: "HCC — Panic Button"
     description: "Emergency alert from HCC app — flash all lights, send notification"
@@ -127,7 +124,6 @@ automation:
         target:
           entity_id: input_boolean.hcc_panic_active
 
-  # ── Mower sensor data ingestion (ESP32 posts to this webhook) ───────────────
   - id: hcc_mower_sensor_sync
     alias: "HCC — Mower Sensor Sync"
     description: "ESP32 mower sensor posts engine hours, battery, GPS data"
@@ -164,7 +160,6 @@ automation:
         data:
           value: "{{ now().isoformat() }}"
 
-  # ── Irrigation: alert when watering starts ──────────────────────────────────
   - id: hcc_irrigation_started
     alias: "HCC — Irrigation Started"
     description: "Notify when B-Hyve begins watering"
@@ -184,7 +179,6 @@ automation:
           message: "B-Hyve watering started at {{ now().strftime('%I:%M %p') }}"
           notification_id: hcc_irrigation
 
-  # ── Weather: NWS severe alert ────────────────────────────────────────────────
   - id: hcc_weather_severe
     alias: "HCC — Severe Weather Alert"
     description: "Notify on severe NWS weather watch or warning"
@@ -204,7 +198,6 @@ automation:
           message: "Conditions: {{ states('weather.home') | title }} — check HCC for details"
           notification_id: hcc_weather_severe
 
-  # ── Freeze warning: winterize irrigation reminder ────────────────────────────
   - id: hcc_freeze_warning
     alias: "HCC — Freeze Warning"
     description: "Remind to winterize irrigation when first freeze approaches in fall"
@@ -259,7 +252,7 @@ else
   info "Adding packages loader to configuration.yaml..."
   cat >> "$CONFIG" << 'CFGPATCH'
 
-# ── HCC Package loader (added by beehive/install.sh) ──────────────────────
+# ── HCC Package loader ──────────────────────────────────────────────────────
 homeassistant:
   packages: !include_dir_named packages
 CFGPATCH
@@ -268,16 +261,16 @@ fi
 
 # ── STEP 5: Install ESPHome add-on ──────────────────────────────────────────
 banner "STEP 5 — ESPHome Add-on"
-info "Installing ESPHome add-on (for mower sensor firmware)..."
+info "Installing ESPHome (for mower sensor firmware)..."
 ha addons install a5d21c77_esphome 2>/dev/null && ok "ESPHome installed" || warn "ESPHome already installed or needs manual install via UI"
 ha addons start a5d21c77_esphome 2>/dev/null && ok "ESPHome started" || true
 
-# ── STEP 6: Copy ESPHome mower sensor config ────────────────────────────────
+# ── STEP 6: Download ESPHome mower sensor config ─────────────────────────────
 banner "STEP 6 — Mower Sensor Firmware Config"
 mkdir -p /config/esphome
-cp /config/beehive/esphome/hcc-mower.yaml /config/esphome/hcc-mower.yaml 2>/dev/null \
-  && ok "Mower sensor config copied to /config/esphome/hcc-mower.yaml" \
-  || warn "Copy failed — run manually after install"
+curl -fsSL "${HCC_BASE}/beehive/esphome/hcc-mower.yaml" -o /config/esphome/hcc-mower.yaml \
+  && ok "Mower sensor config saved to /config/esphome/hcc-mower.yaml" \
+  || warn "Download failed — check connectivity and retry"
 
 # ── STEP 7: Restart HA ──────────────────────────────────────────────────────
 banner "STEP 7 — Restart Home Assistant"
@@ -286,16 +279,16 @@ ha core restart && ok "Restart triggered — wait ~60 seconds" || warn "Restart 
 
 # ── DONE ─────────────────────────────────────────────────────────────────────
 echo ""
-echo -e "${C}╔══════════════════════════════════════════════════════════╗${NC}"
-echo -e "${C}║              BEEHIVE SETUP COMPLETE                     ║${NC}"
-echo -e "${C}╚══════════════════════════════════════════════════════════╝${NC}"
+echo -e "${C}╔══════════════════════════════════════════════════════════╗${N}"
+echo -e "${C}║              BEEHIVE SETUP COMPLETE                     ║${N}"
+echo -e "${C}╚══════════════════════════════════════════════════════════╝${N}"
 echo ""
 echo -e "  ${G}✓${N} HACS installed"
 echo -e "  ${G}✓${N} HCC package loaded (automations, webhooks, sensors)"
 echo -e "  ${G}✓${N} ESPHome add-on installed"
-echo -e "  ${G}✓${N} Mower sensor config ready"
+echo -e "  ${G}✓${N} Mower sensor config ready at /config/esphome/hcc-mower.yaml"
 echo ""
-echo -e "  ${Y}NEXT STEPS (do these in HA on your phone):${N}"
+echo -e "  ${Y}NEXT STEPS (in HA UI on your phone):${N}"
 echo -e "  1. Settings → Add-ons → HACS → Authorize GitHub"
 echo -e "  2. HACS → Integrations → search 'Orbit B-Hyve' → install"
 echo -e "  3. Settings → Devices & Services → Add Integration → Orbit B-Hyve"
