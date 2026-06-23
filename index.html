@@ -557,7 +557,10 @@ html,body{
   <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.55) 0%,transparent 55%)"></div>
   <div style="position:absolute;bottom:10px;left:12px;right:12px">
     <div style="font-size:9px;font-weight:800;letter-spacing:3px;color:rgba(255,255,255,.6);text-transform:uppercase;margin-bottom:1px">MANAGE &bull; MAINTAIN &bull; MONITOR</div>
-    <div style="font-size:11px;font-weight:600;color:rgba(255,220,120,.85);font-style:italic;letter-spacing:.5px">Everything. In One Place.</div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end">
+      <div style="font-size:11px;font-weight:600;color:rgba(255,220,120,.85);font-style:italic;letter-spacing:.5px">Everything. In One Place.</div>
+      <div id="heroWeather" style="font-size:13px;font-weight:800;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.9);letter-spacing:.5px"></div>
+    </div>
   </div>
 </div>
 <!-- HCC SECTION SWITCHER -->
@@ -605,6 +608,11 @@ html,body{
     <button class="hdr-btn outline" onclick="showModal('svc')">&#128295; LOG SERVICE</button>
     <button class="hdr-btn outline" onclick="showModal('hours')">&#9201; UPDATE HOURS</button>
   </div>
+</div>
+<div style="padding:10px 12px 4px;display:flex;gap:8px;flex-wrap:wrap">
+  <button onclick="showTab('dashboard',this.closest('.hcc-section').querySelector('.tab.tabcat-dashboard'));hccScroll('irrigationCard')" style="flex:1;min-width:120px;background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.3);border-radius:10px;padding:10px 8px;font-size:11px;font-weight:800;letter-spacing:1px;cursor:pointer">&#128688; IRRIGATION</button>
+  <button onclick="showTab('dashboard',this.closest('.hcc-section').querySelector('.tab.tabcat-dashboard'));hccScroll('burnCard')" style="flex:1;min-width:120px;background:rgba(255,120,0,.10);color:#ff8c42;border:1px solid rgba(255,120,0,.25);border-radius:10px;padding:10px 8px;font-size:11px;font-weight:800;letter-spacing:1px;cursor:pointer">&#9729; WEATHER</button>
+  <button onclick="showTab('dashboard',this.closest('.hcc-section').querySelector('.tab.tabcat-dashboard'));hccScroll('tab-dashboard')" style="flex:1;min-width:120px;background:rgba(74,158,255,.10);color:#4a9eff;border:1px solid rgba(74,158,255,.25);border-radius:10px;padding:10px 8px;font-size:11px;font-weight:800;letter-spacing:1px;cursor:pointer">&#9881; MOWER</button>
 </div>
 <div class="tabs">
   <button class="tab active tabcat-dashboard" onclick="showTab('dashboard',this)">DASHBOARD</button>
@@ -978,20 +986,20 @@ html,body{
 
     <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">CAMERAS</div>
     <div class="hcc-tile-grid">
-      <div class="hcc-tile hcc-tile-pending">
+      <div class="hcc-tile hcc-tile-pending" style="border-color:rgba(255,210,74,.25);background:rgba(255,210,74,.05)">
         <div class="hcc-tile-icon">&#128247;</div>
         <div class="hcc-tile-name">Front Door</div>
-        <div class="hcc-tile-status">NOT CONNECTED</div>
+        <div class="hcc-tile-status" style="color:#ffd24a">PENDING</div>
       </div>
-      <div class="hcc-tile hcc-tile-pending">
+      <div class="hcc-tile hcc-tile-pending" style="border-color:rgba(255,210,74,.25);background:rgba(255,210,74,.05)">
         <div class="hcc-tile-icon">&#128247;</div>
         <div class="hcc-tile-name">Back Yard</div>
-        <div class="hcc-tile-status">NOT CONNECTED</div>
+        <div class="hcc-tile-status" style="color:#ffd24a">PENDING</div>
       </div>
-      <div class="hcc-tile hcc-tile-pending">
+      <div class="hcc-tile hcc-tile-pending" style="border-color:rgba(255,210,74,.25);background:rgba(255,210,74,.05)">
         <div class="hcc-tile-icon">&#128247;</div>
         <div class="hcc-tile-name">Garage</div>
-        <div class="hcc-tile-status">NOT CONNECTED</div>
+        <div class="hcc-tile-status" style="color:#ffd24a">PENDING</div>
       </div>
       <div class="hcc-tile hcc-tile-add">
         <div class="hcc-tile-icon">&#43;</div>
@@ -1006,7 +1014,7 @@ html,body{
         <span class="hcc-module-icon">&#128247;</span>
         <div class="hcc-module-info">
           <div class="hcc-module-name">Blink Camera Integration</div>
-          <div class="hcc-module-desc">Tap to open Beehive &rarr; Settings &rarr; Add Integration &rarr; Blink</div>
+          <div class="hcc-module-desc">HA fix merged &#10003; — connect after next HA update (Settings &rarr; Add Integration &rarr; Blink)</div>
         </div>
         <span class="hcc-badge-next">SETUP &#8599;</span>
       </div>
@@ -1792,6 +1800,8 @@ function loadWeather(){
         else { banner.className='wx-banner wx-no'; banner.innerHTML='&#128683; DO NOT MOW'; }
       }
       WX={status:mow,temp:Math.round(c.temperature_2m),risk:risk,soil:soil,dewOnGrass:dewOnGrass,loaded:true};
+      var hw=document.getElementById('heroWeather');
+      if(hw){var wCode=c.weathercode||0;var wIcon=wCode===0?'&#9728;&#65039;':wCode<3?'&#9925;':wCode<50?'&#9729;':wCode<70?'&#127783;&#65039;':wCode<80?'&#10052;':'&#26928;&#65039;';hw.innerHTML=wIcon+' '+Math.round(c.temperature_2m)+'&#176;F';}
       renderReadiness();
       loadStation();
     })
