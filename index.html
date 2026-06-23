@@ -2485,8 +2485,7 @@ loadWeather();
 loadIrrigation();
 loadAlerts();
 
-<script>
-/* ===== Engine Hour Sensor sync (added) ===== */
+/* ===== Engine Hour Sensor sync ===== */
 (function(){
   // The endpoint lives on this same site (Cloudflare Pages function at /api/hours),
   // so this is a same-origin call - no domain to set, no CORS.
@@ -2685,7 +2684,6 @@ function hccPanic() {
 
 
 
-<script>
 // ── Wire up new section hero updates ────────────────────────────────────────
 // Update weather hero with live data whenever weather loads
 (function patchWeatherHero() {
