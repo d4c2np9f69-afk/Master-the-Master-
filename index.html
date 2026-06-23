@@ -2519,6 +2519,8 @@ loadAlerts();
     fetch(MOWER_ENDPOINT, {cache:'no-store'})
       .then(function(r){ return r.json(); })
       .then(function(d){
+        var isStub = (d.source === 'stub');
+        var isHeartbeat = (d.source === 'heartbeat' || d.engine_running === false);
         var sensorHrs = (typeof d.hours === 'number') ? d.hours : 0;
         var total = Math.round((MOWER_BASELINE + sensorHrs)*10)/10;
         var changed = false;
@@ -2599,7 +2601,19 @@ loadAlerts();
         } else chip('hcBatt','BATT \u2014','unk');
         if(wifi!=null) chip('hcWifi','WIFI '+wifi.toFixed(0)+'dBm', wifi>-80?'ok':'bad');
         else           chip('hcWifi','WIFI \u2014','unk');
-        setMsg('Sensor: '+total.toFixed(1)+' hrs \u00b7 '+(distMi>0?distMi.toFixed(2)+' mi GPS \u00b7 ':'')+'last sync '+when, '#aaa');
+        if(isStub){
+          setMsg('Sensor box not connected yet \u2014 start the engine and the data will appear', '#f0a500');
+        } else if(isHeartbeat){
+          var hbBatt = nval(d,['battery','battery_parked','batt']);
+          var hbMsg = 'Engine off \u00b7 Box connected';
+          if(hbBatt!=null && hbBatt>0) hbMsg += ' \u00b7 Battery ' + hbBatt.toFixed(2) + ' V';
+          var hbWifi = nval(d,['wifi_rssi','rssi']);
+          if(hbWifi!=null) hbMsg += ' \u00b7 WiFi ' + hbWifi.toFixed(0) + ' dBm';
+          if(d.lastSync) hbMsg += ' \u00b7 ' + new Date(d.lastSync).toLocaleString();
+          setMsg(hbMsg, '#7ee787');
+        } else {
+          setMsg('Sensor: '+total.toFixed(1)+' hrs \u00b7 '+(distMi>0?distMi.toFixed(2)+' mi GPS \u00b7 ':'')+'last sync '+when, '#aaa');
+        }
         if(typeof drawYardMap==='function') drawYardMap(Array.isArray(d.track)?d.track:[]);
         if(manual && typeof toast==='function') toast(changed ? '\u2713 Hours updated from sensor' : '\u2713 Sensor read \u2014 no change');
       })

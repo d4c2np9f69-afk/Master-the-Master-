@@ -413,3 +413,35 @@ interval:
                           id(rpm_peak) = 0;      // reset peak each post
                           id(shock_count) = 0;
                         }
+
+  # Heartbeat every 5 minutes when engine is OFF — sends battery, WiFi, temp
+  # so the dashboard can confirm the sensor box is alive while parked.
+  - interval: 5min
+    then:
+      - if:
+          condition:
+            binary_sensor.is_off: engine_on
+          then:
+            - http_request.post:
+                url: !lambda 'return "${api_url}";'
+                headers:
+                  Content-Type: application/json
+                body: !lambda |-
+                  char buf[256];
+                  snprintf(buf, sizeof(buf),
+                    "{"
+                    "\"engine_running\":false,"
+                    "\"battery\":%.2f,"
+                    "\"battery_parked\":%.2f,"
+                    "\"wifi_rssi\":%.0f,"
+                    "\"esp_temp_f\":%.0f,"
+                    "\"batt_raw\":%.3f,"
+                    "\"source\":\"heartbeat\""
+                    "}",
+                    id(batt_voltage).state,
+                    id(batt_voltage).state,
+                    id(wifi_rssi).state,
+                    id(esp_temp).state,
+                    id(batt_voltage).state / 5.0
+                  );
+                  return std::string(buf);
