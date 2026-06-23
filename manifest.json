@@ -1,10 +1,11 @@
 {
-  "name": "Toro TimeMaster 21200",
-  "short_name": "TimeMaster",
-  "start_url": "index.html",
+  "name": "Home Command Center",
+  "short_name": "HCC",
+  "description": "Monitor, manage and maintain your home — weather, irrigation, yard and smart home.",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#111111",
-  "theme_color": "#CC0000",
+  "background_color": "#04040a",
+  "theme_color": "#04040a",
   "icons": [
     {
       "src": "icons/icon-192.png",
