@@ -667,12 +667,13 @@ html,body{
     </div>
 
     <!-- Token prompt — shown when Beehive online but no token yet -->
-    <div id="haTokenPrompt" style="display:none;background:rgba(74,158,255,.08);border:1px solid rgba(74,158,255,.25);border-radius:12px;padding:14px;margin-bottom:10px">
-      <div style="font-size:12px;font-weight:800;color:#4a9eff;margin-bottom:6px">&#128273; Enable Live Camera Access</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Generate a Long-Lived Token in Beehive to unlock camera snapshots &amp; home status.</div>
-      <div style="font-size:10px;color:rgba(255,255,255,.5);margin-bottom:8px">In Beehive: tap your username (bottom left) &rarr; Security &rarr; Long-Lived Access Tokens &rarr; Create Token</div>
-      <input id="haTokenInput" type="password" placeholder="Paste token here&hellip;" style="width:100%;box-sizing:border-box;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:9px 12px;color:#e8e8f0;font-size:12px;margin-bottom:8px;font-family:inherit">
-      <button onclick="saveHaToken()" style="width:100%;padding:10px;background:#1a5fb4;border:none;border-radius:8px;color:#fff;font-size:11px;font-weight:800;letter-spacing:.5px;cursor:pointer">SAVE &amp; UNLOCK CAMERAS</button>
+    <div id="haTokenPrompt" style="display:none;background:rgba(212,175,55,.07);border:1px solid rgba(212,175,55,.25);border-radius:12px;padding:14px;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:800;color:rgba(212,175,55,.9);margin-bottom:6px">&#128273; Connect to Beehive</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Create a Long-Lived Token in Home Assistant to unlock cameras &amp; home status.</div>
+      <div style="font-size:10px;color:rgba(220,195,145,.5);margin-bottom:8px">In Beehive: tap your username (bottom left) &rarr; Security &rarr; Long-Lived Access Tokens &rarr; Create Token &rarr; copy it</div>
+      <input id="haTokenInput" type="password" placeholder="Paste token here&hellip;" style="width:100%;box-sizing:border-box;background:rgba(0,0,0,.4);border:1px solid rgba(212,175,55,.3);border-radius:8px;padding:9px 12px;color:#ede8df;font-size:12px;margin-bottom:8px;font-family:inherit">
+      <button id="haTokenBtn" onclick="saveHaToken()" style="width:100%;padding:10px;background:linear-gradient(135deg,#5a3e00,#3a2800);border:1px solid rgba(212,175,55,.4);border-radius:8px;color:rgba(212,175,55,.95);font-size:11px;font-weight:800;letter-spacing:.5px;cursor:pointer">&#128275; CONNECT TO BEEHIVE</button>
+      <div id="haTokenStatus" style="font-size:11px;text-align:center;margin-top:8px;min-height:16px"></div>
     </div>
 
     <!-- Camera grid — populated by loadCameras() -->
@@ -922,15 +923,21 @@ html,body{
 
     <!-- SETUP CARD — shown until B-Hyve is connected -->
     <div class="card" id="irrSetupCard">
-      <div class="card-title">&#9881; B-Hyve Setup</div>
-      <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px">To enable live irrigation control, add your Orbit B-Hyve credentials to Cloudflare Pages environment variables.</div>
-      <ul class="spec-list">
-        <li><span class="sk">Variable 1</span><span class="sv">BHYVE_EMAIL</span></li>
-        <li><span class="sk">Variable 2</span><span class="sv">BHYVE_PASSWORD</span></li>
-        <li><span class="sk">Where</span><span class="sv">Cloudflare Pages &rarr; Settings &rarr; Environment Variables</span></li>
-        <li><span class="sk">Project</span><span class="sv">toro1</span></li>
+      <div class="card-title">&#9881; Connect Your Water Hog</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px">B-Hyve is NOT a built-in Home Assistant integration — it needs to be set up separately. The easiest path is the Cloudflare option below.</div>
+
+      <div style="font-size:11px;font-weight:700;color:rgba(212,175,55,.85);letter-spacing:.5px;margin-bottom:6px;font-family:var(--serif)">OPTION 1 — Cloudflare (Easiest)</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.55">Add two variables to Cloudflare Pages so the app can talk directly to B-Hyve:</div>
+      <ul class="spec-list" style="margin-bottom:10px">
+        <li><span class="sk">Go to</span><span class="sv">dash.cloudflare.com &rarr; Pages &rarr; toro1</span></li>
+        <li><span class="sk">Then</span><span class="sv">Settings &rarr; Environment Variables &rarr; Production</span></li>
+        <li><span class="sk">Add</span><span class="sv">BHYVE_EMAIL = your B-Hyve email</span></li>
+        <li><span class="sk">Add</span><span class="sv">BHYVE_PASSWORD = your B-Hyve password</span></li>
       </ul>
-      <button class="btn-full btn-gray" style="margin-top:10px" onclick="window.open('https://dash.cloudflare.com','_blank','noopener')">&#128279; Open Cloudflare Dashboard</button>
+      <button class="btn-full btn-gray" style="margin-bottom:14px" onclick="window.open('https://dash.cloudflare.com','_blank','noopener')">&#128279; Open Cloudflare Dashboard</button>
+
+      <div style="font-size:11px;font-weight:700;color:rgba(212,175,55,.55);letter-spacing:.5px;margin-bottom:6px;font-family:var(--serif)">OPTION 2 — Through Beehive (Advanced)</div>
+      <div style="font-size:11px;color:rgba(220,195,145,.4);line-height:1.55">Requires installing HACS in Home Assistant first, then the Orbit B-Hyve integration through HACS. More steps but gives real-time zone control through HA automations.</div>
     </div>
 
   </div>
@@ -3100,11 +3107,41 @@ function getHaToken() {
 function saveHaToken() {
   var inp = document.getElementById('haTokenInput');
   if (!inp || !inp.value.trim()) return;
-  localStorage.setItem('ha_token', inp.value.trim());
-  var prompt = document.getElementById('haTokenPrompt');
-  if (prompt) prompt.style.display = 'none';
-  loadCameras();
-  loadHomeStatus();
+  var token = inp.value.trim();
+  var base = localStorage.getItem('ha_base') || HA_BASE;
+  var btn = document.getElementById('haTokenBtn');
+  var status = document.getElementById('haTokenStatus');
+  if (btn) { btn.textContent = 'Verifying…'; btn.style.opacity = '0.7'; }
+  if (status) status.innerHTML = '';
+  // Test the token before saving
+  fetch(base + '/api/', { headers: { 'Authorization': 'Bearer ' + token }, signal: AbortSignal.timeout(5000) })
+    .then(function(r) {
+      if (r.status === 401) throw new Error('unauthorized');
+      if (!r.ok) throw new Error('http_' + r.status);
+      return r.json();
+    })
+    .then(function(d) {
+      if (d && (d.message === 'API running.' || d.version)) {
+        localStorage.setItem('ha_token', token);
+        var prompt = document.getElementById('haTokenPrompt');
+        if (prompt) prompt.style.display = 'none';
+        loadCameras();
+        loadHomeStatus();
+      } else {
+        throw new Error('unexpected_response');
+      }
+    })
+    .catch(function(err) {
+      if (btn) { btn.textContent = '🔑 CONNECT TO BEEHIVE'; btn.style.opacity = '1'; }
+      if (status) {
+        var msg = err.message === 'unauthorized'
+          ? '❌ Token rejected — create a new Long-Lived Token in Beehive and paste it here'
+          : err.message && err.message.indexOf('http_') === 0
+          ? '❌ Beehive error ' + err.message.replace('http_','') + ' — try again'
+          : '❌ Can\'t reach Beehive — make sure you\'re on home WiFi';
+        status.innerHTML = '<span style="color:#e05555">' + msg + '</span>';
+      }
+    });
 }
 
 function loadCameras() {
@@ -3119,8 +3156,13 @@ function loadCameras() {
     headers: { 'Authorization': 'Bearer ' + token },
     signal: AbortSignal.timeout(5000)
   })
-  .then(function(r) { return r.json(); })
+  .then(function(r) {
+    if (r.status === 401) throw new Error('unauthorized');
+    if (!r.ok) throw new Error('http_' + r.status);
+    return r.json();
+  })
   .then(function(states) {
+    if (!Array.isArray(states)) throw new Error('bad_response');
     var cameras = states.filter(function(s) { return s.entity_id.startsWith('camera.'); });
     if (!grid) return;
     if (cameras.length === 0) {
@@ -3165,7 +3207,16 @@ function loadCameras() {
     });
   })
   .catch(function(err) {
-    if (grid) grid.innerHTML = '<div style="padding:12px;font-size:11px;color:#ff6262">Camera load failed — check token &amp; WiFi</div>';
+    var msg = err && err.message === 'unauthorized'
+      ? '&#10060; Token rejected — go to HOME and enter a new Long-Lived Token'
+      : '&#10060; Can\'t reach Beehive — must be on home WiFi';
+    if (grid) grid.innerHTML = '<div style="padding:12px;font-size:11px;color:rgba(224,85,85,.9);background:rgba(192,57,43,.1);border-radius:8px;margin:6px 0">' + msg + '</div>';
+    // Re-show the token prompt so they can fix it
+    if (err && err.message === 'unauthorized') {
+      var prompt = document.getElementById('haTokenPrompt');
+      if (prompt) prompt.style.display = 'block';
+      localStorage.removeItem('ha_token');
+    }
   });
 }
 
