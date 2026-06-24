@@ -543,6 +543,24 @@ html,body{
   .health-grid,.stat-boxes{grid-template-columns:repeat(4,1fr)}
   .hcc-tile-grid{grid-template-columns:repeat(4,1fr)}
 }
+/* Camera grid */
+.camera-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
+.camera-card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer}
+.cam-img-wrap{position:relative;aspect-ratio:16/9;background:#0a0a0a;overflow:hidden}
+.cam-img{width:100%;height:100%;object-fit:cover;display:block}
+.cam-no-img{display:flex;align-items:center;justify-content:center;height:100%;font-size:28px;opacity:.3}
+.cam-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.7);padding:5px 8px 2px;text-transform:uppercase;letter-spacing:.5px}
+.cam-state{font-size:9px;color:var(--muted);padding:0 8px 6px}
+/* Home status rows */
+.hs-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
+.hs-row:last-child{border-bottom:none}
+.hs-icon{font-size:16px;width:20px;text-align:center}
+.hs-label{flex:1;font-size:12px;color:rgba(255,255,255,.7)}
+.hs-val{font-size:12px;font-weight:800}
+.hs-ok{color:#22c55e}
+.hs-warn{color:#ffd24a}
+.hs-red{color:#ef4444}
+.hs-neutral{color:#e8e8f0}
 </style>
 </head>
 <body>
@@ -639,14 +657,30 @@ html,body{
       <span class="sec-hdr-icon">&#128247;</span>
       <span class="sec-hdr-label">Security &bull; Cameras</span>
     </div>
-    <div class="hcc-module-list">
-      <div class="hcc-module-row" style="border-color:rgba(74,158,255,.25);background:rgba(74,158,255,.06);cursor:pointer" onclick="openBeehive('/config/integrations/dashboard')">
-        <span class="hcc-module-icon">&#128247;</span>
-        <div class="hcc-module-info">
-          <div class="hcc-module-name">Blink Cameras (3)</div>
-          <div class="hcc-module-desc">Front Door &bull; Back Yard &bull; Garage — tap to connect in Beehive</div>
+
+    <!-- Token prompt — shown when Beehive online but no token yet -->
+    <div id="haTokenPrompt" style="display:none;background:rgba(74,158,255,.08);border:1px solid rgba(74,158,255,.25);border-radius:12px;padding:14px;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:800;color:#4a9eff;margin-bottom:6px">&#128273; Enable Live Camera Access</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Generate a Long-Lived Token in Beehive to unlock camera snapshots &amp; home status.</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.5);margin-bottom:8px">In Beehive: tap your username (bottom left) &rarr; Security &rarr; Long-Lived Access Tokens &rarr; Create Token</div>
+      <input id="haTokenInput" type="password" placeholder="Paste token here&hellip;" style="width:100%;box-sizing:border-box;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:9px 12px;color:#e8e8f0;font-size:12px;margin-bottom:8px;font-family:inherit">
+      <button onclick="saveHaToken()" style="width:100%;padding:10px;background:#1a5fb4;border:none;border-radius:8px;color:#fff;font-size:11px;font-weight:800;letter-spacing:.5px;cursor:pointer">SAVE &amp; UNLOCK CAMERAS</button>
+    </div>
+
+    <!-- Camera grid — populated by loadCameras() -->
+    <div id="blinkCamerasGrid" style="display:none"></div>
+
+    <!-- Placeholder — shown when Beehive offline or no cameras found -->
+    <div id="blinkPlaceholder">
+      <div class="hcc-module-list">
+        <div class="hcc-module-row" style="border-color:rgba(74,158,255,.25);background:rgba(74,158,255,.06)">
+          <span class="hcc-module-icon">&#128247;</span>
+          <div class="hcc-module-info">
+            <div class="hcc-module-name">Blink Cameras (3)</div>
+            <div class="hcc-module-desc">Front Door &bull; Back Yard &bull; Garage &mdash; connects via Beehive</div>
+          </div>
+          <span class="hcc-badge-next">OFFLINE</span>
         </div>
-        <span class="hcc-badge-next">SETUP &#8599;</span>
       </div>
     </div>
 
@@ -658,6 +692,15 @@ html,body{
     <div class="quick-access-grid">
       <button class="qa-btn qa-btn-yard" onclick="hccSection('yard',document.getElementById('snav-yard'))">&#127807; YARD<br><span class="qa-sub">Mower &bull; GPS &bull; Log</span></button>
       <button class="qa-btn qa-btn-irr" onclick="hccSection('irrigation',document.getElementById('snav-irr'))">&#128688; IRRIGATION<br><span class="qa-sub">B-Hyve &bull; Zones &bull; Rain</span></button>
+    </div>
+
+    <!-- Home Status — populated when HA token available -->
+    <div id="homeStatusCard" style="display:none" class="card cat-status">
+      <div class="card-title">&#127968; Home Status</div>
+      <div id="homeStatusRows"></div>
+      <div style="margin-top:8px">
+        <button onclick="loadHomeStatus()" class="btn-full btn-gray" style="font-size:11px">&#128260; Refresh Status</button>
+      </div>
     </div>
 
   </div>
@@ -2919,16 +2962,28 @@ function openBeehive(path) {
 function beehiveOnline(base, d) {
   localStorage.setItem('ha_base', base);
   HA_BASE = base;
-  var dot   = document.getElementById('beehiveDot');
-  var title = document.getElementById('beehiveTitle');
-  var ver   = document.getElementById('beehiveVersion');
-  var steps = document.getElementById('beehiveSetupSteps');
+  var dot    = document.getElementById('beehiveDot');
+  var title  = document.getElementById('beehiveTitle');
+  var ver    = document.getElementById('beehiveVersion');
+  var steps  = document.getElementById('beehiveSetupSteps');
   var toggle = document.getElementById('beehiveSetupToggle');
   if (dot)   dot.style.background = '#22c55e';
   if (title) { title.textContent = '\u{1FAB4} Beehive Online'; title.style.color = '#22c55e'; }
-  if (ver)   ver.textContent = 'Home Assistant ' + d.version + ' — ' + base.replace('http://','');
+  if (ver)   ver.textContent = 'Home Assistant' + (d&&d.version?' '+d.version:'') + ' — ' + base.replace('http://','');
   if (steps) steps.style.display = 'none';
   if (toggle) toggle.style.display = 'none';
+  var token = getHaToken();
+  if (token) {
+    var prompt = document.getElementById('haTokenPrompt');
+    if (prompt) prompt.style.display = 'none';
+    loadCameras();
+    loadHomeStatus();
+  } else {
+    var prompt = document.getElementById('haTokenPrompt');
+    if (prompt) prompt.style.display = 'block';
+    var placeholder = document.getElementById('blinkPlaceholder');
+    if (placeholder) placeholder.style.display = 'none';
+  }
 }
 
 function checkBeehive(manual) {
@@ -2952,7 +3007,7 @@ function checkBeehive(manual) {
     fetch(base + '/api/', { signal: AbortSignal.timeout(2500) })
       .then(function(r) { return r.json(); })
       .then(function(d) {
-        if (d && d.version) { beehiveOnline(base, d); }
+        if (d && (d.message === 'API running.' || d.version)) { beehiveOnline(base, {}); }
         else { tryNext(list.slice(1)); }
       })
       .catch(function() { tryNext(list.slice(1)); });
@@ -2961,6 +3016,121 @@ function checkBeehive(manual) {
 }
 
 setTimeout(function() { checkBeehive(false); }, 800);
+
+// ── HA TOKEN & HOME DATA ─────────────────────────────────────────────────
+function getHaToken() {
+  return localStorage.getItem('ha_token') || '';
+}
+
+function saveHaToken() {
+  var inp = document.getElementById('haTokenInput');
+  if (!inp || !inp.value.trim()) return;
+  localStorage.setItem('ha_token', inp.value.trim());
+  var prompt = document.getElementById('haTokenPrompt');
+  if (prompt) prompt.style.display = 'none';
+  loadCameras();
+  loadHomeStatus();
+}
+
+function loadCameras() {
+  var token = getHaToken();
+  var base = localStorage.getItem('ha_base') || HA_BASE;
+  if (!token || !base) return;
+  var grid = document.getElementById('blinkCamerasGrid');
+  var placeholder = document.getElementById('blinkPlaceholder');
+  if (grid) grid.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">&#128247; Loading cameras&hellip;</div>';
+  if (grid) grid.style.display = 'block';
+  fetch(base + '/api/states', {
+    headers: { 'Authorization': 'Bearer ' + token },
+    signal: AbortSignal.timeout(5000)
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(states) {
+    var cameras = states.filter(function(s) { return s.entity_id.startsWith('camera.'); });
+    if (!grid) return;
+    if (cameras.length === 0) {
+      grid.innerHTML = '<div style="padding:12px;font-size:11px;color:var(--muted)">No cameras found in Beehive. Add cameras in HA first.</div>';
+      return;
+    }
+    if (placeholder) placeholder.style.display = 'none';
+    var html = '<div class="camera-grid">';
+    cameras.forEach(function(cam) {
+      var name = (cam.attributes && cam.attributes.friendly_name) ? cam.attributes.friendly_name : cam.entity_id.replace('camera.','').replace(/_/g,' ');
+      var imgId = 'cam-img-' + cam.entity_id.replace(/[^a-z0-9]/gi,'_');
+      html += '<div class="camera-card" onclick="openBeehive(\'/lovelace/0\')">'
+        + '<div class="cam-img-wrap"><img id="' + imgId + '" class="cam-img" alt="' + name + '" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="></div>'
+        + '<div class="cam-label">' + name + '</div>'
+        + '<div class="cam-state">' + (cam.state || '') + '</div>'
+        + '</div>';
+    });
+    html += '</div>';
+    grid.innerHTML = html;
+    cameras.forEach(function(cam) {
+      var imgEl = document.getElementById('cam-img-' + cam.entity_id.replace(/[^a-z0-9]/gi,'_'));
+      if (!imgEl) return;
+      fetch(base + '/api/camera_proxy/' + cam.entity_id, {
+        headers: { 'Authorization': 'Bearer ' + token },
+        signal: AbortSignal.timeout(8000)
+      })
+      .then(function(r) { return r.blob(); })
+      .then(function(blob) {
+        var url = URL.createObjectURL(blob);
+        if (imgEl) imgEl.src = url;
+      })
+      .catch(function() {
+        if (imgEl && imgEl.parentElement) imgEl.parentElement.innerHTML = '<div class="cam-no-img">&#128247;</div>';
+      });
+    });
+  })
+  .catch(function(err) {
+    if (grid) grid.innerHTML = '<div style="padding:12px;font-size:11px;color:#ff6262">Camera load failed — check token &amp; WiFi</div>';
+  });
+}
+
+function loadHomeStatus() {
+  var token = getHaToken();
+  var base = localStorage.getItem('ha_base') || HA_BASE;
+  if (!token || !base) return;
+  var card = document.getElementById('homeStatusCard');
+  var rows = document.getElementById('homeStatusRows');
+  if (card) card.style.display = 'block';
+  fetch(base + '/api/states', {
+    headers: { 'Authorization': 'Bearer ' + token },
+    signal: AbortSignal.timeout(5000)
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(states) {
+    if (!rows) return;
+    var lights = states.filter(function(s){ return s.entity_id.startsWith('light.'); });
+    var locks  = states.filter(function(s){ return s.entity_id.startsWith('lock.'); });
+    var climate = states.filter(function(s){ return s.entity_id.startsWith('climate.'); });
+    var doors  = states.filter(function(s){ return s.entity_id.startsWith('cover.') || (s.entity_id.startsWith('binary_sensor.') && s.entity_id.indexOf('door')>=0); });
+    var lightsOn = lights.filter(function(l){ return l.state==='on'; }).length;
+    var allLocked = locks.length>0 && locks.every(function(l){ return l.state==='locked'; });
+    var html = '';
+    if (lights.length>0){
+      html += '<div class="hs-row"><span class="hs-icon">&#128161;</span><span class="hs-label">Lights</span>'
+        + '<span class="hs-val '+(lightsOn>0?'hs-warn':'hs-ok')+'">'+(lightsOn>0?lightsOn+' on':'All off')+'</span></div>';
+    }
+    if (locks.length>0){
+      html += '<div class="hs-row"><span class="hs-icon">&#128274;</span><span class="hs-label">Locks ('+locks.length+')</span>'
+        + '<span class="hs-val '+(allLocked?'hs-ok':'hs-red')+'">'+(allLocked?'Locked':'CHECK')+'</span></div>';
+    }
+    if (climate.length>0){
+      var c=climate[0]; var ct=c.attributes&&c.attributes.current_temperature;
+      html += '<div class="hs-row"><span class="hs-icon">&#127777;&#65039;</span><span class="hs-label">Thermostat</span>'
+        + '<span class="hs-val hs-neutral">'+(ct?ct+'&deg;F':'--')+'</span></div>';
+    }
+    if (doors.length>0){
+      var open=doors.filter(function(d){ return d.state==='open'||d.state==='on'; }).length;
+      html += '<div class="hs-row"><span class="hs-icon">&#128682;</span><span class="hs-label">Doors/Covers</span>'
+        + '<span class="hs-val '+(open>0?'hs-warn':'hs-ok')+'">'+(open>0?open+' open':'All closed')+'</span></div>';
+    }
+    if (!html) html = '<div style="font-size:11px;color:var(--muted)">No smart home entities found yet</div>';
+    rows.innerHTML = html;
+  })
+  .catch(function(){ if (rows) rows.innerHTML='<div style="font-size:11px;color:#ff6262">Status unavailable — check token</div>'; });
+}
 </script>
 
 </body>
