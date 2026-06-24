@@ -184,22 +184,22 @@ html,body{
   padding:16px 16px 14px;
 }
 .sec-hero-badge{
-  font-size:9px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;
-  color:rgba(255,255,255,.5);margin-bottom:4px;
+  font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;
+  color:rgba(220,195,145,.55);margin-bottom:4px;
 }
-.sec-hero-title{font-size:26px;font-weight:900;color:#fff;letter-spacing:.3px;line-height:1.1}
-.sec-hero-status{font-size:12px;font-weight:700;color:rgba(255,255,255,.65);margin-top:5px;letter-spacing:.3px}
+.sec-hero-title{font-size:26px;font-weight:400;font-style:italic;font-family:var(--serif);color:rgba(240,220,175,.92);letter-spacing:.3px;line-height:1.1}
+.sec-hero-status{font-size:12px;font-weight:600;color:rgba(220,200,155,.7);margin-top:5px;letter-spacing:.3px}
 /* Weather hero: real photo — overlay at TOP so it doesn't conflict with baked-in bottom text */
 .sec-hero-weather{background:#020c20}
 .sec-hero-weather .sec-hero-overlay{
   background:linear-gradient(to bottom,rgba(0,0,0,.65) 0%,rgba(0,0,0,.2) 45%,transparent 70%);
   justify-content:flex-start;padding:14px 18px 0;
 }
-.sec-hero-weather .sec-hero-title{font-size:46px;font-weight:900;letter-spacing:-1.5px;line-height:1}
+.sec-hero-weather .sec-hero-title{font-size:46px;font-weight:300;font-style:normal;letter-spacing:-1.5px;line-height:1;color:rgba(240,220,175,.95)}
 /* Weather hero condition row */
 .wx-hero-row{display:flex;align-items:flex-start;justify-content:space-between;width:100%}
-.wx-hero-cond{font-size:13px;font-weight:700;color:rgba(255,255,255,.85);letter-spacing:.3px;margin-top:4px}
-.wx-hero-loc{font-size:9px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.6);text-transform:uppercase;margin-top:5px}
+.wx-hero-cond{font-size:13px;font-weight:600;font-family:var(--serif);color:rgba(230,205,155,.85);letter-spacing:.3px;margin-top:4px}
+.wx-hero-loc{font-size:9px;font-weight:600;letter-spacing:2px;color:rgba(210,180,120,.55);text-transform:uppercase;margin-top:5px}
 /* Irrigation hero */
 .sec-hero-irr{background:#020c06}
 .sec-hero-irr .sec-hero-overlay{background:linear-gradient(to top,rgba(0,0,0,.72) 0%,rgba(0,0,0,.15) 55%,transparent 100%)}
@@ -482,11 +482,11 @@ html,body{
 .upg-card,.diag-item,.diag-desc,.upg-desc{background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:10px;margin-bottom:7px;font-size:12px}
 .upg-desc,.diag-desc{color:#d4d4d6;font-weight:500;line-height:1.55}
 .sk{color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.3px;flex:0 0 42%;text-transform:uppercase}
-.sv{color:#f0f0f0;font-weight:700;font-size:12px;text-align:right;flex:1}
+.sv{color:rgba(235,215,175,.88);font-weight:600;font-size:12px;text-align:right;flex:1;font-family:var(--serif)}
 .spec-list{list-style:none;margin:0;padding:0}
 .spec-list li{display:flex;align-items:baseline;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);line-height:1.4}
 .spec-list li:last-child{border-bottom:none}
-.spec-section-hdr{font-size:9px;font-weight:900;letter-spacing:2px;color:var(--red);text-transform:uppercase;padding:12px 0 4px;margin:0}
+.spec-section-hdr{font-size:9px;font-weight:600;letter-spacing:2px;color:rgba(192,57,43,.8);text-transform:uppercase;padding:12px 0 4px;margin:0;font-family:var(--serif)}
 .log-row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05)}
 .log-icon{font-size:16px;flex-shrink:0;margin-top:1px}
 .log-date{font-size:10px;color:#ccc;font-weight:700;margin-bottom:2px}
@@ -774,8 +774,8 @@ html,body{
           <div class="wx-hero-loc">White House, TN &bull; 37188</div>
         </div>
         <div style="text-align:right;padding-bottom:6px">
-          <div style="font-size:9px;font-weight:800;letter-spacing:1.5px;color:rgba(255,255,255,.6);text-transform:uppercase;margin-bottom:4px">Station</div>
-          <div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.85)">KTNWHITE21</div>
+          <div style="font-size:9px;font-weight:600;letter-spacing:1.5px;color:rgba(210,180,120,.5);text-transform:uppercase;margin-bottom:4px;font-family:var(--serif)">Station</div>
+          <div style="font-size:11px;font-weight:600;color:rgba(240,220,175,.8);font-family:var(--serif)">KTNWHITE21</div>
         </div>
       </div>
     </div>
@@ -1218,7 +1218,7 @@ html,body{
   <!-- MOWER IDENTITY -->
   <div class="card cat-specs" style="margin-bottom:10px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-      <div style="font-size:16px;font-weight:900;color:#fff;letter-spacing:.5px">Toro TimeMaster</div>
+      <div style="font-size:16px;font-weight:400;font-style:italic;font-family:var(--serif);color:rgba(240,220,175,.92);letter-spacing:.5px">Toro TimeMaster</div>
       <div style="font-size:11px;font-weight:800;color:var(--red);letter-spacing:1px;border:1px solid rgba(224,28,28,.4);border-radius:6px;padding:3px 8px">MODEL 21200</div>
     </div>
     <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.3px">S/N&nbsp;&nbsp;401338948 &nbsp;&bull;&nbsp; Purchased Apr 11, 2018 &nbsp;&bull;&nbsp; Restored May 2026</div>
@@ -1724,7 +1724,7 @@ function updateDashboard(){
       var remTxt=t.st==='OVERDUE'?'OVERDUE':t.rem.toFixed(1)+' hrs left';
       return '<div style="margin-bottom:11px">'
         +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
-        +'<div style="font-size:12px;font-weight:700;color:#fff">'+t.icon+' '+t.name+'</div>'
+        +'<div style="font-size:12px;font-weight:600;color:rgba(235,215,175,.9);font-family:var(--serif)">'+t.icon+' '+t.name+'</div>'
         +'<span class="pill '+pillCls+'">'+remTxt+'</span></div>'
         +'<div style="height:7px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden">'
         +'<div style="height:100%;width:'+prog+'%;background:'+barColor+';border-radius:4px;transition:width .6s"></div></div>'
@@ -2605,7 +2605,7 @@ function renderInvestment(){
     if(purchases.length){
       html+='<div style="margin-top:8px">'+purchases.slice().reverse().map(function(p){
         return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">'
-          +'<div style="flex:1"><div style="font-size:13px;font-weight:700;color:#fff">'+p.name+'</div>'
+          +'<div style="flex:1"><div style="font-size:13px;font-weight:600;color:rgba(235,215,175,.9);font-family:var(--serif)">'+p.name+'</div>'
           +'<div style="font-size:10px;color:var(--muted)">'+p.date+(p.note?' &middot; '+p.note:'')+'</div></div>'
           +'<div style="font-size:13px;font-weight:700;color:#7ee787;font-family:var(--mono);margin:0 10px">'+fmt(p.cost)+'</div>'
           +'<button onclick="deletePurchase(\''+p.id+'\')" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer">&#10005;</button>'
