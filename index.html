@@ -109,13 +109,13 @@ html,body{
 /* ── HOUSE HERO (HOME section only) ─────────────────────────────────────── */
 .house-hero{
   position:relative;
-  height:280px;
+  height:300px;
   overflow:hidden;
   flex-shrink:0;
 }
 .house-hero img{
   width:100%;height:100%;
-  object-fit:cover;object-position:center 30%;
+  object-fit:cover;object-position:center center;
 }
 .house-hero-overlay{
   position:absolute;inset:0;
@@ -168,9 +168,11 @@ html,body{
 
 /* ── SECTION HERO (Weather, Irrigation, Yard) ───────────────────────────── */
 .sec-hero{
-  position:relative;height:260px;overflow:hidden;flex-shrink:0;
+  position:relative;height:300px;overflow:hidden;flex-shrink:0;
 }
-.sec-hero img{width:100%;height:100%;object-fit:cover;object-position:center 30%}
+.sec-hero img{width:100%;height:100%;object-fit:cover;object-position:center top}
+/* Irrigation and Yard: person's face is at top — pin to top, hide baked-in bottom text */
+.sec-hero-irr img,.sec-hero-yard img{object-position:center top}
 .sec-hero-overlay{
   position:absolute;inset:0;
   display:flex;flex-direction:column;justify-content:flex-end;
@@ -508,7 +510,7 @@ html,body{
 
   <!-- Home hero — only shows when HOME tab is active -->
   <div class="house-hero">
-    <img src="/images/hero-home.jpg" alt="Home Command Center">
+    <img src="./images/hero-home.jpg" alt="Home Command Center">
     <div class="house-hero-overlay"></div>
     <div class="house-hero-content">
       <div id="heroWeather"></div>
@@ -809,7 +811,7 @@ html,body{
 
   <!-- Irrigation hero photo -->
   <div class="sec-hero sec-hero-irr">
-    <img src="/images/hero-irr.jpg" alt="Irrigation">
+    <img src="./images/hero-irr.jpg" alt="Irrigation">
     <div class="sec-hero-overlay">
       <div class="sec-hero-status" id="irrHeroStatus"></div>
     </div>
@@ -850,7 +852,7 @@ html,body{
 
   <!-- Mower photo hero -->
   <div class="sec-hero sec-hero-yard">
-    <img src="/images/hero-yard.jpg" alt="Toro TimeMaster 30&quot;">
+    <img src="./images/hero-yard.jpg" alt="Toro TimeMaster 30&quot;">
     <div class="sec-hero-overlay">
       <div class="sec-hero-status" id="yardHeroStatus"></div>
     </div>
