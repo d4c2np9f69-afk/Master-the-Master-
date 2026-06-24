@@ -204,7 +204,8 @@ html,body{
 .sec-hero-placeholder-label{font-size:10px;font-weight:800;letter-spacing:2px;color:var(--dim);text-transform:uppercase}
 
 /* ── CONTENT WRAPPER ────────────────────────────────────────────────────── */
-.content{padding:16px 14px 72px}
+.content{display:none;padding:16px 14px 72px}
+.content.active{display:block}
 
 /* ── CARDS ──────────────────────────────────────────────────────────────── */
 .card{
@@ -429,10 +430,12 @@ html,body{
 .part-oem{font-size:10px;color:var(--gold);margin-top:2px;font-weight:700}
 .upg-card,.diag-item,.diag-desc,.upg-desc{background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:10px;margin-bottom:7px;font-size:12px}
 .upg-desc,.diag-desc{color:#d4d4d6;font-weight:500;line-height:1.55}
-.sk{color:var(--muted);font-weight:700}
-.sv{color:var(--text);font-weight:600}
-.spec-list{list-style:none;display:flex;flex-direction:column;gap:7px}
-.spec-list li{font-size:12px;display:flex;gap:6px;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.sk{color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.3px;flex:0 0 42%;text-transform:uppercase}
+.sv{color:#f0f0f0;font-weight:700;font-size:12px;text-align:right;flex:1}
+.spec-list{list-style:none;margin:0;padding:0}
+.spec-list li{display:flex;align-items:baseline;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);line-height:1.4}
+.spec-list li:last-child{border-bottom:none}
+.spec-section-hdr{font-size:9px;font-weight:900;letter-spacing:2px;color:var(--red);text-transform:uppercase;padding:12px 0 4px;margin:0}
 .log-row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05)}
 .log-icon{font-size:16px;flex-shrink:0;margin-top:1px}
 .log-date{font-size:10px;color:#ccc;font-weight:700;margin-bottom:2px}
@@ -519,165 +522,77 @@ html,body{
 
   <div class="content">
 
-    <!-- Security -->
+    <!-- Beehive / Home Assistant -->
     <div class="sec-hdr">
-      <span class="sec-hdr-icon">&#128247;</span>
-      <span class="sec-hdr-label">Security &bull; Cameras</span>
-    </div>
-    <div class="hcc-section-hdr">
-      <span class="hcc-section-hdr-icon">&#128247;</span>
-      <span class="hcc-section-hdr-title">Security &bull; Cameras</span>
+      <span class="sec-hdr-icon">&#129303;</span>
+      <span class="sec-hdr-label">Beehive &bull; Home Assistant</span>
     </div>
 
     <div id="beehiveCard" class="hcc-cta-card" style="border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.03)">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
         <span id="beehiveDot" style="width:10px;height:10px;border-radius:50%;background:#444;flex-shrink:0;transition:background .3s"></span>
-        <div>
+        <div style="flex:1">
           <div id="beehiveTitle" style="font-size:13px;font-weight:800;color:#e8e8f0">Beehive — Checking&hellip;</div>
           <div id="beehiveVersion" style="font-size:10px;color:var(--muted);margin-top:1px">Home Assistant</div>
         </div>
-        <button onclick="checkBeehive(true)" style="margin-left:auto;background:none;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:var(--muted);padding:5px 10px;font-size:10px;font-weight:800;font-family:inherit">&#128260;</button>
+        <button onclick="checkBeehive(true)" style="background:none;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:var(--muted);padding:5px 10px;font-size:10px;font-weight:800;font-family:inherit">&#128260;</button>
       </div>
+      <button onclick="openBeehive()" style="width:100%;padding:9px;border:1px solid rgba(74,158,255,.3);border-radius:9px;background:rgba(74,158,255,.07);color:#4a9eff;font-size:11px;font-weight:800;font-family:inherit;margin-bottom:10px">OPEN BEEHIVE &#8599;</button>
 
-      <!-- 3-step setup instructions — always visible until Beehive is confirmed online -->
+      <!-- Setup steps — hidden automatically when Beehive is online -->
       <div id="beehiveSetupSteps">
         <div style="font-size:10px;font-weight:800;color:rgba(255,255,255,.35);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:10px">HOW TO ACTIVATE BEEHIVE</div>
-
-        <!-- Step 1 -->
         <div style="display:flex;gap:10px;margin-bottom:10px;align-items:flex-start">
           <div style="width:20px;height:20px;border-radius:50%;background:#1a5fb4;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">1</div>
           <div style="flex:1">
             <div style="font-size:11px;font-weight:700;color:#e8e8f0;margin-bottom:4px">At the <code style="background:rgba(255,255,255,.1);padding:1px 5px;border-radius:4px;font-size:10px">ha &gt;</code> screen — run these two commands:</div>
             <div onclick="copyCmd(this,'ha addons install a0d7b954_ssh')" style="font-family:monospace;font-size:11px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;color:#4aff9e;cursor:pointer;margin-bottom:4px;word-break:break-all" title="Tap to copy">ha addons install a0d7b954_ssh</div>
             <div onclick="copyCmd(this,'ha addons start a0d7b954_ssh')" style="font-family:monospace;font-size:11px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;color:#4aff9e;cursor:pointer;word-break:break-all" title="Tap to copy">ha addons start a0d7b954_ssh</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:3px">&#128203; Tap either line to copy it</div>
           </div>
         </div>
-
-        <!-- Step 2 -->
         <div style="display:flex;gap:10px;margin-bottom:10px;align-items:flex-start">
           <div style="width:20px;height:20px;border-radius:50%;background:#1a5fb4;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">2</div>
           <div style="flex:1">
-            <div style="font-size:11px;font-weight:700;color:#e8e8f0;margin-bottom:4px">Open Beehive in browser &rarr; Settings &rarr; Add-ons &rarr; Terminal &rarr; OPEN</div>
+            <div style="font-size:11px;font-weight:700;color:#e8e8f0;margin-bottom:4px">Open Beehive &rarr; Settings &rarr; Add-ons &rarr; Terminal &rarr; OPEN</div>
             <button onclick="openBeehive('/hassio/addon/a0d7b954_ssh/info')" style="padding:8px 14px;border:1px solid rgba(74,158,255,.35);border-radius:8px;background:rgba(74,158,255,.08);color:#4a9eff;font-size:11px;font-weight:800;font-family:inherit">OPEN BEEHIVE &#8599;</button>
           </div>
         </div>
-
-        <!-- Step 3 -->
         <div style="display:flex;gap:10px;align-items:flex-start">
           <div style="width:20px;height:20px;border-radius:50%;background:#1a5fb4;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">3</div>
           <div style="flex:1">
-            <div style="font-size:11px;font-weight:700;color:#e8e8f0;margin-bottom:4px">In the Terminal — paste this one command and hit Enter:</div>
+            <div style="font-size:11px;font-weight:700;color:#e8e8f0;margin-bottom:4px">In the Terminal — paste this and hit Enter:</div>
             <div onclick="copyCmd(this,'wget -qO- https://toro1-5rz.pages.dev/setup | bash')" style="font-family:monospace;font-size:10px;background:rgba(0,0,0,.5);border:1px solid rgba(74,158,255,.3);border-radius:6px;padding:7px 10px;color:#4aff9e;cursor:pointer;word-break:break-all" title="Tap to copy">wget -qO- https://toro1-5rz.pages.dev/setup | bash</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:3px">&#128203; Tap to copy &bull; Runs everything automatically</div>
           </div>
         </div>
       </div>
     </div>
 
-    <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">CAMERAS</div>
-    <div class="hcc-tile-grid">
-      <div class="hcc-tile hcc-tile-pending" style="border-color:rgba(255,210,74,.25);background:rgba(255,210,74,.05)">
-        <div class="hcc-tile-icon">&#128247;</div>
-        <div class="hcc-tile-name">Front Door</div>
-        <div class="hcc-tile-status" style="color:#ffd24a">PENDING</div>
-      </div>
-      <div class="hcc-tile hcc-tile-pending" style="border-color:rgba(255,210,74,.25);background:rgba(255,210,74,.05)">
-        <div class="hcc-tile-icon">&#128247;</div>
-        <div class="hcc-tile-name">Back Yard</div>
-        <div class="hcc-tile-status" style="color:#ffd24a">PENDING</div>
-      </div>
-      <div class="hcc-tile hcc-tile-pending" style="border-color:rgba(255,210,74,.25);background:rgba(255,210,74,.05)">
-        <div class="hcc-tile-icon">&#128247;</div>
-        <div class="hcc-tile-name">Garage</div>
-        <div class="hcc-tile-status" style="color:#ffd24a">PENDING</div>
-      </div>
-      <div class="hcc-tile hcc-tile-add">
-        <div class="hcc-tile-icon">&#43;</div>
-        <div class="hcc-tile-name">Add Camera</div>
-        <div class="hcc-tile-status">TAP TO ADD</div>
-      </div>
+    <!-- Security / Cameras -->
+    <div class="sec-hdr" style="margin-top:16px">
+      <span class="sec-hdr-icon">&#128247;</span>
+      <span class="sec-hdr-label">Security &bull; Cameras</span>
     </div>
-
-    <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">MODULES</div>
     <div class="hcc-module-list">
-      <div class="hcc-module-row" style="border-color:rgba(74,158,255,.25);background:rgba(74,158,255,.06);cursor:pointer" onclick="openBeehive()">
+      <div class="hcc-module-row" style="border-color:rgba(74,158,255,.25);background:rgba(74,158,255,.06);cursor:pointer" onclick="openBeehive('/config/integrations/dashboard')">
         <span class="hcc-module-icon">&#128247;</span>
         <div class="hcc-module-info">
-          <div class="hcc-module-name">Blink Camera Integration</div>
-          <div class="hcc-module-desc">HA fix merged &#10003; — connect after next HA update (Settings &rarr; Add Integration &rarr; Blink)</div>
+          <div class="hcc-module-name">Blink Cameras (3)</div>
+          <div class="hcc-module-desc">Front Door &bull; Back Yard &bull; Garage — tap to connect in Beehive</div>
         </div>
         <span class="hcc-badge-next">SETUP &#8599;</span>
       </div>
-      <div class="hcc-module-row hcc-module-future">
-        <span class="hcc-module-icon">&#128692;</span>
-        <div class="hcc-module-info">
-          <div class="hcc-module-name">Gas &amp; Smoke Sensors</div>
-          <div class="hcc-module-desc">ESP32 sensors — early warning + certified backup units</div>
-        </div>
-        <span class="hcc-badge-future">FUTURE</span>
-      </div>
-      <div class="hcc-module-row hcc-module-future">
-        <span class="hcc-module-icon">&#128682;</span>
-        <div class="hcc-module-info">
-          <div class="hcc-module-name">Garage Door</div>
-          <div class="hcc-module-desc">Open/close status + remote control via ESP32</div>
-        </div>
-        <span class="hcc-badge-future">FUTURE</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Smart Home -->
-  <div class="content">
-    <div class="sec-hdr" style="margin-top:8px">
-      <span class="sec-hdr-icon">&#127968;</span>
-      <span class="sec-hdr-label">Smart Home &bull; ESP32</span>
     </div>
 
-    <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">DEVICES</div>
-    <div class="hcc-tile-grid">
-      <div class="hcc-tile hcc-tile-pending">
-        <div class="hcc-tile-icon">&#9889;</div>
-        <div class="hcc-tile-name">Energy Monitor</div>
-        <div class="hcc-tile-status">ESP32 — FUTURE</div>
-      </div>
-      <div class="hcc-tile hcc-tile-pending">
-        <div class="hcc-tile-icon">&#128167;</div>
-        <div class="hcc-tile-name">Water Monitor</div>
-        <div class="hcc-tile-status">ESP32 — FUTURE</div>
-      </div>
-      <div class="hcc-tile hcc-tile-pending">
-        <div class="hcc-tile-icon">&#127777;&#65039;</div>
-        <div class="hcc-tile-name">Thermostat</div>
-        <div class="hcc-tile-status">ESP32 — FUTURE</div>
-      </div>
-      <div class="hcc-tile hcc-tile-pending">
-        <div class="hcc-tile-icon">&#128161;</div>
-        <div class="hcc-tile-name">Lighting</div>
-        <div class="hcc-tile-status">ESP32 — FUTURE</div>
-      </div>
-      <div class="hcc-tile hcc-tile-pending">
-        <div class="hcc-tile-icon">&#128293;</div>
-        <div class="hcc-tile-name">Grill Controller</div>
-        <div class="hcc-tile-status">ESP32 — FUTURE</div>
-      </div>
-      <div class="hcc-tile hcc-tile-pending">
-        <div class="hcc-tile-icon">&#128682;</div>
-        <div class="hcc-tile-name">Garage Door</div>
-        <div class="hcc-tile-status">ESP32 — FUTURE</div>
-      </div>
+    <!-- Quick Access -->
+    <div class="sec-hdr" style="margin-top:16px">
+      <span class="sec-hdr-icon">&#9889;</span>
+      <span class="sec-hdr-label">Quick Access</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <button onclick="hccSection('yard',document.getElementById('snav-yard'))" style="padding:14px 8px;border:1px solid rgba(224,28,28,.3);border-radius:12px;background:rgba(224,28,28,.08);color:#ff6060;font-size:12px;font-weight:900;font-family:inherit;letter-spacing:.5px">&#127807; YARD<br><span style="font-size:10px;font-weight:600;opacity:.7">Mower &bull; GPS &bull; Log</span></button>
+      <button onclick="hccSection('irrigation',document.getElementById('snav-irr'))" style="padding:14px 8px;border:1px solid rgba(34,197,94,.3);border-radius:12px;background:rgba(34,197,94,.08);color:#22c55e;font-size:12px;font-weight:900;font-family:inherit;letter-spacing:.5px">&#128688; IRRIGATION<br><span style="font-size:10px;font-weight:600;opacity:.7">B-Hyve &bull; Zones &bull; Rain</span></button>
     </div>
 
-    <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">BRAIN STATUS</div>
-    <div id="beehiveCard2" class="hcc-cta-card" style="border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.03)">
-      <div id="beehive2Body">
-        <div style="font-size:12px;color:var(--muted);text-align:center;padding:8px 0">&#128260; Checking Beehive&hellip;</div>
-      </div>
-      <div style="margin-top:8px">
-        <button onclick="openBeehive()" style="width:100%;padding:9px;border:1px solid rgba(74,158,255,.3);border-radius:9px;background:rgba(74,158,255,.07);color:#4a9eff;font-size:11px;font-weight:800;font-family:inherit">OPEN BEEHIVE &#8599;</button>
-      </div>
-    </div>
   </div>
 
   <!-- Safety — INSIDE section-home -->
@@ -1011,7 +926,7 @@ html,body{
     <div id="recentActivity"></div>
     <button class="btn-full btn-gray" style="margin-top:8px" onclick="showTab('history',document.querySelectorAll('.tab')[2])">View Full History &#8594;</button>
   </div>
-
+</div><!-- /tab-dashboard -->
 
 <!-- SERVICES TAB -->
 <div id="tab-services" class="content">
@@ -1100,59 +1015,103 @@ html,body{
 
 <!-- SPECS TAB -->
 <div id="tab-specs" class="content">
+
+  <!-- MOWER IDENTITY -->
+  <div class="card cat-specs" style="margin-bottom:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div style="font-size:16px;font-weight:900;color:#fff;letter-spacing:.5px">Toro TimeMaster</div>
+      <div style="font-size:11px;font-weight:800;color:var(--red);letter-spacing:1px;border:1px solid rgba(224,28,28,.4);border-radius:6px;padding:3px 8px">MODEL 21200</div>
+    </div>
+    <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.3px">S/N&nbsp;&nbsp;401338948 &nbsp;&bull;&nbsp; Purchased Apr 11, 2018 &nbsp;&bull;&nbsp; Restored May 2026</div>
+  </div>
+
+  <!-- DECK & DRIVE -->
   <div class="card cat-specs">
-    <div class="card-title">&#128203; Full Specifications</div>
+    <p class="spec-section-hdr">Deck &amp; Drive</p>
     <ul class="spec-list">
-      <li><span class="sk">Model</span><span class="sv">Toro TimeMaster 21200</span></li>
-      <li><span class="sk">Serial Number</span><span class="sv">401338948</span></li>
-      <li><span class="sk">Engine</span><span class="sv">B&amp;S 14D935-0111-F1 / 223cc</span></li>
-      <li><span class="sk">Start System</span><span class="sv">Electric Start + Recoil Backup (WOTIAN 796497)</span></li>
-      <li><span class="sk">Battery</span><span class="sv">Mighty Max ML3-12 &bull; 12V 3AH SLA AGM &bull; F1 Terminal &bull; Installed May 7, 2026</span></li>
-      <li><span class="sk">Smart Controller</span><span class="sv">ESP32-C3 / ESP-WROOM-32 WiFi + Bluetooth</span></li>
-      <li><span class="sk">GPS Module</span><span class="sv">HiLetgo GY-NEO6MV2 NEO-6M GPS</span></li>
-      <li><span class="sk">Motion / RPM Sensor</span><span class="sv">HiLetgo GY-521 MPU6050 6-Axis Accelerometer/Gyro</span></li>
-      <li><span class="sk">Voltage Monitor</span><span class="sv">HiLetgo DC 0-25V Voltage Detection Module</span></li>
-      <li><span class="sk">Sensor Power</span><span class="sv">LM2596 buck converter + inline fused 12V feed</span></li>
-      <li><span class="sk">Drive System</span><span class="sv">Personal Pace Self-Propel</span></li>
-      <li><span class="sk">Cutting Width</span><span class="sv">30 inch</span></li>
+      <li><span class="sk">Cutting Width</span><span class="sv">30 in</span></li>
       <li><span class="sk">Blade System</span><span class="sv">Dual Force Twin Blade</span></li>
       <li><span class="sk">Deck Material</span><span class="sv">Steel</span></li>
-      <li><span class="sk">Height of Cut</span><span class="sv">1.25&quot; &ndash; 4.25&quot; (7 positions)</span></li>
-      <li><span class="sk">Fuel Type</span><span class="sv">Regular Unleaded Gasoline</span></li>
-      <li><span class="sk">Oil Type</span><span class="sv">Full Synthetic 5W-30</span></li>
-      <li><span class="sk">Oil Capacity</span><span class="sv">18 fl oz (0.53L)</span></li>
-      <li><span class="sk">Blade Bolt Torque</span><span class="sv">60 ft-lb (82 N&middot;m)</span></li>
-      <li><span class="sk">Spark Plug Gap</span><span class="sv">0.030&quot; (0.76mm)</span></li>
-      <li><span class="sk">Ignition Coil Gap</span><span class="sv">0.010&quot; (0.25mm)</span></li>
-      <li><span class="sk">Fuse</span><span class="sv">40A Plug-in Type (spare on hand)</span></li>
-      <li><span class="sk">Discharge</span><span class="sv">Bag / Mulch / Side Discharge</span></li>
-      <li><span class="sk">Purchase Date</span><span class="sv">April 11, 2018</span></li>
-      <li><span class="sk">Restoration Date</span><span class="sv">May 9&ndash;13, 2026</span></li>
-      <li><span class="sk">Hour Meter Start</span><span class="sv">0.0 hrs at restoration</span></li>
+      <li><span class="sk">Height of Cut</span><span class="sv">1.25&Prime; &ndash; 4.25&Prime; &nbsp;(7 pos)</span></li>
+      <li><span class="sk">Discharge</span><span class="sv">Bag / Mulch / Side</span></li>
+      <li><span class="sk">Drive System</span><span class="sv">Personal Pace Self-Propel</span></li>
     </ul>
   </div>
-  <div class="card cat-upgrade">
-    <div class="card-title">&#128196; Next Likely Future Items</div>
-    <div class="future-item"><div class="future-num">1</div><div>Engine Governor Spring</div></div>
-    <div class="future-item"><div class="future-num">2</div><div>Carburetor (HUFEWU 590944 &mdash; installed 2025 &#10003;)</div></div>
-    <div class="future-item"><div class="future-num">3</div><div>Recoil Starter (WOTIAN 796497 &mdash; installed &#10003;)</div></div>
-    <div class="future-item"><div class="future-num">4</div><div>Blade Brake (BBC) Cable</div></div>
-    <div class="future-item"><div class="future-num">5</div><div>Wheel Gear Pawls</div></div>
-    <div class="future-item"><div class="future-num">6</div><div>Valve Cover Gasket</div></div>
-    <div class="future-item"><div class="future-num">7</div><div>Head Gasket (Long Term)</div></div>
-  </div>
+
+  <!-- ENGINE -->
   <div class="card cat-specs">
-    <div class="card-title">&#128196; Manuals &amp; Diagrams</div>
-    <div style="display:flex;flex-direction:column;gap:7px">
+    <p class="spec-section-hdr">Engine</p>
+    <ul class="spec-list">
+      <li><span class="sk">Engine</span><span class="sv">B&amp;S 14D935-0111-F1</span></li>
+      <li><span class="sk">Displacement</span><span class="sv">223 cc</span></li>
+      <li><span class="sk">Start System</span><span class="sv">Electric + Recoil Backup</span></li>
+      <li><span class="sk">Recoil</span><span class="sv">WOTIAN 796497</span></li>
+      <li><span class="sk">Fuel Type</span><span class="sv">Regular Unleaded</span></li>
+      <li><span class="sk">Oil Type</span><span class="sv">Full Synthetic 5W-30</span></li>
+      <li><span class="sk">Oil Capacity</span><span class="sv">18 fl oz &nbsp;(0.53 L)</span></li>
+      <li><span class="sk">Spark Plug Gap</span><span class="sv">0.030&Prime; &nbsp;(0.76 mm)</span></li>
+      <li><span class="sk">Ignition Coil Gap</span><span class="sv">0.010&Prime; &nbsp;(0.25 mm)</span></li>
+      <li><span class="sk">Blade Bolt Torque</span><span class="sv">60 ft&#8209;lb &nbsp;(82 N&middot;m)</span></li>
+      <li><span class="sk">Fuse</span><span class="sv">40A Plug-in &nbsp;(spare on hand)</span></li>
+    </ul>
+  </div>
+
+  <!-- BATTERY -->
+  <div class="card cat-specs">
+    <p class="spec-section-hdr">Battery</p>
+    <ul class="spec-list">
+      <li><span class="sk">Model</span><span class="sv">Mighty Max ML3-12</span></li>
+      <li><span class="sk">Specs</span><span class="sv">12V &nbsp;3AH &nbsp;SLA AGM &nbsp;F1</span></li>
+      <li><span class="sk">Installed</span><span class="sv">May 7, 2026</span></li>
+    </ul>
+  </div>
+
+  <!-- SMART SENSOR -->
+  <div class="card cat-specs">
+    <p class="spec-section-hdr">Smart Sensor</p>
+    <ul class="spec-list">
+      <li><span class="sk">Controller</span><span class="sv">ESP32-C3 / ESP-WROOM-32</span></li>
+      <li><span class="sk">GPS</span><span class="sv">HiLetgo GY-NEO6MV2 NEO-6M</span></li>
+      <li><span class="sk">IMU / RPM</span><span class="sv">HiLetgo GY-521 MPU-6050</span></li>
+      <li><span class="sk">Voltage Mon.</span><span class="sv">HiLetgo DC 0&ndash;25V Module</span></li>
+      <li><span class="sk">Sensor Power</span><span class="sv">LM2596 buck + fused 12V</span></li>
+    </ul>
+  </div>
+
+  <!-- MAINTENANCE MILESTONES -->
+  <div class="card cat-specs">
+    <p class="spec-section-hdr">Maintenance Milestones</p>
+    <ul class="spec-list">
+      <li><span class="sk">Carburetor</span><span class="sv">HUFEWU 590944 &mdash; 2025 &#10003;</span></li>
+      <li><span class="sk">Recoil Starter</span><span class="sv">WOTIAN 796497 &#10003;</span></li>
+      <li><span class="sk">Gator Blades</span><span class="sv">Mulching &mdash; May 2026 &#10003;</span></li>
+      <li><span class="sk">Hour Meter Start</span><span class="sv">0.0 hrs at restoration</span></li>
+    </ul>
+    <p class="spec-section-hdr" style="padding-top:10px">Upcoming</p>
+    <ul class="spec-list">
+      <li><span class="sk">1</span><span class="sv">Engine Governor Spring</span></li>
+      <li><span class="sk">2</span><span class="sv">Blade Brake (BBC) Cable</span></li>
+      <li><span class="sk">3</span><span class="sv">Wheel Gear Pawls</span></li>
+      <li><span class="sk">4</span><span class="sv">Valve Cover Gasket</span></li>
+      <li><span class="sk">5</span><span class="sv">Head Gasket (Long Term)</span></li>
+    </ul>
+  </div>
+
+  <!-- MANUALS -->
+  <div class="card cat-specs">
+    <p class="spec-section-hdr">Manuals &amp; Diagrams</p>
+    <div style="display:flex;flex-direction:column;gap:7px;margin-top:6px">
       <button class="btn-full btn-red" onclick="window.open('https://www.manualslib.com/products/Toro-Timemaster-21200-10835427.html','_blank','noopener')">&#128196; TimeMaster 21200 Official Manual</button>
       <button class="btn-full btn-gray" onclick="window.open('https://www.toro.com/en/parts','_blank','noopener')">&#128308; Toro OEM Parts Lookup</button>
-      <button class="btn-full btn-gray" onclick="window.open('https://www.partstree.com/models/14d935-0111-f1-briggs-stratton-vertical-engine','_blank','noopener')">&#128295; B&amp;S Engine Diagrams &mdash; 14D935-0111-F1</button>
+      <button class="btn-full btn-gray" onclick="window.open('https://www.partstree.com/models/14d935-0111-f1-briggs-stratton-vertical-engine','_blank','noopener')">&#128295; B&amp;S Engine Diagrams</button>
       <button class="btn-full btn-gray" onclick="window.open('https://www.youtube.com/results?search_query=Toro+TimeMaster+21200','_blank','noopener')">&#9654; YouTube &mdash; TimeMaster 21200</button>
     </div>
   </div>
+
+  <!-- BACKUP -->
   <div class="card cat-specs">
-    <div class="card-title">&#128190; Data Backup &amp; Restore</div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">Your logs, hours, and miles are saved on this device only. Export a backup file to keep them safe or move to a new phone. Importing replaces all current data.</div>
+    <p class="spec-section-hdr">Data Backup &amp; Restore</p>
+    <div style="font-size:11px;color:var(--muted);margin:6px 0 10px;line-height:1.6">Logs, hours &amp; miles are saved on this device only. Export a backup to keep them safe or move to a new phone.</div>
     <div style="display:flex;flex-direction:column;gap:7px">
       <button class="btn-full btn-green" onclick="exportData()">&#11015; Export Backup File</button>
       <button class="btn-full btn-gray" onclick="document.getElementById('importFile').click()">&#11014; Import Backup File</button>
@@ -1160,6 +1119,7 @@ html,body{
     </div>
     <div id="backupMsg" style="font-size:11px;text-align:center;margin-top:8px;min-height:14px"></div>
   </div>
+
 </div>
 
 <!-- FOOTER -->
@@ -2764,19 +2724,16 @@ function beehiveOnline(base, d) {
   var title = document.getElementById('beehiveTitle');
   var ver   = document.getElementById('beehiveVersion');
   var steps = document.getElementById('beehiveSetupSteps');
-  var b2    = document.getElementById('beehive2Body');
   if (dot)   dot.style.background = '#22c55e';
-  if (title) { title.textContent = '🪴 Beehive Online'; title.style.color = '#22c55e'; }
+  if (title) { title.textContent = '\u{1FAB4} Beehive Online'; title.style.color = '#22c55e'; }
   if (ver)   ver.textContent = 'Home Assistant ' + d.version + ' — ' + base.replace('http://','');
   if (steps) steps.style.display = 'none';
-  if (b2)    b2.innerHTML = '<div style="font-size:12px;color:#22c55e;font-weight:700">&#129303; Beehive online &bull; HA ' + d.version + '</div><div style="font-size:11px;color:var(--muted);margin-top:4px">All automations active. ESPHome devices appear automatically.</div>';
 }
 
 function checkBeehive(manual) {
   var dot   = document.getElementById('beehiveDot');
   var title = document.getElementById('beehiveTitle');
   var ver   = document.getElementById('beehiveVersion');
-  var b2    = document.getElementById('beehive2Body');
   if (dot) dot.style.background = '#ffd24a';
 
   // Try hostname, then fall back to direct IP
@@ -2788,7 +2745,6 @@ function checkBeehive(manual) {
       if (dot)   dot.style.background = '#e01c1c';
       if (title) { title.textContent = 'Beehive Offline'; title.style.color = '#ff6262'; }
       if (ver)   ver.textContent = 'Not reachable — must be on home WiFi';
-      if (b2)    b2.innerHTML = '<div style="font-size:12px;color:#ff6262;font-weight:700">&#128308; Beehive offline — boot it up</div>';
       return;
     }
     var base = list[0];
