@@ -1,0 +1,20 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Orbit B-Hyve",
+        "description": "Enter your B-Hyve / Orbit account email and password.{error_detail}",
+        "data": {
+          "email": "Email",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Wrong email or password — check your B-Hyve account credentials."
+    },
+    "abort": {
+      "already_configured": "B-Hyve is already configured."
+    }
+  }
+}

@@ -48,7 +48,9 @@ class BhyveConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 )
             errors["base"] = error
 
-        description_placeholders = {"error_detail": _last_login_error[:200]} if _last_login_error else {}
+        description_placeholders = {
+            "error_detail": ("\n\n⚠️ Detail: " + _last_login_error[:300]) if _last_login_error else ""
+        }
         return self.async_show_form(
             step_id="user",
             data_schema=STEP_SCHEMA,

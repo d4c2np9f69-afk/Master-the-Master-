@@ -8,7 +8,7 @@ BASE="https://raw.githubusercontent.com/d4c2np9f69-afk/master-the-master-/claude
 echo "Creating $DEST ..."
 mkdir -p "$DEST"
 
-for f in __init__.py manifest.json config_flow.py coordinator.py switch.py const.py; do
+for f in __init__.py manifest.json config_flow.py coordinator.py switch.py const.py strings.json; do
   echo "  Downloading $f ..."
   wget -q "$BASE/$f" -O "$DEST/$f"
 done

@@ -34,7 +34,10 @@ async def bhyve_login(session: aiohttp.ClientSession, email: str, password: str)
                     timeout=aiohttp.ClientTimeout(total=10),
                 ) as r:
                     body = await r.text()
-                    _LOGGER.debug("B-Hyve login %s [%s]: HTTP %s — %s", base, app_id, r.status, body[:200])
+                    if r.status == 200:
+                        _LOGGER.info("B-Hyve login attempt %s [%s]: HTTP 200 — %s", base, app_id, body[:300])
+                    else:
+                        _LOGGER.warning("B-Hyve login attempt %s [%s]: HTTP %s — %s", base, app_id, r.status, body[:300])
                     if r.status == 200:
                         try:
                             data = json.loads(body)

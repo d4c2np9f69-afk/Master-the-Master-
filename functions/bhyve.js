@@ -5,7 +5,7 @@ export async function onRequestGet() {
   const script = `#!/bin/sh
 DEST=/config/custom_components/bhyve
 mkdir -p "$DEST"
-for f in __init__.py manifest.json config_flow.py coordinator.py switch.py const.py; do
+for f in __init__.py manifest.json config_flow.py coordinator.py switch.py const.py strings.json; do
   wget -q -O "$DEST/$f" "${BASE}/$f" && echo "  OK $f" || echo "  FAILED $f"
 done
 echo ""
