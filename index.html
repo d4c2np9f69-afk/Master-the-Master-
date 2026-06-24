@@ -204,8 +204,9 @@ html,body{
 .sec-hero-placeholder-label{font-size:10px;font-weight:800;letter-spacing:2px;color:var(--dim);text-transform:uppercase}
 
 /* ── CONTENT WRAPPER ────────────────────────────────────────────────────── */
-.content{display:none;padding:16px 14px 72px}
-.content.active{display:block}
+.content{padding:16px 14px 72px}
+#section-yard .content{display:none}
+#section-yard .content.active{display:block}
 
 /* ── CARDS ──────────────────────────────────────────────────────────────── */
 .card{
@@ -266,6 +267,16 @@ html,body{
 #section-yard .sec-hdr{border-color:rgba(224,28,28,.2)}
 #section-yard .sec-hdr-label{color:rgba(255,80,60,.7)}
 
+/* ── QUICK ACCESS (HOME section) ───────────────────────────────────────── */
+.quick-access-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.qa-btn{padding:14px 8px;border-radius:10px;font-size:12px;font-weight:900;font-family:inherit;letter-spacing:.5px;cursor:pointer;border:1px solid transparent;text-align:center}
+.qa-sub{display:block;font-size:10px;font-weight:600;opacity:.7;margin-top:3px;letter-spacing:.3px}
+.qa-btn-yard{border-color:rgba(224,28,28,.3);background:rgba(224,28,28,.08);color:#ff6060}
+.qa-btn-irr{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.08);color:#22c55e}
+/* Beehive utility buttons */
+.btn-beehive{width:100%;padding:10px;border:1px solid rgba(74,158,255,.3);border-radius:10px;background:rgba(74,158,255,.07);color:#4a9eff;font-size:11px;font-weight:800;font-family:inherit;margin-bottom:10px;cursor:pointer;letter-spacing:.5px}
+.icon-btn{background:none;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:var(--muted);padding:5px 10px;font-size:10px;font-weight:800;font-family:inherit;cursor:pointer}
+
 /* ── TILES ──────────────────────────────────────────────────────────────── */
 .hcc-tile-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
 .hcc-tile{
@@ -291,7 +302,7 @@ html,body{
   display:flex;align-items:center;gap:10px;
   background:rgba(255,255,255,.035);
   border:1px solid var(--border);
-  border-radius:11px;padding:11px 12px;
+  border-radius:10px;padding:11px 12px;
 }
 .hcc-module-next{border-color:rgba(74,158,255,.28);background:rgba(74,158,255,.05)}
 .hcc-module-future{border-color:rgba(255,255,255,.07)}
@@ -318,21 +329,23 @@ html,body{
 
 /* ── BUTTONS ────────────────────────────────────────────────────────────── */
 .btn-full{
-  width:100%;padding:11px;border:none;border-radius:10px;
+  width:100%;padding:12px;border:none;border-radius:10px;
   font-size:12px;font-weight:800;letter-spacing:.8px;
-  font-family:inherit;
+  font-family:inherit;cursor:pointer;
 }
 .btn-red{background:linear-gradient(135deg,#c01010,#780000);color:#fff;box-shadow:0 2px 12px rgba(180,0,0,.28)}
 .btn-green{background:linear-gradient(135deg,#166534,#14532d);color:#fff}
 .btn-gray{background:rgba(255,255,255,.07);color:var(--muted);border:1px solid var(--border)}
-.hcc-arm-btn{flex:1;padding:10px;border:none;border-radius:9px;color:#fff;font-size:12px;font-weight:800;letter-spacing:.8px;font-family:inherit}
+.hcc-arm-btn{flex:1;padding:10px;border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:800;letter-spacing:.8px;font-family:inherit}
 .hdr-btns{display:flex;gap:8px;margin-top:8px}
 .hdr-btn{flex:1;min-width:0;padding:10px 8px;border-radius:10px;font-size:11px;font-weight:800;letter-spacing:.5px;border:none;text-align:center;font-family:inherit}
 .hdr-btn.red{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;box-shadow:0 2px 10px rgba(200,0,0,.25)}
 .hdr-btn.outline{background:rgba(255,255,255,.06);color:#ddd;border:1px solid var(--border)}
 /* Quick-nav section jump buttons */
 .sec-jump-bar{display:flex;gap:8px;flex-wrap:wrap;padding:10px 14px 2px}
-.sec-jump-btn{flex:1;min-width:110px;padding:10px 8px;border-radius:10px;font-size:11px;font-weight:800;letter-spacing:1px;border:none;font-family:inherit;cursor:pointer}
+.sec-jump-btn{flex:1;min-width:110px;padding:10px 8px;border-radius:10px;font-size:11px;font-weight:800;letter-spacing:1px;border:1px solid transparent;font-family:inherit;cursor:pointer}
+.sec-jump-wx{background:rgba(56,189,248,.1);color:#38bdf8;border-color:rgba(56,189,248,.25)}
+.sec-jump-irr{background:rgba(34,197,94,.1);color:#22c55e;border-color:rgba(34,197,94,.25)}
 
 /* ── TABS (Yard section) ────────────────────────────────────────────────── */
 .tabs{
@@ -361,7 +374,7 @@ html,body{
 .wx-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}
 .wx-card{background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:10px}
 .wx-lbl{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
-.wx-val{font-size:18px;font-weight:800;color:var(--text);margin-top:4px}
+.wx-val{font-size:20px;font-weight:800;color:var(--text);margin-top:4px}
 
 /* ── MOWER / METER ──────────────────────────────────────────────────────── */
 .hdr-specs{
@@ -403,7 +416,7 @@ html,body{
 .lg{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted);font-weight:600}
 .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .sensor-grid{display:grid;grid-template-columns:1fr;gap:7px;margin-bottom:12px}
-.sensor-row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);border-radius:9px;padding:8px 10px}
+.sensor-row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 10px}
 .sensor-row span:first-child{color:#e2e2e2;font-weight:700}
 .sensor-row span:last-child{text-align:right;font-size:13px;font-weight:800}
 .sensor-alert{border-radius:10px;padding:10px 12px;font-size:12px;font-weight:900;text-align:center;margin:8px 0;border:1px solid var(--border);background:rgba(255,255,255,.04)}
@@ -464,6 +477,12 @@ html,body{
 /* irrUsage bar */
 #irrUsage .bar-bg{background:rgba(255,255,255,.08);border-radius:4px;height:6px;overflow:hidden;margin-top:4px}
 #irrUsage .bar-fill{height:100%;background:var(--green);border-radius:4px}
+/* Irrigation action buttons */
+.irr-btn-row{display:flex;gap:8px;margin-top:8px}
+.irr-btn{flex:1;border-radius:10px;padding:10px;font-size:12px;font-weight:800;letter-spacing:.5px;cursor:pointer;font-family:inherit;border:1px solid transparent}
+.irr-btn-stop{background:#3a0d0d;color:#ff8585;border-color:#7a1c1c}
+.irr-btn-clear{background:rgba(34,197,94,.08);color:#5fe08a;border-color:rgba(34,197,94,.3)}
+.irr-btn-delay{background:var(--card);color:var(--muted);border-color:var(--border);font-size:11px;padding:8px}
 /* Cart FAB */
 .cart-fab{position:fixed;bottom:20px;right:16px;z-index:400}
 .cart-btn{background:linear-gradient(135deg,#1a1a28,#0d0d18);border:1px solid rgba(74,158,255,.35);border-radius:50px;padding:10px 18px;color:#4a9eff;font-size:12px;font-weight:800;letter-spacing:.8px;font-family:inherit;box-shadow:0 4px 20px rgba(0,0,0,.5),0 0 16px rgba(74,158,255,.1)}
@@ -535,9 +554,9 @@ html,body{
           <div id="beehiveTitle" style="font-size:13px;font-weight:800;color:#e8e8f0">Beehive — Checking&hellip;</div>
           <div id="beehiveVersion" style="font-size:10px;color:var(--muted);margin-top:1px">Home Assistant</div>
         </div>
-        <button onclick="checkBeehive(true)" style="background:none;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:var(--muted);padding:5px 10px;font-size:10px;font-weight:800;font-family:inherit">&#128260;</button>
+        <button onclick="checkBeehive(true)" class="icon-btn">&#128260;</button>
       </div>
-      <button onclick="openBeehive()" style="width:100%;padding:9px;border:1px solid rgba(74,158,255,.3);border-radius:9px;background:rgba(74,158,255,.07);color:#4a9eff;font-size:11px;font-weight:800;font-family:inherit;margin-bottom:10px">OPEN BEEHIVE &#8599;</button>
+      <button onclick="openBeehive()" class="btn-beehive">OPEN BEEHIVE &#8599;</button>
 
       <!-- Setup steps — hidden automatically when Beehive is online -->
       <div id="beehiveSetupSteps">
@@ -554,7 +573,7 @@ html,body{
           <div style="width:20px;height:20px;border-radius:50%;background:#1a5fb4;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">2</div>
           <div style="flex:1">
             <div style="font-size:11px;font-weight:700;color:#e8e8f0;margin-bottom:4px">Open Beehive &rarr; Settings &rarr; Add-ons &rarr; Terminal &rarr; OPEN</div>
-            <button onclick="openBeehive('/hassio/addon/a0d7b954_ssh/info')" style="padding:8px 14px;border:1px solid rgba(74,158,255,.35);border-radius:8px;background:rgba(74,158,255,.08);color:#4a9eff;font-size:11px;font-weight:800;font-family:inherit">OPEN BEEHIVE &#8599;</button>
+            <button onclick="openBeehive('/hassio/addon/a0d7b954_ssh/info')" class="btn-beehive">OPEN BEEHIVE &#8599;</button>
           </div>
         </div>
         <div style="display:flex;gap:10px;align-items:flex-start">
@@ -588,15 +607,15 @@ html,body{
       <span class="sec-hdr-icon">&#9889;</span>
       <span class="sec-hdr-label">Quick Access</span>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-      <button onclick="hccSection('yard',document.getElementById('snav-yard'))" style="padding:14px 8px;border:1px solid rgba(224,28,28,.3);border-radius:12px;background:rgba(224,28,28,.08);color:#ff6060;font-size:12px;font-weight:900;font-family:inherit;letter-spacing:.5px">&#127807; YARD<br><span style="font-size:10px;font-weight:600;opacity:.7">Mower &bull; GPS &bull; Log</span></button>
-      <button onclick="hccSection('irrigation',document.getElementById('snav-irr'))" style="padding:14px 8px;border:1px solid rgba(34,197,94,.3);border-radius:12px;background:rgba(34,197,94,.08);color:#22c55e;font-size:12px;font-weight:900;font-family:inherit;letter-spacing:.5px">&#128688; IRRIGATION<br><span style="font-size:10px;font-weight:600;opacity:.7">B-Hyve &bull; Zones &bull; Rain</span></button>
+    <div class="quick-access-grid">
+      <button class="qa-btn qa-btn-yard" onclick="hccSection('yard',document.getElementById('snav-yard'))">&#127807; YARD<br><span class="qa-sub">Mower &bull; GPS &bull; Log</span></button>
+      <button class="qa-btn qa-btn-irr" onclick="hccSection('irrigation',document.getElementById('snav-irr'))">&#128688; IRRIGATION<br><span class="qa-sub">B-Hyve &bull; Zones &bull; Rain</span></button>
     </div>
 
   </div>
 
   <!-- Safety — INSIDE section-home -->
-  <div class="content" style="padding:14px 12px 60px">
+  <div class="content">
     <div class="sec-hdr" style="margin-top:8px">
       <span class="sec-hdr-icon">&#128737;&#65039;</span>
       <span class="sec-hdr-label">Safety &bull; Emergency</span>
@@ -737,17 +756,17 @@ html,body{
     <div class="card-title">&#128688; Irrigation &bull; <span id="irrDevName">Water Hog</span> <span id="irrConn" style="font-size:10px;font-weight:700;letter-spacing:1px;margin-left:4px"></span></div>
     <div id="irrBanner" class="wx-banner wx-load" style="margin-bottom:10px">&#128260; Loading irrigation&hellip;</div>
     <div class="wx-grid" style="margin-bottom:8px">
-      <div class="wx-card"><div class="wx-lbl">Mode</div><div class="wx-val" id="irrMode" style="font-size:14px">--</div></div>
-      <div class="wx-card"><div class="wx-lbl">Rain Delay</div><div class="wx-val" id="irrRainDelay" style="font-size:14px">--</div></div>
+      <div class="wx-card"><div class="wx-lbl">Mode</div><div class="wx-val" id="irrMode">--</div></div>
+      <div class="wx-card"><div class="wx-lbl">Rain Delay</div><div class="wx-val" id="irrRainDelay">--</div></div>
     </div>
     <div id="irrZones"></div>
-    <div style="display:flex;gap:6px;margin-top:8px">
-      <button onclick="irrStopAll()" style="flex:1;background:#3a0d0d;color:#ff8585;border:1px solid #7a1c1c;border-radius:10px;padding:9px;font-size:12px;font-weight:800;cursor:pointer">&#9632; STOP ALL</button>
-      <button onclick="irrRain(0)" style="flex:1;background:var(--card);color:#5fe08a;border:1px solid #165c30;border-radius:10px;padding:9px;font-size:12px;font-weight:800;cursor:pointer">&#9728;&#65039; CLEAR DELAY</button>
+    <div class="irr-btn-row">
+      <button class="irr-btn irr-btn-stop" onclick="irrStopAll()">&#9632; STOP ALL</button>
+      <button class="irr-btn irr-btn-clear" onclick="irrRain(0)">&#9728;&#65039; CLEAR DELAY</button>
     </div>
-    <div style="display:flex;gap:6px;margin-top:6px">
-      <button onclick="irrRain(24)" style="flex:1;background:var(--card);color:var(--muted);border:1px solid var(--border);border-radius:10px;padding:7px;font-size:11px;font-weight:700;cursor:pointer">&#127783;&#65039; Delay 24h</button>
-      <button onclick="irrRain(48)" style="flex:1;background:var(--card);color:var(--muted);border:1px solid var(--border);border-radius:10px;padding:7px;font-size:11px;font-weight:700;cursor:pointer">&#127783;&#65039; Delay 48h</button>
+    <div class="irr-btn-row">
+      <button class="irr-btn irr-btn-delay" onclick="irrRain(24)">&#127783;&#65039; Delay 24h</button>
+      <button class="irr-btn irr-btn-delay" onclick="irrRain(48)">&#127783;&#65039; Delay 48h</button>
     </div>
     <div id="irrNextRun" style="font-size:10px;color:var(--muted);text-align:center;margin:6px 0 2px"></div>
     <div id="irrUsage"></div>
@@ -799,8 +818,8 @@ html,body{
 
   <!-- Quick jumps to related sections -->
   <div class="sec-jump-bar">
-    <button class="sec-jump-btn" style="background:rgba(56,189,248,.1);color:#38bdf8;border:1px solid rgba(56,189,248,.25)" onclick="hccSection('weather',document.getElementById('snav-weather'));setTimeout(function(){hccScroll('wxBanner')},50)">&#9925; WEATHER</button>
-    <button class="sec-jump-btn" style="background:rgba(34,197,94,.1);color:#22c55e;border:1px solid rgba(34,197,94,.25)" onclick="hccSection('irrigation',document.getElementById('snav-irr'));setTimeout(function(){hccScroll('irrigationCard')},50)">&#128688; IRRIGATION</button>
+    <button class="sec-jump-btn sec-jump-wx" onclick="hccSection('weather',document.getElementById('snav-weather'));setTimeout(function(){hccScroll('wxBanner')},50)">&#9925; WEATHER</button>
+    <button class="sec-jump-btn sec-jump-irr" onclick="hccSection('irrigation',document.getElementById('snav-irr'));setTimeout(function(){hccScroll('irrigationCard')},50)">&#128688; IRRIGATION</button>
   </div>
 
   <!-- Mower tabs -->
