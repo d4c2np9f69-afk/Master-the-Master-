@@ -184,10 +184,21 @@ html,body{
 }
 .sec-hero-title{font-size:26px;font-weight:900;color:#fff;letter-spacing:.3px;line-height:1.1}
 .sec-hero-status{font-size:12px;font-weight:700;color:rgba(255,255,255,.65);margin-top:5px;letter-spacing:.3px}
-/* Weather hero: sky gradient */
-.sec-hero-weather{background:linear-gradient(160deg,#040e28 0%,#08213d 40%,#050b18 100%)}
-.sec-hero-weather .sec-hero-overlay{background:linear-gradient(to top,rgba(4,4,10,.7) 0%,rgba(4,14,40,.2) 100%)}
-.sec-hero-weather .sec-hero-title{font-size:48px;font-weight:900;letter-spacing:-1px}
+/* Weather hero: rich sky gradient placeholder */
+.sec-hero-weather{background:linear-gradient(160deg,#020c20 0%,#061a3a 30%,#0a2850 55%,#041020 100%)}
+.sec-hero-weather .sec-hero-overlay{
+  background:linear-gradient(to top,rgba(2,6,16,.85) 0%,rgba(4,14,40,.3) 60%,transparent 100%);
+  justify-content:flex-end;padding:20px 18px 18px;
+}
+.sec-hero-weather .sec-hero-title{font-size:52px;font-weight:900;letter-spacing:-1.5px;line-height:1}
+/* Weather hero decorative stars */
+.wx-hero-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.wx-star{position:absolute;background:#fff;border-radius:50%;animation:twinkle 3s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.7}}
+/* Weather hero condition badge */
+.wx-hero-row{display:flex;align-items:flex-end;justify-content:space-between;width:100%}
+.wx-hero-cond{font-size:13px;font-weight:700;color:rgba(255,255,255,.7);letter-spacing:.5px;padding-bottom:4px}
+.wx-hero-loc{font-size:9px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.4);text-transform:uppercase;margin-top:4px}
 /* Irrigation hero: emerald gradient */
 .sec-hero-irr{background:linear-gradient(160deg,#021a0a 0%,#04280f 40%,#020e06 100%)}
 .sec-hero-irr .sec-hero-overlay{background:linear-gradient(to top,rgba(2,10,4,.75) 0%,rgba(4,40,15,.2) 100%)}
@@ -367,6 +378,7 @@ html,body{
 
 /* ── WEATHER / WX ───────────────────────────────────────────────────────── */
 .wx-banner{border-radius:10px;padding:12px;text-align:center;font-weight:800;font-size:14px;letter-spacing:.5px;margin-bottom:10px}
+.wx-banner-lg{font-size:20px;padding:16px 12px}
 .wx-load{background:rgba(255,255,255,.04);color:var(--muted);border:1px solid var(--border)}
 .wx-go{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);color:var(--green)}
 .wx-caution{background:rgba(255,210,74,.08);border:1px solid rgba(255,210,74,.25);color:#ffd24a}
@@ -375,6 +387,8 @@ html,body{
 .wx-card{background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:10px}
 .wx-lbl{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
 .wx-val{font-size:20px;font-weight:800;color:var(--text);margin-top:4px}
+.wx-note{font-size:10px;color:var(--muted);text-align:center;margin:4px 0 8px;min-height:13px;line-height:1.5}
+.wx-radar-wrap{border-radius:10px;overflow:hidden;border:1px solid var(--border);background:#050508}
 
 /* ── MOWER / METER ──────────────────────────────────────────────────────── */
 .hdr-specs{
@@ -668,71 +682,91 @@ html,body{
      ══════════════════════════════════════════════════════════════════════════ -->
 <div id="section-weather" class="hcc-section">
 
-  <!-- Weather hero — placeholder until real photo provided -->
+  <!-- Weather hero — decorative placeholder (replace with real photo when ready) -->
   <div class="sec-hero sec-hero-weather">
+    <!-- decorative star field -->
+    <div class="wx-hero-bg" id="wxStarField"></div>
     <div class="sec-hero-overlay">
-      <div class="sec-hero-badge">LIVE CONDITIONS &bull; WHITE HOUSE, TN</div>
-      <div class="sec-hero-title" id="wxHeroTemp">--&deg;</div>
-      <div class="sec-hero-status" id="wxHeroDesc">Loading weather&hellip;</div>
+      <div class="wx-hero-row">
+        <div>
+          <div class="sec-hero-title" id="wxHeroTemp">--&deg;</div>
+          <div class="wx-hero-cond" id="wxHeroDesc">Tap Refresh to load weather</div>
+          <div class="wx-hero-loc">White House, TN &bull; 37188</div>
+        </div>
+        <div style="text-align:right;padding-bottom:6px">
+          <div style="font-size:9px;font-weight:800;letter-spacing:1.5px;color:rgba(255,255,255,.35);text-transform:uppercase;margin-bottom:4px">Station</div>
+          <div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.55)">KTNWHITE21</div>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="content">
-  <div class="card cat-weather">
-    <div class="card-title">&#127780; Mowing Conditions &bull; White House, TN 37188</div>
-    <div class="wx-banner wx-load" id="wxBanner">&#128260; Loading weather...</div>
-    <div class="wx-grid">
-      <div class="wx-card"><div class="wx-lbl">Temperature</div><div class="wx-val" id="wxTemp">--</div></div>
-      <div class="wx-card"><div class="wx-lbl">Dew Point</div><div class="wx-val" id="wxDew">--</div></div>
-      <div class="wx-card"><div class="wx-lbl">Rain Risk</div><div class="wx-val" id="wxRisk">--</div></div>
-      <div class="wx-card"><div class="wx-lbl">Soil Condition</div><div class="wx-val" id="wxSoil">--</div></div>
-      <div class="wx-card"><div class="wx-lbl">Soil Temp</div><div class="wx-val" id="wxSoilTemp">--</div></div>
-      <div class="wx-card"><div class="wx-lbl">Dew on Grass</div><div class="wx-val" id="wxGrassDew">--</div></div>
-      <div class="wx-card"><div class="wx-lbl">Soil Firmness</div><div class="wx-val" id="wxFirmness">--</div></div>
-      <div class="wx-card"><div class="wx-lbl">Rain 24-48h</div><div class="wx-val" id="wxRainNext">--</div></div>
-      <div class="wx-card"><div class="wx-lbl">Heat Stress</div><div class="wx-val" id="wxHeatStress">--</div></div>
-      <div class="wx-card"><div class="wx-lbl">Lightning</div><div class="wx-val" id="wxLightning">--</div></div>
+
+    <!-- MOWING CONDITIONS -->
+    <div class="card cat-weather">
+      <div class="card-title">&#127780; Mowing Conditions &bull; White House, TN</div>
+      <div class="wx-banner wx-load" id="wxBanner">&#128260; Loading weather&hellip;</div>
+      <div class="wx-grid">
+        <div class="wx-card"><div class="wx-lbl">Temperature</div><div class="wx-val" id="wxTemp">--</div></div>
+        <div class="wx-card"><div class="wx-lbl">Dew Point</div><div class="wx-val" id="wxDew">--</div></div>
+        <div class="wx-card"><div class="wx-lbl">Rain Risk</div><div class="wx-val" id="wxRisk">--</div></div>
+        <div class="wx-card"><div class="wx-lbl">Soil Condition</div><div class="wx-val" id="wxSoil">--</div></div>
+        <div class="wx-card"><div class="wx-lbl">Soil Temp</div><div class="wx-val" id="wxSoilTemp">--</div></div>
+        <div class="wx-card"><div class="wx-lbl">Dew on Grass</div><div class="wx-val" id="wxGrassDew">--</div></div>
+        <div class="wx-card"><div class="wx-lbl">Soil Firmness</div><div class="wx-val" id="wxFirmness">--</div></div>
+        <div class="wx-card"><div class="wx-lbl">Rain 24&ndash;48h</div><div class="wx-val" id="wxRainNext">--</div></div>
+        <div class="wx-card"><div class="wx-lbl">Heat Stress</div><div class="wx-val" id="wxHeatStress">--</div></div>
+        <div class="wx-card"><div class="wx-lbl">Lightning</div><div class="wx-val" id="wxLightning">--</div></div>
+      </div>
+      <div id="wxStationNote" class="wx-note"></div>
+      <button class="btn-full btn-gray" onclick="loadWeather()">&#128260; Refresh Weather</button>
     </div>
-    <div id="wxStationNote" style="font-size:10px;color:var(--muted);text-align:center;margin:2px 0 8px;min-height:13px"></div>
-    <button class="btn-full btn-gray" onclick="loadWeather()">&#128260; Refresh Weather</button>
-    <div id="readyCard" style="border:2px solid var(--border);border-radius:12px;padding:12px;margin:12px 0;background:rgba(255,255,255,.025)">
+
+    <!-- READY TO MOW -->
+    <div class="card cat-weather" id="readyCard" style="border-width:2px">
       <div class="card-title">&#127807; Ready to Mow?</div>
-      <div id="readyBanner" class="wx-banner wx-load" style="font-size:18px;padding:16px">&#8987; Checking...</div>
+      <div id="readyBanner" class="wx-banner wx-load wx-banner-lg">&#8987; Checking&hellip;</div>
       <div id="readyReasons"></div>
     </div>
-    <div style="font-size:9px;letter-spacing:1.5px;color:var(--muted);font-weight:800;text-transform:uppercase;margin:12px 0 8px;padding-top:9px;border-top:1px solid var(--border)">&#128225; Live Rain Radar</div>
-    <div style="position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:#0a0a0a">
-      <iframe
-        title="Live rain radar - White House TN"
-        width="100%" height="240" frameborder="0" style="display:block;border:0"
-        loading="lazy"
-        src="https://embed.windy.com/embed2.html?lat=36.477&lon=-86.66&detailLat=36.477&detailLon=-86.66&zoom=9&level=surface&overlay=radar&menu=&message=&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=mph&metricTemp=%C2%B0F&radarRange=-1">
-      </iframe>
-    </div>
-    <button class="btn-full btn-gray" style="margin-top:7px" onclick="window.open('https://www.windy.com/?radar,36.477,-86.66,9','_blank','noopener')">&#128640; Open Full Radar &amp; Forecast</button>
-    <div style="font-size:9px;color:#666;text-align:center;margin-top:4px">Animated radar by Windy.com &bull; if it doesn't load, tap Open Full Radar</div>
-    <div style="font-size:9px;letter-spacing:1.5px;color:var(--muted);font-weight:800;text-transform:uppercase;margin:12px 0 8px;padding-top:9px;border-top:1px solid var(--border)">&#128225; Weather Station</div>
-    <div class="wx-grid">
-      <div class="wx-card"><div class="wx-lbl">Station ID</div><div class="wx-val" style="font-size:13px">KTNWHITE21</div></div>
-      <div class="wx-card"><div class="wx-lbl">Station Name</div><div class="wx-val" style="font-size:13px">Indian Ridge / jalo301</div></div>
-      <div class="wx-card"><div class="wx-lbl">Coordinates</div><div class="wx-val" style="font-size:13px">36.477&deg; N, 86.66&deg; W</div></div>
-      <div class="wx-card"><div class="wx-lbl">Elevation</div><div class="wx-val" style="font-size:13px">863 ft</div></div>
-      <div class="wx-card"><div class="wx-lbl">Location</div><div class="wx-val" style="font-size:13px">White House, TN</div></div>
-      <div class="wx-card"><div class="wx-lbl">Hardware</div><div class="wx-val" style="font-size:13px">Ambient Weather WS-2902</div></div>
-      <div class="wx-card"><div class="wx-lbl">Software</div><div class="wx-val" style="font-size:13px">AMBWeatherV3.0.0</div></div>
-    </div>
-    <button class="btn-full btn-gray" style="margin-top:7px" onclick="window.open('https://www.wunderground.com/dashboard/pws/KTNWHITE21','_blank','noopener')">&#128202; Open Station Dashboard</button>
-  </div>
 
-  <!-- B-HYVE IRRIGATION CARD -->
+    <!-- LIVE RAIN RADAR -->
+    <div class="card cat-weather">
+      <div class="card-title">&#128225; Live Rain Radar</div>
+      <div class="wx-radar-wrap">
+        <iframe
+          title="Live rain radar - White House TN"
+          width="100%" height="240" frameborder="0" style="display:block;border:0"
+          loading="lazy"
+          src="https://embed.windy.com/embed2.html?lat=36.477&lon=-86.66&detailLat=36.477&detailLon=-86.66&zoom=9&level=surface&overlay=radar&menu=&message=&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=mph&metricTemp=%C2%B0F&radarRange=-1">
+        </iframe>
+      </div>
+      <div class="wx-note" style="margin-top:6px">Animated radar by Windy.com &bull; tap Open Full Radar if it doesn&rsquo;t load</div>
+      <button class="btn-full btn-gray" style="margin-top:10px" onclick="window.open('https://www.windy.com/?radar,36.477,-86.66,9','_blank','noopener')">&#128640; Open Full Radar &amp; Forecast</button>
+    </div>
 
-  <div class="card" id="burnCard">
-    <div class="card-title">&#128293; Brush Burn Conditions</div>
-    <div id="burnBanner" class="wx-banner wx-load" style="margin-bottom:10px">&#128260; Loading conditions…</div>
-    <div id="burnBody"></div>
-    <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadWeather()">&#128260; Refresh Conditions</button>
-  </div>
-</div>
+    <!-- WEATHER STATION -->
+    <div class="card cat-weather">
+      <div class="card-title">&#128202; Weather Station</div>
+      <ul class="spec-list">
+        <li><span class="sk">Station ID</span><span class="sv">KTNWHITE21</span></li>
+        <li><span class="sk">Station Name</span><span class="sv">Indian Ridge / jalo301</span></li>
+        <li><span class="sk">Coordinates</span><span class="sv">36.477&deg;&thinsp;N, 86.66&deg;&thinsp;W</span></li>
+        <li><span class="sk">Elevation</span><span class="sv">863 ft</span></li>
+        <li><span class="sk">Location</span><span class="sv">White House, TN</span></li>
+        <li><span class="sk">Hardware</span><span class="sv">Ambient Weather WS-2902</span></li>
+        <li><span class="sk">Software</span><span class="sv">AMBWeatherV3.0.0</span></li>
+      </ul>
+      <button class="btn-full btn-gray" style="margin-top:10px" onclick="window.open('https://www.wunderground.com/dashboard/pws/KTNWHITE21','_blank','noopener')">&#128202; Open Station Dashboard</button>
+    </div>
+
+    <!-- BRUSH BURN CONDITIONS -->
+    <div class="card cat-weather" id="burnCard">
+      <div class="card-title">&#128293; Brush Burn Conditions</div>
+      <div id="burnBanner" class="wx-banner wx-load">&#128260; Loading conditions&hellip;</div>
+      <div id="burnBody"></div>
+      <button class="btn-full btn-gray" style="margin-top:10px" onclick="loadWeather()">&#128260; Refresh Conditions</button>
+    </div>
 
   </div>
 </div>
@@ -2655,7 +2689,23 @@ function hccSection(id, btn) {
   if (btn) btn.classList.add('active');
   if (id === 'irrigation' && !window._irrLoaded) { window._irrLoaded = true; loadIrrigation(); }
   if (id === 'home' && !window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
+  if (id === 'weather' && !window._starsDrawn) { window._starsDrawn = true; drawWxStars(); }
   window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function drawWxStars() {
+  var el = document.getElementById('wxStarField');
+  if (!el) return;
+  var html = '';
+  var sizes = [1,1,1,2,2,1,1,2,1,1,2,1,3,1,1,2,1,1,2,1,1,1,2,1,1,2,1,1,1,2];
+  var delays = [0,.4,.8,1.2,1.6,2,2.4,2.8,.2,.6,1,1.4,1.8,2.2,2.6,0,.5,1,1.5,2,0,.3,.9,1.3,1.7,2.1,2.5,2.9,.7,1.1];
+  for (var i = 0; i < 30; i++) {
+    var x = Math.round(Math.random()*98);
+    var y = Math.round(Math.random()*85);
+    var s = sizes[i]; var d = delays[i];
+    html += '<div class="wx-star" style="left:'+x+'%;top:'+y+'%;width:'+s+'px;height:'+s+'px;animation-delay:'+d+'s"></div>';
+  }
+  el.innerHTML = html;
 }
 
 function hccPanic() {
