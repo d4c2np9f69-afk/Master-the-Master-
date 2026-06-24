@@ -198,27 +198,29 @@ html,body{
 /* Irrigation hero */
 .sec-hero-irr{background:#020c06}
 .sec-hero-irr .sec-hero-overlay{background:linear-gradient(to top,rgba(0,0,0,.72) 0%,rgba(0,0,0,.15) 55%,transparent 100%)}
-/* Yard hero — bottom overlay with full typography matching other hero images */
+/* Yard hero — bottom overlay matching the warm-gold baked-in style of the other heroes */
 .sec-hero-yard .sec-hero-overlay{
-  background:linear-gradient(to top,rgba(0,0,0,.88) 0%,rgba(0,0,0,.55) 35%,transparent 65%);
-  justify-content:flex-end;padding:0 16px 14px;
+  background:linear-gradient(to top,rgba(0,0,0,.72) 0%,rgba(0,0,0,.3) 45%,transparent 70%);
+  justify-content:flex-end;padding:0 16px 16px;
 }
-.sec-hero-yard img{filter:saturate(1.15) sepia(0.1) brightness(1.05)}
+.sec-hero-yard img{filter:saturate(1.1) brightness(1.02)}
 .yard-hero-art{width:100%}
 .yard-hero-title{
   font-family:Georgia,'Times New Roman',serif;
-  font-size:clamp(14px,4.2vw,20px);font-weight:700;color:#fff;
-  letter-spacing:1px;text-transform:uppercase;white-space:nowrap;
-  text-shadow:0 2px 12px rgba(0,0,0,.9);margin-bottom:5px;
+  font-size:clamp(15px,4.5vw,21px);font-weight:400;font-style:italic;
+  color:rgba(240,220,175,0.92);
+  letter-spacing:.5px;
+  text-shadow:0 2px 16px rgba(0,0,0,.85),0 0 28px rgba(160,100,20,.35);
+  margin-bottom:4px;white-space:nowrap;
 }
-.yard-hero-rule{width:44px;height:1px;background:rgba(212,175,55,.7);margin:5px 0 6px}
+.yard-hero-rule{width:44px;height:1px;background:rgba(212,175,55,.55);margin:4px 0 5px}
 .yard-hero-sub{
-  font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;
-  color:rgba(255,255,255,.65);margin-bottom:8px;
+  font-size:8.5px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;
+  color:rgba(220,185,120,.6);margin-bottom:7px;
 }
 .yard-hero-icons{
   display:flex;gap:10px;flex-wrap:wrap;
-  font-size:9px;font-weight:600;letter-spacing:.8px;color:rgba(255,255,255,.45);
+  font-size:8.5px;font-weight:500;letter-spacing:.6px;color:rgba(210,175,110,.4);
 }
 /* Placeholder hero (when no photo yet) */
 .sec-hero-placeholder{
@@ -844,6 +846,11 @@ html,body{
       <button class="btn-full btn-gray" style="margin-top:10px" onclick="loadWeather()">&#128260; Refresh Conditions</button>
     </div>
 
+    <button class="hcc-panic-btn" onclick="hccPanic()" style="margin-top:16px">
+      <span class="hcc-panic-icon">&#128680;</span>
+      <span>PANIC / EMERGENCY</span>
+    </button>
+
   </div>
 </div>
 
@@ -928,6 +935,11 @@ html,body{
       </ul>
       <button class="btn-full btn-gray" style="margin-top:10px" onclick="window.open('https://dash.cloudflare.com','_blank','noopener')">&#128279; Open Cloudflare Dashboard</button>
     </div>
+
+    <button class="hcc-panic-btn" onclick="hccPanic()" style="margin-top:16px">
+      <span class="hcc-panic-icon">&#128680;</span>
+      <span>PANIC / EMERGENCY</span>
+    </button>
 
   </div>
 </div>
@@ -1313,7 +1325,12 @@ html,body{
   <p>KEEP IT CLEAN. KEEP IT SHARP. <span>MASTER THE MASTER.</span></p>
 </div>
 
-
+<div style="padding:0 14px 20px">
+  <button class="hcc-panic-btn" onclick="hccPanic()">
+    <span class="hcc-panic-icon">&#128680;</span>
+    <span>PANIC / EMERGENCY</span>
+  </button>
+</div>
 
 </div><!-- /section-yard -->
 
