@@ -798,8 +798,6 @@ html,body{
   <div class="sec-hero sec-hero-irr">
     <img src="./images/hero-irr.jpg" alt="Irrigation">
     <div class="sec-hero-overlay">
-      <div class="sec-hero-badge">ORBIT B-HYVE &bull; WATER HOG</div>
-      <div class="sec-hero-title">&#128688; Irrigation</div>
       <div class="sec-hero-status" id="irrHeroStatus"></div>
     </div>
   </div>
@@ -2859,15 +2857,6 @@ function hccPanic() {
   if (wb) observer.observe(wb, {childList:true, subtree:true, characterData:true});
 })();
 
-// Update irrigation hero status from irrBanner
-(function patchIrrHero() {
-  var el = document.getElementById('irrBanner');
-  if (!el) { setTimeout(patchIrrHero, 300); return; }
-  var hero = document.getElementById('irrHeroStatus');
-  new MutationObserver(function() {
-    if (hero) hero.textContent = el.textContent.replace(/^[⏳⚠✓💧☀⛅🌧🌩🌨✅❌⏹]/u,'').trim();
-  }).observe(el, {childList:true, subtree:true, characterData:true});
-})();
 
 
 // ── BEEHIVE STATUS CHECK ─────────────────────────────────────────────────────
