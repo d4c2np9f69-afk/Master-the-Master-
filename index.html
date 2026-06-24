@@ -184,10 +184,10 @@ html,body{
 }
 .sec-hero-title{font-size:26px;font-weight:900;color:#fff;letter-spacing:.3px;line-height:1.1}
 .sec-hero-status{font-size:12px;font-weight:700;color:rgba(255,255,255,.65);margin-top:5px;letter-spacing:.3px}
-/* Weather hero: rich sky gradient placeholder */
-.sec-hero-weather{background:linear-gradient(160deg,#020c20 0%,#061a3a 30%,#0a2850 55%,#041020 100%)}
+/* Weather hero: real photo */
+.sec-hero-weather{background:#020c20}
 .sec-hero-weather .sec-hero-overlay{
-  background:linear-gradient(to top,rgba(2,6,16,.85) 0%,rgba(4,14,40,.3) 60%,transparent 100%);
+  background:linear-gradient(to top,rgba(0,0,0,.72) 0%,rgba(0,0,0,.15) 55%,transparent 100%);
   justify-content:flex-end;padding:20px 18px 18px;
 }
 .sec-hero-weather .sec-hero-title{font-size:52px;font-weight:900;letter-spacing:-1.5px;line-height:1}
@@ -199,11 +199,13 @@ html,body{
 .wx-hero-row{display:flex;align-items:flex-end;justify-content:space-between;width:100%}
 .wx-hero-cond{font-size:13px;font-weight:700;color:rgba(255,255,255,.7);letter-spacing:.5px;padding-bottom:4px}
 .wx-hero-loc{font-size:9px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.4);text-transform:uppercase;margin-top:4px}
-/* Irrigation hero: emerald gradient */
-.sec-hero-irr{background:linear-gradient(160deg,#021a0a 0%,#04280f 40%,#020e06 100%)}
-.sec-hero-irr .sec-hero-overlay{background:linear-gradient(to top,rgba(2,10,4,.75) 0%,rgba(4,40,15,.2) 100%)}
-/* Yard hero: mower photo has its own dark overlay */
-.sec-hero-yard .sec-hero-overlay{background:linear-gradient(to top,rgba(10,0,0,.8) 0%,rgba(10,0,0,.1) 100%)}
+/* Irrigation hero */
+.sec-hero-irr{background:#020c06}
+.sec-hero-irr .sec-hero-overlay{background:linear-gradient(to top,rgba(0,0,0,.72) 0%,rgba(0,0,0,.15) 55%,transparent 100%)}
+/* Yard hero */
+.sec-hero-yard .sec-hero-overlay{background:linear-gradient(to top,rgba(0,0,0,.72) 0%,rgba(0,0,0,.15) 55%,transparent 100%)}
+/* Warm up yard photo to match gold tone of other heroes */
+.sec-hero-yard img{filter:saturate(1.15) sepia(0.12) brightness(1.05)}
 /* Placeholder hero (when no photo yet) */
 .sec-hero-placeholder{
   height:200px;
@@ -699,10 +701,9 @@ html,body{
      ══════════════════════════════════════════════════════════════════════════ -->
 <div id="section-weather" class="hcc-section">
 
-  <!-- Weather hero — decorative placeholder (replace with real photo when ready) -->
+  <!-- Weather hero — real photo -->
   <div class="sec-hero sec-hero-weather">
-    <!-- decorative star field -->
-    <div class="wx-hero-bg" id="wxStarField"></div>
+    <img src="./images/hero-weather.jpg" alt="Weather">
     <div class="sec-hero-overlay">
       <div class="wx-hero-row">
         <div>
@@ -2793,7 +2794,7 @@ function hccSection(id, btn) {
   if (btn) btn.classList.add('active');
   if (id === 'irrigation' && !window._irrLoaded) { window._irrLoaded = true; loadIrrigation(); }
   if (id === 'home' && !window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
-  if (id === 'weather' && !window._starsDrawn) { window._starsDrawn = true; drawWxStars(); }
+
   if (id === 'yard' && typeof drawYardMap === 'function') {
     var yt = (typeof S !== 'undefined' && S.sensorTrack && S.sensorTrack.length >= 2) ? S.sensorTrack : [];
     drawYardMap(yt);
