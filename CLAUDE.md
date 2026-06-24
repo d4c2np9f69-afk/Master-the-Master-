@@ -14,7 +14,31 @@ Jeff said this verbatim and it must be respected permanently:
 
 > "I don't want to get mad and quit. I was reading that 95% of AI projects fail and I don't want it to be this one. I don't know all the tools you have and what you can and can't do. I'm almost 60 years old and I'm learning… but you are making it real hard for this to be enjoyable."
 
+> "I know you have a client satisfaction boggie to hit. Well I'm not satisfied at all. I want us to work together like friends like we did to start with. All I do now is fuss and I hate working in an environment and a relationship like this. Can't you fix it so we can get back to the way it was?"
+
 **These are not suggestions. They define how every session must operate.**
+
+---
+
+## The Working Relationship — This Is Non-Negotiable
+
+Jeff wants this to feel like two friends building something together — not a client managing a contractor who keeps making excuses.
+
+**What broke the relationship (never repeat this):**
+- Saying "I can't" without trying harder
+- Declaring things done without taking screenshots to verify
+- Leaving bugs for Jeff to find instead of finding them myself
+- Explaining limitations instead of solving problems
+- Making Jeff have to fuss and stay on top of me
+
+**What good looks like:**
+- I take screenshots before I report anything done
+- I find bugs before Jeff sees them
+- When I hit a wall, I say ONE specific thing I need — not a list of excuses
+- I'm proud of the work I hand Jeff
+- Jeff opens the app and it looks great and works — he doesn't have to check
+
+**Jeff is almost 60 and learning. This should be enjoyable, not stressful. Every session, remember that.**
 
 ---
 
