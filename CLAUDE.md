@@ -306,7 +306,39 @@ c1c004c  Auto-detect Beehive by IP when homeassistant.local fails
 
 ---
 
-## Current Verified State (as of 2026-06-24, commit e904a5b)
+## Session History — Session 2026-06-24 (Visual Polish + Beehive Integration)
+
+### Changes Made This Session
+
+1. **YARD hero text** (`6b6d477`) — Fixed stark white `.yard-hero-title` to warm italic gold `rgba(240,220,175,0.92)` to match the baked-in text of other hero photos.
+
+2. **App-wide palette overhaul** (`c17bdf0`) — Applied ChatGPT hero colors/fonts throughout the entire app:
+   - All CSS `:root` variables replaced with warm cream-gold palette
+   - `--gold:#d4af37`, `--text:#ede8df`, `--serif:Georgia,'Times New Roman',serif`
+   - `--a-home` changed from tech blue `#4a9eff` → warm gold `#d4af37`
+   - App header, nav bar, card titles, section labels, spec values — all warm cream serif
+   - Removed "Life-Safety Note" nanny warning card Jeff explicitly objected to
+   - Weather hero temp + STATION/KTNWHITE21 inline HTML fixed to warm cream
+
+3. **Blink 2FA + Beehive fixes** (`c7bc5ba`) — Fixed `checkBeehive()` detection bug (HA `/api/` returns `{"message":"API running."}` NOT `{"version":"..."}` — was checking wrong field). Added Blink PIN entry card in camera section as 2FA workaround. Added `blinkSendPin()` function that calls `POST /api/services/blink/send_pin` directly via HA REST.
+
+4. **Panic button — HOME only** (`4c9d36c`) — Panic button placed at the bottom of HOME section only. Verified NOT present on WEATHER, IRRIGATION, or YARD.
+
+5. **Beehive irrigation integration** (`1c2d2c9`) — `loadIrrigation()` now tries HA first via `loadIrrigationFromHA()`. Fetches `/api/states`, filters for B-Hyve zone switches, populates UI from HA entity states, controls via `haIrrToggle()` calling HA services. Falls back to direct B-Hyve cloud API if HA has no irrigation entities.
+
+**Commits this session:**
+```
+1c2d2c9  Route irrigation through Beehive first — HA B-Hyve entities take priority over direct API
+4c9d36c  Panic button — HOME only, at the bottom
+1395a31  Purge all white text — warm cream-gold everywhere
+c7bc5ba  Fix Blink 2FA, irrigation errors, and diagnostic messages
+c17bdf0  Apply ChatGPT hero palette throughout entire app + remove nanny warnings
+6b6d477  Fix YARD hero text — warm italic gold to match other hero photos
+```
+
+---
+
+## Current Verified State (as of 2026-06-24, commit 1c2d2c9)
 
 | Feature | Status |
 |---|---|
@@ -322,23 +354,57 @@ c1c004c  Auto-detect Beehive by IP when homeassistant.local fails
 | KV binding (MOWER_KV) | WORKING |
 | Service worker (hcc-v5) | WORKING |
 | Engine hours baseline (5.9h) | CORRECT |
-| 66/66 Playwright tests | PASSING |
+| Panic button — HOME only | CORRECT |
+| Warm gold/cream palette app-wide | DONE |
+| Georgia serif font throughout | DONE |
+| Beehive detection (checkBeehive) | FIXED |
+| HA token entry UI | WORKING |
+| Blink 2FA workaround (blinkSendPin) | BUILT |
+| Irrigation → Beehive first, direct fallback | DONE |
+
+---
+
+## Beehive / Home Assistant Integration — Current State
+
+**HA Base URL:** `http://homeassistant.local:8123` (auto-fallback to `http://192.168.1.66:8123`)
+
+**HA Token:** Jeff enters a Long-Lived Access Token once in the app → stored in `localStorage` key `ha_token`. App then uses it for all HA API calls.
+
+**How to get HA Long-Lived Token:**
+1. Open Home Assistant → Profile (bottom left avatar) → Long-Lived Access Tokens → Create Token
+2. Copy it
+3. Open the HCC app on home WiFi → HOME section → tap "OPEN BEEHIVE ↗" → find the token input
+
+**Camera section behavior:**
+- If HA token set and Beehive online → fetches camera entities from `/api/states`
+- If no cameras found → shows Blink 2FA PIN entry (for initial Blink setup in HA)
+- `blinkSendPin()` calls `POST /api/services/blink/send_pin` with the PIN
+
+**Irrigation section behavior:**
+- If HA token set → tries `loadIrrigationFromHA()` first
+- Fetches all entity states, filters for B-Hyve switches (zone/bhyve/orbit in entity_id or zone_name/is_watering attributes)
+- If no B-Hyve entities in HA → falls back to `loadIrrigationDirect()` (direct B-Hyve cloud API)
+- `haIrrToggle(entityId, 'on'|'off')` calls `POST /api/services/switch/turn_on` or `turn_off`
 
 ---
 
 ## Pending Items (Next Session Should Address These)
 
-1. **Verify sensor data live** — Jeff mowed on 2026-06-23. After Jeff hard-refreshes the app (closes all browser tabs, reopens), confirm battery voltage, RPM, and mileage are showing. If still `0.00V` and `—`, manually run the curl test above to verify KV binding end-to-end.
+1. **YARD hero photo** — Jeff hit ChatGPT image limit. Next session: regenerate YARD hero photo with text baked in (using prompt from `HERO-STYLE-GUIDE.json`). Until then, CSS overlay text approximates the style but isn't a perfect match.
 
-2. **Hard-refresh instruction for Jeff** — To get the latest app version: on phone, go to `toro1-5rz.pages.dev`, tap the address bar, force-reload. Or open in a fresh private/incognito tab.
+2. **Blink 2FA completion** — Jeff needs to:
+   1. Go to HA → Settings → Integrations → Add Integration → search "Blink"
+   2. Blink sends a 6-digit code to Jeff's phone
+   3. Open HCC app → HOME → CAMERAS section → enter code in the PIN field → tap SEND
+   4. Cameras will then appear in the app
 
-3. **ESPHome heartbeat OTA (if applicable)** — The `beehive/esphome/hcc-mower.yaml` has a 5-minute heartbeat added. If Jeff wants to flash it:
-   1. Home Assistant → ESPHome add-on → `hcc-mower` → three-dot menu → Install → Wirelessly
-   2. Wait ~2 minutes for OTA update
-   3. Box reboots and starts posting heartbeats every 5 min when parked
-   BUT: Confirm with Jeff whether he wants to switch from the `.ino` firmware to ESPHome. These are different systems.
+3. **B-Hyve in HA** — For irrigation to route through Beehive, Jeff needs to add B-Hyve integration in HA (Settings → Integrations → search "Orbit B-Hyve"). Once added, zones will appear automatically in the HCC irrigation section with a "● BEEHIVE" badge.
 
-4. **Lighthouse performance** — Score 60/100. Main causes: unminified JS/CSS in index.html, large hero images. Can be improved with minification but this is low priority vs. functionality.
+4. **B-Hyve direct API credentials** — If HA integration isn't available, the direct fallback uses `/api/irrigation`. That requires `BHYVE_EMAIL` and `BHYVE_PASSWORD` set in Cloudflare Pages → toro1 → Settings → Environment Variables → Production.
+
+5. **Verify sensor data live** — After Jeff hard-refreshes the app, confirm battery voltage, RPM, and mileage display. If still `0.00V` and `—`, run the curl test in the Cloudflare Infrastructure section above.
+
+6. **Lighthouse performance** — Score 60/100. Low priority. Main cause: unminified 300KB index.html.
 
 ---
 
