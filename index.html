@@ -497,6 +497,23 @@ html,body{
 .irr-btn-stop{background:#3a0d0d;color:#ff8585;border-color:#7a1c1c}
 .irr-btn-clear{background:rgba(34,197,94,.08);color:#5fe08a;border-color:rgba(34,197,94,.3)}
 .irr-btn-delay{background:var(--card);color:var(--muted);border-color:var(--border);font-size:11px;padding:8px}
+/* Irrigation card inline helpers */
+.irr-conn{font-size:10px;font-weight:800;letter-spacing:1px;margin-left:6px}
+.irr-next-run{font-size:10px;color:var(--muted);text-align:center;margin:8px 0 2px;min-height:14px}
+/* Zone cards — large visual tiles */
+.zone-card{border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;background:var(--card2)}
+.zone-card.active{border-color:#22c55e;box-shadow:0 0 16px rgba(34,197,94,.15)}
+.zone-photo{width:100%;height:72px;object-fit:cover;background:linear-gradient(135deg,#0a1a0a,#0d2010);display:block}
+.zone-photo-empty{width:100%;height:72px;background:linear-gradient(135deg,#0a1a10,#0d2018);display:flex;align-items:center;justify-content:center;font-size:24px;opacity:.4}
+.zone-body{padding:10px 12px}
+.zone-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.zone-name{font-weight:900;font-size:14px;color:var(--text)}
+.zone-badge{font-size:9px;font-weight:900;letter-spacing:1px;border-radius:5px;padding:3px 7px;border:1px solid}
+.zone-badge-active{color:#22c55e;border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.1)}
+.zone-badge-idle{color:var(--muted);border-color:var(--border);background:transparent}
+.zone-sub{font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:.3px}
+.zone-footer{display:flex;align-items:center;gap:8px}
+.zone-run-btn{flex:1;padding:8px;border-radius:8px;background:rgba(74,163,255,.08);border:1px solid rgba(74,163,255,.3);color:#4aa3ff;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:.5px}
 /* Cart FAB */
 .cart-fab{position:fixed;bottom:20px;right:16px;z-index:400}
 .cart-btn{background:linear-gradient(135deg,#1a1a28,#0d0d18);border:1px solid rgba(74,158,255,.35);border-radius:50px;padding:10px 18px;color:#4a9eff;font-size:12px;font-weight:800;letter-spacing:.8px;font-family:inherit;box-shadow:0 4px 20px rgba(0,0,0,.5),0 0 16px rgba(74,158,255,.1)}
@@ -781,33 +798,79 @@ html,body{
   <div class="sec-hero sec-hero-irr">
     <img src="./images/hero-irr.jpg" alt="Irrigation">
     <div class="sec-hero-overlay">
+      <div class="sec-hero-badge">ORBIT B-HYVE &bull; WATER HOG</div>
+      <div class="sec-hero-title">&#128688; Irrigation</div>
       <div class="sec-hero-status" id="irrHeroStatus"></div>
     </div>
   </div>
 
   <div class="content">
-  <div class="card" id="irrigationCard">
-    <div class="card-title">&#128688; Irrigation &bull; <span id="irrDevName">Water Hog</span> <span id="irrConn" style="font-size:10px;font-weight:700;letter-spacing:1px;margin-left:4px"></span></div>
-    <div id="irrBanner" class="wx-banner wx-load" style="margin-bottom:10px">&#128260; Loading irrigation&hellip;</div>
-    <div class="wx-grid" style="margin-bottom:8px">
-      <div class="wx-card"><div class="wx-lbl">Mode</div><div class="wx-val" id="irrMode">--</div></div>
-      <div class="wx-card"><div class="wx-lbl">Rain Delay</div><div class="wx-val" id="irrRainDelay">--</div></div>
-    </div>
-    <div id="irrZones"></div>
-    <div class="irr-btn-row">
-      <button class="irr-btn irr-btn-stop" onclick="irrStopAll()">&#9632; STOP ALL</button>
-      <button class="irr-btn irr-btn-clear" onclick="irrRain(0)">&#9728;&#65039; CLEAR DELAY</button>
-    </div>
-    <div class="irr-btn-row">
-      <button class="irr-btn irr-btn-delay" onclick="irrRain(24)">&#127783;&#65039; Delay 24h</button>
-      <button class="irr-btn irr-btn-delay" onclick="irrRain(48)">&#127783;&#65039; Delay 48h</button>
-    </div>
-    <div id="irrNextRun" style="font-size:10px;color:var(--muted);text-align:center;margin:6px 0 2px"></div>
-    <div id="irrUsage"></div>
-    <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadIrrigation()">&#128260; Refresh Irrigation</button>
-    <div style="font-size:9px;color:#666;text-align:center;margin-top:4px">Live from your Orbit B-hyve &bull; Water Hog</div>
-  </div>
 
+    <!-- CONTROLLER STATUS -->
+    <div class="card cat-status" id="irrigationCard">
+      <div class="card-title">
+        &#128688; <span id="irrDevName">Water Hog</span><span class="irr-conn" id="irrConn"></span>
+      </div>
+      <div id="irrBanner" class="wx-banner wx-load">&#128260; Loading irrigation&hellip;</div>
+      <div class="wx-grid">
+        <div class="wx-card"><div class="wx-lbl">Mode</div><div class="wx-val" id="irrMode">--</div></div>
+        <div class="wx-card"><div class="wx-lbl">Rain Delay</div><div class="wx-val" id="irrRainDelay">--</div></div>
+      </div>
+      <div id="irrZones"></div>
+      <div class="irr-btn-row">
+        <button class="irr-btn irr-btn-stop" onclick="irrStopAll()">&#9632; STOP ALL</button>
+        <button class="irr-btn irr-btn-clear" onclick="irrRain(0)">&#9728;&#65039; CLEAR DELAY</button>
+      </div>
+      <div class="irr-btn-row">
+        <button class="irr-btn irr-btn-delay" onclick="irrRain(24)">&#127783;&#65039; Delay 24h</button>
+        <button class="irr-btn irr-btn-delay" onclick="irrRain(48)">&#127783;&#65039; Delay 48h</button>
+      </div>
+      <div class="irr-next-run" id="irrNextRun"></div>
+      <div id="irrUsage"></div>
+      <button class="btn-full btn-gray" style="margin-top:10px" onclick="loadIrrigation()">&#128260; Refresh Irrigation</button>
+      <div class="wx-note" style="margin-top:6px">Live from Orbit B-Hyve &bull; Water Hog</div>
+    </div>
+
+    <!-- B-HYVE INTELLIGENCE — weather-smart scheduling info -->
+    <div class="card cat-wx" id="irrIntelCard">
+      <div class="card-title">&#129504; B-Hyve Intelligence</div>
+      <div class="wx-grid" style="margin-bottom:10px">
+        <div class="wx-card"><div class="wx-lbl">Rain Delay</div><div class="wx-val" id="irrIntelRainDelay">--</div></div>
+        <div class="wx-card"><div class="wx-lbl">Smart Zones</div><div class="wx-val" id="irrIntelSmartZones">--</div></div>
+      </div>
+      <ul class="spec-list">
+        <li><span class="sk">Next Run</span><span class="sv" id="irrIntelNext">--</span></li>
+        <li><span class="sk">Last Watered</span><span class="sv" id="irrIntelLast">--</span></li>
+        <li><span class="sk">Controller</span><span class="sv" id="irrIntelConn">--</span></li>
+        <li><span class="sk">Run Mode</span><span class="sv" id="irrIntelMode">--</span></li>
+      </ul>
+      <div class="wx-note">B-Hyve automatically skips watering when rain is forecasted by your KTNWHITE21 weather station &bull; Smart zones adjust runtime based on soil moisture &amp; ET</div>
+    </div>
+
+    <!-- ZONES PREVIEW — shown until B-Hyve connects and populates irrZones -->
+    <div class="card cat-status" id="irrZonesCard">
+      <div class="card-title">&#127807; Your Zones &bull; Water Hog</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.6">Zone photos and live status will appear here once your B-Hyve is connected. Your zone names and photos come directly from the Orbit app.</div>
+      <div id="irrZonesPreview">
+        <!-- Static placeholders — replaced by live data when B-Hyve connects -->
+        <div class="zone-card"><div class="zone-photo-empty">&#127807;</div><div class="zone-body"><div class="zone-header"><div class="zone-name">Zone 1</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Waiting for B-Hyve connection</div><div class="zone-footer"><button class="zone-run-btn" disabled style="opacity:.4">&#9654; Run Zone</button></div></div></div>
+        <div class="zone-card"><div class="zone-photo-empty">&#127807;</div><div class="zone-body"><div class="zone-header"><div class="zone-name">Zone 2</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Waiting for B-Hyve connection</div><div class="zone-footer"><button class="zone-run-btn" disabled style="opacity:.4">&#9654; Run Zone</button></div></div></div>
+        <div class="zone-card"><div class="zone-photo-empty">&#127807;</div><div class="zone-body"><div class="zone-header"><div class="zone-name">Zone 3</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Waiting for B-Hyve connection</div><div class="zone-footer"><button class="zone-run-btn" disabled style="opacity:.4">&#9654; Run Zone</button></div></div></div>
+      </div>
+    </div>
+
+    <!-- SETUP CARD — shown until B-Hyve is connected -->
+    <div class="card" id="irrSetupCard">
+      <div class="card-title">&#9881; B-Hyve Setup</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px">To enable live irrigation control, add your Orbit B-Hyve credentials to Cloudflare Pages environment variables.</div>
+      <ul class="spec-list">
+        <li><span class="sk">Variable 1</span><span class="sv">BHYVE_EMAIL</span></li>
+        <li><span class="sk">Variable 2</span><span class="sv">BHYVE_PASSWORD</span></li>
+        <li><span class="sk">Where</span><span class="sv">Cloudflare Pages &rarr; Settings &rarr; Environment Variables</span></li>
+        <li><span class="sk">Project</span><span class="sv">toro1</span></li>
+      </ul>
+      <button class="btn-full btn-gray" style="margin-top:10px" onclick="window.open('https://dash.cloudflare.com','_blank','noopener')">&#128279; Open Cloudflare Dashboard</button>
+    </div>
 
   </div>
 </div>
@@ -2014,6 +2077,8 @@ function loadIrrigation(){
       if(!d || !d.ok || !d.device){ throw new Error(d && d.error || 'no data'); }
       var dev=d.device;
       IRR={active:dev.active_station||null,lastWatered:dev.last_watered||null,nextStart:dev.next_start_time||null,loaded:true};
+      var sc=document.getElementById('irrSetupCard'); if(sc) sc.style.display='none';
+      var zp=document.getElementById('irrZonesCard'); if(zp) zp.style.display='none';
       function set(id,v){var e=document.getElementById(id); if(e) e.innerHTML=v;}
       set('irrDevName', dev.name||'Irrigation');
       var conn=document.getElementById('irrConn');
@@ -2029,19 +2094,37 @@ function loadIrrigation(){
       var html='';
       (d.zones||[]).forEach(function(z){
         var isA = active && z.station===active;
-        var img = z.image_url ? '<img src="'+z.image_url+'" loading="lazy" style="width:50px;height:50px;border-radius:8px;object-fit:cover;background:#222;flex:none" onerror="this.style.display=\'none\'">' : '';
-        html += '<div style="display:flex;align-items:center;gap:10px;padding:8px;border:1px solid '+(isA?'#22c55e':'var(--border)')+';border-radius:10px;margin-bottom:6px;background:'+(isA?'rgba(34,197,94,.08)':'var(--card)')+'">'
-          + img
-          + '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">'+(z.name||('Zone '+z.station))+'</div>'
-          + '<div style="font-size:10px;color:var(--muted)">Station '+z.station+(z.smart?' • Smart watering':'')+'</div></div>'
-          + '<div style="font-size:11px;font-weight:700;color:'+(isA?'#22c55e':'var(--muted)')+';min-width:50px;text-align:right">'+(isA?'WATERING':'IDLE')+'</div>'
-          + '<button onclick="irrStart('+z.station+')" title="Run this zone" style="background:var(--card);border:1px solid #2a4a6a;color:#4aa3ff;border-radius:8px;padding:6px 10px;font-size:13px;font-weight:800;cursor:pointer;flex:none">&#9654;</button>'
-          + '</div>';
+        var photo = z.image_url
+          ? '<img class="zone-photo" src="'+z.image_url+'" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=zone-photo-empty>&#128688;</div>\'">'
+          : '<div class="zone-photo-empty">&#128688;</div>';
+        html += '<div class="zone-card'+(isA?' active':'')+'">'
+          + photo
+          + '<div class="zone-body">'
+          + '<div class="zone-header"><div class="zone-name">'+(z.name||('Zone '+z.station))+'</div>'
+          + '<span class="zone-badge '+(isA?'zone-badge-active':'zone-badge-idle')+'">'+(isA?'&#128167; WATERING':'IDLE')+'</span></div>'
+          + '<div class="zone-sub">Station '+z.station+(z.smart?' &bull; &#128200; Smart Watering':'')+'</div>'
+          + '<div class="zone-footer"><button class="zone-run-btn" onclick="irrStart('+z.station+')">&#9654; Run Zone</button></div>'
+          + '</div></div>';
       });
       var zc=document.getElementById('irrZones'); if(zc) zc.innerHTML=html;
       // next run line
       var nr=document.getElementById('irrNextRun');
       if(nr){ if(dev.next_start_time){ try{ nr.textContent='Next run: '+new Date(dev.next_start_time).toLocaleString([], {weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }catch(e){ nr.textContent=''; } } else nr.textContent=''; }
+      // Populate Intelligence card
+      var iic=document.getElementById('irrIntelCard');
+      if(iic){ iic.style.display=''; }
+      function iset(id,v,color){ var e=document.getElementById(id); if(e){ e.innerHTML=v; if(color) e.style.color=color; else e.style.color=''; } }
+      var rd2=Number(dev.rain_delay)||0;
+      if(rd2>0){ iset('irrIntelRainDelay',rd2+' HRS','#ffd24a'); }
+      else { iset('irrIntelRainDelay','NONE','#22c55e'); }
+      var smartCount=(d.zones||[]).filter(function(z){return z.smart;}).length;
+      iset('irrIntelSmartZones', smartCount+'/'+(d.zones||[]).length, smartCount>0?'#4aa3ff':null);
+      if(dev.next_start_time){ try{ iset('irrIntelNext', new Date(dev.next_start_time).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})); }catch(e){ iset('irrIntelNext','Scheduled'); } }
+      else { iset('irrIntelNext','No schedule set'); }
+      if(dev.last_watered){ try{ iset('irrIntelLast', new Date(dev.last_watered).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})); }catch(e){ iset('irrIntelLast','—'); } }
+      else { iset('irrIntelLast','No history'); }
+      iset('irrIntelConn', dev.connected?'&#128994; Online':'&#128308; Offline', dev.connected?'#22c55e':'#ff6262');
+      iset('irrIntelMode', (dev.run_mode||'AUTO').toString().toUpperCase(), dev.run_mode==='off'?'#ff6262':dev.run_mode==='manual'?'#ffd24a':'#22c55e');
       renderUsage();
       if(typeof renderReadiness==='function') renderReadiness();
     })
@@ -2631,7 +2714,15 @@ loadAlerts();
       });
   };
 
-  // Render the GPS track as a self-contained yard map (no tiles / API keys).
+  // Preload the property plat map for GPS underlay
+  (function(){
+    var img=new Image();
+    img.onload=function(){ window._platMapImg=img; if(window._lastTrack) drawYardMap(window._lastTrack); };
+    img.onerror=function(){ window._platMapImg=null; };
+    img.src='./images/plat-map.jpg';
+  })();
+
+  // Render the GPS track with property plat map as underlay (no external tiles/API keys).
   function drawYardMap(track){
     var c=document.getElementById('yardMap'); if(!c) return;
     var msg=document.getElementById('yardMapMsg');
@@ -2640,6 +2731,18 @@ loadAlerts();
     var w=c.clientWidth||300, h=c.clientHeight||220;
     c.width=w; c.height=h;
     ctx.clearRect(0,0,w,h);
+    // Draw property plat map underlay (aerial photo of property)
+    if(window._platMapImg){
+      var img=window._platMapImg;
+      var iw=img.naturalWidth, ih=img.naturalHeight;
+      var sc=Math.max(w/iw, h/ih);
+      var dw=iw*sc, dh=ih*sc, dx=(w-dw)/2, dy=(h-dh)/2;
+      ctx.globalAlpha=0.5;
+      ctx.drawImage(img,dx,dy,dw,dh);
+      ctx.globalAlpha=1;
+      ctx.fillStyle='rgba(0,0,0,0.28)';
+      ctx.fillRect(0,0,w,h);
+    }
     if(!track || track.length<2){
       if(msg) msg.textContent='No GPS track yet \u2014 it\u2019ll appear after your first mow with the sensor installed.';
       return;
@@ -2651,8 +2754,7 @@ loadAlerts();
       if(lo<minLo)minLo=lo; if(lo>maxLo)maxLo=lo;
     }
     var midLa=(minLa+maxLa)/2;
-    var lonScale=Math.cos(midLa*Math.PI/180)||1;  // compress longitude so shape isn't stretched
-    // project: x = east, y = south->north (north up)
+    var lonScale=Math.cos(midLa*Math.PI/180)||1;
     var pts=track.map(function(p){ return [ (p[1]-minLo)*lonScale, (maxLa-p[0]) ]; });
     var minX=pts[0][0],maxX=pts[0][0],minY=pts[0][1],maxY=pts[0][1];
     for(var j=1;j<pts.length;j++){
@@ -2664,13 +2766,16 @@ loadAlerts();
     var offX=(w-spanX*scale)/2, offY=(h-spanY*scale)/2;
     function sx(q){ return offX+(q[0]-minX)*scale; }
     function sy(q){ return offY+(q[1]-minY)*scale; }
-    ctx.lineWidth=2; ctx.strokeStyle='#7ee787'; ctx.lineJoin='round'; ctx.lineCap='round';
+    // Glow effect for track
+    ctx.shadowColor='#7ee787'; ctx.shadowBlur=4;
+    ctx.lineWidth=2.5; ctx.strokeStyle='#7ee787'; ctx.lineJoin='round'; ctx.lineCap='round';
     ctx.beginPath();
     for(var k=0;k<pts.length;k++){ var X=sx(pts[k]),Y=sy(pts[k]); if(k===0)ctx.moveTo(X,Y); else ctx.lineTo(X,Y); }
     ctx.stroke();
+    ctx.shadowBlur=0;
     // start (blue) and current/last (red) markers
-    ctx.fillStyle='#4da3ff'; ctx.beginPath(); ctx.arc(sx(pts[0]),sy(pts[0]),4,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='#ff6b6b'; var L=pts[pts.length-1]; ctx.beginPath(); ctx.arc(sx(L),sy(L),4,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#4da3ff'; ctx.beginPath(); ctx.arc(sx(pts[0]),sy(pts[0]),5,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#ff6b6b'; var L=pts[pts.length-1]; ctx.beginPath(); ctx.arc(sx(L),sy(L),5,0,Math.PI*2); ctx.fill();
     if(msg) msg.textContent=track.length+' GPS points \u00b7 blue = start, red = latest';
   }
   window.drawYardMap = drawYardMap;
@@ -2690,6 +2795,10 @@ function hccSection(id, btn) {
   if (id === 'irrigation' && !window._irrLoaded) { window._irrLoaded = true; loadIrrigation(); }
   if (id === 'home' && !window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
   if (id === 'weather' && !window._starsDrawn) { window._starsDrawn = true; drawWxStars(); }
+  if (id === 'yard' && typeof drawYardMap === 'function') {
+    var yt = (typeof S !== 'undefined' && S.sensorTrack && S.sensorTrack.length >= 2) ? S.sensorTrack : [];
+    drawYardMap(yt);
+  }
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
