@@ -2220,14 +2220,16 @@ function loadIrrigation(){
       var b=document.getElementById('irrBanner');
       if(!b) return;
       var msg = err && err.message || '';
+      b.className='wx-banner wx-caution';
       if(msg.indexOf('credentials_not_configured')>=0){
         b.className='wx-banner wx-no';
-        b.innerHTML='&#128688; B-Hyve login not set up — add BHYVE_EMAIL &amp; BHYVE_PASSWORD in Cloudflare Pages settings';
+        b.innerHTML='&#128688; B-Hyve credentials not configured — open Cloudflare Pages &rarr; Settings &rarr; Environment Variables and add BHYVE_EMAIL &amp; BHYVE_PASSWORD';
       } else if(msg.indexOf('login_failed')>=0){
-        b.className='wx-banner wx-caution';
-        b.innerHTML='&#128688; B-Hyve server not responding — tap Refresh to retry';
+        b.className='wx-banner wx-no';
+        b.innerHTML='&#128688; B-Hyve login failed — check BHYVE_EMAIL &amp; BHYVE_PASSWORD in Cloudflare Pages settings. Error: ' + msg.replace('login_failed_','').split('(')[0].trim();
+      } else if(msg.indexOf('no_timer_device')>=0){
+        b.innerHTML='&#128688; No irrigation timer found in B-Hyve account';
       } else {
-        b.className='wx-banner wx-caution';
         b.innerHTML='&#128688; Unable to reach irrigation controller — tap Refresh';
       }
     });
@@ -3068,7 +3070,14 @@ function loadCameras() {
     var cameras = states.filter(function(s) { return s.entity_id.startsWith('camera.'); });
     if (!grid) return;
     if (cameras.length === 0) {
-      grid.innerHTML = '<div style="padding:12px;font-size:11px;color:var(--muted)">No cameras found in Beehive. Add cameras in HA first.</div>';
+      grid.innerHTML = '<div style="background:rgba(212,175,55,.07);border:1px solid rgba(212,175,55,.2);border-radius:12px;padding:14px;margin-bottom:6px">'
+        + '<div style="font-size:12px;font-weight:700;color:rgba(212,175,55,.9);margin-bottom:6px">&#128247; Blink — Enter Verification Code</div>'
+        + '<div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.55">Blink sent a code to your email/phone. Enter it below to finish connecting to Beehive.</div>'
+        + '<div style="font-size:10px;color:rgba(220,195,145,.5);margin-bottom:8px">If you haven\'t added Blink yet: Beehive &rarr; Settings &rarr; Devices &rarr; Add Integration &rarr; Blink</div>'
+        + '<input id="blinkPinInput" type="tel" inputmode="numeric" maxlength="8" placeholder="Enter PIN code&hellip;" style="width:100%;box-sizing:border-box;background:rgba(0,0,0,.4);border:1px solid rgba(212,175,55,.3);border-radius:8px;padding:9px 12px;color:#ede8df;font-size:14px;margin-bottom:8px;font-family:inherit;letter-spacing:4px;text-align:center">'
+        + '<button onclick="blinkSendPin()" style="width:100%;padding:10px;background:linear-gradient(135deg,#5a3e00,#3a2800);border:1px solid rgba(212,175,55,.4);border-radius:8px;color:rgba(212,175,55,.95);font-size:11px;font-weight:700;letter-spacing:.5px;cursor:pointer">&#128273; SEND VERIFICATION CODE TO BEEHIVE</button>'
+        + '<div id="blinkPinStatus" style="font-size:11px;text-align:center;margin-top:8px;min-height:16px"></div>'
+        + '</div>';
       return;
     }
     if (placeholder) placeholder.style.display = 'none';
@@ -3149,6 +3158,42 @@ function loadHomeStatus() {
     rows.innerHTML = html;
   })
   .catch(function(){ if (rows) rows.innerHTML='<div style="font-size:11px;color:#ff6262">Status unavailable — check token</div>'; });
+}
+
+function blinkSendPin() {
+  var pin = (document.getElementById('blinkPinInput') || {}).value || '';
+  var status = document.getElementById('blinkPinStatus');
+  pin = pin.trim();
+  if (!pin) { if(status) { status.style.color='#ff6262'; status.textContent='Enter the PIN code first'; } return; }
+  var token = getHaToken();
+  var base = localStorage.getItem('ha_base') || HA_BASE;
+  if (!token || !base) { if(status) { status.style.color='#ff6262'; status.textContent='Beehive not connected'; } return; }
+  if (status) { status.style.color='var(--muted)'; status.textContent='Sending to Beehive…'; }
+  fetch(base + '/api/services/blink/send_pin', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pin: pin }),
+    signal: AbortSignal.timeout(8000)
+  })
+  .then(function(r) {
+    if (r.ok || r.status === 200) {
+      if (status) { status.style.color='#22c55e'; status.textContent='✓ Code sent! Loading cameras…'; }
+      setTimeout(function() { loadCameras(); loadHomeStatus(); }, 2000);
+    } else {
+      return r.text().then(function(t) { throw new Error(r.status + ' ' + t.slice(0,80)); });
+    }
+  })
+  .catch(function(err) {
+    if (status) {
+      status.style.color='#ff6262';
+      var msg = err && err.message || '';
+      if (msg.indexOf('404') >= 0) {
+        status.textContent = 'Blink not set up in Beehive yet — add it first via Settings → Integrations → Blink';
+      } else {
+        status.textContent = 'Error: ' + (msg || 'check Beehive connection');
+      }
+    }
+  });
 }
 </script>
 
