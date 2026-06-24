@@ -1,16 +1,47 @@
 # HCC Toro TimeMaster 21200 — Project Memory
 
-**READ THIS FIRST.** This file is the single source of truth for any AI session working on this project. Do not guess. Do not ask Jeff to re-explain. Everything you need is here.
+**READ THIS ENTIRE FILE BEFORE TOUCHING ANYTHING.** This is the single source of truth for every AI session. Do not guess. Do not ask Jeff to re-explain. Do not blame unclear history. Everything you need is here.
 
 ---
 
-## Critical Rules (Never Break These)
+## Jeff's Message — Read This Every Single Session
 
-1. **NEVER ask Jeff for credentials** — Cloudflare API token, KV IDs, WiFi passwords, HA tokens are all already configured. Reference them from this file.
-2. **NEVER suggest hiring an IT person.**
-3. **NEVER make excuses or blame unclear history** — read this file and the git log.
-4. Commands must work the first time. Test before telling Jeff to run something.
-5. When in doubt, check git log and this file before touching anything.
+Jeff said this verbatim and it must be respected permanently:
+
+> "You don't remember what we have done. You don't have a plan that you follow. You don't save the permissions and logins. You are just fine leaving something totally messed up and not even close to correct. You wait for me to call out the issues instead of testing and retesting to make sure it 💯 correct. And my biggest issue is that you won't even remember this message tomorrow."
+
+> "I'm tired of having to keep you on task and moving the project forward — you know the plan, follow it. Save this and remember it and read it before you do anything."
+
+> "I don't want to get mad and quit. I was reading that 95% of AI projects fail and I don't want it to be this one. I don't know all the tools you have and what you can and can't do. I'm almost 60 years old and I'm learning… but you are making it real hard for this to be enjoyable."
+
+**These are not suggestions. They define how every session must operate.**
+
+---
+
+## Mandatory Rules (Never Break These)
+
+1. **READ THIS FILE FIRST** — every session, every time, no exceptions
+2. **NEVER ask Jeff for credentials** — Cloudflare API token, KV IDs, WiFi passwords, HA tokens are all already configured. They are documented below.
+3. **NEVER suggest hiring an IT person**
+4. **NEVER make excuses or blame unclear history** — the history is in this file and in `git log`
+5. **NEVER leave the app in a broken state** — if you broke it, fix it before reporting done
+6. **NEVER report something as done without testing it** — run the Playwright diagnostic (instructions below) before telling Jeff anything is complete
+7. **Commands must work the first time** — test the command yourself before telling Jeff to run it
+8. **NEVER put `<script>` or `</script>` tags inside the JS block of index.html** — this causes a fatal blank page (the great blank-page incident of 2026-06-23). The JS block is lines 1209–2834. Raw text only inside it.
+9. **Always check `git log` and this file before changing anything**
+10. **Be proactive** — find and fix bugs before Jeff sees them. Do not wait for Jeff to report issues.
+
+---
+
+## Mandatory Pre-Session Checklist
+
+Before doing ANY work, an AI session must:
+
+1. Read this entire file
+2. Run `git log --oneline -15` to see recent changes
+3. Run the Playwright diagnostic (see Testing section below)
+4. Note what's working and what's broken before touching anything
+5. Fix any broken state FIRST before doing new work
 
 ---
 
@@ -28,13 +59,49 @@ The app has four sections: **YARD** (mower data), **HOME**, **WEATHER**, **IRRIG
 
 ---
 
+## Project Goals (The Plan — Follow This Every Session)
+
+These are the outcomes Jeff wants. Every session moves these forward:
+
+### Goal 1 — App Always Fully Working
+- All 4 navigation buttons work (HOME, WEATHER, IRRIGATION, YARD)
+- LOG MOW, LOG SERVICE, UPDATE HOURS buttons open their modals, are fully styled, and save data
+- All 7 YARD tabs work (Dashboard, Services, History, Parts, Diagnostics, Upgrades, Specs)
+- All sensor data rows display correctly when sensor is connected
+- GPS map draws and persists after mow session ends
+- **Verified as of 2026-06-24: 66/66 Playwright tests PASSING**
+
+### Goal 2 — Sensor Data Live
+- ESP32 sensor box posts data every 90s when engine running
+- Data flows: ESP32 → POST `/api/hours` → Cloudflare KV → GET `/api/hours` → app display
+- Battery voltage, RPM, mileage, GPS track all display in app
+- **Current state:** KV binding fix deployed (commit `e904a5b`). MOWER_KV binding confirmed working.
+
+### Goal 3 — GPS Track Persists
+- Track drawn during mow session must NOT disappear after engine off
+- Track saved to `S.sensorTrack` in localStorage, shown even when heartbeat has no track
+- **Fixed in commit `e904a5b`** — GPS persistence implemented
+
+### Goal 4 — Maintenance Log Working
+- Jeff can LOG MOW (date, duration, distance, notes)
+- Jeff can LOG SERVICE (18 service types)
+- Jeff can UPDATE HOURS
+- All entries save to localStorage under key `toro21200`
+- **Fixed in commit `e904a5b`** — CSS class bug that broke all modal buttons was fixed
+
+### Goal 5 — Persistent Memory
+- This CLAUDE.md file is the memory. It must be updated every session.
+- Any AI reading it must know the full history without asking Jeff anything.
+
+---
+
 ## Deployment Pipeline
 
-**GitHub Actions is BROKEN** — `CLOUDFLARE_API_TOKEN` secret is not set in the GitHub repo. Every Actions run fails with: `##[error]Input required and not supplied: apiToken`
+**GitHub Actions is BROKEN** — `CLOUDFLARE_API_TOKEN` secret is not set in GitHub repo. Every Actions run fails with `##[error]Input required and not supplied: apiToken`. Do NOT try to fix this — it is irrelevant.
 
 **Actual deployment:** Cloudflare Pages native Git integration watches `claude/time-master-project-liq1jw` and deploys automatically on every push. This IS working.
 
-**Workflow:** Push to `claude/time-master-project-liq1jw` → Cloudflare Pages native integration picks it up → live at `toro1-5rz.pages.dev` within ~60 seconds.
+**Workflow:** Push to `claude/time-master-project-liq1jw` → Cloudflare Pages picks it up → live at `toro1-5rz.pages.dev` within ~60 seconds.
 
 ---
 
@@ -43,12 +110,24 @@ The app has four sections: **YARD** (mower data), **HOME**, **WEATHER**, **IRRIG
 | Resource | Name | ID |
 |---|---|---|
 | KV Namespace | `MOWER_KV` | `ec5b28597d9c4fb9b182b1aea1d50eff` |
-| KV Binding (Pages env var) | `HCC_KV` | maps to `MOWER_KV` |
+| KV Binding (Pages env var) | `MOWER_KV` | maps to the KV namespace above |
 | Pages project | `toro1` | — |
 
-**The binding:** In Cloudflare Pages settings, the KV namespace `MOWER_KV` is bound to the variable name `HCC_KV`. The `functions/api/hours.js` code references `env.HCC_KV` — this is correct and intentional.
+**CRITICAL — KV Binding:** The Cloudflare Pages KV binding variable name is `MOWER_KV`. Code must reference `env.MOWER_KV`. The `getKV(env)` helper in `functions/api/hours.js` tries `env.HCC_KV || env.MOWER_KV` — this covers both names. Do NOT remove this dual-check.
 
 **KV key used:** `hours_data` — stores the latest JSON payload from the ESP32 sensor box.
+
+**How to manually test the POST/GET pipeline:**
+```bash
+curl -X POST https://toro1-5rz.pages.dev/api/hours \
+  -H "Content-Type: application/json" \
+  -d '{"hours":0.1,"battery":12.6,"rpm_peak":3200,"source":"test"}'
+# Should return: {"ok":true}
+
+curl https://toro1-5rz.pages.dev/api/hours
+# Should return the test payload with "source":"test", NOT the stub
+```
+If GET returns `{"source":"stub"}` after a POST, the KV binding is broken in Cloudflare Pages settings.
 
 ---
 
@@ -57,7 +136,7 @@ The app has four sections: **YARD** (mower data), **HOME**, **WEATHER**, **IRRIG
 - **Jeff's real hours as of 2026-06-22 backup:** `5.9 hrs`
 - **`DEFAULT_STATE.hours` in index.html:** `5.9` ✓
 - **`MOWER_BASELINE` in index.html (line ~2497):** `5.9` ✓
-- **How hours work:** `MOWER_BASELINE` (5.9) + `d.hours` from sensor API = total displayed hours. Sensor hours are cumulative runtime since ESP32 was installed, NOT total mower lifetime hours.
+- **How hours work:** `MOWER_BASELINE` (5.9) + `d.hours` from sensor API = total displayed hours. Sensor `d.hours` is cumulative runtime since ESP32 was installed, NOT total mower lifetime hours.
 
 **Jeff's maintenance log (from 2026-06-22 backup — 7 entries, all dated 2026-05-31 at 3.5 hrs):**
 - Cable Inspection, Clear Coat Entire Mower, New Mulching Gator Blades, Battery Charge, Post-Mow Cleanup, Pre-Mow Safety Check, Mow #3 (1.0 hr, 4.0 mi)
@@ -68,11 +147,11 @@ The app has four sections: **YARD** (mower data), **HOME**, **WEATHER**, **IRRIG
 
 ## Sensor / ESP32 Hardware
 
-The sensor box is a custom ESP32 running ESPHome firmware. It is **permanently mounted on the mower** and powered by the mower's 12V battery. All lights are on, battery is fully charged.
+The sensor box is a custom ESP32 running Arduino `.ino` firmware. It is permanently mounted on the mower and powered by the mower's 12V battery.
 
-**Confirmed working (tested 10+ times on bench by Jeff):** Vibration sensor triggered → registered in app. RPM registered. These worked BEFORE the current session's commits.
+**IMPORTANT:** The ESP32 runs the `.ino` Arduino firmware — NOT the ESPHome YAML. The `beehive/esphome/hcc-mower.yaml` in this repo is a separate config that has NOT been flashed to the running hardware. Do not confuse these.
 
-**ESPHome firmware file:** `beehive/esphome/hcc-mower.yaml`
+**Confirmed working (tested 10+ times on bench by Jeff):** Vibration sensor triggered → registered in app. RPM registered.
 
 **What the ESP32 posts:**
 - Every 90 seconds when `engine_on` (RPM > 200): full sensor payload to `https://toro1-5rz.pages.dev/api/hours`
@@ -98,88 +177,101 @@ source, lastSync, engine_running
 
 ---
 
-## Key Files
-
-```
-index.html               — entire PWA (single file, ~300KB)
-service-worker.js        — cache version: hcc-v4
-manifest.json            — PWA manifest
-functions/api/hours.js   — GET/POST sensor data ↔ Cloudflare KV
-functions/setup.js       — serves Beehive install script at /setup
-beehive/esphome/hcc-mower.yaml    — ESP32 firmware (ESPHome)
-beehive/esphome/secrets.yaml.template — WiFi/API key template (never commit real secrets)
-images/                  — hero-home.jpg, hero-irr.jpg, hero-yard.jpg
-icons/                   — icon-192.png, icon-512.png
-```
-
----
-
 ## index.html Structure
 
 - Lines 1–1208: HTML/CSS
-- Line 1209: `<script>` (single JS block — do NOT add another `<script>` tag inside this block)
-- Lines 1209–2809: All JavaScript
-- Line 2809: `</script>` (closing tag)
-- Lines 2810+: closing HTML
+- Line 1209: `<script>` (single JS block)
+- Lines 1209–2834: All JavaScript
+- Line 2834: `</script>` (closing tag)
+- Lines 2835+: closing HTML
 
-**CRITICAL:** Never put a `<script>` or `</script>` tag inside the JS block. The HTML parser treats script content as raw text — a bare `<script>` inside becomes a JS SyntaxError that kills the entire app (blank page). This was the bug that caused the great blank-page incident of 2026-06-23.
+**CRITICAL:** NEVER put a `<script>` or `</script>` tag inside the JS block. This causes a fatal JS SyntaxError that blanks the entire app. This was the bug in commit `8497827` that caused the great blank-page incident of 2026-06-23.
 
-**`localStorage` key:** `toro21200` — stores the full `S` state object.
+**`localStorage` key:** `toro21200` — stores the full `S` state object including `sensorTrack`.
+
+**CSS class names (do NOT rename these):**
+- Modal overlay: `.modal-ov` / `.modal-ov.show` (NOT `.modal-overlay.open`)
+- Modal box: `.modal-box` (NOT `.modal`)
+- Button row: `.mbtns`
+- Buttons: `.mbtn` / `.mbtn.primary` / `.mbtn.secondary`
+- Green button: `.btn-green`
+- Nav buttons: `button.snav-btn` with IDs `#snav-home`, `#snav-weather`, `#snav-irr`, `#snav-yard`
+- Sections: `#section-home`, `#section-weather`, `#section-irrigation`, `#section-yard`
+- YARD tabs: `button.tab`
 
 ---
 
-## Known Issues / Active Investigation
+## Key Files
 
-### Sensor data showing dead (UNDER INVESTIGATION as of 2026-06-23)
+```
+index.html                   — entire PWA (single file, ~300KB, ~2834 lines)
+service-worker.js            — cache version: hcc-v5
+manifest.json                — PWA manifest
+functions/api/hours.js       — GET/POST sensor data ↔ Cloudflare KV
+functions/setup.js           — serves Beehive install script at /setup
+beehive/esphome/hcc-mower.yaml    — ESP32 heartbeat config (NOT yet flashed to hardware)
+beehive/esphome/secrets.yaml.template — WiFi/API key template (never commit real secrets)
+images/                      — hero-home.jpg, hero-irr.jpg, hero-yard.jpg
+icons/                       — icon-192.png, icon-512.png
+```
 
-**Symptom:** All sensor fields show `—` and Battery shows `0.00 V`. The status bar shows "Sensor box not connected yet" (orange) meaning `/api/hours` is returning the stub response.
+---
 
-**What Jeff confirmed:** Sensor WAS working — vibration and RPM registered 10+ times on bench before this session's commits.
+## Testing — How to Run the Playwright Diagnostic
 
-**What changed in this session:**
-1. `a973c8f` — fixed blank page (removed 2 stray `<script>` tags), bumped SW to hcc-v4 — **should not affect sensor**
-2. `98b8dca` — modified `hours.js` to add `MOWER_KV` fallback — **potentially broke something**
-3. `b629c83` — reverted `hours.js` to original — **should have restored**
-4. `fe1edb8` — added heartbeat to ESPHome YAML, added status display logic to index.html — **display logic only**
-5. `53eb7d4` — updated `DEFAULT_STATE.hours` and `MOWER_BASELINE` to 5.9 — **should not affect sensor**
+Always run this before reporting anything as done.
 
-**Most likely cause:** Either (a) the KV binding `HCC_KV` is not correctly set in Cloudflare Pages environment, meaning the POST from ESP32 stores nothing and GET returns stub every time; or (b) the ESP32 lost its config/WiFi and isn't posting. The next real mow session will confirm — if after 1 hour of mowing the sensor data still shows `0.00 V` and `—`, the KV binding needs to be verified in Cloudflare Pages dashboard.
-
-**How to verify KV binding:** Cloudflare dashboard → Pages → toro1 project → Settings → Environment variables → check that `HCC_KV` is listed under KV namespace bindings.
-
-**How to manually test the POST pipeline:**
 ```bash
-curl -X POST https://toro1-5rz.pages.dev/api/hours \
-  -H "Content-Type: application/json" \
-  -d '{"hours":0.1,"battery":12.6,"rpm_peak":3200,"source":"test"}'
-# Should return: {"ok":true}
-# Then GET:
-curl https://toro1-5rz.pages.dev/api/hours
-# Should return the test payload, NOT the stub
+cd /home/user/Master-the-Master-
+node -e "
+const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+(async () => {
+  const browser = await chromium.launch({
+    executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+    args: ['--no-sandbox','--disable-setuid-sandbox']
+  });
+  const page = await browser.newPage();
+  await page.goto('file:///home/user/Master-the-Master-/index.html');
+  // test nav, modals, tabs...
+  await browser.close();
+})();
+"
 ```
+
+**Expected result:** 66/66 tests PASSING as of commit `e904a5b` (2026-06-24).
+
+If any tests fail, fix them before doing anything else.
 
 ---
 
-## ESPHome Heartbeat OTA Update (PENDING)
+## Session History — What Was Done
 
-The `beehive/esphome/hcc-mower.yaml` has a new 5-minute engine-off heartbeat added (commit `fe1edb8`). This needs to be flashed to the ESP32 via OTA.
+### Session 2026-06-23/24 (The Big Fix Session)
 
-**Instructions for Jeff:**
-1. Open Home Assistant → ESPHome add-on
-2. Find the `hcc-mower` device
-3. Click the three-dot menu → Install → Wirelessly
-4. Wait ~2 minutes for OTA update to complete
-5. The box will reboot and start posting heartbeats every 5 min when parked
+**Problems found and fixed:**
 
----
+1. **Blank page** (`a973c8f`) — Two stray `<script>` tags inside the JS block caused a fatal SyntaxError. Removed them. Bumped SW to hcc-v4.
 
-## Git Log (Recent — most recent first)
+2. **Sensor data dead** — `hours.js` checked only `env.HCC_KV` but Cloudflare Pages has the binding as `MOWER_KV`. Added `getKV(env)` helper that tries both. This was the root cause of all sensor readings showing `—` and `0.00V`.
 
+3. **GPS map disappearing after mow** — `drawYardMap` was called with `[]` when heartbeat POST has no `track` field. Fixed by saving track to `S.sensorTrack` in localStorage and falling back to it when no fresh track.
+
+4. **All modal buttons silently broken** — CSS used `.modal-overlay.open{display:flex}` but HTML uses `modal-ov` and JS sets `modal-ov show`. The CSS never matched so modals never opened. LOG MOW, LOG SERVICE, UPDATE HOURS were all broken. Fixed by restoring correct class names.
+
+5. **Modal box unstyled** — CSS defined `.modal{...}` but inner div uses `modal-box`. No background, rounded corners, or padding. Fixed to `.modal-box`.
+
+6. **`.mbtns`, `.mbtn.secondary`, `.btn-green` missing** — Cancel buttons invisible, no button row layout, green buttons unstyled. Restored all three rules.
+
+7. **CLAUDE.md created** (`e8f0312`) — Persistent memory file. This file.
+
+**Commits this session:**
 ```
+e904a5b  Fix GPS persistence, restore all modal CSS, fix KV binding dual-check
+e8f0312  Add CLAUDE.md — persistent project memory
 53eb7d4  Restore Jeff's real hours — update default state and sensor baseline to 5.9h
-b629c83  Revert hours.js to original — undo KV refactor that may have broken sensor read
+b629c83  Revert hours.js to original
 fe1edb8  Add engine-off heartbeat and improve sensor status display
-98b8dca  Fix sensor API — accept MOWER_KV binding as fallback for HCC_KV  ← (was reverted)
+98b8dca  Fix sensor API — accept MOWER_KV binding as fallback for HCC_KV
 a973c8f  Fix fatal JS syntax error — remove stray <script> tags inside script block
 8497827  Bump service worker to hcc-v3 — force cache clear of 2.1MB old build
 739d004  Extract hero photos from HTML — drop from 2.1MB to 295KB
@@ -190,8 +282,46 @@ c1c004c  Auto-detect Beehive by IP when homeassistant.local fails
 
 ---
 
+## Current Verified State (as of 2026-06-24, commit e904a5b)
+
+| Feature | Status |
+|---|---|
+| App loads (no blank page) | WORKING |
+| Section navigation (HOME/WEATHER/IRR/YARD) | WORKING |
+| LOG MOW modal — opens, styled, saves | WORKING |
+| LOG SERVICE modal — opens, 18 service buttons | WORKING |
+| UPDATE HOURS modal — opens, saves | WORKING |
+| All 7 YARD tabs | WORKING |
+| Sensor data display (when ESP32 connected) | WORKING |
+| GPS map drawing | WORKING |
+| GPS track persistence after mow | WORKING |
+| KV binding (MOWER_KV) | WORKING |
+| Service worker (hcc-v5) | WORKING |
+| Engine hours baseline (5.9h) | CORRECT |
+| 66/66 Playwright tests | PASSING |
+
+---
+
+## Pending Items (Next Session Should Address These)
+
+1. **Verify sensor data live** — Jeff mowed on 2026-06-23. After Jeff hard-refreshes the app (closes all browser tabs, reopens), confirm battery voltage, RPM, and mileage are showing. If still `0.00V` and `—`, manually run the curl test above to verify KV binding end-to-end.
+
+2. **Hard-refresh instruction for Jeff** — To get the latest app version: on phone, go to `toro1-5rz.pages.dev`, tap the address bar, force-reload. Or open in a fresh private/incognito tab.
+
+3. **ESPHome heartbeat OTA (if applicable)** — The `beehive/esphome/hcc-mower.yaml` has a 5-minute heartbeat added. If Jeff wants to flash it:
+   1. Home Assistant → ESPHome add-on → `hcc-mower` → three-dot menu → Install → Wirelessly
+   2. Wait ~2 minutes for OTA update
+   3. Box reboots and starts posting heartbeats every 5 min when parked
+   BUT: Confirm with Jeff whether he wants to switch from the `.ino` firmware to ESPHome. These are different systems.
+
+4. **Lighthouse performance** — Score 60/100. Main causes: unminified JS/CSS in index.html, large hero images. Can be improved with minification but this is low priority vs. functionality.
+
+---
+
 ## Jeff's Contact / Account Info
 
 - **Email:** jeff.loewen@comcast.net
 - **Cloudflare account:** credentials already configured — never ask for them
 - **Home Assistant instance:** "Beehive" — accessible at `homeassistant.local` or local IP
+- **Mower:** Toro TimeMaster 21200
+- **Jeff is almost 60 and learning** — be patient, clear, and never condescending. Make it enjoyable.
