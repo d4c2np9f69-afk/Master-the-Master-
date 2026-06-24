@@ -2291,18 +2291,16 @@ function loadIrrigationDirect(){
     .catch(function(err){
       var b=document.getElementById('irrBanner');
       if(!b) return;
-      var msg = err && err.message || '';
-      b.className='wx-banner wx-caution';
+      var msg = err && err.message || 'unknown';
+      b.className='wx-banner wx-no';
       if(msg.indexOf('credentials_not_configured')>=0){
-        b.className='wx-banner wx-no';
-        b.innerHTML='&#128688; B-Hyve credentials not configured — open Cloudflare Pages &rarr; Settings &rarr; Environment Variables and add BHYVE_EMAIL &amp; BHYVE_PASSWORD';
+        b.innerHTML='&#128688; B-Hyve credentials missing in Cloudflare Pages env vars';
       } else if(msg.indexOf('login_failed')>=0){
-        b.className='wx-banner wx-no';
-        b.innerHTML='&#128688; B-Hyve login failed — check BHYVE_EMAIL &amp; BHYVE_PASSWORD in Cloudflare Pages settings. Error: ' + msg.replace('login_failed_','').split('(')[0].trim();
+        b.innerHTML='&#128688; B-Hyve login failed — wrong email/password? Detail: ' + msg;
       } else if(msg.indexOf('no_timer_device')>=0){
         b.innerHTML='&#128688; No irrigation timer found in B-Hyve account';
       } else {
-        b.innerHTML='&#128688; Unable to reach irrigation controller — tap Refresh';
+        b.innerHTML='&#128688; B-Hyve error: ' + msg;
       }
     });
 }
