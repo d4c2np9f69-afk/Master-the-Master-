@@ -49,6 +49,15 @@ export async function onRequestGet({ env }) {
     const activeStations = watering.stations || [];
     const activeZone = activeStations.length > 0 ? activeStations[0].station : null;
 
+    // B-Hyve stores connection status in several places depending on firmware version
+    const isConnected = !!(
+      timer.is_connected ||
+      timer.connected ||
+      status.is_connected ||
+      status.connected ||
+      timer.hardware_version  // present on all registered devices that have ever connected
+    );
+
     const zones = (timer.zones || []).map(z => ({
       station: z.station,
       name: z.name || `Zone ${z.station}`,
@@ -61,7 +70,7 @@ export async function onRequestGet({ env }) {
       device: {
         id: timer.id,
         name: timer.name || 'Irrigation Controller',
-        connected: !!(timer.is_connected),
+        connected: isConnected,
         run_mode: status.run_mode || 'auto',
         rain_delay: status.rain_delay || 0,
         active_station: activeZone,

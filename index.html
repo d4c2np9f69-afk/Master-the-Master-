@@ -2082,7 +2082,7 @@ function loadIrrigation(){
       function set(id,v){var e=document.getElementById(id); if(e) e.innerHTML=v;}
       set('irrDevName', dev.name||'Irrigation');
       var conn=document.getElementById('irrConn');
-      if(conn){ conn.innerHTML = dev.connected?'● ONLINE':'● OFFLINE'; conn.style.color = dev.connected?'#22c55e':'#ff6262'; }
+      if(conn){ conn.innerHTML = dev.connected?'&#9679; ONLINE':'&#9679; CHECK APP'; conn.style.color = dev.connected?'#22c55e':'#ffd24a'; }
       set('irrMode', (dev.run_mode||'--').toString().toUpperCase());
       var rd=Number(dev.rain_delay)||0, rdEl=document.getElementById('irrRainDelay');
       if(rdEl){ if(rd>0){ rdEl.innerHTML=rd+' h'; rdEl.style.color='#ffd24a'; } else { rdEl.innerHTML='None'; rdEl.style.color='#22c55e'; } }
@@ -2123,7 +2123,7 @@ function loadIrrigation(){
       else { iset('irrIntelNext','No schedule set'); }
       if(dev.last_watered){ try{ iset('irrIntelLast', new Date(dev.last_watered).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})); }catch(e){ iset('irrIntelLast','—'); } }
       else { iset('irrIntelLast','No history'); }
-      iset('irrIntelConn', dev.connected?'&#128994; Online':'&#128308; Offline', dev.connected?'#22c55e':'#ff6262');
+      iset('irrIntelConn', dev.connected?'&#128994; Online':'&#128993; Check B-Hyve App', dev.connected?'#22c55e':'#ffd24a');
       iset('irrIntelMode', (dev.run_mode||'AUTO').toString().toUpperCase(), dev.run_mode==='off'?'#ff6262':dev.run_mode==='manual'?'#ffd24a':'#22c55e');
       renderUsage();
       if(typeof renderReadiness==='function') renderReadiness();
