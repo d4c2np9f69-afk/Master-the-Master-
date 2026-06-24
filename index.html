@@ -29,43 +29,46 @@ button{font-family:inherit;cursor:pointer}
 
 /* TOKENS */
 :root{
-  /* backgrounds */
-  --bg:#04040a;
-  --surface:#0b0b12;
-  --card:#111119;
-  --card2:rgba(255,255,255,.04);
-  /* borders */
-  --border:rgba(255,255,255,.09);
-  --border2:rgba(255,255,255,.05);
-  /* text */
-  --text:#f2f2f6;
-  --muted:rgba(255,255,255,.42);
-  --dim:rgba(255,255,255,.22);
+  /* ── Premium Estate palette — matches ChatGPT hero photos ── */
+  /* backgrounds — warm charcoal, not cold blue-black */
+  --bg:#060508;
+  --surface:#0d0b10;
+  --card:#131018;
+  --card2:rgba(255,245,220,.03);
+  /* borders — warm, not cold white */
+  --border:rgba(220,195,145,.1);
+  --border2:rgba(220,195,145,.06);
+  /* text — warm cream, not cool blue-white */
+  --text:#ede8df;
+  --muted:rgba(235,215,185,.45);
+  --dim:rgba(220,195,150,.22);
   /* accent palette */
   --blue:#4a9eff;
   --sky:#38bdf8;
   --green:#22c55e;
-  --red:#e01c1c;
-  --red2:#a00000;
-  --gold:#ffd24a;
-  --amber:#ff8c42;
-  /* section accents */
-  --a-home:#4a9eff;
+  --red:#c0392b;
+  --red2:#8b1a1a;
+  --gold:#d4af37;
+  --amber:#c87941;
+  /* section accents — HOME=warm gold (premium), WEATHER=sky, IRR=deep green, YARD=brick red */
+  --a-home:#d4af37;
   --a-wx:#38bdf8;
   --a-irr:#22c55e;
-  --a-yard:#e01c1c;
-  /* legacy aliases used by existing JS-generated HTML */
-  --ink:#f2f2f6;
+  --a-yard:#c0392b;
+  /* legacy aliases */
+  --ink:#ede8df;
   --font:'Archivo','Helvetica Neue',Arial,sans-serif;
+  --serif:Georgia,'Times New Roman',serif;
   --mono:'Archivo','Helvetica Neue',Arial,sans-serif;
   --c-sensor:#4a9eff;
   --c-status:#22c55e;
-  --c-health:#ffd24a;
-  --c-service:#ff8c42;
-  --c-safety:#e01c1c;
+  --c-health:#d4af37;
+  --c-service:#c87941;
+  --c-safety:#c0392b;
   --c-fitness:#a855f7;
   --c-weather:#38bdf8;
-  --glowRed:0 0 14px rgba(224,28,28,.5);
+  --glowRed:0 0 14px rgba(192,57,43,.5);
+  --glowGold:0 0 14px rgba(212,175,55,.4);
 }
 
 /* BASE */
@@ -82,29 +85,30 @@ html,body{
   font-variant-numeric:tabular-nums lining-nums;
 }
 
-/* ── APP HEADER ─────────────────────────────────────────────────────────── */
+/* ── APP HEADER — warm gold premium estate style ─────────────────────────── */
 .app-hdr{
   display:flex;align-items:center;gap:10px;
   padding:11px 14px;
-  background:linear-gradient(160deg,#08081a 0%,#050510 100%);
-  border-bottom:1px solid rgba(100,160,255,.18);
+  background:linear-gradient(160deg,#0e0b0a 0%,#080608 100%);
+  border-bottom:1px solid rgba(212,175,55,.18);
   box-shadow:0 4px 20px rgba(0,0,0,.6);
   flex-shrink:0;
   position:sticky;top:0;z-index:200;
 }
 .app-hdr-badge{
-  background:linear-gradient(135deg,#152040,#0a1228);
-  border:1px solid rgba(74,158,255,.4);
+  background:linear-gradient(135deg,#1e1608,#140f05);
+  border:1px solid rgba(212,175,55,.45);
   border-radius:6px;
   padding:5px 10px;
-  font-size:11px;font-weight:900;letter-spacing:2.5px;
-  color:#7ab4ff;
+  font-size:11px;font-weight:700;letter-spacing:2.5px;
+  font-family:var(--serif);
+  color:rgba(212,175,55,.9);
   flex-shrink:0;
-  box-shadow:0 0 16px rgba(74,158,255,.12);
+  box-shadow:0 0 16px rgba(212,175,55,.12);
 }
 .app-hdr-text{flex:1;min-width:0}
-.app-hdr-title{font-size:15px;font-weight:900;letter-spacing:.5px;color:#f4f4f8;line-height:1}
-.app-hdr-sub{font-size:9px;font-weight:700;letter-spacing:3px;color:rgba(100,160,255,.6);margin-top:2px;text-transform:uppercase}
+.app-hdr-title{font-size:15px;font-weight:400;font-style:italic;font-family:var(--serif);letter-spacing:.5px;color:rgba(240,220,175,.92);line-height:1}
+.app-hdr-sub{font-size:9px;font-weight:600;letter-spacing:3px;color:rgba(212,175,55,.55);margin-top:2px;text-transform:uppercase}
 
 /* ── HOUSE HERO (HOME section only) ─────────────────────────────────────── */
 .house-hero{
@@ -138,8 +142,8 @@ html,body{
 /* ── SECTION NAV ────────────────────────────────────────────────────────── */
 .sec-nav{
   display:flex;
-  background:#070710;
-  border-bottom:1px solid rgba(255,255,255,.07);
+  background:#0a0809;
+  border-bottom:1px solid rgba(220,195,145,.08);
   overflow-x:auto;
   -webkit-overflow-scrolling:touch;
   scrollbar-width:none;
@@ -151,16 +155,17 @@ html,body{
   display:flex;flex-direction:column;align-items:center;gap:3px;
   padding:10px 4px 8px;
   background:none;border:none;border-bottom:3px solid transparent;
-  color:rgba(255,255,255,.28);
-  font-size:8px;font-weight:900;letter-spacing:1.8px;text-transform:uppercase;
+  color:rgba(220,195,145,.28);
+  font-size:8px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;
+  font-family:var(--serif);
   transition:color .18s,border-color .18s,background .18s;
 }
 .snav-icon{font-size:20px;line-height:1}
-.snav-btn.active{color:#fff;border-bottom-color:var(--a-home);background:rgba(74,158,255,.05)}
-#snav-home.active   {border-bottom-color:var(--a-home)}
-#snav-weather.active{border-bottom-color:var(--a-wx)}
-#snav-irr.active    {border-bottom-color:var(--a-irr)}
-#snav-yard.active   {border-bottom-color:var(--a-yard)}
+.snav-btn.active{color:rgba(240,220,175,.95);border-bottom-color:var(--a-home);background:rgba(212,175,55,.05)}
+#snav-home.active   {border-bottom-color:var(--a-home);background:rgba(212,175,55,.05)}
+#snav-weather.active{border-bottom-color:var(--a-wx);background:rgba(56,189,248,.04)}
+#snav-irr.active    {border-bottom-color:var(--a-irr);background:rgba(34,197,94,.04)}
+#snav-yard.active   {border-bottom-color:var(--a-yard);background:rgba(192,57,43,.05)}
 
 /* ── SECTIONS ───────────────────────────────────────────────────────────── */
 .hcc-section{display:none}
@@ -247,8 +252,9 @@ html,body{
   box-shadow:0 4px 20px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.04);
 }
 .card-title{
-  font-size:11px;font-weight:900;letter-spacing:1.8px;text-transform:uppercase;
-  color:var(--text);
+  font-size:11px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;
+  font-family:var(--serif);
+  color:rgba(235,215,175,.88);
   padding-bottom:12px;margin-bottom:14px;
   border-bottom:1px solid var(--border);
   display:flex;align-items:center;gap:8px;
@@ -286,15 +292,15 @@ html,body{
   border-bottom:1px solid var(--border);
 }
 .sec-hdr-icon{font-size:20px}
-.sec-hdr-label{font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
-#section-home .sec-hdr{border-color:rgba(74,158,255,.2)}
-#section-home .sec-hdr-label{color:rgba(100,160,255,.7)}
+.sec-hdr-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-family:var(--serif);color:rgba(220,190,130,.6)}
+#section-home .sec-hdr{border-color:rgba(212,175,55,.2)}
+#section-home .sec-hdr-label{color:rgba(212,175,55,.75)}
 #section-weather .sec-hdr{border-color:rgba(56,189,248,.2)}
 #section-weather .sec-hdr-label{color:rgba(100,200,255,.7)}
 #section-irrigation .sec-hdr{border-color:rgba(34,197,94,.2)}
 #section-irrigation .sec-hdr-label{color:rgba(80,220,120,.7)}
-#section-yard .sec-hdr{border-color:rgba(224,28,28,.2)}
-#section-yard .sec-hdr-label{color:rgba(255,80,60,.7)}
+#section-yard .sec-hdr{border-color:rgba(192,57,43,.2)}
+#section-yard .sec-hdr-label{color:rgba(220,100,80,.7)}
 
 /* ── QUICK ACCESS (HOME section) ───────────────────────────────────────── */
 .quick-access-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
@@ -725,7 +731,7 @@ html,body{
         <span class="hcc-module-icon">&#8987;</span>
         <div class="hcc-module-info">
           <div class="hcc-module-name">Apple Watch — Fall Detection</div>
-          <div class="hcc-module-desc">Already ON — calls 911 + contacts automatically. Keep this enabled.</div>
+          <div class="hcc-module-desc">Active on Jeff's &amp; Angela's watches — fall detection + emergency contacts</div>
         </div>
         <span class="hcc-badge-live">LIVE</span>
       </div>
@@ -741,16 +747,12 @@ html,body{
         <span class="hcc-module-icon">&#128168;</span>
         <div class="hcc-module-info">
           <div class="hcc-module-name">Gas &amp; Smoke Detectors</div>
-          <div class="hcc-module-desc">ESP32 sensors for trend monitoring. Keep UL-listed detectors as primary.</div>
+          <div class="hcc-module-desc">ESP32 sensors for gas &amp; smoke trend monitoring</div>
         </div>
         <span class="hcc-badge-future">FUTURE</span>
       </div>
     </div>
 
-    <div class="hcc-cta-card" style="margin-top:12px;border-color:rgba(239,68,68,.2);background:rgba(239,68,68,.05)">
-      <div class="hcc-cta-title" style="color:#ef4444">&#9888;&#65039; Life-Safety Note</div>
-      <div class="hcc-cta-desc" style="color:rgba(255,180,180,.7)">Apple Watch Fall Detection + Emergency SOS are your primary life-safety net — they call 911 automatically. This app adds convenience layers on top, never replaces certified safety systems.</div>
-    </div>
   </div>
 
 </div><!-- /section-home -->
