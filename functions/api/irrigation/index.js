@@ -8,8 +8,8 @@ async function bhyveLogin(email, password) {
     body: JSON.stringify({ email, password })
   });
   if (!r.ok) {
-    const msg = await r.text().catch(() => r.status.toString());
-    throw new Error('login_failed: ' + msg);
+    const msg = await r.text().catch(() => '');
+    throw new Error('login_failed_' + r.status + ': ' + msg.slice(0, 200));
   }
   return r.json();
 }

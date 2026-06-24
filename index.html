@@ -2137,7 +2137,8 @@ function loadIrrigation(){
         b.innerHTML='&#128688; B-Hyve login not set up — add BHYVE_EMAIL &amp; BHYVE_PASSWORD in Cloudflare Pages settings';
       } else if(msg.indexOf('login_failed')>=0){
         b.className='wx-banner wx-no';
-        b.innerHTML='&#128688; B-Hyve login failed — check email &amp; password in Cloudflare Pages settings';
+        var detail = msg.replace('login_failed_','').substring(0,80);
+        b.innerHTML='&#128688; B-Hyve login failed ('+detail+') — check email &amp; password in Cloudflare Pages';
       } else {
         b.className='wx-banner wx-no';
         b.innerHTML='&#128688; Irrigation unavailable — tap Refresh to retry';
