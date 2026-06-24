@@ -923,21 +923,32 @@ html,body{
 
     <!-- SETUP CARD — shown until B-Hyve is connected -->
     <div class="card" id="irrSetupCard">
-      <div class="card-title">&#9881; Connect Your Water Hog</div>
-      <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px">B-Hyve is NOT a built-in Home Assistant integration — it needs to be set up separately. The easiest path is the Cloudflare option below.</div>
+      <div class="card-title">&#9881; Add B-Hyve to Beehive</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px">B-Hyve isn't built into Home Assistant — install it in 2 steps through HACS.</div>
 
-      <div style="font-size:11px;font-weight:700;color:rgba(212,175,55,.85);letter-spacing:.5px;margin-bottom:6px;font-family:var(--serif)">OPTION 1 — Cloudflare (Easiest)</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.55">Add two variables to Cloudflare Pages so the app can talk directly to B-Hyve:</div>
+      <div style="font-size:11px;font-weight:700;color:rgba(212,175,55,.85);letter-spacing:.5px;margin-bottom:8px;font-family:var(--serif)">STEP 1 — Install HACS (one time)</div>
       <ul class="spec-list" style="margin-bottom:10px">
-        <li><span class="sk">Go to</span><span class="sv">dash.cloudflare.com &rarr; Pages &rarr; toro1</span></li>
-        <li><span class="sk">Then</span><span class="sv">Settings &rarr; Environment Variables &rarr; Production</span></li>
-        <li><span class="sk">Add</span><span class="sv">BHYVE_EMAIL = your B-Hyve email</span></li>
-        <li><span class="sk">Add</span><span class="sv">BHYVE_PASSWORD = your B-Hyve password</span></li>
+        <li><span class="sk">Open</span><span class="sv">Beehive in a browser on your phone or computer</span></li>
+        <li><span class="sk">Go to</span><span class="sv">Settings &rarr; Add-ons &rarr; Add-on Store</span></li>
+        <li><span class="sk">Search</span><span class="sv">"Terminal &amp; SSH" &rarr; Install &rarr; Start</span></li>
+        <li><span class="sk">Open</span><span class="sv">Terminal add-on &rarr; paste this command:</span></li>
       </ul>
-      <button class="btn-full btn-gray" style="margin-bottom:14px" onclick="window.open('https://dash.cloudflare.com','_blank','noopener')">&#128279; Open Cloudflare Dashboard</button>
+      <div style="background:rgba(0,0,0,.5);border:1px solid rgba(212,175,55,.2);border-radius:8px;padding:10px;margin-bottom:10px;font-family:monospace;font-size:11px;color:rgba(212,175,55,.85);word-break:break-all">wget -O - https://get.hacs.xyz | bash -</div>
+      <ul class="spec-list" style="margin-bottom:14px">
+        <li><span class="sk">Then</span><span class="sv">Restart Home Assistant (Settings &rarr; System &rarr; Restart)</span></li>
+        <li><span class="sk">After restart</span><span class="sv">HACS appears in the left sidebar</span></li>
+      </ul>
 
-      <div style="font-size:11px;font-weight:700;color:rgba(212,175,55,.55);letter-spacing:.5px;margin-bottom:6px;font-family:var(--serif)">OPTION 2 — Through Beehive (Advanced)</div>
-      <div style="font-size:11px;color:rgba(220,195,145,.4);line-height:1.55">Requires installing HACS in Home Assistant first, then the Orbit B-Hyve integration through HACS. More steps but gives real-time zone control through HA automations.</div>
+      <div style="font-size:11px;font-weight:700;color:rgba(212,175,55,.85);letter-spacing:.5px;margin-bottom:8px;font-family:var(--serif)">STEP 2 — Install Orbit B-Hyve</div>
+      <ul class="spec-list" style="margin-bottom:14px">
+        <li><span class="sk">Open</span><span class="sv">HACS in sidebar &rarr; Integrations</span></li>
+        <li><span class="sk">Search</span><span class="sv">"Orbit B-Hyve" &rarr; Download &rarr; Restart HA</span></li>
+        <li><span class="sk">Go to</span><span class="sv">Settings &rarr; Integrations &rarr; Add Integration</span></li>
+        <li><span class="sk">Search</span><span class="sv">"Orbit B-Hyve" &rarr; enter your B-Hyve email &amp; password</span></li>
+        <li><span class="sk">Done!</span><span class="sv">Zones appear here automatically — no more setup needed</span></li>
+      </ul>
+
+      <div style="font-size:10px;color:rgba(220,195,145,.4);line-height:1.55;border-top:1px solid rgba(220,195,145,.1);padding-top:10px">Already have HACS? Skip Step 1 and go straight to Step 2.</div>
     </div>
 
   </div>
