@@ -184,21 +184,17 @@ html,body{
 }
 .sec-hero-title{font-size:26px;font-weight:900;color:#fff;letter-spacing:.3px;line-height:1.1}
 .sec-hero-status{font-size:12px;font-weight:700;color:rgba(255,255,255,.65);margin-top:5px;letter-spacing:.3px}
-/* Weather hero: real photo */
+/* Weather hero: real photo — overlay at TOP so it doesn't conflict with baked-in bottom text */
 .sec-hero-weather{background:#020c20}
 .sec-hero-weather .sec-hero-overlay{
-  background:linear-gradient(to top,rgba(0,0,0,.72) 0%,rgba(0,0,0,.15) 55%,transparent 100%);
-  justify-content:flex-end;padding:20px 18px 18px;
+  background:linear-gradient(to bottom,rgba(0,0,0,.65) 0%,rgba(0,0,0,.2) 45%,transparent 70%);
+  justify-content:flex-start;padding:14px 18px 0;
 }
-.sec-hero-weather .sec-hero-title{font-size:52px;font-weight:900;letter-spacing:-1.5px;line-height:1}
-/* Weather hero decorative stars */
-.wx-hero-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.wx-star{position:absolute;background:#fff;border-radius:50%;animation:twinkle 3s ease-in-out infinite}
-@keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.7}}
-/* Weather hero condition badge */
-.wx-hero-row{display:flex;align-items:flex-end;justify-content:space-between;width:100%}
-.wx-hero-cond{font-size:13px;font-weight:700;color:rgba(255,255,255,.7);letter-spacing:.5px;padding-bottom:4px}
-.wx-hero-loc{font-size:9px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.4);text-transform:uppercase;margin-top:4px}
+.sec-hero-weather .sec-hero-title{font-size:46px;font-weight:900;letter-spacing:-1.5px;line-height:1}
+/* Weather hero condition row */
+.wx-hero-row{display:flex;align-items:flex-start;justify-content:space-between;width:100%}
+.wx-hero-cond{font-size:13px;font-weight:700;color:rgba(255,255,255,.85);letter-spacing:.3px;margin-top:4px}
+.wx-hero-loc{font-size:9px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.6);text-transform:uppercase;margin-top:5px}
 /* Irrigation hero */
 .sec-hero-irr{background:#020c06}
 .sec-hero-irr .sec-hero-overlay{background:linear-gradient(to top,rgba(0,0,0,.72) 0%,rgba(0,0,0,.15) 55%,transparent 100%)}
@@ -707,13 +703,13 @@ html,body{
     <div class="sec-hero-overlay">
       <div class="wx-hero-row">
         <div>
-          <div class="sec-hero-title" id="wxHeroTemp">--&deg;</div>
-          <div class="wx-hero-cond" id="wxHeroDesc">Tap Refresh to load weather</div>
+          <div class="sec-hero-title" id="wxHeroTemp"></div>
+          <div class="wx-hero-cond" id="wxHeroDesc"></div>
           <div class="wx-hero-loc">White House, TN &bull; 37188</div>
         </div>
         <div style="text-align:right;padding-bottom:6px">
-          <div style="font-size:9px;font-weight:800;letter-spacing:1.5px;color:rgba(255,255,255,.35);text-transform:uppercase;margin-bottom:4px">Station</div>
-          <div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.55)">KTNWHITE21</div>
+          <div style="font-size:9px;font-weight:800;letter-spacing:1.5px;color:rgba(255,255,255,.6);text-transform:uppercase;margin-bottom:4px">Station</div>
+          <div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.85)">KTNWHITE21</div>
         </div>
       </div>
     </div>
@@ -2135,12 +2131,11 @@ function loadIrrigation(){
         b.className='wx-banner wx-no';
         b.innerHTML='&#128688; B-Hyve login not set up — add BHYVE_EMAIL &amp; BHYVE_PASSWORD in Cloudflare Pages settings';
       } else if(msg.indexOf('login_failed')>=0){
-        b.className='wx-banner wx-no';
-        var detail = msg.replace('login_failed_','').substring(0,80);
-        b.innerHTML='&#128688; B-Hyve login failed ('+detail+') — check email &amp; password in Cloudflare Pages';
+        b.className='wx-banner wx-caution';
+        b.innerHTML='&#128688; B-Hyve server not responding — tap Refresh to retry';
       } else {
-        b.className='wx-banner wx-no';
-        b.innerHTML='&#128688; Irrigation unavailable — tap Refresh to retry';
+        b.className='wx-banner wx-caution';
+        b.innerHTML='&#128688; Unable to reach irrigation controller — tap Refresh';
       }
     });
 }
@@ -2849,7 +2844,11 @@ function hccPanic() {
     if (hw && ht) ht.innerHTML = hw.innerHTML || '--&deg;';
     if (hd) {
       var b = document.getElementById('wxBanner');
-      if (b) hd.textContent = b.textContent.replace(/^[⏳⚠✓💧☀⛅🌧🌩🌨✅❌]/u, '').trim();
+      if (b) {
+        var txt = b.textContent.replace(/^[⏳⚠✓💧☀⛅🌧🌩🌨✅❌\s]/u,'').trim();
+        var isData = txt.length > 0 && txt.indexOf('Refresh') === -1 && txt.indexOf('Loading') === -1 && txt.indexOf('load') === -1 && txt.indexOf('failed') === -1 && txt.indexOf('Error') === -1;
+        hd.textContent = isData ? txt : '';
+      }
     }
   });
   var hw = document.getElementById('heroWeather');
