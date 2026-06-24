@@ -5,32 +5,52 @@ const API_BASES = [
   'https://api.bhyve.com/v1',
 ];
 
-const BASE_HEADERS = {
-  'Content-Type': 'application/json',
-  'Accept': 'application/json',
-  'orbit-app-id': 'Orbit Support Dashboard',
-  'orbit-api-key': '1',
-  'User-Agent': 'bhyve/2.67 (iPhone; iOS 17; Scale/3.00)',
-};
+// Multiple known app IDs — try each if login fails
+const APP_IDS = [
+  'Orbit Support Dashboard',
+  'com.orbitbhyve.ios',
+  'com.orbit.orbitbhyve',
+];
 
-// Returns { session, base } — tries each known base URL until one works
+function makeHeaders(appId) {
+  return {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'orbit-app-id': appId,
+    'orbit-api-key': '1',
+    'User-Agent': 'bhyve/2.67 (iPhone; iOS 17; Scale/3.00)',
+  };
+}
+
+// Returns { session, base, appId } — tries every known base URL × app ID combination
 async function bhyveLogin(email, password) {
-  let lastErr = 'login_failed: no base URL worked';
+  const attempts = [];
   for (const base of API_BASES) {
-    const r = await fetch(`${base}/session`, {
-      method: 'POST',
-      headers: BASE_HEADERS,
-      body: JSON.stringify({ email, password })
-    });
-    if (r.ok) {
-      const session = await r.json();
-      return { session, base };
+    for (const appId of APP_IDS) {
+      try {
+        const r = await fetch(`${base}/session`, {
+          method: 'POST',
+          headers: makeHeaders(appId),
+          body: JSON.stringify({ email, password })
+        });
+        const body = await r.text().catch(() => '');
+        attempts.push({ base, appId, status: r.status, body: body.slice(0, 80) });
+        if (r.ok) {
+          try {
+            const session = JSON.parse(body);
+            if (session && (session.orbit_session_token || session.token || session.session_token)) {
+              return { session, base, appId };
+            }
+          } catch (_) {}
+        }
+      } catch (e) {
+        attempts.push({ base, appId, status: 'network_error', body: e.message });
+      }
     }
-    const body = await r.text().catch(() => '');
-    lastErr = 'login_failed_' + r.status + ' (' + base.replace('https://','') + '): ' + body.slice(0, 120);
-    if (r.status !== 404) break; // 404 means endpoint moved — retry. 401/422 means wrong creds — stop.
   }
-  throw new Error(lastErr);
+  // All attempts failed — return detailed diagnostic
+  const summary = attempts.map(a => `${a.base.replace('https://','').split('/')[0]}/${a.appId.slice(0,10)}: ${a.status}`).join(' | ');
+  throw new Error('login_failed — ' + summary);
 }
 
 export async function onRequestGet({ env }) {
@@ -42,13 +62,18 @@ export async function onRequestGet({ env }) {
   }
 
   try {
-    const { session, base } = await bhyveLogin(email, password);
-    const token = session.orbit_session_token;
-    const userId = session.user_id;
+    const { session, base, appId } = await bhyveLogin(email, password);
 
-    if (!token || !userId) throw new Error('no_session_token');
+    // Handle different session field names across API versions
+    const token = session.orbit_session_token || session.token || session.session_token;
+    const userId = session.user_id || session.id || session.userId;
 
-    const devHeaders = { ...BASE_HEADERS, 'orbit-session-token': token };
+    if (!token || !userId) {
+      throw new Error('no_session_token — session fields: ' + JSON.stringify(Object.keys(session)));
+    }
+
+    const devHeaders = makeHeaders(appId);
+    devHeaders['orbit-session-token'] = token;
     delete devHeaders['Content-Type'];
 
     const dr = await fetch(`${base}/devices?user_id=${userId}`, { headers: devHeaders });
@@ -61,7 +86,7 @@ export async function onRequestGet({ env }) {
       (Array.isArray(d.zones) && d.zones.length > 0)
     );
     if (!timer) {
-      return Response.json({ ok: false, error: 'no_timer_device_found' }, { status: 404 });
+      return Response.json({ ok: false, error: 'no_timer_device_found', devices_found: (devices||[]).map(d=>d.type) }, { status: 404 });
     }
 
     const status = timer.status || {};
@@ -69,7 +94,6 @@ export async function onRequestGet({ env }) {
     const activeStations = watering.stations || [];
     const activeZone = activeStations.length > 0 ? activeStations[0].station : null;
 
-    // B-Hyve stores connection status in several fields depending on firmware version
     const isConnected = !!(
       timer.is_connected || timer.connected ||
       status.is_connected || status.connected ||
