@@ -2143,6 +2143,76 @@ function loadIrrigation(){
   var card=document.getElementById('irrigationCard'); if(!card) return;
   var b=document.getElementById('irrBanner');
   if(b){ b.className='wx-banner wx-load'; b.innerHTML='&#128260; Loading irrigation…'; }
+  // Try Beehive first — if HA has B-Hyve integration, use that. Otherwise fall back to direct API.
+  var haToken=getHaToken(), haBase=localStorage.getItem('ha_base')||HA_BASE;
+  if(haToken && haBase){ loadIrrigationFromHA(haToken,haBase,function(){ loadIrrigationDirect(); }); return; }
+  loadIrrigationDirect();
+}
+
+function loadIrrigationFromHA(token,base,onFail){
+  fetch(base+'/api/states',{headers:{'Authorization':'Bearer '+token},signal:AbortSignal.timeout(5000)})
+  .then(function(r){return r.json();})
+  .then(function(states){
+    // B-Hyve/Orbit entities in HA are switches with zone/bhyve/orbit in entity_id or attributes
+    var zones=states.filter(function(s){
+      if(!s.entity_id.startsWith('switch.')) return false;
+      var id=s.entity_id, at=s.attributes||{};
+      return id.indexOf('zone')>=0||id.indexOf('bhyve')>=0||id.indexOf('orbit')>=0||
+             id.indexOf('water_hog')>=0||at.zone_name!=null||at.is_watering!=null;
+    });
+    var rainSensor=states.find(function(s){return s.entity_id.indexOf('rain_delay')>=0;});
+    if(zones.length===0){onFail('no_bhyve_entities');return;}
+    // Populate UI from HA
+    var activeZone=zones.find(function(z){return z.state==='on';});
+    var sc=document.getElementById('irrSetupCard'); if(sc) sc.style.display='none';
+    var zp=document.getElementById('irrZonesCard'); if(zp) zp.style.display='none';
+    var devName=document.getElementById('irrDevName');
+    if(devName) devName.textContent='Water Hog';
+    var conn=document.getElementById('irrConn');
+    if(conn){conn.innerHTML=' &#11044; BEEHIVE';conn.style.color='#d4af37';}
+    var modeEl=document.getElementById('irrMode'); if(modeEl) modeEl.textContent='AUTO';
+    var rd=rainSensor?Number(rainSensor.state)||0:0;
+    var rdEl=document.getElementById('irrRainDelay');
+    if(rdEl){rdEl.innerHTML=rd>0?rd+' h':'None';rdEl.style.color=rd>0?'#d4af37':'#22c55e';}
+    var b2=document.getElementById('irrBanner');
+    if(b2){
+      if(activeZone){
+        var an=(activeZone.attributes&&activeZone.attributes.friendly_name)||activeZone.entity_id.replace('switch.','').replace(/_/g,' ');
+        b2.className='wx-banner wx-go';b2.innerHTML='&#128167; WATERING — '+an;
+      } else {b2.className='wx-banner wx-caution';b2.innerHTML='&#10003; All zones idle &bull; via Beehive';}
+    }
+    var html='';
+    zones.forEach(function(z){
+      var isA=z.state==='on';
+      var name=(z.attributes&&z.attributes.friendly_name)||z.entity_id.replace('switch.','').replace(/_/g,' ');
+      html+='<div class="zone-card'+(isA?' active':'')+'"><div class="zone-photo-empty">&#128688;</div>'
+        +'<div class="zone-body"><div class="zone-header"><div class="zone-name">'+name+'</div>'
+        +'<span class="zone-badge '+(isA?'zone-badge-active':'zone-badge-idle')+'">'+(isA?'&#128167; WATERING':'IDLE')+'</span></div>'
+        +'<div class="zone-sub">via Beehive</div>'
+        +'<div class="zone-footer"><button class="zone-run-btn" onclick="haIrrToggle(\''+z.entity_id+'\',\'on\')">&#9654; Run</button>'
+        +'<button class="zone-run-btn" style="background:rgba(192,57,43,.2);margin-left:6px" onclick="haIrrToggle(\''+z.entity_id+'\',\'off\')">&#9646;&#9646; Stop</button>'
+        +'</div></div></div>';
+    });
+    var zc=document.getElementById('irrZones'); if(zc) zc.innerHTML=html;
+    IRR={active:activeZone?activeZone.entity_id:null,loaded:true,fromHA:true};
+    if(typeof renderReadiness==='function') renderReadiness();
+  })
+  .catch(function(){onFail('ha_fetch_error');});
+}
+
+function haIrrToggle(entityId,onOff){
+  var token=getHaToken(),base=localStorage.getItem('ha_base')||HA_BASE;
+  if(!token||!base){alert('Beehive not connected');return;}
+  fetch(base+'/api/services/switch/turn_'+(onOff==='on'?'on':'off'),{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+    body:JSON.stringify({entity_id:entityId}),
+    signal:AbortSignal.timeout(6000)
+  }).then(function(){setTimeout(loadIrrigation,1500);})
+  .catch(function(){alert('Beehive command failed — check connection');});
+}
+
+function loadIrrigationDirect(){
   fetch('/api/irrigation',{cache:'no-store'})
     .then(function(r){ return r.json(); })
     .then(function(d){
