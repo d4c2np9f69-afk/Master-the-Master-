@@ -16,13 +16,19 @@ STEP_SCHEMA = vol.Schema(
 )
 
 
+_last_login_error: str = ""
+
+
 async def _validate_credentials(hass: HomeAssistant, email: str, password: str) -> str | None:
     """Return None on success, error key string on failure."""
+    global _last_login_error
     try:
         async with aiohttp.ClientSession() as session:
             await bhyve_login(session, email, password)
+        _last_login_error = ""
         return None
-    except Exception:
+    except Exception as e:
+        _last_login_error = str(e)
         return "invalid_auth"
 
 
@@ -42,8 +48,10 @@ class BhyveConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 )
             errors["base"] = error
 
+        description_placeholders = {"error_detail": _last_login_error[:200]} if _last_login_error else {}
         return self.async_show_form(
             step_id="user",
             data_schema=STEP_SCHEMA,
             errors=errors,
+            description_placeholders=description_placeholders,
         )

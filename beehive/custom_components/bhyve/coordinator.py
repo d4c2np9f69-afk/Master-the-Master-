@@ -12,33 +12,60 @@ from .const import API_BASES, DOMAIN, HEADERS, SCAN_INTERVAL_SECONDS
 
 _LOGGER = logging.getLogger(__name__)
 
+# Try additional app IDs in case the primary one is rejected
+_APP_IDS = [
+    "Orbit Support Dashboard",
+    "com.orbitbhyve.ios",
+    "com.orbit.orbitbhyve",
+]
+
 
 async def bhyve_login(session: aiohttp.ClientSession, email: str, password: str):
-    """Try each known B-Hyve API base until login succeeds."""
-    last_err = "no base URL worked"
+    """Try each known B-Hyve API base + app ID until login succeeds."""
+    attempts = []
     for base in API_BASES:
-        try:
-            async with session.post(
-                f"{base}/session",
-                headers=HEADERS,
-                json={"email": email, "password": password},
-                timeout=aiohttp.ClientTimeout(total=10),
-            ) as r:
-                body = await r.text()
-                if r.status == 200:
-                    data = json.loads(body)
-                    token = (
-                        data.get("orbit_session_token")
-                        or data.get("token")
-                        or data.get("session_token")
-                    )
-                    user_id = data.get("user_id") or data.get("id") or data.get("userId")
-                    if token and user_id:
-                        return token, user_id, base
-                last_err = f"{base}: HTTP {r.status} — {body[:120]}"
-        except Exception as e:
-            last_err = f"{base}: {e}"
-    raise UpdateFailed(f"B-Hyve login failed — {last_err}")
+        for app_id in _APP_IDS:
+            hdrs = {**HEADERS, "orbit-app-id": app_id}
+            try:
+                async with session.post(
+                    f"{base}/session",
+                    headers=hdrs,
+                    json={"email": email, "password": password},
+                    timeout=aiohttp.ClientTimeout(total=10),
+                ) as r:
+                    body = await r.text()
+                    _LOGGER.debug("B-Hyve login %s [%s]: HTTP %s — %s", base, app_id, r.status, body[:200])
+                    if r.status == 200:
+                        try:
+                            data = json.loads(body)
+                        except Exception:
+                            attempts.append(f"{base}: 200 but not JSON")
+                            continue
+                        # Accept any field name for the session token
+                        token = (
+                            data.get("orbit_session_token")
+                            or data.get("token")
+                            or data.get("session_token")
+                            or data.get("access_token")
+                        )
+                        user_id = (
+                            data.get("user_id")
+                            or data.get("id")
+                            or data.get("userId")
+                        )
+                        if token and user_id:
+                            _LOGGER.info("B-Hyve login OK via %s", base)
+                            return token, user_id, base
+                        attempts.append(f"{base}: 200 but missing token/user_id — keys: {list(data.keys())}")
+                    else:
+                        attempts.append(f"{base}: HTTP {r.status} — {body[:80]}")
+            except Exception as e:
+                attempts.append(f"{base}: network error — {e}")
+
+    detail = " | ".join(attempts)
+    _LOGGER.error("B-Hyve login failed — %s", detail)
+    raise UpdateFailed(f"B-Hyve login failed — {detail}")
+
 
 
 class BhyveCoordinator(DataUpdateCoordinator):
