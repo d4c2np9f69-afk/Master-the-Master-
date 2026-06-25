@@ -45,15 +45,8 @@ curl -fsSL "\${HCC_BASE}/beehive/blink/config_flow.py" -o "\${DST}/config_flow.p
 ok "2FA patch applied"
 
 info "Updating manifest version..."
-python3 - <<'PY'
-import json
-p='/config/custom_components/blink/manifest.json'
-with open(p) as f: data=json.load(f)
-data['version']='2026.6.4-hcc-2fa-fix'
-data['name']='Blink (2FA Fix)'
-with open(p,'w') as f: json.dump(data,f,indent=2)
-print("  manifest updated")
-PY
+sed -i 's/"version": "[^"]*"/"version": "2026.6.4-hcc-2fa-fix"/' "\${DST}/manifest.json"
+sed -i 's/"name": "[^"]*"/"name": "Blink (2FA Fix)"/' "\${DST}/manifest.json"
 ok "Manifest updated"
 
 info "Restarting Home Assistant..."
