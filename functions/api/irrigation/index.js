@@ -1,8 +1,7 @@
 // /api/irrigation — GET: fetches live status from Orbit B-Hyve via their unofficial REST API
 const API_BASES = [
+  'https://api.orbitbhyve.com/v1',
   'https://api.orbitonline.com/v1',
-  'https://api2.orbitonline.com/v1',
-  'https://api.bhyve.com/v1',
 ];
 
 // Multiple known app IDs — try each if login fails

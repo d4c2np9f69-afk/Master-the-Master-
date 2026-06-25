@@ -3,9 +3,8 @@ CONF_EMAIL = "email"
 CONF_PASSWORD = "password"
 
 API_BASES = [
+    "https://api.orbitbhyve.com/v1",
     "https://api.orbitonline.com/v1",
-    "https://api2.orbitonline.com/v1",
-    "https://api.bhyve.com/v1",
 ]
 
 HEADERS = {
