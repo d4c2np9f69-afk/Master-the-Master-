@@ -44,9 +44,12 @@ curl -fsSL "\${HCC_BASE}/beehive/blink/config_flow.py" -o "\${DST}/config_flow.p
   || die "Failed to download patched config_flow.py"
 ok "2FA patch applied"
 
-info "Updating manifest version..."
-sed -i 's/"version": "[^"]*"/"version": "2026.6.4-hcc-2fa-fix"/' "\${DST}/manifest.json"
-sed -i 's/"name": "[^"]*"/"name": "Blink (2FA Fix)"/' "\${DST}/manifest.json"
+info "Updating manifest (adding required version field)..."
+if grep -q '"version"' "\${DST}/manifest.json"; then
+  sed -i 's/"version": "[^"]*"/"version": "2026.6.4-hcc-2fa-fix"/' "\${DST}/manifest.json"
+else
+  sed -i '2i\\  "version": "2026.6.4-hcc-2fa-fix",' "\${DST}/manifest.json"
+fi
 ok "Manifest updated"
 
 info "Restarting Home Assistant..."
