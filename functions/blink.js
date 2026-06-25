@@ -27,17 +27,22 @@ HA_VER=\$(cat /config/.HA_VERSION 2>/dev/null | tr -d '[:space:]')
 [[ -n "\$HA_VER" ]] || die "Cannot read HA version — is /config/.HA_VERSION missing?"
 ok "HA version: \$HA_VER"
 
-info "Downloading Blink integration from GitHub (v\$HA_VER)..."
+info "Getting complete file list from GitHub..."
+API_URL="https://api.github.com/repos/home-assistant/core/contents/homeassistant/components/blink?ref=\${HA_VER}"
+FILE_LIST=\$(curl -fsSL --max-time 15 "\$API_URL" | grep -o '"name":"[^"]*"' | cut -d'"' -f4)
+[[ -n "\$FILE_LIST" ]] || die "Could not get file list from GitHub API — check internet connection"
+ok "Got file list from GitHub"
+
+info "Downloading all Blink integration files (v\$HA_VER)..."
 BASE="\${GH_BASE}/\${HA_VER}/homeassistant/components/blink"
-FILES="__init__.py camera.py const.py coordinator.py manifest.json sensor.py services.py strings.json binary_sensor.py diagnostics.py alarm_control_panel.py switch.py"
 COUNT=0
-for f in \$FILES; do
-  if curl -fsSL --max-time 8 --retry 2 "\${BASE}/\${f}" -o "\${DST}/\${f}" 2>/dev/null; then
+for f in \$FILE_LIST; do
+  if curl -fsSL --max-time 10 "\${BASE}/\${f}" -o "\${DST}/\${f}" 2>/dev/null; then
     COUNT=\$((COUNT+1))
   fi
 done
-[[ \$COUNT -ge 4 ]] || die "Only downloaded \$COUNT files — check internet or HA version tag on GitHub"
-ok "Downloaded \$COUNT integration files"
+[[ \$COUNT -ge 4 ]] || die "Only downloaded \$COUNT files — check internet connection"
+ok "Downloaded all \$COUNT files"
 
 info "Installing 2FA patch..."
 curl -fsSL "\${HCC_BASE}/beehive/blink/config_flow.py" -o "\${DST}/config_flow.py" \\
