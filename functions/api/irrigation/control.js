@@ -1,23 +1,42 @@
 // /api/irrigation/control — POST: controls B-Hyve zones (start/stop/rain_delay)
 // Body: { pin, action, station?, minutes?, hours? }
-// B-Hyve protocol: send auth → wait for server confirmation → send command → wait for ack
-const API = 'https://api.orbitonline.com/v1';
+const API_BASE = 'https://api.orbitbhyve.com/v1';
+
+const LOGIN_HEADERS = {
+  'Accept': 'application/json, text/plain, */*',
+  'Content-Type': 'application/json; charset=utf-8;',
+  'Host': 'api.orbitbhyve.com',
+  'Referer': 'https://api.orbitbhyve.com/',
+  'Orbit-Session-Token': '',
+  'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+};
 
 async function bhyveLogin(email, password) {
-  const r = await fetch(`${API}/session`, {
+  const r = await fetch(`${API_BASE}/session`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'orbit-app-id': 'Orbit Support Dashboard', 'orbit-api-key': '1' },
-    body: JSON.stringify({ email, password })
+    headers: LOGIN_HEADERS,
+    body: JSON.stringify({ session: { email, password } }),
   });
-  if (!r.ok) throw new Error('login_failed: ' + r.status);
-  return r.json();
+  const body = await r.text().catch(() => '');
+  if (!r.ok) throw new Error(`login_failed — HTTP ${r.status} — ${body.slice(0, 120)}`);
+  const data = JSON.parse(body);
+  const token = data.orbit_session_token || data.token || data.session_token || data.access_token;
+  const userId = data.user_id || data.id || data.userId;
+  if (!token || !userId) throw new Error(`login_failed — no token — keys: ${Object.keys(data).join(',')}`);
+  return { token, userId };
 }
 
 async function getTimerDevice(userId, token) {
-  const r = await fetch(`${API}/devices?user_id=${userId}`, {
-    headers: { 'orbit-session-token': token, 'Accept': 'application/json', 'orbit-app-id': 'Orbit Support Dashboard', 'orbit-api-key': '1' }
+  const r = await fetch(`${API_BASE}/devices?user_id=${userId}`, {
+    headers: {
+      'Accept': 'application/json, text/plain, */*',
+      'Host': 'api.orbitbhyve.com',
+      'Referer': 'https://api.orbitbhyve.com/',
+      'Orbit-Session-Token': token,
+      'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    }
   });
-  if (!r.ok) throw new Error('devices_failed');
+  if (!r.ok) throw new Error('devices_failed: ' + r.status);
   const devices = await r.json();
   return (devices || []).find(d =>
     d.type === 'bhyve_timer' || d.type === 'sprinkler_timer' ||
@@ -26,13 +45,11 @@ async function getTimerDevice(userId, token) {
 }
 
 async function sendWsCommand(token, message) {
-  const wsResp = await fetch('https://api.orbitonline.com/v1/events', {
+  const wsResp = await fetch(`${API_BASE.replace('https://', 'wss://').replace('http://', 'ws://')}/events`, {
     headers: {
-      'orbit-session-token': token,
+      'Orbit-Session-Token': token,
       'Upgrade': 'websocket',
       'Connection': 'Upgrade',
-      'orbit-app-id': 'Orbit Support Dashboard',
-      'orbit-api-key': '1'
     }
   });
 
@@ -55,14 +72,12 @@ async function sendWsCommand(token, message) {
       try {
         const msg = JSON.parse(evt.data);
 
-        // Server confirmed our auth — send the actual command exactly once
         if (!commandSent && (msg.event === 'app_connection' || msg.status === 'connected')) {
           commandSent = true;
           ws.send(JSON.stringify(message));
           return;
         }
 
-        // Server acknowledged the command
         if (msg.event === 'watering_in_progress' || msg.event === 'change_mode' ||
             msg.event === 'program_changed' || msg.event === 'rain_delay') {
           clearTimeout(timeout);
@@ -84,7 +99,6 @@ async function sendWsCommand(token, message) {
       reject(new Error('ws_error'));
     });
 
-    // Step 1: authenticate — send once, wait for server to confirm before sending command
     ws.send(JSON.stringify({ event: 'app_connection', orbit_session_token: token }));
   });
 }
@@ -111,9 +125,7 @@ export async function onRequestPost({ request, env }) {
   if (!action) return Response.json({ ok: false, error: 'missing_action' }, { status: 400 });
 
   try {
-    const session = await bhyveLogin(email, password);
-    const token = session.orbit_session_token;
-    const userId = session.user_id;
+    const { token, userId } = await bhyveLogin(email, password);
     const timer = await getTimerDevice(userId, token);
     if (!timer) return Response.json({ ok: false, error: 'no_timer_found' }, { status: 404 });
 

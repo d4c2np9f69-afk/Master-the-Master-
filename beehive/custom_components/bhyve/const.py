@@ -9,10 +9,9 @@ API_BASES = [
 
 HEADERS = {
     "Content-Type": "application/json",
-    "Accept": "application/json",
-    "orbit-app-id": "Orbit Support Dashboard",
-    "orbit-api-key": "1",
-    "User-Agent": "bhyve/2.67 (iPhone; iOS 17; Scale/3.00)",
+    "Accept": "application/json, text/plain, */*",
+    "Orbit-Session-Token": "",
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
 }
 
 SCAN_INTERVAL_SECONDS = 60
