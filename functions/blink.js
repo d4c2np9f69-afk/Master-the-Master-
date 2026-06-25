@@ -29,7 +29,7 @@ ok "HA version: \$HA_VER"
 
 info "Downloading Blink integration from GitHub (v\$HA_VER)..."
 BASE="\${GH_BASE}/\${HA_VER}/homeassistant/components/blink"
-FILES="__init__.py camera.py const.py coordinator.py manifest.json sensor.py strings.json binary_sensor.py diagnostics.py alarm_control_panel.py"
+FILES="__init__.py camera.py const.py coordinator.py manifest.json sensor.py services.py strings.json binary_sensor.py diagnostics.py alarm_control_panel.py switch.py"
 COUNT=0
 for f in \$FILES; do
   if curl -fsSL --max-time 8 --retry 2 "\${BASE}/\${f}" -o "\${DST}/\${f}" 2>/dev/null; then
