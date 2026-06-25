@@ -176,8 +176,11 @@ html,body{
   position:relative;height:300px;overflow:hidden;flex-shrink:0;
 }
 .sec-hero img{width:100%;height:100%;object-fit:cover;object-position:center top}
-/* Irrigation and Yard: person's face is at top — pin to top, hide baked-in bottom text */
-.sec-hero-irr img,.sec-hero-yard img{object-position:center top}
+/* Irrigation: pin to top */
+.sec-hero-irr img{object-position:center top}
+/* Yard hero: landscape photo — use natural aspect ratio so baked-in text is never cropped */
+.sec-hero-yard{height:auto;aspect-ratio:1320/851;max-height:340px}
+.sec-hero-yard img{object-fit:cover;object-position:center center}
 .sec-hero-overlay{
   position:absolute;inset:0;
   display:flex;flex-direction:column;justify-content:flex-end;
@@ -1139,8 +1142,9 @@ html,body{
       </div>
     </div>
     <div id="calibBtnRow" style="margin-top:10px;display:flex;gap:8px">
-      <button onclick="startMapCalib()" style="flex:1;background:#121a12;border:1px solid #2a4a2a;color:#9ab9ab;padding:9px;border-radius:7px;font-size:12px">&#128205; Calibrate Map</button>
-      <button onclick="clearMapCalib()" id="clearCalibBtn" style="display:none;background:#1a1212;border:1px solid #5a2a2a;color:#ff6262;padding:9px 14px;border-radius:7px;font-size:12px">&#10005; Clear</button>
+      <button onclick="startMapCalib()" style="flex:1;background:#121a12;border:1px solid #2a4a2a;color:#9ab9ab;padding:9px;border-radius:7px;font-size:12px">&#128205; Calibrate</button>
+      <button onclick="runGpsSim()" id="simBtn" style="flex:1;background:#1a0a0a;border:1px solid #cc0000;color:#cc0000;padding:9px;border-radius:7px;font-size:12px;font-weight:600">&#9654; Simulate</button>
+      <button onclick="clearMapCalib()" id="clearCalibBtn" style="display:none;background:#1a1212;border:1px solid #5a2a2a;color:#ff6262;padding:9px 14px;border-radius:7px;font-size:12px">&#10005;</button>
     </div>
   </div>
   <div class="card cat-activity">
@@ -3128,6 +3132,234 @@ loadAlerts();
   window.clearMapCalib=clearMapCalib;
   _refreshCalibUI();
   window.addEventListener('resize',function(){ if(window._lastTrack) drawYardMap(window._lastTrack); });
+
+  // ── GPS SIMULATION ───────────────────────────────────────────────────────
+  // Generates a realistic back-and-forth mowing track over Jeff's property
+  // at 32.899480N, 97.033920W and animates it on the aerial canvas.
+  var _simTimer=null, _simStep=0, _simFullTrack=[], _simHistory=[];
+
+  function _buildSimTrack(){
+    // Property coords: center 32.899480N, -97.033920W
+    // Approximate yard: 90ft wide × 65ft deep, back yard
+    var cLat=32.899200, cLon=-97.033850;
+    var latFt=0.00000275, lonFt=0.00000330;
+    var swath=2.5, passes=26, len=80;
+    var startLat=cLat+(passes*swath/2)*latFt;
+    var startLon=cLon-(len/2)*lonFt;
+    var pts=[];
+    // Add home pin at driveway corner
+    var homeLat=cLat+(passes*swath/2+8)*latFt, homeLon=cLon-(len/2-4)*lonFt;
+    pts.push({lat:homeLat, lon:homeLon, home:true});
+    for(var p=0;p<passes;p++){
+      var lat=startLat-p*swath*latFt;
+      var lon1=startLon, lon2=startLon+len*lonFt;
+      // interpolate each pass into ~20 intermediate steps
+      var steps=20;
+      for(var s=0;s<=steps;s++){
+        var t=s/steps;
+        var lo=(p%2===0)?(lon1+(lon2-lon1)*t):(lon2+(lon1-lon2)*t);
+        pts.push({lat:lat, lon:lo});
+      }
+    }
+    return pts;
+  }
+
+  function _drawMowerIcon(ctx,x,y,angle,scale){
+    scale=scale||1;
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(angle);
+    // Mower deck (Toro red rectangle)
+    ctx.fillStyle='#cc0000';
+    ctx.fillRect(-9*scale,-5*scale,18*scale,10*scale);
+    // Handle bars (dark gray lines going back)
+    ctx.strokeStyle='#888'; ctx.lineWidth=1.5*scale;
+    ctx.beginPath();
+    ctx.moveTo(-5*scale,5*scale); ctx.lineTo(-4*scale,16*scale);
+    ctx.moveTo(5*scale,5*scale);  ctx.lineTo(4*scale,16*scale);
+    ctx.stroke();
+    // Person: body
+    ctx.fillStyle='#3a5a8a';
+    ctx.fillRect(-3*scale,15*scale,6*scale,9*scale);
+    // Person: head
+    ctx.fillStyle='#e8c090';
+    ctx.beginPath(); ctx.arc(0,24*scale,3.5*scale,0,Math.PI*2); ctx.fill();
+    // Person: legs hint
+    ctx.fillStyle='#2a3a5a';
+    ctx.fillRect(-3*scale,24*scale,2*scale,6*scale);
+    ctx.fillRect(1*scale,24*scale,2*scale,6*scale);
+    // Blue live-position dot on mower
+    ctx.fillStyle='#4da3ff';
+    ctx.shadowColor='#4da3ff'; ctx.shadowBlur=6*scale;
+    ctx.beginPath(); ctx.arc(0,-1*scale,3.5*scale,0,Math.PI*2); ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.restore();
+  }
+
+  function _drawTelemetry(ctx,w,h,info){
+    var bh=54;
+    ctx.fillStyle='rgba(5,10,5,0.82)';
+    ctx.fillRect(0,h-bh,w,bh);
+    // Separator line (Toro red)
+    ctx.fillStyle='#cc0000';
+    ctx.fillRect(0,h-bh,w,2);
+    // Items
+    var items=[
+      {icon:'HOME',label:'Home',val:info.home?'Set':'—',col:'#d4af37'},
+      {icon:'DIST',label:'Dist',val:info.dist+'mi',col:'#7ee787'},
+      {icon:'TIME',label:'Time',val:info.time,col:'#7ee787'},
+      {icon:'MPH', label:'Speed',val:info.mph+'mph',col:'#7ee787'},
+      {icon:'GPS', label:'GPS',val:'±'+info.acc+'m',col:'#4da3ff'},
+    ];
+    var iw=w/items.length;
+    for(var i=0;i<items.length;i++){
+      var ix=i*iw+iw/2;
+      ctx.fillStyle=items[i].col;
+      ctx.font='bold 8px monospace'; ctx.textAlign='center';
+      ctx.fillText(items[i].icon,ix,h-bh+13);
+      ctx.fillStyle='rgba(255,255,255,0.9)';
+      ctx.font='bold 12px monospace';
+      ctx.fillText(items[i].val,ix,h-bh+28);
+      ctx.fillStyle='rgba(150,180,150,0.6)';
+      ctx.font='8px sans-serif';
+      ctx.fillText(items[i].label,ix,h-bh+40);
+    }
+    // Progress bar
+    ctx.fillStyle='rgba(60,60,60,0.6)';
+    ctx.fillRect(8,h-10,w-16,5);
+    ctx.fillStyle='#cc0000';
+    ctx.fillRect(8,h-10,(w-16)*info.progress,5);
+    // Progress text
+    ctx.fillStyle='#d4af37'; ctx.font='8px monospace'; ctx.textAlign='right';
+    ctx.fillText(Math.round(info.progress*100)+'%',w-8,h-11);
+  }
+
+  function _simFrame(){
+    var c=document.getElementById('yardMap'); if(!c){stopGpsSim();return;}
+    var ctx=c.getContext('2d');
+    var w=c.clientWidth||300, h=c.clientHeight||320;
+    c.width=w; c.height=h;
+    ctx.clearRect(0,0,w,h);
+    // Aerial background
+    if(window._platMapImg){
+      var img=window._platMapImg;
+      var iw=img.naturalWidth, ih=img.naturalHeight;
+      var sc=Math.min(w/iw,h/ih);
+      var dw=iw*sc, dh=ih*sc, dx=(w-dw)/2, dy=(h-dh)/2;
+      ctx.drawImage(img,dx,dy,dw,dh);
+      ctx.fillStyle='rgba(0,0,0,0.2)'; ctx.fillRect(0,0,w,h);
+    }
+    // Draw history tracks (previous sessions, faded)
+    for(var hi=0;hi<_simHistory.length;hi++){
+      var ht=_simHistory[hi];
+      ctx.globalAlpha=0.3;
+      ctx.strokeStyle='#ff8800'; ctx.lineWidth=1.5; ctx.lineJoin='round';
+      ctx.beginPath();
+      var hPts=_getCanvasPts(ht,w,h);
+      if(hPts.length>1){ ctx.moveTo(hPts[0].x,hPts[0].y); for(var hk=1;hk<hPts.length;hk++) ctx.lineTo(hPts[hk].x,hPts[hk].y); ctx.stroke(); }
+      ctx.globalAlpha=1;
+    }
+    // Current track up to simStep
+    var currentGps=_simFullTrack.slice(0,_simStep+1).filter(function(p){return !p.home;});
+    var pts=_getCanvasPts(currentGps,w,h);
+    if(pts.length>=2){
+      ctx.shadowColor='#cc0000'; ctx.shadowBlur=4;
+      ctx.strokeStyle='#cc0000'; ctx.lineWidth=3; ctx.lineJoin='round'; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
+      for(var k=1;k<pts.length;k++) ctx.lineTo(pts[k].x,pts[k].y);
+      ctx.stroke(); ctx.shadowBlur=0;
+    }
+    // Home pin
+    var homeGps=_simFullTrack[0];
+    if(homeGps&&homeGps.home){
+      var hp=_getCanvasPts([homeGps],w,h);
+      if(hp.length){
+        ctx.fillStyle='#d4af37'; ctx.shadowColor='#d4af37'; ctx.shadowBlur=8;
+        ctx.font='18px serif'; ctx.textAlign='center';
+        ctx.fillText('📍',hp[0].x,hp[0].y+6);
+        ctx.shadowBlur=0;
+        ctx.fillStyle='rgba(212,175,55,0.8)'; ctx.font='bold 8px sans-serif';
+        ctx.fillText('HOME',hp[0].x,hp[0].y+16);
+      }
+    }
+    // Live mower icon at current position
+    if(pts.length>=1){
+      var cur=pts[pts.length-1];
+      var angle=0;
+      if(pts.length>=2){ var prev=pts[pts.length-2]; angle=Math.atan2(cur.y-prev.y,cur.x-prev.x)+Math.PI/2; }
+      _drawMowerIcon(ctx,cur.x,cur.y,angle,w>350?1:0.85);
+    }
+    // Compute telemetry
+    var distM=currentGps.length*0.3; // ~0.3m per step
+    var distMi=(distM*0.000621).toFixed(2);
+    var elapsed=_simStep*0.08; // ~0.08s per step, sped up 30x
+    var mm=Math.floor(elapsed/60), ss=Math.floor(elapsed%60);
+    var timeStr=(mm>0?mm+'m ':'')+ss+'s';
+    var progress=_simStep/Math.max(_simFullTrack.length-1,1);
+    _drawTelemetry(ctx,w,h,{home:true,dist:distMi,time:timeStr,mph:'3.2',acc:'4',progress:progress});
+    // Advance
+    _simStep++;
+    if(_simStep>=_simFullTrack.length){
+      // Simulation complete — save to history
+      var completedGps=_simFullTrack.filter(function(p){return !p.home;});
+      _simHistory.push(completedGps.slice());
+      if(_simHistory.length>5) _simHistory.shift();
+      try{ localStorage.setItem('yard_sim_history',JSON.stringify(_simHistory)); }catch(e){}
+      stopGpsSim();
+      var msg=document.getElementById('yardMapMsg');
+      if(msg) msg.textContent='Simulation complete — '+_simHistory.length+' session(s) on record. Tap Simulate again to add another pass.';
+      return;
+    }
+    _simTimer=requestAnimationFrame(_simFrame);
+  }
+
+  function _getCanvasPts(gpsPts,w,h){
+    if(!gpsPts||!gpsPts.length) return [];
+    // If calibrated, use GPS→pixel transform
+    if(_mapCalib&&_mapCalib.length>=2){
+      var out=[];
+      for(var i=0;i<gpsPts.length;i++){
+        var pt=gpsToXY(gpsPts[i].lat||gpsPts[i][0],gpsPts[i].lon||gpsPts[i][1],w,h);
+        if(pt) out.push(pt);
+      }
+      if(out.length>=2) return out;
+    }
+    // Auto-fit fallback
+    var lats=gpsPts.map(function(p){return p.lat||p[0];}),lons=gpsPts.map(function(p){return p.lon||p[1];});
+    var minLa=Math.min.apply(null,lats),maxLa=Math.max.apply(null,lats);
+    var minLo=Math.min.apply(null,lons),maxLo=Math.max.apply(null,lons);
+    var midLa=(minLa+maxLa)/2, lonScale=Math.cos(midLa*Math.PI/180)||1;
+    var ax=(minLo)*lonScale,bx=(maxLo)*lonScale,ay=-(maxLa),by=-(minLa);
+    var spanX=(bx-ax)||1e-9,spanY=(by-ay)||1e-9,pad=50;
+    var sc=Math.min((w-2*pad)/spanX,(h-80-2*pad)/spanY);
+    var ox=(w-spanX*sc)/2,oy=((h-80)-spanY*sc)/2;
+    return gpsPts.map(function(p){
+      var la=p.lat||p[0],lo=p.lon||p[1];
+      return {x:ox+(lo*lonScale-ax)*sc, y:oy+(-la-ay)*sc};
+    });
+  }
+
+  function runGpsSim(){
+    if(_simTimer){ stopGpsSim(); return; }
+    // Load history from localStorage
+    try{ var sh=localStorage.getItem('yard_sim_history'); if(sh) _simHistory=JSON.parse(sh); }catch(e){}
+    _simFullTrack=_buildSimTrack();
+    _simStep=0;
+    var btn=document.getElementById('simBtn');
+    if(btn){ btn.textContent='■ Stop'; btn.style.color='#ff6262'; btn.style.borderColor='#ff6262'; }
+    var msg=document.getElementById('yardMapMsg');
+    if(msg) msg.textContent='Simulating GPS mowing session…';
+    _simTimer=requestAnimationFrame(_simFrame);
+  }
+
+  function stopGpsSim(){
+    if(_simTimer){ cancelAnimationFrame(_simTimer); _simTimer=null; }
+    var btn=document.getElementById('simBtn');
+    if(btn){ btn.textContent='► Simulate'; btn.style.color='#cc0000'; btn.style.borderColor='#cc0000'; }
+  }
+
+  window.runGpsSim=runGpsSim;
+  window.stopGpsSim=stopGpsSim;
 
   // Silent auto-sync shortly after the page finishes its initial render.
   setTimeout(function(){ window.mowerSync(false); }, 1200);
