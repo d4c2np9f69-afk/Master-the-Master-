@@ -45,7 +45,8 @@ async function getTimerDevice(userId, token) {
 }
 
 async function sendWsCommand(token, message) {
-  const wsResp = await fetch(`${API_BASE.replace('https://', 'wss://').replace('http://', 'ws://')}/events`, {
+  // Cloudflare Workers requires https:// (not wss://) for outbound WebSocket upgrades
+  const wsResp = await fetch(`${API_BASE}/events`, {
     headers: {
       'Orbit-Session-Token': token,
       'Upgrade': 'websocket',
