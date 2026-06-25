@@ -4,9 +4,18 @@ from collections.abc import Mapping
 import logging
 from typing import Any
 
-from blinkpy.auth import Auth, BlinkTwoFARequiredError, LoginError, TokenRefreshFailed
+from blinkpy.auth import Auth, LoginError, TokenRefreshFailed
 from blinkpy.blinkpy import Blink, BlinkSetupError
 import voluptuous as vol
+
+# BlinkTwoFARequiredError was renamed/moved in some blinkpy versions
+try:
+    from blinkpy.auth import BlinkTwoFARequiredError
+except ImportError:
+    try:
+        from blinkpy.helpers.errors import UnauthorizedError as BlinkTwoFARequiredError
+    except ImportError:
+        BlinkTwoFARequiredError = Exception  # fallback — catch anything
 
 from homeassistant.config_entries import (
     SOURCE_REAUTH,
@@ -19,7 +28,11 @@ from homeassistant.core import callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import DOMAIN, HARDWARE_ID
+try:
+    from .const import DOMAIN, HARDWARE_ID
+except ImportError:
+    from .const import DOMAIN
+    HARDWARE_ID = "Home Assistant"
 
 _LOGGER = logging.getLogger(__name__)
 
