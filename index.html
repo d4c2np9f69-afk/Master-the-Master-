@@ -530,8 +530,8 @@ html,body{
 /* Zone cards — large visual tiles */
 .zone-card{border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;background:var(--card2)}
 .zone-card.active{border-color:#22c55e;box-shadow:0 0 16px rgba(34,197,94,.15)}
-.zone-photo{width:100%;height:72px;object-fit:cover;background:linear-gradient(135deg,#0a1a0a,#0d2010);display:block}
-.zone-photo-empty{width:100%;height:72px;background:linear-gradient(135deg,#0a1a10,#0d2018);display:flex;align-items:center;justify-content:center;font-size:24px;opacity:.4}
+.zone-photo{width:100%;height:130px;object-fit:cover;object-position:center top;background:linear-gradient(135deg,#0a1a0a,#0d2010);display:block}
+.zone-photo-empty{width:100%;height:130px;background:linear-gradient(135deg,#0a1a10,#0d2018);display:flex;align-items:center;justify-content:center;font-size:24px;opacity:.4}
 .zone-body{padding:10px 12px}
 .zone-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
 .zone-name{font-weight:900;font-size:14px;color:var(--text)}
@@ -915,12 +915,14 @@ html,body{
     <!-- ZONES PREVIEW — shown until B-Hyve connects and populates irrZones -->
     <div class="card cat-status" id="irrZonesCard">
       <div class="card-title">&#127807; Your Zones &bull; Water Hog</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.6">Zone photos and live status will appear here once your B-Hyve is connected. Your zone names and photos come directly from the Orbit app.</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.6">Connect B-Hyve to enable live status and zone control. Zone names will update automatically once connected.</div>
       <div id="irrZonesPreview">
-        <!-- Static placeholders — replaced by live data when B-Hyve connects -->
-        <div class="zone-card"><div class="zone-photo-empty">&#127807;</div><div class="zone-body"><div class="zone-header"><div class="zone-name">Zone 1</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Waiting for B-Hyve connection</div><div class="zone-footer"><button class="zone-run-btn" disabled style="opacity:.4">&#9654; Run Zone</button></div></div></div>
-        <div class="zone-card"><div class="zone-photo-empty">&#127807;</div><div class="zone-body"><div class="zone-header"><div class="zone-name">Zone 2</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Waiting for B-Hyve connection</div><div class="zone-footer"><button class="zone-run-btn" disabled style="opacity:.4">&#9654; Run Zone</button></div></div></div>
-        <div class="zone-card"><div class="zone-photo-empty">&#127807;</div><div class="zone-body"><div class="zone-header"><div class="zone-name">Zone 3</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Waiting for B-Hyve connection</div><div class="zone-footer"><button class="zone-run-btn" disabled style="opacity:.4">&#9654; Run Zone</button></div></div></div>
+        <div class="zone-card"><img class="zone-photo" src="./images/zones/zone-1.jpg" loading="lazy"><div class="zone-body"><div class="zone-header"><div class="zone-name">Z1 Front Right</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Pride of Place. Every Detail Counts.</div><div class="zone-footer"><button class="zone-run-btn" disabled style="opacity:.4">&#9654; Run Zone</button></div></div></div>
+        <div class="zone-card"><img class="zone-photo" src="./images/zones/zone-2.jpg" loading="lazy"><div class="zone-body"><div class="zone-header"><div class="zone-name">Z2 Front Left</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Welcoming Spaces. Beautifully Balanced.</div><div class="zone-footer"><button class="zone-run-btn" disabled style="opacity:.4">&#9654; Run Zone</button></div></div></div>
+        <div class="zone-card"><img class="zone-photo" src="./images/zones/zone-3.jpg" loading="lazy"><div class="zone-body"><div class="zone-header"><div class="zone-name">Z3 Back Left</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Natural Beauty. Peaceful Spaces.</div><div class="zone-footer"><button class="zone-run-btn" disabled style="opacity:.4">&#9654; Run Zone</button></div></div></div>
+        <div class="zone-card"><img class="zone-photo" src="./images/zones/zone-4.jpg" loading="lazy"><div class="zone-body"><div class="zone-header"><div class="zone-name">Z4 Back Right</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Outdoor Comfort. Backyard Retreat.</div><div class="zone-footer"><button class="zone-run-btn" disabled style="opacity:.4">&#9654; Run Zone</button></div></div></div>
+        <div class="zone-card"><img class="zone-photo" src="./images/zones/zone-5.jpg" loading="lazy"><div class="zone-body"><div class="zone-header"><div class="zone-name">Z5 Right Side Drive</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Defined Edges. Timeless Curb Appeal.</div><div class="zone-footer"><button class="zone-run-btn" disabled style="opacity:.4">&#9654; Run Zone</button></div></div></div>
+        <div class="zone-card"><img class="zone-photo" src="./images/zones/zone-6.jpg" loading="lazy"><div class="zone-body"><div class="zone-header"><div class="zone-name">Garden</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Nourished Growth. Healthy Living.</div><div class="zone-footer"><button class="zone-run-btn" disabled style="opacity:.4">&#9654; Run Zone</button></div></div></div>
       </div>
     </div>
 
@@ -2222,7 +2224,11 @@ function loadIrrigationFromHA(token,base,onFail){
     zones.forEach(function(z){
       var isA=z.state==='on';
       var name=(z.attributes&&z.attributes.friendly_name)||z.entity_id.replace('switch.','').replace(/_/g,' ');
-      html+='<div class="zone-card'+(isA?' active':'')+'"><div class="zone-photo-empty">&#128688;</div>'
+      var stNum=parseInt((z.entity_id.match(/(\d+)/)||[])[1])||0;
+      var photo=stNum>=1&&stNum<=6
+        ?'<img class="zone-photo" src="./images/zones/zone-'+stNum+'.jpg" loading="lazy">'
+        :'<div class="zone-photo-empty">&#128688;</div>';
+      html+='<div class="zone-card'+(isA?' active':'')+'">'+photo
         +'<div class="zone-body"><div class="zone-header"><div class="zone-name">'+name+'</div>'
         +'<span class="zone-badge '+(isA?'zone-badge-active':'zone-badge-idle')+'">'+(isA?'&#128167; WATERING':'IDLE')+'</span></div>'
         +'<div class="zone-sub">via Beehive</div>'
@@ -2273,9 +2279,11 @@ function loadIrrigationDirect(){
       var html='';
       (d.zones||[]).forEach(function(z){
         var isA = active && z.station===active;
-        var photo = z.image_url
-          ? '<img class="zone-photo" src="'+z.image_url+'" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=zone-photo-empty>&#128688;</div>\'">'
-          : '<div class="zone-photo-empty">&#128688;</div>';
+        var stNum=z.station||0;
+        var photoSrc=stNum>=1&&stNum<=6?'./images/zones/zone-'+stNum+'.jpg':z.image_url||null;
+        var photo=photoSrc
+          ?'<img class="zone-photo" src="'+photoSrc+'" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=zone-photo-empty>&#128688;</div>\'">'
+          :'<div class="zone-photo-empty">&#128688;</div>';
         html += '<div class="zone-card'+(isA?' active':'')+'">'
           + photo
           + '<div class="zone-body">'
