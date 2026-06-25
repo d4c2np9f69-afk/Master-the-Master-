@@ -388,9 +388,47 @@ c17bdf0  Apply ChatGPT hero palette throughout entire app + remove nanny warning
 
 ---
 
+## Session History — Session 2026-06-25 (GPS Map + Hero + B-Hyve HA Integration)
+
+### Changes Made This Session
+
+1. **B-Hyve HA custom integration updated** (`c7ed75e`) — Added `strings.json` for proper form labels. Updated coordinator to log at WARNING level (visible in HA System Logs without debug mode). Config flow now shows actual error detail in the form description when login fails. Install script updated to download `strings.json` too.
+
+2. **YARD hero photo replaced** (`c5ac967`) — New photo (IMG_0497): man with Toro TimeMaster, "Yard Command Center" text baked in. Hero overlay text removed (photo has it). CSS overlay kept only for sensor status.
+
+3. **Real aerial GPS map** (`c5ac967`) — Replaced placeholder plat-map.jpg with real aerial photo (`yard-aerial.jpg`) of Jeff's property at 32.899480°N, 97.033920°W (S. Aztec Dr). Image used as fixed base, never rotated or stretched.
+
+4. **GPS map calibration system** (`c5ac967`) — Tap "Calibrate Map" → tap 2+ points on aerial → enter GPS coords → Save. Stores calibration in `localStorage.yard_map_calib`. When calibrated, GPS track pins exactly to real positions on aerial. Falls back to auto-fit if not calibrated. Track color changed green → Toro red (#cc0000); live position = blue dot.
+
+5. **YARD hero crop fix** (`c5202ec`) — CSS `aspect-ratio:1320/851` so full landscape photo shows without cropping. "Yard Command Center" text always fully visible.
+
+6. **GPS simulation with telemetry HUD** (`c5202ec`) — "▶ Simulate" button on map card. Runs animated back-and-forth mowing pattern at property coords. Shows: person-pushing-mower icon (canvas drawn), Toro red track with glow, 📍 home pin, telemetry strip (DIST/TIME/MPH/GPS accuracy), progress bar. Learning map: saves up to 5 past sessions in amber so coverage history accumulates.
+
+**Key file changes:**
+- `images/hero-yard.jpg` — replaced with new Toro mower photo
+- `images/yard-aerial.jpg` — new aerial base map for GPS canvas
+- `beehive/custom_components/bhyve/strings.json` — new, proper HA translations
+- `beehive/custom_components/bhyve/coordinator.py` — WARNING level logging
+- `beehive/custom_components/bhyve/config_flow.py` — shows error detail in form
+- `functions/bhyve.js` + `beehive/install-bhyve.sh` — include strings.json
+
+**Commits this session:**
+```
+c5202ec  Fix YARD hero crop + GPS simulation with telemetry HUD + learning map
+c5ac967  YARD hero photo + real aerial GPS map with calibration system
+c7ed75e  B-Hyve: surface login errors in HA form + log at WARNING level
+f904d10  B-Hyve coordinator: try all API URLs x app IDs, log full response detail
+```
+
+---
+
 ## Pending Items (Next Session Should Address These)
 
-1. **YARD hero photo** — Jeff hit ChatGPT image limit. Next session: regenerate YARD hero photo with text baked in (using prompt from `HERO-STYLE-GUIDE.json`). Until then, CSS overlay text approximates the style but isn't a perfect match.
+1. **B-Hyve invalid_auth** — Jeff ran `sh bhyve` and saw `invalid_auth` in the HA config form. Updated coordinator logs every API attempt at WARNING level. Jeff needs to:
+   1. Run `sh bhyve` in HA Terminal again (gets updated files including strings.json)
+   2. Restart HA
+   3. Settings → Integrations → Add Integration → "Orbit B-Hyve" → enter email/password
+   4. If still fails: Settings → System → Logs → search "B-Hyve login attempt" to see exact HTTP response from each of 9 API attempts
 
 2. **Blink 2FA completion** — Jeff needs to:
    1. Go to HA → Settings → Integrations → Add Integration → search "Blink"
@@ -398,13 +436,16 @@ c17bdf0  Apply ChatGPT hero palette throughout entire app + remove nanny warning
    3. Open HCC app → HOME → CAMERAS section → enter code in the PIN field → tap SEND
    4. Cameras will then appear in the app
 
-3. **B-Hyve in HA** — For irrigation to route through Beehive, Jeff needs to add B-Hyve integration in HA (Settings → Integrations → search "Orbit B-Hyve"). Once added, zones will appear automatically in the HCC irrigation section with a "● BEEHIVE" badge.
+3. **GPS map calibration** — After first real mow with ESP32 sensor running, calibrate the aerial map:
+   1. YARD tab → scroll to Yard Map
+   2. Tap "📍 Calibrate"
+   3. Tap the driveway corner on the aerial → enter its GPS coords (use phone Maps app to get coords)
+   4. Tap a rear yard corner → enter coords → tap Save
+   5. GPS track will pin exactly to the aerial from then on
 
-4. **B-Hyve direct API credentials** — If HA integration isn't available, the direct fallback uses `/api/irrigation`. That requires `BHYVE_EMAIL` and `BHYVE_PASSWORD` set in Cloudflare Pages → toro1 → Settings → Environment Variables → Production.
+4. **Verify sensor data live** — After Jeff hard-refreshes the app, confirm battery voltage, RPM, and mileage display. If still `0.00V` and `—`, run the curl test in the Cloudflare Infrastructure section above.
 
-5. **Verify sensor data live** — After Jeff hard-refreshes the app, confirm battery voltage, RPM, and mileage display. If still `0.00V` and `—`, run the curl test in the Cloudflare Infrastructure section above.
-
-6. **Lighthouse performance** — Score 60/100. Low priority. Main cause: unminified 300KB index.html.
+5. **Lighthouse performance** — Score 60/100. Low priority. Main cause: unminified 300KB index.html.
 
 ---
 
