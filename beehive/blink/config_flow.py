@@ -41,6 +41,8 @@ async def validate_input(blink: Blink) -> None:
     """Validate the user input allows us to connect."""
     try:
         await blink.start()
+    except BlinkTwoFARequiredError:
+        raise  # must propagate so async_step_user can redirect to 2FA step
     except (LoginError, TokenRefreshFailed) as err:
         raise InvalidAuth from err
 
