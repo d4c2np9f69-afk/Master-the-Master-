@@ -25,12 +25,13 @@ async function bhyveLogin(email, password) {
   return { token, userId };
 }
 
-export async function onRequestGet({ env }) {
-  const email = env.BHYVE_EMAIL;
-  const password = env.BHYVE_PASSWORD;
+export async function onRequestGet({ env, request }) {
+  const url = new URL(request.url);
+  const email = env.BHYVE_EMAIL || url.searchParams.get('e') || '';
+  const password = env.BHYVE_PASSWORD || url.searchParams.get('p') || '';
 
   if (!email || !password) {
-    return Response.json({ ok: false, error: 'credentials_not_configured' }, { status: 503 });
+    return Response.json({ ok: false, error: 'credentials_not_provided' }, { status: 400 });
   }
 
   try {

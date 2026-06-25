@@ -104,21 +104,16 @@ async function sendWsCommand(token, message) {
 }
 
 export async function onRequestPost({ request, env }) {
-  const pin = env.CONTROL_PIN;
-  const email = env.BHYVE_EMAIL;
-  const password = env.BHYVE_PASSWORD;
-
-  if (!email || !password) {
-    return Response.json({ ok: false, error: 'credentials_not_configured' }, { status: 503 });
-  }
-
   let body;
   try { body = await request.json(); } catch (_) {
     return Response.json({ ok: false, error: 'invalid_json' }, { status: 400 });
   }
 
-  if (pin && body.pin !== pin) {
-    return Response.json({ ok: false, error: 'unauthorized' }, { status: 403 });
+  const email = env.BHYVE_EMAIL || body.email || '';
+  const password = env.BHYVE_PASSWORD || body.password || '';
+
+  if (!email || !password) {
+    return Response.json({ ok: false, error: 'credentials_not_provided' }, { status: 400 });
   }
 
   const { action, station, minutes, hours } = body;

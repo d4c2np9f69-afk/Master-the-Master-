@@ -88,7 +88,8 @@ html,body{
 /* ── APP HEADER — warm gold premium estate style ─────────────────────────── */
 .app-hdr{
   display:flex;align-items:center;gap:10px;
-  padding:11px 14px;
+  padding:11px 14px 11px;
+  padding-top:max(11px, calc(env(safe-area-inset-top) + 4px));
   background:linear-gradient(160deg,#0e0b0a 0%,#080608 100%);
   border-bottom:1px solid rgba(212,175,55,.18);
   box-shadow:0 4px 20px rgba(0,0,0,.6);
@@ -528,19 +529,19 @@ html,body{
 .irr-conn{font-size:10px;font-weight:800;letter-spacing:1px;margin-left:6px}
 .irr-next-run{font-size:10px;color:var(--muted);text-align:center;margin:8px 0 2px;min-height:14px}
 /* Zone cards — large visual tiles */
-.zone-card{border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;background:var(--card2)}
-.zone-card.active{border-color:#22c55e;box-shadow:0 0 16px rgba(34,197,94,.15)}
-.zone-photo{width:100%;height:130px;object-fit:cover;object-position:center top;background:linear-gradient(135deg,#0a1a0a,#0d2010);display:block}
-.zone-photo-empty{width:100%;height:130px;background:linear-gradient(135deg,#0a1a10,#0d2018);display:flex;align-items:center;justify-content:center;font-size:24px;opacity:.4}
-.zone-body{padding:10px 12px}
-.zone-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
-.zone-name{font-weight:900;font-size:14px;color:var(--text)}
-.zone-badge{font-size:9px;font-weight:900;letter-spacing:1px;border-radius:5px;padding:3px 7px;border:1px solid}
+.zone-card{display:flex;flex-direction:row;align-items:stretch;border:1px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden;background:var(--card2)}
+.zone-card.active{border-color:#22c55e;box-shadow:0 0 12px rgba(34,197,94,.15)}
+.zone-photo{width:95px;min-width:95px;height:95px;object-fit:cover;object-position:center;background:linear-gradient(135deg,#0a1a0a,#0d2010);display:block;flex-shrink:0}
+.zone-photo-empty{width:95px;min-width:95px;height:95px;background:linear-gradient(135deg,#0a1a10,#0d2018);display:flex;align-items:center;justify-content:center;font-size:22px;opacity:.4;flex-shrink:0}
+.zone-body{flex:1;padding:8px 10px;display:flex;flex-direction:column;justify-content:space-between;min-width:0}
+.zone-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2px;gap:4px}
+.zone-name{font-weight:900;font-size:13px;color:var(--text);flex:1;min-width:0}
+.zone-badge{font-size:8px;font-weight:900;letter-spacing:.8px;border-radius:4px;padding:2px 5px;border:1px solid;white-space:nowrap;flex-shrink:0}
 .zone-badge-active{color:#22c55e;border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.1)}
 .zone-badge-idle{color:var(--muted);border-color:var(--border);background:transparent}
-.zone-sub{font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:.3px}
-.zone-footer{display:flex;align-items:center;gap:8px}
-.zone-run-btn{flex:1;padding:8px;border-radius:8px;background:rgba(74,163,255,.08);border:1px solid rgba(74,163,255,.3);color:#4aa3ff;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:.5px}
+.zone-sub{font-size:9px;color:var(--muted);margin-bottom:4px;letter-spacing:.2px}
+.zone-footer{display:flex;align-items:center;gap:6px}
+.zone-run-btn{flex:1;padding:6px 4px;border-radius:6px;background:rgba(74,163,255,.08);border:1px solid rgba(74,163,255,.3);color:#4aa3ff;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:.3px}
 /* Cart FAB */
 .cart-fab{position:fixed;bottom:20px;right:16px;z-index:400}
 .cart-btn{background:linear-gradient(135deg,#1a1a28,#0d0d18);border:1px solid rgba(74,158,255,.35);border-radius:50px;padding:10px 18px;color:#4a9eff;font-size:12px;font-weight:800;letter-spacing:.8px;font-family:inherit;box-shadow:0 4px 20px rgba(0,0,0,.5),0 0 16px rgba(74,158,255,.1)}
@@ -917,43 +918,26 @@ html,body{
       <div class="card-title">&#127807; Your Zones &bull; Water Hog</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.6">Connect B-Hyve to enable live status and zone control. Zone names will update automatically once connected.</div>
       <div id="irrZonesPreview">
-        <div class="zone-card"><img class="zone-photo" src="./images/zones/zone-1.jpg" loading="lazy"><div class="zone-body"><div class="zone-header"><div class="zone-name">Z1 Front Right</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Pride of Place. Every Detail Counts.</div><div class="zone-footer"><button class="zone-run-btn" disabled style="opacity:.4">&#9654; Run Zone</button></div></div></div>
-        <div class="zone-card"><img class="zone-photo" src="./images/zones/zone-2.jpg" loading="lazy"><div class="zone-body"><div class="zone-header"><div class="zone-name">Z2 Front Left</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Welcoming Spaces. Beautifully Balanced.</div><div class="zone-footer"><button class="zone-run-btn" disabled style="opacity:.4">&#9654; Run Zone</button></div></div></div>
-        <div class="zone-card"><img class="zone-photo" src="./images/zones/zone-3.jpg" loading="lazy"><div class="zone-body"><div class="zone-header"><div class="zone-name">Z3 Back Left</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Natural Beauty. Peaceful Spaces.</div><div class="zone-footer"><button class="zone-run-btn" disabled style="opacity:.4">&#9654; Run Zone</button></div></div></div>
-        <div class="zone-card"><img class="zone-photo" src="./images/zones/zone-4.jpg" loading="lazy"><div class="zone-body"><div class="zone-header"><div class="zone-name">Z4 Back Right</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Outdoor Comfort. Backyard Retreat.</div><div class="zone-footer"><button class="zone-run-btn" disabled style="opacity:.4">&#9654; Run Zone</button></div></div></div>
-        <div class="zone-card"><img class="zone-photo" src="./images/zones/zone-5.jpg" loading="lazy"><div class="zone-body"><div class="zone-header"><div class="zone-name">Z5 Right Side Drive</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Defined Edges. Timeless Curb Appeal.</div><div class="zone-footer"><button class="zone-run-btn" disabled style="opacity:.4">&#9654; Run Zone</button></div></div></div>
-        <div class="zone-card"><img class="zone-photo" src="./images/zones/zone-6.jpg" loading="lazy"><div class="zone-body"><div class="zone-header"><div class="zone-name">Garden</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Nourished Growth. Healthy Living.</div><div class="zone-footer"><button class="zone-run-btn" disabled style="opacity:.4">&#9654; Run Zone</button></div></div></div>
+        <div class="zone-card"><img class="zone-photo" src="./images/zones/zone-1.jpg" loading="lazy"><div class="zone-body"><div class="zone-header"><div class="zone-name">Z1 Front Right</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Station 1</div><div class="zone-footer"><button class="zone-run-btn" onclick="irrStart(1)">&#9654; Run Zone</button></div></div></div>
+        <div class="zone-card"><img class="zone-photo" src="./images/zones/zone-2.jpg" loading="lazy"><div class="zone-body"><div class="zone-header"><div class="zone-name">Z2 Front Left</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Station 2</div><div class="zone-footer"><button class="zone-run-btn" onclick="irrStart(2)">&#9654; Run Zone</button></div></div></div>
+        <div class="zone-card"><img class="zone-photo" src="./images/zones/zone-3.jpg" loading="lazy"><div class="zone-body"><div class="zone-header"><div class="zone-name">Z3 Back Left</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Station 3</div><div class="zone-footer"><button class="zone-run-btn" onclick="irrStart(3)">&#9654; Run Zone</button></div></div></div>
+        <div class="zone-card"><img class="zone-photo" src="./images/zones/zone-4.jpg" loading="lazy"><div class="zone-body"><div class="zone-header"><div class="zone-name">Z4 Back Right</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Station 4</div><div class="zone-footer"><button class="zone-run-btn" onclick="irrStart(4)">&#9654; Run Zone</button></div></div></div>
+        <div class="zone-card"><img class="zone-photo" src="./images/zones/zone-5.jpg" loading="lazy"><div class="zone-body"><div class="zone-header"><div class="zone-name">Z5 Right Side Drive</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Station 5</div><div class="zone-footer"><button class="zone-run-btn" onclick="irrStart(5)">&#9654; Run Zone</button></div></div></div>
+        <div class="zone-card"><img class="zone-photo" src="./images/zones/zone-6.jpg" loading="lazy"><div class="zone-body"><div class="zone-header"><div class="zone-name">Garden</div><span class="zone-badge zone-badge-idle">IDLE</span></div><div class="zone-sub">Station 6</div><div class="zone-footer"><button class="zone-run-btn" onclick="irrStart(6)">&#9654; Run Zone</button></div></div></div>
       </div>
     </div>
 
     <!-- SETUP CARD — shown until B-Hyve is connected -->
     <div class="card" id="irrSetupCard">
-      <div class="card-title">&#9881; Add B-Hyve to Beehive</div>
-      <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px">B-Hyve isn't built into Home Assistant — install it in 2 steps through HACS.</div>
-
-      <div style="font-size:11px;font-weight:700;color:rgba(212,175,55,.85);letter-spacing:.5px;margin-bottom:8px;font-family:var(--serif)">STEP 1 — Install HACS (one time)</div>
-      <ul class="spec-list" style="margin-bottom:10px">
-        <li><span class="sk">Open</span><span class="sv">Beehive in a browser on your phone or computer</span></li>
-        <li><span class="sk">Go to</span><span class="sv">Settings &rarr; Add-ons &rarr; Add-on Store</span></li>
-        <li><span class="sk">Search</span><span class="sv">"Terminal &amp; SSH" &rarr; Install &rarr; Start</span></li>
-        <li><span class="sk">Open</span><span class="sv">Terminal add-on &rarr; paste this command:</span></li>
-      </ul>
-      <div style="background:rgba(0,0,0,.5);border:1px solid rgba(212,175,55,.2);border-radius:8px;padding:10px;margin-bottom:10px;font-family:monospace;font-size:11px;color:rgba(212,175,55,.85);word-break:break-all">wget -O - https://get.hacs.xyz | bash -</div>
-      <ul class="spec-list" style="margin-bottom:14px">
-        <li><span class="sk">Then</span><span class="sv">Restart Home Assistant (Settings &rarr; System &rarr; Restart)</span></li>
-        <li><span class="sk">After restart</span><span class="sv">HACS appears in the left sidebar</span></li>
-      </ul>
-
-      <div style="font-size:11px;font-weight:700;color:rgba(212,175,55,.85);letter-spacing:.5px;margin-bottom:8px;font-family:var(--serif)">STEP 2 — Install Orbit B-Hyve</div>
-      <ul class="spec-list" style="margin-bottom:14px">
-        <li><span class="sk">Open</span><span class="sv">HACS in sidebar &rarr; Integrations</span></li>
-        <li><span class="sk">Search</span><span class="sv">"Orbit B-Hyve" &rarr; Download &rarr; Restart HA</span></li>
-        <li><span class="sk">Go to</span><span class="sv">Settings &rarr; Integrations &rarr; Add Integration</span></li>
-        <li><span class="sk">Search</span><span class="sv">"Orbit B-Hyve" &rarr; enter your B-Hyve email &amp; password</span></li>
-        <li><span class="sk">Done!</span><span class="sv">Zones appear here automatically — no more setup needed</span></li>
-      </ul>
-
-      <div style="font-size:10px;color:rgba(220,195,145,.4);line-height:1.55;border-top:1px solid rgba(220,195,145,.1);padding-top:10px">Already have HACS? Skip Step 1 and go straight to Step 2.</div>
+      <div class="card-title">&#9881; B-Hyve Account</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px">Enter your Orbit B-Hyve login to enable live zone status and control.</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+        <input id="bhyveEmailIn" type="email" autocomplete="email" placeholder="B-Hyve email" style="width:100%;box-sizing:border-box;padding:10px 12px;background:rgba(0,0,0,.4);border:1px solid rgba(212,175,55,.3);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;outline:none;-webkit-appearance:none">
+        <input id="bhyvePassIn" type="password" autocomplete="current-password" placeholder="B-Hyve password" style="width:100%;box-sizing:border-box;padding:10px 12px;background:rgba(0,0,0,.4);border:1px solid rgba(212,175,55,.3);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;outline:none;-webkit-appearance:none">
+      </div>
+      <button onclick="saveBhyveCreds()" style="width:100%;padding:11px;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.4);border-radius:8px;color:#d4af37;font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:.5px">&#127807; Connect B-Hyve</button>
+      <div id="bhyveCredsMsg" style="font-size:11px;margin-top:8px;text-align:center;min-height:18px;color:var(--muted)"></div>
+      <div style="font-size:10px;color:rgba(220,195,145,.35);margin-top:10px;border-top:1px solid rgba(220,195,145,.1);padding-top:10px">Already using Beehive? Enter your HA token in HOME &mdash; zones appear automatically when Beehive is online.</div>
     </div>
 
   </div>
@@ -2151,37 +2135,52 @@ function renderUsage(){
 }
 
 // --- B-hyve CONTROL (PIN-gated) — start/stop zones + rain delay ---
-function irrPin(){
-  var p=localStorage.getItem('irr_pin');
-  if(!p){ p=prompt('Enter your sprinkler control PIN:'); if(p){ p=p.trim(); localStorage.setItem('irr_pin',p); } }
-  return p;
+function getBhyveCreds(){ return {email:localStorage.getItem('bhyve_email')||'',pass:localStorage.getItem('bhyve_pass')||''}; }
+function saveBhyveCreds(){
+  var e=document.getElementById('bhyveEmailIn'),p=document.getElementById('bhyvePassIn');
+  if(!e||!p) return;
+  var email=(e.value||'').trim(), pass=(p.value||'').trim();
+  var msg=document.getElementById('bhyveCredsMsg');
+  if(!email||!pass){ if(msg){msg.style.color='#ff6262';msg.textContent='Enter both email and password.';} return; }
+  localStorage.setItem('bhyve_email',email);
+  localStorage.setItem('bhyve_pass',pass);
+  if(msg){msg.style.color='#22c55e';msg.textContent='Saved! Connecting…';}
+  loadIrrigation();
 }
 function irrControl(action,opts){
-  var pin=irrPin(); if(!pin) return;
+  var creds=getBhyveCreds();
+  if(!creds.email||!creds.pass){
+    var sc=document.getElementById('irrSetupCard'); if(sc) sc.style.display='';
+    var b=document.getElementById('irrBanner'); if(b){b.className='wx-banner wx-no';b.innerHTML='&#128688; Enter B-Hyve login in the setup card below';}
+    return;
+  }
   var banner=document.getElementById('irrBanner');
-  if(banner){ banner.className='wx-banner wx-load'; banner.innerHTML='⏳ Sending '+action+'…'; }
-  fetch('/api/irrigation/control',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({pin:pin,action:action},opts||{}))})
+  if(banner){ banner.className='wx-banner wx-load'; banner.innerHTML='&#8987; Sending…'; }
+  fetch('/api/irrigation/control',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(Object.assign({email:creds.email,password:creds.pass,action:action},opts||{}))})
     .then(function(r){return r.json();})
     .then(function(d){
-      if(d&&d.error==='unauthorized'){ localStorage.removeItem('irr_pin'); alert('Wrong PIN — tap the button again to re-enter.'); }
-      else if(!d||!d.ok){ alert('Command failed: '+((d&&d.error)||'unknown')); }
+      if(!d||!d.ok){ alert('Command failed: '+((d&&d.error)||'unknown')); }
       setTimeout(loadIrrigation,2800);
     })
-    .catch(function(){ alert('Control request failed.'); setTimeout(loadIrrigation,2800); });
+    .catch(function(){ alert('Control request failed — check connection.'); setTimeout(loadIrrigation,2800); });
 }
 function irrStart(station){
   var m=prompt('Run Zone '+station+' for how many minutes?','10'); if(m===null) return;
   m=Math.max(1,Math.min(60,parseInt(m,10)||10));
-  if(confirm('💧 Start Zone '+station+' for '+m+' minutes right now?')) irrControl('start',{station:station,minutes:m});
+  if(confirm('Start Zone '+station+' for '+m+' minutes?')) irrControl('start',{station:station,minutes:m});
 }
-function irrStopAll(){ if(confirm('⏹ Stop all watering now?')) irrControl('stop',{}); }
-function irrRain(h){ if(confirm(h>0?('🌧️ Set a '+h+'-hour rain delay?'):('☀️ Clear the rain delay so watering resumes?'))) irrControl('rain_delay',{hours:h}); }
+function irrStopAll(){ if(confirm('Stop all watering now?')) irrControl('stop',{}); }
+function irrRain(h){ if(confirm(h>0?('Set a '+h+'-hour rain delay?'):('Clear the rain delay?'))) irrControl('rain_delay',{hours:h}); }
 
 // Orbit B-hyve irrigation — live zones/photos/status from /api/irrigation (worker proxy)
 function loadIrrigation(){
   var card=document.getElementById('irrigationCard'); if(!card) return;
   var b=document.getElementById('irrBanner');
   if(b){ b.className='wx-banner wx-load'; b.innerHTML='&#128260; Loading irrigation…'; }
+  // Pre-fill credentials form if creds already saved
+  var creds=getBhyveCreds();
+  var ei=document.getElementById('bhyveEmailIn'); if(ei&&creds.email) ei.value=creds.email;
   // Try Beehive first — if HA has B-Hyve integration, use that. Otherwise fall back to direct API.
   var haToken=getHaToken(), haBase=localStorage.getItem('ha_base')||HA_BASE;
   if(haToken && haBase){ loadIrrigationFromHA(haToken,haBase,function(){ loadIrrigationDirect(); }); return; }
@@ -2256,7 +2255,13 @@ function haIrrToggle(entityId,onOff){
 }
 
 function loadIrrigationDirect(){
-  fetch('/api/irrigation',{cache:'no-store'})
+  var creds=getBhyveCreds();
+  if(!creds.email||!creds.pass){
+    var b=document.getElementById('irrBanner');
+    if(b){ b.className='wx-banner wx-no'; b.innerHTML='&#128688; Enter your B-Hyve login below to see your zones'; }
+    return;
+  }
+  fetch('/api/irrigation?e='+encodeURIComponent(creds.email)+'&p='+encodeURIComponent(creds.pass),{cache:'no-store'})
     .then(function(r){ return r.json(); })
     .then(function(d){
       if(!d || !d.ok || !d.device){ throw new Error(d && d.error || 'no data'); }
@@ -2320,12 +2325,14 @@ function loadIrrigationDirect(){
       if(!b) return;
       var msg = err && err.message || 'unknown';
       b.className='wx-banner wx-no';
-      if(msg.indexOf('credentials_not_configured')>=0){
-        b.innerHTML='&#128688; B-Hyve credentials missing in Cloudflare Pages env vars';
-      } else if(msg.indexOf('login_failed')>=0){
-        b.innerHTML='&#128688; B-Hyve login failed — wrong email/password? Detail: ' + msg;
+      if(msg.indexOf('login_failed')>=0){
+        localStorage.removeItem('bhyve_email'); localStorage.removeItem('bhyve_pass');
+        b.innerHTML='&#128688; B-Hyve login failed &mdash; re-enter email &amp; password below';
+        var sc=document.getElementById('irrSetupCard'); if(sc) sc.style.display='';
+        var ei=document.getElementById('bhyveEmailIn'); if(ei) ei.value='';
+        var pi=document.getElementById('bhyvePassIn'); if(pi) pi.value='';
       } else if(msg.indexOf('no_timer_device')>=0){
-        b.innerHTML='&#128688; No irrigation timer found in B-Hyve account';
+        b.innerHTML='&#128688; No irrigation timer found in your B-Hyve account';
       } else {
         b.innerHTML='&#128688; B-Hyve error: ' + msg;
       }
