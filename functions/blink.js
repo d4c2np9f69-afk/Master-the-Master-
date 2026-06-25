@@ -48,8 +48,9 @@ info "Updating manifest (adding required version field)..."
 if grep -q '"version"' "\${DST}/manifest.json"; then
   sed -i 's/"version": "[^"]*"/"version": "2026.6.4-hcc-2fa-fix"/' "\${DST}/manifest.json"
 else
-  sed -i '2i\\  "version": "2026.6.4-hcc-2fa-fix",' "\${DST}/manifest.json"
+  awk 'NR==1{print; print "  \\"version\\": \\"2026.6.4-hcc-2fa-fix\\","} NR>1' "\${DST}/manifest.json" > /tmp/blink_manifest.json && mv /tmp/blink_manifest.json "\${DST}/manifest.json"
 fi
+grep '"version"' "\${DST}/manifest.json" | head -1 || die "Version field still missing after update"
 ok "Manifest updated"
 
 info "Restarting Home Assistant..."
