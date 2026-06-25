@@ -18,10 +18,15 @@ echo ""
 
 [[ -d /config ]] || die "Must run inside the Beehive HA Terminal add-on"
 
-SRC="/usr/src/homeassistant/homeassistant/components/blink"
 DST="/config/custom_components/blink"
 
-[[ -d "\$SRC" ]] || die "Built-in Blink component not found at \$SRC — wrong HA version?"
+info "Locating built-in Blink component..."
+SRC=\$(python3 -c "import homeassistant.components.blink as m, os; print(os.path.dirname(m.__file__))" 2>/dev/null || true)
+if [[ -z "\$SRC" ]]; then
+  SRC=\$(find / -path "*/homeassistant/components/blink" -type d 2>/dev/null | head -1 || true)
+fi
+[[ -n "\$SRC" && -d "\$SRC" ]] || die "Cannot find built-in Blink component — try: find / -path '*/components/blink' -type d"
+ok "Found at \$SRC"
 
 info "Copying built-in Blink component to custom_components..."
 mkdir -p /config/custom_components
