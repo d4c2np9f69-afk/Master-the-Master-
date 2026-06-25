@@ -4,6 +4,7 @@
 const SCRIPT = `#!/usr/bin/env bash
 set -eu
 HCC_BASE="https://toro1-5rz.pages.dev"
+GH_BASE="https://raw.githubusercontent.com/home-assistant/core"
 R='\\033[0;31m' G='\\033[0;32m' C='\\033[0;36m' Y='\\033[1;33m' N='\\033[0m'
 OK="\${G}✓\${N}" ERR="\${R}✗\${N}" INFO="\${C}→\${N}"
 ok()   { echo -e "  \${OK}  $1"; }
@@ -19,25 +20,29 @@ echo ""
 [[ -d /config ]] || die "Must run inside the Beehive HA Terminal add-on"
 
 DST="/config/custom_components/blink"
+mkdir -p "\$DST"
 
-info "Locating built-in Blink component..."
-SRC=\$(python3 -c "import homeassistant.components.blink as m, os; print(os.path.dirname(m.__file__))" 2>/dev/null || true)
-if [[ -z "\$SRC" ]]; then
-  SRC=\$(find / -path "*/homeassistant/components/blink" -type d 2>/dev/null | head -1 || true)
-fi
-[[ -n "\$SRC" && -d "\$SRC" ]] || die "Cannot find built-in Blink component — try: find / -path '*/components/blink' -type d"
-ok "Found at \$SRC"
+info "Reading HA version..."
+HA_VER=\$(cat /config/.HA_VERSION 2>/dev/null | tr -d '[:space:]')
+[[ -n "\$HA_VER" ]] || die "Cannot read HA version — is /config/.HA_VERSION missing?"
+ok "HA version: \$HA_VER"
 
-info "Copying built-in Blink component to custom_components..."
-mkdir -p /config/custom_components
-rm -rf "\$DST"
-cp -R "\$SRC" "\$DST"
-ok "Copied to \$DST"
+info "Downloading Blink integration from GitHub (v\$HA_VER)..."
+BASE="\${GH_BASE}/\${HA_VER}/homeassistant/components/blink"
+FILES="__init__.py camera.py const.py coordinator.py manifest.json sensor.py strings.json binary_sensor.py diagnostics.py alarm_control_panel.py"
+COUNT=0
+for f in \$FILES; do
+  if curl -fsSL "\${BASE}/\${f}" -o "\${DST}/\${f}" 2>/dev/null; then
+    COUNT=\$((COUNT+1))
+  fi
+done
+[[ \$COUNT -ge 4 ]] || die "Only downloaded \$COUNT files — check internet or HA version tag on GitHub"
+ok "Downloaded \$COUNT integration files"
 
-info "Downloading patched config_flow.py..."
+info "Installing 2FA patch..."
 curl -fsSL "\${HCC_BASE}/beehive/blink/config_flow.py" -o "\${DST}/config_flow.py" \\
-  || die "Download failed — check internet connection and try again"
-ok "Patched config_flow.py installed"
+  || die "Failed to download patched config_flow.py"
+ok "2FA patch applied"
 
 info "Updating manifest version..."
 python3 - <<'PY'
@@ -56,17 +61,15 @@ ha core restart 2>/dev/null && ok "Restart triggered — wait ~60 seconds" || tr
 
 echo ""
 echo -e "\${C}╔══════════════════════════════════════════════╗\${N}"
-echo -e "\${C}║         BLINK 2FA FIX INSTALLED              ║\${N}"
+echo -e "\${C}║         BLINK 2FA FIX INSTALLED!             ║\${N}"
 echo -e "\${C}╚══════════════════════════════════════════════╝\${N}"
 echo ""
-echo -e "  \${Y}NEXT STEPS (after HA restarts):\${N}"
-echo -e "  1. Settings → Integrations → find Blink card"
-echo -e "  2. Tap the ⋮ three dots → Delete"
-echo -e "  3. Tap + Add Integration → search Blink"
-echo -e "  4. Enter your Blink email + password"
-echo -e "  5. A 6-digit code will arrive by text"
-echo -e "  6. Enter the code in the HA dialog immediately"
-echo -e "  7. Cameras will appear!"
+echo -e "  \${Y}AFTER HA RESTARTS:\${N}"
+echo -e "  1. Settings → Integrations → Blink → ⋮ → Delete"
+echo -e "  2. + Add Integration → Blink"
+echo -e "  3. Enter your Blink email + password"
+echo -e "  4. Code arrives by text — enter it immediately"
+echo -e "  5. Cameras appear!"
 echo ""
 `;
 
