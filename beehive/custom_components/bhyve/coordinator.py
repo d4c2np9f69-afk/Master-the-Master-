@@ -30,7 +30,7 @@ async def bhyve_login(session: aiohttp.ClientSession, email: str, password: str)
                 async with session.post(
                     f"{base}/session",
                     headers=hdrs,
-                    json={"email": email, "password": password},
+                    json={"session": {"email": email, "password": password}},
                     timeout=aiohttp.ClientTimeout(total=10),
                 ) as r:
                     body = await r.text()

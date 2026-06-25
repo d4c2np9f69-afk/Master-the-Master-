@@ -30,7 +30,7 @@ async function bhyveLogin(email, password) {
         const r = await fetch(`${base}/session`, {
           method: 'POST',
           headers: makeHeaders(appId),
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify({ session: { email, password } })
         });
         const body = await r.text().catch(() => '');
         attempts.push({ base, appId, status: r.status, body: body.slice(0, 80) });
