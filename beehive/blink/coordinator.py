@@ -55,7 +55,7 @@ class BlinkUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             raise ConfigEntryError("Unknown error connecting to Blink") from ex
 
         if not self.api.available:
-            raise ConfigEntryNotReady
+            raise ConfigEntryAuthFailed("Blink authentication required")
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Async update wrapper."""
