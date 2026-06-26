@@ -161,37 +161,26 @@ async function getDeviceState(accessToken, deviceId) {
 }
 
 async function setDeviceState(accessToken, deviceId, state) {
-  // Write endpoint uses device ID in URL path (GET uses Deviceid header, PUT uses path)
-  // Try both URL patterns + both HTTP methods to find what the API accepts
-  const urlsToTry = [
-    `${API_BASE}/device/${encodeURIComponent(deviceId)}`,
-    `${API_BASE}/devices/${encodeURIComponent(deviceId)}`,
-    `${API_BASE}/device`,
-  ];
-  const methods = ['PUT', 'PATCH'];
+  // Try multiple methods — Python luxgeo package uses PUT with full state,
+  // but some endpoints use POST. 500 = right URL wrong body/method; 404 = wrong URL.
   const errors = [];
-
-  for (const url of urlsToTry) {
-    for (const method of methods) {
-      const r = await fetch(url, {
-        method,
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-          'Deviceid': deviceId,
-        },
-        body: JSON.stringify(state),
-      });
-      if (r.ok) return await r.json().catch(() => ({}));
-      const b = await r.text().catch(() => '');
-      errors.push(`${method} ${url.replace(API_BASE,'')} → ${r.status}`);
-      // 404 = wrong URL, keep trying; 4xx other = auth/body issue, stop
-      if (r.status !== 404 && r.status !== 405 && method === 'PATCH') {
-        throw new Error(`set_device: ${r.status} — ${b.slice(0, 80)} [${errors.join(', ')}]`);
-      }
-    }
+  for (const method of ['PUT', 'POST', 'PATCH']) {
+    const r = await fetch(`${API_BASE}/device`, {
+      method,
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Deviceid': deviceId,
+        'User-Agent': 'LUXGeo/1.0',
+      },
+      body: JSON.stringify(state),
+    });
+    if (r.ok) return await r.json().catch(() => ({}));
+    const b = await r.text().catch(() => '');
+    errors.push(`${method} → ${r.status}: ${b.slice(0, 60)}`);
   }
-  throw new Error(`set_device: all URLs 404 — [${errors.join(', ')}] body: ${JSON.stringify(state)}`);
+  throw new Error(`set_device failed — ${errors.join(' | ')}`);
 }
 
 function parseThermostat(state, deviceId, deviceName) {
@@ -253,23 +242,24 @@ export async function onRequestPost({ request, env }) {
       return Response.json({ ok: false, error: diag, raw: userData }, { status: 404 });
     }
 
-    // Build minimal body — only the ONE field being changed (avoid sending read-only fields)
-    let putBody;
+    // GET full raw state, modify the target field, PUT the whole object back
+    // (matches Python luxgeo package behavior: d = get_state(); d[field]=val; put(d))
+    const currentState = await getDeviceState(tokens.access_token, device.id);
+
     if (action === 'set_sp') {
-      putBody = {};
-      if (heat_sp != null) putBody.holdheat = parseInt(heat_sp, 10);
-      if (cool_sp != null) putBody.holdcool = parseInt(cool_sp, 10);
+      if (heat_sp != null) currentState.holdheat = parseInt(heat_sp, 10);
+      if (cool_sp != null) currentState.holdcool = parseInt(cool_sp, 10);
     } else if (action === 'set_mode') {
       const modeInt = MODE_TO_INT[value];
       if (modeInt === undefined) return Response.json({ ok: false, error: 'unknown_mode: ' + value }, { status: 400 });
-      putBody = { systemmode: modeInt };
+      currentState.systemmode = modeInt;
     } else if (action === 'set_fan') {
-      putBody = { fanmode: value === 'on' ? 1 : 0 };
+      currentState.fanmode = value === 'on' ? 1 : 0;
     } else {
       return Response.json({ ok: false, error: 'unknown_action: ' + action }, { status: 400 });
     }
 
-    await setDeviceState(tokens.access_token, device.id, putBody);
+    await setDeviceState(tokens.access_token, device.id, currentState);
     const newState = await getDeviceState(tokens.access_token, device.id);
     return Response.json({ ok: true, thermostat: parseThermostat(newState, device.id, device.name) });
   } catch (e) {
