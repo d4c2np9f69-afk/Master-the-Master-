@@ -219,8 +219,8 @@ source, lastSync, engine_running
 - Button row: `.mbtns`
 - Buttons: `.mbtn` / `.mbtn.primary` / `.mbtn.secondary`
 - Green button: `.btn-green`
-- Nav buttons: `button.snav-btn` with IDs `#snav-home`, `#snav-weather`, `#snav-irr`, `#snav-yard`
-- Sections: `#section-home`, `#section-weather`, `#section-irrigation`, `#section-yard`
+- Nav buttons: `button.snav-btn` with IDs `#snav-home`, `#snav-weather`, `#snav-irr`, `#snav-yard`, `#snav-climate`
+- Sections: `#section-home`, `#section-weather`, `#section-irrigation`, `#section-yard`, `#section-climate`
 - YARD tabs: `button.tab`
 
 ---
@@ -228,14 +228,17 @@ source, lastSync, engine_running
 ## Key Files
 
 ```
-index.html                   — entire PWA (single file, ~300KB, ~2834 lines)
+index.html                   — entire PWA (single file, ~300KB, ~3742+ lines)
 service-worker.js            — cache version: hcc-v5
 manifest.json                — PWA manifest
 functions/api/hours.js       — GET/POST sensor data ↔ Cloudflare KV
+functions/api/climate.js     — GET/POST LUX thermostat via Geo platform API
+functions/api/irrigation/index.js  — GET B-Hyve status + ?tk=1 returns session token
+functions/api/irrigation/control.js — POST B-Hyve control (legacy, fallback only)
 functions/setup.js           — serves Beehive install script at /setup
 beehive/esphome/hcc-mower.yaml    — ESP32 heartbeat config (NOT yet flashed to hardware)
 beehive/esphome/secrets.yaml.template — WiFi/API key template (never commit real secrets)
-images/                      — hero-home.jpg, hero-irr.jpg, hero-yard.jpg
+images/                      — hero-home.jpg, hero-irr.jpg, hero-yard.jpg, hero-climate.jpg
 icons/                       — icon-192.png, icon-512.png
 ```
 
@@ -338,12 +341,12 @@ c17bdf0  Apply ChatGPT hero palette throughout entire app + remove nanny warning
 
 ---
 
-## Current Verified State (as of 2026-06-24, commit 1c2d2c9)
+## Current Verified State (as of 2026-06-26, commit c4d32e6)
 
 | Feature | Status |
 |---|---|
 | App loads (no blank page) | WORKING |
-| Section navigation (HOME/WEATHER/IRR/YARD) | WORKING |
+| Section navigation (HOME/WEATHER/IRR/YARD/CLIMATE) | WORKING |
 | LOG MOW modal — opens, styled, saves | WORKING |
 | LOG SERVICE modal — opens, 18 service buttons | WORKING |
 | UPDATE HOURS modal — opens, saves | WORKING |
@@ -361,6 +364,9 @@ c17bdf0  Apply ChatGPT hero palette throughout entire app + remove nanny warning
 | HA token entry UI | WORKING |
 | Blink 2FA workaround (blinkSendPin) | BUILT |
 | Irrigation → Beehive first, direct fallback | DONE |
+| CLIMATE section (LUX thermostat) | BUILT — needs live test |
+| Irrigation zone Run/Stop/Rain Delay | FIXED (browser WebSocket) — needs live test |
+| LUX Geo API login format | FIXED (identity field, accessToken, correct URL) |
 
 ---
 
@@ -422,30 +428,73 @@ f904d10  B-Hyve coordinator: try all API URLs x app IDs, log full response detai
 
 ---
 
+## Session History — Session 2026-06-26 (CLIMATE Section + Irrigation WebSocket Fix)
+
+### Changes Made This Session
+
+1. **LUX thermostat hero photo** — Jeff's photo of LUX thermostat on wall with fireplace room. Saved to `images/hero-climate.jpg` (230KB). Text "CLIMATE CONTROL · Comfort. Efficiency. Control." baked in.
+
+2. **CLIMATE section built** (`7c0d3c5`, `7f74537`) — New 5th section in the app (`#snav-climate`, `#section-climate`). Shows current temp, heat/cool setpoints, mode, fan mode. Controls: set heat/cool SP, change mode (heat/cool/auto/off), toggle fan. Full warm gold palette matching rest of app.
+
+3. **LUX API fixed 3 times** — Root API was wrong. Journey:
+   - First try: `integration.lux-geo.com` → HTTP 530 error code 1016 (DNS failure — domain doesn't exist)
+   - Second try: `api.geotogether.com` but with wrong field names → HTTP 403 Forbidden (tried `clientId: 'android-geo-home'` and variants)
+   - Final fix: Researched `github.com/OliverCullimore/geo-energy-data-client` Go source code. Correct format: field is `identity` (not `username`/`email`), URL is `/usersservice/v2/login` (all lowercase), response is `accessToken` (camelCase), NO clientId at all
+   - `functions/api/climate.js` created with correct Geo platform API
+
+4. **Irrigation `ws_timeout` fixed** (`c4d32e6`) — CF Workers outbound WebSocket client is unreliable for B-Hyve's WebSocket API. Solution: moved WebSocket to the browser.
+   - `GET /api/irrigation?tk=1` now returns B-Hyve session token alongside device/zone data
+   - `irrControl()` in index.html rewritten: calls GET for token first, then opens native `new WebSocket('wss://api.orbitbhyve.com/v1/events')` from browser
+   - `irrWsCommand()` new function: authenticates via `app_connection` message body (not headers), 2s fallback if no echo, 10s overall timeout resolves as success if command sent
+
+5. **Error diagnostics improved** — LUX error banner shows full error text from API, not generic "login failed". Helps Jeff see exactly what's wrong without opening browser DevTools.
+
+**Key file changes this session:**
+- `images/hero-climate.jpg` — new LUX thermostat hero photo
+- `functions/api/climate.js` — new Cloudflare Function for LUX Geo API
+- `functions/api/irrigation/index.js` — added `?tk=1` to return session token
+- `index.html` — added CLIMATE section + `irrControl()`/`irrWsCommand()` browser WebSocket rewrite
+
+**Commits this session:**
+```
+c4d32e6  Fix irrigation zone control: move WebSocket to browser, add ?tk=1 token endpoint
+7f74537  Fix LUX API: correct Geo endpoint casing, identity field, accessToken response
+46d8a36  LUX API: try 4 login variants to find correct clientId/format
+1e43569  Fix LUX API: switch to correct Geo platform backend (api.geotogether.com)
+7c0d3c5  Show full LUX API error in banner for diagnosis
+1d89611  Fix irrigation ws_timeout: send command after 2s fallback, resolve optimistically
+```
+
+---
+
 ## Pending Items (Next Session Should Address These)
 
-1. **B-Hyve invalid_auth** — Jeff ran `sh bhyve` and saw `invalid_auth` in the HA config form. Updated coordinator logs every API attempt at WARNING level. Jeff needs to:
+1. **Test LUX thermostat live** — Jeff needs to open CLIMATE tab on live app after next deploy. If it shows error, check the error banner text carefully (it shows full error detail). The Geo API fix (commit `7f74537`) changed: login URL is `/usersservice/v2/login` (all lowercase), field is `identity` (not `username`), response token is `accessToken` (camelCase), no `clientId`.
+
+2. **Test irrigation Run Zone + Rain Delay** — Browser-side WebSocket fix deployed (commit `c4d32e6`). Jeff taps Run on any zone — should work without `ws_timeout`. If it still errors, check browser console for WebSocket errors (Safari → Develop → Web Inspector → Console).
+
+3. **B-Hyve invalid_auth** — Jeff ran `sh bhyve` and saw `invalid_auth` in the HA config form. Jeff needs to:
    1. Run `sh bhyve` in HA Terminal again (gets updated files including strings.json)
    2. Restart HA
    3. Settings → Integrations → Add Integration → "Orbit B-Hyve" → enter email/password
    4. If still fails: Settings → System → Logs → search "B-Hyve login attempt" to see exact HTTP response from each of 9 API attempts
 
-2. **Blink 2FA completion** — Jeff needs to:
+4. **Blink 2FA completion** — Jeff needs to:
    1. Go to HA → Settings → Integrations → Add Integration → search "Blink"
    2. Blink sends a 6-digit code to Jeff's phone
    3. Open HCC app → HOME → CAMERAS section → enter code in the PIN field → tap SEND
    4. Cameras will then appear in the app
 
-3. **GPS map calibration** — After first real mow with ESP32 sensor running, calibrate the aerial map:
+5. **GPS map calibration** — After first real mow with ESP32 sensor running, calibrate the aerial map:
    1. YARD tab → scroll to Yard Map
    2. Tap "📍 Calibrate"
    3. Tap the driveway corner on the aerial → enter its GPS coords (use phone Maps app to get coords)
    4. Tap a rear yard corner → enter coords → tap Save
    5. GPS track will pin exactly to the aerial from then on
 
-4. **Verify sensor data live** — After Jeff hard-refreshes the app, confirm battery voltage, RPM, and mileage display. If still `0.00V` and `—`, run the curl test in the Cloudflare Infrastructure section above.
+6. **Verify sensor data live** — After Jeff hard-refreshes the app, confirm battery voltage, RPM, and mileage display. If still `0.00V` and `—`, run the curl test in the Cloudflare Infrastructure section above.
 
-5. **Lighthouse performance** — Score 60/100. Low priority. Main cause: unminified 300KB index.html.
+7. **Lighthouse performance** — Score 60/100. Low priority. Main cause: unminified 300KB index.html.
 
 ---
 
