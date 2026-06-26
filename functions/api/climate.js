@@ -1,130 +1,210 @@
-// /api/climate — LUX Connected Home thermostat via Geo platform API
-// GET params: e (email/identity), p (password)
-// POST body: { email, password, action, cool_sp?, heat_sp?, value? }
-const GEO_BASE = 'https://api.geotogether.com';
+// /api/climate — LUX Connected Home thermostat via Azure B2C + myluxstat.io
+// GET: returns thermostat status
+// POST: controls thermostat — body: { email, password, action, heat_sp?, cool_sp?, value? }
+// Actions: set_sp, set_mode (heat/cool/auto/off), set_fan (on/auto)
 
-const C_TO_F = c => Math.round(c * 9 / 5 + 32);
-const F_TO_C = f => +((f - 32) * 5 / 9).toFixed(1);
+const CLIENT_ID = 'b335ca43-3bde-4406-b281-8816afb7cc91';
+const REDIRECT_URI = 'connecteddevicesjci.luxmobile://connecteddevicesjci/path';
+const SCOPE = 'https://connecteddevicesjci.onmicrosoft.com/mobile/user_impersonation https://connecteddevicesjci.onmicrosoft.com/mobile/read_write offline_access openid';
+const B2C_TENANT = 'connecteddevicesjci.onmicrosoft.com';
+const B2C_POLICY = 'B2C_1A_SignIn';
+const B2C_BASE = 'https://connecteddevicesjci.b2clogin.com';
+const API_BASE = 'https://www.myluxstat.io/api';
 
-const MODE_FROM_GEO = { '1': 'heat', '2': 'cool', '4': 'auto', '5': 'off', '0': 'off' };
-const MODE_TO_GEO   = { heat: '1', cool: '2', auto: '4', off: '5' };
+const MODE_MAP = { 0: 'off', 1: 'heat', 2: 'cool', 3: 'auto' };
+const MODE_TO_INT = { off: 0, heat: 1, cool: 2, auto: 3 };
 
-async function geoLogin(identity, password) {
-  const r = await fetch(`${GEO_BASE}/usersservice/v2/login`, {
+async function generatePKCE() {
+  const buf = new Uint8Array(32);
+  crypto.getRandomValues(buf);
+  const cv = btoa(String.fromCharCode(...buf)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(cv));
+  const cc = btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  return { cv, cc };
+}
+
+function parseCookiesFromHeader(raw) {
+  const result = {};
+  if (!raw) return result;
+  // Multiple Set-Cookie values may be comma-separated (CF Workers joins them)
+  // Split on comma followed by a non-space-then-semicolon sequence (new cookie starts)
+  const parts = raw.split(/,(?=\s*[^;,]+=)/);
+  for (const part of parts) {
+    const m = part.trim().match(/^([^=\s;]+)=([^;]*)/);
+    if (m) result[m[1]] = m[2];
+  }
+  return result;
+}
+
+function cookieStr(cookies) {
+  return Object.entries(cookies).map(([k, v]) => `${k}=${v}`).join('; ');
+}
+
+async function luxAuth(email, password) {
+  const { cv, cc } = await generatePKCE();
+
+  const authUrl = new URL(`${B2C_BASE}/te/${B2C_TENANT}/${B2C_POLICY}/oauth2/v2.0/authorize`);
+  authUrl.searchParams.set('nonce', cc.slice(0, 22));
+  authUrl.searchParams.set('audience', `https://${B2C_TENANT}`);
+  authUrl.searchParams.set('scope', SCOPE);
+  authUrl.searchParams.set('response_type', 'code');
+  authUrl.searchParams.set('client_id', CLIENT_ID);
+  authUrl.searchParams.set('code_challenge', cc);
+  authUrl.searchParams.set('code_challenge_method', 'S256');
+  authUrl.searchParams.set('redirect_uri', REDIRECT_URI);
+  authUrl.searchParams.set('state', cv.slice(0, 22));
+  const authorizeUrl = authUrl.toString();
+
+  // Step 1: GET authorize page to get CSRF + StateProperties
+  const r1 = await fetch(authorizeUrl);
+  if (!r1.ok) throw new Error(`auth_step1: ${r1.status}`);
+  const html = await r1.text();
+
+  let cookies = parseCookiesFromHeader(r1.headers.get('set-cookie') || '');
+  const csrf = cookies['x-ms-cpim-csrf'] || '';
+  if (!csrf) throw new Error(`auth_no_csrf — cookie keys: ${Object.keys(cookies).join(',')}`);
+
+  const spMatch = html.match(/"transId":"StateProperties=([^"]+)"/);
+  if (!spMatch) throw new Error('auth_no_state_properties');
+  const sp = spMatch[1];
+
+  // Step 2: POST credentials to SelfAsserted
+  const url2 = `${B2C_BASE}/${B2C_TENANT}/${B2C_POLICY}/SelfAsserted?tx=StateProperties=${sp}&p=${B2C_POLICY}`;
+  const r2 = await fetch(url2, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({ identity, password }),
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-Csrf-Token': csrf,
+      'Cookie': cookieStr(cookies),
+      'Referer': authorizeUrl,
+    },
+    body: new URLSearchParams({ request_type: 'RESPONSE', logonIdentifier: email, password }).toString(),
   });
-  const body = await r.text().catch(() => '');
-  if (!r.ok) throw new Error(`login_failed — HTTP ${r.status} — ${body.slice(0, 200)}`);
-  const data = JSON.parse(body);
-  const token = data.accessToken || data.access_token || data.token;
-  if (!token) throw new Error(`login_failed — no accessToken — keys: ${Object.keys(data).join(',')}`);
-  return { token, username: data.username || data.email || identity };
-}
+  const sc2 = r2.headers.get('set-cookie') || '';
+  cookies = { ...cookies, ...parseCookiesFromHeader(sc2) };
 
-async function geoGetSystems(token) {
-  const r = await fetch(`${GEO_BASE}/api/userapi/v2/user/detail-systems?systemDetails=true`, {
-    headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` },
-  });
-  if (!r.ok) {
-    const body = await r.text().catch(() => '');
-    throw new Error(`systems_failed: HTTP ${r.status} — ${body.slice(0, 120)}`);
-  }
-  const data = await r.json();
-  // systemDetails is an array; grab first systemId
-  const systems = data.systemRoles || data.systemDetails || [];
-  const sys = systems[0] || {};
-  const systemId = sys.systemId || sys.id || null;
-  return { systemId, systems };
-}
-
-async function geoGetLive(token, systemId) {
-  const r = await fetch(`${GEO_BASE}/api/userapi/system/smets2-live-data/${systemId}`, {
-    headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` },
-  });
-  if (!r.ok) {
-    const body = await r.text().catch(() => '');
-    throw new Error(`live_failed: HTTP ${r.status} — ${body.slice(0, 120)}`);
-  }
-  return await r.json();
-}
-
-async function geoGetPeriodic(token, systemId) {
-  const r = await fetch(`${GEO_BASE}/api/userapi/system/smets2-periodic-data/${systemId}`, {
-    headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` },
-  });
-  if (!r.ok) return null;
-  return await r.json();
-}
-
-function getFeature(arr, ...names) {
-  if (!Array.isArray(arr)) return null;
-  for (const name of names) {
-    const f = arr.find(x => x.feature === name || x.type === name || x.name === name);
-    if (f) return f.value ?? f.val ?? f.data;
-  }
-  return null;
-}
-
-function parseThermostat(live, periodic, systemId) {
-  // live data has temperature, systemStatus, power fields
-  // periodic data has setPoints for heating/cooling
-  const sp = (periodic && periodic.setPoints) || {};
-  const heatSp = sp.heatingSetpoint ?? sp.heat ?? sp.heating ?? null;
-  const coolSp = sp.coolingSetpoint ?? sp.cool ?? sp.cooling ?? null;
-
-  // Temperature: live.temperature is likely in Celsius tenths or Celsius
-  let tempC = null;
-  if (live.temperature != null) {
-    tempC = live.temperature > 100 ? live.temperature / 10 : live.temperature;
+  const r2body = await r2.text().catch(() => '');
+  if (r2body.includes('"status":"400"') || r2body.includes('"status":"401"')) {
+    let msg = 'invalid_credentials';
+    const errMatch = r2body.match(/"message"\s*:\s*"([^"]+)"/);
+    if (errMatch) msg = errMatch[1];
+    throw new Error(`login_failed: ${msg}`);
   }
 
-  // Mode from systemStatus
-  const status = live.systemStatus || {};
-  const modeRaw = String(status.operationMode ?? status.mode ?? status.hvacMode ?? '5');
-  const fanRaw  = String(status.fanMode ?? status.fan ?? '0');
-
-  // Try device-data array if present
-  const devData = live.deviceData || live.data || [];
-  const ch = Array.isArray(devData) ? (devData[0] || {}) : devData;
-  const features = ch.data || ch.channelData || [];
-  if (features.length) {
-    if (tempC === null) {
-      const v = getFeature(features, 'TEMPERATURE', 'INDOOR_TEMPERATURE');
-      if (v != null) tempC = parseFloat(v);
+  // Step 3: GET confirmed — follow redirects until we hit the custom-scheme one with the code
+  const url3 = `${B2C_BASE}/${B2C_TENANT}/${B2C_POLICY}/api/CombinedSigninAndSignup/confirmed?csrf_token=${csrf}&tx=StateProperties=${sp}&p=${B2C_POLICY}`;
+  let codeUrl = '';
+  let nextUrl = url3;
+  for (let i = 0; i < 8; i++) {
+    const r3 = await fetch(nextUrl, {
+      redirect: 'manual',
+      headers: {
+        'X-Csrf-Token': csrf,
+        'Cookie': cookieStr(cookies),
+        'Referer': url3,
+      },
+    });
+    const loc = r3.headers.get('location') || '';
+    if (!loc) break;
+    const sc3 = r3.headers.get('set-cookie') || '';
+    if (sc3) cookies = { ...cookies, ...parseCookiesFromHeader(sc3) };
+    if (loc.startsWith('http://') || loc.startsWith('https://')) {
+      nextUrl = loc;
+    } else {
+      codeUrl = loc;
+      break;
     }
   }
 
+  if (!codeUrl.includes('code=')) throw new Error(`auth_no_code — redirect: ${codeUrl.slice(0, 120)}`);
+  const codeMatch = codeUrl.match(/[?&]code=([^&]+)/);
+  if (!codeMatch) throw new Error('auth_code_parse_failed');
+  const code = decodeURIComponent(codeMatch[1]);
+
+  // Step 4: Exchange code + PKCE verifier for tokens
+  const r4 = await fetch(`${B2C_BASE}/te/${B2C_TENANT}/${B2C_POLICY}/oauth2/v2.0/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: CLIENT_ID,
+      scope: SCOPE,
+      code,
+      redirect_uri: REDIRECT_URI,
+      grant_type: 'authorization_code',
+      code_verifier: cv,
+    }).toString(),
+  });
+  const r4body = await r4.text().catch(() => '{}');
+  if (!r4.ok) throw new Error(`auth_token: ${r4.status} — ${r4body.slice(0, 120)}`);
+  const tokens = JSON.parse(r4body);
+  if (!tokens.access_token) throw new Error(`auth_no_access_token — keys: ${Object.keys(tokens).join(',')}`);
+  return tokens;
+}
+
+async function getLocationUser(accessToken) {
+  const r = await fetch(`${API_BASE}/location/user`, {
+    headers: { 'Authorization': `Bearer ${accessToken}` },
+  });
+  if (!r.ok) throw new Error(`location_user: ${r.status}`);
+  return await r.json();
+}
+
+async function getDeviceState(accessToken, deviceId) {
+  const r = await fetch(`${API_BASE}/device`, {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Deviceid': deviceId,
+    },
+  });
+  if (!r.ok) throw new Error(`device_state: ${r.status}`);
+  return await r.json();
+}
+
+async function setDeviceState(accessToken, deviceId, state) {
+  const r = await fetch(`${API_BASE}/device`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      'Deviceid': deviceId,
+    },
+    body: JSON.stringify(state),
+  });
+  if (!r.ok) {
+    const b = await r.text().catch(() => '');
+    throw new Error(`set_device: ${r.status} — ${b.slice(0, 100)}`);
+  }
+  return await r.json().catch(() => ({}));
+}
+
+function parseThermostat(state, deviceId, deviceName) {
   return {
-    device_id: systemId,
-    name: live.name || live.systemName || 'LUX Thermostat',
-    current_temp: tempC != null ? C_TO_F(tempC) : null,
-    cool_sp: coolSp != null ? C_TO_F(parseFloat(coolSp)) : 72,
-    heat_sp: heatSp != null ? C_TO_F(parseFloat(heatSp)) : 68,
-    op_mode: MODE_FROM_GEO[modeRaw] || 'off',
-    fan_mode: fanRaw === '1' || fanRaw === 'on' ? 'on' : 'auto',
-    raw: live,
+    device_id: deviceId,
+    name: deviceName || state.name || 'LUX Thermostat',
+    current_temp: state.currenttemp ?? state.currentTemp ?? null,
+    heat_sp: state.holdheat ?? state.heatSetpoint ?? 68,
+    cool_sp: state.holdcool ?? state.coolSetpoint ?? 72,
+    op_mode: MODE_MAP[state.systemmode] ?? 'off',
+    fan_mode: (state.fanmode === 1 || state.fanMode === 'on') ? 'on' : 'auto',
+    raw: state,
   };
 }
 
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
-  const identity = env.LUX_EMAIL    || url.searchParams.get('e') || '';
-  const password  = env.LUX_PASSWORD || url.searchParams.get('p') || '';
-
-  if (!identity || !password) {
-    return Response.json({ ok: false, error: 'credentials_not_provided' }, { status: 400 });
-  }
+  const email    = env.LUX_EMAIL    || url.searchParams.get('e') || '';
+  const password = env.LUX_PASSWORD || url.searchParams.get('p') || '';
+  if (!email || !password) return Response.json({ ok: false, error: 'credentials_not_provided' }, { status: 400 });
 
   try {
-    const { token }        = await geoLogin(identity, password);
-    const { systemId }     = await geoGetSystems(token);
-    if (!systemId) return Response.json({ ok: false, error: 'no_system_found' }, { status: 404 });
-    const live             = await geoGetLive(token, systemId);
-    const periodic         = await geoGetPeriodic(token, systemId);
-    const thermostat       = parseThermostat(live, periodic, systemId);
-    return Response.json({ ok: true, thermostat });
+    const tokens = await luxAuth(email, password);
+    const userData = await getLocationUser(tokens.access_token);
+    const loc = (userData.location || userData.locations?.[0]) || {};
+    const devices = loc.devices || [];
+    const device = devices[0];
+    if (!device) return Response.json({ ok: false, error: 'no_device_found', userData }, { status: 404 });
+    const state = await getDeviceState(tokens.access_token, device.id);
+    return Response.json({ ok: true, thermostat: parseThermostat(state, device.id, device.name) });
   } catch (e) {
     return Response.json({ ok: false, error: e.message }, { status: 503 });
   }
@@ -135,64 +215,36 @@ export async function onRequestPost({ request, env }) {
   try { body = await request.json(); } catch (_) {
     return Response.json({ ok: false, error: 'invalid_json' }, { status: 400 });
   }
-
-  const identity = env.LUX_EMAIL    || body.email    || '';
-  const password  = env.LUX_PASSWORD || body.password || '';
-
-  if (!identity || !password) {
-    return Response.json({ ok: false, error: 'credentials_not_provided' }, { status: 400 });
-  }
-
+  const email    = env.LUX_EMAIL    || body.email    || '';
+  const password = env.LUX_PASSWORD || body.password || '';
+  if (!email || !password) return Response.json({ ok: false, error: 'credentials_not_provided' }, { status: 400 });
   const { action, cool_sp, heat_sp, value } = body;
   if (!action) return Response.json({ ok: false, error: 'missing_action' }, { status: 400 });
 
   try {
-    const { token }    = await geoLogin(identity, password);
-    const { systemId } = await geoGetSystems(token);
-    if (!systemId) return Response.json({ ok: false, error: 'no_system_found' }, { status: 404 });
+    const tokens = await luxAuth(email, password);
+    const userData = await getLocationUser(tokens.access_token);
+    const loc = (userData.location || userData.locations?.[0]) || {};
+    const device = (loc.devices || [])[0];
+    if (!device) return Response.json({ ok: false, error: 'no_device_found' }, { status: 404 });
 
-    const setUrl = `${GEO_BASE}/api/userapi/system/smets2-setpoints/${systemId}`;
-
+    const patch = {};
     if (action === 'set_sp') {
-      const payload = {};
-      if (cool_sp != null) payload.coolingSetpoint = F_TO_C(parseInt(cool_sp, 10));
-      if (heat_sp != null) payload.heatingSetpoint = F_TO_C(parseInt(heat_sp, 10));
-      const r = await fetch(setUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(payload),
-      });
-      if (!r.ok) {
-        const rb = await r.text().catch(() => '');
-        throw new Error(`set_sp_failed: HTTP ${r.status} — ${rb.slice(0, 120)}`);
-      }
+      if (heat_sp != null) patch.holdheat = parseInt(heat_sp, 10);
+      if (cool_sp != null) patch.holdcool = parseInt(cool_sp, 10);
     } else if (action === 'set_mode') {
-      const r = await fetch(`${GEO_BASE}/api/userapi/system/smets2-setmode/${systemId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ operationMode: MODE_TO_GEO[value] || '5' }),
-      });
-      if (!r.ok) {
-        const rb = await r.text().catch(() => '');
-        throw new Error(`set_mode_failed: HTTP ${r.status} — ${rb.slice(0, 120)}`);
-      }
+      const modeInt = MODE_TO_INT[value];
+      if (modeInt === undefined) return Response.json({ ok: false, error: 'unknown_mode: ' + value }, { status: 400 });
+      patch.systemmode = modeInt;
     } else if (action === 'set_fan') {
-      const r = await fetch(`${GEO_BASE}/api/userapi/system/smets2-setfan/${systemId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ fanMode: value === 'on' ? '1' : '0' }),
-      });
-      if (!r.ok) {
-        const rb = await r.text().catch(() => '');
-        throw new Error(`set_fan_failed: HTTP ${r.status} — ${rb.slice(0, 120)}`);
-      }
+      patch.fanmode = value === 'on' ? 1 : 0;
     } else {
       return Response.json({ ok: false, error: 'unknown_action: ' + action }, { status: 400 });
     }
 
-    const live     = await geoGetLive(token, systemId);
-    const periodic = await geoGetPeriodic(token, systemId);
-    return Response.json({ ok: true, thermostat: parseThermostat(live, periodic, systemId) });
+    await setDeviceState(tokens.access_token, device.id, patch);
+    const newState = await getDeviceState(tokens.access_token, device.id);
+    return Response.json({ ok: true, thermostat: parseThermostat(newState, device.id, device.name) });
   } catch (e) {
     return Response.json({ ok: false, error: e.message }, { status: 503 });
   }
