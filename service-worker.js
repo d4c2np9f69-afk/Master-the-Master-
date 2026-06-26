@@ -1,4 +1,4 @@
-const CACHE_NAME = "hcc-v5";
+const CACHE_NAME = "hcc-v6";
 const CRITICAL_ASSETS = [
   "./",
   "./index.html",
@@ -34,10 +34,31 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   const url = new URL(event.request.url);
+
+  // API calls always go to network
   if (url.pathname.startsWith("/api/")) {
     event.respondWith(fetch(event.request));
     return;
   }
+
+  // HTML / navigation requests: NETWORK-FIRST so code fixes always land.
+  // Cache-first on the HTML was hiding every update behind the old cached copy.
+  const isHTML = event.request.mode === "navigate" ||
+    url.pathname === "/" || url.pathname.endsWith("/index.html");
+  if (isHTML) {
+    event.respondWith(
+      fetch(event.request)
+        .then(resp => {
+          const copy = resp.clone();
+          caches.open(CACHE_NAME).then(c => c.put(event.request, copy));
+          return resp;
+        })
+        .catch(() => caches.match(event.request).then(r => r || caches.match("./index.html")))
+    );
+    return;
+  }
+
+  // Everything else (icons, images, manifest): cache-first is fine
   event.respondWith(
     caches.match(event.request).then(r => r || fetch(event.request))
   );
