@@ -420,6 +420,7 @@ html,body{
 .alexa-skill-cmd{font-size:10px;color:var(--muted);font-style:italic;margin-top:2px}
 .alexa-enable-btn{padding:6px 12px;background:rgba(26,156,219,.18);border:1px solid rgba(26,156,219,.5);border-radius:20px;color:#4db8e8;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit;flex-shrink:0}
 .alexa-enable-btn:active{background:rgba(26,156,219,.35)}
+.alexa-enable-btn.active{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.5);color:#4ade80;cursor:default}
 .alexa-ring{width:34px;height:34px;background:linear-gradient(135deg,#1a9cdb,#0070a8);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 10px rgba(26,156,219,.4)}
 
 /* ── BUTTONS ────────────────────────────────────────────────────────────── */
@@ -917,31 +918,31 @@ html,body{
         </div>
       </div>
 
-      <div class="alexa-skill-row">
+      <div class="alexa-skill-row" id="alexa-row-lux">
         <span class="alexa-skill-icon">&#127777;</span>
         <div class="alexa-skill-info">
           <div class="alexa-skill-name">LUX Connected Home</div>
           <div class="alexa-skill-cmd">"Alexa, set the thermostat to 72"</div>
         </div>
-        <button class="alexa-enable-btn" onclick="window.open('https://www.amazon.com/dp/B07DFLWF7C','_blank')">Enable &#8599;</button>
+        <button class="alexa-enable-btn" id="alexa-btn-lux" onclick="alexaToggle('lux','https://www.amazon.com/dp/B07DFLWF7C')">Enable &#8599;</button>
       </div>
 
-      <div class="alexa-skill-row">
+      <div class="alexa-skill-row" id="alexa-row-bhyve">
         <span class="alexa-skill-icon">&#128167;</span>
         <div class="alexa-skill-info">
           <div class="alexa-skill-name">Orbit B-Hyve</div>
           <div class="alexa-skill-cmd">"Alexa, tell B-Hyve to run Front Lawn"</div>
         </div>
-        <button class="alexa-enable-btn" onclick="window.open('https://www.amazon.com/dp/B077YNWR5H','_blank')">Enable &#8599;</button>
+        <button class="alexa-enable-btn" id="alexa-btn-bhyve" onclick="alexaToggle('bhyve','https://www.amazon.com/dp/B077YNWR5H')">Enable &#8599;</button>
       </div>
 
-      <div class="alexa-skill-row">
+      <div class="alexa-skill-row" id="alexa-row-ha">
         <span class="alexa-skill-icon">&#127968;</span>
         <div class="alexa-skill-info">
           <div class="alexa-skill-name">Home Assistant (Nabu Casa)</div>
           <div class="alexa-skill-cmd">"Alexa, turn on the porch light" — full HA control</div>
         </div>
-        <button class="alexa-enable-btn" onclick="window.open('https://www.nabucasa.com','_blank')">Setup &#8599;</button>
+        <button class="alexa-enable-btn" id="alexa-btn-ha" onclick="alexaToggle('ha','https://www.nabucasa.com')">Setup &#8599;</button>
       </div>
 
       <div style="margin-top:12px;padding:9px 12px;background:rgba(26,156,219,.07);border:1px solid rgba(26,156,219,.18);border-radius:8px">
@@ -3881,6 +3882,7 @@ loadWeather();
 loadIrrigation();
 loadAlerts();
 acctRefreshStatus();
+alexaInitBadges();
 // Refresh alerts every 5 minutes automatically
 setInterval(loadAlerts, 5*60*1000);
 // Restore notification button state + mark already-asked so we don't re-prompt
@@ -4594,6 +4596,32 @@ function drawWxStars() {
     html += '<div class="wx-star" style="left:'+x+'%;top:'+y+'%;width:'+s+'px;height:'+s+'px;animation-delay:'+d+'s"></div>';
   }
   el.innerHTML = html;
+}
+
+function alexaToggle(skill, url) {
+  var key = 'alexa_skill_' + skill;
+  var btn = document.getElementById('alexa-btn-' + skill);
+  if (!btn) return;
+  if (btn.classList.contains('active')) {
+    // Already marked active — open skill page in case they want to manage it
+    window.open(url, '_blank');
+  } else {
+    // Mark as active
+    localStorage.setItem(key, '1');
+    btn.classList.add('active');
+    btn.textContent = '✅ Active';
+  }
+}
+
+function alexaInitBadges() {
+  var skills = ['lux', 'bhyve', 'ha'];
+  for (var i = 0; i < skills.length; i++) {
+    var s = skills[i];
+    if (localStorage.getItem('alexa_skill_' + s) === '1') {
+      var btn = document.getElementById('alexa-btn-' + s);
+      if (btn) { btn.classList.add('active'); btn.textContent = '✅ Active'; }
+    }
+  }
 }
 
 function hccPanic() {
