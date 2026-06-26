@@ -4723,9 +4723,27 @@ function voiceStart() {
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) {
     voiceOpen();
-    voiceShowResult('err', 'Voice recognition not supported on this browser. Try Chrome or Safari.');
+    voiceShowResult('err', 'Voice recognition not supported — try Safari 13+ or Chrome.');
     return;
   }
+  // Ask for mic permission explicitly first so iOS shows the "Allow Microphone?" dialog
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({audio:true})
+      .then(function(stream){
+        stream.getTracks().forEach(function(t){ t.stop(); }); // release immediately
+        voiceStartRecog(SR);
+      })
+      .catch(function(){
+        voiceOpen();
+        document.getElementById('voiceStatus').textContent = 'Microphone permission needed';
+        voiceShowResult('err', '🎤 Microphone is blocked\n\nTo fix: go to\nSettings → Privacy & Security\n→ Microphone\n→ turn ON Safari\n\nThen come back and tap the mic.');
+      });
+  } else {
+    voiceStartRecog(SR);
+  }
+}
+
+function voiceStartRecog(SR) {
   voiceOpen();
   if (_voiceRecog) { try { _voiceRecog.abort(); } catch(e){} }
   _voiceRecog = new SR();
@@ -4750,8 +4768,19 @@ function voiceStart() {
   };
   _voiceRecog.onerror = function(e) {
     document.getElementById('micBtn').classList.remove('listening');
-    document.getElementById('voiceStatus').textContent = 'Tap the mic and speak a command';
-    if (e.error !== 'no-speech') voiceShowResult('err', 'Error: ' + e.error);
+    if (e.error === 'audio-capture' || e.error === 'not-allowed') {
+      // Close the overlay right away — keeping it open causes Siri to pick up speech instead
+      voiceClose();
+      document.getElementById('voiceStatus').textContent = 'Tap the mic and speak a command';
+      setTimeout(function(){
+        voiceOpen();
+        document.getElementById('voiceStatus').textContent = 'Microphone permission needed';
+        voiceShowResult('err', '🎤 Microphone is blocked — DO NOT SPEAK\n\nGo to: Settings → Privacy & Security → Microphone → turn ON Safari\n\nThen return here and tap the mic again.');
+      }, 50);
+    } else if (e.error !== 'no-speech') {
+      document.getElementById('voiceStatus').textContent = 'Tap the mic and speak a command';
+      voiceShowResult('err', 'Mic error: ' + e.error + ' — tap mic to retry');
+    }
   };
   _voiceRecog.onend = function() {
     document.getElementById('micBtn').classList.remove('listening');
