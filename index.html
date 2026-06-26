@@ -744,18 +744,19 @@ html,body{
 
 <!-- Voice Command Overlay -->
 <div class="voice-overlay" id="voiceOverlay">
-  <div class="voice-status" id="voiceStatus">Tap the mic and speak a command</div>
-  <div class="voice-transcript" id="voiceTranscript">&#127908;</div>
+  <div class="voice-status" id="voiceStatus">Tap a command below</div>
+  <div class="voice-transcript" id="voiceTranscript" style="display:none">&#127908;</div>
   <div class="voice-result" id="voiceResult" style="display:none"></div>
   <div class="voice-cmds">
-    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"Cool to 72"</span>
-    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"Heat to 68"</span>
-    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"Braves game time"</span>
-    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"What time is it"</span>
-    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"Open weather"</span>
-    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"Open yard"</span>
+    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">Cool to 72</span>
+    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">Heat to 68</span>
+    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">Braves game time</span>
+    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">What time is it</span>
+    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">Open weather</span>
+    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">Open yard</span>
   </div>
-  <button onclick="voiceClose()" style="width:100%;margin-top:16px;padding:11px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">CLOSE</button>
+  <button id="voiceListenBtn" onclick="voiceListenStart()" style="width:100%;margin-top:14px;padding:12px;background:rgba(26,156,219,.15);border:1px solid rgba(26,156,219,.4);border-radius:10px;color:#4db8e8;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit">&#127908; Try Live Microphone</button>
+  <button onclick="voiceClose()" style="width:100%;margin-top:10px;padding:11px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">CLOSE</button>
 </div>
 
 <!-- ══ SECTION NAV ═══════════════════════════════════════════════════════════ -->
@@ -4719,28 +4720,27 @@ function alexaInitBadges() {
 var _voiceRecog = null;
 var _voiceOpen = false;
 
+// Mic button in header — opens the SAFE tap-to-run panel. No microphone is
+// activated here, so nothing can trigger Siri or dial contacts.
 function voiceStart() {
+  voiceOpen();
+  document.getElementById('voiceStatus').textContent = 'Tap a command below';
+  document.getElementById('voiceTranscript').style.display = 'none';
+  document.getElementById('voiceResult').style.display = 'none';
+}
+
+// Explicit opt-in: only when Jeff taps "Try Live Microphone" do we attempt
+// SpeechRecognition. We do NOT pre-grab the mic with getUserMedia — on iOS that
+// leaves the mic busy and SpeechRecognition then fails with audio-capture.
+// SpeechRecognition requests its own mic permission.
+function voiceListenStart() {
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) {
-    voiceOpen();
-    voiceShowResult('err', 'Voice recognition not supported — try Safari 13+ or Chrome.');
+    voiceShowResult('err', 'Live mic not supported on this browser — use the command buttons above.');
     return;
   }
-  // Ask for mic permission explicitly first so iOS shows the "Allow Microphone?" dialog
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({audio:true})
-      .then(function(stream){
-        stream.getTracks().forEach(function(t){ t.stop(); }); // release immediately
-        voiceStartRecog(SR);
-      })
-      .catch(function(){
-        voiceOpen();
-        document.getElementById('voiceStatus').textContent = 'Microphone permission needed';
-        voiceShowResult('err', '🎤 Microphone is blocked\n\nTo fix: go to\nSettings → Privacy & Security\n→ Microphone\n→ turn ON Safari\n\nThen come back and tap the mic.');
-      });
-  } else {
-    voiceStartRecog(SR);
-  }
+  document.getElementById('voiceTranscript').style.display = '';
+  voiceStartRecog(SR);
 }
 
 function voiceStartRecog(SR) {
@@ -4768,23 +4768,17 @@ function voiceStartRecog(SR) {
   };
   _voiceRecog.onerror = function(e) {
     document.getElementById('micBtn').classList.remove('listening');
-    if (e.error === 'audio-capture' || e.error === 'not-allowed') {
-      // Close the overlay right away — keeping it open causes Siri to pick up speech instead
-      voiceClose();
-      document.getElementById('voiceStatus').textContent = 'Tap the mic and speak a command';
-      setTimeout(function(){
-        voiceOpen();
-        document.getElementById('voiceStatus').textContent = 'Microphone permission needed';
-        voiceShowResult('err', '🎤 Microphone is blocked — DO NOT SPEAK\n\nGo to: Settings → Privacy & Security → Microphone → turn ON Safari\n\nThen return here and tap the mic again.');
-      }, 50);
-    } else if (e.error !== 'no-speech') {
-      document.getElementById('voiceStatus').textContent = 'Tap the mic and speak a command';
-      voiceShowResult('err', 'Mic error: ' + e.error + ' — tap mic to retry');
+    document.getElementById('voiceStatus').textContent = 'Tap a command below';
+    document.getElementById('voiceTranscript').style.display = 'none';
+    if (e.error === 'audio-capture' || e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+      voiceShowResult('err', '🎤 Live mic isn\'t working on this iPhone — just use the command buttons above, they do the same thing.');
+    } else if (e.error !== 'no-speech' && e.error !== 'aborted') {
+      voiceShowResult('err', 'Mic: ' + e.error + ' — use the buttons above instead.');
     }
   };
   _voiceRecog.onend = function() {
     document.getElementById('micBtn').classList.remove('listening');
-    document.getElementById('voiceStatus').textContent = 'Tap the mic and speak a command';
+    document.getElementById('voiceStatus').textContent = 'Tap a command below';
   };
   _voiceRecog.start();
 }
