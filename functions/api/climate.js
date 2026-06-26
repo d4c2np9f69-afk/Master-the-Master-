@@ -161,10 +161,9 @@ async function getDeviceState(accessToken, deviceId) {
 }
 
 async function setDeviceState(accessToken, deviceId, state) {
-  // Try multiple methods — Python luxgeo package uses PUT with full state,
-  // but some endpoints use POST. 500 = right URL wrong body/method; 404 = wrong URL.
+  // POST works; PUT returns 500 on this API. Keep PUT as fallback.
   const errors = [];
-  for (const method of ['PUT', 'POST', 'PATCH']) {
+  for (const method of ['POST', 'PUT']) {
     const r = await fetch(`${API_BASE}/device`, {
       method,
       headers: {
