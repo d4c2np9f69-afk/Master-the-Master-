@@ -232,7 +232,7 @@ index.html                   — entire PWA (single file, ~300KB, ~3742+ lines)
 service-worker.js            — cache version: hcc-v5
 manifest.json                — PWA manifest
 functions/api/hours.js       — GET/POST sensor data ↔ Cloudflare KV
-functions/api/climate.js     — GET/POST LUX thermostat via Geo platform API
+functions/api/climate.js     — GET/POST LUX thermostat via Azure B2C + myluxstat.io API
 functions/api/irrigation/index.js  — GET B-Hyve status + ?tk=1 returns session token
 functions/api/irrigation/control.js — POST B-Hyve control (legacy, fallback only)
 functions/setup.js           — serves Beehive install script at /setup
@@ -341,7 +341,7 @@ c17bdf0  Apply ChatGPT hero palette throughout entire app + remove nanny warning
 
 ---
 
-## Current Verified State (as of 2026-06-26, commit c4d32e6)
+## Current Verified State (as of 2026-06-26, commit 94e2b34)
 
 | Feature | Status |
 |---|---|
@@ -436,11 +436,21 @@ f904d10  B-Hyve coordinator: try all API URLs x app IDs, log full response detai
 
 2. **CLIMATE section built** (`7c0d3c5`, `7f74537`) — New 5th section in the app (`#snav-climate`, `#section-climate`). Shows current temp, heat/cool setpoints, mode, fan mode. Controls: set heat/cool SP, change mode (heat/cool/auto/off), toggle fan. Full warm gold palette matching rest of app.
 
-3. **LUX API fixed 3 times** — Root API was wrong. Journey:
-   - First try: `integration.lux-geo.com` → HTTP 530 error code 1016 (DNS failure — domain doesn't exist)
-   - Second try: `api.geotogether.com` but with wrong field names → HTTP 403 Forbidden (tried `clientId: 'android-geo-home'` and variants)
-   - Final fix: Researched `github.com/OliverCullimore/geo-energy-data-client` Go source code. Correct format: field is `identity` (not `username`/`email`), URL is `/usersservice/v2/login` (all lowercase), response is `accessToken` (camelCase), NO clientId at all
-   - `functions/api/climate.js` created with correct Geo platform API
+3. **LUX API — long journey to correct backend** — Three wrong APIs before finding the real one:
+   - Try 1: `integration.lux-geo.com` → HTTP 530, DNS failure (domain doesn't exist)
+   - Try 2: `api.geotogether.com` (UK smart meter company — completely unrelated) → HTTP 403 Forbidden
+   - Try 3: Downloaded `luxgeo` PyPI package (v0.1.2), unzipped the wheel, read `auth.py` and `api.py` source
+   - **Real API discovered:** Azure AD B2C OAuth2 PKCE flow + `https://www.myluxstat.io/api/`
+     - Client ID: `b335ca43-3bde-4406-b281-8816afb7cc91`
+     - Auth: 4-step PKCE flow at `connecteddevicesjci.b2clogin.com`
+       1. GET authorize → extract CSRF cookie + StateProperties from HTML
+       2. POST `/SelfAsserted` with `{logonIdentifier, password, request_type:'RESPONSE'}`
+       3. GET `/confirmed` → follow redirects → custom scheme URL contains auth code
+       4. POST token endpoint with code + code_verifier → access_token
+     - Devices: `GET https://www.myluxstat.io/api/location/user` → `userData.location[0].devices[0]`
+     - State: `GET /api/device` with `Deviceid` header → `{systemmode, holdheat, currenttemp}` (all °F)
+     - Control: `PUT /api/device` with `Deviceid` header + JSON patch
+   - After deploy: still got `no_device_found` — `userData.location` is an ARRAY not an object. Fixed with `Array.isArray` check.
 
 4. **Irrigation `ws_timeout` fixed** (`c4d32e6`) — CF Workers outbound WebSocket client is unreliable for B-Hyve's WebSocket API. Solution: moved WebSocket to the browser.
    - `GET /api/irrigation?tk=1` now returns B-Hyve session token alongside device/zone data
@@ -457,6 +467,11 @@ f904d10  B-Hyve coordinator: try all API URLs x app IDs, log full response detai
 
 **Commits this session:**
 ```
+94e2b34  CLAUDE.md: mark LUX thermostat WORKING — live confirmed 2026-06-26
+0c08f2f  LUX: fix location array — userData.location is [] not {}
+3ce74fa  LUX: add diagnostic detail to no_device_found error
+9eaabcb  Fix LUX thermostat API: use real Azure B2C + myluxstat.io backend
+f814c01  Update CLAUDE.md: session history, new sections, corrected state
 c4d32e6  Fix irrigation zone control: move WebSocket to browser, add ?tk=1 token endpoint
 7f74537  Fix LUX API: correct Geo endpoint casing, identity field, accessToken response
 46d8a36  LUX API: try 4 login variants to find correct clientId/format
@@ -465,13 +480,15 @@ c4d32e6  Fix irrigation zone control: move WebSocket to browser, add ?tk=1 token
 1d89611  Fix irrigation ws_timeout: send command after 2s fallback, resolve optimistically
 ```
 
+**End-of-session verified state:**
+- LUX CLIMATE tab shows: ONLINE · Cooling · Set 72°F · Room Temp 72° · Device CS1-DD-FB ✅
+- All 5 nav sections load without errors ✅
+
 ---
 
 ## Pending Items (Next Session Should Address These)
 
-1. **LUX thermostat WORKING** — confirmed live 2026-06-26. Device CS1-DD-FB, showing 72°F room temp, cooling mode. All controls built.
-
-2. **Test irrigation Run Zone + Rain Delay** — Browser-side WebSocket fix deployed (commit `c4d32e6`). Jeff taps Run on any zone — should work without `ws_timeout`. If it still errors, check browser console for WebSocket errors (Safari → Develop → Web Inspector → Console).
+1. **Test irrigation Run Zone + Rain Delay** — Browser-side WebSocket fix deployed (commit `c4d32e6`). Jeff taps Run on any zone — should work without `ws_timeout`. If it still errors, check browser console for WebSocket errors (Safari → Develop → Web Inspector → Console).
 
 3. **B-Hyve invalid_auth** — Jeff ran `sh bhyve` and saw `invalid_auth` in the HA config form. Jeff needs to:
    1. Run `sh bhyve` in HA Terminal again (gets updated files including strings.json)
@@ -495,6 +512,34 @@ c4d32e6  Fix irrigation zone control: move WebSocket to browser, add ?tk=1 token
 6. **Verify sensor data live** — After Jeff hard-refreshes the app, confirm battery voltage, RPM, and mileage display. If still `0.00V` and `—`, run the curl test in the Cloudflare Infrastructure section above.
 
 7. **Lighthouse performance** — Score 60/100. Low priority. Main cause: unminified 300KB index.html.
+
+---
+
+## LUX Thermostat — API Reference (DO NOT CHANGE UNLESS BROKEN)
+
+**Auth flow** (4 steps, implemented in `functions/api/climate.js`):
+1. GET `https://connecteddevicesjci.b2clogin.com/te/connecteddevicesjci.onmicrosoft.com/B2C_1A_SignIn/oauth2/v2.0/authorize?...` with PKCE code_challenge → parse `x-ms-cpim-csrf` cookie + `"transId":"StateProperties=..."` from HTML
+2. POST `.../B2C_1A_SignIn/SelfAsserted?tx=StateProperties=...` with `{logonIdentifier, password, request_type:'RESPONSE'}` + CSRF header + cookies
+3. GET `.../CombinedSigninAndSignup/confirmed?...` → follow redirects until custom scheme URL → extract `code=`
+4. POST `.../oauth2/v2.0/token` with `{grant_type:authorization_code, code, code_verifier, client_id, redirect_uri}` → `{access_token, refresh_token}`
+
+**Client ID:** `b335ca43-3bde-4406-b281-8816afb7cc91`
+**Redirect URI:** `connecteddevicesjci.luxmobile://connecteddevicesjci/path`
+**Scope:** `https://connecteddevicesjci.onmicrosoft.com/mobile/user_impersonation https://connecteddevicesjci.onmicrosoft.com/mobile/read_write offline_access openid`
+
+**API endpoints** (Bearer token):
+- `GET https://www.myluxstat.io/api/location/user` → `{location:[{devices:[{id, name}]}]}`
+- `GET https://www.myluxstat.io/api/device` + header `Deviceid: {id}` → `{systemmode, holdheat, holdcool, currenttemp, fanmode}`
+- `PUT https://www.myluxstat.io/api/device` + `Deviceid` header + JSON patch body
+
+**Device state fields (all °F, no conversion needed):**
+- `systemmode`: 0=off, 1=heat, 2=cool, 3=auto
+- `holdheat`: heat setpoint
+- `holdcool`: cool setpoint
+- `currenttemp`: current room temperature
+- `fanmode`: 0=auto, 1=on
+
+**Jeff's device:** CS1-DD-FB (confirmed working 2026-06-26)
 
 ---
 
