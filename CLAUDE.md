@@ -488,7 +488,12 @@ c4d32e6  Fix irrigation zone control: move WebSocket to browser, add ?tk=1 token
 
 ## Pending Items (Next Session Should Address These)
 
-1. **Test irrigation Run Zone + Rain Delay** — Browser-side WebSocket fix deployed (commit `c4d32e6`). Jeff taps Run on any zone — should work without `ws_timeout`. If it still errors, check browser console for WebSocket errors (Safari → Develop → Web Inspector → Console).
+1. **FIX LUX setpoint control — HTTP 500 on PUT /api/device** — GET works (reads temp/mode fine), but PUT to change setpoint returns `500 {"message":"Failed to perform operation."}`. Jeff tapped cool setpoint down arrow (72→70), got the error. Two likely causes:
+   - `holdcool` may be wrong field name for cool setpoint — check luxgeo source or try `coolSetpoint`, `cool_setpoint`, `desiredcool`
+   - PUT may require the FULL device state object (not just the changed field) — fetch current state first, merge the change, then PUT the whole object
+   - Fix is in `functions/api/climate.js` → `setDeviceState()` and the `set_sp` action handler
+
+2. **Test irrigation Run Zone + Rain Delay** — Browser-side WebSocket fix deployed (commit `c4d32e6`). Jeff taps Run on any zone — should work without `ws_timeout`. If it still errors, check browser console for WebSocket errors (Safari → Develop → Web Inspector → Console).
 
 3. **B-Hyve invalid_auth** — Jeff ran `sh bhyve` and saw `invalid_auth` in the HA config form. Jeff needs to:
    1. Run `sh bhyve` in HA Terminal again (gets updated files including strings.json)
