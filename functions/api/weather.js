@@ -1,58 +1,101 @@
-// /api/weather — proxies open-meteo.com into the Weather Underground station format
-// the app expects (temp, dewpt, heatIndex, humidity, precipTotal, windSpeed, windGust, etc.)
+// /api/weather — proxies Weather Underground PWS KTNWHITE21 real-station data
+// Falls back to Open-Meteo grid if WU is unavailable
 export async function onRequestGet() {
+  const WU_KEY = '0e87ee079c0147a787ee079c01d7a75d';
+  const WU_STATION = 'KTNWHITE21';
+
+  // Cardinal direction lookup (16-point compass)
+  const DIRS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  function toCard(deg) {
+    if (deg == null) return null;
+    return DIRS[Math.round(deg / 22.5) % 16];
+  }
+
   try {
     const r = await fetch(
-      'https://api.open-meteo.com/v1/forecast' +
-      '?latitude=36.477&longitude=-86.66' +
-      '&current_weather=true' +
-      '&hourly=temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,precipitation,windspeed_10m,windgusts_10m' +
-      '&temperature_unit=fahrenheit&windspeed_unit=mph&precipitation_unit=inch' +
-      '&timezone=America%2FChicago&forecast_days=1',
-      { headers: { 'User-Agent': 'HCC-PWA/1.0' }, cf: { cacheTtl: 300 } }
+      `https://api.weather.com/v2/pws/observations/current?stationId=${WU_STATION}&format=json&units=e&apiKey=${WU_KEY}&numericPrecision=decimal`,
+      { headers: { 'User-Agent': 'HCC-PWA/1.0 (jeff.loewen@comcast.net)' }, cf: { cacheTtl: 300 } }
     );
-    if (!r.ok) throw new Error('upstream ' + r.status);
+    if (!r.ok) throw new Error('WU ' + r.status);
     const d = await r.json();
+    const obs = d?.observations?.[0];
+    if (!obs) throw new Error('no observation');
 
-    const cw = d.current_weather;
-    const h = d.hourly || {};
-    const times = h.time || [];
-    const now = Date.now();
-
-    // Find the index of the most recent completed hour
-    let idx = 0;
-    for (let i = 0; i < times.length; i++) {
-      if (new Date(times[i]).getTime() <= now) idx = i;
-    }
-
-    const temp = h.temperature_2m?.[idx] ?? cw.temperature;
-    const dewpt = h.dewpoint_2m?.[idx] ?? null;
-    const apparent = h.apparent_temperature?.[idx] ?? temp;
-    const humidity = h.relativehumidity_2m?.[idx] ?? null;
-    const precip = h.precipitation?.[idx] ?? 0;
-    const windSpeed = cw.windspeed;
-    const windGust = h.windgusts_10m?.[idx] ?? windSpeed;
-
-    const obsTime = new Date().toLocaleString('en-US', {
-      timeZone: 'America/Chicago',
-      year: 'numeric', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-    });
+    const imp = obs.imperial || {};
+    const wdDeg = obs.winddir ?? null;
 
     return Response.json({
-      temp: Math.round(temp),
-      dewpt: dewpt != null ? Math.round(dewpt) : null,
-      heatIndex: Math.round(apparent),
-      humidity: humidity != null ? Math.round(humidity) : null,
-      precipTotal: Math.round(precip * 100) / 100,
-      windSpeed: Math.round(windSpeed),
-      windGust: Math.round(windGust),
-      station: 'HCC-BackYard',
-      neighborhood: 'White House, TN',
-      obsTimeLocal: obsTime
+      // Core temps
+      temp:           imp.temp    != null ? Math.round(imp.temp)    : null,
+      dewpt:          imp.dewpt   != null ? Math.round(imp.dewpt)   : null,
+      heatIndex:      imp.heatIndex != null ? Math.round(imp.heatIndex) : (imp.temp != null ? Math.round(imp.temp) : null),
+      // Humidity + precip
+      humidity:       obs.humidity != null ? Math.round(obs.humidity) : null,
+      precipTotal:    imp.precipTotal != null ? Math.round(imp.precipTotal * 100) / 100 : 0,
+      precipRate:     imp.precipRate  != null ? Math.round(imp.precipRate  * 100) / 100 : 0,
+      // Wind
+      windSpeed:      imp.windSpeed != null ? Math.round(imp.windSpeed) : null,
+      windGust:       imp.windGust  != null ? Math.round(imp.windGust)  : null,
+      winddir:        wdDeg,
+      windDirCard:    toCard(wdDeg),
+      // Pressure
+      pressure:       imp.pressure != null ? Math.round(imp.pressure * 100) / 100 : null,
+      // Solar
+      uv:             obs.uv             != null ? Math.round(obs.uv * 10) / 10 : null,
+      solarRadiation: obs.solarRadiation != null ? Math.round(obs.solarRadiation) : null,
+      // Meta
+      station:        obs.stationID || WU_STATION,
+      neighborhood:   obs.neighborhood  || 'White House, TN',
+      obsTimeLocal:   obs.obsTimeLocal  || new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' })
     }, { headers: { 'Cache-Control': 'public, max-age=300' } });
 
   } catch (e) {
-    return Response.json({ error: 'unavailable: ' + e.message }, { status: 503 });
+    // WU unavailable — fall back to Open-Meteo so the app keeps working
+    try {
+      const r2 = await fetch(
+        'https://api.open-meteo.com/v1/forecast' +
+        '?latitude=36.477&longitude=-86.66' +
+        '&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,surface_pressure' +
+        '&hourly=dewpoint_2m,apparent_temperature,windgusts_10m,precipitation' +
+        '&temperature_unit=fahrenheit&windspeed_unit=mph&precipitation_unit=inch' +
+        '&timezone=America%2FChicago&forecast_days=1',
+        { headers: { 'User-Agent': 'HCC-PWA/1.0' }, cf: { cacheTtl: 300 } }
+      );
+      if (!r2.ok) throw new Error('fallback ' + r2.status);
+      const d2 = await r2.json();
+      const c = d2.current;
+      const h = d2.hourly || {};
+      const now = Date.now();
+      const times = h.time || [];
+      let idx = 0;
+      for (let i = 0; i < times.length; i++) {
+        if (new Date(times[i]).getTime() <= now) idx = i;
+      }
+      const temp = c.temperature_2m;
+      const hum  = c.relative_humidity_2m;
+      const dew  = h.dewpoint_2m?.[idx] ?? (temp - ((100 - hum) / 5));
+      const wdDeg = c.wind_direction_10m ?? null;
+      const presHpa = c.surface_pressure ?? null;
+      return Response.json({
+        temp:         Math.round(temp),
+        dewpt:        Math.round(dew),
+        heatIndex:    Math.round(h.apparent_temperature?.[idx] ?? temp),
+        humidity:     Math.round(hum),
+        precipTotal:  Math.round((h.precipitation?.[idx] ?? 0) * 100) / 100,
+        precipRate:   0,
+        windSpeed:    Math.round(c.wind_speed_10m),
+        windGust:     Math.round(h.windgusts_10m?.[idx] ?? c.wind_speed_10m),
+        winddir:      wdDeg,
+        windDirCard:  ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round((wdDeg??0)/22.5)%16],
+        pressure:     presHpa ? Math.round(presHpa * 0.02953 * 100) / 100 : null,
+        uv:           null,
+        solarRadiation: null,
+        station:      'Open-Meteo (WU offline)',
+        neighborhood: 'White House, TN',
+        obsTimeLocal: new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' })
+      }, { headers: { 'Cache-Control': 'public, max-age=300' } });
+    } catch (e2) {
+      return Response.json({ error: 'unavailable: ' + e.message }, { status: 503 });
+    }
   }
 }

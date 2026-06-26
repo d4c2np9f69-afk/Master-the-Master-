@@ -152,7 +152,7 @@ html,body{
 }
 .sec-nav::-webkit-scrollbar{display:none}
 .snav-btn{
-  flex:1;min-width:72px;
+  flex:1;min-width:72px;position:relative;
   display:flex;flex-direction:column;align-items:center;gap:3px;
   padding:10px 4px 8px;
   background:none;border:none;border-bottom:3px solid transparent;
@@ -636,6 +636,33 @@ html,body{
 /* ── Spotter badge ── */
 .spotter-row{display:flex;align-items:center;gap:12px;padding:12px 0}
 .spotter-icon{width:46px;height:46px;border-radius:23px;background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.4);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+/* ── NWS Active Alerts ── */
+.nws-alerts-wrap{display:none;margin-bottom:4px}
+.nws-alerts-wrap.has-alerts{display:block}
+.nws-alert-item{border-radius:10px;padding:11px 13px;margin-bottom:6px;border:1px solid}
+.nws-alert-item:last-child{margin-bottom:0}
+.nws-ae{font-size:12px;font-weight:800;letter-spacing:.3px;font-family:var(--serif);display:flex;align-items:center;gap:6px}
+.nws-ah{font-size:10px;margin-top:4px;opacity:.82;line-height:1.4}
+.al-warning{background:rgba(220,38,38,.18);border-color:rgba(220,38,38,.5)}
+.al-warning .nws-ae,.al-warning .nws-ah{color:#fca5a5}
+.al-watch{background:rgba(234,88,12,.16);border-color:rgba(234,88,12,.45)}
+.al-watch .nws-ae,.al-watch .nws-ah{color:#fdba74}
+.al-advisory{background:rgba(234,179,8,.13);border-color:rgba(234,179,8,.4)}
+.al-advisory .nws-ae,.al-advisory .nws-ah{color:#fde047}
+.al-other{background:rgba(100,115,140,.13);border-color:rgba(100,115,140,.3)}
+.al-other .nws-ae,.al-other .nws-ah{color:#cbd5e1}
+/* ── Alert badge dot on nav ── */
+.wx-alert-dot{position:absolute;top:5px;right:7px;width:8px;height:8px;border-radius:50%;background:#ef4444;display:none;box-shadow:0 0 0 2px var(--bg),0 0 8px rgba(239,68,68,.9);animation:pulseDot 2s ease-in-out infinite}
+.wx-alert-dot.show{display:block}
+@keyframes pulseDot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.7}}
+/* ── Notification enable button ── */
+.wx-notif-btn{padding:6px 12px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:8px;color:#22c55e;font-size:10px;font-weight:800;font-family:inherit;cursor:pointer}
+.wx-notif-btn.granted{background:rgba(34,197,94,.2);border-color:rgba(34,197,94,.55);color:#4ade80}
+.wx-notif-btn.denied{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:#fca5a5;cursor:default}
+/* ── Home alert strip ── */
+.home-alert-strip{display:none;border-radius:10px;padding:10px 13px;margin-bottom:10px;background:rgba(220,38,38,.16);border:1px solid rgba(220,38,38,.45);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.home-alert-strip.show{display:flex;align-items:center;gap:10px}
+.home-alert-strip-text{flex:1;font-size:11px;font-weight:700;color:#fca5a5;font-family:var(--serif);line-height:1.35}
 </style>
 </head>
 <body>
@@ -656,6 +683,7 @@ html,body{
   </button>
   <button class="snav-btn" id="snav-weather" onclick="hccSection('weather',this)">
     <span class="snav-icon">&#9925;</span><span>WEATHER</span>
+    <span class="wx-alert-dot" id="wxAlertDot"></span>
   </button>
   <button class="snav-btn" id="snav-irr" onclick="hccSection('irrigation',this)">
     <span class="snav-icon">&#128688;</span><span>IRRIGATION</span>
@@ -683,6 +711,13 @@ html,body{
   </div>
 
   <div class="content">
+
+    <!-- Active NWS alerts strip — taps through to WEATHER section -->
+    <div class="home-alert-strip" id="homeAlertStrip" onclick="hccSection('weather',document.getElementById('snav-weather'));setTimeout(function(){document.getElementById('wxAlertsCard')&&document.getElementById('wxAlertsCard').scrollIntoView({behavior:'smooth'})},200)">
+      <span style="font-size:22px;flex-shrink:0">🚨</span>
+      <div class="home-alert-strip-text" id="homeAlertText">NWS Alert active — tap to view</div>
+      <span style="font-size:16px;color:rgba(252,165,165,.6)">&#8250;</span>
+    </div>
 
     <!-- Beehive / Home Assistant -->
     <div class="sec-hdr">
@@ -919,6 +954,21 @@ html,body{
 
   <div class="content">
 
+    <!-- NWS ACTIVE ALERTS — shown only when alerts are active -->
+    <div id="wxAlertsCard" class="nws-alerts-wrap">
+      <div class="card" style="padding:14px;border-color:rgba(239,68,68,.45);background:rgba(30,0,0,.45)">
+        <div class="card-title" style="color:#fca5a5;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <span>🚨 NWS Active Alerts</span>
+          <span style="font-size:9px;font-weight:700;letter-spacing:.5px;color:rgba(252,165,165,.55)">Robertson &amp; Sumner Co &bull; TN</span>
+        </div>
+        <div id="wxAlertsList"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;flex-wrap:wrap;gap:8px">
+          <div style="font-size:9px;color:var(--muted)">weather.gov &bull; auto-refreshes every 5 min</div>
+          <button class="wx-notif-btn" id="wxNotifBtn" onclick="enableAlertNotifs()">🔔 Enable Push Alerts</button>
+        </div>
+      </div>
+    </div>
+
     <!-- MOWING CONDITIONS -->
     <div class="card cat-weather">
       <div class="card-title">&#127780; Mowing Conditions &bull; White House, TN</div>
@@ -934,6 +984,10 @@ html,body{
         <div class="wx-card"><div class="wx-lbl">Rain 24&ndash;48h</div><div class="wx-val" id="wxRainNext">--</div></div>
         <div class="wx-card"><div class="wx-lbl">Heat Stress</div><div class="wx-val" id="wxHeatStress">--</div></div>
         <div class="wx-card"><div class="wx-lbl">Lightning</div><div class="wx-val" id="wxLightning">--</div></div>
+        <div class="wx-card"><div class="wx-lbl">Wind Dir</div><div class="wx-val" id="wxWindDir">--</div></div>
+        <div class="wx-card"><div class="wx-lbl">UV Index</div><div class="wx-val" id="wxUV">--</div></div>
+        <div class="wx-card"><div class="wx-lbl">Pressure</div><div class="wx-val" id="wxPressure">--</div></div>
+        <div class="wx-card"><div class="wx-lbl">Rain Rate</div><div class="wx-val" id="wxRainRate">--</div></div>
       </div>
       <div id="wxStationNote" class="wx-note"></div>
       <button class="btn-full btn-gray" onclick="loadWeather()">&#128260; Refresh Weather</button>
@@ -994,7 +1048,11 @@ html,body{
         <button onclick="window.open('https://www.spotternetwork.org','_blank','noopener')" style="flex:1;padding:10px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:8px;color:#22c55e;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#128506; Spotter Map</button>
         <button onclick="window.open('https://www.wunderground.com/dashboard/pws/KTNWHITE21','_blank','noopener')" style="flex:1;padding:10px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.3);border-radius:8px;color:#38bdf8;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#128202; PWS Data</button>
       </div>
-      <div class="wx-note" style="margin-top:8px">Your location shows on the Spotter Map when logged in to RadarScope &bull; report severe weather at spotternetwork.org</div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button onclick="window.open('https://mping.nssl.noaa.gov','_blank','noopener')" style="flex:1;padding:10px;background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.3);border-radius:8px;color:#fb923c;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#127783; mPING Report</button>
+        <button onclick="window.open('https://www.weather.gov/nwr/','_blank','noopener')" style="flex:1;padding:10px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.3);border-radius:8px;color:#a78bfa;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#128251; NOAA Radio</button>
+      </div>
+      <div class="wx-note" style="margin-top:8px">Your location shows on the Spotter Map when logged in to RadarScope &bull; Report precip &amp; severe weather via mPING</div>
     </div>
 
     <!-- WEATHER STATION -->
@@ -2269,9 +2327,8 @@ function loadWeather(){
     });
 }
 
-// Live readings from the user's own Weather Underground PWS (KTNWHITE21),
-// proxied server-side via /api/weather. Overrides the forecast estimates
-// with real backyard-sensor values; silently keeps the forecast on failure.
+// Live readings from Weather Underground PWS KTNWHITE21 — real backyard station.
+// Overrides forecast estimates with actual readings; silently keeps forecast on failure.
 function loadStation(){
   fetch('/api/weather',{cache:'no-store'})
     .then(function(r){ return r.ok?r.json():Promise.reject(); })
@@ -2280,18 +2337,45 @@ function loadStation(){
       STATION=s;
       function set(id,val){var e=document.getElementById(id); if(e) e.innerHTML=val;}
       function setc(id,val,color){var e=document.getElementById(id); if(e){e.innerHTML=val; e.style.color=color||'';}}
-      if(s.temp!=null)  set('wxTemp', Math.round(s.temp)+'&#176;F');
-      if(s.dewpt!=null) set('wxDew',  Math.round(s.dewpt)+'&#176;F');
+      // Temps
+      if(s.temp!=null)  set('wxTemp',  Math.round(s.temp)+'&#176;F');
+      if(s.dewpt!=null) set('wxDew',   Math.round(s.dewpt)+'&#176;F');
+      // Heat stress
       var hi=(s.heatIndex!=null)?s.heatIndex:s.temp;
       if(hi!=null){
         var lvl=hi<80?['LOW','#22c55e']:hi<90?['MODERATE','#ffd24a']:hi<103?['HIGH','#ff8c42']:['EXTREME','#ff6262'];
         setc('wxHeatStress',lvl[0],lvl[1]);
       }
+      // Soil firmness from precip total
       var pt=(s.precipTotal!=null)?s.precipTotal:0;
       var firm=pt<=0?['FIRM','#22c55e']:pt<=0.1?['MOIST','#ffd24a']:['SOFT','#ff6262'];
       setc('wxFirmness',firm[0],firm[1]);
+      // Wind direction
+      if(s.windDirCard!=null){
+        var wdDeg=s.winddir!=null?(s.winddir+'&#176; '):'';
+        set('wxWindDir', wdDeg+s.windDirCard);
+      }
+      // UV index with color scale
+      if(s.uv!=null){
+        var uvV=s.uv, uvC=uvV<3?'#22c55e':uvV<6?'#ffd24a':uvV<8?'#f97316':uvV<11?'#ff6262':'#8b5cf6';
+        var uvL=uvV<3?'Low':uvV<6?'Moderate':uvV<8?'High':uvV<11?'Very High':'Extreme';
+        setc('wxUV', uvV+' &bull; '+uvL, uvC);
+      }
+      // Barometric pressure
+      if(s.pressure!=null){
+        set('wxPressure', s.pressure+' inHg');
+      }
+      // Rain rate (current in/hr)
+      if(s.precipRate!=null){
+        var rr=s.precipRate, rrC=rr===0?'#22c55e':rr<0.1?'#ffd24a':'#ff6262';
+        setc('wxRainRate', rr===0?'None':rr+' in/hr', rrC);
+      }
+      // Station note
       var note=document.getElementById('wxStationNote');
-      if(note){ note.textContent='📡 Live from your station '+(s.station||'')+(s.neighborhood?(' · '+s.neighborhood):'')+(s.obsTimeLocal?(' · '+s.obsTimeLocal.split(' ')[1]):''); }
+      var isReal=s.station&&s.station.indexOf('Open-Meteo')<0;
+      if(note){ note.textContent=(isReal?'📡 ':'🌐 ')+(s.station||'')+(s.neighborhood?' · '+s.neighborhood:'')+(s.obsTimeLocal?' · '+s.obsTimeLocal.split(' ')[1]:''); }
+      // Update weather hero with real temp
+      var ht=document.getElementById('wxHeroTemp'); if(ht&&s.temp!=null) ht.innerHTML=Math.round(s.temp)+'&#176;';
       if(typeof renderBurn==='function') renderBurn();
     })
     .catch(function(){ /* forecast fallback already shown */ });
@@ -2355,8 +2439,142 @@ var IRR={active:null,lastWatered:null,nextStart:null,loaded:false};
 function loadAlerts(){
   fetch('/api/alerts',{cache:'no-store'})
     .then(function(r){return r.json();})
-    .then(function(d){ ALERTS=(d&&d.alerts)||[]; if(typeof renderReadiness==='function') renderReadiness(); if(typeof renderBurn==='function') renderBurn(); })
-    .catch(function(){ ALERTS=[]; });
+    .then(function(d){
+      ALERTS=(d&&d.alerts)||[];
+      renderNwsAlerts(ALERTS);
+      updateAlertBadge(ALERTS);
+      checkAndNotify(ALERTS);
+      if(typeof renderReadiness==='function') renderReadiness();
+      if(typeof renderBurn==='function') renderBurn();
+    })
+    .catch(function(){ ALERTS=[]; renderNwsAlerts([]); updateAlertBadge([]); });
+}
+
+/* ===== NWS Alert rendering ===== */
+var _lastAlertKeys=[];
+
+function alertSeverityClass(a){
+  var ev=(a.event||'').toLowerCase();
+  if(/\bwarning\b/.test(ev)) return 'al-warning';
+  if(/\bwatch\b/.test(ev))   return 'al-watch';
+  if(/advisory|statement/.test(ev)) return 'al-advisory';
+  return 'al-other';
+}
+
+function alertIcon(a){
+  var ev=(a.event||'').toLowerCase();
+  if(/tornado/.test(ev))            return '🌪';
+  if(/thunder|t.storm/.test(ev))    return '⛈';
+  if(/flash flood|flood/.test(ev))  return '🌊';
+  if(/blizzard|ice storm/.test(ev)) return '❄️';
+  if(/snow|winter/.test(ev))        return '🌨';
+  if(/high wind|wind advisory/.test(ev)) return '💨';
+  if(/fire|red flag/.test(ev))      return '🔥';
+  if(/heat/.test(ev))               return '🌡';
+  if(/freeze|frost/.test(ev))       return '🌡';
+  if(/dense fog|fog/.test(ev))      return '🌫';
+  if(/warning/.test(ev))            return '🚨';
+  if(/watch/.test(ev))              return '⚠️';
+  return '📢';
+}
+
+function renderNwsAlerts(alerts){
+  var wrap=document.getElementById('wxAlertsCard');
+  var list=document.getElementById('wxAlertsList');
+  var strip=document.getElementById('homeAlertStrip');
+  var stripText=document.getElementById('homeAlertText');
+  if(!wrap) return;
+  if(!alerts||alerts.length===0){
+    wrap.classList.remove('has-alerts');
+    if(strip) strip.classList.remove('show');
+    return;
+  }
+  wrap.classList.add('has-alerts');
+  if(list){
+    list.innerHTML=alerts.map(function(a){
+      var cls=alertSeverityClass(a);
+      var ico=alertIcon(a);
+      var hl=(a.headline||'').replace(/^[^·—]*[·—]\s*/,'');
+      if(!hl&&a.headline) hl=a.headline.substring(0,120);
+      return '<div class="nws-alert-item '+cls+'">'
+        +'<div class="nws-ae">'+ico+'<span>'+escHtml(a.event||'Alert')+'</span>'
+        +'<span style="margin-left:auto;font-size:9px;letter-spacing:.5px;opacity:.7">'+escHtml((a.severity||'')+(a.urgency?' · '+a.urgency:''))+'</span>'
+        +'</div>'
+        +(hl?'<div class="nws-ah">'+escHtml(hl.substring(0,140))+'</div>':'')
+        +'</div>';
+    }).join('');
+  }
+  // Home strip — show most severe alert
+  if(strip&&stripText){
+    var worst=alerts[0];
+    var ico2=alertIcon(worst);
+    var count=alerts.length;
+    stripText.textContent=ico2+' '+escHtml(worst.event||'NWS Alert')+(count>1?' + '+(count-1)+' more':'')+' — Tap to view';
+    strip.classList.add('show');
+  }
+}
+
+function updateAlertBadge(alerts){
+  var dot=document.getElementById('wxAlertDot');
+  if(!dot) return;
+  var hasSevere=(alerts||[]).some(function(a){
+    return /warning|watch/i.test(a.event||'');
+  });
+  if(hasSevere) dot.classList.add('show');
+  else dot.classList.remove('show');
+}
+
+function checkAndNotify(newAlerts){
+  if(!('Notification' in window)||Notification.permission!=='granted') return;
+  var keys=(newAlerts||[]).map(function(a){ return (a.event||'')+'::'+((a.headline||'').substring(0,60)); });
+  var isNew=keys.filter(function(k){ return _lastAlertKeys.indexOf(k)<0; });
+  isNew.forEach(function(k){
+    var idx=keys.indexOf(k);
+    var a=newAlerts[idx]; if(!a) return;
+    var sev=(a.severity||'').toLowerCase();
+    if(sev==='extreme'||sev==='severe'||/warning|watch/i.test(a.event||'')){
+      try {
+        new Notification('⚠️ NWS Alert — White House, TN',{
+          body: (a.event||'')+(a.headline?'\n'+(a.headline||'').substring(0,120):''),
+          icon: './icons/icon-192.png',
+          tag: k,
+          requireInteraction: sev==='extreme'
+        });
+      } catch(e2){}
+    }
+  });
+  _lastAlertKeys=keys;
+}
+
+function enableAlertNotifs(){
+  var btn=document.getElementById('wxNotifBtn');
+  if(!('Notification' in window)){
+    if(btn){ btn.textContent='Not supported on this browser'; btn.className='wx-notif-btn denied'; }
+    return;
+  }
+  if(Notification.permission==='granted'){
+    localStorage.setItem('wx_notif','1');
+    if(btn){ btn.textContent='✅ Alerts enabled'; btn.className='wx-notif-btn granted'; }
+    checkAndNotify(ALERTS);
+    return;
+  }
+  if(Notification.permission==='denied'){
+    if(btn){ btn.textContent='Blocked — enable in browser settings'; btn.className='wx-notif-btn denied'; }
+    return;
+  }
+  Notification.requestPermission().then(function(p){
+    if(p==='granted'){
+      localStorage.setItem('wx_notif','1');
+      if(btn){ btn.textContent='✅ Alerts enabled'; btn.className='wx-notif-btn granted'; }
+      checkAndNotify(ALERTS);
+    } else {
+      if(btn){ btn.textContent='Blocked — enable in browser settings'; btn.className='wx-notif-btn denied'; }
+    }
+  });
+}
+
+function escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 /* ===== NEXRAD Radar — RainViewer + Leaflet ===== */
@@ -3444,6 +3662,15 @@ loadWeather();
 loadIrrigation();
 loadAlerts();
 acctRefreshStatus();
+// Refresh alerts every 5 minutes automatically
+setInterval(loadAlerts, 5*60*1000);
+// Restore notification button state
+(function(){
+  var btn=document.getElementById('wxNotifBtn');
+  if(!btn||!('Notification' in window)) return;
+  if(Notification.permission==='granted'){ btn.textContent='✅ Alerts enabled'; btn.className='wx-notif-btn granted'; }
+  else if(Notification.permission==='denied'){ btn.textContent='Blocked — enable in browser settings'; btn.className='wx-notif-btn denied'; }
+})();
 
 /* ===== Engine Hour Sensor sync ===== */
 (function(){
