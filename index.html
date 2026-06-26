@@ -344,6 +344,19 @@ html,body{
 .qa-sub{display:block;font-size:10px;font-weight:600;opacity:.7;margin-top:3px;letter-spacing:.3px}
 .qa-btn-yard{border-color:rgba(224,28,28,.3);background:rgba(224,28,28,.08);color:#ff6060}
 .qa-btn-irr{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.08);color:#22c55e}
+/* ── CONNECTED ACCOUNTS HUB ──────────────────────────────────────────────── */
+.acct-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.acct-row:last-of-type{border-bottom:none}
+.acct-icon{font-size:19px;width:28px;text-align:center;flex-shrink:0}
+.acct-info{flex:1;min-width:0}
+.acct-name{font-size:13px;font-weight:800;color:var(--text);font-family:var(--serif)}
+.acct-desc{font-size:10px;color:var(--muted);margin-top:2px}
+.acct-badge{font-size:9px;font-weight:800;letter-spacing:1px;padding:3px 7px;border-radius:10px;flex-shrink:0;white-space:nowrap}
+.acct-badge-ok{background:rgba(34,197,94,.15);color:#22c55e;border:1px solid rgba(34,197,94,.3)}
+.acct-badge-no{background:rgba(180,180,180,.1);color:#999;border:1px solid rgba(180,180,180,.2)}
+.acct-form{display:none;background:rgba(0,0,0,.25);border-radius:10px;padding:12px;margin-bottom:6px}
+.acct-form.open{display:block}
+.acct-input{width:100%;box-sizing:border-box;padding:9px 12px;background:rgba(0,0,0,.4);border:1px solid rgba(212,175,55,.3);border-radius:8px;color:var(--text);font-size:13px;margin-bottom:8px;font-family:inherit}
 /* Beehive utility buttons */
 .btn-beehive{width:100%;padding:10px;border:1px solid rgba(74,158,255,.3);border-radius:10px;background:rgba(74,158,255,.07);color:#4a9eff;font-size:11px;font-weight:800;font-family:inherit;margin-bottom:10px;cursor:pointer;letter-spacing:.5px}
 .icon-btn{background:none;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:var(--muted);padding:5px 10px;font-size:10px;font-weight:800;font-family:inherit;cursor:pointer}
@@ -740,6 +753,71 @@ html,body{
     <div class="quick-access-grid">
       <button class="qa-btn qa-btn-yard" onclick="hccSection('yard',document.getElementById('snav-yard'))">&#127807; YARD<br><span class="qa-sub">Mower &bull; GPS &bull; Log</span></button>
       <button class="qa-btn qa-btn-irr" onclick="hccSection('irrigation',document.getElementById('snav-irr'))">&#128688; IRRIGATION<br><span class="qa-sub">B-Hyve &bull; Zones &bull; Rain</span></button>
+    </div>
+
+    <!-- ── CONNECTED ACCOUNTS HUB ── -->
+    <div class="sec-hdr" style="margin-top:16px">
+      <span class="sec-hdr-icon">&#128273;</span>
+      <span class="sec-hdr-label">Connected Accounts</span>
+    </div>
+    <div class="card" id="connAcctCard">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">Your logins are saved on this device. Tap any service to set up or update.</div>
+
+      <!-- Beehive / HA -->
+      <div class="acct-row" onclick="acctToggle('acct-ha')">
+        <span class="acct-icon">&#127968;</span>
+        <div class="acct-info">
+          <div class="acct-name">Beehive &bull; Home Assistant</div>
+          <div class="acct-desc" id="acct-ha-desc">Long-Lived Access Token</div>
+        </div>
+        <span class="acct-badge acct-badge-no" id="acct-ha-badge">NOT SET</span>
+      </div>
+      <div class="acct-form" id="acct-ha">
+        <input id="acct-ha-token" type="password" placeholder="Paste HA Long-Lived Token&hellip;" autocomplete="off" class="acct-input">
+        <div style="display:flex;gap:8px;margin-top:0">
+          <button onclick="acctSaveHa()" style="flex:1;padding:9px;background:linear-gradient(135deg,#1a3a5f,#0d2040);border:1px solid rgba(74,158,255,.4);border-radius:8px;color:#4a9eff;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:.5px">&#128275; SAVE TOKEN</button>
+          <button onclick="acctClear('ha')" title="Remove saved token" style="padding:9px 14px;background:rgba(255,0,0,.08);border:1px solid rgba(255,0,0,.2);border-radius:8px;color:#ff6262;font-size:13px;font-weight:800;cursor:pointer">&#10005;</button>
+        </div>
+        <div id="acct-ha-msg" style="font-size:11px;text-align:center;margin-top:7px;min-height:14px"></div>
+      </div>
+
+      <!-- LUX Thermostat -->
+      <div class="acct-row" onclick="acctToggle('acct-lux')">
+        <span class="acct-icon">&#127777;&#65039;</span>
+        <div class="acct-info">
+          <div class="acct-name">LUX Thermostat</div>
+          <div class="acct-desc" id="acct-lux-desc">LUX Connected Home account</div>
+        </div>
+        <span class="acct-badge acct-badge-no" id="acct-lux-badge">NOT SET</span>
+      </div>
+      <div class="acct-form" id="acct-lux">
+        <input id="acct-lux-email" type="email" placeholder="LUX account email" autocomplete="email" class="acct-input">
+        <input id="acct-lux-pass" type="password" placeholder="LUX password" autocomplete="current-password" class="acct-input">
+        <div style="display:flex;gap:8px;margin-top:0">
+          <button onclick="acctSaveLux()" style="flex:1;padding:9px;background:linear-gradient(135deg,#3a2800,#5a3e00);border:1px solid rgba(212,175,55,.4);border-radius:8px;color:rgba(212,175,55,.95);font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:.5px">&#128275; SAVE</button>
+          <button onclick="acctClear('lux')" title="Remove saved credentials" style="padding:9px 14px;background:rgba(255,0,0,.08);border:1px solid rgba(255,0,0,.2);border-radius:8px;color:#ff6262;font-size:13px;font-weight:800;cursor:pointer">&#10005;</button>
+        </div>
+        <div id="acct-lux-msg" style="font-size:11px;text-align:center;margin-top:7px;min-height:14px"></div>
+      </div>
+
+      <!-- B-Hyve Irrigation -->
+      <div class="acct-row" onclick="acctToggle('acct-bhyve')">
+        <span class="acct-icon">&#128688;</span>
+        <div class="acct-info">
+          <div class="acct-name">B-Hyve Irrigation</div>
+          <div class="acct-desc" id="acct-bhyve-desc">Orbit B-Hyve account</div>
+        </div>
+        <span class="acct-badge acct-badge-no" id="acct-bhyve-badge">NOT SET</span>
+      </div>
+      <div class="acct-form" id="acct-bhyve">
+        <input id="acct-bhyve-email" type="email" placeholder="B-Hyve email" autocomplete="email" class="acct-input">
+        <input id="acct-bhyve-pass" type="password" placeholder="B-Hyve password" autocomplete="current-password" class="acct-input">
+        <div style="display:flex;gap:8px;margin-top:0">
+          <button onclick="acctSaveBhyve()" style="flex:1;padding:9px;background:linear-gradient(135deg,#003a1a,#005a28);border:1px solid rgba(34,197,94,.4);border-radius:8px;color:#22c55e;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:.5px">&#128275; SAVE</button>
+          <button onclick="acctClear('bhyve')" title="Remove saved credentials" style="padding:9px 14px;background:rgba(255,0,0,.08);border:1px solid rgba(255,0,0,.2);border-radius:8px;color:#ff6262;font-size:13px;font-weight:800;cursor:pointer">&#10005;</button>
+        </div>
+        <div id="acct-bhyve-msg" style="font-size:11px;text-align:center;margin-top:7px;min-height:14px"></div>
+      </div>
     </div>
 
     <!-- Home Status — populated when HA token available -->
@@ -2263,6 +2341,7 @@ function saveBhyveCreds(){
   localStorage.setItem('bhyve_email',email);
   localStorage.setItem('bhyve_pass',pass);
   if(msg){msg.style.color='#22c55e';msg.textContent='Saved! Connecting…';}
+  acctRefreshStatus();
   loadIrrigation();
 }
 function irrControl(action,opts){
@@ -2371,7 +2450,70 @@ function saveLuxCreds(){
   localStorage.setItem('lux_email',email);
   localStorage.setItem('lux_pass',pass);
   if(msg){msg.style.color='#22c55e';msg.textContent='Saved! Connecting…';}
+  acctRefreshStatus();
   loadClimate();
+}
+
+function acctToggle(id){
+  var form=document.getElementById(id);
+  if(!form) return;
+  var isOpen=form.classList.contains('open');
+  document.querySelectorAll('.acct-form').forEach(function(f){f.classList.remove('open');});
+  if(!isOpen){
+    form.classList.add('open');
+    if(id==='acct-ha'){ var t=localStorage.getItem('ha_token')||''; var inp=document.getElementById('acct-ha-token'); if(inp&&t) inp.value=t; }
+    else if(id==='acct-lux'){ var ei=document.getElementById('acct-lux-email'),pi=document.getElementById('acct-lux-pass'); if(ei) ei.value=localStorage.getItem('lux_email')||''; if(pi) pi.value=localStorage.getItem('lux_pass')||''; }
+    else if(id==='acct-bhyve'){ var ei2=document.getElementById('acct-bhyve-email'),pi2=document.getElementById('acct-bhyve-pass'); if(ei2) ei2.value=localStorage.getItem('bhyve_email')||''; if(pi2) pi2.value=localStorage.getItem('bhyve_pass')||''; }
+  }
+}
+function acctRefreshStatus(){
+  var ha=!!localStorage.getItem('ha_token');
+  var lux=!!(localStorage.getItem('lux_email')&&localStorage.getItem('lux_pass'));
+  var bhyve=!!(localStorage.getItem('bhyve_email')&&localStorage.getItem('bhyve_pass'));
+  function set(prefix,ok,desc){
+    var b=document.getElementById(prefix+'-badge'),d=document.getElementById(prefix+'-desc');
+    if(b){b.textContent=ok?'SAVED ✓':'NOT SET';b.className='acct-badge '+(ok?'acct-badge-ok':'acct-badge-no');}
+    if(d&&desc) d.textContent=desc;
+  }
+  set('acct-ha',ha,ha?'Token saved on this device':'Long-Lived Access Token');
+  set('acct-lux',lux,lux?localStorage.getItem('lux_email')||'LUX account':'LUX Connected Home account');
+  set('acct-bhyve',bhyve,bhyve?localStorage.getItem('bhyve_email')||'B-Hyve account':'Orbit B-Hyve account');
+}
+function acctSaveHa(){
+  var inp=document.getElementById('acct-ha-token'),msg=document.getElementById('acct-ha-msg');
+  if(!inp||!inp.value.trim()){if(msg){msg.style.color='#ff6262';msg.textContent='Paste a token first.';}return;}
+  localStorage.setItem('ha_token',inp.value.trim());
+  acctRefreshStatus();
+  if(msg){msg.style.color='#22c55e';msg.textContent='Saved! Will connect on home WiFi.';}
+  setTimeout(function(){var f=document.getElementById('acct-ha');if(f)f.classList.remove('open');checkBeehive(false);loadCameras();loadHomeStatus();},1500);
+}
+function acctSaveLux(){
+  var email=(document.getElementById('acct-lux-email')?document.getElementById('acct-lux-email').value:'').trim();
+  var pass=(document.getElementById('acct-lux-pass')?document.getElementById('acct-lux-pass').value:'').trim();
+  var msg=document.getElementById('acct-lux-msg');
+  if(!email||!pass){if(msg){msg.style.color='#ff6262';msg.textContent='Enter both email and password.';}return;}
+  localStorage.setItem('lux_email',email);localStorage.setItem('lux_pass',pass);
+  acctRefreshStatus();
+  if(msg){msg.style.color='#22c55e';msg.textContent='Saved! Connecting…';}
+  setTimeout(function(){var f=document.getElementById('acct-lux');if(f)f.classList.remove('open');loadClimate();},1200);
+}
+function acctSaveBhyve(){
+  var email=(document.getElementById('acct-bhyve-email')?document.getElementById('acct-bhyve-email').value:'').trim();
+  var pass=(document.getElementById('acct-bhyve-pass')?document.getElementById('acct-bhyve-pass').value:'').trim();
+  var msg=document.getElementById('acct-bhyve-msg');
+  if(!email||!pass){if(msg){msg.style.color='#ff6262';msg.textContent='Enter both email and password.';}return;}
+  localStorage.setItem('bhyve_email',email);localStorage.setItem('bhyve_pass',pass);
+  acctRefreshStatus();
+  if(msg){msg.style.color='#22c55e';msg.textContent='Saved!';}
+  setTimeout(function(){var f=document.getElementById('acct-bhyve');if(f)f.classList.remove('open');loadIrrigation();},1200);
+}
+function acctClear(svc){
+  if(!confirm('Remove saved '+svc.toUpperCase()+' credentials?')) return;
+  if(svc==='ha') localStorage.removeItem('ha_token');
+  else if(svc==='lux'){localStorage.removeItem('lux_email');localStorage.removeItem('lux_pass');}
+  else if(svc==='bhyve'){localStorage.removeItem('bhyve_email');localStorage.removeItem('bhyve_pass');}
+  document.querySelectorAll('.acct-form').forEach(function(f){f.classList.remove('open');});
+  acctRefreshStatus();
 }
 
 function loadClimate(){
@@ -2382,6 +2524,7 @@ function loadClimate(){
     if(b){b.className='wx-banner wx-no';b.innerHTML='&#127777;&#65039; Enter your LUX login below to connect';}
     return;
   }
+  var sc=document.getElementById('luxSetupCard'); if(sc) sc.style.display='none';
   if(b){b.className='wx-banner wx-load';b.innerHTML='&#128260; Connecting to LUX…';}
   fetch('/api/climate?e='+encodeURIComponent(creds.email)+'&p='+encodeURIComponent(creds.pass),{cache:'no-store'})
     .then(function(r){return r.json();})
@@ -2594,6 +2737,7 @@ function loadIrrigationDirect(){
     if(b){ b.className='wx-banner wx-no'; b.innerHTML='&#128688; Enter your B-Hyve login below to see your zones'; }
     return;
   }
+  var sc=document.getElementById('irrSetupCard'); if(sc) sc.style.display='none';
   fetch('/api/irrigation?e='+encodeURIComponent(creds.email)+'&p='+encodeURIComponent(creds.pass),{cache:'no-store'})
     .then(function(r){ return r.json(); })
     .then(function(d){
@@ -3097,6 +3241,7 @@ renderAll();
 loadWeather();
 loadIrrigation();
 loadAlerts();
+acctRefreshStatus();
 
 /* ===== Engine Hour Sensor sync ===== */
 (function(){
@@ -3731,6 +3876,34 @@ function hccSection(id, btn) {
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
+/* ===== Swipe navigation ===== */
+(function(){
+  var SECTIONS=['home','weather','irrigation','yard','climate'];
+  var NAV_IDS=['snav-home','snav-weather','snav-irr','snav-yard','snav-climate'];
+  var startX=0, startY=0, startScrollY=0;
+  var THRESHOLD=60, MAX_VERT=80;
+  document.addEventListener('touchstart',function(e){
+    startX=e.touches[0].clientX;
+    startY=e.touches[0].clientY;
+    startScrollY=window.scrollY;
+  },{passive:true});
+  document.addEventListener('touchend',function(e){
+    var dx=e.changedTouches[0].clientX-startX;
+    var dy=e.changedTouches[0].clientY-startY;
+    var scrolled=Math.abs(window.scrollY-startScrollY);
+    // Ignore if vertical swipe, small swipe, or page was scrolled during gesture
+    if(Math.abs(dy)>MAX_VERT||Math.abs(dx)<THRESHOLD||scrolled>20) return;
+    // Find current active section index
+    var cur=0;
+    document.querySelectorAll('.hcc-section').forEach(function(s,i){
+      if(s.classList.contains('active')) cur=i;
+    });
+    var next= dx<0 ? Math.min(cur+1,SECTIONS.length-1) : Math.max(cur-1,0);
+    if(next===cur) return;
+    hccSection(SECTIONS[next], document.getElementById(NAV_IDS[next]));
+  },{passive:true});
+})();
+
 function drawWxStars() {
   var el = document.getElementById('wxStarField');
   if (!el) return;
@@ -3889,9 +4062,12 @@ function saveHaToken() {
   var base = localStorage.getItem('ha_base') || HA_BASE;
   var btn = document.getElementById('haTokenBtn');
   var status = document.getElementById('haTokenStatus');
+  // Save immediately so it works even when traveling (no home WiFi)
+  localStorage.setItem('ha_token', token);
+  acctRefreshStatus();
   if (btn) { btn.textContent = 'Verifying…'; btn.style.opacity = '0.7'; }
   if (status) status.innerHTML = '';
-  // Test the token before saving
+  // Try to verify — if we can't reach Beehive, that's OK, token is saved
   fetch(base + '/api/', { headers: { 'Authorization': 'Bearer ' + token }, signal: AbortSignal.timeout(5000) })
     .then(function(r) {
       if (r.status === 401) throw new Error('unauthorized');
@@ -3900,7 +4076,7 @@ function saveHaToken() {
     })
     .then(function(d) {
       if (d && (d.message === 'API running.' || d.version)) {
-        localStorage.setItem('ha_token', token);
+        if (btn) { btn.textContent = '✅ CONNECTED'; btn.style.opacity = '1'; }
         var prompt = document.getElementById('haTokenPrompt');
         if (prompt) prompt.style.display = 'none';
         loadCameras();
@@ -3914,10 +4090,8 @@ function saveHaToken() {
       if (status) {
         var msg = err.message === 'unauthorized'
           ? '❌ Token rejected — create a new Long-Lived Token in Beehive and paste it here'
-          : err.message && err.message.indexOf('http_') === 0
-          ? '❌ Beehive error ' + err.message.replace('http_','') + ' — try again'
-          : '❌ Can\'t reach Beehive — make sure you\'re on home WiFi';
-        status.innerHTML = '<span style="color:#e05555">' + msg + '</span>';
+          : '✅ Token saved — Beehive will connect automatically on home WiFi';
+        status.innerHTML = '<span style="color:' + (err.message === 'unauthorized' ? '#e05555' : '#22c55e') + '">' + msg + '</span>';
       }
     });
 }
