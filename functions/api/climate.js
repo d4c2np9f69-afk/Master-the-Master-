@@ -1,68 +1,91 @@
-// /api/climate — GET: fetch LUX thermostat status, POST: control thermostat
+// /api/climate — LUX Connected Home thermostat via Geo platform API
 // GET params: e (email), p (password)
-// POST body: { email, password, action, device_id, cool_sp?, heat_sp?, value? }
+// POST body: { email, password, action, device_id?, cool_sp?, heat_sp?, value? }
 // Actions: set_sp, set_mode, set_fan
-const LUX_BASE = 'https://integration.lux-geo.com';
+const GEO_BASE = 'https://api.geotogether.com';
 
-async function luxLogin(email, password) {
-  const r = await fetch(`${LUX_BASE}/users/sign_in.json`, {
+const C_TO_F = c => Math.round(c * 9 / 5 + 32);
+const F_TO_C = f => ((f - 32) * 5 / 9).toFixed(1);
+
+// Operation mode mapping (Geo numeric → name)
+const MODE_FROM_GEO = { '1': 'heat', '2': 'cool', '4': 'auto', '5': 'off' };
+const MODE_TO_GEO   = { heat: '1', cool: '2', auto: '4', off: '5' };
+
+async function geoLogin(email, password) {
+  const r = await fetch(`${GEO_BASE}/usersService/v2/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({ user: { email, password } }),
+    body: JSON.stringify({ username: email, password, clientId: 'android-geo-home' }),
   });
   const body = await r.text().catch(() => '');
-  if (!r.ok) throw new Error(`login_failed — HTTP ${r.status} — ${body.slice(0, 120)}`);
+  if (!r.ok) throw new Error(`login_failed — HTTP ${r.status} — ${body.slice(0, 200)}`);
   const data = JSON.parse(body);
-  const token = data.authentication_token || data.auth_token || data.token;
-  const userId = data.id || data.user_id;
+  const token = data.token || data.access_token || data.authentication_token;
+  const userId = data.userId || data.user_id || data.id;
   if (!token || !userId) throw new Error(`login_failed — no token — keys: ${Object.keys(data).join(',')}`);
   return { token, userId };
 }
 
-async function luxGetDevices(userId, token) {
-  const r = await fetch(`${LUX_BASE}/users/${userId}/produkts.json`, {
-    headers: { 'Accept': 'application/json', 'X-Auth-Token': token },
+async function geoGetLive(userId, token) {
+  const r = await fetch(`${GEO_BASE}/api/userdata/device/liveData?systemId=${userId}`, {
+    headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` },
   });
-  if (!r.ok) throw new Error('devices_failed: ' + r.status);
+  if (!r.ok) throw new Error('live_data_failed: ' + r.status);
   return await r.json();
 }
 
-async function luxPutDevice(userId, token, deviceId, payload) {
-  const r = await fetch(`${LUX_BASE}/users/${userId}/produkts/${deviceId}.json`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-Auth-Token': token },
-    body: JSON.stringify(payload),
-  });
-  const body = await r.text().catch(() => '');
-  if (!r.ok) throw new Error(`put_failed — HTTP ${r.status} — ${body.slice(0, 120)}`);
-  return JSON.parse(body);
+function getFeature(data, name) {
+  if (!Array.isArray(data)) return null;
+  const item = data.find(d => d.feature === name);
+  return item ? item.value : null;
 }
 
-function parseDevice(d) {
-  // LUX API nests status under d.current_values or d.status or top-level
-  const cv = d.current_values || d.status || d;
-  const current_temp = cv.indoor_temp ?? cv.temp ?? cv.current_temp ?? cv.current ?? null;
-  const cool_sp = cv.cool_set_point ?? cv.cool_sp ?? cv.cooling_setpoint ?? d.cool_set_point ?? 72;
-  const heat_sp = cv.heat_set_point ?? cv.heat_sp ?? cv.heating_setpoint ?? d.heat_set_point ?? 68;
-  const op_mode = cv.op_mode ?? cv.mode ?? cv.system_mode ?? d.op_mode ?? 'off';
-  const fan_mode = cv.fan_mode ?? cv.fan ?? d.fan_mode ?? 'auto';
-  const schedule = cv.schedule ?? cv.program ?? d.program ?? null;
+function parseLiveData(live) {
+  // liveData has deviceData array; use first channel
+  const channels = live.deviceData || live.data || [];
+  const ch = channels[0] || {};
+  const data = ch.data || ch.channelData || [];
+
+  const tempC     = parseFloat(getFeature(data, 'TEMPERATURE') || getFeature(data, 'INDOOR_TEMPERATURE') || '0');
+  const coolSpC   = parseFloat(getFeature(data, 'COOL_SETPOINT') || getFeature(data, 'COOLING_SETPOINT') || '24');
+  const heatSpC   = parseFloat(getFeature(data, 'HEATING_SETPOINT') || '20');
+  const modeRaw   = getFeature(data, 'OPERATION_MODE') || '5';
+  const fanRaw    = getFeature(data, 'FAN_MODE') || getFeature(data, 'FAN_STATUS') || '0';
+
   return {
-    device_id: d.serial_number ?? d.id ?? d.device_id,
-    name: d.name || d.label || 'Thermostat',
-    current_temp,
-    cool_sp,
-    heat_sp,
-    op_mode,
-    fan_mode,
-    schedule_active: !!schedule,
-    raw: cv,
+    device_id: live.serial || live.systemId || live.id || null,
+    name: live.name || 'LUX Thermostat',
+    current_temp: C_TO_F(tempC),
+    cool_sp: C_TO_F(coolSpC),
+    heat_sp: C_TO_F(heatSpC),
+    op_mode: MODE_FROM_GEO[modeRaw] || 'off',
+    fan_mode: fanRaw === '1' || fanRaw === 'on' ? 'on' : 'auto',
+    raw_mode: modeRaw,
+    raw_fan: fanRaw,
   };
+}
+
+async function geoSetData(userId, token, feature, value) {
+  const r = await fetch(`${GEO_BASE}/api/setData`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${token}` },
+    body: JSON.stringify({
+      systemId: userId,
+      zone: '1',
+      feature,
+      value: String(value),
+      activationCode: 1,
+      accessLevel: '0',
+    }),
+  });
+  const body = await r.text().catch(() => '');
+  if (!r.ok) throw new Error(`set_failed — HTTP ${r.status} — ${body.slice(0, 120)}`);
+  return JSON.parse(body || '{}');
 }
 
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
-  const email = env.LUX_EMAIL || url.searchParams.get('e') || '';
+  const email    = env.LUX_EMAIL    || url.searchParams.get('e') || '';
   const password = env.LUX_PASSWORD || url.searchParams.get('p') || '';
 
   if (!email || !password) {
@@ -70,13 +93,9 @@ export async function onRequestGet({ request, env }) {
   }
 
   try {
-    const { token, userId } = await luxLogin(email, password);
-    const devices = await luxGetDevices(userId, token);
-    const list = Array.isArray(devices) ? devices : (devices.produkts || devices.devices || [devices]);
-    if (!list.length) {
-      return Response.json({ ok: false, error: 'no_devices_found' }, { status: 404 });
-    }
-    const thermostat = parseDevice(list[0]);
+    const { token, userId } = await geoLogin(email, password);
+    const live = await geoGetLive(userId, token);
+    const thermostat = parseLiveData(live);
     return Response.json({ ok: true, thermostat });
   } catch (e) {
     return Response.json({ ok: false, error: e.message }, { status: 503 });
@@ -89,41 +108,33 @@ export async function onRequestPost({ request, env }) {
     return Response.json({ ok: false, error: 'invalid_json' }, { status: 400 });
   }
 
-  const email = env.LUX_EMAIL || body.email || '';
+  const email    = env.LUX_EMAIL    || body.email    || '';
   const password = env.LUX_PASSWORD || body.password || '';
 
   if (!email || !password) {
     return Response.json({ ok: false, error: 'credentials_not_provided' }, { status: 400 });
   }
 
-  const { action, device_id, cool_sp, heat_sp, value } = body;
+  const { action, cool_sp, heat_sp, value } = body;
   if (!action) return Response.json({ ok: false, error: 'missing_action' }, { status: 400 });
 
   try {
-    const { token, userId } = await luxLogin(email, password);
+    const { token, userId } = await geoLogin(email, password);
 
-    let targetDeviceId = device_id;
-    if (!targetDeviceId) {
-      const devices = await luxGetDevices(userId, token);
-      const list = Array.isArray(devices) ? devices : (devices.produkts || devices.devices || [devices]);
-      if (!list.length) return Response.json({ ok: false, error: 'no_devices_found' }, { status: 404 });
-      targetDeviceId = list[0].serial_number ?? list[0].id;
-    }
-
-    let payload = {};
     if (action === 'set_sp') {
-      if (cool_sp != null) payload.cool_set_point = parseInt(cool_sp, 10);
-      if (heat_sp != null) payload.heat_set_point = parseInt(heat_sp, 10);
+      if (cool_sp != null) await geoSetData(userId, token, 'COOL_SETPOINT',  F_TO_C(parseInt(cool_sp, 10)));
+      if (heat_sp != null) await geoSetData(userId, token, 'HEATING_SETPOINT', F_TO_C(parseInt(heat_sp, 10)));
     } else if (action === 'set_mode') {
-      payload.op_mode = value;
+      const geoMode = MODE_TO_GEO[value] || '5';
+      await geoSetData(userId, token, 'OPERATION_MODE', geoMode);
     } else if (action === 'set_fan') {
-      payload.fan_mode = value;
+      await geoSetData(userId, token, 'FAN_MODE', value === 'on' ? '1' : '0');
     } else {
       return Response.json({ ok: false, error: 'unknown_action: ' + action }, { status: 400 });
     }
 
-    const result = await luxPutDevice(userId, token, targetDeviceId, { produkt: payload });
-    const thermostat = parseDevice(result.produkt || result);
+    const live = await geoGetLive(userId, token);
+    const thermostat = parseLiveData(live);
     return Response.json({ ok: true, thermostat });
   } catch (e) {
     return Response.json({ ok: false, error: e.message }, { status: 503 });
