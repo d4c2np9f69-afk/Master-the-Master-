@@ -2354,15 +2354,10 @@ function loadClimate(){
     })
     .catch(function(err){
       var msg=err&&err.message||'unknown';
-      if(b){b.className='wx-banner wx-no';}
+      if(b){b.className='wx-banner wx-no'; b.innerHTML='&#127777;&#65039; LUX: '+msg;}
       if(msg.indexOf('login_failed')>=0||msg.indexOf('401')>=0){
         localStorage.removeItem('lux_email'); localStorage.removeItem('lux_pass');
-        if(b) b.innerHTML='&#127777;&#65039; LUX login failed &mdash; re-enter your email &amp; password below';
         var sc=document.getElementById('luxSetupCard'); if(sc) sc.style.display='';
-        var ei2=document.getElementById('luxEmailIn'); if(ei2) ei2.value='';
-        var pi=document.getElementById('luxPassIn'); if(pi) pi.value='';
-      } else {
-        if(b) b.innerHTML='&#127777;&#65039; LUX error: '+msg;
       }
     });
 }
