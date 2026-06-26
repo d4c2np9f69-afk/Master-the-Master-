@@ -740,12 +740,12 @@ html,body{
   <div class="voice-transcript" id="voiceTranscript">&#127908;</div>
   <div class="voice-result" id="voiceResult" style="display:none"></div>
   <div class="voice-cmds">
-    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"Set thermostat to 72"</span>
-    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"Go to weather"</span>
-    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"Go to yard"</span>
-    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"Cool to 70"</span>
+    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"Cool to 72"</span>
     <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"Heat to 68"</span>
-    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"Go to irrigation"</span>
+    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"Braves game time"</span>
+    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"What time is it"</span>
+    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"Open weather"</span>
+    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"Open yard"</span>
   </div>
   <button onclick="voiceClose()" style="width:100%;margin-top:16px;padding:11px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">CLOSE</button>
 </div>
@@ -4760,6 +4760,70 @@ function voiceSpeak(text) {
   window.speechSynthesis.speak(u);
 }
 
+// Format any Date as Central Time string
+function voiceCentralTime(date, opts) {
+  var defaults = { timeZone:'America/Chicago', hour:'numeric', minute:'2-digit', hour12:true };
+  return date.toLocaleString('en-US', Object.assign({}, defaults, opts || {}));
+}
+
+// MLB team name lookup — returns { id, name } or null
+var VOICE_MLB = {
+  'braves':144,'atlanta':144,'astros':117,'houston':117,'cubs':112,'cardinals':138,'st louis':138,
+  'rangers':140,'texas':140,'yankees':147,'new york yankees':147,'red sox':111,'boston':111,
+  'dodgers':119,'mets':121,'new york mets':121,'phillies':143,'philadelphia':143,
+  'padres':135,'san diego':135,'giants':137,'san francisco':137,'nationals':120,'washington':120,
+  'marlins':146,'miami':146,'reds':113,'cincinnati':113,'pirates':134,'pittsburgh':134,
+  'brewers':158,'milwaukee':158,'rockies':115,'colorado':115,'diamondbacks':109,'arizona':109,
+  'twins':142,'minnesota':142,'white sox':145,'guardians':114,'cleveland':114,'tigers':116,
+  'detroit':116,'royals':118,'kansas city':118,'angels':108,'athletics':133,'oakland':133,
+  'mariners':136,'seattle':136,'blue jays':141,'toronto':141,'rays':139,'tampa bay':139,
+  'orioles':110,'baltimore':110
+};
+
+function voiceSportsLookup(raw) {
+  // Find team ID by scanning the raw phrase for any known team name
+  var phrase = raw.toLowerCase();
+  var teamId = null;
+  // Try multi-word keys first (longer match wins)
+  var keys = Object.keys(VOICE_MLB).sort(function(a,b){ return b.length - a.length; });
+  for (var i = 0; i < keys.length; i++) {
+    if (phrase.indexOf(keys[i]) !== -1) { teamId = VOICE_MLB[keys[i]]; break; }
+  }
+  if (!teamId) { voiceShowResult('err', 'Unknown team — try "Braves game" or "Rangers game"'); return; }
+
+  var today = new Date();
+  var end = new Date(today.getTime() + 8 * 86400000);
+  var fmt = function(d) { return d.toISOString().split('T')[0]; };
+
+  voiceShowResult('info', '⏳ Looking up schedule…');
+  fetch('https://statsapi.mlb.com/api/v1/schedule?sportId=1&teamId=' + teamId + '&startDate=' + fmt(today) + '&endDate=' + fmt(end) + '&hydrate=team')
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      var nextGame = null;
+      var dates = data.dates || [];
+      for (var di = 0; di < dates.length && !nextGame; di++) {
+        var games = dates[di].games || [];
+        for (var gi = 0; gi < games.length; gi++) {
+          var g = games[gi];
+          if (new Date(g.gameDate) >= today) { nextGame = g; break; }
+        }
+      }
+      if (!nextGame) {
+        voiceShowResult('info', 'No games in the next 8 days');
+        voiceSpeak('No games scheduled in the next 8 days');
+        return;
+      }
+      var gd = new Date(nextGame.gameDate);
+      var timeStr = voiceCentralTime(gd, { weekday:'short', month:'short', day:'numeric' });
+      var away = nextGame.teams.away.team.name;
+      var home = nextGame.teams.home.team.name;
+      var display = away + ' @ ' + home + '\n' + timeStr + ' CT';
+      voiceShowResult('ok', '⚾ ' + display);
+      voiceSpeak(away + ' at ' + home + ', ' + timeStr + ' Central Time');
+    })
+    .catch(function(){ voiceShowResult('err', 'Could not load MLB schedule'); });
+}
+
 // Convert spoken number words to digits — "seventy two" → "72"
 function voiceNumToDigit(t) {
   var map = {
@@ -4895,9 +4959,36 @@ function voiceExecute(cmd) {
     return;
   }
 
+  // ── What time is it ─────────────────────────────────────────────────────────
+  if (/\b(?:what(?:'s|\s+is)?\s+(?:the\s+)?time|what time|current time|time is it)\b/.test(t)) {
+    var now = new Date();
+    var ctStr = voiceCentralTime(now);
+    voiceShowResult('info', '🕐 ' + ctStr + ' Central Time');
+    voiceSpeak('It is ' + ctStr + ' Central Time');
+    return;
+  }
+
+  // ── Sports schedule (MLB) ───────────────────────────────────────────────────
+  var hasSportsWord = /\b(?:game|play(?:ing)?|schedule|series|start)\b/.test(t);
+  var hasTeamWord = false;
+  var keysCheck = Object.keys(VOICE_MLB);
+  for (var ki = 0; ki < keysCheck.length; ki++) {
+    if (t.indexOf(keysCheck[ki]) !== -1) { hasTeamWord = true; break; }
+  }
+  if (hasSportsWord && hasTeamWord) {
+    voiceSportsLookup(t);
+    return;
+  }
+  // Just a team name alone (e.g. "Braves game time" → hasSportsWord=true covered above;
+  // but "Braves" alone → also try lookup)
+  if (hasTeamWord && /\b(?:time|when|next|tonight|today)\b/.test(t)) {
+    voiceSportsLookup(t);
+    return;
+  }
+
   // ── Fallback ────────────────────────────────────────────────────────────────
   document.getElementById('voiceStatus').textContent = 'Tap the mic and speak a command';
-  voiceShowResult('err', 'Try: "cool to 72" · "open weather" · "set heat to 68" · "turn off"');
+  voiceShowResult('err', 'Try: "cool to 72" · "Braves game time" · "what time is it"');
 }
 
 function hccPanic() {
