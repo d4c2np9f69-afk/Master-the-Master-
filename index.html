@@ -511,6 +511,14 @@ html,body{
 .wx-lbl{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
 .wx-val{font-size:20px;font-weight:800;color:var(--text);margin-top:4px}
 .wx-note{font-size:10px;color:var(--muted);text-align:center;margin:4px 0 8px;min-height:13px;line-height:1.5}
+.wu-badge{display:flex;align-items:center;gap:13px;background:linear-gradient(135deg,rgba(180,130,15,.22),rgba(212,175,55,.10));border:1.5px solid rgba(212,175,55,.45);border-radius:12px;padding:13px 15px;margin:12px 0 8px;position:relative;overflow:hidden}
+.wu-badge::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(212,175,55,.7),transparent)}
+.wu-badge-medal{font-size:36px;line-height:1;flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(212,175,55,.5))}
+.wu-badge-body{flex:1;min-width:0}
+.wu-badge-title{font-size:14px;font-weight:800;color:var(--gold);font-family:var(--serif);letter-spacing:.4px}
+.wu-badge-station{font-size:11px;font-weight:700;color:var(--text);margin-top:3px;letter-spacing:.2px}
+.wu-badge-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.wu-badge-stars{font-size:11px;color:rgba(212,175,55,.6);margin-top:4px;letter-spacing:2px}
 .wx-radar-wrap{border-radius:10px;overflow:hidden;border:1px solid var(--border);background:#050508}
 
 /* ── MOWER / METER ──────────────────────────────────────────────────────── */
@@ -1073,7 +1081,8 @@ html,body{
         </div>
         <div style="text-align:right;padding-bottom:6px">
           <div style="font-size:9px;font-weight:600;letter-spacing:1.5px;color:rgba(210,180,120,.5);text-transform:uppercase;margin-bottom:4px;font-family:var(--serif)">Station</div>
-          <div style="font-size:11px;font-weight:600;color:rgba(240,220,175,.8);font-family:var(--serif)">KTNWHITE21</div>
+          <div style="font-size:11px;font-weight:600;color:rgba(240,220,175,.8);font-family:var(--serif)">&#127894; KTNWHITE21</div>
+          <div style="font-size:9px;font-weight:700;color:rgba(212,175,55,.65);letter-spacing:.5px;margin-top:2px;font-family:var(--serif)">WU Recognized</div>
         </div>
       </div>
     </div>
@@ -1243,6 +1252,15 @@ html,body{
         <li><span class="sk">Hardware</span><span class="sv">Ambient Weather WS-2902</span></li>
         <li><span class="sk">Software</span><span class="sv">AMBWeatherV3.0.0</span></li>
       </ul>
+      <div class="wu-badge">
+        <div class="wu-badge-medal">&#127894;</div>
+        <div class="wu-badge-body">
+          <div class="wu-badge-title">WU Recognized Station</div>
+          <div class="wu-badge-station">KTNWHITE21 &bull; Indian Ridge / jalo301</div>
+          <div class="wu-badge-sub">Quality-verified by Weather Underground &bull; 863 ft &bull; White House, TN</div>
+          <div class="wu-badge-stars">&#9733; &#9733; &#9733;</div>
+        </div>
+      </div>
       <button class="btn-full btn-gray" style="margin-top:10px" onclick="window.open('https://www.wunderground.com/dashboard/pws/KTNWHITE21','_blank','noopener')">&#128202; Open Station Dashboard</button>
     </div>
 
