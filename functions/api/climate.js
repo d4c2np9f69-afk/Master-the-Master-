@@ -202,7 +202,10 @@ export async function onRequestGet({ request, env }) {
     const loc = (userData.location || userData.locations?.[0]) || {};
     const devices = loc.devices || [];
     const device = devices[0];
-    if (!device) return Response.json({ ok: false, error: 'no_device_found', userData }, { status: 404 });
+    if (!device) {
+      const diag = `no_device_found — keys:${Object.keys(userData).join(',')} loc_keys:${Object.keys(loc).join(',') || 'none'} devices:${devices.length}`;
+      return Response.json({ ok: false, error: diag, raw: userData }, { status: 404 });
+    }
     const state = await getDeviceState(tokens.access_token, device.id);
     return Response.json({ ok: true, thermostat: parseThermostat(state, device.id, device.name) });
   } catch (e) {
@@ -226,7 +229,10 @@ export async function onRequestPost({ request, env }) {
     const userData = await getLocationUser(tokens.access_token);
     const loc = (userData.location || userData.locations?.[0]) || {};
     const device = (loc.devices || [])[0];
-    if (!device) return Response.json({ ok: false, error: 'no_device_found' }, { status: 404 });
+    if (!device) {
+      const diag = `no_device_found — keys:${Object.keys(userData).join(',')} loc_keys:${Object.keys(loc).join(',') || 'none'}`;
+      return Response.json({ ok: false, error: diag, raw: userData }, { status: 404 });
+    }
 
     const patch = {};
     if (action === 'set_sp') {
