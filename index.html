@@ -167,6 +167,7 @@ html,body{
 #snav-weather.active{border-bottom-color:var(--a-wx);background:rgba(56,189,248,.04)}
 #snav-irr.active    {border-bottom-color:var(--a-irr);background:rgba(34,197,94,.04)}
 #snav-yard.active   {border-bottom-color:var(--a-yard);background:rgba(192,57,43,.05)}
+#snav-climate.active{border-bottom-color:#f97316;background:rgba(249,115,22,.04)}
 
 /* ── SECTIONS ───────────────────────────────────────────────────────────── */
 .hcc-section{display:none}
@@ -182,6 +183,9 @@ html,body{
 /* Yard hero: landscape photo — use natural aspect ratio so baked-in text is never cropped */
 .sec-hero-yard{height:auto;aspect-ratio:1320/851;max-height:340px}
 .sec-hero-yard img{object-fit:cover;object-position:center center}
+/* Climate hero — photo replaces gradient when hero-climate.jpg is added */
+.sec-hero-climate{background:linear-gradient(160deg,#0a0610 0%,#1a0a00 50%,#0a0610 100%)}
+.sec-hero-climate img{object-fit:cover;object-position:center center}
 .sec-hero-overlay{
   position:absolute;inset:0;
   display:flex;flex-direction:column;justify-content:flex-end;
@@ -305,6 +309,34 @@ html,body{
 #section-irrigation .sec-hdr-label{color:rgba(80,220,120,.7)}
 #section-yard .sec-hdr{border-color:rgba(192,57,43,.2)}
 #section-yard .sec-hdr-label{color:rgba(220,100,80,.7)}
+#section-climate .sec-hdr{border-color:rgba(249,115,22,.2)}
+#section-climate .sec-hdr-label{color:rgba(249,160,60,.75)}
+
+/* ── CLIMATE / LUX THERMOSTAT ───────────────────────────────────────────── */
+.lux-temp-row{display:flex;align-items:center;justify-content:space-around;padding:20px 10px 14px}
+.lux-temp-block{text-align:center;flex:1}
+.lux-temp-lbl{font-size:9px;color:var(--muted);letter-spacing:1.2px;margin-bottom:6px;font-weight:700;text-transform:uppercase}
+.lux-temp-big{font-size:62px;font-weight:900;line-height:1;font-family:var(--serif)}
+.lux-temp-room{color:var(--text)}
+.lux-temp-set{color:#f97316}
+.lux-temp-sep{width:1px;background:var(--border);align-self:stretch;margin:4px 0}
+.lux-adj-row{display:flex;align-items:center;justify-content:center;gap:10px}
+.lux-adj-btn{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.3);border-radius:8px;color:#f97316;font-size:16px;padding:5px 14px;cursor:pointer;font-family:inherit;line-height:1;font-weight:900}
+.lux-badges{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.lux-badge{font-size:9px;font-weight:800;letter-spacing:.7px;padding:3px 8px;border-radius:5px;border:1px solid;white-space:nowrap}
+.lux-badge-cool{color:#38bdf8;border-color:rgba(56,189,248,.4);background:rgba(56,189,248,.1)}
+.lux-badge-heat{color:#f97316;border-color:rgba(249,115,22,.4);background:rgba(249,115,22,.1)}
+.lux-badge-off{color:var(--muted);border-color:var(--border);background:transparent}
+.lux-badge-auto{color:#22c55e;border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.1)}
+.lux-badge-fan{color:#d4af37;border-color:rgba(212,175,55,.3);background:rgba(212,175,55,.08)}
+.lux-badge-sched{color:var(--muted);border-color:var(--border);background:transparent}
+.lux-badge-sched-on{color:#22c55e;border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.1)}
+.lux-mode-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.lux-mode-btn{padding:8px 2px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:.2px}
+.lux-mode-btn.lmb-active-cool{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.4);color:#38bdf8}
+.lux-mode-btn.lmb-active-heat{background:rgba(249,115,22,.12);border-color:rgba(249,115,22,.4);color:#f97316}
+.lux-mode-btn.lmb-active-auto{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.4);color:#22c55e}
+.lux-mode-btn.lmb-active-off{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:var(--text)}
 
 /* ── QUICK ACCESS (HOME section) ───────────────────────────────────────── */
 .quick-access-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
@@ -599,6 +631,9 @@ html,body{
   </button>
   <button class="snav-btn" id="snav-yard" onclick="hccSection('yard',this)">
     <span class="snav-icon">&#127807;</span><span>YARD</span>
+  </button>
+  <button class="snav-btn" id="snav-climate" onclick="hccSection('climate',this)">
+    <span class="snav-icon">&#127777;&#65039;</span><span>CLIMATE</span>
   </button>
 </nav>
 
@@ -1342,6 +1377,89 @@ html,body{
 
 
 </div><!-- /section-yard -->
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SECTION 5: CLIMATE (LUX Thermostat)
+     ══════════════════════════════════════════════════════════════════════════ -->
+<div id="section-climate" class="hcc-section">
+
+  <!-- Climate hero — swap in hero-climate.jpg once photo is ready -->
+  <div class="sec-hero sec-hero-climate">
+    <img src="./images/hero-climate.jpg" alt="Climate" onerror="this.style.display='none'">
+    <div class="sec-hero-overlay">
+      <div class="sec-hero-status" id="climateHeroStatus"></div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- THERMOSTAT STATUS CARD -->
+    <div class="card" id="luxCard">
+      <div class="card-title">&#127777;&#65039; LUX Thermostat <span id="luxConn" class="irr-conn"></span></div>
+      <div id="luxBanner" class="wx-banner wx-load">&#128260; Loading thermostat&hellip;</div>
+
+      <!-- Main display — hidden until data loads -->
+      <div id="luxMain" style="display:none">
+        <div class="lux-temp-row">
+          <div class="lux-temp-block">
+            <div class="lux-temp-lbl">Room Temp</div>
+            <div id="luxCurrentTemp" class="lux-temp-big lux-temp-room">--&deg;</div>
+          </div>
+          <div class="lux-temp-sep"></div>
+          <div class="lux-temp-block">
+            <div class="lux-temp-lbl">Set Temp</div>
+            <div class="lux-adj-row">
+              <button class="lux-adj-btn" onclick="luxAdjust(-1)">&#9660;</button>
+              <div id="luxSetTemp" class="lux-temp-big lux-temp-set">--&deg;</div>
+              <button class="lux-adj-btn" onclick="luxAdjust(1)">&#9650;</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="lux-badges">
+          <span id="luxModeBadge" class="lux-badge lux-badge-off">MODE</span>
+          <span id="luxFanBadge" class="lux-badge lux-badge-fan">FAN</span>
+          <span id="luxSchedBadge" class="lux-badge lux-badge-sched">SCHEDULE</span>
+        </div>
+
+        <div class="lux-mode-grid">
+          <button class="lux-mode-btn" id="luxBtnCool" onclick="luxSetMode('cool')">&#10052;&#65039; COOL</button>
+          <button class="lux-mode-btn" id="luxBtnHeat" onclick="luxSetMode('heat')">&#128293; HEAT</button>
+          <button class="lux-mode-btn" id="luxBtnAuto" onclick="luxSetMode('auto')">&#128260; AUTO</button>
+          <button class="lux-mode-btn" id="luxBtnOff" onclick="luxSetMode('off')">&#9646;&#9646; OFF</button>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <button onclick="luxSetFan('auto')" id="luxFanAuto" style="flex:1;padding:7px 4px;border-radius:7px;background:rgba(212,175,55,.06);border:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:800;font-family:inherit;cursor:pointer">&#128168; Fan Auto</button>
+          <button onclick="luxSetFan('on')" id="luxFanOn" style="flex:1;padding:7px 4px;border-radius:7px;background:rgba(212,175,55,.06);border:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:800;font-family:inherit;cursor:pointer">&#128168; Fan On</button>
+          <button onclick="luxSetFan('circulate')" id="luxFanCirc" style="flex:1;padding:7px 4px;border-radius:7px;background:rgba(212,175,55,.06);border:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:800;font-family:inherit;cursor:pointer">&#128168; Circulate</button>
+        </div>
+
+        <div class="wx-grid" style="margin-bottom:8px">
+          <div class="wx-card"><div class="wx-lbl">Device</div><div class="wx-val" id="luxDevName" style="font-size:12px">--</div></div>
+          <div class="wx-card"><div class="wx-lbl">Last Sync</div><div class="wx-val" id="luxLastSync" style="font-size:12px">--</div></div>
+        </div>
+      </div>
+
+      <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadClimate()">&#128260; Refresh</button>
+      <div class="wx-note" style="margin-top:6px">Live from LUX Connected Home</div>
+    </div>
+
+    <!-- SETUP CARD -->
+    <div class="card" id="luxSetupCard">
+      <div class="card-title">&#9881; LUX Account</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px">Enter your LUX Connected Home login to enable thermostat control from this app.</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+        <input id="luxEmailIn" type="email" autocomplete="email" placeholder="LUX account email" style="width:100%;box-sizing:border-box;padding:10px 12px;background:rgba(0,0,0,.4);border:1px solid rgba(249,115,22,.3);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;outline:none;-webkit-appearance:none">
+        <input id="luxPassIn" type="password" autocomplete="current-password" placeholder="LUX account password" style="width:100%;box-sizing:border-box;padding:10px 12px;background:rgba(0,0,0,.4);border:1px solid rgba(249,115,22,.3);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;outline:none;-webkit-appearance:none">
+      </div>
+      <button onclick="saveLuxCreds()" style="width:100%;padding:11px;background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.4);border-radius:8px;color:#f97316;font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:.5px">&#127777;&#65039; Connect Thermostat</button>
+      <div id="luxCredsMsg" style="font-size:11px;margin-top:8px;text-align:center;min-height:18px;color:var(--muted)"></div>
+      <div style="font-size:10px;color:rgba(220,195,145,.35);margin-top:10px;border-top:1px solid rgba(220,195,145,.1);padding-top:10px">Use the same email and password as the LUX Connected Home app on your phone.</div>
+    </div>
+
+  </div>
+</div><!-- /section-climate -->
 
 <!-- CART FAB -->
 <button class="cart-fab" id="cartFab" onclick="showModal('cart')">&#128722;<span id="cartCount">0</span></button>
@@ -2172,6 +2290,148 @@ function irrStart(station){
 }
 function irrStopAll(){ if(confirm('Stop all watering now?')) irrControl('stop',{}); }
 function irrRain(h){ if(confirm(h>0?('Set a '+h+'-hour rain delay?'):('Clear the rain delay?'))) irrControl('rain_delay',{hours:h}); }
+
+// ── LUX THERMOSTAT ─────────────────────────────────────────────────────────
+var LUX_STATE = {loaded:false, mode:'off', fan:'auto', cool_sp:72, heat_sp:68, device_id:null};
+
+function getLuxCreds(){ return {email:localStorage.getItem('lux_email')||'',pass:localStorage.getItem('lux_pass')||''}; }
+
+function saveLuxCreds(){
+  var e=document.getElementById('luxEmailIn'),p=document.getElementById('luxPassIn');
+  if(!e||!p) return;
+  var email=(e.value||'').trim(), pass=(p.value||'').trim();
+  var msg=document.getElementById('luxCredsMsg');
+  if(!email||!pass){ if(msg){msg.style.color='#ff6262';msg.textContent='Enter both email and password.';} return; }
+  localStorage.setItem('lux_email',email);
+  localStorage.setItem('lux_pass',pass);
+  if(msg){msg.style.color='#22c55e';msg.textContent='Saved! Connecting…';}
+  loadClimate();
+}
+
+function loadClimate(){
+  var creds=getLuxCreds();
+  var b=document.getElementById('luxBanner');
+  var ei=document.getElementById('luxEmailIn'); if(ei&&creds.email) ei.value=creds.email;
+  if(!creds.email||!creds.pass){
+    if(b){b.className='wx-banner wx-no';b.innerHTML='&#127777;&#65039; Enter your LUX login below to connect';}
+    return;
+  }
+  if(b){b.className='wx-banner wx-load';b.innerHTML='&#128260; Connecting to LUX…';}
+  fetch('/api/climate?e='+encodeURIComponent(creds.email)+'&p='+encodeURIComponent(creds.pass),{cache:'no-store'})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(!d||!d.ok||!d.thermostat) throw new Error(d&&d.error||'no data');
+      var t=d.thermostat;
+      LUX_STATE.mode=t.op_mode||'off';
+      LUX_STATE.fan=t.fan_mode||'auto';
+      LUX_STATE.cool_sp=t.cool_sp||72;
+      LUX_STATE.heat_sp=t.heat_sp||68;
+      LUX_STATE.device_id=t.device_id||null;
+      // Update UI
+      var sc=document.getElementById('luxSetupCard'); if(sc) sc.style.display='none';
+      var mx=document.getElementById('luxMain'); if(mx) mx.style.display='';
+      var curT=t.current_temp||t.temperature;
+      document.getElementById('luxCurrentTemp').textContent=(curT?Math.round(curT)+'°':'--°');
+      var sp = LUX_STATE.mode==='heat' ? LUX_STATE.heat_sp : LUX_STATE.cool_sp;
+      document.getElementById('luxSetTemp').textContent=Math.round(sp)+'°';
+      document.getElementById('luxDevName').textContent=t.name||'LUX Thermostat';
+      document.getElementById('luxLastSync').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+      var conn=document.getElementById('luxConn');
+      if(conn){conn.innerHTML=' &#9679; ONLINE';conn.style.color='#22c55e';}
+      luxRenderMode(LUX_STATE.mode);
+      luxRenderFan(LUX_STATE.fan);
+      // Banner
+      var mode=LUX_STATE.mode;
+      if(b){
+        if(mode==='cool'){b.className='wx-banner wx-caution';b.innerHTML='&#10052;&#65039; Cooling &bull; Set '+Math.round(LUX_STATE.cool_sp)+'°F';}
+        else if(mode==='heat'){b.className='wx-banner wx-go';b.innerHTML='&#128293; Heating &bull; Set '+Math.round(LUX_STATE.heat_sp)+'°F';}
+        else if(mode==='auto'){b.className='wx-banner wx-caution';b.innerHTML='&#128260; Auto &bull; Cool '+Math.round(LUX_STATE.cool_sp)+'° / Heat '+Math.round(LUX_STATE.heat_sp)+'°';}
+        else{b.className='wx-banner wx-no';b.innerHTML='&#9646;&#9646; System Off';}
+      }
+      // Hero status
+      var hs=document.getElementById('climateHeroStatus');
+      if(hs&&curT) hs.textContent=Math.round(curT)+'°F';
+    })
+    .catch(function(err){
+      var msg=err&&err.message||'unknown';
+      if(b){b.className='wx-banner wx-no';}
+      if(msg.indexOf('login_failed')>=0||msg.indexOf('401')>=0){
+        localStorage.removeItem('lux_email'); localStorage.removeItem('lux_pass');
+        if(b) b.innerHTML='&#127777;&#65039; LUX login failed &mdash; re-enter your email &amp; password below';
+        var sc=document.getElementById('luxSetupCard'); if(sc) sc.style.display='';
+        var ei2=document.getElementById('luxEmailIn'); if(ei2) ei2.value='';
+        var pi=document.getElementById('luxPassIn'); if(pi) pi.value='';
+      } else {
+        if(b) b.innerHTML='&#127777;&#65039; LUX error: '+msg;
+      }
+    });
+}
+
+function luxRenderMode(mode){
+  var mb=document.getElementById('luxModeBadge');
+  if(mb){
+    var labels={cool:'&#10052;&#65039; COOLING ON',heat:'&#128293; HEATING ON',auto:'&#128260; AUTO',off:'&#9646;&#9646; OFF'};
+    var cls={cool:'lux-badge-cool',heat:'lux-badge-heat',auto:'lux-badge-auto',off:'lux-badge-off'};
+    mb.innerHTML=labels[mode]||mode.toUpperCase();
+    mb.className='lux-badge '+(cls[mode]||'lux-badge-off');
+  }
+  var btns={cool:'luxBtnCool',heat:'luxBtnHeat',auto:'luxBtnAuto',off:'luxBtnOff'};
+  var cls={cool:'lmb-active-cool',heat:'lmb-active-heat',auto:'lmb-active-auto',off:'lmb-active-off'};
+  Object.keys(btns).forEach(function(m){
+    var el=document.getElementById(btns[m]);
+    if(el){ el.className='lux-mode-btn'+(m===mode?' '+cls[m]:''); }
+  });
+}
+
+function luxRenderFan(fan){
+  var fb=document.getElementById('luxFanBadge');
+  var fanLabels={auto:'&#128168; FAN AUTO',on:'&#128168; FAN ON',circulate:'&#128168; FAN CIRCULATE'};
+  if(fb){fb.innerHTML=fanLabels[fan]||('FAN '+fan.toUpperCase());fb.className='lux-badge lux-badge-fan';}
+  ['luxFanAuto','luxFanOn','luxFanCirc'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.style.borderColor='var(--border)',el.style.color='var(--muted)';
+  });
+  var activeMap={auto:'luxFanAuto',on:'luxFanOn',circulate:'luxFanCirc'};
+  var ac=document.getElementById(activeMap[fan]);
+  if(ac){ac.style.borderColor='rgba(212,175,55,.45)';ac.style.color='#d4af37';}
+}
+
+function luxAdjust(delta){
+  var creds=getLuxCreds(); if(!creds.email||!creds.pass) return;
+  if(LUX_STATE.mode==='heat') LUX_STATE.heat_sp+=delta;
+  else LUX_STATE.cool_sp+=delta;
+  var sp=LUX_STATE.mode==='heat'?LUX_STATE.heat_sp:LUX_STATE.cool_sp;
+  document.getElementById('luxSetTemp').textContent=Math.round(sp)+'°';
+  clearTimeout(window._luxAdjTimer);
+  window._luxAdjTimer=setTimeout(function(){ luxSendControl('set_sp',{}); },800);
+}
+
+function luxSetMode(mode){
+  var creds=getLuxCreds(); if(!creds.email||!creds.pass){var b=document.getElementById('luxBanner');if(b){b.className='wx-banner wx-no';b.innerHTML='Enter LUX login first';}return;}
+  LUX_STATE.mode=mode;
+  luxRenderMode(mode);
+  luxSendControl('set_mode',{value:mode});
+}
+
+function luxSetFan(fan){
+  var creds=getLuxCreds(); if(!creds.email||!creds.pass) return;
+  LUX_STATE.fan=fan;
+  luxRenderFan(fan);
+  luxSendControl('set_fan',{value:fan});
+}
+
+function luxSendControl(action,opts){
+  var creds=getLuxCreds(); if(!creds.email||!creds.pass) return;
+  var payload=Object.assign({email:creds.email,password:creds.pass,action:action,device_id:LUX_STATE.device_id},opts||{});
+  if(action==='set_sp') payload.cool_sp=LUX_STATE.cool_sp, payload.heat_sp=LUX_STATE.heat_sp;
+  fetch('/api/climate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(!d||!d.ok){ var b=document.getElementById('luxBanner');if(b){b.className='wx-banner wx-no';b.innerHTML='&#127777;&#65039; Command failed: '+(d&&d.error||'unknown');} }
+      setTimeout(loadClimate,3000);
+    })
+    .catch(function(){ var b=document.getElementById('luxBanner');if(b){b.className='wx-banner wx-no';b.innerHTML='&#127777;&#65039; Control request failed';} });
+}
 
 // Orbit B-hyve irrigation — live zones/photos/status from /api/irrigation (worker proxy)
 function loadIrrigation(){
@@ -3389,6 +3649,7 @@ function hccSection(id, btn) {
   if (btn) btn.classList.add('active');
   if (id === 'irrigation' && !window._irrLoaded) { window._irrLoaded = true; loadIrrigation(); }
   if (id === 'home' && !window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
+  if (id === 'climate') { loadClimate(); }
 
   if (id === 'yard' && typeof drawYardMap === 'function') {
     var yt = (typeof S !== 'undefined' && S.sensorTrack && S.sensorTrack.length >= 2) ? S.sensorTrack : [];
