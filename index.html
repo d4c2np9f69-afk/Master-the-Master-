@@ -421,6 +421,44 @@ html,body{
 .alexa-enable-btn{padding:6px 12px;background:rgba(26,156,219,.18);border:1px solid rgba(26,156,219,.5);border-radius:20px;color:#4db8e8;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit;flex-shrink:0}
 .alexa-enable-btn:active{background:rgba(26,156,219,.35)}
 .alexa-enable-btn.active{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.5);color:#4ade80;cursor:default}
+
+/* ── VOICE COMMAND (MIC) ─────────────────────────────────────────────────── */
+.mic-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(26,156,219,.15);border:1.5px solid rgba(26,156,219,.4);
+  color:#4db8e8;font-size:17px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;transition:all .2s;
+}
+.mic-btn.listening{
+  background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.6);color:#f87171;
+  animation:micPulse 1s ease-in-out infinite;
+}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 8px rgba(239,68,68,0)}}
+.voice-overlay{
+  display:none;position:fixed;bottom:0;left:0;right:0;z-index:600;
+  background:rgba(10,8,5,.96);border-top:1px solid rgba(212,175,55,.2);
+  border-radius:20px 20px 0 0;padding:20px 20px 36px;
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.32,1,.32,1);
+}
+.voice-overlay.open{display:block;transform:translateY(0)}
+.voice-transcript{
+  font-size:18px;font-family:var(--serif);color:var(--text);
+  min-height:52px;text-align:center;padding:10px 0 6px;line-height:1.4;
+}
+.voice-status{font-size:11px;color:var(--muted);text-align:center;letter-spacing:.8px;text-transform:uppercase;margin-bottom:14px}
+.voice-result{
+  padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;
+  text-align:center;min-height:36px;
+}
+.voice-result.ok{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3)}
+.voice-result.err{background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.25)}
+.voice-result.info{background:rgba(26,156,219,.12);color:#7dd3fc;border:1px solid rgba(26,156,219,.25)}
+.voice-cmds{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:14px}
+.voice-cmd-chip{
+  padding:5px 11px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:20px;font-size:10px;color:var(--muted);cursor:pointer;
+}
+.voice-cmd-chip:active{background:rgba(212,175,55,.15)}
 .alexa-ring{width:34px;height:34px;background:linear-gradient(135deg,#1a9cdb,#0070a8);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 10px rgba(26,156,219,.4)}
 
 /* ── BUTTONS ────────────────────────────────────────────────────────────── */
@@ -693,6 +731,23 @@ html,body{
     <div class="app-hdr-title">HOME COMMAND CENTER</div>
     <div class="app-hdr-sub">Manage &bull; Maintain &bull; Monitor</div>
   </div>
+  <button class="mic-btn" id="micBtn" onclick="voiceStart()" title="Voice Command">&#127908;</button>
+</div>
+
+<!-- Voice Command Overlay -->
+<div class="voice-overlay" id="voiceOverlay">
+  <div class="voice-status" id="voiceStatus">Tap the mic and speak a command</div>
+  <div class="voice-transcript" id="voiceTranscript">&#127908;</div>
+  <div class="voice-result" id="voiceResult" style="display:none"></div>
+  <div class="voice-cmds">
+    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"Set thermostat to 72"</span>
+    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"Go to weather"</span>
+    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"Go to yard"</span>
+    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"Cool to 70"</span>
+    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"Heat to 68"</span>
+    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">"Go to irrigation"</span>
+  </div>
+  <button onclick="voiceClose()" style="width:100%;margin-top:16px;padding:11px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">CLOSE</button>
 </div>
 
 <!-- ══ SECTION NAV ═══════════════════════════════════════════════════════════ -->
@@ -4622,6 +4677,227 @@ function alexaInitBadges() {
       if (btn) { btn.classList.add('active'); btn.textContent = '✅ Active'; }
     }
   }
+}
+
+// ── VOICE COMMAND ENGINE ──────────────────────────────────────────────────────
+var _voiceRecog = null;
+var _voiceOpen = false;
+
+function voiceStart() {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    voiceOpen();
+    voiceShowResult('err', 'Voice recognition not supported on this browser. Try Chrome or Safari.');
+    return;
+  }
+  voiceOpen();
+  if (_voiceRecog) { try { _voiceRecog.abort(); } catch(e){} }
+  _voiceRecog = new SR();
+  _voiceRecog.lang = 'en-US';
+  _voiceRecog.interimResults = true;
+  _voiceRecog.maxAlternatives = 1;
+
+  _voiceRecog.onstart = function() {
+    document.getElementById('micBtn').classList.add('listening');
+    document.getElementById('voiceStatus').textContent = '🔴 Listening…';
+    document.getElementById('voiceTranscript').textContent = '…';
+    document.getElementById('voiceResult').style.display = 'none';
+  };
+  _voiceRecog.onresult = function(e) {
+    var interim = '', final = '';
+    for (var i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) final += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    document.getElementById('voiceTranscript').textContent = final || interim || '…';
+    if (final) voiceExecute(final.trim());
+  };
+  _voiceRecog.onerror = function(e) {
+    document.getElementById('micBtn').classList.remove('listening');
+    document.getElementById('voiceStatus').textContent = 'Tap the mic and speak a command';
+    if (e.error !== 'no-speech') voiceShowResult('err', 'Error: ' + e.error);
+  };
+  _voiceRecog.onend = function() {
+    document.getElementById('micBtn').classList.remove('listening');
+    document.getElementById('voiceStatus').textContent = 'Tap the mic and speak a command';
+  };
+  _voiceRecog.start();
+}
+
+function voiceOpen() {
+  var ov = document.getElementById('voiceOverlay');
+  ov.style.display = 'block';
+  setTimeout(function(){ ov.classList.add('open'); }, 10);
+  _voiceOpen = true;
+}
+
+function voiceClose() {
+  if (_voiceRecog) { try { _voiceRecog.abort(); } catch(e){} }
+  document.getElementById('micBtn').classList.remove('listening');
+  var ov = document.getElementById('voiceOverlay');
+  ov.classList.remove('open');
+  setTimeout(function(){ ov.style.display = 'none'; }, 320);
+  _voiceOpen = false;
+}
+
+function voiceShowResult(type, msg) {
+  var el = document.getElementById('voiceResult');
+  el.className = 'voice-result ' + type;
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function voiceDemoChip(el) {
+  document.getElementById('voiceTranscript').textContent = el.textContent.replace(/"/g,'');
+  voiceExecute(el.textContent.replace(/"/g,''));
+}
+
+function voiceSpeak(text) {
+  if (!window.speechSynthesis) return;
+  var u = new SpeechSynthesisUtterance(text);
+  u.volume = 0.8; u.rate = 1; u.pitch = 1;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(u);
+}
+
+// Convert spoken number words to digits — "seventy two" → "72"
+function voiceNumToDigit(t) {
+  var map = {
+    'zero':0,'one':1,'two':2,'three':3,'four':4,'five':5,'six':6,'seven':7,'eight':8,'nine':9,
+    'ten':10,'eleven':11,'twelve':12,'thirteen':13,'fourteen':14,'fifteen':15,
+    'sixteen':16,'seventeen':17,'eighteen':18,'nineteen':19,
+    'twenty':20,'thirty':30,'forty':40,'fifty':50,'sixty':60,'seventy':70,'eighty':80,'ninety':90
+  };
+  // "seventy two" or "seventy-two" → "72"
+  t = t.replace(/\b(twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)[\s\-]+(one|two|three|four|five|six|seven|eight|nine)\b/g, function(m, t1, o1) {
+    return '' + (map[t1] + map[o1]);
+  });
+  for (var w in map) { t = t.replace(new RegExp('\\b' + w + '\\b', 'g'), '' + map[w]); }
+  return t;
+}
+
+function voiceSetCool(sp) {
+  if (sp < 60 || sp > 85) { voiceShowResult('err', 'Temperature out of range (60–85°F)'); return; }
+  voiceShowResult('info', '⏳ Setting cool to ' + sp + '°…');
+  var lux = JSON.parse(localStorage.getItem('lux_creds') || 'null') || {};
+  if (!lux.e || !lux.p) { voiceShowResult('err', 'LUX account not saved — open HOME → Accounts'); return; }
+  fetch('/api/climate', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({email:lux.e, password:lux.p, action:'set_sp', cool_sp:sp})
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if (d.ok) { voiceShowResult('ok', '✅ Cool set to ' + sp + '°F'); voiceSpeak('Done. Cool set to ' + sp + ' degrees.'); if (d.thermostat) updateClimateUI(d.thermostat); }
+    else { voiceShowResult('err', 'Failed: ' + (d.error || 'unknown error')); }
+  }).catch(function(){ voiceShowResult('err', 'Network error'); });
+}
+
+function voiceSetHeat(sp) {
+  if (sp < 50 || sp > 80) { voiceShowResult('err', 'Temperature out of range (50–80°F)'); return; }
+  voiceShowResult('info', '⏳ Setting heat to ' + sp + '°…');
+  var lux = JSON.parse(localStorage.getItem('lux_creds') || 'null') || {};
+  if (!lux.e || !lux.p) { voiceShowResult('err', 'LUX account not saved — open HOME → Accounts'); return; }
+  fetch('/api/climate', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({email:lux.e, password:lux.p, action:'set_sp', heat_sp:sp})
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if (d.ok) { voiceShowResult('ok', '✅ Heat set to ' + sp + '°F'); voiceSpeak('Done. Heat set to ' + sp + ' degrees.'); if (d.thermostat) updateClimateUI(d.thermostat); }
+    else { voiceShowResult('err', 'Failed: ' + (d.error || 'unknown error')); }
+  }).catch(function(){ voiceShowResult('err', 'Network error'); });
+}
+
+function voiceSetMode(mode) {
+  var lux = JSON.parse(localStorage.getItem('lux_creds') || 'null') || {};
+  if (!lux.e || !lux.p) { voiceShowResult('err', 'LUX account not saved — open HOME → Accounts'); return; }
+  voiceShowResult('info', '⏳ Setting mode to ' + mode + '…');
+  fetch('/api/climate', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({email:lux.e, password:lux.p, action:'set_mode', value:mode})
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if (d.ok) { voiceShowResult('ok', '✅ Mode set to ' + mode); voiceSpeak('Mode set to ' + mode); }
+    else { voiceShowResult('err', 'Failed: ' + (d.error || 'unknown')); }
+  }).catch(function(){ voiceShowResult('err', 'Network error'); });
+}
+
+// Keyword-extraction command parser — forgiving, no strict phrase order required
+function voiceExecute(cmd) {
+  // Convert number words and normalize
+  var t = voiceNumToDigit(cmd.toLowerCase().replace(/['"]/g,'').trim());
+  document.getElementById('voiceStatus').textContent = 'Processing…';
+
+  // Extract numbers
+  var nums = [];
+  t.replace(/\d+/g, function(n) { nums.push(parseInt(n, 10)); return n; });
+  var firstNum = nums.length ? nums[0] : null;
+
+  // ── Navigation ─────────────────────────────────────────────────────────────
+  // Has nav intent word OR is a pure keyword utterance with no number context
+  var navIntent = /\b(?:go|open|show|navigate|switch|take me|bring|pull up|display|view)\b/.test(t);
+  var navSections = [
+    { words: ['weather','forecast','radar','rain','storm'],         id: 'weather',  label: 'Weather' },
+    { words: ['irrigation','water','sprinkler','watering','zones'], id: 'irr',      label: 'Irrigation' },
+    { words: ['yard','mower','mow','lawn','grass','equipment'],     id: 'yard',     label: 'Yard' },
+    { words: ['climate','thermostat','hvac'],                       id: 'climate',  label: 'Climate' },
+    { words: ['home','main','start','back','dashboard'],            id: 'home',     label: 'Home' }
+  ];
+  // A setpoint command has both a number AND a "to/degree" marker — don't nav on those
+  var isSetpointCmd = firstNum && /\b(?:to|degrees?|at)\b/.test(t);
+  if (!isSetpointCmd && (navIntent || !firstNum)) {
+    for (var ni = 0; ni < navSections.length; ni++) {
+      var ns = navSections[ni];
+      var found = false;
+      for (var wi = 0; wi < ns.words.length; wi++) {
+        if (new RegExp('\\b' + ns.words[wi] + '\\b').test(t)) { found = true; break; }
+      }
+      if (found) {
+        var btn = document.getElementById('snav-' + ns.id);
+        if (btn) btn.click();
+        voiceShowResult('ok', '✅ Opened ' + ns.label);
+        voiceSpeak('Opening ' + ns.label);
+        setTimeout(voiceClose, 1200);
+        return;
+      }
+    }
+  }
+
+  // ── Thermostat setpoints ────────────────────────────────────────────────────
+  // Detect cool vs heat context anywhere in the sentence
+  var hasCool = /\b(?:cool(?:er|ing)?|cold|chill(?:y)?|ac|air)\b/.test(t);
+  var hasHeat = /\b(?:heat(?:er|ing)?|warm(?:er|ing)?|hot(?:ter)?)\b/.test(t);
+  var hasSetVerb = /\b(?:set|change|adjust|drop|lower|raise|bump|bring|move|make|put|push|take)\b/.test(t);
+  var hasTempWord = /\b(?:thermostat|temp|temperature|degrees?|it|that)\b/.test(t);
+  var numInRange = firstNum && firstNum >= 50 && firstNum <= 90;
+
+  if (numInRange) {
+    if (hasCool) { voiceSetCool(firstNum); return; }
+    if (hasHeat) { voiceSetHeat(firstNum); return; }
+    // Ambiguous (just "set to 72" or "72 degrees" or "thermostat to 72") — default cool
+    if (hasSetVerb || hasTempWord) { voiceSetCool(firstNum); return; }
+  }
+
+  // ── Mode commands ───────────────────────────────────────────────────────────
+  var hasModeVerb = hasSetVerb || /\b(?:turn|switch|on|off|mode)\b/.test(t);
+  if (hasModeVerb && !firstNum) {
+    if (/\b(?:off|disable|stop|shut)\b/.test(t)) { voiceSetMode('off'); return; }
+    if (/\bauto(?:matic)?\b/.test(t)) { voiceSetMode('auto'); return; }
+    if (hasCool) { voiceSetMode('cool'); return; }
+    if (hasHeat) { voiceSetMode('heat'); return; }
+  }
+
+  // ── Current temperature query ───────────────────────────────────────────────
+  var isQuestion = /\b(?:what|how|tell|check|is it|whats)\b/.test(t);
+  if (isQuestion && /\b(?:temp|temperature|hot|cold|warm|outside|weather|degrees?)\b/.test(t)) {
+    var tEl = document.getElementById('wxTemp') || document.getElementById('climateCurTemp');
+    var tempNow = tEl ? tEl.textContent.replace(/[^\d]/g,'') : null;
+    if (tempNow) {
+      voiceShowResult('info', '🌡 Current temp: ' + tempNow + '°F');
+      voiceSpeak('The current temperature is ' + tempNow + ' degrees Fahrenheit.');
+    } else {
+      var wxBtn = document.getElementById('snav-weather');
+      if (wxBtn) wxBtn.click();
+      voiceShowResult('info', 'Opening weather for current conditions');
+    }
+    return;
+  }
+
+  // ── Fallback ────────────────────────────────────────────────────────────────
+  document.getElementById('voiceStatus').textContent = 'Tap the mic and speak a command';
+  voiceShowResult('err', 'Try: "cool to 72" · "open weather" · "set heat to 68" · "turn off"');
 }
 
 function hccPanic() {
