@@ -1024,9 +1024,9 @@ html,body{
       <button class="btn-full btn-gray" style="margin-top:8px" onclick="window.open('https://www.radarscope.app','_blank','noopener')">&#128225; Open RadarScope</button>
     </div>
 
-    <!-- 7-DAY NWS FORECAST -->
+    <!-- 10-DAY FORECAST -->
     <div class="card cat-weather" id="wxForecastCard">
-      <div class="card-title">&#128197; 7-Day Forecast &bull; NWS Nashville</div>
+      <div class="card-title">&#128197; 10-Day Forecast &bull; White House 37188</div>
       <div id="wxFcBanner" class="wx-banner wx-load">&#8987; Loading forecast&hellip;</div>
       <div id="wxFcGrid" class="fc-scroll" style="margin-top:10px"></div>
       <div id="wxFcNote" class="wx-note" style="margin-top:6px"></div>
@@ -2792,70 +2792,93 @@ function radarStep(dir){
 }
 
 /* ===== NWS 7-Day Forecast ===== */
-var _fcGridUrl=null;
 function loadForecast(){
   var banner=document.getElementById('wxFcBanner'), grid=document.getElementById('wxFcGrid');
-  if(banner){banner.style.display='';banner.className='wx-banner wx-load';banner.innerHTML='&#8987; Loading forecast&hellip;';}
+  if(banner){banner.style.display='';banner.className='wx-banner wx-load';banner.innerHTML='&#8987; Loading 10-day forecast&hellip;';}
   if(grid) grid.innerHTML='';
-  var doFetch=function(url){
-    fetch(url,{headers:{'Accept':'application/geo+json','User-Agent':'HCC-PWA/1.0 jeff.loewen@comcast.net'},signal:AbortSignal.timeout(10000)})
-      .then(function(r){return r.json();})
-      .then(function(d){
-        var periods=d.properties&&d.properties.periods;
-        if(!periods||!periods.length) throw new Error('no periods');
-        if(banner) banner.style.display='none';
-        var note=document.getElementById('wxFcNote');
-        if(note) note.textContent='NWS Nashville (OHX) · Updated '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-        renderForecast(periods);
-      })
-      .catch(function(){if(banner){banner.className='wx-banner wx-caution';banner.innerHTML='&#9888; Tap Refresh Forecast to load';}});
-  };
-  if(_fcGridUrl){doFetch(_fcGridUrl);return;}
-  fetch('https://api.weather.gov/points/36.477,-86.66',{headers:{'Accept':'application/geo+json','User-Agent':'HCC-PWA/1.0 jeff.loewen@comcast.net'},signal:AbortSignal.timeout(10000)})
-    .then(function(r){return r.json();})
-    .then(function(d){_fcGridUrl=d.properties&&d.properties.forecast;if(!_fcGridUrl) throw new Error('no grid');doFetch(_fcGridUrl);})
-    .catch(function(){if(banner){banner.className='wx-banner wx-caution';banner.innerHTML='&#9888; Tap Refresh Forecast to load';}});
+  fetch('/api/forecast',{cache:'no-store',signal:AbortSignal.timeout(12000)})
+    .then(function(r){ return r.ok ? r.json() : Promise.reject('HTTP '+r.status); })
+    .then(function(d){
+      if(d.error) throw new Error(d.error);
+      if(!d.days||!d.days.length) throw new Error('no days');
+      if(banner) banner.style.display='none';
+      var note=document.getElementById('wxFcNote');
+      if(note) note.textContent='Weather.com · White House 37188 · Updated '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+      renderForecast(d.days);
+    })
+    .catch(function(e){
+      if(banner){banner.className='wx-banner wx-caution';banner.innerHTML='&#9888; Tap Refresh Forecast to retry';}
+    });
 }
 
-function renderForecast(periods){
+function renderForecast(days){
   var grid=document.getElementById('wxFcGrid'); if(!grid) return;
-  var days={}, order=[];
-  periods.forEach(function(p){
-    var raw=p.name||'';
-    var key=raw.replace(/ Night$| Afternoon$| Evening$| Morning$/,'');
-    if(raw==='Tonight') key='Tonight';
-    if(raw==='Today') key='Today';
-    if(!days[key]){days[key]={name:key,hi:null,lo:null,cond:'',icon:''};order.push(key);}
-    if(p.isDaytime){days[key].hi=p.temperature;days[key].cond=p.shortForecast;days[key].icon=p.icon;}
-    else{days[key].lo=p.temperature;if(!days[key].hi){days[key].cond=p.shortForecast;days[key].icon=p.icon;}}
-  });
   var html='';
-  order.slice(0,7).forEach(function(key,i){
-    var d=days[key];
-    var emoji=wxFcEmoji(d.cond);
-    var label=i===0?'TODAY':key.slice(0,3).toUpperCase();
-    var hi=d.hi!==null?d.hi+'&deg;':(d.lo!==null?d.lo+'&deg;':'--');
-    var lo=d.lo!==null?d.lo+'&deg; lo':'';
-    var cond=(d.cond||'').split(' ').slice(0,4).join(' ');
-    html+='<div class="fc-day'+(i===0?' fc-today':'')+'"><div class="fc-day-name">'+label+'</div><div class="fc-day-icon">'+emoji+'</div><div class="fc-day-hi">'+hi+'</div><div class="fc-day-lo">'+lo+'</div><div class="fc-day-cond">'+cond+'</div></div>';
+  days.slice(0,10).forEach(function(d,i){
+    var emoji=wxFcIcon(d.icon, d.wxPhrase);
+    var label=i===0?'TODAY':d.dayName;
+    var hi=d.hi!==null?d.hi+'&deg;':'--';
+    var lo=d.lo!==null?d.lo+'&deg;':'--';
+    var rain=d.precip!==null?d.precip+'%':'';
+    var cond=(d.wxPhrase||'').substring(0,14);
+    html+='<div class="fc-day'+(i===0?' fc-today':'')+'">'
+      +'<div class="fc-day-name">'+label+'</div>'
+      +'<div class="fc-day-icon">'+emoji+'</div>'
+      +'<div class="fc-day-hi">'+hi+'</div>'
+      +'<div class="fc-day-lo">'+lo+'</div>'
+      +(rain?'<div class="fc-day-cond" style="color:rgba(56,189,248,.8)">&#128167;'+rain+'</div>':'')
+      +(cond&&!rain?'<div class="fc-day-cond">'+cond+'</div>':'')
+      +'</div>';
   });
   grid.innerHTML=html;
 }
 
-function wxFcEmoji(cond){
-  if(!cond) return '🌡';
-  var c=cond.toLowerCase();
-  if(c.indexOf('thunder')>=0) return '⛈';
-  if(c.indexOf('snow')>=0||c.indexOf('blizzard')>=0) return '❄️';
-  if(c.indexOf('sleet')>=0||c.indexOf('ice')>=0) return '🌨';
-  if(c.indexOf('rain')>=0||c.indexOf('shower')>=0||c.indexOf('drizzle')>=0) return '🌧';
-  if(c.indexOf('fog')>=0||c.indexOf('haze')>=0) return '🌫';
-  if(c.indexOf('wind')>=0) return '💨';
-  if(c.indexOf('partly')>=0||c.indexOf('mostly sunny')>=0) return '⛅';
-  if(c.indexOf('cloud')>=0||c.indexOf('overcast')>=0||c.indexOf('mostly cloudy')>=0) return '☁️';
-  if(c.indexOf('clear')>=0||c.indexOf('sunny')>=0) return '☀️';
-  return '🌡';
+// Map TWC icon codes (1-47) to emoji — covers the full code set
+function wxFcIcon(code, phrase){
+  if(code!=null){
+    var c=parseInt(code,10);
+    if(c===0||c===1||c===2)        return '&#127751;'; // tornado/hurricane
+    if(c===3||c===4)               return '&#9928;&#65039;'; // thunderstorms
+    if(c===5)                      return '&#127783;&#65039;'; // rain/snow mix
+    if(c===6||c===7)               return '&#127784;&#65039;'; // sleet/snow showers
+    if(c===8||c===9||c===10)       return '&#127783;&#65039;'; // freezing rain/drizzle
+    if(c===11||c===12)             return '&#127783;&#65039;'; // rain showers
+    if(c===13||c===14||c===15)     return '&#10052;&#65039;'; // snow
+    if(c===16)                     return '&#10052;&#65039;'; // snow
+    if(c===17)                     return '&#9928;&#65039;'; // hail
+    if(c===18)                     return '&#127784;&#65039;'; // sleet
+    if(c===19||c===20||c===21||c===22) return '&#127863;'; // fog/dust/haze
+    if(c===23||c===24)             return '&#128168;'; // wind
+    if(c===25)                     return '&#127784;&#65039;'; // freezing drizzle
+    if(c===26)                     return '&#9729;&#65039;'; // cloudy
+    if(c===27||c===28)             return '&#9925;'; // mostly cloudy
+    if(c===29||c===30)             return '&#9925;'; // partly cloudy
+    if(c===31||c===32)             return '&#9728;&#65039;'; // clear/sunny
+    if(c===33||c===34)             return '&#127769;'; // fair/mostly clear night
+    if(c===35)                     return '&#9928;&#65039;'; // thunderstorm
+    if(c===36)                     return '&#127774;'; // hot
+    if(c===37||c===38||c===39||c===40) return '&#9928;&#65039;'; // scattered t-storms
+    if(c===41||c===42||c===43||c===44) return '&#10052;&#65039;'; // snow
+    if(c===45||c===46)             return '&#127783;&#65039;'; // rain showers night
+    if(c===47)                     return '&#9928;&#65039;'; // thunderstorm night
+  }
+  // Fallback: phrase-based
+  if(!phrase) return '&#127777;&#65039;';
+  var p=phrase.toLowerCase();
+  if(p.indexOf('thunder')>=0||p.indexOf('storm')>=0) return '&#9928;&#65039;';
+  if(p.indexOf('snow')>=0)   return '&#10052;&#65039;';
+  if(p.indexOf('sleet')>=0||p.indexOf('ice')>=0) return '&#127784;&#65039;';
+  if(p.indexOf('rain')>=0||p.indexOf('shower')>=0||p.indexOf('drizzle')>=0) return '&#127783;&#65039;';
+  if(p.indexOf('fog')>=0||p.indexOf('haze')>=0) return '&#127863;';
+  if(p.indexOf('wind')>=0)   return '&#128168;';
+  if(p.indexOf('partly')>=0) return '&#9925;';
+  if(p.indexOf('cloud')>=0)  return '&#9729;&#65039;';
+  if(p.indexOf('clear')>=0||p.indexOf('sunny')>=0) return '&#9728;&#65039;';
+  return '&#127777;&#65039;';
 }
+
+// Keep old name as alias for any other callers
+function wxFcEmoji(cond){ return wxFcIcon(null, cond); }
 
 // Water-usage + cost estimate (Hunter MP flow @180°; White House Utility District 2026 rates)
 var IRR_FLOW={1:17.2,2:14.3,5:5.7};        // zone GPM (MP3500 x6/x5, MP3000 x3) — 82 psi supply, no shortfall
