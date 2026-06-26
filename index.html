@@ -618,6 +618,24 @@ html,body{
 .hs-warn{color:#ffd24a}
 .hs-red{color:#ef4444}
 .hs-neutral{color:#e8e8f0}
+/* ── NEXRAD Radar ── */
+.wx-radar-leaflet{height:280px;border-radius:10px;overflow:hidden;background:#111;position:relative}
+.radar-ctrl{display:flex;gap:6px;margin-top:8px}
+.rcbtn{padding:8px 0;background:rgba(0,0,0,.45);border:1px solid rgba(212,175,55,.3);border-radius:8px;color:var(--text);font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;flex:1;text-align:center;-webkit-tap-highlight-color:transparent}
+.rcbtn.rca{background:rgba(212,175,55,.2);border-color:rgba(212,175,55,.7);color:#d4af37}
+/* ── 7-Day Forecast ── */
+.fc-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.fc-scroll::-webkit-scrollbar{display:none}
+.fc-day{min-width:68px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:10px;padding:9px 6px;text-align:center;flex-shrink:0}
+.fc-day-name{font-size:9px;font-weight:800;letter-spacing:.8px;color:var(--muted);font-family:var(--serif);text-transform:uppercase}
+.fc-day-icon{font-size:22px;margin:4px 0 2px}
+.fc-day-hi{font-size:15px;font-weight:800;color:var(--text);font-family:var(--serif)}
+.fc-day-lo{font-size:11px;color:var(--muted);margin-top:1px}
+.fc-day-cond{font-size:9px;color:var(--muted);margin-top:3px;line-height:1.3}
+.fc-today{border-color:rgba(212,175,55,.55)!important;background:rgba(212,175,55,.09)!important}
+/* ── Spotter badge ── */
+.spotter-row{display:flex;align-items:center;gap:12px;padding:12px 0}
+.spotter-icon{width:46px;height:46px;border-radius:23px;background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.4);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -928,19 +946,55 @@ html,body{
       <div id="readyReasons"></div>
     </div>
 
-    <!-- LIVE RAIN RADAR -->
-    <div class="card cat-weather">
-      <div class="card-title">&#128225; Live Rain Radar</div>
-      <div class="wx-radar-wrap">
-        <iframe
-          title="Live rain radar - White House TN"
-          width="100%" height="240" frameborder="0" style="display:block;border:0"
-          loading="lazy"
-          src="https://embed.windy.com/embed2.html?lat=36.477&lon=-86.66&detailLat=36.477&detailLon=-86.66&zoom=9&level=surface&overlay=radar&menu=&message=&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=mph&metricTemp=%C2%B0F&radarRange=-1">
-        </iframe>
+    <!-- NEXRAD LIVE RADAR -->
+    <div class="card cat-weather" id="wxRadarCard">
+      <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+        <span>&#128225; NEXRAD Live Radar</span>
+        <span style="font-size:9px;font-weight:700;letter-spacing:.5px;color:var(--muted)">KOHX &bull; Nashville</span>
       </div>
-      <div class="wx-note" style="margin-top:6px">Animated radar by Windy.com &bull; tap Open Full Radar if it doesn&rsquo;t load</div>
-      <button class="btn-full btn-gray" style="margin-top:10px" onclick="window.open('https://www.windy.com/?radar,36.477,-86.66,9','_blank','noopener')">&#128640; Open Full Radar &amp; Forecast</button>
+      <div id="wxRadarMap" class="wx-radar-leaflet"></div>
+      <div class="radar-ctrl">
+        <button id="wxRadarPlayBtn" class="rcbtn" onclick="radarToggle()">&#9654; Play</button>
+        <button class="rcbtn" style="flex:0.4" onclick="radarStep(-1)">&#9664;</button>
+        <button class="rcbtn" style="flex:0.4" onclick="radarStep(1)">&#9654;</button>
+        <button class="rcbtn" style="flex:0.35" onclick="loadRadarFrames()" title="Refresh">&#128260;</button>
+      </div>
+      <div id="wxRadarTime" class="wx-note" style="margin-top:7px;text-align:center">Tap Play for animated radar loop</div>
+      <button class="btn-full btn-gray" style="margin-top:8px" onclick="window.open('https://www.radarscope.app','_blank','noopener')">&#128225; Open RadarScope</button>
+    </div>
+
+    <!-- 7-DAY NWS FORECAST -->
+    <div class="card cat-weather" id="wxForecastCard">
+      <div class="card-title">&#128197; 7-Day Forecast &bull; NWS Nashville</div>
+      <div id="wxFcBanner" class="wx-banner wx-load">&#8987; Loading forecast&hellip;</div>
+      <div id="wxFcGrid" class="fc-scroll" style="margin-top:10px"></div>
+      <div id="wxFcNote" class="wx-note" style="margin-top:6px"></div>
+      <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadForecast()">&#128260; Refresh Forecast</button>
+    </div>
+
+    <!-- SPOTTER NETWORK -->
+    <div class="card cat-weather" id="wxSpotterCard">
+      <div class="card-title">&#127755; Storm Spotter &bull; Spotter Network</div>
+      <div class="spotter-row">
+        <div class="spotter-icon">&#127755;</div>
+        <div>
+          <div style="font-size:16px;font-weight:800;font-family:var(--serif);color:var(--text)">jlo301</div>
+          <div style="font-size:11px;color:#22c55e;margin-top:3px">&#10003; Verified NWS-Trained Storm Spotter</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">Spotter Network &bull; Indian Ridge</div>
+        </div>
+      </div>
+      <ul class="spec-list">
+        <li><span class="sk">Spotter ID</span><span class="sv">jlo301</span></li>
+        <li><span class="sk">PWS Station</span><span class="sv">KTNWHITE21</span></li>
+        <li><span class="sk">Location</span><span class="sv">White House, TN 37188</span></li>
+        <li><span class="sk">Nearest Radar</span><span class="sv">KOHX Nashville</span></li>
+        <li><span class="sk">NWS Office</span><span class="sv">OHX &bull; Nashville</span></li>
+      </ul>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button onclick="window.open('https://www.spotternetwork.org','_blank','noopener')" style="flex:1;padding:10px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:8px;color:#22c55e;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#128506; Spotter Map</button>
+        <button onclick="window.open('https://www.wunderground.com/dashboard/pws/KTNWHITE21','_blank','noopener')" style="flex:1;padding:10px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.3);border-radius:8px;color:#38bdf8;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#128202; PWS Data</button>
+      </div>
+      <div class="wx-note" style="margin-top:8px">Your location shows on the Spotter Map when logged in to RadarScope &bull; report severe weather at spotternetwork.org</div>
     </div>
 
     <!-- WEATHER STATION -->
@@ -2303,6 +2357,154 @@ function loadAlerts(){
     .then(function(r){return r.json();})
     .then(function(d){ ALERTS=(d&&d.alerts)||[]; if(typeof renderReadiness==='function') renderReadiness(); if(typeof renderBurn==='function') renderBurn(); })
     .catch(function(){ ALERTS=[]; });
+}
+
+/* ===== NEXRAD Radar — RainViewer + Leaflet ===== */
+var _rMap=null, _rLayer=null, _rFrames=[], _rIdx=0, _rPlaying=false, _rTimer=null;
+
+function ensureLeaflet(cb){
+  if(window.L){ cb(); return; }
+  var lnk=document.createElement('link');
+  lnk.rel='stylesheet';
+  lnk.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+  document.head.appendChild(lnk);
+  var sc=document.createElement('script');
+  sc.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  sc.onload=cb;
+  sc.onerror=function(){ var n=document.getElementById('wxRadarTime'); if(n) n.textContent='Radar unavailable — check connection'; };
+  document.head.appendChild(sc);
+}
+
+function initRadarMap(){
+  ensureLeaflet(function(){
+    var el=document.getElementById('wxRadarMap');
+    if(!el) return;
+    if(_rMap){ _rMap.invalidateSize(); if(_rFrames.length===0) loadRadarFrames(); return; }
+    _rMap=window.L.map('wxRadarMap',{center:[36.477,-86.66],zoom:7,zoomControl:true,attributionControl:false});
+    window.L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_matter_no_labels/{z}/{x}/{y}{r}.png',{maxZoom:12,subdomains:'abcd'}).addTo(_rMap);
+    window.L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png',{maxZoom:12,subdomains:'abcd'}).addTo(_rMap);
+    window.L.circleMarker([36.477,-86.66],{radius:7,color:'#d4af37',weight:2,fillColor:'#d4af37',fillOpacity:1})
+      .bindPopup('<b>KTNWHITE21</b><br>White House, TN<br>jalo301').addTo(_rMap);
+    loadRadarFrames();
+  });
+}
+
+function loadRadarFrames(){
+  var note=document.getElementById('wxRadarTime');
+  if(note) note.textContent='Loading radar frames…';
+  fetch('https://api.rainviewer.com/public/weather-maps.json',{cache:'no-store'})
+    .then(function(r){return r.json();})
+    .then(function(data){
+      _rFrames=(data.radar.past||[]).concat(data.radar.nowcast||[]);
+      if(!_rFrames.length){if(note) note.textContent='No radar data — try again';return;}
+      _rIdx=_rFrames.length-1;
+      radarShowFrame(_rIdx);
+    })
+    .catch(function(){if(note) note.textContent='Radar unavailable — check connection';});
+}
+
+function radarShowFrame(idx){
+  if(!_rMap||!_rFrames.length) return;
+  _rIdx=Math.max(0,Math.min(idx,_rFrames.length-1));
+  if(_rLayer) _rMap.removeLayer(_rLayer);
+  _rLayer=window.L.tileLayer(
+    'https://tilecache.rainviewer.com/v2/radar/'+_rFrames[_rIdx].time+'/256/{z}/{x}/{y}/2/1_1.png',
+    {opacity:0.65,maxZoom:12,tileSize:256}
+  );
+  _rLayer.addTo(_rMap);
+  var note=document.getElementById('wxRadarTime');
+  if(note){
+    var d=new Date(_rFrames[_rIdx].time*1000);
+    var isLatest=_rIdx===_rFrames.length-1;
+    note.textContent=(isLatest?'Latest: ':'Frame '+(_rIdx+1)+'/'+_rFrames.length+': ')+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+(isLatest?' · LIVE':'');
+  }
+}
+
+function radarToggle(){
+  if(_rPlaying) radarPause(); else radarPlay();
+}
+function radarPlay(){
+  if(!_rFrames.length){loadRadarFrames();return;}
+  _rPlaying=true;
+  var btn=document.getElementById('wxRadarPlayBtn');
+  if(btn){btn.innerHTML='&#9646;&#9646; Pause';btn.classList.add('rca');}
+  _rTimer=setInterval(function(){_rIdx=(_rIdx+1)%_rFrames.length;radarShowFrame(_rIdx);},600);
+}
+function radarPause(){
+  _rPlaying=false;
+  clearInterval(_rTimer);
+  var btn=document.getElementById('wxRadarPlayBtn');
+  if(btn){btn.innerHTML='&#9654; Play';btn.classList.remove('rca');}
+}
+function radarStep(dir){
+  radarPause();
+  radarShowFrame(_rIdx+dir);
+}
+
+/* ===== NWS 7-Day Forecast ===== */
+var _fcGridUrl=null;
+function loadForecast(){
+  var banner=document.getElementById('wxFcBanner'), grid=document.getElementById('wxFcGrid');
+  if(banner){banner.style.display='';banner.className='wx-banner wx-load';banner.innerHTML='&#8987; Loading forecast&hellip;';}
+  if(grid) grid.innerHTML='';
+  var doFetch=function(url){
+    fetch(url,{headers:{'Accept':'application/geo+json','User-Agent':'HCC-PWA/1.0 jeff.loewen@comcast.net'},signal:AbortSignal.timeout(10000)})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var periods=d.properties&&d.properties.periods;
+        if(!periods||!periods.length) throw new Error('no periods');
+        if(banner) banner.style.display='none';
+        var note=document.getElementById('wxFcNote');
+        if(note) note.textContent='NWS Nashville (OHX) · Updated '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+        renderForecast(periods);
+      })
+      .catch(function(){if(banner){banner.className='wx-banner wx-caution';banner.innerHTML='&#9888; Tap Refresh Forecast to load';}});
+  };
+  if(_fcGridUrl){doFetch(_fcGridUrl);return;}
+  fetch('https://api.weather.gov/points/36.477,-86.66',{headers:{'Accept':'application/geo+json','User-Agent':'HCC-PWA/1.0 jeff.loewen@comcast.net'},signal:AbortSignal.timeout(10000)})
+    .then(function(r){return r.json();})
+    .then(function(d){_fcGridUrl=d.properties&&d.properties.forecast;if(!_fcGridUrl) throw new Error('no grid');doFetch(_fcGridUrl);})
+    .catch(function(){if(banner){banner.className='wx-banner wx-caution';banner.innerHTML='&#9888; Tap Refresh Forecast to load';}});
+}
+
+function renderForecast(periods){
+  var grid=document.getElementById('wxFcGrid'); if(!grid) return;
+  var days={}, order=[];
+  periods.forEach(function(p){
+    var raw=p.name||'';
+    var key=raw.replace(/ Night$| Afternoon$| Evening$| Morning$/,'');
+    if(raw==='Tonight') key='Tonight';
+    if(raw==='Today') key='Today';
+    if(!days[key]){days[key]={name:key,hi:null,lo:null,cond:'',icon:''};order.push(key);}
+    if(p.isDaytime){days[key].hi=p.temperature;days[key].cond=p.shortForecast;days[key].icon=p.icon;}
+    else{days[key].lo=p.temperature;if(!days[key].hi){days[key].cond=p.shortForecast;days[key].icon=p.icon;}}
+  });
+  var html='';
+  order.slice(0,7).forEach(function(key,i){
+    var d=days[key];
+    var emoji=wxFcEmoji(d.cond);
+    var label=i===0?'TODAY':key.slice(0,3).toUpperCase();
+    var hi=d.hi!==null?d.hi+'&deg;':(d.lo!==null?d.lo+'&deg;':'--');
+    var lo=d.lo!==null?d.lo+'&deg; lo':'';
+    var cond=(d.cond||'').split(' ').slice(0,4).join(' ');
+    html+='<div class="fc-day'+(i===0?' fc-today':'')+'"><div class="fc-day-name">'+label+'</div><div class="fc-day-icon">'+emoji+'</div><div class="fc-day-hi">'+hi+'</div><div class="fc-day-lo">'+lo+'</div><div class="fc-day-cond">'+cond+'</div></div>';
+  });
+  grid.innerHTML=html;
+}
+
+function wxFcEmoji(cond){
+  if(!cond) return '🌡';
+  var c=cond.toLowerCase();
+  if(c.indexOf('thunder')>=0) return '⛈';
+  if(c.indexOf('snow')>=0||c.indexOf('blizzard')>=0) return '❄️';
+  if(c.indexOf('sleet')>=0||c.indexOf('ice')>=0) return '🌨';
+  if(c.indexOf('rain')>=0||c.indexOf('shower')>=0||c.indexOf('drizzle')>=0) return '🌧';
+  if(c.indexOf('fog')>=0||c.indexOf('haze')>=0) return '🌫';
+  if(c.indexOf('wind')>=0) return '💨';
+  if(c.indexOf('partly')>=0||c.indexOf('mostly sunny')>=0) return '⛅';
+  if(c.indexOf('cloud')>=0||c.indexOf('overcast')>=0||c.indexOf('mostly cloudy')>=0) return '☁️';
+  if(c.indexOf('clear')>=0||c.indexOf('sunny')>=0) return '☀️';
+  return '🌡';
 }
 
 // Water-usage + cost estimate (Hunter MP flow @180°; White House Utility District 2026 rates)
@@ -3868,6 +4070,11 @@ function hccSection(id, btn) {
   if (id === 'irrigation' && !window._irrLoaded) { window._irrLoaded = true; loadIrrigation(); }
   if (id === 'home' && !window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
   if (id === 'climate') { loadClimate(); }
+  if (id === 'weather') {
+    if (!window._radarInited) { window._radarInited = true; setTimeout(initRadarMap, 150); }
+    else if (_rMap) { setTimeout(function(){ _rMap.invalidateSize(); }, 150); }
+    if (!window._forecastLoaded) { window._forecastLoaded = true; loadForecast(); }
+  }
 
   if (id === 'yard' && typeof drawYardMap === 'function') {
     var yt = (typeof S !== 'undefined' && S.sensorTrack && S.sensorTrack.length >= 2) ? S.sensorTrack : [];
