@@ -1,56 +1,80 @@
 // /api/climate — LUX Connected Home thermostat via Geo platform API
 // GET params: e (email), p (password)
-// POST body: { email, password, action, device_id?, cool_sp?, heat_sp?, value? }
-// Actions: set_sp, set_mode, set_fan
+// POST body: { email, password, action, cool_sp?, heat_sp?, value? }
 const GEO_BASE = 'https://api.geotogether.com';
 
 const C_TO_F = c => Math.round(c * 9 / 5 + 32);
 const F_TO_C = f => ((f - 32) * 5 / 9).toFixed(1);
 
-// Operation mode mapping (Geo numeric → name)
 const MODE_FROM_GEO = { '1': 'heat', '2': 'cool', '4': 'auto', '5': 'off' };
 const MODE_TO_GEO   = { heat: '1', cool: '2', auto: '4', off: '5' };
 
+const LOGIN_ATTEMPTS = [
+  { username: true,  clientId: 'android-geo-home' },
+  { username: true,  clientId: 'ios-geo-home' },
+  { username: true,  clientId: null },
+  { username: false, clientId: null },
+];
+
 async function geoLogin(email, password) {
-  const r = await fetch(`${GEO_BASE}/usersService/v2/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({ username: email, password, clientId: 'android-geo-home' }),
-  });
-  const body = await r.text().catch(() => '');
-  if (!r.ok) throw new Error(`login_failed — HTTP ${r.status} — ${body.slice(0, 200)}`);
-  const data = JSON.parse(body);
-  const token = data.token || data.access_token || data.authentication_token;
-  const userId = data.userId || data.user_id || data.id;
-  if (!token || !userId) throw new Error(`login_failed — no token — keys: ${Object.keys(data).join(',')}`);
-  return { token, userId };
+  let lastErr = '';
+  for (const attempt of LOGIN_ATTEMPTS) {
+    const payload = attempt.username
+      ? { username: email, password }
+      : { email, password };
+    if (attempt.clientId) payload.clientId = attempt.clientId;
+
+    const r = await fetch(`${GEO_BASE}/usersService/v2/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': 'okhttp/4.9.2',
+      },
+      body: JSON.stringify(payload),
+    });
+    const body = await r.text().catch(() => '');
+    if (r.ok) {
+      const data = JSON.parse(body);
+      const token  = data.token || data.access_token || data.authentication_token;
+      const userId = data.userId || data.user_id || data.id;
+      if (token && userId) return { token, userId };
+    }
+    lastErr = `HTTP ${r.status} — ${body.slice(0, 120)}`;
+  }
+  throw new Error(`login_failed — ${lastErr}`);
 }
 
 async function geoGetLive(userId, token) {
   const r = await fetch(`${GEO_BASE}/api/userdata/device/liveData?systemId=${userId}`, {
     headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` },
   });
-  if (!r.ok) throw new Error('live_data_failed: ' + r.status);
+  if (!r.ok) {
+    const body = await r.text().catch(() => '');
+    throw new Error(`live_data_failed: HTTP ${r.status} — ${body.slice(0, 120)}`);
+  }
   return await r.json();
 }
 
-function getFeature(data, name) {
+function getFeature(data, ...names) {
   if (!Array.isArray(data)) return null;
-  const item = data.find(d => d.feature === name);
-  return item ? item.value : null;
+  for (const name of names) {
+    const item = data.find(d => d.feature === name);
+    if (item) return item.value;
+  }
+  return null;
 }
 
 function parseLiveData(live) {
-  // liveData has deviceData array; use first channel
   const channels = live.deviceData || live.data || [];
   const ch = channels[0] || {};
   const data = ch.data || ch.channelData || [];
 
-  const tempC     = parseFloat(getFeature(data, 'TEMPERATURE') || getFeature(data, 'INDOOR_TEMPERATURE') || '0');
-  const coolSpC   = parseFloat(getFeature(data, 'COOL_SETPOINT') || getFeature(data, 'COOLING_SETPOINT') || '24');
-  const heatSpC   = parseFloat(getFeature(data, 'HEATING_SETPOINT') || '20');
-  const modeRaw   = getFeature(data, 'OPERATION_MODE') || '5';
-  const fanRaw    = getFeature(data, 'FAN_MODE') || getFeature(data, 'FAN_STATUS') || '0';
+  const tempC   = parseFloat(getFeature(data, 'TEMPERATURE', 'INDOOR_TEMPERATURE') || '0');
+  const coolSpC = parseFloat(getFeature(data, 'COOL_SETPOINT', 'COOLING_SETPOINT') || '24');
+  const heatSpC = parseFloat(getFeature(data, 'HEATING_SETPOINT') || '20');
+  const modeRaw = getFeature(data, 'OPERATION_MODE') || '5';
+  const fanRaw  = getFeature(data, 'FAN_MODE', 'FAN_STATUS') || '0';
 
   return {
     device_id: live.serial || live.systemId || live.id || null,
@@ -60,8 +84,6 @@ function parseLiveData(live) {
     heat_sp: C_TO_F(heatSpC),
     op_mode: MODE_FROM_GEO[modeRaw] || 'off',
     fan_mode: fanRaw === '1' || fanRaw === 'on' ? 'on' : 'auto',
-    raw_mode: modeRaw,
-    raw_fan: fanRaw,
   };
 }
 
@@ -69,14 +91,7 @@ async function geoSetData(userId, token, feature, value) {
   const r = await fetch(`${GEO_BASE}/api/setData`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${token}` },
-    body: JSON.stringify({
-      systemId: userId,
-      zone: '1',
-      feature,
-      value: String(value),
-      activationCode: 1,
-      accessLevel: '0',
-    }),
+    body: JSON.stringify({ systemId: userId, zone: '1', feature, value: String(value), activationCode: 1, accessLevel: '0' }),
   });
   const body = await r.text().catch(() => '');
   if (!r.ok) throw new Error(`set_failed — HTTP ${r.status} — ${body.slice(0, 120)}`);
@@ -122,11 +137,10 @@ export async function onRequestPost({ request, env }) {
     const { token, userId } = await geoLogin(email, password);
 
     if (action === 'set_sp') {
-      if (cool_sp != null) await geoSetData(userId, token, 'COOL_SETPOINT',  F_TO_C(parseInt(cool_sp, 10)));
+      if (cool_sp != null) await geoSetData(userId, token, 'COOL_SETPOINT',    F_TO_C(parseInt(cool_sp, 10)));
       if (heat_sp != null) await geoSetData(userId, token, 'HEATING_SETPOINT', F_TO_C(parseInt(heat_sp, 10)));
     } else if (action === 'set_mode') {
-      const geoMode = MODE_TO_GEO[value] || '5';
-      await geoSetData(userId, token, 'OPERATION_MODE', geoMode);
+      await geoSetData(userId, token, 'OPERATION_MODE', MODE_TO_GEO[value] || '5');
     } else if (action === 'set_fan') {
       await geoSetData(userId, token, 'FAN_MODE', value === 'on' ? '1' : '0');
     } else {
@@ -134,8 +148,7 @@ export async function onRequestPost({ request, env }) {
     }
 
     const live = await geoGetLive(userId, token);
-    const thermostat = parseLiveData(live);
-    return Response.json({ ok: true, thermostat });
+    return Response.json({ ok: true, thermostat: parseLiveData(live) });
   } catch (e) {
     return Response.json({ ok: false, error: e.message }, { status: 503 });
   }
