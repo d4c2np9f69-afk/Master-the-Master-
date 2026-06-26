@@ -2851,8 +2851,12 @@ function initRadarMap(){
     if(!el) return;
     if(_rMap){ _rMap.invalidateSize(); if(_rFrames.length===0) loadRadarFrames(); return; }
     _rMap=window.L.map('wxRadarMap',{center:[36.477,-86.66],zoom:7,zoomControl:true,attributionControl:false});
-    // Single dark tile layer — no {r} retina suffix (causes 404 on iPhone HiDPI)
-    window.L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_matter/{z}/{x}/{y}.png',{maxZoom:18,subdomains:'abcd'}).addTo(_rMap);
+    // ESRI World Dark Gray Canvas — free, no API key, ESRI y/x tile order needs custom getTileUrl
+    window.L.TileLayer.extend({
+      getTileUrl:function(c){
+        return 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/'+c.z+'/'+c.y+'/'+c.x;
+      }
+    })('',{maxZoom:16}).addTo(_rMap);
     window.L.circleMarker([36.477,-86.66],{radius:7,color:'#d4af37',weight:2,fillColor:'#d4af37',fillOpacity:1})
       .bindPopup('<b>KTNWHITE21</b><br>White House, TN<br>jalo301').addTo(_rMap);
     loadRadarFrames();
