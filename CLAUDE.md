@@ -486,12 +486,35 @@ c4d32e6  Fix irrigation zone control: move WebSocket to browser, add ?tk=1 token
 
 ---
 
+## Session History — Session 2026-06-26 cont. (Weather Overhaul + LUX Fix)
+
+### Changes Made This Session
+
+1. **Weather section full overhaul** (`4d8313f`–`d44baf3`) — Real KTNWHITE21 WU station data (was Open-Meteo grid), NWS active alerts card with color-coded severity, alert badge dot on WEATHER nav, home section alert strip, push notification auto-request on first WEATHER visit, 4 new Mowing Conditions cells (Wind Dir, UV Index, Pressure, Rain Rate), native mPING quick-report card (11 type buttons, GPS location, submits to NOAA mPING API via Cloudflare proxy).
+
+2. **Radar dark map fix** (`7da5113`) — iPhone HiDPI 3x screen caused CartoDB @2x tile 404s. Fixed by switching to single `dark_matter` layer without `{r}` retina suffix.
+
+3. **10-day forecast** (`d44baf3`) — Switched from NWS 7-day to Weather.com TWC 10-day API using existing WU key. New `/api/forecast` Cloudflare Function. 10 days with hi/lo/rain%/icon.
+
+4. **LUX setpoint PUT 500 fixed** (`f09c696`) — Root cause: GET response includes read-only fields (`currenttemp`, `name`, etc.). Sending them back in PUT body caused `500 {"message":"Failed to perform operation."}`. Fix: build clean `putBody` with only 4 writable fields (`systemmode`, `holdheat`, `holdcool`, `fanmode`) before calling PUT.
+
+**Key commits this session:**
+```
+f09c696  Fix LUX setpoint PUT 500 — strip read-only fields before PUT
+d44baf3  Switch to 10-day forecast — Weather.com TWC API for White House 37188
+7da5113  Fix radar dark map on iPhone — drop retina suffix, use single dark_matter layer
+704374a  Auto-request alert notifications on first WEATHER tab visit
+b7ff936  Native mPING quick-report card — submit directly to NOAA from the app
+4d8313f  Weather command center: real WU data, NWS alerts, push notifications, mPING
+```
+
+**Verified state — 26/26 Playwright tests PASSING, zero JS errors**
+
+---
+
 ## Pending Items (Next Session Should Address These)
 
-1. **FIX LUX setpoint control — HTTP 500 on PUT /api/device** — GET works (reads temp/mode fine), but PUT to change setpoint returns `500 {"message":"Failed to perform operation."}`. Jeff tapped cool setpoint down arrow (72→70), got the error. Two likely causes:
-   - `holdcool` may be wrong field name for cool setpoint — check luxgeo source or try `coolSetpoint`, `cool_setpoint`, `desiredcool`
-   - PUT may require the FULL device state object (not just the changed field) — fetch current state first, merge the change, then PUT the whole object
-   - Fix is in `functions/api/climate.js` → `setDeviceState()` and the `set_sp` action handler
+1. **Test LUX setpoint control** — HTTP 500 fix deployed (`f09c696`). Jeff should tap cool setpoint ↓ arrow in CLIMATE tab and confirm it no longer errors. If still fails, check the error message — it will now be more specific.
 
 2. **Test irrigation Run Zone + Rain Delay** — Browser-side WebSocket fix deployed (commit `c4d32e6`). Jeff taps Run on any zone — should work without `ws_timeout`. If it still errors, check browser console for WebSocket errors (Safari → Develop → Web Inspector → Console).
 
