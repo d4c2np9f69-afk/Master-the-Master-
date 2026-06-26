@@ -514,7 +514,7 @@ b7ff936  Native mPING quick-report card — submit directly to NOAA from the app
 
 ## Pending Items (Next Session Should Address These)
 
-1. **Test LUX setpoint control** — HTTP 500 fix deployed (`f09c696`). Jeff should tap cool setpoint ↓ arrow in CLIMATE tab and confirm it no longer errors. If still fails, check the error message — it will now be more specific.
+1. ~~**LUX setpoint control**~~ — **FIXED and confirmed working** (`b360583`). Root cause: LUX API uses `POST /api/device` for writes, NOT PUT. PUT always returned 500. Code now tries POST first, PUT as fallback. Jeff confirmed 73°F setpoint change reflected in official LUX app.
 
 2. **Test irrigation Run Zone + Rain Delay** — Browser-side WebSocket fix deployed (commit `c4d32e6`). Jeff taps Run on any zone — should work without `ws_timeout`. If it still errors, check browser console for WebSocket errors (Safari → Develop → Web Inspector → Console).
 
@@ -558,7 +558,7 @@ b7ff936  Native mPING quick-report card — submit directly to NOAA from the app
 **API endpoints** (Bearer token):
 - `GET https://www.myluxstat.io/api/location/user` → `{location:[{devices:[{id, name}]}]}`
 - `GET https://www.myluxstat.io/api/device` + header `Deviceid: {id}` → `{systemmode, holdheat, holdcool, currenttemp, fanmode}`
-- `PUT https://www.myluxstat.io/api/device` + `Deviceid` header + JSON patch body
+- `POST https://www.myluxstat.io/api/device` + `Deviceid` header + full state JSON body (PUT returns 500 — this API uses POST for writes, confirmed 2026-06-26)
 
 **Device state fields (all °F, no conversion needed):**
 - `systemmode`: 0=off, 1=heat, 2=cool, 3=auto
