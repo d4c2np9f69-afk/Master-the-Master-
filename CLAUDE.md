@@ -364,9 +364,9 @@ c17bdf0  Apply ChatGPT hero palette throughout entire app + remove nanny warning
 | HA token entry UI | WORKING |
 | Blink 2FA workaround (blinkSendPin) | BUILT |
 | Irrigation → Beehive first, direct fallback | DONE |
-| CLIMATE section (LUX thermostat) | BUILT — needs live test |
+| CLIMATE section (LUX thermostat) | WORKING — live tested 2026-06-26 |
 | Irrigation zone Run/Stop/Rain Delay | FIXED (browser WebSocket) — needs live test |
-| LUX Geo API login format | FIXED (identity field, accessToken, correct URL) |
+| LUX real API (Azure B2C + myluxstat.io) | WORKING — CS1-DD-FB device confirmed |
 
 ---
 
@@ -469,7 +469,7 @@ c4d32e6  Fix irrigation zone control: move WebSocket to browser, add ?tk=1 token
 
 ## Pending Items (Next Session Should Address These)
 
-1. **Test LUX thermostat live** — Jeff needs to open CLIMATE tab on live app after next deploy. If it shows error, check the error banner text carefully (it shows full error detail). The Geo API fix (commit `7f74537`) changed: login URL is `/usersservice/v2/login` (all lowercase), field is `identity` (not `username`), response token is `accessToken` (camelCase), no `clientId`.
+1. **LUX thermostat WORKING** — confirmed live 2026-06-26. Device CS1-DD-FB, showing 72°F room temp, cooling mode. All controls built.
 
 2. **Test irrigation Run Zone + Rain Delay** — Browser-side WebSocket fix deployed (commit `c4d32e6`). Jeff taps Run on any zone — should work without `ws_timeout`. If it still errors, check browser console for WebSocket errors (Safari → Develop → Web Inspector → Console).
 
