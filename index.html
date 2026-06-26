@@ -2380,36 +2380,7 @@ function loadClimate(){
     .then(function(r){return r.json();})
     .then(function(d){
       if(!d||!d.ok||!d.thermostat) throw new Error(d&&d.error||'no data');
-      var t=d.thermostat;
-      LUX_STATE.mode=t.op_mode||'off';
-      LUX_STATE.fan=t.fan_mode||'auto';
-      LUX_STATE.cool_sp=t.cool_sp||72;
-      LUX_STATE.heat_sp=t.heat_sp||68;
-      LUX_STATE.device_id=t.device_id||null;
-      // Update UI
-      var sc=document.getElementById('luxSetupCard'); if(sc) sc.style.display='none';
-      var mx=document.getElementById('luxMain'); if(mx) mx.style.display='';
-      var curT=t.current_temp||t.temperature;
-      document.getElementById('luxCurrentTemp').textContent=(curT?Math.round(curT)+'°':'--°');
-      var sp = LUX_STATE.mode==='heat' ? LUX_STATE.heat_sp : LUX_STATE.cool_sp;
-      document.getElementById('luxSetTemp').textContent=Math.round(sp)+'°';
-      document.getElementById('luxDevName').textContent=t.name||'LUX Thermostat';
-      document.getElementById('luxLastSync').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-      var conn=document.getElementById('luxConn');
-      if(conn){conn.innerHTML=' &#9679; ONLINE';conn.style.color='#22c55e';}
-      luxRenderMode(LUX_STATE.mode);
-      luxRenderFan(LUX_STATE.fan);
-      // Banner
-      var mode=LUX_STATE.mode;
-      if(b){
-        if(mode==='cool'){b.className='wx-banner wx-caution';b.innerHTML='&#10052;&#65039; Cooling &bull; Set '+Math.round(LUX_STATE.cool_sp)+'°F';}
-        else if(mode==='heat'){b.className='wx-banner wx-go';b.innerHTML='&#128293; Heating &bull; Set '+Math.round(LUX_STATE.heat_sp)+'°F';}
-        else if(mode==='auto'){b.className='wx-banner wx-caution';b.innerHTML='&#128260; Auto &bull; Cool '+Math.round(LUX_STATE.cool_sp)+'° / Heat '+Math.round(LUX_STATE.heat_sp)+'°';}
-        else{b.className='wx-banner wx-no';b.innerHTML='&#9646;&#9646; System Off';}
-      }
-      // Hero status
-      var hs=document.getElementById('climateHeroStatus');
-      if(hs&&curT) hs.textContent=Math.round(curT)+'°F';
+      luxApplyState(d.thermostat);
     })
     .catch(function(err){
       var msg=err&&err.message||'unknown';
@@ -2450,6 +2421,36 @@ function luxRenderFan(fan){
   if(ac){ac.style.borderColor='rgba(212,175,55,.45)';ac.style.color='#d4af37';}
 }
 
+function luxApplyState(t){
+  LUX_STATE.mode=t.op_mode||'off';
+  LUX_STATE.fan=t.fan_mode||'auto';
+  LUX_STATE.cool_sp=t.cool_sp||72;
+  LUX_STATE.heat_sp=t.heat_sp||68;
+  LUX_STATE.device_id=t.device_id||null;
+  var sc=document.getElementById('luxSetupCard'); if(sc) sc.style.display='none';
+  var mx=document.getElementById('luxMain'); if(mx) mx.style.display='';
+  var curT=t.current_temp||t.temperature;
+  document.getElementById('luxCurrentTemp').textContent=(curT?Math.round(curT)+'°':'--°');
+  var sp=LUX_STATE.mode==='heat'?LUX_STATE.heat_sp:LUX_STATE.cool_sp;
+  document.getElementById('luxSetTemp').textContent=Math.round(sp)+'°';
+  document.getElementById('luxDevName').textContent=t.name||'LUX Thermostat';
+  document.getElementById('luxLastSync').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  var conn=document.getElementById('luxConn');
+  if(conn){conn.innerHTML=' &#9679; ONLINE';conn.style.color='#22c55e';}
+  luxRenderMode(LUX_STATE.mode);
+  luxRenderFan(LUX_STATE.fan);
+  var b=document.getElementById('luxBanner');
+  if(b){
+    var mode=LUX_STATE.mode;
+    if(mode==='cool'){b.className='wx-banner wx-caution';b.innerHTML='&#10052;&#65039; Cooling &bull; Set '+Math.round(LUX_STATE.cool_sp)+'°F';}
+    else if(mode==='heat'){b.className='wx-banner wx-go';b.innerHTML='&#128293; Heating &bull; Set '+Math.round(LUX_STATE.heat_sp)+'°F';}
+    else if(mode==='auto'){b.className='wx-banner wx-caution';b.innerHTML='&#128260; Auto &bull; Cool '+Math.round(LUX_STATE.cool_sp)+'° / Heat '+Math.round(LUX_STATE.heat_sp)+'°';}
+    else{b.className='wx-banner wx-no';b.innerHTML='&#9646;&#9646; System Off';}
+  }
+  var hs=document.getElementById('climateHeroStatus');
+  if(hs&&curT) hs.textContent=Math.round(curT)+'°F';
+}
+
 function luxAdjust(delta){
   var creds=getLuxCreds(); if(!creds.email||!creds.pass) return;
   if(LUX_STATE.mode==='heat') LUX_STATE.heat_sp+=delta;
@@ -2476,15 +2477,26 @@ function luxSetFan(fan){
 
 function luxSendControl(action,opts){
   var creds=getLuxCreds(); if(!creds.email||!creds.pass) return;
+  var b=document.getElementById('luxBanner');
+  if(b){b.className='wx-banner wx-load';b.innerHTML='&#128260; Sending command…';}
   var payload=Object.assign({email:creds.email,password:creds.pass,action:action,device_id:LUX_STATE.device_id},opts||{});
-  if(action==='set_sp') payload.cool_sp=LUX_STATE.cool_sp, payload.heat_sp=LUX_STATE.heat_sp;
+  if(action==='set_sp'){payload.cool_sp=LUX_STATE.cool_sp;payload.heat_sp=LUX_STATE.heat_sp;}
   fetch('/api/climate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
     .then(function(r){return r.json();})
     .then(function(d){
-      if(!d||!d.ok){ var b=document.getElementById('luxBanner');if(b){b.className='wx-banner wx-no';b.innerHTML='&#127777;&#65039; Command failed: '+(d&&d.error||'unknown');} }
-      setTimeout(loadClimate,3000);
+      if(!d||!d.ok){
+        var err=d&&d.error||'unknown';
+        if(b){b.className='wx-banner wx-no';b.innerHTML='&#127777;&#65039; Command failed: '+err;}
+        setTimeout(loadClimate,8000);
+        return;
+      }
+      if(d.thermostat){ luxApplyState(d.thermostat); }
+      else{ setTimeout(loadClimate,1000); }
     })
-    .catch(function(){ var b=document.getElementById('luxBanner');if(b){b.className='wx-banner wx-no';b.innerHTML='&#127777;&#65039; Control request failed';} });
+    .catch(function(err){
+      if(b){b.className='wx-banner wx-no';b.innerHTML='&#127777;&#65039; Control failed: '+(err&&err.message||'network error');}
+      setTimeout(loadClimate,8000);
+    });
 }
 
 // Orbit B-hyve irrigation — live zones/photos/status from /api/irrigation (worker proxy)
