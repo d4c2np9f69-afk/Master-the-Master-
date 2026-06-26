@@ -76,7 +76,7 @@ export async function onRequestGet({ env, request }) {
       image_url: z.image_url || null
     }));
 
-    return Response.json({
+    const resp = {
       ok: true,
       device: {
         id: timer.id,
@@ -89,7 +89,10 @@ export async function onRequestGet({ env, request }) {
         next_start_time: status.next_start_time || timer.next_start_time || null
       },
       zones
-    });
+    };
+    // Include session token when browser needs it for direct WebSocket control
+    if (url.searchParams.get('tk') === '1') resp._token = token;
+    return Response.json(resp);
 
   } catch (e) {
     return Response.json({ ok: false, error: e.message }, { status: 503 });

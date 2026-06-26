@@ -2273,16 +2273,75 @@ function irrControl(action,opts){
     return;
   }
   var banner=document.getElementById('irrBanner');
-  if(banner){ banner.className='wx-banner wx-load'; banner.innerHTML='&#8987; Sending…'; }
-  fetch('/api/irrigation/control',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(Object.assign({email:creds.email,password:creds.pass,action:action},opts||{}))})
+  if(banner){ banner.className='wx-banner wx-load'; banner.innerHTML='&#8987; Connecting&#8230;'; }
+  // Get session token via CF Worker (handles CORS), then do WebSocket directly from browser
+  fetch('/api/irrigation?e='+encodeURIComponent(creds.email)+'&p='+encodeURIComponent(creds.pass)+'&tk=1',{cache:'no-store'})
     .then(function(r){return r.json();})
     .then(function(d){
-      if(!d||!d.ok){ alert('Command failed: '+((d&&d.error)||'unknown')); }
-      setTimeout(loadIrrigation,2800);
+      if(!d||!d.ok||!d._token||!d.device) throw new Error(d.error||'no token');
+      if(banner) banner.innerHTML='&#8987; Sending&#8230;';
+      irrWsCommand(d._token, d.device.id, action, opts||{}, function(err){
+        if(err){
+          if(banner){banner.className='wx-banner wx-no';banner.innerHTML='&#10060; '+err;}
+        } else {
+          if(banner){banner.className='wx-banner wx-go';banner.innerHTML='&#9989; Command sent';}
+        }
+        setTimeout(loadIrrigation,2500);
+      });
     })
-    .catch(function(){ alert('Control request failed — check connection.'); setTimeout(loadIrrigation,2800); });
+    .catch(function(e){
+      if(banner){banner.className='wx-banner wx-no';banner.innerHTML='&#10060; '+(e.message||'connection failed');}
+      setTimeout(loadIrrigation,3000);
+    });
 }
+
+function irrWsCommand(token, deviceId, action, opts, cb){
+  var ws;
+  try{ ws=new WebSocket('wss://api.orbitbhyve.com/v1/events'); }
+  catch(e){ cb('WebSocket not supported'); return; }
+  var done=false, commandSent=false;
+  var timer=setTimeout(function(){
+    if(!done){ done=true; try{ws.close();}catch(_){}
+      cb(commandSent ? null : 'Timed out — check B-Hyve app'); }
+  },10000);
+  function buildMsg(){
+    if(action==='start'&&opts.station){
+      var rt=Math.max(1,Math.min(60,parseInt(opts.minutes,10)||10))*60;
+      return {event:'change_mode',device_id:deviceId,mode:'manual',stations:[{station:parseInt(opts.station,10),run_time:rt}]};
+    } else if(action==='stop'){
+      return {event:'change_mode',device_id:deviceId,mode:'auto',stations:[]};
+    } else if(action==='rain_delay'){
+      return {event:'rain_delay',device_id:deviceId,delay:parseInt(opts.hours,10)||0};
+    }
+    return null;
+  }
+  function sendCmd(){
+    if(commandSent) return;
+    var msg=buildMsg();
+    if(!msg){clearTimeout(timer);done=true;cb('Unknown action');return;}
+    commandSent=true;
+    ws.send(JSON.stringify(msg));
+  }
+  ws.onopen=function(){
+    ws.send(JSON.stringify({event:'app_connection',orbit_session_token:token}));
+    setTimeout(sendCmd,2000); // fallback if no app_connection echo
+  };
+  ws.onmessage=function(evt){
+    try{
+      var msg=JSON.parse(evt.data);
+      if(!commandSent&&(msg.event==='app_connection'||msg.status==='connected')){ sendCmd(); return; }
+      if(msg.event==='watering_in_progress'||msg.event==='change_mode'||
+         msg.event==='program_changed'||msg.event==='rain_delay'){
+        if(!done){done=true;clearTimeout(timer);try{ws.close();}catch(_){}cb(null);}
+        return;
+      }
+      if(msg.event==='error'&&!done){done=true;clearTimeout(timer);try{ws.close();}catch(_){}cb(msg.message||'B-Hyve error');}
+    }catch(_){}
+  };
+  ws.onerror=function(){if(!done){done=true;clearTimeout(timer);cb('WebSocket error');}};
+  ws.onclose=function(){if(!done){done=true;clearTimeout(timer);cb(commandSent?null:'Connection closed');}};
+}
+
 function irrStart(station){
   var m=prompt('Run Zone '+station+' for how many minutes?','10'); if(m===null) return;
   m=Math.max(1,Math.min(60,parseInt(m,10)||10));
