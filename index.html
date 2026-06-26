@@ -2343,6 +2343,13 @@ function irrWsCommand(token, deviceId, action, opts, cb){
 }
 
 function irrStart(station){
+  var creds=getBhyveCreds();
+  if(!creds.email||!creds.pass){
+    var sc=document.getElementById('irrSetupCard'); if(sc) sc.style.display='';
+    var b=document.getElementById('irrBanner'); if(b){b.className='wx-banner wx-no';b.innerHTML='&#128688; Enter your B-Hyve login below to control zones';}
+    hccScroll('irrSetupCard');
+    return;
+  }
   var m=prompt('Run Zone '+station+' for how many minutes?','10'); if(m===null) return;
   m=Math.max(1,Math.min(60,parseInt(m,10)||10));
   if(confirm('Start Zone '+station+' for '+m+' minutes?')) irrControl('start',{station:station,minutes:m});
