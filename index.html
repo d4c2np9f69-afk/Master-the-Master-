@@ -411,6 +411,17 @@ html,body{
 }
 .hcc-panic-icon{font-size:20px}
 
+/* ── ALEXA VOICE CONTROL ─────────────────────────────────────────────────── */
+.alexa-skill-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.alexa-skill-row:last-of-type{border-bottom:none;padding-bottom:0}
+.alexa-skill-icon{font-size:22px;flex-shrink:0;width:28px;text-align:center}
+.alexa-skill-info{flex:1;min-width:0}
+.alexa-skill-name{font-size:12px;font-weight:800;color:var(--text);font-family:var(--serif)}
+.alexa-skill-cmd{font-size:10px;color:var(--muted);font-style:italic;margin-top:2px}
+.alexa-enable-btn{padding:6px 12px;background:rgba(26,156,219,.18);border:1px solid rgba(26,156,219,.5);border-radius:20px;color:#4db8e8;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit;flex-shrink:0}
+.alexa-enable-btn:active{background:rgba(26,156,219,.35)}
+.alexa-ring{width:34px;height:34px;background:linear-gradient(135deg,#1a9cdb,#0070a8);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 10px rgba(26,156,219,.4)}
+
 /* ── BUTTONS ────────────────────────────────────────────────────────────── */
 .btn-full{
   width:100%;padding:12px;border:none;border-radius:10px;
@@ -889,6 +900,59 @@ html,body{
       </div>
     </div>
 
+  </div>
+
+  <!-- Alexa Voice Control — INSIDE section-home -->
+  <div class="content">
+    <div class="sec-hdr" style="margin-top:8px">
+      <span class="sec-hdr-icon">&#128266;</span>
+      <span class="sec-hdr-label">Voice Control &bull; Alexa</span>
+    </div>
+    <div class="card" style="padding:14px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div class="alexa-ring"><span style="font-size:18px">&#128266;</span></div>
+        <div>
+          <div style="font-size:13px;font-weight:800;color:var(--text);font-family:var(--serif)">Amazon Alexa</div>
+          <div style="font-size:11px;color:var(--muted)">Enable skills in the Alexa app to use voice control</div>
+        </div>
+      </div>
+
+      <div class="alexa-skill-row">
+        <span class="alexa-skill-icon">&#127777;</span>
+        <div class="alexa-skill-info">
+          <div class="alexa-skill-name">LUX Connected Home</div>
+          <div class="alexa-skill-cmd">"Alexa, set the thermostat to 72"</div>
+        </div>
+        <button class="alexa-enable-btn" onclick="window.open('https://www.amazon.com/dp/B07DFLWF7C','_blank')">Enable &#8599;</button>
+      </div>
+
+      <div class="alexa-skill-row">
+        <span class="alexa-skill-icon">&#128167;</span>
+        <div class="alexa-skill-info">
+          <div class="alexa-skill-name">Orbit B-Hyve</div>
+          <div class="alexa-skill-cmd">"Alexa, tell B-Hyve to run Front Lawn"</div>
+        </div>
+        <button class="alexa-enable-btn" onclick="window.open('https://www.amazon.com/dp/B077YNWR5H','_blank')">Enable &#8599;</button>
+      </div>
+
+      <div class="alexa-skill-row">
+        <span class="alexa-skill-icon">&#127968;</span>
+        <div class="alexa-skill-info">
+          <div class="alexa-skill-name">Home Assistant (Nabu Casa)</div>
+          <div class="alexa-skill-cmd">"Alexa, turn on the porch light" — full HA control</div>
+        </div>
+        <button class="alexa-enable-btn" onclick="window.open('https://www.nabucasa.com','_blank')">Setup &#8599;</button>
+      </div>
+
+      <div style="margin-top:12px;padding:9px 12px;background:rgba(26,156,219,.07);border:1px solid rgba(26,156,219,.18);border-radius:8px">
+        <div style="font-size:10px;font-weight:800;color:rgba(77,184,232,.8);letter-spacing:.8px;margin-bottom:3px">QUICK COMMANDS</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.7">
+          &#8220;Alexa, set the thermostat to 70&#8221;<br>
+          &#8220;Alexa, what&#x27;s the temperature inside?&#8221;<br>
+          &#8220;Alexa, tell B-Hyve to water for 10 minutes&#8221;
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Safety — INSIDE section-home -->
