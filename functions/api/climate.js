@@ -161,20 +161,22 @@ async function getDeviceState(accessToken, deviceId) {
 }
 
 async function setDeviceState(accessToken, deviceId, state) {
-  const r = await fetch(`${API_BASE}/device`, {
-    method: 'PUT',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-      'Deviceid': deviceId,
-    },
-    body: JSON.stringify(state),
-  });
-  if (!r.ok) {
+  // Try PUT first, then PATCH if PUT fails (some LUX API versions use PATCH for partial updates)
+  for (const method of ['PUT', 'PATCH']) {
+    const r = await fetch(`${API_BASE}/device`, {
+      method,
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+        'Deviceid': deviceId,
+      },
+      body: JSON.stringify(state),
+    });
+    if (r.ok) return await r.json().catch(() => ({}));
+    if (method === 'PUT') continue; // try PATCH next
     const b = await r.text().catch(() => '');
-    throw new Error(`set_device: ${r.status} — ${b.slice(0, 100)}`);
+    throw new Error(`set_device: ${r.status} — ${b.slice(0, 100)} [tried PUT+PATCH, body: ${JSON.stringify(state)}]`);
   }
-  return await r.json().catch(() => ({}));
 }
 
 function parseThermostat(state, deviceId, deviceName) {
@@ -236,26 +238,18 @@ export async function onRequestPost({ request, env }) {
       return Response.json({ ok: false, error: diag, raw: userData }, { status: 404 });
     }
 
-    // GET current state so we can merge and PUT only the writable fields
-    // (sending read-only fields like currenttemp back to PUT causes HTTP 500)
-    const currentState = await getDeviceState(tokens.access_token, device.id);
-
-    const putBody = {
-      systemmode: currentState.systemmode ?? 0,
-      holdheat:   currentState.holdheat   ?? currentState.heatSetpoint ?? 68,
-      holdcool:   currentState.holdcool   ?? currentState.coolSetpoint ?? 72,
-      fanmode:    currentState.fanmode    ?? 0,
-    };
-
+    // Build minimal body — only the ONE field being changed (avoid sending read-only fields)
+    let putBody;
     if (action === 'set_sp') {
+      putBody = {};
       if (heat_sp != null) putBody.holdheat = parseInt(heat_sp, 10);
       if (cool_sp != null) putBody.holdcool = parseInt(cool_sp, 10);
     } else if (action === 'set_mode') {
       const modeInt = MODE_TO_INT[value];
       if (modeInt === undefined) return Response.json({ ok: false, error: 'unknown_mode: ' + value }, { status: 400 });
-      putBody.systemmode = modeInt;
+      putBody = { systemmode: modeInt };
     } else if (action === 'set_fan') {
-      putBody.fanmode = value === 'on' ? 1 : 0;
+      putBody = { fanmode: value === 'on' ? 1 : 0 };
     } else {
       return Response.json({ ok: false, error: 'unknown_action: ' + action }, { status: 400 });
     }
