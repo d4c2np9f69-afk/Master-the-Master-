@@ -2869,12 +2869,13 @@ function initRadarMap(){
     if(!el) return;
     if(_rMap){ _rMap.invalidateSize(); if(_rFrames.length===0) loadRadarFrames(); return; }
     _rMap=window.L.map('wxRadarMap',{center:[36.477,-86.66],zoom:7,zoomControl:true,attributionControl:false});
-    // ESRI World Dark Gray Canvas — free, no API key, ESRI y/x tile order needs custom getTileUrl
-    window.L.TileLayer.extend({
-      getTileUrl:function(c){
-        return 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/'+c.z+'/'+c.y+'/'+c.x;
-      }
-    })('',{maxZoom:16}).addTo(_rMap);
+    // OpenStreetMap — universally reliable free tiles
+    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,subdomains:'abc'}).addTo(_rMap);
+    // Invert OSM to a dark basemap — only affects tilePane, not the radar overlay
+    _rMap.getPane('tilePane').style.filter='invert(1) hue-rotate(200deg) saturate(0.45) brightness(0.85)';
+    // Dedicated pane for NEXRAD so radar colours are never filtered
+    _rMap.createPane('radarPane');
+    _rMap.getPane('radarPane').style.zIndex=450;
     window.L.circleMarker([36.477,-86.66],{radius:7,color:'#d4af37',weight:2,fillColor:'#d4af37',fillOpacity:1})
       .bindPopup('<b>KTNWHITE21</b><br>White House, TN<br>jalo301').addTo(_rMap);
     loadRadarFrames();
@@ -2901,7 +2902,7 @@ function radarShowFrame(idx){
   if(_rLayer) _rMap.removeLayer(_rLayer);
   _rLayer=window.L.tileLayer(
     'https://tilecache.rainviewer.com/v2/radar/'+_rFrames[_rIdx].time+'/256/{z}/{x}/{y}/2/1_1.png',
-    {opacity:0.65,maxZoom:12,tileSize:256}
+    {opacity:0.65,maxZoom:12,tileSize:256,pane:'radarPane'}
   );
   _rLayer.addTo(_rMap);
   var note=document.getElementById('wxRadarTime');
@@ -4638,17 +4639,30 @@ function hccSection(id, btn) {
   var NAV_IDS=['snav-home','snav-weather','snav-irr','snav-yard','snav-climate'];
   var startX=0, startY=0, startScrollY=0;
   var THRESHOLD=60, MAX_VERT=80;
+  var _hScrollEl=null, _hScrollStart=0;
   document.addEventListener('touchstart',function(e){
     startX=e.touches[0].clientX;
     startY=e.touches[0].clientY;
     startScrollY=window.scrollY;
+    // Track nearest horizontally scrollable ancestor so we don't fight it
+    _hScrollEl=null; _hScrollStart=0;
+    var el=e.target;
+    while(el&&el!==document.body){
+      var ox=window.getComputedStyle(el).overflowX;
+      if((ox==='auto'||ox==='scroll')&&el.scrollWidth>el.clientWidth+2){
+        _hScrollEl=el; _hScrollStart=el.scrollLeft; break;
+      }
+      el=el.parentElement;
+    }
   },{passive:true});
   document.addEventListener('touchend',function(e){
     var dx=e.changedTouches[0].clientX-startX;
     var dy=e.changedTouches[0].clientY-startY;
     var scrolled=Math.abs(window.scrollY-startScrollY);
-    // Ignore if vertical swipe, small swipe, or page was scrolled during gesture
+    // Ignore vertical, small, or page-scrolled swipes
     if(Math.abs(dy)>MAX_VERT||Math.abs(dx)<THRESHOLD||scrolled>20) return;
+    // If the swipe was consumed by an inner horizontal scroll container, don't navigate
+    if(_hScrollEl&&Math.abs(_hScrollEl.scrollLeft-_hScrollStart)>4) return;
     // Find current active section index
     var cur=0;
     document.querySelectorAll('.hcc-section').forEach(function(s,i){
