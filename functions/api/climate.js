@@ -161,22 +161,37 @@ async function getDeviceState(accessToken, deviceId) {
 }
 
 async function setDeviceState(accessToken, deviceId, state) {
-  // Try PUT first, then PATCH if PUT fails (some LUX API versions use PATCH for partial updates)
-  for (const method of ['PUT', 'PATCH']) {
-    const r = await fetch(`${API_BASE}/device`, {
-      method,
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-        'Deviceid': deviceId,
-      },
-      body: JSON.stringify(state),
-    });
-    if (r.ok) return await r.json().catch(() => ({}));
-    if (method === 'PUT') continue; // try PATCH next
-    const b = await r.text().catch(() => '');
-    throw new Error(`set_device: ${r.status} — ${b.slice(0, 100)} [tried PUT+PATCH, body: ${JSON.stringify(state)}]`);
+  // Write endpoint uses device ID in URL path (GET uses Deviceid header, PUT uses path)
+  // Try both URL patterns + both HTTP methods to find what the API accepts
+  const urlsToTry = [
+    `${API_BASE}/device/${encodeURIComponent(deviceId)}`,
+    `${API_BASE}/devices/${encodeURIComponent(deviceId)}`,
+    `${API_BASE}/device`,
+  ];
+  const methods = ['PUT', 'PATCH'];
+  const errors = [];
+
+  for (const url of urlsToTry) {
+    for (const method of methods) {
+      const r = await fetch(url, {
+        method,
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+          'Deviceid': deviceId,
+        },
+        body: JSON.stringify(state),
+      });
+      if (r.ok) return await r.json().catch(() => ({}));
+      const b = await r.text().catch(() => '');
+      errors.push(`${method} ${url.replace(API_BASE,'')} → ${r.status}`);
+      // 404 = wrong URL, keep trying; 4xx other = auth/body issue, stop
+      if (r.status !== 404 && r.status !== 405 && method === 'PATCH') {
+        throw new Error(`set_device: ${r.status} — ${b.slice(0, 80)} [${errors.join(', ')}]`);
+      }
+    }
   }
+  throw new Error(`set_device: all URLs 404 — [${errors.join(', ')}] body: ${JSON.stringify(state)}`);
 }
 
 function parseThermostat(state, deviceId, deviceName) {
