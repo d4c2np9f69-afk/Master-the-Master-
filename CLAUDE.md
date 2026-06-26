@@ -365,6 +365,7 @@ c17bdf0  Apply ChatGPT hero palette throughout entire app + remove nanny warning
 | Blink 2FA workaround (blinkSendPin) | BUILT |
 | Irrigation → Beehive first, direct fallback | DONE |
 | CLIMATE section (LUX thermostat) | WORKING — live tested 2026-06-26 |
+| LUX setpoint control (arrows) | WORKING — confirmed 2026-06-26, set 72°F from HCC app ✅ |
 | Irrigation zone Run/Stop/Rain Delay | FIXED (browser WebSocket) — needs live test |
 | LUX real API (Azure B2C + myluxstat.io) | WORKING — CS1-DD-FB device confirmed |
 
