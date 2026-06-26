@@ -236,23 +236,31 @@ export async function onRequestPost({ request, env }) {
       return Response.json({ ok: false, error: diag, raw: userData }, { status: 404 });
     }
 
-    // API requires full state object — GET current state, merge change, PUT back
+    // GET current state so we can merge and PUT only the writable fields
+    // (sending read-only fields like currenttemp back to PUT causes HTTP 500)
     const currentState = await getDeviceState(tokens.access_token, device.id);
 
+    const putBody = {
+      systemmode: currentState.systemmode ?? 0,
+      holdheat:   currentState.holdheat   ?? currentState.heatSetpoint ?? 68,
+      holdcool:   currentState.holdcool   ?? currentState.coolSetpoint ?? 72,
+      fanmode:    currentState.fanmode    ?? 0,
+    };
+
     if (action === 'set_sp') {
-      if (heat_sp != null) currentState.holdheat = parseInt(heat_sp, 10);
-      if (cool_sp != null) currentState.holdcool = parseInt(cool_sp, 10);
+      if (heat_sp != null) putBody.holdheat = parseInt(heat_sp, 10);
+      if (cool_sp != null) putBody.holdcool = parseInt(cool_sp, 10);
     } else if (action === 'set_mode') {
       const modeInt = MODE_TO_INT[value];
       if (modeInt === undefined) return Response.json({ ok: false, error: 'unknown_mode: ' + value }, { status: 400 });
-      currentState.systemmode = modeInt;
+      putBody.systemmode = modeInt;
     } else if (action === 'set_fan') {
-      currentState.fanmode = value === 'on' ? 1 : 0;
+      putBody.fanmode = value === 'on' ? 1 : 0;
     } else {
       return Response.json({ ok: false, error: 'unknown_action: ' + action }, { status: 400 });
     }
 
-    await setDeviceState(tokens.access_token, device.id, currentState);
+    await setDeviceState(tokens.access_token, device.id, putBody);
     const newState = await getDeviceState(tokens.access_token, device.id);
     return Response.json({ ok: true, thermostat: parseThermostat(newState, device.id, device.name) });
   } catch (e) {
