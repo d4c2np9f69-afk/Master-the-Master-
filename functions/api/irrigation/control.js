@@ -62,32 +62,55 @@ async function sendWsCommand(token, message) {
   ws.accept();
 
   return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      try { ws.close(); } catch (_) {}
-      reject(new Error('ws_timeout'));
-    }, 9000);
-
     let commandSent = false;
+    let settled = false;
+
+    function sendCommand() {
+      if (commandSent) return;
+      commandSent = true;
+      ws.send(JSON.stringify(message));
+      // Resolve optimistically 3s after sending if no confirmation event arrives
+      setTimeout(() => {
+        if (!settled) {
+          settled = true;
+          try { ws.close(); } catch (_) {}
+          resolve({ ok: true, event: 'sent' });
+        }
+      }, 3000);
+    }
+
+    const timeout = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        try { ws.close(); } catch (_) {}
+        // If command was already sent, treat as success — B-Hyve may have processed it
+        if (commandSent) resolve({ ok: true, event: 'sent' });
+        else reject(new Error('ws_timeout'));
+      }
+    }, 9000);
 
     ws.addEventListener('message', (evt) => {
       try {
         const msg = JSON.parse(evt.data);
 
         if (!commandSent && (msg.event === 'app_connection' || msg.status === 'connected')) {
-          commandSent = true;
-          ws.send(JSON.stringify(message));
+          sendCommand();
           return;
         }
 
         if (msg.event === 'watering_in_progress' || msg.event === 'change_mode' ||
             msg.event === 'program_changed' || msg.event === 'rain_delay') {
-          clearTimeout(timeout);
-          try { ws.close(); } catch (_) {}
-          resolve({ ok: true, event: msg.event });
+          if (!settled) {
+            settled = true;
+            clearTimeout(timeout);
+            try { ws.close(); } catch (_) {}
+            resolve({ ok: true, event: msg.event });
+          }
           return;
         }
 
-        if (msg.event === 'error') {
+        if (msg.event === 'error' && !settled) {
+          settled = true;
           clearTimeout(timeout);
           try { ws.close(); } catch (_) {}
           reject(new Error(msg.message || 'ws_error'));
@@ -96,11 +119,18 @@ async function sendWsCommand(token, message) {
     });
 
     ws.addEventListener('error', () => {
-      clearTimeout(timeout);
-      reject(new Error('ws_error'));
+      if (!settled) {
+        settled = true;
+        clearTimeout(timeout);
+        reject(new Error('ws_error'));
+      }
     });
 
+    // Send auth handshake
     ws.send(JSON.stringify({ event: 'app_connection', orbit_session_token: token }));
+
+    // If B-Hyve doesn't send app_connection event within 2s, send command anyway
+    setTimeout(() => { sendCommand(); }, 2000);
   });
 }
 
