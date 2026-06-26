@@ -199,7 +199,8 @@ export async function onRequestGet({ request, env }) {
   try {
     const tokens = await luxAuth(email, password);
     const userData = await getLocationUser(tokens.access_token);
-    const loc = (userData.location || userData.locations?.[0]) || {};
+    const locRaw = userData.location;
+    const loc = (Array.isArray(locRaw) ? locRaw[0] : locRaw) || (userData.locations?.[0]) || {};
     const devices = loc.devices || [];
     const device = devices[0];
     if (!device) {
@@ -227,7 +228,8 @@ export async function onRequestPost({ request, env }) {
   try {
     const tokens = await luxAuth(email, password);
     const userData = await getLocationUser(tokens.access_token);
-    const loc = (userData.location || userData.locations?.[0]) || {};
+    const locRaw = userData.location;
+    const loc = (Array.isArray(locRaw) ? locRaw[0] : locRaw) || (userData.locations?.[0]) || {};
     const device = (loc.devices || [])[0];
     if (!device) {
       const diag = `no_device_found — keys:${Object.keys(userData).join(',')} loc_keys:${Object.keys(loc).join(',') || 'none'}`;
