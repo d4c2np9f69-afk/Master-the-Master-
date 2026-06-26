@@ -236,21 +236,23 @@ export async function onRequestPost({ request, env }) {
       return Response.json({ ok: false, error: diag, raw: userData }, { status: 404 });
     }
 
-    const patch = {};
+    // API requires full state object — GET current state, merge change, PUT back
+    const currentState = await getDeviceState(tokens.access_token, device.id);
+
     if (action === 'set_sp') {
-      if (heat_sp != null) patch.holdheat = parseInt(heat_sp, 10);
-      if (cool_sp != null) patch.holdcool = parseInt(cool_sp, 10);
+      if (heat_sp != null) currentState.holdheat = parseInt(heat_sp, 10);
+      if (cool_sp != null) currentState.holdcool = parseInt(cool_sp, 10);
     } else if (action === 'set_mode') {
       const modeInt = MODE_TO_INT[value];
       if (modeInt === undefined) return Response.json({ ok: false, error: 'unknown_mode: ' + value }, { status: 400 });
-      patch.systemmode = modeInt;
+      currentState.systemmode = modeInt;
     } else if (action === 'set_fan') {
-      patch.fanmode = value === 'on' ? 1 : 0;
+      currentState.fanmode = value === 'on' ? 1 : 0;
     } else {
       return Response.json({ ok: false, error: 'unknown_action: ' + action }, { status: 400 });
     }
 
-    await setDeviceState(tokens.access_token, device.id, patch);
+    await setDeviceState(tokens.access_token, device.id, currentState);
     const newState = await getDeviceState(tokens.access_token, device.id);
     return Response.json({ ok: true, thermostat: parseThermostat(newState, device.id, device.name) });
   } catch (e) {
