@@ -642,6 +642,13 @@ A single ESP32 + CC1101 box reads BOTH water and gas off the air; electric uses 
 - **Buzzer on spare GPIO** (~$2) — local audible alert (panel over-temp, leak) independent of WiFi.
 - Jeff's "do now" shortlist: **spare CT on well pump + DS18B20 panel temp + water-main valve.**
 
+### 🏠 Jeff's actual loads (simple house, 200A service) + monitor/control verdict
+Loads: (1) washer/dryer, (2) stove/oven combo unit (range), (3) dishwasher, (4) A/C, (5) lights & plugs.
+- **Verdict: NO panel-level switching needed.** House is nowhere near capacity → no load-shedding contactors needed. Cooking/laundry = MONITOR ONLY (never auto-energize a stove/oven). Told Jeff to skip smart breakers/panel relays = saves money.
+- **Control belongs elsewhere:** A/C → already controlled by LUX thermostat. Lights → smart switches at the wall (Shelly Plus behind existing switch) or smart plugs, per-room, NOT the breaker (whole-circuit kills smart bulbs). Range/dryer/dishwasher → monitor + "done"/"left on" alerts only.
+- **Energy board upsized to 6-channel** CircuitSetup ATM90E32 (2 chips) for per-appliance breakout:
+  CT1+CT2 = 2 mains (200A CTs); CT3 = range/oven (50A); CT4 = dryer (30–50A); CT5 = A/C (30–50A); CT6 = dishwasher OR well/irrigation pump (20A). Lights/plugs = mains-minus-big-loads, no CT needed.
+
 ### 🤖 Planned automations (build in Home Assistant once hardware is in; surface in app)
 - **Free (energy data only):** appliance-done alerts (laundry/dishwasher), power-outage/brownout text (chip reads voltage), "oven left on," bill forecast, breaker-trip warning near 180A/200A, phantom-load flag.
 - **Cross-device (the Command Center magic):**
