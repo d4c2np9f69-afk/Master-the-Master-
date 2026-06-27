@@ -605,6 +605,41 @@ Jeff is building a wireless meter reader to pull his water usage into Beehive �
 
 ---
 
+## Whole-Home Utilities Monitoring (planned, started 2026-06-27)
+
+Goal: read water + gas + electric and show them in the HCC app via Home Assistant.
+A single ESP32 + CC1101 box reads BOTH water and gas off the air; electric uses CT clamps.
+
+**Jeff's utility providers:**
+- **Water/Sewer:** White House Utility District (WHUD) — Kamstrup 621 meter (see Water Meter section)
+- **Electric:** Cumberland Electric Membership Corp (CEMC)
+- **Gas:** Piedmont Natural Gas (piped natural gas, NOT propane) — uses Itron AMR
+
+### 🔥 GAS — Piedmont / Itron ERT (easiest of the three)
+- Piedmont uses **Itron AMR**; gas meter broadcasts **Itron ERT** on the **900–920 MHz ISM band** (SCM / SCM+ / IDM formats).
+- **The SAME ESP32 + CC1101 @ 915 MHz box** that reads the water meter can also read gas — just decode a 2nd format. No extra hardware.
+- **NO encryption key needed** — Itron ERT electric/gas meters are typically unencrypted (unlike the Kamstrup water meter). Nothing to request from Piedmont.
+- Need the meter's **ERT ID** (serial on the Itron module) to filter to Jeff's meter, or match by usage.
+- IDM message = 5-min interval data → good for usage graphs.
+- Tools/reference: rtlamr (bemasher), rtl_433, ESPHome wmbus/ERT components.
+
+### ⚡ ELECTRIC — Shelly EM (CT clamps, NOT meter reading)
+- Going with **Shelly EM Gen3 (50A, 2-channel)** — HA officially recommends it; local API, MQTT, no cloud.
+- Works regardless of CEMC's meter type (clamps the panel, not the meter).
+- **Parts:** Shelly EM Gen3 + **2× 120A CT clamps** (US split-phase = 2 legs; the included 50A clamp is too small for the 200A mains). Shelly sells a "EM + 120A + 50A Clamps" bundle.
+- **INSTALL CAUTION:** Shelly power wires + CT clamps go INSIDE the 200A breaker panel around live mains. Recommend an electrician or kill the main first. (App/HA setup is the safe part Claude handles.)
+
+### 📱 App plan
+- Add an **ENERGY card** (live watts, kWh today/month) + **GAS card** (usage + cost) — likely a new "Utilities" strip on HOME, alongside the planned Water Usage card.
+- All pulled from HA `/api/states` (same pattern as irrigation/cameras).
+- End state: water 💧 + gas 🔥 + electric ⚡ all in one dashboard.
+
+**Open items / what Claude still needs from Jeff:**
+- Gas meter's Itron **ERT ID** (off the meter module).
+- Confirm order of Shelly EM Gen3 + 120A clamp bundle.
+
+---
+
 ## Jeff's Contact / Account Info
 
 - **Email:** jeff.loewen@comcast.net
