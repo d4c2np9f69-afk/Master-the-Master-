@@ -572,6 +572,39 @@ b7ff936  Native mPING quick-report card — submit directly to NOAA from the app
 
 ---
 
+## Water Meter Integration (Jeff's hardware project — in progress, started 2026-06-27)
+
+Jeff is building a wireless meter reader to pull his water usage into Beehive → HCC app.
+
+**Hardware:**
+- **Meter:** Kamstrup 621 (flowIQ / Multical family) — broadcasts encrypted **wireless M-Bus** telegrams
+- **Radio:** Qoroos **CC1101** sub-GHz transceiver with SMA antenna, tuned to **915 MHz** (US)
+- **Brain:** **ESP32** WROOM-32 (30-pin NodeMCU, CP2102 USB)
+- **Wiring:** CC1101 → ESP32 SPI (SCK→GPIO18, MOSI→GPIO23, MISO→GPIO19, CSN→GPIO5, GDO0/GDO2 → spare GPIOs), VCC→3V3, GND→GND
+
+**Firmware stack Jeff built/assembled (all done):**
+- CC1101 driver (SPI)
+- Wireless M-Bus receiver (decodes wM-Bus frames)
+- CRC verification (discards corrupt frames)
+- AES-128 decryption (Kamstrup encrypts telegrams)
+- MQTT publish → Home Assistant
+- Mirrors the wmbusmeters / ESPHome wM-Bus component approach
+
+**Data flow:** Kamstrup 621 → encrypted wM-Bus @915MHz → CC1101 → ESP32 (CRC + AES-128 decrypt) → MQTT → Home Assistant → (planned) HCC app via HA `/api/states`
+
+**BLOCKER — AES-128 decryption key:**
+- Each Kamstrup meter has a unique per-meter AES-128 key. Without it telegrams decode to gibberish.
+- **Jeff is requesting the key from the water utility on Monday (2026-06-30).**
+- When he calls: give the **meter serial number** (printed on the meter face) and ask for the **"AES-128 encryption/decryption key for my meter"** (utilities may call it the meter key / OMS key).
+
+**App plan (build once data is flowing in HA):**
+- Add a **Water Usage card** in the IRRIGATION section
+- Pull the MQTT sensor from HA `/api/states` (same pattern as irrigation/cameras)
+- Show: gallons today, gallons this month, current flow
+- Stretch: cross-reference B-Hyve watering runtimes → cost per watering cycle
+
+---
+
 ## Jeff's Contact / Account Info
 
 - **Email:** jeff.loewen@comcast.net
