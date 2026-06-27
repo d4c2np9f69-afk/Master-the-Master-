@@ -627,7 +627,7 @@ A single ESP32 + CC1101 box reads BOTH water and gas off the air; electric uses 
 - Going with **Shelly EM Gen3 (50A, 2-channel)** — HA officially recommends it; local API, MQTT, no cloud.
 - Works regardless of CEMC's meter type (clamps the panel, not the meter).
 - **Parts:** Shelly EM Gen3 + **2× 120A CT clamps** (US split-phase = 2 legs; the included 50A clamp is too small for the 200A mains). Shelly sells a "EM + 120A + 50A Clamps" bundle.
-- **INSTALL CAUTION:** Shelly power wires + CT clamps go INSIDE the 200A breaker panel around live mains. Recommend an electrician or kill the main first. (App/HA setup is the safe part Claude handles.)
+- **INSTALL:** Jeff **wired the house himself** — he is fully comfortable in the breaker panel. Do NOT suggest hiring an electrician. Treat him as a capable peer on electrical work; give real wiring detail (which legs to clamp, where to tap 120/240V for the Shelly, CT orientation/polarity).
 
 ### 📱 App plan
 - Add an **ENERGY card** (live watts, kWh today/month) + **GAS card** (usage + cost) — likely a new "Utilities" strip on HOME, alongside the planned Water Usage card.
@@ -646,4 +646,5 @@ A single ESP32 + CC1101 box reads BOTH water and gas off the air; electric uses 
 - **Cloudflare account:** credentials already configured — never ask for them
 - **Home Assistant instance:** "Beehive" — accessible at `homeassistant.local` or local IP
 - **Mower:** Toro TimeMaster 21200
-- **Jeff is almost 60 and learning** — be patient, clear, and never condescending. Make it enjoyable.
+- **Jeff wired his own house** — he is skilled and comfortable doing his own electrical work in the breaker panel. Never suggest hiring an electrician. Talk to him as a capable peer on electrical/hardware.
+- **Jeff is almost 60 and learning** the software/AI side — be patient and clear there, never condescending. But on hands-on hardware/electrical/firmware he is experienced. Make it enjoyable.
