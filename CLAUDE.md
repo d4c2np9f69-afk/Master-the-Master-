@@ -623,14 +623,34 @@ A single ESP32 + CC1101 box reads BOTH water and gas off the air; electric uses 
 - IDM message = 5-min interval data → good for usage graphs.
 - Tools/reference: rtlamr (bemasher), rtl_433, ESPHome wmbus/ERT components.
 
-### ⚡ ELECTRIC — Shelly Pro 3EM (CT clamps, NOT meter reading)
-- CT-based whole-home monitor; works regardless of CEMC's meter type (clamps the panel, not the meter). Local API/MQTT, official HA integration, no cloud.
-- **Model choice (IMPORTANT):** the compact **Shelly EM Gen3 maxes at ~80A/channel — TOO SMALL for the 200A mains.** Use the **Shelly Pro 3EM** (DIN-rail, 3-channel) instead.
-  - **Pro 3EM (120A)** = 3× solid 120A clamps — OK if real per-leg peak < 120A.
-  - **Pro 3EM-400 (Rogowski)** = 3× flexible 400A coils — **RECOMMENDED for the 200A service**, never clips under heavy load, fits fat main lugs.
-- **Parts:** Shelly Pro 3EM-400 (~$140) + 2-pole breaker to power/voltage-sense + DIN rail/enclosure.
-- **Wiring:** L1+L2+Neutral to voltage terminals (set profile to split-phase 2×120V). Coil A on main leg 1, coil B on main leg 2 (arrows → load); A+B = whole home. 3rd coil (C) is a spare for a big single circuit (AC, well/irrigation pump, dryer, EV). Flip a coil if a leg reads negative.
+### ⚡ ELECTRIC — DIY ESP32 + ATM90E32AS energy meter (Jeff is BUILDING, not buying)
+- Jeff chose to **build** the energy monitor rather than buy a Shelly Pro 3EM. Open-hardware equivalent.
+- **Architecture:** dedicated metering IC **Microchip ATM90E32AS** (does RMS V/I, real/apparent power, PF, kWh) ↔ **ESP32** over SPI. Native **ESPHome `atm90e32` component** → Home Assistant, no custom firmware.
+- **Reference design:** CircuitSetup "Split-Single-Phase Energy Meter" (open-source PCB/Gerbers on GitHub) — fab at JLCPCB & populate, or buy the bare main board.
+- **Current sensing:** use **200A split-core CTs** (e.g. SCT-T16 200A, Magnelab SCT-0750-200), NOT Rogowski. ATM90E32 expects CT input; Rogowski would need an extra op-amp integrator stage. 200A CTs cover the 200A service cleanly.
+- **Voltage sensing:** **2× 9V AC–AC transformer wall-warts** — one per leg (split-phase needs both L1 & L2 voltage refs; one also powers the board).
+- **Wiring:** CT on main leg 1 → CT1, CT on main leg 2 → CT2 (arrows → load); sum = whole home. SPI: CS/SCK/MISO/MOSI + 3.3V/GND (same skill as the CC1101).
+- **Calibration:** tune `gain_voltage`, `gain_ct`, 60Hz in ESPHome against a known load.
+- **Approx cost ~$90–110 DIY** vs ~$140 Shelly.
 - **INSTALL:** Jeff **wired the house himself** — fully comfortable in the breaker panel. Do NOT suggest hiring an electrician. Treat him as a capable peer; give real wiring detail.
+
+### 🛠️ Bake-in hardware to add DURING the energy-meter install (cheap, unlocks automations)
+- **Spare CT(s)** on key circuits — well/irrigation pump (priority), AC, dryer/EV → enables per-appliance automations. DIY board has spare channels.
+- **DS18B20 temp probe inside the breaker panel** (~$3, spare ESP32 GPIO) — detects hot breaker/loose lug = early fire warning. HIGH PRIORITY (Jeff wired the house).
+- **Relay/contactor** (~$10) — local load-shedding / kill a circuit even if HA is down.
+- **Motorized ball valve on the water main** (~$50, pairs with water meter) — turns "leak detected" into auto-shutoff.
+- **Buzzer on spare GPIO** (~$2) — local audible alert (panel over-temp, leak) independent of WiFi.
+- Jeff's "do now" shortlist: **spare CT on well pump + DS18B20 panel temp + water-main valve.**
+
+### 🤖 Planned automations (build in Home Assistant once hardware is in; surface in app)
+- **Free (energy data only):** appliance-done alerts (laundry/dishwasher), power-outage/brownout text (chip reads voltage), "oven left on," bill forecast, breaker-trip warning near 180A/200A, phantom-load flag.
+- **Cross-device (the Command Center magic):**
+  - Triple-verified watering: B-Hyve zone ON → energy confirms pump current → water meter confirms gallons; alert on "commanded but no flow/current" (dry run / failure).
+  - Water-leak auto-shutoff: continuous flow + no schedule → alert + close main valve.
+  - Pump protection: dry-run / short-cycle detection.
+  - HVAC health: LUX + AC draw + outdoor temp → short-cycle/locked-compressor detection + daily $ cost.
+  - Away scene: phones leave → thermostat setback, confirm oven off via power, arm Blink, rain-delay B-Hyve.
+- **Panel temp (DS18B20):** over-temp → buzzer + push alert (fire prevention).
 
 ### 📱 App plan
 - Add an **ENERGY card** (live watts, kWh today/month) + **GAS card** (usage + cost) — likely a new "Utilities" strip on HOME, alongside the planned Water Usage card.
