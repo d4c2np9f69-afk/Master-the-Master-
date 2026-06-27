@@ -623,11 +623,14 @@ A single ESP32 + CC1101 box reads BOTH water and gas off the air; electric uses 
 - IDM message = 5-min interval data → good for usage graphs.
 - Tools/reference: rtlamr (bemasher), rtl_433, ESPHome wmbus/ERT components.
 
-### ⚡ ELECTRIC — Shelly EM (CT clamps, NOT meter reading)
-- Going with **Shelly EM Gen3 (50A, 2-channel)** — HA officially recommends it; local API, MQTT, no cloud.
-- Works regardless of CEMC's meter type (clamps the panel, not the meter).
-- **Parts:** Shelly EM Gen3 + **2× 120A CT clamps** (US split-phase = 2 legs; the included 50A clamp is too small for the 200A mains). Shelly sells a "EM + 120A + 50A Clamps" bundle.
-- **INSTALL:** Jeff **wired the house himself** — he is fully comfortable in the breaker panel. Do NOT suggest hiring an electrician. Treat him as a capable peer on electrical work; give real wiring detail (which legs to clamp, where to tap 120/240V for the Shelly, CT orientation/polarity).
+### ⚡ ELECTRIC — Shelly Pro 3EM (CT clamps, NOT meter reading)
+- CT-based whole-home monitor; works regardless of CEMC's meter type (clamps the panel, not the meter). Local API/MQTT, official HA integration, no cloud.
+- **Model choice (IMPORTANT):** the compact **Shelly EM Gen3 maxes at ~80A/channel — TOO SMALL for the 200A mains.** Use the **Shelly Pro 3EM** (DIN-rail, 3-channel) instead.
+  - **Pro 3EM (120A)** = 3× solid 120A clamps — OK if real per-leg peak < 120A.
+  - **Pro 3EM-400 (Rogowski)** = 3× flexible 400A coils — **RECOMMENDED for the 200A service**, never clips under heavy load, fits fat main lugs.
+- **Parts:** Shelly Pro 3EM-400 (~$140) + 2-pole breaker to power/voltage-sense + DIN rail/enclosure.
+- **Wiring:** L1+L2+Neutral to voltage terminals (set profile to split-phase 2×120V). Coil A on main leg 1, coil B on main leg 2 (arrows → load); A+B = whole home. 3rd coil (C) is a spare for a big single circuit (AC, well/irrigation pump, dryer, EV). Flip a coil if a leg reads negative.
+- **INSTALL:** Jeff **wired the house himself** — fully comfortable in the breaker panel. Do NOT suggest hiring an electrician. Treat him as a capable peer; give real wiring detail.
 
 ### 📱 App plan
 - Add an **ENERGY card** (live watts, kWh today/month) + **GAS card** (usage + cost) — likely a new "Utilities" strip on HOME, alongside the planned Water Usage card.
