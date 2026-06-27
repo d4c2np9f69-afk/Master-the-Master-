@@ -422,43 +422,15 @@ html,body{
 .alexa-enable-btn:active{background:rgba(26,156,219,.35)}
 .alexa-enable-btn.active{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.5);color:#4ade80;cursor:default}
 
-/* ── VOICE COMMAND (MIC) ─────────────────────────────────────────────────── */
-.mic-btn{
-  width:36px;height:36px;border-radius:50%;
-  background:rgba(26,156,219,.15);border:1.5px solid rgba(26,156,219,.4);
-  color:#4db8e8;font-size:17px;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;flex-shrink:0;transition:all .2s;
+/* ── ALEXA APP BUTTON ────────────────────────────────────────────────────── */
+.alexa-btn{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  width:44px;height:44px;border-radius:12px;flex-shrink:0;cursor:pointer;
+  background:linear-gradient(135deg,#1a9cdb,#0070a8);border:none;
+  color:#fff;font-size:16px;box-shadow:0 0 10px rgba(26,156,219,.4);transition:all .2s;
 }
-.mic-btn.listening{
-  background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.6);color:#f87171;
-  animation:micPulse 1s ease-in-out infinite;
-}
-@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 8px rgba(239,68,68,0)}}
-.voice-overlay{
-  display:none;position:fixed;bottom:0;left:0;right:0;z-index:600;
-  background:rgba(10,8,5,.96);border-top:1px solid rgba(212,175,55,.2);
-  border-radius:20px 20px 0 0;padding:20px 20px 36px;
-  transform:translateY(100%);transition:transform .3s cubic-bezier(.32,1,.32,1);
-}
-.voice-overlay.open{display:block;transform:translateY(0)}
-.voice-transcript{
-  font-size:18px;font-family:var(--serif);color:var(--text);
-  min-height:52px;text-align:center;padding:10px 0 6px;line-height:1.4;
-}
-.voice-status{font-size:11px;color:var(--muted);text-align:center;letter-spacing:.8px;text-transform:uppercase;margin-bottom:14px}
-.voice-result{
-  padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;
-  text-align:center;min-height:36px;
-}
-.voice-result.ok{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3)}
-.voice-result.err{background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.25)}
-.voice-result.info{background:rgba(26,156,219,.12);color:#7dd3fc;border:1px solid rgba(26,156,219,.25)}
-.voice-cmds{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:14px}
-.voice-cmd-chip{
-  padding:5px 11px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
-  border-radius:20px;font-size:10px;color:var(--muted);cursor:pointer;
-}
-.voice-cmd-chip:active{background:rgba(212,175,55,.15)}
+.alexa-btn span{font-size:7px;font-weight:800;letter-spacing:.5px;line-height:1}
+.alexa-btn:active{transform:scale(.94)}
 .alexa-ring{width:34px;height:34px;background:linear-gradient(135deg,#1a9cdb,#0070a8);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 10px rgba(26,156,219,.4)}
 
 /* ── BUTTONS ────────────────────────────────────────────────────────────── */
@@ -739,24 +711,7 @@ html,body{
     <div class="app-hdr-title">HOME COMMAND CENTER</div>
     <div class="app-hdr-sub">Manage &bull; Maintain &bull; Monitor</div>
   </div>
-  <button class="mic-btn" id="micBtn" onclick="voiceStart()" title="Voice Command">&#127908;</button>
-</div>
-
-<!-- Voice Command Overlay -->
-<div class="voice-overlay" id="voiceOverlay">
-  <div class="voice-status" id="voiceStatus">Tap a command below</div>
-  <div class="voice-transcript" id="voiceTranscript" style="display:none">&#127908;</div>
-  <div class="voice-result" id="voiceResult" style="display:none"></div>
-  <div class="voice-cmds">
-    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">Cool to 72</span>
-    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">Heat to 68</span>
-    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">Braves game time</span>
-    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">What time is it</span>
-    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">Open weather</span>
-    <span class="voice-cmd-chip" onclick="voiceDemoChip(this)">Open yard</span>
-  </div>
-  <button id="voiceListenBtn" onclick="voiceListenStart()" style="width:100%;margin-top:14px;padding:12px;background:rgba(26,156,219,.15);border:1px solid rgba(26,156,219,.4);border-radius:10px;color:#4db8e8;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit">&#127908; Try Live Microphone</button>
-  <button onclick="voiceClose()" style="width:100%;margin-top:10px;padding:11px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">CLOSE</button>
+  <button class="alexa-btn" id="alexaBtn" onclick="openAlexaApp()" title="Open Alexa">&#127908;<span>ALEXA</span></button>
 </div>
 
 <!-- ══ SECTION NAV ═══════════════════════════════════════════════════════════ -->
@@ -4716,338 +4671,23 @@ function alexaInitBadges() {
   }
 }
 
-// ── VOICE COMMAND ENGINE ──────────────────────────────────────────────────────
-var _voiceRecog = null;
-var _voiceOpen = false;
-
-// Mic button in header — opens the SAFE tap-to-run panel. No microphone is
-// activated here, so nothing can trigger Siri or dial contacts.
-function voiceStart() {
-  voiceOpen();
-  document.getElementById('voiceStatus').textContent = 'Tap a command below';
-  document.getElementById('voiceTranscript').style.display = 'none';
-  document.getElementById('voiceResult').style.display = 'none';
-}
-
-// Explicit opt-in: only when Jeff taps "Try Live Microphone" do we attempt
-// SpeechRecognition. We do NOT pre-grab the mic with getUserMedia — on iOS that
-// leaves the mic busy and SpeechRecognition then fails with audio-capture.
-// SpeechRecognition requests its own mic permission.
-function voiceListenStart() {
-  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) {
-    voiceShowResult('err', 'Live mic not supported on this browser — use the command buttons above.');
-    return;
-  }
-  document.getElementById('voiceTranscript').style.display = '';
-  voiceStartRecog(SR);
-}
-
-function voiceStartRecog(SR) {
-  voiceOpen();
-  if (_voiceRecog) { try { _voiceRecog.abort(); } catch(e){} }
-  _voiceRecog = new SR();
-  _voiceRecog.lang = 'en-US';
-  _voiceRecog.interimResults = true;
-  _voiceRecog.maxAlternatives = 1;
-
-  _voiceRecog.onstart = function() {
-    document.getElementById('micBtn').classList.add('listening');
-    document.getElementById('voiceStatus').textContent = '🔴 Listening…';
-    document.getElementById('voiceTranscript').textContent = '…';
-    document.getElementById('voiceResult').style.display = 'none';
-  };
-  _voiceRecog.onresult = function(e) {
-    var interim = '', final = '';
-    for (var i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) final += e.results[i][0].transcript;
-      else interim += e.results[i][0].transcript;
-    }
-    document.getElementById('voiceTranscript').textContent = final || interim || '…';
-    if (final) voiceExecute(final.trim());
-  };
-  _voiceRecog.onerror = function(e) {
-    document.getElementById('micBtn').classList.remove('listening');
-    document.getElementById('voiceStatus').textContent = 'Tap a command below';
-    document.getElementById('voiceTranscript').style.display = 'none';
-    if (e.error === 'audio-capture' || e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-      voiceShowResult('err', '🎤 Live mic isn\'t working on this iPhone — just use the command buttons above, they do the same thing.');
-    } else if (e.error !== 'no-speech' && e.error !== 'aborted') {
-      voiceShowResult('err', 'Mic: ' + e.error + ' — use the buttons above instead.');
-    }
-  };
-  _voiceRecog.onend = function() {
-    document.getElementById('micBtn').classList.remove('listening');
-    document.getElementById('voiceStatus').textContent = 'Tap a command below';
-  };
-  _voiceRecog.start();
-}
-
-function voiceOpen() {
-  var ov = document.getElementById('voiceOverlay');
-  ov.style.display = 'block';
-  setTimeout(function(){ ov.classList.add('open'); }, 10);
-  _voiceOpen = true;
-}
-
-function voiceClose() {
-  if (_voiceRecog) { try { _voiceRecog.abort(); } catch(e){} }
-  document.getElementById('micBtn').classList.remove('listening');
-  var ov = document.getElementById('voiceOverlay');
-  ov.classList.remove('open');
-  setTimeout(function(){ ov.style.display = 'none'; }, 320);
-  _voiceOpen = false;
-}
-
-function voiceShowResult(type, msg) {
-  var el = document.getElementById('voiceResult');
-  el.className = 'voice-result ' + type;
-  el.textContent = msg;
-  el.style.display = 'block';
-}
-
-function voiceDemoChip(el) {
-  document.getElementById('voiceTranscript').textContent = el.textContent.replace(/"/g,'');
-  voiceExecute(el.textContent.replace(/"/g,''));
-}
-
-function voiceSpeak(text) {
-  if (!window.speechSynthesis) return;
-  var u = new SpeechSynthesisUtterance(text);
-  u.volume = 0.8; u.rate = 1; u.pitch = 1;
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(u);
-}
-
-// Format any Date as Central Time string
-function voiceCentralTime(date, opts) {
-  var defaults = { timeZone:'America/Chicago', hour:'numeric', minute:'2-digit', hour12:true };
-  return date.toLocaleString('en-US', Object.assign({}, defaults, opts || {}));
-}
-
-// MLB team name lookup — returns { id, name } or null
-var VOICE_MLB = {
-  'braves':144,'atlanta':144,'astros':117,'houston':117,'cubs':112,'cardinals':138,'st louis':138,
-  'rangers':140,'texas':140,'yankees':147,'new york yankees':147,'red sox':111,'boston':111,
-  'dodgers':119,'mets':121,'new york mets':121,'phillies':143,'philadelphia':143,
-  'padres':135,'san diego':135,'giants':137,'san francisco':137,'nationals':120,'washington':120,
-  'marlins':146,'miami':146,'reds':113,'cincinnati':113,'pirates':134,'pittsburgh':134,
-  'brewers':158,'milwaukee':158,'rockies':115,'colorado':115,'diamondbacks':109,'arizona':109,
-  'twins':142,'minnesota':142,'white sox':145,'guardians':114,'cleveland':114,'tigers':116,
-  'detroit':116,'royals':118,'kansas city':118,'angels':108,'athletics':133,'oakland':133,
-  'mariners':136,'seattle':136,'blue jays':141,'toronto':141,'rays':139,'tampa bay':139,
-  'orioles':110,'baltimore':110
-};
-
-function voiceSportsLookup(raw) {
-  // Find team ID by scanning the raw phrase for any known team name
-  var phrase = raw.toLowerCase();
-  var teamId = null;
-  // Try multi-word keys first (longer match wins)
-  var keys = Object.keys(VOICE_MLB).sort(function(a,b){ return b.length - a.length; });
-  for (var i = 0; i < keys.length; i++) {
-    if (phrase.indexOf(keys[i]) !== -1) { teamId = VOICE_MLB[keys[i]]; break; }
-  }
-  if (!teamId) { voiceShowResult('err', 'Unknown team — try "Braves game" or "Rangers game"'); return; }
-
-  var today = new Date();
-  var end = new Date(today.getTime() + 8 * 86400000);
-  var fmt = function(d) { return d.toISOString().split('T')[0]; };
-
-  voiceShowResult('info', '⏳ Looking up schedule…');
-  fetch('https://statsapi.mlb.com/api/v1/schedule?sportId=1&teamId=' + teamId + '&startDate=' + fmt(today) + '&endDate=' + fmt(end) + '&hydrate=team')
-    .then(function(r){ return r.json(); })
-    .then(function(data) {
-      var nextGame = null;
-      var dates = data.dates || [];
-      for (var di = 0; di < dates.length && !nextGame; di++) {
-        var games = dates[di].games || [];
-        for (var gi = 0; gi < games.length; gi++) {
-          var g = games[gi];
-          if (new Date(g.gameDate) >= today) { nextGame = g; break; }
-        }
-      }
-      if (!nextGame) {
-        voiceShowResult('info', 'No games in the next 8 days');
-        voiceSpeak('No games scheduled in the next 8 days');
-        return;
-      }
-      var gd = new Date(nextGame.gameDate);
-      var timeStr = voiceCentralTime(gd, { weekday:'short', month:'short', day:'numeric' });
-      var away = nextGame.teams.away.team.name;
-      var home = nextGame.teams.home.team.name;
-      var display = away + ' @ ' + home + '\n' + timeStr + ' CT';
-      voiceShowResult('ok', '⚾ ' + display);
-      voiceSpeak(away + ' at ' + home + ', ' + timeStr + ' Central Time');
-    })
-    .catch(function(){ voiceShowResult('err', 'Could not load MLB schedule'); });
-}
-
-// Convert spoken number words to digits — "seventy two" → "72"
-function voiceNumToDigit(t) {
-  var map = {
-    'zero':0,'one':1,'two':2,'three':3,'four':4,'five':5,'six':6,'seven':7,'eight':8,'nine':9,
-    'ten':10,'eleven':11,'twelve':12,'thirteen':13,'fourteen':14,'fifteen':15,
-    'sixteen':16,'seventeen':17,'eighteen':18,'nineteen':19,
-    'twenty':20,'thirty':30,'forty':40,'fifty':50,'sixty':60,'seventy':70,'eighty':80,'ninety':90
-  };
-  // "seventy two" or "seventy-two" → "72"
-  t = t.replace(/\b(twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)[\s\-]+(one|two|three|four|five|six|seven|eight|nine)\b/g, function(m, t1, o1) {
-    return '' + (map[t1] + map[o1]);
-  });
-  for (var w in map) { t = t.replace(new RegExp('\\b' + w + '\\b', 'g'), '' + map[w]); }
-  return t;
-}
-
-function voiceSetCool(sp) {
-  if (sp < 60 || sp > 85) { voiceShowResult('err', 'Temperature out of range (60–85°F)'); return; }
-  voiceShowResult('info', '⏳ Setting cool to ' + sp + '°…');
-  var lux = JSON.parse(localStorage.getItem('lux_creds') || 'null') || {};
-  if (!lux.e || !lux.p) { voiceShowResult('err', 'LUX account not saved — open HOME → Accounts'); return; }
-  fetch('/api/climate', {method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({email:lux.e, password:lux.p, action:'set_sp', cool_sp:sp})
-  }).then(function(r){ return r.json(); }).then(function(d){
-    if (d.ok) { voiceShowResult('ok', '✅ Cool set to ' + sp + '°F'); voiceSpeak('Done. Cool set to ' + sp + ' degrees.'); if (d.thermostat) updateClimateUI(d.thermostat); }
-    else { voiceShowResult('err', 'Failed: ' + (d.error || 'unknown error')); }
-  }).catch(function(){ voiceShowResult('err', 'Network error'); });
-}
-
-function voiceSetHeat(sp) {
-  if (sp < 50 || sp > 80) { voiceShowResult('err', 'Temperature out of range (50–80°F)'); return; }
-  voiceShowResult('info', '⏳ Setting heat to ' + sp + '°…');
-  var lux = JSON.parse(localStorage.getItem('lux_creds') || 'null') || {};
-  if (!lux.e || !lux.p) { voiceShowResult('err', 'LUX account not saved — open HOME → Accounts'); return; }
-  fetch('/api/climate', {method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({email:lux.e, password:lux.p, action:'set_sp', heat_sp:sp})
-  }).then(function(r){ return r.json(); }).then(function(d){
-    if (d.ok) { voiceShowResult('ok', '✅ Heat set to ' + sp + '°F'); voiceSpeak('Done. Heat set to ' + sp + ' degrees.'); if (d.thermostat) updateClimateUI(d.thermostat); }
-    else { voiceShowResult('err', 'Failed: ' + (d.error || 'unknown error')); }
-  }).catch(function(){ voiceShowResult('err', 'Network error'); });
-}
-
-function voiceSetMode(mode) {
-  var lux = JSON.parse(localStorage.getItem('lux_creds') || 'null') || {};
-  if (!lux.e || !lux.p) { voiceShowResult('err', 'LUX account not saved — open HOME → Accounts'); return; }
-  voiceShowResult('info', '⏳ Setting mode to ' + mode + '…');
-  fetch('/api/climate', {method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({email:lux.e, password:lux.p, action:'set_mode', value:mode})
-  }).then(function(r){ return r.json(); }).then(function(d){
-    if (d.ok) { voiceShowResult('ok', '✅ Mode set to ' + mode); voiceSpeak('Mode set to ' + mode); }
-    else { voiceShowResult('err', 'Failed: ' + (d.error || 'unknown')); }
-  }).catch(function(){ voiceShowResult('err', 'Network error'); });
-}
-
-// Keyword-extraction command parser — forgiving, no strict phrase order required
-function voiceExecute(cmd) {
-  // Convert number words and normalize
-  var t = voiceNumToDigit(cmd.toLowerCase().replace(/['"]/g,'').trim());
-  document.getElementById('voiceStatus').textContent = 'Processing…';
-
-  // Extract numbers
-  var nums = [];
-  t.replace(/\d+/g, function(n) { nums.push(parseInt(n, 10)); return n; });
-  var firstNum = nums.length ? nums[0] : null;
-
-  // ── Navigation ─────────────────────────────────────────────────────────────
-  // Has nav intent word OR is a pure keyword utterance with no number context
-  var navIntent = /\b(?:go|open|show|navigate|switch|take me|bring|pull up|display|view)\b/.test(t);
-  var navSections = [
-    { words: ['weather','forecast','radar','rain','storm'],         id: 'weather',  label: 'Weather' },
-    { words: ['irrigation','water','sprinkler','watering','zones'], id: 'irr',      label: 'Irrigation' },
-    { words: ['yard','mower','mow','lawn','grass','equipment'],     id: 'yard',     label: 'Yard' },
-    { words: ['climate','thermostat','hvac'],                       id: 'climate',  label: 'Climate' },
-    { words: ['home','main','start','back','dashboard'],            id: 'home',     label: 'Home' }
-  ];
-  // A setpoint command has both a number AND a "to/degree" marker — don't nav on those
-  var isSetpointCmd = firstNum && /\b(?:to|degrees?|at)\b/.test(t);
-  if (!isSetpointCmd && (navIntent || !firstNum)) {
-    for (var ni = 0; ni < navSections.length; ni++) {
-      var ns = navSections[ni];
-      var found = false;
-      for (var wi = 0; wi < ns.words.length; wi++) {
-        if (new RegExp('\\b' + ns.words[wi] + '\\b').test(t)) { found = true; break; }
-      }
-      if (found) {
-        var btn = document.getElementById('snav-' + ns.id);
-        if (btn) btn.click();
-        voiceShowResult('ok', '✅ Opened ' + ns.label);
-        voiceSpeak('Opening ' + ns.label);
-        setTimeout(voiceClose, 1200);
-        return;
-      }
-    }
-  }
-
-  // ── Thermostat setpoints ────────────────────────────────────────────────────
-  // Detect cool vs heat context anywhere in the sentence
-  var hasCool = /\b(?:cool(?:er|ing)?|cold|chill(?:y)?|ac|air)\b/.test(t);
-  var hasHeat = /\b(?:heat(?:er|ing)?|warm(?:er|ing)?|hot(?:ter)?)\b/.test(t);
-  var hasSetVerb = /\b(?:set|change|adjust|drop|lower|raise|bump|bring|move|make|put|push|take)\b/.test(t);
-  var hasTempWord = /\b(?:thermostat|temp|temperature|degrees?|it|that)\b/.test(t);
-  var numInRange = firstNum && firstNum >= 50 && firstNum <= 90;
-
-  if (numInRange) {
-    if (hasCool) { voiceSetCool(firstNum); return; }
-    if (hasHeat) { voiceSetHeat(firstNum); return; }
-    // Ambiguous (just "set to 72" or "72 degrees" or "thermostat to 72") — default cool
-    if (hasSetVerb || hasTempWord) { voiceSetCool(firstNum); return; }
-  }
-
-  // ── Mode commands ───────────────────────────────────────────────────────────
-  var hasModeVerb = hasSetVerb || /\b(?:turn|switch|on|off|mode)\b/.test(t);
-  if (hasModeVerb && !firstNum) {
-    if (/\b(?:off|disable|stop|shut)\b/.test(t)) { voiceSetMode('off'); return; }
-    if (/\bauto(?:matic)?\b/.test(t)) { voiceSetMode('auto'); return; }
-    if (hasCool) { voiceSetMode('cool'); return; }
-    if (hasHeat) { voiceSetMode('heat'); return; }
-  }
-
-  // ── Current temperature query ───────────────────────────────────────────────
-  var isQuestion = /\b(?:what|how|tell|check|is it|whats)\b/.test(t);
-  if (isQuestion && /\b(?:temp|temperature|hot|cold|warm|outside|weather|degrees?)\b/.test(t)) {
-    var tEl = document.getElementById('wxTemp') || document.getElementById('climateCurTemp');
-    var tempNow = tEl ? tEl.textContent.replace(/[^\d]/g,'') : null;
-    if (tempNow) {
-      voiceShowResult('info', '🌡 Current temp: ' + tempNow + '°F');
-      voiceSpeak('The current temperature is ' + tempNow + ' degrees Fahrenheit.');
-    } else {
-      var wxBtn = document.getElementById('snav-weather');
-      if (wxBtn) wxBtn.click();
-      voiceShowResult('info', 'Opening weather for current conditions');
-    }
-    return;
-  }
-
-  // ── What time is it ─────────────────────────────────────────────────────────
-  if (/\b(?:what(?:'s|\s+is)?\s+(?:the\s+)?time|what time|current time|time is it)\b/.test(t)) {
-    var now = new Date();
-    var ctStr = voiceCentralTime(now);
-    voiceShowResult('info', '🕐 ' + ctStr + ' Central Time');
-    voiceSpeak('It is ' + ctStr + ' Central Time');
-    return;
-  }
-
-  // ── Sports schedule (MLB) ───────────────────────────────────────────────────
-  var hasSportsWord = /\b(?:game|play(?:ing)?|schedule|series|start)\b/.test(t);
-  var hasTeamWord = false;
-  var keysCheck = Object.keys(VOICE_MLB);
-  for (var ki = 0; ki < keysCheck.length; ki++) {
-    if (t.indexOf(keysCheck[ki]) !== -1) { hasTeamWord = true; break; }
-  }
-  if (hasSportsWord && hasTeamWord) {
-    voiceSportsLookup(t);
-    return;
-  }
-  // Just a team name alone (e.g. "Braves game time" → hasSportsWord=true covered above;
-  // but "Braves" alone → also try lookup)
-  if (hasTeamWord && /\b(?:time|when|next|tonight|today)\b/.test(t)) {
-    voiceSportsLookup(t);
-    return;
-  }
-
-  // ── Fallback ────────────────────────────────────────────────────────────────
-  document.getElementById('voiceStatus').textContent = 'Tap the mic and speak a command';
-  voiceShowResult('err', 'Try: "cool to 72" · "Braves game time" · "what time is it"');
+// Open the Amazon Alexa app so Jeff can talk to Alexa directly.
+// Tries the Alexa app's URL scheme; if the app isn't installed, falls back
+// to the App Store page after a short delay.
+function openAlexaApp() {
+  var APP_STORE = 'https://apps.apple.com/us/app/amazon-alexa/id944011620';
+  var opened = false;
+  // If the app opens, the page is backgrounded — cancel the store fallback.
+  var onHide = function(){ opened = true; };
+  document.addEventListener('visibilitychange', onHide);
+  window.addEventListener('pagehide', onHide);
+  // Attempt to launch the Alexa app
+  try { window.location.href = 'alexa://'; } catch (e) {}
+  setTimeout(function(){
+    document.removeEventListener('visibilitychange', onHide);
+    window.removeEventListener('pagehide', onHide);
+    if (!opened && !document.hidden) { window.location.href = APP_STORE; }
+  }, 1500);
 }
 
 function hccPanic() {
