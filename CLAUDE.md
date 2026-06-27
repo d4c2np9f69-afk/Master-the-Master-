@@ -577,7 +577,7 @@ b7ff936  Native mPING quick-report card — submit directly to NOAA from the app
 Jeff is building a wireless meter reader to pull his water usage into Beehive → HCC app.
 
 **Hardware:**
-- **Meter:** Kamstrup 621 (flowIQ / Multical family) — broadcasts encrypted **wireless M-Bus** telegrams
+- **Meter:** Kamstrup **flowIQ 2100** (CONFIRMED from meter photo 2026-06-27 — NOT a 621). Type No `02U23C036EC`, 5/8" 25 GPM, 250 PSI, S/N starts `25394131`. Broadcasts encrypted **wireless M-Bus** telegrams (Kamstrup flowIQ family; wmbusmeters driver ~ flowiq2200/multical21).
 - **Radio:** Qoroos **CC1101** sub-GHz transceiver with SMA antenna, tuned to **915 MHz** (US)
 - **Brain:** **ESP32** WROOM-32 (30-pin NodeMCU, CP2102 USB)
 - **Wiring:** CC1101 → ESP32 SPI (SCK→GPIO18, MOSI→GPIO23, MISO→GPIO19, CSN→GPIO5, GDO0/GDO2 → spare GPIOs), VCC→3V3, GND→GND
@@ -624,6 +624,11 @@ A single ESP32 + CC1101 box reads BOTH water and gas off the air; electric uses 
 - Tools/reference: rtlamr (bemasher), rtl_433, ESPHome wmbus/ERT components.
 
 ### ⚡ ELECTRIC — DIY ESP32 + ATM90E32AS energy meter (Jeff is BUILDING, not buying)
+- **Service confirmed 200A** (electric meter reads CL200). Panel is an older **Challenger** load center (Eaton spec sheet inside).
+- **Electric meter = Landis+Gyr FOCUS AXR-SD, Gridstream RF (ZigBee), meter #145590962 — NOT Itron.** So the CC1101/rtlamr radio CANNOT read the electric meter (closed Gridstream mesh). Doesn't matter — the CT-clamp build reads the panel directly regardless of meter. (Slim optional path: ZigBee HAN device authorized by CEMC — not worth chasing.)
+- **Breaker amps (from panel photo):** A/C 30A (2-pole), Range 50A (2-pole), Dryer 30A (2-pole), Dishwasher 20A; rest 15–20A lights/plugs.
+- **CT list (6-ch CircuitSetup board):** CT1+CT2 = 2× **200A** (mains); CT3 = **100A** (range/50A bkr); CT4 = **50A** (dryer/30A); CT5 = **50A** (A/C/30A); CT6 = **20–30A** (dishwasher/20A, or well pump).
+- ⚠️ **SAFETY:** Challenger panels have a known overheating/recall history; photo shows possible scorching near center breakers — Jeff advised to inspect those connections. Makes the DS18B20 panel-temp probe higher priority.
 - Jeff chose to **build** the energy monitor rather than buy a Shelly Pro 3EM. Open-hardware equivalent.
 - **Architecture:** dedicated metering IC **Microchip ATM90E32AS** (does RMS V/I, real/apparent power, PF, kWh) ↔ **ESP32** over SPI. Native **ESPHome `atm90e32` component** → Home Assistant, no custom firmware.
 - **Reference design:** CircuitSetup "Split-Single-Phase Energy Meter" (open-source PCB/Gerbers on GitHub) — fab at JLCPCB & populate, or buy the bare main board.
