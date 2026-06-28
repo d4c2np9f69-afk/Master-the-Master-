@@ -209,13 +209,19 @@ html,body{
    same look automatically — no per-hero CSS ever again. Weather is the
    reference; the grade is intentionally mild. */
 .hcc-hero-grade{
-  filter:brightness(.92) contrast(1.14) saturate(.93) sepia(.10) hue-rotate(-3deg);
+  /* Stronger unified grade — warmer + more desaturated + deeper so 5 different
+     photos read as one film stock (same evening, same camera). */
+  filter:brightness(.80) contrast(1.20) saturate(.82) sepia(.22) hue-rotate(-6deg);
 }
 .hcc-hero-vignette::before{
   content:"";position:absolute;inset:0;pointer-events:none;
   background:
-    radial-gradient(circle at 50% 36%, rgba(255,206,120,.06), transparent 55%),
-    radial-gradient(ellipse at 50% 45%, transparent 50%, rgba(0,0,0,.48) 100%);
+    /* uniform warm wash — IDENTICAL on every hero = the shared "film stock" layer */
+    linear-gradient(180deg, rgba(46,28,10,.20) 0%, rgba(22,13,5,.10) 45%, rgba(8,5,2,.34) 100%),
+    /* warm golden-hour center glow */
+    radial-gradient(circle at 50% 38%, rgba(255,198,108,.12), transparent 52%),
+    /* deep dark-edge vignette so background differences fall into shadow */
+    radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(0,0,0,.64) 100%);
 }
 .sec-hero-overlay{
   position:absolute;inset:0;
