@@ -54,6 +54,7 @@ Jeff wants this to feel like two friends building something together — not a c
 8. **NEVER put `<script>` or `</script>` tags inside the JS block of index.html** — this causes a fatal blank page (the great blank-page incident of 2026-06-23). The JS block is lines 1209–2834. Raw text only inside it.
 9. **Always check `git log` and this file before changing anything**
 10. **Be proactive** — find and fix bugs before Jeff sees them. Do not wait for Jeff to report issues.
+11. **Keep this file LEAN (memory hygiene)** — it's injected into every message, so bloat costs efficiency on every turn. Condense finished work into the **Change Log** (one line each); never paste full commit-hash lists or blow-by-blow narratives — that detail lives in `git log`. Keep the reference sections (infra, APIs, hardware, gold standards) but trim them when they go stale. Target: stay well under ~600 lines.
 
 ---
 
@@ -323,105 +324,36 @@ If any tests fail, fix them before doing anything else.
 
 ---
 
-## Session History — What Was Done
+## Current State (updated 2026-06-28)
 
-### Session 2026-06-23/24 (The Big Fix Session)
+**App:** 5 sections (HOME/WEATHER/IRRIGATION/YARD/CLIMATE). 26/26 Playwright tests passing, zero JS errors. Service worker **hcc-v6** (network-first HTML so updates always land).
 
-**Problems found and fixed:**
-
-1. **Blank page** (`a973c8f`) — Two stray `<script>` tags inside the JS block caused a fatal SyntaxError. Removed them. Bumped SW to hcc-v4.
-
-2. **Sensor data dead** — `hours.js` checked only `env.HCC_KV` but Cloudflare Pages has the binding as `MOWER_KV`. Added `getKV(env)` helper that tries both. This was the root cause of all sensor readings showing `—` and `0.00V`.
-
-3. **GPS map disappearing after mow** — `drawYardMap` was called with `[]` when heartbeat POST has no `track` field. Fixed by saving track to `S.sensorTrack` in localStorage and falling back to it when no fresh track.
-
-4. **All modal buttons silently broken** — CSS used `.modal-overlay.open{display:flex}` but HTML uses `modal-ov` and JS sets `modal-ov show`. The CSS never matched so modals never opened. LOG MOW, LOG SERVICE, UPDATE HOURS were all broken. Fixed by restoring correct class names.
-
-5. **Modal box unstyled** — CSS defined `.modal{...}` but inner div uses `modal-box`. No background, rounded corners, or padding. Fixed to `.modal-box`.
-
-6. **`.mbtns`, `.mbtn.secondary`, `.btn-green` missing** — Cancel buttons invisible, no button row layout, green buttons unstyled. Restored all three rules.
-
-7. **CLAUDE.md created** (`e8f0312`) — Persistent memory file. This file.
-
-**Commits this session:**
-```
-e904a5b  Fix GPS persistence, restore all modal CSS, fix KV binding dual-check
-e8f0312  Add CLAUDE.md — persistent project memory
-53eb7d4  Restore Jeff's real hours — update default state and sensor baseline to 5.9h
-b629c83  Revert hours.js to original
-fe1edb8  Add engine-off heartbeat and improve sensor status display
-98b8dca  Fix sensor API — accept MOWER_KV binding as fallback for HCC_KV
-a973c8f  Fix fatal JS syntax error — remove stray <script> tags inside script block
-8497827  Bump service worker to hcc-v3 — force cache clear of 2.1MB old build
-739d004  Extract hero photos from HTML — drop from 2.1MB to 295KB
-686bece  Switch Step 3 copy command from curl to wget for HA Terminal compatibility
-a463d09  Add /setup endpoint that serves install script directly
-c1c004c  Auto-detect Beehive by IP when homeassistant.local fails
-```
-
----
-
-## Session History — Session 2026-06-24 (Visual Polish + Beehive Integration)
-
-### Changes Made This Session
-
-1. **YARD hero text** (`6b6d477`) — Fixed stark white `.yard-hero-title` to warm italic gold `rgba(240,220,175,0.92)` to match the baked-in text of other hero photos.
-
-2. **App-wide palette overhaul** (`c17bdf0`) — Applied ChatGPT hero colors/fonts throughout the entire app:
-   - All CSS `:root` variables replaced with warm cream-gold palette
-   - `--gold:#d4af37`, `--text:#ede8df`, `--serif:Georgia,'Times New Roman',serif`
-   - `--a-home` changed from tech blue `#4a9eff` → warm gold `#d4af37`
-   - App header, nav bar, card titles, section labels, spec values — all warm cream serif
-   - Removed "Life-Safety Note" nanny warning card Jeff explicitly objected to
-   - Weather hero temp + STATION/KTNWHITE21 inline HTML fixed to warm cream
-
-3. **Blink 2FA + Beehive fixes** (`c7bc5ba`) — Fixed `checkBeehive()` detection bug (HA `/api/` returns `{"message":"API running."}` NOT `{"version":"..."}` — was checking wrong field). Added Blink PIN entry card in camera section as 2FA workaround. Added `blinkSendPin()` function that calls `POST /api/services/blink/send_pin` directly via HA REST.
-
-4. **Panic button — HOME only** (`4c9d36c`) — Panic button placed at the bottom of HOME section only. Verified NOT present on WEATHER, IRRIGATION, or YARD.
-
-5. **Beehive irrigation integration** (`1c2d2c9`) — `loadIrrigation()` now tries HA first via `loadIrrigationFromHA()`. Fetches `/api/states`, filters for B-Hyve zone switches, populates UI from HA entity states, controls via `haIrrToggle()` calling HA services. Falls back to direct B-Hyve cloud API if HA has no irrigation entities.
-
-**Commits this session:**
-```
-1c2d2c9  Route irrigation through Beehive first — HA B-Hyve entities take priority over direct API
-4c9d36c  Panic button — HOME only, at the bottom
-1395a31  Purge all white text — warm cream-gold everywhere
-c7bc5ba  Fix Blink 2FA, irrigation errors, and diagnostic messages
-c17bdf0  Apply ChatGPT hero palette throughout entire app + remove nanny warnings
-6b6d477  Fix YARD hero text — warm italic gold to match other hero photos
-```
-
----
-
-## Current Verified State (as of 2026-06-26, commit 94e2b34)
-
-| Feature | Status |
+| Area | State |
 |---|---|
-| App loads (no blank page) | WORKING |
-| Section navigation (HOME/WEATHER/IRR/YARD/CLIMATE) | WORKING |
-| LOG MOW modal — opens, styled, saves | WORKING |
-| LOG SERVICE modal — opens, 18 service buttons | WORKING |
-| UPDATE HOURS modal — opens, saves | WORKING |
-| All 7 YARD tabs | WORKING |
-| Sensor data display (when ESP32 connected) | WORKING |
-| GPS map drawing | WORKING |
-| GPS track persistence after mow | WORKING |
-| KV binding (MOWER_KV) | WORKING |
-| Service worker (hcc-v5) | WORKING |
-| Engine hours baseline (5.9h) | CORRECT |
-| Panic button — HOME only | CORRECT |
-| Warm gold/cream palette app-wide | DONE |
-| Georgia serif font throughout | DONE |
-| Beehive detection (checkBeehive) | FIXED |
-| HA token entry UI | WORKING |
-| Blink 2FA workaround (blinkSendPin) | BUILT |
-| Irrigation → Beehive first, direct fallback | DONE |
-| CLIMATE section (LUX thermostat) | WORKING — live tested 2026-06-26 |
-| LUX setpoint control (arrows) | WORKING — confirmed 2026-06-26, set 72°F from HCC app ✅ |
-| Irrigation zone Run/Stop/Rain Delay | FIXED (browser WebSocket) — needs live test |
-| LUX real API (Azure B2C + myluxstat.io) | WORKING — CS1-DD-FB device confirmed |
+| Modals (LOG MOW/SERVICE, UPDATE HOURS) | working |
+| 7 YARD tabs; GPS map + calibration + telemetry sim | working |
+| Sensor data (battery/RPM/GPS) | working when ESP32 connected |
+| Engine hours baseline 5.9h; Panic button HOME-only | correct |
+| Hero grade module + status tokens (gold standards above) | done |
+| CLIMATE / LUX thermostat + setpoint (POST /api/device) | WORKING — live confirmed |
+| Irrigation → HA first, direct B-Hyve fallback; zone control via browser WebSocket | done — needs live test |
+| Weather: KTNWHITE21 live data, NWS alerts (deduped by id), 10-day (Open-Meteo), radar (OSM tiles), Lawn Water Need + /api/drought | done — radar/notifs need device confirm |
+| Alexa button (opens Alexa app); in-app voice REMOVED | done |
+| mPING submit | BLOCKED — needs NSSL API token in `MPING_TOKEN` env var |
 
 ---
+
+## Change Log (highlights — full detail in `git log`)
+
+- **06-23/24:** Fixed blank page (stray `<script>` in JS block), dead sensor data (MOWER_KV binding — see `getKV` dual-check), GPS persistence, all modal CSS. Created this file. Extracted hero photos (2.1MB→295KB).
+- **06-24:** Warm cream-gold palette app-wide; panic button HOME-only; Beehive-first irrigation.
+- **06-25:** Real aerial GPS map + calibration (`localStorage.yard_map_calib`) + telemetry sim; YARD hero photo; B-Hyve HA custom integration (`beehive/custom_components/bhyve/`).
+- **06-26:** CLIMATE section + LUX thermostat (real API — see LUX reference below); irrigation `ws_timeout` fixed by moving WebSocket to the browser (`irrControl`/`irrWsCommand`, `/api/irrigation?tk=1`).
+- **06-26 cont.:** Weather overhaul (live WU data, NWS alerts, mPING card); LUX setpoint fixed (POST, not PUT).
+- **06-27/28:** Voice→Alexa swap (removed in-app voice that mis-dialed contacts); SW network-first (hcc-v6); WU Recognized badge; **hero grade module** + **visual consistency tokens/`statusColor()`** (gold standards above); weather fixes (radar OSM tiles, unified mow verdict via `applyMowVerdict`, alert dedup, Lawn Water Need + `/api/drought`, Spotter/NOAA anchors, mPING token-ready); whole-home utilities planning (below).
+
+---
+
 
 ## Beehive / Home Assistant Integration — Current State
 
@@ -444,124 +376,6 @@ c17bdf0  Apply ChatGPT hero palette throughout entire app + remove nanny warning
 - Fetches all entity states, filters for B-Hyve switches (zone/bhyve/orbit in entity_id or zone_name/is_watering attributes)
 - If no B-Hyve entities in HA → falls back to `loadIrrigationDirect()` (direct B-Hyve cloud API)
 - `haIrrToggle(entityId, 'on'|'off')` calls `POST /api/services/switch/turn_on` or `turn_off`
-
----
-
-## Session History — Session 2026-06-25 (GPS Map + Hero + B-Hyve HA Integration)
-
-### Changes Made This Session
-
-1. **B-Hyve HA custom integration updated** (`c7ed75e`) — Added `strings.json` for proper form labels. Updated coordinator to log at WARNING level (visible in HA System Logs without debug mode). Config flow now shows actual error detail in the form description when login fails. Install script updated to download `strings.json` too.
-
-2. **YARD hero photo replaced** (`c5ac967`) — New photo (IMG_0497): man with Toro TimeMaster, "Yard Command Center" text baked in. Hero overlay text removed (photo has it). CSS overlay kept only for sensor status.
-
-3. **Real aerial GPS map** (`c5ac967`) — Replaced placeholder plat-map.jpg with real aerial photo (`yard-aerial.jpg`) of Jeff's property at 32.899480°N, 97.033920°W (S. Aztec Dr). Image used as fixed base, never rotated or stretched.
-
-4. **GPS map calibration system** (`c5ac967`) — Tap "Calibrate Map" → tap 2+ points on aerial → enter GPS coords → Save. Stores calibration in `localStorage.yard_map_calib`. When calibrated, GPS track pins exactly to real positions on aerial. Falls back to auto-fit if not calibrated. Track color changed green → Toro red (#cc0000); live position = blue dot.
-
-5. **YARD hero crop fix** (`c5202ec`) — CSS `aspect-ratio:1320/851` so full landscape photo shows without cropping. "Yard Command Center" text always fully visible.
-
-6. **GPS simulation with telemetry HUD** (`c5202ec`) — "▶ Simulate" button on map card. Runs animated back-and-forth mowing pattern at property coords. Shows: person-pushing-mower icon (canvas drawn), Toro red track with glow, 📍 home pin, telemetry strip (DIST/TIME/MPH/GPS accuracy), progress bar. Learning map: saves up to 5 past sessions in amber so coverage history accumulates.
-
-**Key file changes:**
-- `images/hero-yard.jpg` — replaced with new Toro mower photo
-- `images/yard-aerial.jpg` — new aerial base map for GPS canvas
-- `beehive/custom_components/bhyve/strings.json` — new, proper HA translations
-- `beehive/custom_components/bhyve/coordinator.py` — WARNING level logging
-- `beehive/custom_components/bhyve/config_flow.py` — shows error detail in form
-- `functions/bhyve.js` + `beehive/install-bhyve.sh` — include strings.json
-
-**Commits this session:**
-```
-c5202ec  Fix YARD hero crop + GPS simulation with telemetry HUD + learning map
-c5ac967  YARD hero photo + real aerial GPS map with calibration system
-c7ed75e  B-Hyve: surface login errors in HA form + log at WARNING level
-f904d10  B-Hyve coordinator: try all API URLs x app IDs, log full response detail
-```
-
----
-
-## Session History — Session 2026-06-26 (CLIMATE Section + Irrigation WebSocket Fix)
-
-### Changes Made This Session
-
-1. **LUX thermostat hero photo** — Jeff's photo of LUX thermostat on wall with fireplace room. Saved to `images/hero-climate.jpg` (230KB). Text "CLIMATE CONTROL · Comfort. Efficiency. Control." baked in.
-
-2. **CLIMATE section built** (`7c0d3c5`, `7f74537`) — New 5th section in the app (`#snav-climate`, `#section-climate`). Shows current temp, heat/cool setpoints, mode, fan mode. Controls: set heat/cool SP, change mode (heat/cool/auto/off), toggle fan. Full warm gold palette matching rest of app.
-
-3. **LUX API — long journey to correct backend** — Three wrong APIs before finding the real one:
-   - Try 1: `integration.lux-geo.com` → HTTP 530, DNS failure (domain doesn't exist)
-   - Try 2: `api.geotogether.com` (UK smart meter company — completely unrelated) → HTTP 403 Forbidden
-   - Try 3: Downloaded `luxgeo` PyPI package (v0.1.2), unzipped the wheel, read `auth.py` and `api.py` source
-   - **Real API discovered:** Azure AD B2C OAuth2 PKCE flow + `https://www.myluxstat.io/api/`
-     - Client ID: `b335ca43-3bde-4406-b281-8816afb7cc91`
-     - Auth: 4-step PKCE flow at `connecteddevicesjci.b2clogin.com`
-       1. GET authorize → extract CSRF cookie + StateProperties from HTML
-       2. POST `/SelfAsserted` with `{logonIdentifier, password, request_type:'RESPONSE'}`
-       3. GET `/confirmed` → follow redirects → custom scheme URL contains auth code
-       4. POST token endpoint with code + code_verifier → access_token
-     - Devices: `GET https://www.myluxstat.io/api/location/user` → `userData.location[0].devices[0]`
-     - State: `GET /api/device` with `Deviceid` header → `{systemmode, holdheat, currenttemp}` (all °F)
-     - Control: `PUT /api/device` with `Deviceid` header + JSON patch
-   - After deploy: still got `no_device_found` — `userData.location` is an ARRAY not an object. Fixed with `Array.isArray` check.
-
-4. **Irrigation `ws_timeout` fixed** (`c4d32e6`) — CF Workers outbound WebSocket client is unreliable for B-Hyve's WebSocket API. Solution: moved WebSocket to the browser.
-   - `GET /api/irrigation?tk=1` now returns B-Hyve session token alongside device/zone data
-   - `irrControl()` in index.html rewritten: calls GET for token first, then opens native `new WebSocket('wss://api.orbitbhyve.com/v1/events')` from browser
-   - `irrWsCommand()` new function: authenticates via `app_connection` message body (not headers), 2s fallback if no echo, 10s overall timeout resolves as success if command sent
-
-5. **Error diagnostics improved** — LUX error banner shows full error text from API, not generic "login failed". Helps Jeff see exactly what's wrong without opening browser DevTools.
-
-**Key file changes this session:**
-- `images/hero-climate.jpg` — new LUX thermostat hero photo
-- `functions/api/climate.js` — new Cloudflare Function for LUX Geo API
-- `functions/api/irrigation/index.js` — added `?tk=1` to return session token
-- `index.html` — added CLIMATE section + `irrControl()`/`irrWsCommand()` browser WebSocket rewrite
-
-**Commits this session:**
-```
-94e2b34  CLAUDE.md: mark LUX thermostat WORKING — live confirmed 2026-06-26
-0c08f2f  LUX: fix location array — userData.location is [] not {}
-3ce74fa  LUX: add diagnostic detail to no_device_found error
-9eaabcb  Fix LUX thermostat API: use real Azure B2C + myluxstat.io backend
-f814c01  Update CLAUDE.md: session history, new sections, corrected state
-c4d32e6  Fix irrigation zone control: move WebSocket to browser, add ?tk=1 token endpoint
-7f74537  Fix LUX API: correct Geo endpoint casing, identity field, accessToken response
-46d8a36  LUX API: try 4 login variants to find correct clientId/format
-1e43569  Fix LUX API: switch to correct Geo platform backend (api.geotogether.com)
-7c0d3c5  Show full LUX API error in banner for diagnosis
-1d89611  Fix irrigation ws_timeout: send command after 2s fallback, resolve optimistically
-```
-
-**End-of-session verified state:**
-- LUX CLIMATE tab shows: ONLINE · Cooling · Set 72°F · Room Temp 72° · Device CS1-DD-FB ✅
-- All 5 nav sections load without errors ✅
-
----
-
-## Session History — Session 2026-06-26 cont. (Weather Overhaul + LUX Fix)
-
-### Changes Made This Session
-
-1. **Weather section full overhaul** (`4d8313f`–`d44baf3`) — Real KTNWHITE21 WU station data (was Open-Meteo grid), NWS active alerts card with color-coded severity, alert badge dot on WEATHER nav, home section alert strip, push notification auto-request on first WEATHER visit, 4 new Mowing Conditions cells (Wind Dir, UV Index, Pressure, Rain Rate), native mPING quick-report card (11 type buttons, GPS location, submits to NOAA mPING API via Cloudflare proxy).
-
-2. **Radar dark map fix** (`7da5113`) — iPhone HiDPI 3x screen caused CartoDB @2x tile 404s. Fixed by switching to single `dark_matter` layer without `{r}` retina suffix.
-
-3. **10-day forecast** (`d44baf3`) — Switched from NWS 7-day to Weather.com TWC 10-day API using existing WU key. New `/api/forecast` Cloudflare Function. 10 days with hi/lo/rain%/icon.
-
-4. **LUX setpoint PUT 500 fixed** (`f09c696`) — Root cause: GET response includes read-only fields (`currenttemp`, `name`, etc.). Sending them back in PUT body caused `500 {"message":"Failed to perform operation."}`. Fix: build clean `putBody` with only 4 writable fields (`systemmode`, `holdheat`, `holdcool`, `fanmode`) before calling PUT.
-
-**Key commits this session:**
-```
-f09c696  Fix LUX setpoint PUT 500 — strip read-only fields before PUT
-d44baf3  Switch to 10-day forecast — Weather.com TWC API for White House 37188
-7da5113  Fix radar dark map on iPhone — drop retina suffix, use single dark_matter layer
-704374a  Auto-request alert notifications on first WEATHER tab visit
-b7ff936  Native mPING quick-report card — submit directly to NOAA from the app
-4d8313f  Weather command center: real WU data, NWS alerts, push notifications, mPING
-```
-
-**Verified state — 26/26 Playwright tests PASSING, zero JS errors**
 
 ---
 
