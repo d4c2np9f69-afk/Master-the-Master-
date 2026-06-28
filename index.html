@@ -186,24 +186,21 @@ html,body{
 /* Climate hero — photo replaces gradient when hero-climate.jpg is added */
 .sec-hero-climate{background:linear-gradient(160deg,#0a0610 0%,#1a0a00 50%,#0a0610 100%)}
 .sec-hero-climate img{object-fit:cover;object-position:center center}
-/* ── HERO GRADE CONSISTENCY LOCK ──────────────────────────────────────────
-   One warm golden-hour cinematic grade so Home, Irrigation, Yard & Climate
-   look like one film stock. Weather is the calibration target — left ungraded. */
-.house-hero img,
-.sec-hero-irr img,
-.sec-hero-climate img{
-  filter:brightness(.85) contrast(1.15) saturate(.95) sepia(.12) hue-rotate(-8deg);
+/* ── HERO MASTER GRADE — REUSABLE MODULE ───────────────────────────────────
+   One cinematic golden-hour grade for EVERY hero. applyHeroGrades() (JS) tags
+   each hero container with .hcc-hero-vignette and each hero <img> with
+   .hcc-hero-grade. Any future section (Security, Utilities, Garage, Cameras…)
+   that uses a .sec-hero / .house-hero / .hcc-hero container inherits the exact
+   same look automatically — no per-hero CSS ever again. Weather is the
+   reference; the grade is intentionally mild. */
+.hcc-hero-grade{
+  filter:brightness(.92) contrast(1.14) saturate(.93) sepia(.10) hue-rotate(-3deg);
 }
-/* Matching warm-center + dark-edge vignette (paints over the image, under the
-   text overlay because ::before precedes the overlay/content in paint order). */
-.house-hero::before,
-.sec-hero-irr::before,
-.sec-hero-yard::before,
-.sec-hero-climate::before{
+.hcc-hero-vignette::before{
   content:"";position:absolute;inset:0;pointer-events:none;
   background:
-    radial-gradient(circle at 50% 36%, rgba(255,206,120,.07), transparent 55%),
-    radial-gradient(ellipse at 50% 45%, transparent 48%, rgba(0,0,0,.45) 100%);
+    radial-gradient(circle at 50% 36%, rgba(255,206,120,.06), transparent 55%),
+    radial-gradient(ellipse at 50% 45%, transparent 50%, rgba(0,0,0,.48) 100%);
 }
 .sec-hero-overlay{
   position:absolute;inset:0;
@@ -235,7 +232,7 @@ html,body{
   background:linear-gradient(to top,rgba(0,0,0,.72) 0%,rgba(0,0,0,.3) 45%,transparent 70%);
   justify-content:flex-end;padding:0 16px 16px;
 }
-.sec-hero-yard img{filter:brightness(.85) contrast(1.15) saturate(.95) sepia(.12) hue-rotate(-8deg)}
+/* Yard hero grade now handled by the reusable .hcc-hero-grade module */
 .yard-hero-art{width:100%}
 .yard-hero-title{
   font-family:Georgia,'Times New Roman',serif;
@@ -4022,7 +4019,21 @@ function renderAll(){
   updateCart();
 }
 
+// Reusable hero-grade module — tag every hero so all sections (including any
+// added later) pass through the one cinematic grade + vignette automatically.
+// To cover a NEW hero, just give its container class .sec-hero / .house-hero
+// / .hcc-hero — no extra CSS or JS needed.
+function applyHeroGrades(){
+  var heroes=document.querySelectorAll('.house-hero, .sec-hero, .hcc-hero');
+  heroes.forEach(function(c){
+    c.classList.add('hcc-hero-vignette');
+    var img=c.querySelector('img');
+    if(img) img.classList.add('hcc-hero-grade');
+  });
+}
+
 // INIT
+applyHeroGrades();
 renderAll();
 (function(){
   function set(id,txt){var e=document.getElementById(id); if(e) e.textContent=txt;}
