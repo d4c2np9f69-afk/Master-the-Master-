@@ -129,7 +129,7 @@ html,body{
 /* ── HOUSE HERO (HOME section only) ─────────────────────────────────────── */
 .house-hero{
   position:relative;
-  height:auto;aspect-ratio:756/329;max-height:380px;
+  height:auto;aspect-ratio:1215/948;max-height:460px;
   overflow:hidden;
   flex-shrink:0;
 }
@@ -195,12 +195,13 @@ html,body{
 .sec-hero img{width:100%;height:100%;object-fit:cover;object-position:center top}
 /* Irrigation: pin to top */
 .sec-hero-irr img{object-position:center top}
-/* Yard hero: landscape photo — use natural aspect ratio so baked-in text is never cropped */
-.sec-hero-yard{height:auto;aspect-ratio:756/329;max-height:380px}
 .sec-hero-yard img{object-fit:cover;object-position:center center}
-/* Climate hero — photo replaces gradient when hero-climate.jpg is added */
-.sec-hero-climate{background:linear-gradient(160deg,#0a0610 0%,#1a0a00 50%,#0a0610 100%)}
 .sec-hero-climate img{object-fit:cover;object-position:center center}
+/* Per-hero aspect = each image's true ratio so the baked-in gold titles never crop */
+.sec-hero-weather{aspect-ratio:1320/864;height:auto;max-height:460px}
+.sec-hero-irr{aspect-ratio:1320/885;height:auto;max-height:460px}
+.sec-hero-yard{aspect-ratio:1320/963;height:auto;max-height:460px}
+.sec-hero-climate{aspect-ratio:1320/931;height:auto;max-height:460px;background:linear-gradient(160deg,#0a0610 0%,#1a0a00 50%,#0a0610 100%)}
 /* ── HERO MASTER GRADE — REUSABLE MODULE ───────────────────────────────────
    One cinematic golden-hour grade for EVERY hero. applyHeroGrades() (JS) tags
    each hero container with .hcc-hero-vignette and each hero <img> with
@@ -211,7 +212,10 @@ html,body{
 /* BAKED-IN HERO IMAGES — grade is baked into the .jpgs, but they came in dark,
    so lift brightness (a correction, NOT a re-grade) and keep the vignette very light. */
 .hcc-hero-grade{
-  filter:brightness(1.28) contrast(.98) saturate(1.05);
+  /* Images are already graded by the creator — keep this near-neutral, just a
+     hair of lift so they don't read dim on a phone. Per-hero tweaks (if any)
+     go on the section-specific selectors below. */
+  filter:brightness(1.06) saturate(1.02);
 }
 .hcc-hero-vignette::before{
   content:"";position:absolute;inset:0;pointer-events:none;
