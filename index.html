@@ -186,6 +186,25 @@ html,body{
 /* Climate hero — photo replaces gradient when hero-climate.jpg is added */
 .sec-hero-climate{background:linear-gradient(160deg,#0a0610 0%,#1a0a00 50%,#0a0610 100%)}
 .sec-hero-climate img{object-fit:cover;object-position:center center}
+/* ── HERO GRADE CONSISTENCY LOCK ──────────────────────────────────────────
+   One warm golden-hour cinematic grade so Home, Irrigation, Yard & Climate
+   look like one film stock. Weather is the calibration target — left ungraded. */
+.house-hero img,
+.sec-hero-irr img,
+.sec-hero-climate img{
+  filter:brightness(.85) contrast(1.15) saturate(.95) sepia(.12) hue-rotate(-8deg);
+}
+/* Matching warm-center + dark-edge vignette (paints over the image, under the
+   text overlay because ::before precedes the overlay/content in paint order). */
+.house-hero::before,
+.sec-hero-irr::before,
+.sec-hero-yard::before,
+.sec-hero-climate::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(circle at 50% 36%, rgba(255,206,120,.07), transparent 55%),
+    radial-gradient(ellipse at 50% 45%, transparent 48%, rgba(0,0,0,.45) 100%);
+}
 .sec-hero-overlay{
   position:absolute;inset:0;
   display:flex;flex-direction:column;justify-content:flex-end;
@@ -216,7 +235,7 @@ html,body{
   background:linear-gradient(to top,rgba(0,0,0,.72) 0%,rgba(0,0,0,.3) 45%,transparent 70%);
   justify-content:flex-end;padding:0 16px 16px;
 }
-.sec-hero-yard img{filter:saturate(1.1) brightness(1.02)}
+.sec-hero-yard img{filter:brightness(.85) contrast(1.15) saturate(.95) sepia(.12) hue-rotate(-8deg)}
 .yard-hero-art{width:100%}
 .yard-hero-title{
   font-family:Georgia,'Times New Roman',serif;
