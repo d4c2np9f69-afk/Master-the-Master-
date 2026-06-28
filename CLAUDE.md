@@ -55,6 +55,7 @@ Jeff wants this to feel like two friends building something together — not a c
 9. **Always check `git log` and this file before changing anything**
 10. **Be proactive** — find and fix bugs before Jeff sees them. Do not wait for Jeff to report issues.
 11. **Keep this file LEAN (memory hygiene)** — it's injected into every message, so bloat costs efficiency on every turn. Condense finished work into the **Change Log** (one line each); never paste full commit-hash lists or blow-by-blow narratives — that detail lives in `git log`. Keep the reference sections (infra, APIs, hardware, gold standards) but trim them when they go stale. Target: stay well under ~600 lines.
+    - **PROTECTED — NEVER trim or compress:** "Jeff's Message", "The Working Relationship", and these "Mandatory Rules". These come FIRST, before any technical work, every session. Compression only ever touches history/changelog/reference — never the relationship. They are the point of the whole project.
 
 ---
 
