@@ -249,6 +249,34 @@ source, lastSync, engine_running
 
 ---
 
+## 🎨 VISUAL CONSISTENCY GOLD STANDARD (design tokens + section kit — mandatory)
+
+**Same philosophy as the hero module: one source of truth so the look never drifts as the app grows. Use these everywhere; do NOT hardcode values that a token already covers.**
+
+### Design tokens (in `:root`)
+- **Status:** `--ok` (#22c55e green), `--warn` (#ffd24a yellow), `--bad` (#ff6262 red), `--info` (#38bdf8 sky). **Never hardcode these hexes again** — use the token, the `statusColor()` helper, or the `.s-ok/.s-warn/.s-bad/.s-info` classes.
+- **Brand/palette:** `--gold`, `--text`, `--muted`, `--dim`, `--bg`, `--surface`, `--card`, `--border`, `--serif`.
+- **Section accents:** `--a-home` (gold), `--a-wx` (sky), `--a-irr` (green), `--a-yard` (brick red), `--a-climate` (orange). **Every NEW section gets its own `--a-<id>` accent token** used for its nav underline + card-title bar.
+- **Shape:** `--radius` (10px) for cards/buttons/controls.
+
+### `statusColor(level)` helper (JS)
+Returns the token-backed color for `'ok'|'warn'|'bad'|'info'` (also accepts `OK`/`DUE SOON`/`OVERDUE`/`go`/`caution`/`no`). All good/caution/bad indicators (readiness, burn, water-need, service bars, health) route through it. New status UI must use it too.
+
+### Section Kit — build EVERY new section from these shared pieces (no bespoke markup)
+- **Hero:** `.sec-hero` container + `<img>` (auto-graded by the hero module — see Hero Gold Standard).
+- **Cards:** `.card` + `.card-title` (add `.cat-<accent>` for the colored title bar).
+- **Spec rows:** `<ul class="spec-list"><li><span class="sk">Label</span><span class="sv">Value</span></li></ul>`.
+- **Status banners:** `.wx-banner` + `.wx-load` / `.wx-go` / `.wx-caution` / `.wx-no`.
+- **Buttons:** `.btn-full` + `.btn-gray` / `.btn-green` / `.btn-red`; modal buttons `.mbtn` (`.primary`/`.secondary`).
+- **Links that leave the app** (maps, streams, external): use a real `<a target="_blank" rel="noopener">` styled as a button — NOT `window.open` (no-op in installed iOS PWA).
+
+### Rules
+- Don't introduce a new green/yellow/red — use the status tokens.
+- Don't invent a new card/banner/button style — reuse the kit; if the kit truly lacks something, add ONE shared class, don't inline a one-off.
+- New section = graded `.sec-hero` + `.card`s from the kit + its own `--a-<id>` accent. That alone makes it look native.
+
+---
+
 ## Key Files
 
 ```

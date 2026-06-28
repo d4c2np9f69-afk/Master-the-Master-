@@ -50,11 +50,20 @@ button{font-family:inherit;cursor:pointer}
   --red2:#8b1a1a;
   --gold:#d4af37;
   --amber:#c87941;
-  /* section accents — HOME=warm gold (premium), WEATHER=sky, IRR=deep green, YARD=brick red */
+  /* section accents — HOME=warm gold (premium), WEATHER=sky, IRR=deep green, YARD=brick red, CLIMATE=orange */
   --a-home:#d4af37;
   --a-wx:#38bdf8;
   --a-irr:#22c55e;
   --a-yard:#c0392b;
+  --a-climate:#f97316;
+  /* ── SEMANTIC STATUS TOKENS — single source of truth for good/caution/bad/info.
+     Use these (or statusColor()/.s-* classes) everywhere; never hardcode the hexes. */
+  --ok:#22c55e;
+  --warn:#ffd24a;
+  --bad:#ff6262;
+  --info:#38bdf8;
+  /* shared corner radius so every card/button/control matches */
+  --radius:10px;
   /* legacy aliases */
   --ink:#ede8df;
   --font:'Archivo','Helvetica Neue',Arial,sans-serif;
@@ -70,6 +79,12 @@ button{font-family:inherit;cursor:pointer}
   --glowRed:0 0 14px rgba(192,57,43,.5);
   --glowGold:0 0 14px rgba(212,175,55,.4);
 }
+
+/* Status utility classes — pair with statusColor() / the --ok/--warn/--bad tokens */
+.s-ok{color:var(--ok)}
+.s-warn{color:var(--warn)}
+.s-bad{color:var(--bad)}
+.s-info{color:var(--info)}
 
 /* BASE */
 html,body{
@@ -2078,7 +2093,18 @@ function svcStatus(r){
   return {last:last,next:next,rem:rem,pct:pct,st:st};
 }
 
-function hColor(v){ return v>=90?'#22c55e':v>=75?'#ffd24a':'#ff6262'; }
+// Semantic status → token-backed color. ONE source for every good/caution/bad
+// indicator in the app. Pass 'ok'|'warn'|'bad'|'info' (or OK/DUE SOON/OVERDUE).
+function statusColor(level){
+  switch(String(level)){
+    case 'ok': case 'OK': case 'good': case 'go': return 'var(--ok)';
+    case 'warn': case 'caution': case 'DUE SOON': return 'var(--warn)';
+    case 'bad': case 'no': case 'OVERDUE': return 'var(--bad)';
+    case 'info': return 'var(--info)';
+    default: return 'var(--text)';
+  }
+}
+function hColor(v){ return v>=90?'var(--ok)':v>=75?'var(--warn)':'var(--bad)'; }
 
 function calcHealth(){
   var e=100,d=100,b=100,dr=100;
@@ -2181,7 +2207,7 @@ var UPGRADES = [
 var partFilter = 'ALL';
 var logFilter  = 'ALL';
 
-function hc(v){ return v>=90?'#22c55e':v>=75?'#ffd24a':'#ff6262'; }
+function hc(v){ return v>=90?'var(--ok)':v>=75?'var(--warn)':'var(--bad)'; }
 
 function updateDashboard(){
   var h = calcHealth();
@@ -2200,7 +2226,7 @@ function updateDashboard(){
   var ns = tasks[0];
   el=document.getElementById('nextSvcVal');  if(el) el.textContent=ns.rem.toFixed(1)+' hrs';
   el=document.getElementById('nextSvcName'); if(el) el.textContent=ns.name;
-  el=document.getElementById('hrsToNext');   if(el){ el.textContent=ns.rem.toFixed(1); el.style.color=ns.st==='OK'?'#ffd24a':'#ff6262'; }
+  el=document.getElementById('hrsToNext');   if(el){ el.textContent=ns.rem.toFixed(1); el.style.color=ns.st==='OK'?'var(--warn)':'var(--bad)'; }
 
   // Service Countdown panel - shows elapsed progress so every hour visibly moves a bar
   var alertsNow = tasks.filter(function(t){ return t.st!=='OK' && t.interval>1; });
@@ -2212,7 +2238,7 @@ function updateDashboard(){
     cl.innerHTML=top4.map(function(t){
       var elapsed=t.interval-t.rem;                       // hours into this cycle
       var prog=Math.min(100,Math.max(0,Math.round((elapsed/t.interval)*100)));
-      var barColor=t.st==='OVERDUE'?'#ff6262':t.st==='DUE SOON'?'#ffd24a':'#22c55e';
+      var barColor=statusColor(t.st);
       var pillCls=t.st==='OK'?'pill-ok':t.st==='DUE SOON'?'pill-warn':'pill-bad';
       var remTxt=t.st==='OVERDUE'?'OVERDUE':t.rem.toFixed(1)+' hrs left';
       return '<div style="margin-bottom:11px">'
@@ -2275,7 +2301,7 @@ function renderServices(){
   ['OVERDUE','DUE SOON','OK'].forEach(function(st){
     var list=tasks.filter(function(t){ return t.st===st; });
     if(!list.length) return;
-    var c=st==='OK'?'#22c55e':st==='DUE SOON'?'#ffd24a':'#ff6262';
+    var c=statusColor(st);
     var lbl=st==='OK'?'&#10003; UP TO DATE':st==='DUE SOON'?'&#9203; DUE SOON':'&#9888; OVERDUE';
     out+='<div style="font-size:11px;letter-spacing:2px;color:'+c+';font-weight:800;padding:8px 0 5px;border-bottom:1px solid var(--border);margin-bottom:8px">'+lbl+'</div>';
     list.forEach(function(r){
@@ -2679,7 +2705,7 @@ function renderBurn(){
   if(banner){ banner.removeAttribute('class'); banner.style.cssText='border-radius:12px;padding:14px;text-align:center;font-size:16px;margin-bottom:10px;background:'+flag[2]+';color:'+flag[3]+';border:1px solid '+flag[4]+';font-weight:800'; banner.innerHTML=flag[0]+' &mdash; '+flag[1]; }
   if(body){
     body.innerHTML=rows.map(function(r){
-      var col=r[2]==='ok'?'#22c55e':r[2]==='warn'?'#ffd24a':'#ff6262';
+      var col=statusColor(r[2]);
       return '<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)"><span style="font-size:14px;flex-shrink:0">'+r[0]+'</span><span style="font-size:12px;color:'+col+';font-weight:600;line-height:1.4">'+r[1]+'</span></div>';
     }).join('')
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:9px;font-weight:700"><span style="color:#5fe08a">&#128994; GREEN safe</span><span style="color:#ffd24a">&#128993; YELLOW caution</span><span style="color:#ff8585">&#128681; RED not advised</span><span style="color:#bbb">&#127988; BLACK no burn</span></div>'
@@ -3661,7 +3687,7 @@ function renderReadiness(){
   else { banner.className='wx-banner wx-go'; banner.innerHTML='&#10003; GOOD TO MOW'; if(card) card.style.borderColor='#22c55e'; }
 
   reasons.innerHTML=rs.map(function(r){
-    var col=r[2]==='ok'?'#22c55e':r[2]==='warn'?'#ffd24a':'#ff6262';
+    var col=statusColor(r[2]);
     return '<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)"><span style="font-size:15px;flex-shrink:0">'+r[0]+'</span><span style="font-size:12px;color:'+col+';font-weight:600;line-height:1.4">'+r[1]+'</span></div>';
   }).join('');
 }
