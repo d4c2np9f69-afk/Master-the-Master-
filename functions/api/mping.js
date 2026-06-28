@@ -47,14 +47,28 @@ export async function onRequestPost(context) {
       obtime: obstime
     };
 
+    // mPING REQUIRES an API token to submit reports (the reporttypes GET is open,
+    // but POST /reports/ rejects unauthenticated requests). Token is provisioned
+    // by NSSL on request and stored as the Cloudflare env var MPING_TOKEN.
+    const token = context.env && context.env.MPING_TOKEN;
+    if (!token) {
+      return Response.json({
+        error: 'mPING token not configured',
+        detail: 'mPING requires an API key to submit. Request one from NSSL (mping@nssl.noaa.gov) for spotter jlo301, then set MPING_TOKEN in Cloudflare Pages env.'
+      }, { status: 412 });
+    }
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'User-Agent': UA,
+      'Accept': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
+      'Authorization': 'Token ' + token
+    };
+
     const r = await fetch(MPING_BASE + '/reports/', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': UA,
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-      },
+      headers,
       body: JSON.stringify(payload)
     });
 

@@ -21,10 +21,12 @@ export async function onRequestGet() {
 
     const d = await r.json();
     const alerts = (d.features || []).map(f => ({
+      id: f.id || f.properties?.id || '',
       event: f.properties?.event || '',
       headline: f.properties?.headline || f.properties?.description?.split('\n')[0] || '',
       severity: f.properties?.severity || 'Unknown',
-      urgency: f.properties?.urgency || 'Unknown'
+      urgency: f.properties?.urgency || 'Unknown',
+      expires: f.properties?.expires || ''
     }));
 
     return Response.json({ alerts }, {

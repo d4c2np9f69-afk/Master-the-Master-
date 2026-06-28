@@ -1118,6 +1118,18 @@ html,body{
       <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadForecast()">&#128260; Refresh Forecast</button>
     </div>
 
+    <!-- LAWN WATER NEED — station rain + drought → irrigation guidance -->
+    <div class="card cat-weather" id="wxWaterCard">
+      <div class="card-title">&#128167; Lawn Water Need</div>
+      <div id="wxWaterVerdict" class="wx-banner wx-load">&#8987; Loading rain &amp; drought&hellip;</div>
+      <ul class="spec-list" style="margin-top:6px">
+        <li><span class="sk">Rain Today (station)</span><span class="sv" id="wxRainToday">&mdash;</span></li>
+        <li><span class="sk">Current Rain Rate</span><span class="sv" id="wxRain7">&mdash;</span></li>
+        <li><span class="sk">Drought Status (37188)</span><span class="sv" id="wxDroughtCat">&mdash;</span></li>
+      </ul>
+      <div class="wx-note" id="wxDroughtNote" style="margin-top:6px">U.S. Drought Monitor &bull; Robertson County &bull; KTNWHITE21 rainfall</div>
+    </div>
+
     <!-- SPOTTER NETWORK -->
     <div class="card cat-weather" id="wxSpotterCard">
       <div class="card-title">&#127755; Storm Spotter &bull; Spotter Network</div>
@@ -1137,14 +1149,14 @@ html,body{
         <li><span class="sk">NWS Office</span><span class="sv">OHX &bull; Nashville</span></li>
       </ul>
       <div style="display:flex;gap:8px;margin-top:12px">
-        <button onclick="window.open('https://www.spotternetwork.org','_blank','noopener')" style="flex:1;padding:10px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:8px;color:#22c55e;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#128506; Spotter Map</button>
-        <button onclick="window.open('https://www.wunderground.com/dashboard/pws/KTNWHITE21','_blank','noopener')" style="flex:1;padding:10px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.3);border-radius:8px;color:#38bdf8;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#128202; PWS Data</button>
+        <a href="https://www.spotternetwork.org/pages/maps" target="_blank" rel="noopener" style="flex:1;text-align:center;text-decoration:none;padding:10px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:8px;color:#22c55e;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#128506; Spotter Map</a>
+        <a href="https://www.wunderground.com/dashboard/pws/KTNWHITE21" target="_blank" rel="noopener" style="flex:1;text-align:center;text-decoration:none;padding:10px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.3);border-radius:8px;color:#38bdf8;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#128202; PWS Data</a>
       </div>
       <div style="display:flex;gap:8px;margin-top:8px">
         <button onclick="mpingScrollToReport()" style="flex:1;padding:10px;background:rgba(249,115,22,.2);border:1px solid rgba(249,115,22,.5);border-radius:8px;color:#fb923c;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#127783; Quick mPING Report &#8595;</button>
-        <button onclick="window.open('https://www.weather.gov/nwr/','_blank','noopener')" style="flex:1;padding:10px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.3);border-radius:8px;color:#a78bfa;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#128251; NOAA Radio</button>
+        <a href="https://tunein.com/radio/NOAA-Weather-Radio-16255-s95242/" target="_blank" rel="noopener" style="flex:1;text-align:center;text-decoration:none;padding:10px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.3);border-radius:8px;color:#a78bfa;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#128251; NOAA Radio &#9654;</a>
       </div>
-      <div class="wx-note" style="margin-top:8px">Your location shows on the Spotter Map when logged in to RadarScope &bull; Submit precip reports in-app via Quick mPING below</div>
+      <div class="wx-note" style="margin-top:8px">NOAA Radio opens the live Nashville KIG79 broadcast (162.550 MHz) &bull; Spotter Map shows live spotter positions &bull; Submit precip reports in-app via Quick mPING below</div>
     </div>
 
     <!-- mPING QUICK REPORT — native in-app submission to NOAA mPING -->
@@ -2526,9 +2538,82 @@ function loadStation(){
       if(note){ note.textContent=(isReal?'📡 ':'🌐 ')+(s.station||'')+(s.neighborhood?' · '+s.neighborhood:'')+(s.obsTimeLocal?' · '+s.obsTimeLocal.split(' ')[1]:''); }
       // Update weather hero with real temp
       var ht=document.getElementById('wxHeroTemp'); if(ht&&s.temp!=null) ht.innerHTML=Math.round(s.temp)+'&#176;';
+      // Single source of truth: recompute the mow verdict from REAL station rain +
+      // forecast rain risk, so the banner, the cells, and readiness all agree.
+      applyMowVerdict();
       if(typeof renderBurn==='function') renderBurn();
     })
     .catch(function(){ /* forecast fallback already shown */ });
+}
+
+// ONE verdict used everywhere. Prefers real station rain (precipTotal today) for
+// soil/wetness and the Open-Meteo forecast for rain probability. Updates the
+// weather banner, the soil cell, WX state, and the YARD readiness — all in sync.
+function applyMowVerdict(){
+  var rainToday = (STATION && STATION.precipTotal!=null) ? Number(STATION.precipTotal) : 0;
+  var risk = (WX && WX.loaded && WX.risk!=null) ? WX.risk : 0;
+  var temp = (STATION && STATION.temp!=null) ? Math.round(STATION.temp) : (WX&&WX.temp!=null?WX.temp:null);
+  var mow='YES', soil='FIRM';
+  if(risk>55 || rainToday>0.35){ mow='NO'; soil='WET'; }
+  else if(risk>30 || rainToday>0.12){ mow='CAUTION'; soil='MOIST'; }
+  WX={status:mow, temp:temp, risk:risk, soil:soil, dewOnGrass:(WX&&WX.dewOnGrass)||'DRY', rainToday:rainToday, loaded:true};
+  // Soil cell matches the verdict
+  var sc=document.getElementById('wxSoil');
+  if(sc){ sc.innerHTML=soil; sc.style.color=soil==='FIRM'?'#22c55e':soil==='MOIST'?'#ffd24a':'#ff6262'; }
+  // Weather banner matches the verdict
+  var banner=document.getElementById('wxBanner');
+  if(banner){
+    if(mow==='YES'){ banner.className='wx-banner wx-go'; banner.innerHTML='&#10003; GOOD TO MOW'; }
+    else if(mow==='CAUTION'){ banner.className='wx-banner wx-caution'; banner.innerHTML='&#9888; MOW WITH CAUTION'; }
+    else { banner.className='wx-banner wx-no'; banner.innerHTML='&#128683; DO NOT MOW'; }
+  }
+  if(typeof renderReadiness==='function') renderReadiness();
+  renderWaterNeed();
+}
+
+// Drought + rainfall → lawn watering guidance (#5)
+var DROUGHT={loaded:false};
+function loadDrought(){
+  fetch('/api/drought',{cache:'no-store'})
+    .then(function(r){ return r.ok?r.json():Promise.reject(); })
+    .then(function(d){
+      if(!d||d.error) return;
+      DROUGHT={loaded:true,category:d.category,label:d.label,advice:d.advice,percent:d.percent};
+      renderWaterNeed();
+    })
+    .catch(function(){ /* leave drought blank; rain-only guidance still works */ });
+}
+
+function renderWaterNeed(){
+  var rainToday=(STATION&&STATION.precipTotal!=null)?Number(STATION.precipTotal):null;
+  var rate=(STATION&&STATION.precipRate!=null)?Number(STATION.precipRate):null;
+  var rt=document.getElementById('wxRainToday'); if(rt) rt.innerHTML=(rainToday!=null?rainToday.toFixed(2)+'"':'&mdash;');
+  var rr=document.getElementById('wxRain7'); if(rr) rr.innerHTML=(rate!=null?(rate===0?'None':rate.toFixed(2)+' in/hr'):'&mdash;');
+  var dc=document.getElementById('wxDroughtCat');
+  if(dc){
+    if(DROUGHT.loaded){
+      var dcol=DROUGHT.category==='None'?'#22c55e':DROUGHT.category==='D0'?'#ffd24a':DROUGHT.category==='D1'?'#ff8c42':'#ff6262';
+      dc.innerHTML=DROUGHT.label; dc.style.color=dcol;
+    } else { dc.innerHTML='&mdash;'; }
+  }
+  // Verdict: rain in the last day suppresses need; drought raises it
+  var v=document.getElementById('wxWaterVerdict'); if(!v) return;
+  var inDrought=DROUGHT.loaded && DROUGHT.category!=='None';
+  var wetEnough=(rainToday!=null && rainToday>=0.25);
+  var someRain=(rainToday!=null && rainToday>=0.05);
+  if(wetEnough){
+    v.className='wx-banner wx-go';
+    v.innerHTML='&#10003; NO WATERING NEEDED &mdash; '+rainToday.toFixed(2)+'" of rain today';
+  } else if(inDrought && !someRain){
+    v.className='wx-banner wx-no';
+    v.innerHTML='&#128167; WATER THE LAWN &mdash; '+DROUGHT.label+', little/no rain';
+  } else if(inDrought || (!someRain)){
+    v.className='wx-banner wx-caution';
+    v.innerHTML='&#9888; CONSIDER WATERING &mdash; '+(inDrought?DROUGHT.label:'dry, no rain today');
+  } else {
+    v.className='wx-banner wx-go';
+    v.innerHTML='&#10003; LAWN OK &mdash; recent rain, no drought';
+  }
 }
 
 // Live state for Ready-to-Mow safety checks (NWS alerts + irrigation)
@@ -2674,26 +2759,36 @@ function updateAlertBadge(alerts){
   else dot.classList.remove('show');
 }
 
+// Persisted notification dedup — survives app reloads so the SAME alert never
+// pops up again and again. Keyed by NWS alert id, remembered for 18h.
+function _notifiedMap(){ try { return JSON.parse(localStorage.getItem('notified_alerts')||'{}'); } catch(e){ return {}; } }
+function _saveNotified(m){ try { localStorage.setItem('notified_alerts', JSON.stringify(m)); } catch(e){} }
+
 function checkAndNotify(newAlerts){
   if(!('Notification' in window)||Notification.permission!=='granted') return;
-  var keys=(newAlerts||[]).map(function(a){ return (a.event||'')+'::'+((a.headline||'').substring(0,60)); });
-  var isNew=keys.filter(function(k){ return _lastAlertKeys.indexOf(k)<0; });
-  isNew.forEach(function(k){
-    var idx=keys.indexOf(k);
-    var a=newAlerts[idx]; if(!a) return;
+  var now=Date.now(), TTL=18*3600*1000;
+  var map=_notifiedMap();
+  // prune expired entries
+  Object.keys(map).forEach(function(k){ if(now-map[k]>TTL) delete map[k]; });
+  (newAlerts||[]).forEach(function(a){
+    if(!a) return;
+    // Stable key: prefer the NWS alert id; fall back to event+headline
+    var key=a.id||((a.event||'')+'::'+((a.headline||'').substring(0,60)));
+    if(map[key]) return; // already notified for this exact alert — skip
     var sev=(a.severity||'').toLowerCase();
     if(sev==='extreme'||sev==='severe'||/warning|watch/i.test(a.event||'')){
       try {
         new Notification('⚠️ NWS Alert — White House, TN',{
           body: (a.event||'')+(a.headline?'\n'+(a.headline||'').substring(0,120):''),
           icon: './icons/icon-192.png',
-          tag: k,
+          tag: key,
           requireInteraction: sev==='extreme'
         });
       } catch(e2){}
+      map[key]=now; // remember we've notified for this alert
     }
   });
-  _lastAlertKeys=keys;
+  _saveNotified(map);
 }
 
 function enableAlertNotifs(){
@@ -2824,16 +2919,18 @@ function initRadarMap(){
     var el=document.getElementById('wxRadarMap');
     if(!el) return;
     if(_rMap){ _rMap.invalidateSize(); if(_rFrames.length===0) loadRadarFrames(); return; }
-    _rMap=window.L.map('wxRadarMap',{center:[36.477,-86.66],zoom:7,zoomControl:true,attributionControl:false});
-    // OpenStreetMap — universally reliable free tiles
-    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,subdomains:'abc'}).addTo(_rMap);
-    // Invert OSM to a dark basemap — only affects tilePane, not the radar overlay
-    _rMap.getPane('tilePane').style.filter='invert(1) hue-rotate(200deg) saturate(0.45) brightness(0.85)';
-    // Dedicated pane for NEXRAD so radar colours are never filtered
+    _rMap=window.L.map('wxRadarMap',{center:[36.477,-86.66],zoom:8,zoomControl:true,attributionControl:false});
+    // OpenStreetMap — universally reliable free tiles. NO CSS filter (filter blanks
+    // tiles on iOS Safari — that was the radar "grey box" bug).
+    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,subdomains:'abc',crossOrigin:true}).addTo(_rMap);
+    // Dedicated pane for NEXRAD overlay so it always sits above the basemap
     _rMap.createPane('radarPane');
     _rMap.getPane('radarPane').style.zIndex=450;
     window.L.circleMarker([36.477,-86.66],{radius:7,color:'#d4af37',weight:2,fillColor:'#d4af37',fillOpacity:1})
       .bindPopup('<b>KTNWHITE21</b><br>White House, TN<br>jalo301').addTo(_rMap);
+    // Multiple invalidateSize passes — the section animates in, so the container
+    // isn't fully sized at t=0. Without this Leaflet loads 0 tiles → grey box.
+    [120,400,800].forEach(function(ms){ setTimeout(function(){ if(_rMap) _rMap.invalidateSize(); }, ms); });
     loadRadarFrames();
   });
 }
@@ -4563,6 +4660,7 @@ function hccSection(id, btn) {
     if (!window._radarInited) { window._radarInited = true; setTimeout(initRadarMap, 150); }
     else if (_rMap) { setTimeout(function(){ _rMap.invalidateSize(); }, 150); }
     if (!window._forecastLoaded) { window._forecastLoaded = true; loadForecast(); }
+    if (!window._droughtLoaded) { window._droughtLoaded = true; loadDrought(); }
     // Auto-request notification permission on first WEATHER tab visit (this tap IS a user gesture)
     if (!window._notifAsked && 'Notification' in window && Notification.permission === 'default') {
       window._notifAsked = true;
