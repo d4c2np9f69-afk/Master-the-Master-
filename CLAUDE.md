@@ -225,6 +225,30 @@ source, lastSync, engine_running
 
 ---
 
+## 🎬 HERO IMAGE GOLD STANDARD (mandatory for every section — current & future)
+
+**This is the standing rule. Every hero in the app — and every NEW section we ever add (Security, Utilities, Garage, Cameras, Energy, etc.) — MUST pass through the one reusable hero-grade module. Never grade a hero individually again.**
+
+**How it works (already built):**
+- **`.hcc-hero-grade`** (CSS) — the single cinematic color grade applied to every hero `<img>`:
+  `filter: brightness(.92) contrast(1.14) saturate(.93) sepia(.10) hue-rotate(-3deg);`
+- **`.hcc-hero-vignette`** (CSS) — warm-center + dark-edge vignette via `::before` (paints over the image, under text overlays):
+  `radial-gradient(circle at 50% 36%, rgba(255,206,120,.06), transparent 55%), radial-gradient(ellipse at 50% 45%, transparent 50%, rgba(0,0,0,.48) 100%)`
+- **`applyHeroGrades()`** (JS, called in INIT) — auto-tags every `.house-hero / .sec-hero / .hcc-hero` container with `.hcc-hero-vignette` and its `<img>` with `.hcc-hero-grade`.
+
+**To add a hero for a NEW section (the ONLY thing required):**
+1. Put the hero photo in an `<img>` inside a container with class **`.sec-hero`** (or `.house-hero` / `.hcc-hero`).
+2. Give the `<img>` a descriptive `alt`.
+3. That's it — `applyHeroGrades()` grades + vignettes it automatically on load. **Do NOT add per-hero `filter` CSS.**
+
+**Rules:**
+- Weather hero was the original calibration reference; the grade is intentionally mild and now applies uniformly to ALL heroes so the set looks like one film stock / same evening / same camera.
+- Do NOT put a `filter:` on any individual hero img — it will fight the module. If one hero ever needs a nudge, adjust the shared `.hcc-hero-grade` values (affects all) — keep them unified.
+- Never swap/regenerate hero photos to "fix" tone — the grade handles tone. Only replace a photo if the composition itself is being changed.
+- Keep text overlays/typography as-is; the vignette sits under them by design.
+
+---
+
 ## Key Files
 
 ```
