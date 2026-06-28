@@ -738,6 +738,20 @@ html,body{
 .home-alert-strip{display:none;border-radius:10px;padding:10px 13px;margin-bottom:10px;background:rgba(220,38,38,.16);border:1px solid rgba(220,38,38,.45);cursor:pointer;-webkit-tap-highlight-color:transparent}
 .home-alert-strip.show{display:flex;align-items:center;gap:10px}
 .home-alert-strip-text{flex:1;font-size:11px;font-weight:700;color:#fca5a5;font-family:var(--serif);line-height:1.35}
+/* ── Cast-to-TV helper ── */
+.cast-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;width:44px;height:44px;border-radius:12px;flex-shrink:0;cursor:pointer;margin-right:8px;background:linear-gradient(135deg,#2a2a2e,#161618);border:1px solid rgba(212,175,55,.35);color:rgba(240,220,175,.92);font-size:16px;transition:all .2s}
+.cast-btn span{font-size:7px;font-weight:800;letter-spacing:.5px;line-height:1}
+.cast-btn:active{transform:scale(.94)}
+.cast-ov{display:none;position:fixed;inset:0;z-index:700;background:rgba(8,6,4,.82);align-items:center;justify-content:center;padding:24px}
+.cast-ov.show{display:flex}
+.cast-card{background:linear-gradient(160deg,#16120a,#0b0906);border:1px solid rgba(212,175,55,.35);border-radius:18px;padding:22px 20px;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.cast-card h3{margin:0 0 4px;font-family:var(--serif);font-size:19px;color:var(--gold);letter-spacing:.3px}
+.cast-card .cs{font-size:11px;color:var(--muted);margin-bottom:14px}
+.cast-step{display:flex;gap:11px;align-items:flex-start;padding:9px 0;border-bottom:1px solid rgba(212,175,55,.12)}
+.cast-step .n{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:rgba(212,175,55,.18);border:1px solid rgba(212,175,55,.4);color:var(--gold);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.cast-step .t{font-size:12.5px;color:var(--text);line-height:1.4}
+.cast-note{font-size:10.5px;color:var(--muted);margin-top:12px;line-height:1.5}
+.cast-close{width:100%;margin-top:16px;padding:12px;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.4);border-radius:10px;color:var(--gold);font-size:13px;font-weight:800;font-family:inherit;cursor:pointer}
 </style>
 </head>
 <body>
@@ -749,7 +763,22 @@ html,body{
     <div class="app-hdr-title">HOME COMMAND CENTER</div>
     <div class="app-hdr-sub">Manage &bull; Maintain &bull; Monitor</div>
   </div>
+  <button class="cast-btn" id="castBtn" onclick="castOpen()" title="Cast to TV">&#128250;<span>CAST</span></button>
   <button class="alexa-btn" id="alexaBtn" onclick="openAlexaApp()" title="Open Alexa">&#127908;<span>ALEXA</span></button>
+</div>
+
+<!-- Cast-to-TV helper sheet -->
+<div class="cast-ov" id="castOv" onclick="if(event.target===this)castClose()">
+  <div class="cast-card">
+    <h3>&#128250; Show on the TV</h3>
+    <div class="cs">Mirror your phone so everyone can watch — the app works exactly the same.</div>
+    <div class="cast-step"><div class="n">1</div><div class="t">Make sure your phone is on the <b>same Wi-Fi</b> as the TV.</div></div>
+    <div class="cast-step"><div class="n">2</div><div class="t"><b>Swipe down</b> from the top-right corner to open Control Center.</div></div>
+    <div class="cast-step"><div class="n">3</div><div class="t">Tap <b>Screen Mirroring</b> &rarr; pick the TV (Apple TV or an AirPlay TV).</div></div>
+    <div class="cast-step"><div class="n">4</div><div class="t">Come back here &mdash; the app is now on the big screen. Drive it from your phone.</div></div>
+    <div class="cast-note">&#128161; No AirPlay TV? Use a <b>Lightning-to-HDMI</b> adapter into any TV's HDMI port. &middot; Tip: turn on <b>Do Not Disturb</b> so texts don't pop up on the TV.</div>
+    <button class="cast-close" onclick="castClose()">GOT IT</button>
+  </div>
 </div>
 
 <!-- ══ SECTION NAV ═══════════════════════════════════════════════════════════ -->
@@ -4850,6 +4879,11 @@ function openAlexaApp() {
     if (!opened && !document.hidden) { window.location.href = APP_STORE; }
   }, 1500);
 }
+
+// Cast-to-TV helper. iOS doesn't let a web app START screen mirroring (it's a
+// Control Center action), so this shows the quick steps instead of faking it.
+function castOpen(){ var o=document.getElementById('castOv'); if(o) o.classList.add('show'); }
+function castClose(){ var o=document.getElementById('castOv'); if(o) o.classList.remove('show'); }
 
 function hccPanic() {
   if (!confirm('EMERGENCY ALERT\n\nThis will:\n\u2022 Trigger Beehive panic automation\n\u2022 Flash all smart lights\n\u2022 Log event with timestamp\n\nProceed?')) return;
