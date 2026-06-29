@@ -1165,15 +1165,11 @@ html,body{
         <span>&#128225; NEXRAD Live Radar</span>
         <span style="font-size:9px;font-weight:700;letter-spacing:.5px;color:var(--muted)">KOHX &bull; Nashville</span>
       </div>
-      <div id="wxRadarMap" class="wx-radar-leaflet"></div>
-      <div class="radar-ctrl">
-        <button id="wxRadarPlayBtn" class="rcbtn" onclick="radarToggle()">&#9654; Play</button>
-        <button class="rcbtn" style="flex:0.4" onclick="radarStep(-1)">&#9664;</button>
-        <button class="rcbtn" style="flex:0.4" onclick="radarStep(1)">&#9654;</button>
-        <button class="rcbtn" style="flex:0.35" onclick="loadRadarFrames()" title="Refresh">&#128260;</button>
-      </div>
-      <div id="wxRadarTime" class="wx-note" style="margin-top:7px;text-align:center">Tap Play for animated radar loop</div>
-      <button class="btn-full btn-gray" style="margin-top:8px" onclick="window.open('https://www.radarscope.app','_blank','noopener')">&#128225; Open RadarScope</button>
+      <iframe id="wxRadarFrame" title="Live Radar — White House, TN" loading="lazy"
+        src="https://embed.windy.com/embed2.html?lat=36.477&lon=-86.66&detailLat=36.477&detailLon=-86.66&zoom=8&level=surface&overlay=radar&product=radar&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=mph&metricTemp=%C2%B0F&radarRange=-1"
+        style="width:100%;height:320px;border:0;border-radius:10px;display:block;background:#0b0f14"></iframe>
+      <div class="wx-note" style="margin-top:7px;text-align:center">Live animated radar &bull; pinch to zoom, drag the timeline to replay</div>
+      <a href="https://www.radarscope.app" target="_blank" rel="noopener" class="btn-full btn-gray" style="margin-top:8px;display:block;text-align:center;text-decoration:none">&#128225; Open RadarScope</a>
     </div>
 
     <!-- 10-DAY FORECAST -->
@@ -4749,8 +4745,7 @@ function hccSection(id, btn) {
   if (id === 'home' && !window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
   if (id === 'climate') { loadClimate(); }
   if (id === 'weather') {
-    if (!window._radarInited) { window._radarInited = true; setTimeout(initRadarMap, 150); }
-    else if (_rMap) { setTimeout(function(){ _rMap.invalidateSize(); }, 150); }
+    /* Radar is now an embedded Windy iframe (self-loading) — no Leaflet init needed */
     if (!window._forecastLoaded) { window._forecastLoaded = true; loadForecast(); }
     if (!window._droughtLoaded) { window._droughtLoaded = true; loadDrought(); }
     // Auto-request notification permission on first WEATHER tab visit (this tap IS a user gesture)
