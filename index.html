@@ -145,7 +145,15 @@ html.light .hdr-btn.outline{background:rgba(60,45,15,.06);color:#3a3024;}
 html.light .tab{color:rgba(40,32,20,.42);}             /* inactive YARD tabs */
 html.light .tab.active{color:#1c180f;border-bottom-color:var(--a-yard);} /* was #fff on #fff */
 html.light .sv{color:#2e2820;}
-html.light .meter-num{color:#1c180f;}
+/* .main-meter is an always-black LCD-style panel (both themes) — keep its text
+   light in light mode too. (Its bg is a gradient, so token-driven text would go
+   dark-on-black and vanish.) */
+html.light .main-meter .meter-num{color:#f0ede6;}
+html.light .main-meter .meter-lbl,
+html.light .main-meter .meter-unit,
+html.light .main-meter .meter-next-lbl,
+html.light .main-meter .meter-next-name{color:rgba(235,225,205,.6);}
+html.light .main-meter .meter-next-val{color:#e3b341;}
 html.light .hour-meter-box{background:#23201a;border-color:rgba(0,0,0,.25);} /* keep LCD look */
 html.light .sensor-row{background:rgba(60,45,15,.05);border-color:rgba(70,55,25,.14);}
 html.light .sensor-row span:first-child{color:#241f17;}
