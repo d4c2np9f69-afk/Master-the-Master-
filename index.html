@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>/* apply saved theme before paint to avoid flash; default = light */try{if(localStorage.getItem('hcc_theme')!=='dark'){document.documentElement.classList.add('light');}}catch(e){}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -79,6 +80,89 @@ button{font-family:inherit;cursor:pointer}
   --glowRed:0 0 14px rgba(192,57,43,.5);
   --glowGold:0 0 14px rgba(212,175,55,.4);
 }
+
+/* ── LIGHT THEME ─────────────────────────────────────────────────────────
+   Toggled by the header switch (toggleTheme); persisted in localStorage
+   'hcc_theme'. Overrides ONLY the design tokens, so every component that uses
+   var(--bg/--card/--text/…) flips automatically. The header + section nav have
+   their own hardcoded dark backgrounds, so they stay as a dark "brand chrome"
+   bar above the light content — readable and intentional. Status/gold/accent
+   tokens are darkened here so they keep contrast on white. */
+html.light{
+  --bg:#f3efe7;            /* warm paper, not clinical white */
+  --surface:#faf7f1;
+  --card:#ffffff;
+  --card2:rgba(60,45,15,.035);
+  --border:rgba(70,55,25,.18);
+  --border2:rgba(70,55,25,.1);
+  --text:#241f17;          /* warm near-black */
+  --muted:rgba(60,50,35,.66);
+  --dim:rgba(70,55,30,.45);
+  --ink:#241f17;
+  /* brand + status, darkened for contrast on white */
+  --gold:#9a7b1e;
+  --amber:#a85d28;
+  --ok:#15803d;
+  --warn:#b7791f;
+  --bad:#d61f1f;
+  --info:#0277b6;
+  --green:#15803d;
+  --red:#b03a2e;
+  /* section accents (nav underline + card-title bars) */
+  --a-home:#9a7b1e;
+  --a-wx:#0277b6;
+  --a-irr:#15803d;
+  --a-yard:#b03a2e;
+  --a-climate:#ea580c;
+  /* card-category title colors used around the app */
+  --c-sensor:#1d4ed8;
+  --c-status:#15803d;
+  --c-health:#9a7b1e;
+  --c-service:#a85d28;
+  --c-safety:#b03a2e;
+  --c-fitness:#7c3aed;
+  --c-weather:#0277b6;
+  --glowGold:0 0 14px rgba(154,123,30,.18);
+}
+/* Softer card shadow + crisp hairline on white */
+html.light .card{box-shadow:0 2px 10px rgba(40,30,10,.08);}
+html.light body, html.light{background:var(--bg);}
+/* Components that hardcode light-on-dark text need a dark-on-light override on white.
+   (Header, section nav, hero overlays, modals and media-overlay labels keep their
+   own dark backgrounds, so they are intentionally NOT overridden here.) */
+html.light .card-title{color:#2e2820;}                 /* was cream — invisible on white */
+html.light .sec-hdr-label{color:#5c4a1c;}
+html.light #section-home .sec-hdr-label{color:var(--a-home);}
+html.light #section-weather .sec-hdr-label{color:var(--a-wx);}
+html.light #section-irrigation .sec-hdr-label{color:var(--a-irr);}
+html.light #section-yard .sec-hdr-label{color:var(--a-yard);}
+html.light #section-climate .sec-hdr-label{color:var(--a-climate);}
+html.light .hcc-tile-name{color:#241f17;}
+html.light .hcc-module-name{color:#241f17;}
+html.light .hdr-btn.outline{background:rgba(60,45,15,.06);color:#3a3024;}
+html.light .tab{color:rgba(40,32,20,.42);}             /* inactive YARD tabs */
+html.light .tab.active{color:#1c180f;border-bottom-color:var(--a-yard);} /* was #fff on #fff */
+html.light .sv{color:#2e2820;}
+html.light .meter-num{color:#1c180f;}
+html.light .hour-meter-box{background:#23201a;border-color:rgba(0,0,0,.25);} /* keep LCD look */
+html.light .sensor-row{background:rgba(60,45,15,.05);border-color:rgba(70,55,25,.14);}
+html.light .sensor-row span:first-child{color:#241f17;}
+html.light .hist-table th{color:#2e2820;}
+html.light .diag-desc{color:#3a342a;}
+html.light .hs-neutral{color:#241f17;}
+html.light .hs-label{color:rgba(40,32,20,.6);}
+html.light .wx-load{background:rgba(60,45,15,.05);}     /* faint banner bg on white */
+/* status-tinted text → darker so it reads on the light tinted panels */
+html.light .wx-caution,html.light .sensor-alert,html.light .readiness-row.warn,html.light .hs-warn{color:#8a6310;}
+html.light .wx-no,html.light .sensor-alert.bad,html.light .readiness-row.bad,html.light .hs-red{color:#c0241c;}
+html.light .wx-go{color:#15803d;}
+/* NWS alert card headings on light tinted panels */
+html.light .al-warning .nws-ah{color:#b91c1c;}
+html.light .al-watch .nws-ah{color:#c2410c;}
+html.light .al-advisory .nws-ah{color:#a16207;}
+html.light .home-alert-strip-text{color:#b91c1c;}
+html.light .spec-list li{border-bottom-color:rgba(70,55,25,.12);}
+html.light .td-date,html.light .log-date{color:#5a5246;}  /* history dates were #ccc */
 
 /* Status utility classes — pair with statusColor() / the --ok/--warn/--bad tokens */
 .s-ok{color:var(--ok)}
@@ -411,7 +495,7 @@ html,body{
 .hcc-tile-pending{opacity:.55}
 .hcc-tile-add{border-style:dashed;border-color:rgba(74,158,255,.3);color:rgba(74,158,255,.6)}
 .hcc-tile-icon{font-size:26px;margin-bottom:6px;line-height:1}
-.hcc-tile-name{font-size:11px;font-weight:800;color:#e8e8f0;letter-spacing:.4px}
+.hcc-tile-name{font-size:11px;font-weight:800;color:var(--text);letter-spacing:.4px}
 .hcc-tile-status{font-size:10px;color:var(--dim);margin-top:2px;font-weight:700;letter-spacing:.4px}
 
 /* ── MODULE LIST (security modules, safety modules) ─────────────────────── */
@@ -685,7 +769,7 @@ html,body{
 .hs-ok{color:#22c55e}
 .hs-warn{color:#ffd24a}
 .hs-red{color:#ef4444}
-.hs-neutral{color:#e8e8f0}
+.hs-neutral{color:var(--text)}
 /* ── NEXRAD Radar ── */
 .wx-radar-leaflet{height:280px;border-radius:10px;overflow:hidden;background:#111;position:relative}
 .radar-ctrl{display:flex;gap:6px;margin-top:8px}
@@ -739,6 +823,9 @@ html,body{
 .home-alert-strip.show{display:flex;align-items:center;gap:10px}
 .home-alert-strip-text{flex:1;font-size:11px;font-weight:700;color:#fca5a5;font-family:var(--serif);line-height:1.35}
 /* ── Cast-to-TV helper ── */
+.theme-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;width:44px;height:44px;border-radius:12px;flex-shrink:0;cursor:pointer;margin-right:8px;background:linear-gradient(135deg,#2a2a2e,#161618);border:1px solid rgba(212,175,55,.35);color:rgba(240,220,175,.92);font-size:16px;transition:all .2s}
+.theme-btn span{font-size:7px;font-weight:800;letter-spacing:.5px;line-height:1}
+.theme-btn:active{transform:scale(.94)}
 .cast-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;width:44px;height:44px;border-radius:12px;flex-shrink:0;cursor:pointer;margin-right:8px;background:linear-gradient(135deg,#2a2a2e,#161618);border:1px solid rgba(212,175,55,.35);color:rgba(240,220,175,.92);font-size:16px;transition:all .2s}
 .cast-btn span{font-size:7px;font-weight:800;letter-spacing:.5px;line-height:1}
 .cast-btn:active{transform:scale(.94)}
@@ -763,6 +850,7 @@ html,body{
     <div class="app-hdr-title">HOME COMMAND CENTER</div>
     <div class="app-hdr-sub">Manage &bull; Maintain &bull; Monitor</div>
   </div>
+  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Switch light / dark"><span id="themeIcon">&#9728;&#65039;</span><span id="themeLbl">LIGHT</span></button>
   <button class="cast-btn" id="castBtn" onclick="castOpen()" title="Cast to TV">&#128250;<span>CAST</span></button>
   <button class="alexa-btn" id="alexaBtn" onclick="openAlexaApp()" title="Open Alexa">&#127908;<span>ALEXA</span></button>
 </div>
@@ -834,7 +922,7 @@ html,body{
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
         <span id="beehiveDot" style="width:10px;height:10px;border-radius:50%;background:#444;flex-shrink:0;transition:background .3s"></span>
         <div style="flex:1">
-          <div id="beehiveTitle" style="font-size:13px;font-weight:800;color:#e8e8f0">Beehive — Checking&hellip;</div>
+          <div id="beehiveTitle" style="font-size:13px;font-weight:800;color:var(--text)">Beehive — Checking&hellip;</div>
           <div id="beehiveVersion" style="font-size:10px;color:var(--muted);margin-top:1px">Home Assistant</div>
         </div>
         <button onclick="checkBeehive(true)" class="icon-btn">&#128260;</button>
@@ -842,13 +930,13 @@ html,body{
       <button onclick="openBeehive()" class="btn-beehive">OPEN BEEHIVE &#8599;</button>
 
       <!-- Setup steps — hidden when Beehive is online; collapsed by default when offline -->
-      <button id="beehiveSetupToggle" onclick="var s=document.getElementById('beehiveSetupSteps');var open=s.style.display!=='none';s.style.display=open?'none':'block';this.textContent=open?'▼ Show setup instructions':'▲ Hide setup instructions';" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:6px 0 4px;cursor:pointer;width:100%;text-align:left">▼ Show setup instructions</button>
+      <button id="beehiveSetupToggle" onclick="var s=document.getElementById('beehiveSetupSteps');var open=s.style.display!=='none';s.style.display=open?'none':'block';this.textContent=open?'▼ Show setup instructions':'▲ Hide setup instructions';" style="background:none;border:none;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:6px 0 4px;cursor:pointer;width:100%;text-align:left">▼ Show setup instructions</button>
       <div id="beehiveSetupSteps" style="display:none">
-        <div style="font-size:10px;font-weight:800;color:rgba(255,255,255,.35);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:10px">HOW TO ACTIVATE BEEHIVE</div>
+        <div style="font-size:10px;font-weight:800;color:var(--dim);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:10px">HOW TO ACTIVATE BEEHIVE</div>
         <div style="display:flex;gap:10px;margin-bottom:10px;align-items:flex-start">
           <div style="width:20px;height:20px;border-radius:50%;background:#1a5fb4;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">1</div>
           <div style="flex:1">
-            <div style="font-size:11px;font-weight:700;color:#e8e8f0;margin-bottom:4px">At the <code style="background:rgba(255,255,255,.1);padding:1px 5px;border-radius:4px;font-size:10px">ha &gt;</code> screen — run these two commands:</div>
+            <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px">At the <code style="background:rgba(255,255,255,.1);padding:1px 5px;border-radius:4px;font-size:10px">ha &gt;</code> screen — run these two commands:</div>
             <div onclick="copyCmd(this,'ha addons install a0d7b954_ssh')" style="font-family:monospace;font-size:11px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;color:#4aff9e;cursor:pointer;margin-bottom:4px;word-break:break-all" title="Tap to copy">ha addons install a0d7b954_ssh</div>
             <div onclick="copyCmd(this,'ha addons start a0d7b954_ssh')" style="font-family:monospace;font-size:11px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;color:#4aff9e;cursor:pointer;word-break:break-all" title="Tap to copy">ha addons start a0d7b954_ssh</div>
           </div>
@@ -856,14 +944,14 @@ html,body{
         <div style="display:flex;gap:10px;margin-bottom:10px;align-items:flex-start">
           <div style="width:20px;height:20px;border-radius:50%;background:#1a5fb4;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">2</div>
           <div style="flex:1">
-            <div style="font-size:11px;font-weight:700;color:#e8e8f0;margin-bottom:4px">Open Beehive &rarr; Settings &rarr; Add-ons &rarr; Terminal &rarr; OPEN</div>
+            <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px">Open Beehive &rarr; Settings &rarr; Add-ons &rarr; Terminal &rarr; OPEN</div>
             <button onclick="openBeehive('/hassio/addon/a0d7b954_ssh/info')" class="btn-beehive">OPEN BEEHIVE &#8599;</button>
           </div>
         </div>
         <div style="display:flex;gap:10px;align-items:flex-start">
           <div style="width:20px;height:20px;border-radius:50%;background:#1a5fb4;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">3</div>
           <div style="flex:1">
-            <div style="font-size:11px;font-weight:700;color:#e8e8f0;margin-bottom:4px">In the Terminal — paste this and hit Enter:</div>
+            <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px">In the Terminal — paste this and hit Enter:</div>
             <div onclick="copyCmd(this,'wget -qO- https://toro1-5rz.pages.dev/setup | bash')" style="font-family:monospace;font-size:10px;background:rgba(0,0,0,.5);border:1px solid rgba(74,158,255,.3);border-radius:6px;padding:7px 10px;color:#4aff9e;cursor:pointer;word-break:break-all" title="Tap to copy">wget -qO- https://toro1-5rz.pages.dev/setup | bash</div>
           </div>
         </div>
@@ -880,7 +968,7 @@ html,body{
     <div id="haTokenPrompt" style="display:none;background:rgba(212,175,55,.07);border:1px solid rgba(212,175,55,.25);border-radius:12px;padding:14px;margin-bottom:10px">
       <div style="font-size:12px;font-weight:800;color:rgba(212,175,55,.9);margin-bottom:6px">&#128273; Connect to Beehive</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Create a Long-Lived Token in Home Assistant to unlock cameras &amp; home status.</div>
-      <div style="font-size:10px;color:rgba(220,195,145,.5);margin-bottom:8px">In Beehive: tap your username (bottom left) &rarr; Security &rarr; Long-Lived Access Tokens &rarr; Create Token &rarr; copy it</div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:8px">In Beehive: tap your username (bottom left) &rarr; Security &rarr; Long-Lived Access Tokens &rarr; Create Token &rarr; copy it</div>
       <input id="haTokenInput" type="password" placeholder="Paste token here&hellip;" style="width:100%;box-sizing:border-box;background:rgba(0,0,0,.4);border:1px solid rgba(212,175,55,.3);border-radius:8px;padding:9px 12px;color:#ede8df;font-size:12px;margin-bottom:8px;font-family:inherit">
       <button id="haTokenBtn" onclick="saveHaToken()" style="width:100%;padding:10px;background:linear-gradient(135deg,#5a3e00,#3a2800);border:1px solid rgba(212,175,55,.4);border-radius:8px;color:rgba(212,175,55,.95);font-size:11px;font-weight:800;letter-spacing:.5px;cursor:pointer">&#128275; CONNECT TO BEEHIVE</button>
       <div id="haTokenStatus" style="font-size:11px;text-align:center;margin-top:8px;min-height:16px"></div>
@@ -1054,7 +1142,7 @@ html,body{
       <span>PANIC / EMERGENCY</span>
     </button>
 
-    <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">SAFETY MODULES</div>
+    <div style="font-size:10px;font-weight:700;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">SAFETY MODULES</div>
     <div class="hcc-module-list">
       <div class="hcc-module-row" style="border-color:rgba(34,197,94,.25);background:rgba(34,197,94,.06)">
         <span class="hcc-module-icon">&#8987;</span>
@@ -1390,7 +1478,7 @@ html,body{
       </div>
       <button onclick="saveBhyveCreds()" style="width:100%;padding:11px;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.4);border-radius:8px;color:#d4af37;font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:.5px">&#127807; Connect B-Hyve</button>
       <div id="bhyveCredsMsg" style="font-size:11px;margin-top:8px;text-align:center;min-height:18px;color:var(--muted)"></div>
-      <div style="font-size:10px;color:rgba(220,195,145,.35);margin-top:10px;border-top:1px solid rgba(220,195,145,.1);padding-top:10px">Already using Beehive? Enter your HA token in HOME &mdash; zones appear automatically when Beehive is online.</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:10px;border-top:1px solid rgba(220,195,145,.1);padding-top:10px">Already using Beehive? Enter your HA token in HOME &mdash; zones appear automatically when Beehive is online.</div>
     </div>
 
   </div>
@@ -1873,7 +1961,7 @@ html,body{
       </div>
       <button onclick="saveLuxCreds()" style="width:100%;padding:11px;background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.4);border-radius:8px;color:#f97316;font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:.5px">&#127777;&#65039; Connect Thermostat</button>
       <div id="luxCredsMsg" style="font-size:11px;margin-top:8px;text-align:center;min-height:18px;color:var(--muted)"></div>
-      <div style="font-size:10px;color:rgba(220,195,145,.35);margin-top:10px;border-top:1px solid rgba(220,195,145,.1);padding-top:10px">Use the same email and password as the LUX Connected Home app on your phone.</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:10px;border-top:1px solid rgba(220,195,145,.1);padding-top:10px">Use the same email and password as the LUX Connected Home app on your phone.</div>
     </div>
 
   </div>
@@ -2278,7 +2366,7 @@ function updateDashboard(){
       var remTxt=t.st==='OVERDUE'?'OVERDUE':t.rem.toFixed(1)+' hrs left';
       return '<div style="margin-bottom:11px">'
         +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
-        +'<div style="font-size:12px;font-weight:600;color:rgba(235,215,175,.9);font-family:var(--serif)">'+t.icon+' '+t.name+'</div>'
+        +'<div style="font-size:12px;font-weight:600;color:var(--text);font-family:var(--serif)">'+t.icon+' '+t.name+'</div>'
         +'<span class="pill '+pillCls+'">'+remTxt+'</span></div>'
         +'<div style="height:7px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden">'
         +'<div style="height:100%;width:'+prog+'%;background:'+barColor+';border-radius:4px;transition:width .6s"></div></div>'
@@ -4034,7 +4122,7 @@ function renderInvestment(){
     if(purchases.length){
       html+='<div style="margin-top:8px">'+purchases.slice().reverse().map(function(p){
         return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">'
-          +'<div style="flex:1"><div style="font-size:13px;font-weight:600;color:rgba(235,215,175,.9);font-family:var(--serif)">'+p.name+'</div>'
+          +'<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--text);font-family:var(--serif)">'+p.name+'</div>'
           +'<div style="font-size:10px;color:var(--muted)">'+p.date+(p.note?' &middot; '+p.note:'')+'</div></div>'
           +'<div style="font-size:13px;font-weight:700;color:#7ee787;font-family:var(--mono);margin:0 10px">'+fmt(p.cost)+'</div>'
           +'<button onclick="deletePurchase(\''+p.id+'\')" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer">&#10005;</button>'
@@ -4093,8 +4181,28 @@ function applyHeroGrades(){
   });
 }
 
+// ── THEME (light/dark) ──────────────────────────────────────────────────
+// The <head> script already applied the saved theme (default light) before
+// paint. These keep the toggle button label in sync and persist changes.
+function currentTheme(){ return document.documentElement.classList.contains('light') ? 'light' : 'dark'; }
+function syncThemeBtn(){
+  var t=currentTheme();
+  var icon=document.getElementById('themeIcon'), lbl=document.getElementById('themeLbl');
+  if(icon) icon.innerHTML = t==='light' ? '&#9728;&#65039;' : '&#127769;'; // ☀️ / 🌙
+  if(lbl) lbl.textContent = t==='light' ? 'LIGHT' : 'DARK';
+  var meta=document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute('content', t==='light' ? '#0e0b0a' : '#04040a'); // header bar stays dark
+}
+function toggleTheme(){
+  var next = currentTheme()==='light' ? 'dark' : 'light';
+  document.documentElement.classList.toggle('light', next==='light');
+  try{ localStorage.setItem('hcc_theme', next); }catch(e){}
+  syncThemeBtn();
+}
+
 // INIT
 applyHeroGrades();
+syncThemeBtn();
 renderAll();
 (function(){
   function set(id,txt){var e=document.getElementById(id); if(e) e.textContent=txt;}
@@ -5093,7 +5201,7 @@ function loadCameras() {
       grid.innerHTML = '<div style="background:rgba(212,175,55,.07);border:1px solid rgba(212,175,55,.2);border-radius:12px;padding:14px;margin-bottom:6px">'
         + '<div style="font-size:12px;font-weight:700;color:rgba(212,175,55,.9);margin-bottom:6px">&#128247; Blink — Enter Verification Code</div>'
         + '<div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.55">Blink sent a code to your email/phone. Enter it below to finish connecting to Beehive.</div>'
-        + '<div style="font-size:10px;color:rgba(220,195,145,.5);margin-bottom:8px">If you haven\'t added Blink yet: Beehive &rarr; Settings &rarr; Devices &rarr; Add Integration &rarr; Blink</div>'
+        + '<div style="font-size:10px;color:var(--muted);margin-bottom:8px">If you haven\'t added Blink yet: Beehive &rarr; Settings &rarr; Devices &rarr; Add Integration &rarr; Blink</div>'
         + '<input id="blinkPinInput" type="tel" inputmode="numeric" maxlength="8" placeholder="Enter PIN code&hellip;" style="width:100%;box-sizing:border-box;background:rgba(0,0,0,.4);border:1px solid rgba(212,175,55,.3);border-radius:8px;padding:9px 12px;color:#ede8df;font-size:14px;margin-bottom:8px;font-family:inherit;letter-spacing:4px;text-align:center">'
         + '<button onclick="blinkSendPin()" style="width:100%;padding:10px;background:linear-gradient(135deg,#5a3e00,#3a2800);border:1px solid rgba(212,175,55,.4);border-radius:8px;color:rgba(212,175,55,.95);font-size:11px;font-weight:700;letter-spacing:.5px;cursor:pointer">&#128273; SEND VERIFICATION CODE TO BEEHIVE</button>'
         + '<div id="blinkPinStatus" style="font-size:11px;text-align:center;margin-top:8px;min-height:16px"></div>'

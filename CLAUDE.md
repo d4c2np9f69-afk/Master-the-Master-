@@ -272,6 +272,11 @@ Returns the token-backed color for `'ok'|'warn'|'bad'|'info'` (also accepts `OK`
 - **Buttons:** `.btn-full` + `.btn-gray` / `.btn-green` / `.btn-red`; modal buttons `.mbtn` (`.primary`/`.secondary`).
 - **Links that leave the app** (maps, streams, external): use a real `<a target="_blank" rel="noopener">` styled as a button — NOT `window.open` (no-op in installed iOS PWA).
 
+### Light / Dark theme (added 2026-06-29)
+- Toggle in the header (☀️ LIGHT / 🌙 DARK), `toggleTheme()`, persisted in `localStorage.hcc_theme`. **Default = light** (white). A tiny `<head>` script applies the saved theme before paint (no flash).
+- Implemented as `html.light{ … }` overriding ONLY the design tokens (`--bg/--surface/--card/--text/--muted/--border/--gold/--ok/--warn/--bad/…`). Header + section nav + hero overlays + modals keep their own hardcoded dark backgrounds → "dark chrome, light content."
+- **LESSON (do this for every new component):** drive text/borders from tokens — `var(--text)`, `var(--muted)`, `var(--dim)`, `var(--border)`. **NEVER hardcode a light text color** (`#e8e8f0`, `#fff`, `rgba(235,215,175,…)`) on a card — it vanishes in light mode. If a component truly needs a light-on-dark chip (LCD readout, status panel), give it a solid dark bg so it reads in both themes, and add an `html.light .thing{…}` override if needed.
+
 ### Rules
 - Don't introduce a new green/yellow/red — use the status tokens.
 - Don't invent a new card/banner/button style — reuse the kit; if the kit truly lacks something, add ONE shared class, don't inline a one-off.
@@ -336,6 +341,7 @@ If any tests fail, fix them before doing anything else.
 | Sensor data (battery/RPM/GPS) | working when ESP32 connected |
 | Engine hours baseline 5.9h; Panic button HOME-only | correct |
 | Hero grade module + status tokens (gold standards above) | done |
+| Light/Dark theme toggle (header ☀️/🌙, persists in `hcc_theme`) | done — **default light** |
 | CLIMATE / LUX thermostat + setpoint (POST /api/device) | WORKING — live confirmed |
 | Irrigation → HA first, direct B-Hyve fallback; zone control via browser WebSocket | done — needs live test |
 | Weather: KTNWHITE21 live data, NWS alerts (deduped by id), 10-day (Open-Meteo), radar (OSM tiles), Lawn Water Need + /api/drought | done — radar/notifs need device confirm |
@@ -351,6 +357,7 @@ If any tests fail, fix them before doing anything else.
 - **06-25:** Real aerial GPS map + calibration (`localStorage.yard_map_calib`) + telemetry sim; YARD hero photo; B-Hyve HA custom integration (`beehive/custom_components/bhyve/`).
 - **06-26:** CLIMATE section + LUX thermostat (real API — see LUX reference below); irrigation `ws_timeout` fixed by moving WebSocket to the browser (`irrControl`/`irrWsCommand`, `/api/irrigation?tk=1`).
 - **06-26 cont.:** Weather overhaul (live WU data, NWS alerts, mPING card); LUX setpoint fixed (POST, not PUT).
+- **06-29:** Radar → Windy embed restored + "NWS Radar ↗" popout (RadarScope link was dead). **Light/Dark theme** added (header toggle, default light, token-driven `html.light` override; swapped hardcoded light text → tokens so light mode reads cleanly; dark unchanged). Verified all 5 sections + YARD subtabs + LOG MOW modal in both themes, zero JS errors.
 - **06-27/28:** Voice→Alexa swap (removed in-app voice that mis-dialed contacts); SW network-first (hcc-v6); WU Recognized badge; **hero grade module** + **visual consistency tokens/`statusColor()`** (gold standards above); weather fixes (radar OSM tiles, unified mow verdict via `applyMowVerdict`, alert dedup, Lawn Water Need + `/api/drought`, Spotter/NOAA anchors, mPING token-ready); whole-home utilities planning (below).
 
 ---
