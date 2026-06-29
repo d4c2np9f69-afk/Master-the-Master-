@@ -67,8 +67,10 @@ button{font-family:inherit;cursor:pointer}
   --radius:10px;
   /* legacy aliases */
   --ink:#ede8df;
-  --font:'Archivo','Helvetica Neue',Arial,sans-serif;
-  --serif:Georgia,'Times New Roman',serif;
+  /* Style A — ONE clean system font everywhere (no more serif/sans mix).
+     --serif now points at the same stack so every legacy var(--serif) usage unifies. */
+  --font:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,'Segoe UI','Helvetica Neue',Arial,sans-serif;
+  --serif:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,'Segoe UI','Helvetica Neue',Arial,sans-serif;
   --mono:'Archivo','Helvetica Neue',Arial,sans-serif;
   --c-sensor:#4a9eff;
   --c-status:#22c55e;
@@ -163,6 +165,16 @@ html.light .al-advisory .nws-ah{color:#a16207;}
 html.light .home-alert-strip-text{color:#b91c1c;}
 html.light .spec-list li{border-bottom-color:rgba(70,55,25,.12);}
 html.light .td-date,html.light .log-date{color:#5a5246;}  /* history dates were #ccc */
+/* Style A — white chrome (header + section nav) so the app is white top-to-bottom */
+html.light .app-hdr{background:#fff;border-bottom:1px solid var(--border);box-shadow:0 1px 0 rgba(0,0,0,.04);}
+html.light .app-hdr-title{color:#1c1c1e;}
+html.light .app-hdr-sub{color:#8a8a8e;}
+html.light .app-hdr-badge{background:#fff;color:var(--a-home);border-color:var(--a-home);box-shadow:none;}
+html.light .theme-btn,html.light .cast-btn{background:#f0f0f3;border:1px solid #e3e3e8;color:#3a3a3c;}
+html.light .sec-nav{background:#fff;border-bottom:1px solid var(--border);}
+html.light .snav-btn{color:#9a9aa0;}
+html.light .snav-btn.active{color:#1c1c1e;}
+html.light .tabs{background:#fff;}
 
 /* Status utility classes — pair with statusColor() / the --ok/--warn/--bad tokens */
 .s-ok{color:var(--ok)}
@@ -207,7 +219,7 @@ html,body{
   box-shadow:0 0 16px rgba(212,175,55,.12);
 }
 .app-hdr-text{flex:1;min-width:0}
-.app-hdr-title{font-size:15px;font-weight:400;font-style:italic;font-family:var(--serif);letter-spacing:.5px;color:rgba(240,220,175,.92);line-height:1}
+.app-hdr-title{font-size:16px;font-weight:600;font-style:normal;font-family:var(--font);letter-spacing:-.2px;color:rgba(240,220,175,.92);line-height:1.05}
 .app-hdr-sub{font-size:9px;font-weight:600;letter-spacing:3px;color:rgba(212,175,55,.55);margin-top:2px;text-transform:uppercase}
 
 /* ── HOUSE HERO (HOME section only) ─────────────────────────────────────── */
@@ -382,8 +394,8 @@ html,body{
   box-shadow:0 4px 20px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.04);
 }
 .card-title{
-  font-size:11px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;
-  font-family:var(--serif);
+  font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+  font-family:var(--font);
   color:rgba(235,215,175,.88);
   padding-bottom:12px;margin-bottom:14px;
   border-bottom:1px solid var(--border);
@@ -4191,7 +4203,7 @@ function syncThemeBtn(){
   if(icon) icon.innerHTML = t==='light' ? '&#9728;&#65039;' : '&#127769;'; // ☀️ / 🌙
   if(lbl) lbl.textContent = t==='light' ? 'LIGHT' : 'DARK';
   var meta=document.querySelector('meta[name="theme-color"]');
-  if(meta) meta.setAttribute('content', t==='light' ? '#0e0b0a' : '#04040a'); // header bar stays dark
+  if(meta) meta.setAttribute('content', t==='light' ? '#ffffff' : '#04040a'); // match white header in light mode
 }
 function toggleTheme(){
   var next = currentTheme()==='light' ? 'dark' : 'light';

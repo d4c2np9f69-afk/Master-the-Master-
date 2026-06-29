@@ -277,6 +277,11 @@ Returns the token-backed color for `'ok'|'warn'|'bad'|'info'` (also accepts `OK`
 - Implemented as `html.light{ … }` overriding ONLY the design tokens (`--bg/--surface/--card/--text/--muted/--border/--gold/--ok/--warn/--bad/…`). Header + section nav + hero overlays + modals keep their own hardcoded dark backgrounds → "dark chrome, light content."
 - **LESSON (do this for every new component):** drive text/borders from tokens — `var(--text)`, `var(--muted)`, `var(--dim)`, `var(--border)`. **NEVER hardcode a light text color** (`#e8e8f0`, `#fff`, `rgba(235,215,175,…)`) on a card — it vanishes in light mode. If a component truly needs a light-on-dark chip (LCD readout, status panel), give it a solid dark bg so it reads in both themes, and add an `html.light .thing{…}` override if needed.
 
+### Typography — ONE font (Style A, chosen by Jeff 2026-06-29)
+- The app uses a **single clean system font everywhere** — no serif/sans mix (the old Georgia serif made it look "choppy"). `--font` AND `--serif` both point at the Apple system stack (`-apple-system,BlinkMacSystemFont,'SF Pro Text/Display',system-ui,…`). `var(--serif)` is kept only as a legacy alias so existing usages stay unified.
+- **NEVER reintroduce a serif** or a second font family. New UI uses `var(--font)` (or just inherits).
+- Light mode = "Style A / Apple Clean": **white top-to-bottom** — header + section nav are white in `html.light` (overrides their hardcoded dark chrome), clean sans, section-accent underlines. The cinematic hero photos provide the personality; the chrome stays quiet. Dark mode keeps the dark chrome.
+
 ### Rules
 - Don't introduce a new green/yellow/red — use the status tokens.
 - Don't invent a new card/banner/button style — reuse the kit; if the kit truly lacks something, add ONE shared class, don't inline a one-off.
@@ -357,6 +362,7 @@ If any tests fail, fix them before doing anything else.
 - **06-25:** Real aerial GPS map + calibration (`localStorage.yard_map_calib`) + telemetry sim; YARD hero photo; B-Hyve HA custom integration (`beehive/custom_components/bhyve/`).
 - **06-26:** CLIMATE section + LUX thermostat (real API — see LUX reference below); irrigation `ws_timeout` fixed by moving WebSocket to the browser (`irrControl`/`irrWsCommand`, `/api/irrigation?tk=1`).
 - **06-26 cont.:** Weather overhaul (live WU data, NWS alerts, mPING card); LUX setpoint fixed (POST, not PUT).
+- **06-29 (Style A redesign):** Jeff picked "Apple Clean" from 3 rendered mockups. Unified to ONE system font (killed the Georgia serif mix that looked choppy; `--font`+`--serif`→Apple stack), made light-mode chrome **white top-to-bottom** (header + nav), clean header title (non-italic), tighter card-title spacing. Verified all sections both themes, zero JS errors.
 - **06-29:** Radar → Windy embed restored + "NWS Radar ↗" popout (RadarScope link was dead). **Light/Dark theme** added (header toggle, default light, token-driven `html.light` override; swapped hardcoded light text → tokens so light mode reads cleanly; dark unchanged). Verified all 5 sections + YARD subtabs + LOG MOW modal in both themes, zero JS errors.
 - **06-27/28:** Voice→Alexa swap (removed in-app voice that mis-dialed contacts); SW network-first (hcc-v6); WU Recognized badge; **hero grade module** + **visual consistency tokens/`statusColor()`** (gold standards above); weather fixes (radar OSM tiles, unified mow verdict via `applyMowVerdict`, alert dedup, Lawn Water Need + `/api/drought`, Spotter/NOAA anchors, mPING token-ready); whole-home utilities planning (below).
 
