@@ -1165,11 +1165,20 @@ html,body{
         <span>&#128225; NEXRAD Live Radar</span>
         <span style="font-size:9px;font-weight:700;letter-spacing:.5px;color:var(--muted)">KOHX &bull; Nashville</span>
       </div>
-      <iframe id="wxRadarFrame" title="Live Radar — White House, TN" loading="lazy"
-        src="https://embed.windy.com/embed2.html?lat=36.477&lon=-86.66&detailLat=36.477&detailLon=-86.66&zoom=8&level=surface&overlay=radar&product=radar&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=mph&metricTemp=%C2%B0F&radarRange=-1"
-        style="width:100%;height:320px;border:0;border-radius:10px;display:block;background:#0b0f14"></iframe>
-      <div class="wx-note" style="margin-top:7px;text-align:center">Live animated radar &bull; pinch to zoom, drag the timeline to replay</div>
-      <a href="https://www.radarscope.app" target="_blank" rel="noopener" class="btn-full btn-gray" style="margin-top:8px;display:block;text-align:center;text-decoration:none">&#128225; Open RadarScope</a>
+      <img id="wxRadarImg" alt="KOHX Nashville NEXRAD radar loop"
+        src="https://radar.weather.gov/ridge/standard/KOHX_loop.gif"
+        onerror="if(typeof radarImgError==='function')radarImgError(this)"
+        style="width:100%;border-radius:10px;display:block;background:#0b0f14;min-height:220px;object-fit:cover">
+      <div id="wxRadarFallback" style="display:none;border-radius:10px;background:#0b0f14;border:1px solid var(--border);padding:26px 16px;text-align:center">
+        <div style="font-size:30px">&#128225;</div>
+        <div style="font-size:12px;color:var(--muted);margin:6px 0 12px">Live radar couldn't load right now.</div>
+        <a href="https://radar.weather.gov/?settings=v1_eyJhZ2VuZGEiOnsiaWQiOiJsb2NhbCJ9fQ%3D%3D#/" target="_blank" rel="noopener" style="display:inline-block;padding:9px 16px;background:rgba(56,189,248,.14);border:1px solid rgba(56,189,248,.4);border-radius:8px;color:#38bdf8;font-size:12px;font-weight:800;text-decoration:none">Open NWS Radar &#8599;</a>
+      </div>
+      <div class="wx-note" style="margin-top:7px;text-align:center">Live NWS NEXRAD loop &bull; KOHX Nashville &bull; tap Refresh for the latest frames</div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn-full btn-gray" style="flex:1" onclick="refreshRadarImg()">&#128260; Refresh Radar</button>
+        <a href="https://www.radarscope.app" target="_blank" rel="noopener" class="btn-full btn-gray" style="flex:1;display:block;text-align:center;text-decoration:none">&#128225; RadarScope</a>
+      </div>
     </div>
 
     <!-- 10-DAY FORECAST -->
@@ -4745,7 +4754,7 @@ function hccSection(id, btn) {
   if (id === 'home' && !window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
   if (id === 'climate') { loadClimate(); }
   if (id === 'weather') {
-    /* Radar is now an embedded Windy iframe (self-loading) — no Leaflet init needed */
+    refreshRadarImg(); /* pull the freshest NWS radar frames each time Weather opens */
     if (!window._forecastLoaded) { window._forecastLoaded = true; loadForecast(); }
     if (!window._droughtLoaded) { window._droughtLoaded = true; loadDrought(); }
     // Auto-request notification permission on first WEATHER tab visit (this tap IS a user gesture)
@@ -4879,6 +4888,28 @@ function openAlexaApp() {
 // Control Center action), so this shows the quick steps instead of faking it.
 function castOpen(){ var o=document.getElementById('castOv'); if(o) o.classList.add('show'); }
 function castClose(){ var o=document.getElementById('castOv'); if(o) o.classList.remove('show'); }
+
+// Reload the NWS radar loop with a cache-buster to pull the newest frames
+function refreshRadarImg(){
+  var i=document.getElementById('wxRadarImg'); if(!i) return;
+  i.removeAttribute('data-fb');
+  i.style.display='block';
+  var fb=document.getElementById('wxRadarFallback'); if(fb) fb.style.display='none';
+  i.src='https://radar.weather.gov/ridge/standard/KOHX_loop.gif?t='+Date.now();
+}
+
+// Graceful radar fallback: if the animated loop fails, try the static latest
+// frame once; if that also fails, hide the broken image and show the link card.
+function radarImgError(img){
+  if(!img) return;
+  if(!img.getAttribute('data-fb')){
+    img.setAttribute('data-fb','1');
+    img.src='https://radar.weather.gov/ridge/standard/KOHX_0.gif?t='+Date.now();
+    return;
+  }
+  img.style.display='none';
+  var fb=document.getElementById('wxRadarFallback'); if(fb) fb.style.display='block';
+}
 
 function hccPanic() {
   if (!confirm('EMERGENCY ALERT\n\nThis will:\n\u2022 Trigger Beehive panic automation\n\u2022 Flash all smart lights\n\u2022 Log event with timestamp\n\nProceed?')) return;
