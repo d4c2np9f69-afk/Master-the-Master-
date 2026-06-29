@@ -159,9 +159,14 @@ html.light .wx-caution,html.light .sensor-alert,html.light .readiness-row.warn,h
 html.light .wx-no,html.light .sensor-alert.bad,html.light .readiness-row.bad,html.light .hs-red{color:#c0241c;}
 html.light .wx-go{color:#15803d;}
 /* NWS alert card headings on light tinted panels */
-html.light .al-warning .nws-ah{color:#b91c1c;}
-html.light .al-watch .nws-ah{color:#c2410c;}
-html.light .al-advisory .nws-ah{color:#a16207;}
+html.light .al-warning .nws-ae,html.light .al-warning .nws-ah{color:#b91c1c;}
+html.light .al-watch .nws-ae,html.light .al-watch .nws-ah{color:#c2410c;}
+html.light .al-advisory .nws-ae,html.light .al-advisory .nws-ah{color:#a16207;}
+html.light .al-other .nws-ae,html.light .al-other .nws-ah{color:#475569;}
+/* NWS alerts card → clean white in light mode (matches the other cards) */
+html.light .nws-alert-card{background:#fff;border:1px solid rgba(220,38,38,.3);box-shadow:0 2px 10px rgba(180,30,30,.06);}
+html.light .nws-alert-title{color:#b91c1c;}
+html.light .nws-alert-sub{color:rgba(185,28,28,.6);}
 html.light .home-alert-strip-text{color:#b91c1c;}
 html.light .spec-list li{border-bottom-color:rgba(70,55,25,.12);}
 html.light .td-date,html.light .log-date{color:#5a5246;}  /* history dates were #ccc */
@@ -815,6 +820,10 @@ html,body{
 .al-advisory .nws-ae,.al-advisory .nws-ah{color:#fde047}
 .al-other{background:rgba(100,115,140,.13);border-color:rgba(100,115,140,.3)}
 .al-other .nws-ae,.al-other .nws-ah{color:#cbd5e1}
+/* NWS alerts card shell (dark mode = subtle red-tinted; light mode override above) */
+.nws-alert-card{border-color:rgba(239,68,68,.45);background:rgba(40,0,0,.4)}
+.nws-alert-title{color:#fca5a5}
+.nws-alert-sub{color:rgba(252,165,165,.55)}
 /* ── Alert badge dot on nav ── */
 .wx-alert-dot{position:absolute;top:5px;right:7px;width:8px;height:8px;border-radius:50%;background:#ef4444;display:none;box-shadow:0 0 0 2px var(--bg),0 0 8px rgba(239,68,68,.9);animation:pulseDot 2s ease-in-out infinite}
 .wx-alert-dot.show{display:block}
@@ -1215,10 +1224,10 @@ html,body{
 
     <!-- NWS ACTIVE ALERTS — shown only when alerts are active -->
     <div id="wxAlertsCard" class="nws-alerts-wrap">
-      <div class="card" style="padding:14px;border-color:rgba(239,68,68,.45);background:rgba(30,0,0,.45)">
-        <div class="card-title" style="color:#fca5a5;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="card nws-alert-card" style="padding:14px">
+        <div class="card-title nws-alert-title" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <span>🚨 NWS Active Alerts</span>
-          <span style="font-size:9px;font-weight:700;letter-spacing:.5px;color:rgba(252,165,165,.55)">Robertson &amp; Sumner Co &bull; TN</span>
+          <span class="nws-alert-sub" style="font-size:9px;font-weight:700;letter-spacing:.5px">Robertson &amp; Sumner Co &bull; TN</span>
         </div>
         <div id="wxAlertsList"></div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;flex-wrap:wrap;gap:8px">
