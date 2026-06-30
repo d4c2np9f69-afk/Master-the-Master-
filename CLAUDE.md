@@ -374,6 +374,16 @@ If any tests fail, fix them before doing anything else.
 
 **Beehive hardware (CONFIRMED 2026-07):** **Beelink J45 (Gemini) mini-PC** — Intel Pentium **J4205** (Apollo Lake quad-core), ~**8GB/128GB**, x86, 12V/2A, SN `4205HQBG40244`, part `J45-A-8128JDOW64PRO-D8`. **x86 with USB ports → it CAN host an RTL-SDR directly** (rtl_433/rtlamr add-on) for the gas/water meter reading — no separate ESP32 box needed, IF (a) HA is installed so USB passes through (HA OS bare-metal/supervised — confirm it's not a no-USB VM) and (b) the Beelink sits within radio range of the meters (or antenna run to a window).
 
+### Architecture — the J45 is the brains, mostly over the NETWORK (how anything new connects)
+The Beelink J45 runs Home Assistant = the central hub. Devices connect THREE ways; **only radio sticks physically plug into the J45:**
+- **USB stick INTO the J45** (gives HA a new "radio language"): **RTL-SDR** (water+gas meters, buying now). Later likely **one Zigbee or Thread coordinator stick** (~$20-30) → a single stick = a whole mesh of cheap door/leak/temp/motion sensors + smart plugs (this is the path for a SECURITY/ALARM layer with no wiring). Optional Z-Wave stick / BT adapter.
+- **Wi-Fi / LAN** (talks to HA via the router — NO cable to the J45): ESP32/ESPHome sensors (energy monitor, backup meter box), Shelly plugs, local cameras.
+- **Cloud** (HA logs into the vendor cloud over the internet): **Blink** (Sync Module is Wi-Fi→Amazon cloud, no USB/local port — that's WHY it can't cable into the J45), B-Hyve, LUX thermostat.
+- **Alarm:** brand-dependent — a hardwired panel integrates via a board (Konnected/Envisalink over Wi-Fi/LAN), not a cable to the J45.
+**Takeaway for planning:** most additions need NO wire to the J45 (they join over Wi-Fi/cloud). Keep a couple of USB ports free: RTL-SDR now, probably a Zigbee/Thread stick next.
+
+**⚠️ STATUS (2026-07): the J45 / Home Assistant install is NOT yet set up correctly — this is the FOUNDATIONAL next step before meters, RTL-SDR, Zigbee, alarm, etc. Target = HA OS installed bare-metal on the J45 (x86-64) → gives the Add-on store + Supervisor + USB passthrough (needed for RTL-SDR now + Zigbee later) + easy backups. First confirm the current install type (HA OS / Supervised / Container / a VM) and whether it's reachable at homeassistant.local:8123. Get Beehive solid BEFORE buying/adding more.**
+
 **HA Base URL:** `http://homeassistant.local:8123` (auto-fallback to `http://192.168.1.66:8123`)
 
 **HA Token:** Jeff enters a Long-Lived Access Token once in the app → stored in `localStorage` key `ha_token`. App then uses it for all HA API calls.
