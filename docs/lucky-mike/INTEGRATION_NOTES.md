@@ -72,6 +72,23 @@ near-zero new plumbing. The phased Bronze→Platinum structure is sensible. Keep
 - Branding on the page: **Smart Stall™ — "Because They're Family."**
 - It double-purposes as a **customer demo/sales** screen, so keep it presentable.
 
+## Site facts (confirmed by Jeff 2026-06-30) + revisions
+- **Barn Wi-Fi is strong** and **each stall has a 120V receptacle.** So: power the
+  ESP32 from a USB adapter at the outlet (no battery), use plain Wi-Fi (no PoE for
+  range), and **control the fan with a plug-in power-monitoring smart plug**
+  (Sonoff S31 / Shelly Plus Plug US) — NOT a hard-wired relay (reverses my earlier
+  note; with a finished receptacle, plug-in is safer, customer-installable, and the
+  power reading confirms the fan is actually running). See `BOM_OPTIMIZED.md`.
+- **Every stall = one identical repeatable module** (ESP32 + sensors + smart plug +
+  cam on Wi-Fi off the outlet). Price/install **per stall**; an N-stall barn is the
+  same recipe × N — great for productizing.
+
+## Business model (see `PRICING_AND_BUSINESS.md`)
+Three models; **recommended = Model B: barn owner offers "Smart Stall" as a paid
+amenity** (she fronts CapEx, recoups via monthly boarder fees; Jeff sells a
+multi-stall installed job + optional support retainer). Build Lucky Mike's stall at
+cost first as the demo. Pricing MUST include Jeff's labor (ChatGPT's deck didn't).
+
 ## Why doing utilities first is the right order (agree with Jeff)
 The water/gas/electric utilities work is the *same skill*: ESPHome sensor → HA →
 app card. Building that first creates the exact reusable plumbing this page needs.
