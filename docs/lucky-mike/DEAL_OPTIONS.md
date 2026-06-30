@@ -1,99 +1,94 @@
 # Lucky Mike Smart Stall — Deal Structure Options & Economics
 
-> What Jeff charges and makes under each deal structure. **All numbers are
-> ESTIMATES** — finalize once Jeff confirms (a) his labor rate and (b) the monthly
-> boarder fee. Formulas shown so the numbers can be re-plugged. Companion:
-> `PRICING_AND_BUSINESS.md`, `BOM_OPTIMIZED.md`.
+> What Jeff charges and makes under each structure. Numbers now use **Jeff's
+> confirmed inputs** (2026-06-30): **$50 flat trip charge** and **$40/mo** boarder
+> fee. The build/install labor fee ($300/stall) is **Claude's recommendation** —
+> Jeff's to adjust. Companion: `PRICING_AND_BUSINESS.md`, `BOM_OPTIMIZED.md`.
 
-## Shared cost basis (adjust these two and everything updates)
-| Input | Estimate | Note |
+## Locked inputs
+| Input | Value | Note |
 |---|---|---|
-| Parts per stall (essential + 1 cam) | **$150** | hard cash out-of-pocket; see BOM |
-| Jeff's labor rate (for pricing) | **$65/hr** | placeholder — Jeff to confirm |
-| Single-stall install time | **~6 hr** | first-ever stall ~8 hr; later single stalls ~5–6 hr |
-| → Cash cost / stall | **$150** | parts only |
-| → Time / stall | **~6 hr** (~$390 of time) | Jeff's own labor = paid out of revenue |
-| Boarder monthly fee (end price) | model at **$25/mo** (range $20–35) | who keeps it depends on the option |
-| Yearly service plan | **$150/yr/stall** | ~2 hr/yr work; firmware, check, priority support |
-
-> For a solo operator, **"what you make" = revenue − parts − any cash costs.** Your
-> labor time is paid out of that — so also watch the **effective $/hr**.
+| Parts per stall (essential + 1 cam) | **$150** | hard cash out-of-pocket |
+| Trip charge | **$50 flat / visit** | covers show-up/travel; NOT build labor |
+| Build/install fee (Jeff's labor) | **$300 / stall** *(recommended)* | ~6 hr work; ≈$50/hr. Additional stalls same trip ≈ $200 |
+| Monthly fee (boarder pays) | **$40 / mo** | who keeps it = the key decision (below) |
 
 ---
 
-## OPTION 1 — Demand-triggered install + service plan  *(lowest risk, recommended default)*
-No cost to the barn owner until she signs a boarder who wants the service. Then a
-**set installed price per stall**, plus an **optional yearly service plan**.
+## ⭐ THE KEY DECISION: who keeps the $40/mo?
+This one fork decides everything, because the same $40 can't be kept twice:
 
-- **Set install price:** **$850 / stall**
-- **Your take at install:** $850 − $150 parts = **$700** for ~6 hr → **~$117/hr** effective
-- **Service plan:** $150/yr/stall, ~2 hr/yr → **~$120/yr** net recurring per stall
-- **Barn owner:** $0 risk — pays only when a paying boarder is lined up; she
-  passes through or marks up the install + monthly to that boarder.
-- **Risk to Jeff:** ~none (paid on completion). Obligation: warranty + opt-in plan.
-- **5-yr value / stall:** $850 + ~3×$150 plan ≈ **$1,300 revenue / ~$1,150 net**, front-loaded.
+- **Barn owner keeps it** → she's the reseller / it's her money-maker. Jeff earns
+  on the **one-time install** (so the install must carry a real build fee). → Options 1 & 2.
+- **Jeff keeps it** → managed service. Jeff can install near-cost (parts + trip) and
+  earns on the **$40/mo**. He owns support + risk. → Option 3.
+- **Split it** (e.g., **$25 Jeff / $15 barn**) → both win; barn gets amenity income
+  with zero cost, Jeff gets recurring. Boarder still pays one clean $40.
 
----
-
-## OPTION 2 — Financed purchase  *(same economics, payment terms)*
-She buys the system(s) but pays over time instead of one check.
-
-- **Total price:** same **$850 / stall** (optionally +$50 finance fee, or 0% as a
-  first-deal/family courtesy).
-- **Terms example:** $850 → **~$75/mo × 12**.
-- **Your take:** same **~$700/stall**, but you **front $150 parts + your time** and
-  collect over the year (cash-flow lag).
-- **Risk to Jeff:** collection risk → mitigate by keeping title to the hardware
-  until paid in full (simple one-page agreement).
-- **Best when:** she wants the **whole barn now** but can't write one check —
-  finance it instead of giving up the recurring (keeps you out of churn/uptake risk).
-- **5-yr value / stall:** ≈ Option 1 (~$1,150 net), just spread out.
+At **$40/mo the recurring dwarfs the one-time** — see the 5-yr column. So this is
+really "do I want money-now-and-walk-away, or money-over-time-and-own-it?"
 
 ---
 
-## OPTION 3 — Jeff keeps the fees (managed service)  *(most upside, most obligation)*
-She buys nothing. Jeff installs at his cost; she offers "Smart Stall monitoring,"
-bills it inside board, and remits the fee to Jeff (or the boarder pays Jeff and she
-just markets it).
+## OPTION 1 — Demand-triggered install  *(barn keeps the $40; lowest risk, recommended start)*
+No cost to the barn owner until she signs a boarder who wants it. Then a set price.
 
-- **Jeff fronts:** $150 parts + ~6 hr time per stall (~$540 all-in).
-- **Recurring to Jeff:** at $25/mo, less ~$5/mo to her for billing/marketing →
-  **~$20/mo to Jeff** (or keep the full $25 if the boarder pays Jeff directly).
-- **Cash payback** (on the $150 parts): **~6–8 months.** Full payback incl. your
-  time (~$540): **~22–27 months.**
-- **5-yr value / stall (if continuously subscribed):** $25 × 60 = **$1,500 gross**
-  − $150 parts − ~$250 support ≈ **~$1,100 net**, back-loaded; **year 3+ is mostly
-  profit and uncapped** if it keeps running.
-- **Risk to Jeff:** highest — you carry CapEx, **occupancy/churn risk**, depend on
-  the barn collecting/remitting, and you **own the ongoing support** (uptime, 9pm
-  "it's down"). Only scale into this after the first installs prove demand.
-- **For the barn owner — the flexible part Jeff wanted:** she can treat it as a
-  **money-maker** (mark up your fee to boarders, or take a referral cut, zero CapEx)
-  **OR** offer it at cost as a **barn amenity / differentiator**. Her choice.
+- **Installed price (1 stall):** $150 parts + $50 trip + $300 build = **$500/stall**
+- **Your take over cash cost:** $500 − $150 = **$350** for ~6 hr (~$58/hr) + you keep the trip charge
+- **Additional stalls, same visit:** ~$350 each ($150 parts + $200 build, trip shared)
+- **6-stall barn example:** $500 + 5×$350 = **$2,250** revenue; parts $900 →
+  **~$1,350 take** for ~20 hr (~$67/hr)
+- **Service plan:** $50 trip + parts per service call (or flat ~$99/yr/stall)
+- **Barn owner:** $0 until a paying boarder; she keeps the $40/mo → her money-maker
+- **Risk to Jeff:** ~none (paid on install). **5-yr/stall to Jeff: ~$350** (one-time)
+
+## OPTION 2 — Financed purchase  *(same as Opt 1, paid over time)*
+- Same **$500/stall** total, paid over ~12 mo (~$45/mo), optional small finance fee.
+- You front $150 parts + time, collect over the year. Hold title until paid.
+- Best when she wants the **whole barn now** but not in one check. **5-yr/stall: ~$350.**
+
+## OPTION 3 — Jeff keeps the $40/mo  *(managed service; most money, most obligation)*
+She buys nothing; you install near-cost (parts + $50 trip) and keep the monthly.
+
+- **At install:** charge **$200** (parts $150 + trip $50) so you're not out of pocket;
+  your ~6 hr is the investment.
+- **Recurring:** keep **$40/mo** (boarder pays you direct, or barn remits) — or give
+  her ~$5/mo for billing and keep $35.
+- **Cash payback** (on $150 parts): **~4 months.**
+- **5-yr/stall:** $40×60 = **$2,400** − $150 parts − ~$250 support ≈ **~$2,000 net**
+  (≈ **$1,700** if you share $5/mo with the barn). Year 1 pays your time back; the
+  rest is mostly profit, and it **keeps paying past year 5**.
+- **Risk to Jeff:** highest — you carry CapEx, **churn/vacancy risk**, depend on
+  collection, and **own ongoing support** (uptime, the 9pm "it's down" call).
+
+## SPLIT — $25 Jeff / $15 barn  *(both win; good "scale" model)*
+- **Jeff 5-yr/stall:** $25×60 = $1,500 − $150 − ~$250 ≈ **~$1,100 net** (+ install at
+  parts+trip so you're never out of pocket).
+- **Barn 5-yr/stall:** $15×60 = **$900**, zero CapEx (if Jeff fronts) → pure amenity
+  profit for her, which makes her an eager partner.
+- Boarder pays one clean **$40/mo**.
 
 ---
 
-## Side-by-side
-| | Opt 1 — Triggered install | Opt 2 — Financed | Opt 3 — Jeff keeps fees |
-|---|---|---|---|
-| Barn owner upfront | $0 until a client | $0 (pays over time) | $0 |
-| Jeff cash out | $0 (paid on install) | ~$150/stall until paid | ~$150/stall, ongoing |
-| Jeff paid | **now** | over ~12 mo | monthly, slow build |
-| ~Take / stall | **$700 + $120/yr plan** | ~$700 (+finance fee) | ~$20/mo (~$240/yr) |
-| Jeff's risk | low | low–moderate (collections) | **high** (churn/support/CapEx) |
-| Support obligation | warranty + opt-in plan | same | **ongoing, owned** |
-| 5-yr net / stall | ~$1,150 (front-loaded) | ~$1,150 | ~$1,100 (back-loaded, uncapped after) |
-| Best for | the default; clean & safe | she wants whole barn now | building a real recurring biz |
+## Side-by-side (per stall)
+| | Opt 1 install | Opt 2 financed | Opt 3 Jeff keeps $40 | Split 25/15 |
+|---|---|---|---|---|
+| Who keeps $40/mo | barn | barn | **Jeff** | shared |
+| Barn upfront | $0 till client | $0 (over time) | $0 | $0 |
+| Jeff cash out | $0 | ~$150 till paid | ~$150 | ~$150 |
+| Jeff paid | **now** | over ~12 mo | monthly | monthly |
+| Jeff 5-yr net | ~$350 | ~$350 | **~$2,000** | ~$1,100 |
+| Jeff risk/effort | low | low–mod | **high (owns support)** | moderate |
+| Best for | clean, money-now | whole barn, cash terms | building recurring biz | everybody-wins scale |
 
 ## Recommendation
-Lead with **Option 1** — it's the cleanest, she takes zero risk (easy yes), and
-you're paid per job. Keep **Option 2** in your pocket for a whole-barn order she
-can't pay at once. Pitch **Option 3** as the "money-making opportunity" framing for
-an ambitious barn owner — but only grow into it after a few Option-1 installs prove
-demand and you're ready for the support load. Over 5 years the totals are
-surprisingly close; the real difference is **risk, effort, and when you get paid.**
+1. **Lucky Mike (unit #1): build at parts cost** — it's the demo, not a sale.
+2. **First real installs: Option 1** ($500/stall, barn keeps the $40). Simple, you're
+   paid on the spot, no support pager. Proves demand.
+3. **Once proven, pitch the Split (or Option 3)** for scale — at $40/mo the recurring
+   is 3–6× the one-time over 5 years, *if* you're ready to own support and risk.
+   For a one-man operation, the Split is the sweet spot: real recurring without
+   giving the barn owner zero reason to push it.
 
-## TODO to finalize (need from Jeff)
-1. **Your target labor rate** ($/hr) — drives every install price.
-2. **Target monthly boarder fee** ($/mo) — drives Options 3 and the barn-owner payback.
-(Then these tables get locked to real numbers.)
+> Reality check for a solo, almost-60 operator: recurring = a support obligation
+> that never sleeps. Option 1 keeps life simple; grow into recurring deliberately.
