@@ -372,6 +372,8 @@ If any tests fail, fix them before doing anything else.
 
 ## Beehive / Home Assistant Integration — Current State
 
+**Beehive hardware (CONFIRMED 2026-07):** **Beelink J45 (Gemini) mini-PC** — Intel Pentium **J4205** (Apollo Lake quad-core), ~**8GB/128GB**, x86, 12V/2A, SN `4205HQBG40244`, part `J45-A-8128JDOW64PRO-D8`. **x86 with USB ports → it CAN host an RTL-SDR directly** (rtl_433/rtlamr add-on) for the gas/water meter reading — no separate ESP32 box needed, IF (a) HA is installed so USB passes through (HA OS bare-metal/supervised — confirm it's not a no-USB VM) and (b) the Beelink sits within radio range of the meters (or antenna run to a window).
+
 **HA Base URL:** `http://homeassistant.local:8123` (auto-fallback to `http://192.168.1.66:8123`)
 
 **HA Token:** Jeff enters a Long-Lived Access Token once in the app → stored in `localStorage` key `ha_token`. App then uses it for all HA API calls.
@@ -486,7 +488,7 @@ Jeff is building a wireless meter reader to pull his water usage into Beehive �
 - **Gas** (exterior wall) = easy from inside/garage. **Water** (underground pit, metal lid, curb) = the hard one. Try a windowsill facing the meters first; if water is weak → taller/better 915 antenna at the window, or move the box to the garage/an IP65 box near the pit.
 - **Besides ESP32 + CC1101:** 5V USB adapter+cable (~$5), F-F jumpers (~$2), a good 915 MHz SMA antenna (+ optional SMA pigtail to window, ~$6), small enclosure (IP65 if outdoor, ~$8-12). **No level shifter** (both 3.3V).
 - **Beehive (HA) is the hub/display — it has NO radio; it can't read the meters by itself.** It needs a receiver feeding it (ESP32+CC1101, or an RTL-SDR).
-- **Radio/firmware path depends on protocol:** gas is **Itron ERT** (different decode than the Kamstrup wM-Bus stack Jeff built). Easiest Itron path = cheap **RTL-SDR (~$25-35) + rtlamr/rtl_433** — can plug **straight into the Beehive host** (Pi/NUC/HA Green-Yellow w/ USB) as an add-on, **IF Beehive is within radio range of the meters** → no separate box. If Beehive is out of range, put the radio near the meters (ESP32+CC1101 Wi-Fi box, or a small Pi+RTL-SDR) reporting back over Wi-Fi. Keep **ESP32+CC1101** for the Kamstrup wM-Bus path. **TODO: confirm what Beehive runs on + where it sits vs the meters.** Pick the road once WHUD confirms the water radio/protocol.
+- **Radio/firmware path depends on protocol:** gas is **Itron ERT** (different decode than the Kamstrup wM-Bus stack Jeff built). Easiest Itron path = cheap **RTL-SDR (~$25-35) + rtlamr/rtl_433** — can plug **straight into the Beehive host** (Pi/NUC/HA Green-Yellow w/ USB) as an add-on, **IF Beehive is within radio range of the meters** → no separate box. If Beehive is out of range, put the radio near the meters (ESP32+CC1101 Wi-Fi box, or a small Pi+RTL-SDR) reporting back over Wi-Fi. Keep **ESP32+CC1101** for the Kamstrup wM-Bus path. **Beehive = Beelink J45 x86 mini-PC (has USB) → RTL-SDR can plug straight into it.** Remaining unknowns: is HA bare-metal/supervised (USB works) vs a VM (needs passthrough), and does the Beelink sit within range of the meters. Pick the road once WHUD confirms the water radio/protocol.
 
 **App plan (build once data is flowing in HA):**
 - Add a **Water Usage card** in the IRRIGATION section
