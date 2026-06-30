@@ -423,6 +423,8 @@ If any tests fail, fix them before doing anything else.
 
 7. **Lighthouse performance** — Score 60/100. Low priority. Main cause: unminified 300KB index.html.
 
+8. **Lucky Mike "Smart Stall" page — QUEUED (build AFTER utilities + current docket).** Jeff's next planned section: a horse-stall monitoring page (ESP32+ESPHome→HA→app, same stack as everything else). Source plan + hero photo + my technical review are saved in `docs/lucky-mike/` — **read `docs/lucky-mike/INTEGRATION_NOTES.md` first** (it lists the ChatGPT mistakes to fix: architecture diagram funnels cameras/Shelly through ESP32 [wrong], drop the redundant microSD + USB-power-bank, DS18B20 dup/misspelling, Phase 3 total mislabeled "Phase 2", Platinum-vs-Elite name clash, Phase 4 GPS reality check). When built: new "STABLE" section, own `--a-stable` accent, Section-Kit only, hero = `lucky-mike-hero.jpg`, live tiles from HA `/api/states`, branding "Smart Stall™ — Because They're Family." Do NOT start until Jeff says the current docket is clean.
+
 ---
 
 ## LUX Thermostat — API Reference (DO NOT CHANGE UNLESS BROKEN)
