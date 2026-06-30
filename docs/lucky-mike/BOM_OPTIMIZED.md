@@ -56,6 +56,32 @@ Jeff confirms.
 
 Optional adds: DS18B20 probe +$3 · 2nd camera +~$40 · fan smart plug +$15 (Phase 2).
 
+### Multi-pack / bulk pricing + parts-on-hand (true marginal cash per stall)
+Buying boards/sensors/connectors in multi-packs (and you already stock a lot of this
+from the water-meter + other ESP32 builds) drops the real per-stall cash a lot. The
+**camera is the floor** — it's the one thing that doesn't shrink and you won't have
+spares of.
+
+| Part | Multi-pack source | per-unit | Likely on-hand? |
+|---|---|---|---|
+| ESP32 WROOM | 3-pack ~$20 | ~$6.50 | **YES (you stock these)** |
+| USB adapter + cable | 4-pack / spares | ~$4 | **likely** |
+| BME280 | 3-pack ~$14 | ~$4.50 | maybe |
+| LD2410 | single/2-pk | ~$5 | maybe not |
+| Reed switch | 10-pack ~$8 | ~$0.80 | maybe |
+| Jumpers/wire/resistors | bulk kits (amortized) | ~$2 | **YES** |
+| IP enclosure | multipack | ~$7 | no |
+| Wi-Fi camera ×1 | 2-pack Tapo ~$65 | ~$33 | **no — the floor** |
+| **Bulk total** | | **~$63/stall** | |
+| **Bulk MINUS common on-hand** (ESP32, USB, jumpers/wire ≈ $12) | | **~$50/stall** | camera $33 + BME280 $4.5 + LD2410 $5 + reed $1 + box $7 |
+
+**→ True marginal cash per added stall, once you're stocked: ~$50** (≈ camera +
+the few sensors you don't keep + a box). Camera ≈ two-thirds of that.
+
+**Cash-risk ladder per stall:** ~$90 buying one-off retail → **~$63 bulk** →
+**~$50 bulk + your on-hand boards/wire.** (Confirm what you actually have stocked
+and we'll nail the exact number.)
+
 ## Barn-level (shared, buy ONCE — not per stall)
 | Part | Pick | ~$ | Notes |
 |---|---|---|---|
