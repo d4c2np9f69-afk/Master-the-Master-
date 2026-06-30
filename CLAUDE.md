@@ -481,6 +481,12 @@ Jeff is building a wireless meter reader to pull his water usage into Beehive �
 - When Jeff calls WHUD, ask BOTH: (1) the **"AES-128 encryption/decryption key (OMS/meter key) for my meter"** in **hex** (give meter S/N `25394131`); AND (2) **"Is my meter read by the Kamstrup's built-in radio, or by the separate radio module (`EFW`/`100WD`, endpoint `79453337`) in my pit, and what system does that use?"** — the answer tells us which RF source to decode.
 - If WHUD reads the EFW/100WD MIU, the Kamstrup AES key may be moot for their read path, but the Kamstrup register often still emits wM-Bus we can decode independently with the key — so still get the key.
 
+**Reader box — placement + remaining hardware:**
+- The reader box is a **Wi-Fi device** → does NOT need to be near the HCC/HA. Put it where it best HEARS the meters; it just needs power + Wi-Fi and sends to HA over Wi-Fi.
+- **Gas** (exterior wall) = easy from inside/garage. **Water** (underground pit, metal lid, curb) = the hard one. Try a windowsill facing the meters first; if water is weak → taller/better 915 antenna at the window, or move the box to the garage/an IP65 box near the pit.
+- **Besides ESP32 + CC1101:** 5V USB adapter+cable (~$5), F-F jumpers (~$2), a good 915 MHz SMA antenna (+ optional SMA pigtail to window, ~$6), small enclosure (IP65 if outdoor, ~$8-12). **No level shifter** (both 3.3V).
+- **Radio/firmware path depends on protocol:** gas is **Itron ERT** (different decode than the Kamstrup wM-Bus stack Jeff built). Easiest Itron path = cheap **RTL-SDR (~$25-35) + rtlamr** on a Pi/mini-PC (reads gas + likely water at once, no key). Keep **ESP32+CC1101** for the Kamstrup wM-Bus path. Pick the road once WHUD confirms the water radio/protocol.
+
 **App plan (build once data is flowing in HA):**
 - Add a **Water Usage card** in the IRRIGATION section
 - Pull the MQTT sensor from HA `/api/states` (same pattern as irrigation/cameras)
