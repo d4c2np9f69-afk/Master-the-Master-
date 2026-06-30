@@ -460,7 +460,8 @@ If any tests fail, fix them before doing anything else.
 Jeff is building a wireless meter reader to pull his water usage into Beehive → HCC app.
 
 **Hardware:**
-- **Meter:** Kamstrup **flowIQ 2100** (CONFIRMED from meter photo 2026-06-27 — NOT a 621). Type No `02U23C036EC`, 5/8" 25 GPM, 250 PSI, S/N starts `25394131`. Broadcasts encrypted **wireless M-Bus** telegrams (Kamstrup flowIQ family; wmbusmeters driver ~ flowiq2200/multical21).
+- **Meter:** Kamstrup **flowIQ 2100** (CONFIRMED from clear meter photos 2026-07). Type No `02U23C036EC`, 5/8" 25 GPM, 250 PSI, IP68, mfg 2023. **S/N `25394131`** (suffix `/W8/2…`), **Con. `0100200123033`**, **Ver `K1`**. LCD read `0012636.56 Gal` at photo time. Kamstrup flowIQ family broadcasts encrypted **wireless M-Bus** (wmbusmeters driver ~ flowiq2200/multical21).
+- **⚠️ CRITICAL FINDING (2026-07 photos) — there is a SEPARATE external AMR radio in the pit, WIRED to the Kamstrup register** (gray cable from the meter → a white pit transmitter). Module markings: **MODEL `100WD`**, **`EFW-1300-401`**, **endpoint S/N `79453337`**, **FCC ID `EFW…`**, **IC `8640-100WD`**. This third-party MIU (NOT Kamstrup's own radio) is very likely **how WHUD actually reads the meter.** Implication: the over-the-air signal may be this MIU's protocol, **not** Kamstrup wM-Bus — which could change the whole decode path. TWO possible RF sources to test: (a) the Kamstrup register's own wM-Bus (needs the AES key — pursue), and (b) the EFW 100WD MIU (need to ID its band/protocol from a clean FCC-ID photo + ask the utility). Do NOT tamper with the utility-owned MIU/wiring.
 - **Radio:** Qoroos **CC1101** sub-GHz transceiver with SMA antenna, tuned to **915 MHz** (US)
 - **Brain:** **ESP32** WROOM-32 (30-pin NodeMCU, CP2102 USB)
 - **Wiring:** CC1101 → ESP32 SPI (SCK→GPIO18, MOSI→GPIO23, MISO→GPIO19, CSN→GPIO5, GDO0/GDO2 → spare GPIOs), VCC→3V3, GND→GND
@@ -475,10 +476,10 @@ Jeff is building a wireless meter reader to pull his water usage into Beehive �
 
 **Data flow:** Kamstrup 621 → encrypted wM-Bus @915MHz → CC1101 → ESP32 (CRC + AES-128 decrypt) → MQTT → Home Assistant → (planned) HCC app via HA `/api/states`
 
-**BLOCKER — AES-128 decryption key:**
-- Each Kamstrup meter has a unique per-meter AES-128 key. Without it telegrams decode to gibberish.
-- **Jeff is requesting the key from the water utility on Monday (2026-06-30).**
-- When he calls: give the **meter serial number** (printed on the meter face) and ask for the **"AES-128 encryption/decryption key for my meter"** (utilities may call it the meter key / OMS key).
+**BLOCKER — AES-128 decryption key + WHICH radio is read:**
+- Each Kamstrup meter has a unique per-meter AES-128 key. Without it the Kamstrup wM-Bus telegrams decode to gibberish.
+- When Jeff calls WHUD, ask BOTH: (1) the **"AES-128 encryption/decryption key (OMS/meter key) for my meter"** in **hex** (give meter S/N `25394131`); AND (2) **"Is my meter read by the Kamstrup's built-in radio, or by the separate radio module (`EFW`/`100WD`, endpoint `79453337`) in my pit, and what system does that use?"** — the answer tells us which RF source to decode.
+- If WHUD reads the EFW/100WD MIU, the Kamstrup AES key may be moot for their read path, but the Kamstrup register often still emits wM-Bus we can decode independently with the key — so still get the key.
 
 **App plan (build once data is flowing in HA):**
 - Add a **Water Usage card** in the IRRIGATION section
@@ -498,8 +499,10 @@ A single ESP32 + CC1101 box reads BOTH water and gas off the air; electric uses 
 - **Electric:** Cumberland Electric Membership Corp (CEMC)
 - **Gas:** Piedmont Natural Gas (piped natural gas, NOT propane) — uses Itron AMR
 
-### 🔥 GAS — Piedmont / Itron ERT (easiest of the three)
-- Piedmont uses **Itron AMR**; gas meter broadcasts **Itron ERT** on the **900–920 MHz ISM band** (SCM / SCM+ / IDM formats).
+### 🔥 GAS — Piedmont (meter CONFIRMED; radio module still to ID)
+- **Meter body (CONFIRMED 2026-07 photo):** Elster / American Meter **AC-250**, MAOP 5 PSI, 250 CFH, Piedmont meter# **`T821986`**, serial **`10M225478`**. (This nameplate is the meter index, NOT the radio.)
+- **STILL NEEDED:** a photo of the **gas AMR radio module + its ID** — don't assume Itron until we see it (could be Itron ERT, or an Elster/Honeywell radio). The radio's ID is what we filter on.
+- IF it's **Itron ERT**: broadcasts on the **900–920 MHz ISM band** (SCM/SCM+/IDM), readable by the same CC1101 @915 box, **no key needed**.
 - **The SAME ESP32 + CC1101 @ 915 MHz box** that reads the water meter can also read gas — just decode a 2nd format. No extra hardware.
 - **NO encryption key needed** — Itron ERT electric/gas meters are typically unencrypted (unlike the Kamstrup water meter). Nothing to request from Piedmont.
 - Need the meter's **ERT ID** (serial on the Itron module) to filter to Jeff's meter, or match by usage.
