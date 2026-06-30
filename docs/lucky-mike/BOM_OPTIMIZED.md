@@ -30,6 +30,32 @@
 | Misc | dupont, terminal blocks, mounts | 8 | |
 | **Per-stall essential subtotal** | | **~$100–125** | + 1 camera |
 
+## REAL minimum (Bronze) per-stall parts cost — confirmed 2026-06-30
+Essential monitoring only (camera + environment + presence + door), outlet-powered.
+Fan plug / water / feed are later phases and NOT in this number. Barn UPS excluded
+(Jeff absorbs it as a shared one-time cost).
+
+| Part | Single-buy | Barn qty (6+) |
+|---|---|---|
+| ESP32 WROOM dev board | $8 | $5 |
+| 5V USB adapter + cable | $6 | $4 |
+| BME280 (genuine) | $7 | $5 |
+| LD2410 mmWave presence | $6 | $5 |
+| Door reed switch | $2 | $1.50 |
+| Wi-Fi camera ×1 (Tapo C120 / Reolink) | $40 | $35 |
+| IP enclosure + glands | $10 | $8 |
+| Wiring / mounts / misc | $8 | $6 |
+| **Subtotal** | **~$87** | **~$69** |
+| **+10% spares** | **~$96** | **~$76** |
+
+**→ Use ~$90/stall single-buy, ~$75/stall in barn quantity as the real parts cost.**
+(Camera is the swing factor, ~$30–55.) NOTE: the deal-economics docs originally
+used a padded $150/stall — real floor is ~$90, which *improves* every option's
+margin (Option 1 take ≈ $410/stall, not $350). Re-lock deal numbers at $90 when
+Jeff confirms.
+
+Optional adds: DS18B20 probe +$3 · 2nd camera +~$40 · fan smart plug +$15 (Phase 2).
+
 ## Barn-level (shared, buy ONCE — not per stall)
 | Part | Pick | ~$ | Notes |
 |---|---|---|---|
