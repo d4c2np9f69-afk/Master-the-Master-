@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>WHUD Water Meter Data Access Request (v2)</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;color:#1c2530;background:#fff;width:840px;margin:0 auto;font-size:13px;line-height:1.4}
+  .pad{padding:26px 30px}
+  .hdr{display:flex;align-items:flex-start;justify-content:space-between;border-bottom:3px solid #c9a227;padding-bottom:12px}
+  .hdr .org{font-size:21px;font-weight:800;color:#1e3a5f}
+  .hdr .sub{font-size:11px;color:#5a6470;margin-top:3px;line-height:1.5}
+  .formno{font-size:10px;color:#5a6470;text-align:right;line-height:1.7}
+  .formno b{color:#1e3a5f}
+  .title{background:#1e3a5f;color:#fff;text-align:center;padding:11px;margin-top:14px}
+  .title h1{font-size:18px;letter-spacing:.5px}
+  .title .t2{font-size:11px;opacity:.85;margin-top:2px;font-weight:500}
+  .purpose{background:#eef3f8;border:1px solid #d4e0ec;padding:11px 13px;font-size:12px;margin-top:12px;line-height:1.55}
+  .purpose b{color:#1e3a5f}
+  .secbar{background:#1e3a5f;color:#fff;font-weight:700;font-size:13px;letter-spacing:.4px;padding:7px 12px;margin-top:16px;display:flex;justify-content:space-between;align-items:center}
+  .secbar .note{font-size:10px;font-weight:600;opacity:.8}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;padding:12px 4px 4px}
+  .fld label{display:block;font-size:10px;font-weight:700;color:#1e3a5f;letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px}
+  .fld .val{border:1px solid #b9c4d0;border-radius:5px;padding:8px 9px;font-size:13px;min-height:34px;background:#fff}
+  .fld .val.pre{background:#f4f8fc;font-weight:600}
+  .fld .hint{font-size:9px;color:#8a93a0;font-weight:500;text-transform:none;letter-spacing:0}
+  .blk{border:1px solid #d9e0e8;border-radius:7px;padding:11px 13px;margin-top:10px}
+  .blk .q{font-weight:700;color:#1e3a5f;font-size:13px;margin-bottom:7px}
+  .blk .q .star{color:#c0392b}
+  .opt{display:inline-flex;align-items:center;gap:6px;margin:3px 18px 3px 0;font-size:12.5px}
+  .box{width:14px;height:14px;border:1.5px solid #5a6470;border-radius:3px;display:inline-block;flex-shrink:0}
+  .keyline{border:2px solid #1e3a5f;border-radius:6px;padding:12px;margin-top:7px;background:#fbfcfe;font-family:ui-monospace,Menlo,monospace;color:#8a93a0;font-size:12px}
+  .pre-tag{font-size:10px;font-weight:700;color:#1a7a3c;background:#e6f5ec;border:1px solid #b6e0c4;border-radius:4px;padding:2px 7px;margin-left:6px}
+  .write{display:inline-block;border-bottom:1px solid #8a93a0;min-width:120px;height:15px}
+  .auth{font-size:11.5px;color:#3a444f;padding:10px 4px;line-height:1.6}
+  .sig{display:grid;grid-template-columns:2fr 1fr;gap:24px;margin-top:18px}
+  .sigline{border-top:1px solid #5a6470;padding-top:4px;font-size:10px;color:#5a6470}
+  .district{background:#3a444f;color:#fff;font-weight:700;font-size:12px;padding:6px 12px;margin-top:18px}
+  .dgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;padding:20px 4px 6px}
+  .foot{text-align:center;font-size:9.5px;color:#8a93a0;border-top:1px solid #e0e6ec;margin-top:16px;padding-top:8px}
+</style></head>
+<body><div class="pad">
+
+  <div class="hdr">
+    <div>
+      <div class="org">💧 White House Utility District</div>
+      <div class="sub">3303 Highway 31W · P.O. Box 608 · White House, TN 37188<br>
+        Phone (615) 672-4110 · www.whud.org · customerservice@whud.org</div>
+    </div>
+    <div class="formno"><b>FORM NO.</b><br>WM-AMR-01 (rev 2)<br><br><b>DATE REC'D</b> ___________<br><b>REF / TICKET #</b> ________</div>
+  </div>
+
+  <div class="title">
+    <h1>WATER METER DATA ACCESS REQUEST</h1>
+    <div class="t2">Account-Holder Request to Self-Monitor Household Water Usage</div>
+  </div>
+
+  <div class="purpose">
+    <b>Purpose:</b> I am the verified account holder named below. I am building a small private display of
+    <u>my own household water usage</u> on my home network, using a passive radio receiver. <b>Readings are
+    received passively over the air — I am NOT requesting any change, access, or modification to District
+    equipment.</b> Please confirm how my meter is read and provide the applicable items in Section B.
+  </div>
+
+  <div class="secbar">SECTION A — ACCOUNT HOLDER INFORMATION <span class="note">PRE-FILLED FROM ACCOUNT / BILL</span></div>
+  <div class="grid2">
+    <div class="fld"><label>Full Name(s)</label><div class="val pre">Jeff &amp; Angela M. Loewen</div></div>
+    <div class="fld"><label>Date of Request</label><div class="val"></div></div>
+    <div class="fld"><label>Service Address</label><div class="val pre">301 S. Aztec Dr., White House, TN 37188</div></div>
+    <div class="fld"><label>Account Number</label><div class="val pre">00710690-02</div></div>
+    <div class="fld"><label>Customer Number</label><div class="val pre">60556</div></div>
+    <div class="fld"><label>Phone</label><div class="val pre">615-315-1844</div></div>
+    <div class="fld"><label>Email</label><div class="val pre">jeff.loewen@comcast.net</div></div>
+    <div class="fld"><label>Water Meter ID / Serial <span class="hint">(meter face &amp; bill)</span></label><div class="val pre">25394131</div></div>
+  </div>
+
+  <div class="secbar">SECTION B — METER &amp; RADIO INFORMATION <span class="note">PLEASE CONFIRM / PROVIDE — ✔ EACH AS COMPLETED</span></div>
+
+  <div class="blk">
+    <div class="q">1. What we already have <span class="pre-tag">FROM PHOTOS — PLEASE CONFIRM</span></div>
+    <div style="font-size:12.5px;line-height:1.9">
+      • Water meter: <b>Kamstrup flowIQ 2100</b>, Meter ID / Serial <b>25394131</b> &nbsp;<span class="box"></span> confirmed<br>
+      • Separate radio module in my meter pit (wired to the meter): Model <b>100WD</b>, Endpoint/Transmitter ID <b>79453337</b> &nbsp;<span class="box"></span> confirmed<br>
+      • Is endpoint <b>79453337</b> the ID you use to read/bill my water? &nbsp;<span class="box"></span> Yes &nbsp;<span class="box"></span> No → correct ID: <span class="write"></span>
+    </div>
+  </div>
+
+  <div class="blk">
+    <div class="q">2. Which device does the District actually READ? <span class="star">★ most important</span></div>
+    <span class="opt"><span class="box"></span> The meter's built-in radio (Kamstrup wireless M-Bus)</span>
+    <span class="opt"><span class="box"></span> The separate pit radio module (Itron-style ERT, endpoint 79453337)</span>
+    <span class="opt"><span class="box"></span> Other / both: <span class="write"></span></span>
+  </div>
+
+  <div class="blk">
+    <div class="q">3. Is the over-the-air reading encrypted?</div>
+    <span class="opt"><span class="box"></span> No — open / standard ERT (no key needed)</span>
+    <span class="opt"><span class="box"></span> Yes — AES-128 (please provide the key below)</span>
+    <span class="opt"><span class="box"></span> Unknown</span>
+  </div>
+
+  <div class="blk">
+    <div class="q">4. IF encrypted — AES-128 / OMS decryption key for meter 25394131 <span class="hint">(hex; print clearly — every character matters)</span></div>
+    <div class="keyline">Key: ______________________________________________________________</div>
+  </div>
+
+  <div class="blk">
+    <div class="q">5. Radio details (check / fill what applies)</div>
+    <div style="margin-bottom:6px"><b style="font-size:11px;color:#1e3a5f">FREQUENCY:</b>
+      <span class="opt"><span class="box"></span> 868 MHz</span>
+      <span class="opt"><span class="box"></span> 915 MHz</span>
+      <span class="opt"><span class="box"></span> 900–920 MHz ISM</span>
+      <span class="opt"><span class="box"></span> Other: <span class="write"></span></span>
+    </div>
+    <div style="margin-bottom:6px"><b style="font-size:11px;color:#1e3a5f">PROTOCOL / FORMAT:</b>
+      <span class="opt"><span class="box"></span> Itron ERT (SCM / SCM+ / IDM)</span>
+      <span class="opt"><span class="box"></span> Wireless M-Bus (C1 / T1 / S1)</span>
+      <span class="opt"><span class="box"></span> Other: <span class="write"></span></span>
+    </div>
+    <div><b style="font-size:11px;color:#1e3a5f">TRANSMIT INTERVAL:</b>
+      <span class="opt"><span class="box"></span> every <span class="write" style="min-width:55px"></span> sec</span>
+      <span class="opt"><span class="box"></span> every <span class="write" style="min-width:55px"></span> min</span>
+      <span class="opt"><span class="box"></span> other: <span class="write"></span></span>
+    </div>
+  </div>
+
+  <div class="secbar">SECTION C — APPLICANT AUTHORIZATION</div>
+  <div class="auth">
+    I certify that I am the account holder (or spouse of the account holder) for the service address above, and
+    that this information is requested solely to passively monitor my own household water usage on my private
+    network. I am not requesting any modification to or physical access to District-owned equipment.
+  </div>
+  <div class="sig">
+    <div class="sigline">Account Holder Signature</div>
+    <div class="sigline">Date</div>
+  </div>
+
+  <div class="district">FOR DISTRICT USE ONLY</div>
+  <div class="dgrid">
+    <div class="sigline">Staff Name / Title</div>
+    <div class="sigline">Department</div>
+    <div class="sigline">Date</div>
+  </div>
+
+  <div class="foot">Form WM-AMR-01 (rev 2) · White House Utility District · Account-holder request to self-monitor household water usage.</div>
+
+</div></body></html>
