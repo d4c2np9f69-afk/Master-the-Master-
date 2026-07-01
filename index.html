@@ -1369,43 +1369,9 @@ html,body{
       <!-- Status banner -->
       <div id="mpingBanner" class="wx-banner wx-load" style="display:none"></div>
 
-      <!-- Type selection: Precipitation -->
-      <div style="font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin:10px 0 6px">Precipitation Type</div>
-      <div id="mpingPrecipBtns" class="mping-type-grid">
-        <button class="mping-type-btn" data-type-id="1" onclick="mpingSelect(this)">☀️<br><span>None</span></button>
-        <button class="mping-type-btn" data-type-id="3" onclick="mpingSelect(this)">🌦<br><span>Drizzle</span></button>
-        <button class="mping-type-btn" data-type-id="2" onclick="mpingSelect(this)">🌧<br><span>Rain</span></button>
-        <button class="mping-type-btn" data-type-id="4" onclick="mpingSelect(this)">🌨<br><span>Frz Rain</span></button>
-        <button class="mping-type-btn" data-type-id="6" onclick="mpingSelect(this)">🧊<br><span>Sleet</span></button>
-        <button class="mping-type-btn" data-type-id="7" onclick="mpingSelect(this)">❄️<br><span>Snow</span></button>
-        <button class="mping-type-btn" data-type-id="8" onclick="mpingSelect(this)">🌩<br><span>Mixed</span></button>
-      </div>
-
-      <!-- Convective -->
-      <div style="font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin:10px 0 6px">Convective</div>
-      <div class="mping-type-grid">
-        <button class="mping-type-btn mping-hail" data-type-id="12" onclick="mpingSelect(this)">⛈<br><span>Small Hail</span></button>
-        <button class="mping-type-btn mping-hail" data-type-id="11" onclick="mpingSelect(this)">⛈<br><span>Hail</span></button>
-        <button class="mping-type-btn mping-tornado" data-type-id="14" onclick="mpingSelect(this)">🌪<br><span>Funnel</span></button>
-        <button class="mping-type-btn mping-tornado" data-type-id="13" onclick="mpingSelect(this)">🌪<br><span>Tornado</span></button>
-      </div>
-
-      <!-- Location row -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding:8px 10px;background:rgba(0,0,0,.3);border-radius:8px;border:1px solid var(--border)">
-        <div>
-          <div style="font-size:10px;font-weight:700;color:var(--text)" id="mpingLocLabel">&#128204; Using KTNWHITE21 station</div>
-          <div style="font-size:9px;color:var(--muted);margin-top:2px">36.477° N, 86.660° W &bull; White House, TN</div>
-        </div>
-        <button onclick="mpingUseGPS()" style="padding:6px 10px;background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.3);border-radius:6px;color:var(--gold);font-size:10px;font-weight:700;font-family:inherit;cursor:pointer">&#128204; GPS</button>
-      </div>
-
-      <!-- Submit -->
-      <button id="mpingSubmitBtn" class="btn-full" onclick="mpingSubmit()" disabled
-        style="margin-top:10px;background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.3);border-radius:10px;padding:13px;color:#fb923c;font-size:14px;font-weight:800;font-family:var(--serif);letter-spacing:.5px;cursor:not-allowed;opacity:.5;transition:all .2s">
-        Select a Type to Report
-      </button>
-
-      <div class="wx-note" style="margin-top:8px">Reports go directly to NOAA &bull; Credited to spotter jlo301 &bull; <span style="color:rgba(249,115,22,.7)">NOAA/OU mPING v2</span></div>
+      <div style="font-size:12px;color:var(--muted);margin:10px 0 2px;line-height:1.5">Report the precip type, hail, or storm damage you're seeing straight to NOAA — it helps ground-truth the radar near you.</div>
+      <a href="https://mping.nssl.noaa.gov/" target="_blank" rel="noopener" class="btn-full" style="display:block;text-align:center;text-decoration:none;margin-top:10px;background:#ea580c;border:1px solid #ea580c;border-radius:10px;padding:13px;color:#fff;font-size:14px;font-weight:800;letter-spacing:.5px">&#128225; Open mPING to Report &#8599;</a>
+      <div class="wx-note" style="margin-top:8px">Official NOAA/OU citizen tool &bull; free <b>mPING</b> app (iOS/Android) or web map &bull; spotter jlo301</div>
     </div>
 
     <!-- WEATHER STATION -->
