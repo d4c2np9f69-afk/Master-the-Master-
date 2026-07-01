@@ -58,54 +58,57 @@ export async function onRequestGet({ env, request }) {
       return Response.json({ ok: false, error: 'no_timer_device_found', devices_found: (devices||[]).map(d=>d.type) }, { status: 404 });
     }
 
-    // Watering history — the B-Hyve device object has NO "last watered" field, and
-    // /watering_events 404s (doesn't exist). The data lives in status.watering_status
-    // (current) and status.watering_statuses (recent runs). Derive last-watered from
-    // whichever timestamp field is present; debug dumps the raw objects to confirm it.
-    const debug = url.searchParams.get('debug') === '1';
+    // Watering history — CORRECT endpoint is /watering_events/{device_id} (device id
+    // in the PATH; a ?device_id= query 404s). Returns recent runs. Parse defensively.
     const st = timer.status || {};
-    const dbg = {
-      deviceKeys: Object.keys(timer),
-      statusKeys: Object.keys(st),
-      watering_status: st.watering_status || null,
-      watering_statuses: st.watering_statuses || null,
-      next_start_programs: st.next_start_programs || null
-    };
+    const dbg = { deviceKeys: Object.keys(timer), statusKeys: Object.keys(st), events: [] };
     let lastWateredFromEvents = null;
     let history = [];
-    const TFIELDS = ['last_watering_time', 'stopped_watering_station_at', 'started_watering_station_at', 'end_time', 'start_time', 'wateringStationAt', 'completed_at', 'water_event_at'];
-    const pickTime = (o) => {
-      if (!o || typeof o !== 'object') return null;
-      for (const k of TFIELDS) { if (o[k]) return o[k]; }
-      return null;
-    };
-    const records = [];
-    if (st.watering_status && typeof st.watering_status === 'object') records.push(st.watering_status);
-    if (Array.isArray(st.watering_statuses)) st.watering_statuses.forEach(r => { if (r && typeof r === 'object') records.push(r); });
-    const withTime = records.map(r => ({ r, t: pickTime(r) })).filter(x => x.t);
-    withTime.sort((a, b) => new Date(b.t).getTime() - new Date(a.t).getTime());
-    if (withTime.length) {
-      lastWateredFromEvents = withTime[0].t;
-      history = withTime.slice(0, 10).map(x => ({
-        time: x.t,
-        station: (x.r.station != null ? x.r.station : (x.r.current_station != null ? x.r.current_station : null)),
-        run_time: (x.r.run_time != null ? x.r.run_time : (x.r.watering_time != null ? x.r.watering_time : null))
-      }));
+    const evUrls = [
+      `${API_BASE}/watering_events/${timer.id}?page=1&per-page=25`,
+      `${API_BASE}/watering_events/${timer.id}`
+    ];
+    for (const eu of evUrls) {
+      try {
+        const wr = await fetch(eu, { headers: devHeaders });
+        const bodyText = await wr.text().catch(() => '');
+        dbg.events.push({ url: eu.replace(API_BASE, ''), status: wr.status, sample: bodyText.slice(0, 500) });
+        if (!wr.ok || !bodyText) continue;
+        let raw; try { raw = JSON.parse(bodyText); } catch (_) { continue; }
+        const arr = Array.isArray(raw) ? raw
+                  : Array.isArray(raw.watering_events) ? raw.watering_events
+                  : Array.isArray(raw.data) ? raw.data : [];
+        const events = [];
+        arr.forEach(item => {
+          if (item && Array.isArray(item.irrigation)) {
+            item.irrigation.forEach(z => events.push(Object.assign({ _evtime: item.start_time || item.end_time }, z)));
+          } else if (item) events.push(item);
+        });
+        const ts = (e) => new Date(e.end_time || e.start_time || e.started_watering_station_at || e._evtime || 0).getTime();
+        events.sort((a, b) => ts(b) - ts(a));
+        if (events.length && ts(events[0]) > 0) {
+          const e0 = events[0];
+          lastWateredFromEvents = e0.end_time || e0.start_time || e0.started_watering_station_at || e0._evtime || null;
+          history = events.slice(0, 10).map(e => ({
+            time: e.end_time || e.start_time || e.started_watering_station_at || e._evtime || null,
+            station: (e.station != null ? e.station : (e.current_station != null ? e.current_station : null)),
+            run_time: (e.run_time != null ? e.run_time : (e.watering_time != null ? e.watering_time : null)),
+            gallons: (e.water_volume_gal != null ? e.water_volume_gal : null)
+          }));
+          break;
+        }
+      } catch (e) { dbg.events.push({ url: eu.replace(API_BASE, ''), error: String(e).slice(0, 140) }); }
     }
 
     // Compact plain-text debug (screenshot-friendly) — ?debug=2
     if (url.searchParams.get('debug') === '2') {
-      const short = (o) => o == null ? 'null' : JSON.stringify(o).slice(0, 700);
       const txt = [
         'last_watered: ' + (lastWateredFromEvents || 'null'),
         'history: ' + history.length + ' items',
-        'statusKeys: ' + Object.keys(st).join(', '),
+        'first history item: ' + (history[0] ? JSON.stringify(history[0]) : 'none'),
         '',
-        'watering_status = ' + short(st.watering_status),
-        '',
-        'watering_statuses = ' + short(st.watering_statuses),
-        '',
-        'next_start_programs = ' + short(st.next_start_programs)
+        'watering_events fetch attempts:',
+        ...dbg.events.map(e => '  ' + e.url + '  -> status ' + (e.status || 'ERR') + '\n    ' + (e.sample || e.error || '').slice(0, 400))
       ].join('\n');
       return new Response(txt, { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
     }
@@ -143,7 +146,7 @@ export async function onRequestGet({ env, request }) {
       zones,
       history
     };
-    if (debug) resp._debug = dbg;
+    if (url.searchParams.get('debug') === '1') resp._debug = dbg;
     // Include session token when browser needs it for direct WebSocket control
     if (url.searchParams.get('tk') === '1') resp._token = token;
     return Response.json(resp);
