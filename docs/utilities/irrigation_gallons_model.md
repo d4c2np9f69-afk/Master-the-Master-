@@ -44,8 +44,19 @@ irrigation credit). Reality check:
 - ROI angle for the family/CFO pitch: turns the meter project into documented recurring
   $ savings.
 
-### Jeff's actual claim (2026-07): WHUD sewer = 2× water, NO sewer meter
-- WHUD reportedly does **not meter sewer** — they charge sewer as a **multiple of metered
+### Correction (2026-07): SEWER authority = City of White House (NOT WHUD)
+- **Water** = WHUD. **Sewer** = **City of White House** — two different entities. Aim the
+  sewer-overcharge claim at the **City**, not WHUD.
+- **WHUD has a seasonal (summer irrigation) sewer rate; the City of White House does NOT** —
+  that's the core unfairness: the City bills sewer as a flat multiple of water with no
+  summer/irrigation break.
+- Jeff has already (a) written the City with **no response**, and (b) contacted his
+  **alderman** ~2 years ago ("looking into it," stalled). → The play is **stronger data**:
+  once the meter is live, produce documented irrigation gallons to make real noise / force
+  a response. This is the WHY behind getting the meter reading working.
+
+### Jeff's actual claim (2026-07): sewer = ~2× water, NO sewer meter (bill the City)
+- The sewer provider does **not meter sewer** — charges sewer as a **multiple of metered
   water usage** (Jeff says ~2×). So irrigation water (which can't be sewage) is being
   sewer-billed at that multiplier. Jeff wants **3 years of reimbursement** for the overcharge.
 - **FIRST get WHUD's written sewer-calc policy / rate schedule.** The case type depends on it:
