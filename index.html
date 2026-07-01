@@ -562,6 +562,31 @@ html,body{
 .hcc-badge-next{flex-shrink:0;background:#0f2448;color:#4a9eff;font-size:9px;font-weight:900;letter-spacing:1px;border-radius:5px;padding:3px 7px;border:1px solid rgba(74,158,255,.35)}
 .hcc-badge-future{flex-shrink:0;background:rgba(255,255,255,.05);color:var(--dim);font-size:9px;font-weight:900;letter-spacing:1px;border-radius:5px;padding:3px 7px}
 
+/* ── UTILITIES (Water / Gas / Electric meter cards, HOME) ───────────────── */
+.util-list{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
+.util-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.30)}
+.util-banner{width:100%;height:104px;overflow:hidden;background:#0b0b0f}
+.util-banner img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.util-w .util-banner img{object-position:center 30%}
+.util-accent{height:3px;width:100%;background:var(--dim)}
+.util-w .util-accent{background:var(--info,#38bdf8)}
+.util-g .util-accent{background:#f97316}
+.util-e .util-accent{background:var(--gold,#d4af37)}
+.util-body{padding:12px 14px 13px}
+.util-head{display:flex;align-items:center;gap:9px;margin-bottom:11px}
+.util-head-name{font-size:13px;font-weight:800;color:var(--text);letter-spacing:.3px}
+.util-head-prov{font-size:10px;color:var(--muted);margin-top:1px}
+.util-chip{margin-left:auto;font-size:9px;font-weight:900;letter-spacing:1px;padding:3px 8px;border-radius:10px;white-space:nowrap;background:rgba(150,150,150,.14);color:var(--muted);border:1px solid var(--border)}
+.util-chip.live{background:rgba(34,197,94,.14);color:var(--ok,#22c55e);border-color:rgba(34,197,94,.35)}
+.util-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.util-stat{background:rgba(150,150,150,.08);border:1px solid var(--border);border-radius:10px;padding:9px 6px;text-align:center}
+.util-stat-label{font-size:9px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:var(--dim)}
+.util-stat-val{font-size:17px;font-weight:800;color:var(--text);margin-top:3px;line-height:1.1;font-variant-numeric:tabular-nums}
+.util-stat-unit{font-size:9px;font-weight:700;color:var(--muted);margin-left:2px}
+.util-foot{font-size:10px;color:var(--muted);margin-top:10px;display:flex;align-items:center;gap:6px}
+.util-foot .dot{width:7px;height:7px;border-radius:50%;background:#9a9a9a;flex-shrink:0}
+.util-foot.live .dot{background:var(--ok,#22c55e)}
+
 /* ── PANIC BUTTON ───────────────────────────────────────────────────────── */
 .hcc-panic-btn{
   width:100%;padding:12px 16px;
@@ -1035,6 +1060,81 @@ html,body{
           <span class="hcc-badge-next">OFFLINE</span>
         </div>
       </div>
+    </div>
+
+    <!-- ── UTILITIES (Water / Gas / Electric) — live once Beehive meter reader is online ── -->
+    <div class="sec-hdr" style="margin-top:16px">
+      <span class="sec-hdr-icon">&#128200;</span>
+      <span class="sec-hdr-label">Utilities</span>
+    </div>
+    <div class="util-list" id="utilitiesList">
+
+      <!-- WATER -->
+      <div class="util-card util-w">
+        <div class="util-banner"><img src="./images/util-water.jpg" alt="White House Utilities water meter"></div>
+        <div class="util-accent"></div>
+        <div class="util-body">
+          <div class="util-head">
+            <span style="font-size:18px">&#128167;</span>
+            <div style="flex:1;min-width:0">
+              <div class="util-head-name">Water</div>
+              <div class="util-head-prov">White House Utilities &bull; flowIQ 2100</div>
+            </div>
+            <span class="util-chip" id="util-water-chip">WAITING</span>
+          </div>
+          <div class="util-stats">
+            <div class="util-stat"><div class="util-stat-label">Today</div><div class="util-stat-val" id="util-water-today">&mdash;<span class="util-stat-unit">gal</span></div></div>
+            <div class="util-stat"><div class="util-stat-label">This Month</div><div class="util-stat-val" id="util-water-month">&mdash;<span class="util-stat-unit">gal</span></div></div>
+            <div class="util-stat"><div class="util-stat-label">Flow</div><div class="util-stat-val" id="util-water-flow">&mdash;<span class="util-stat-unit">gpm</span></div></div>
+          </div>
+          <div class="util-foot" id="util-water-foot"><span class="dot"></span> Waiting for Beehive meter reader</div>
+        </div>
+      </div>
+
+      <!-- GAS -->
+      <div class="util-card util-g">
+        <div class="util-banner"><img src="./images/util-gas.jpg" alt="Piedmont Natural Gas meter"></div>
+        <div class="util-accent"></div>
+        <div class="util-body">
+          <div class="util-head">
+            <span style="font-size:18px">&#128293;</span>
+            <div style="flex:1;min-width:0">
+              <div class="util-head-name">Natural Gas</div>
+              <div class="util-head-prov">Piedmont Natural Gas &bull; Itron 100G ERT</div>
+            </div>
+            <span class="util-chip" id="util-gas-chip">WAITING</span>
+          </div>
+          <div class="util-stats">
+            <div class="util-stat"><div class="util-stat-label">Today</div><div class="util-stat-val" id="util-gas-today">&mdash;<span class="util-stat-unit">ccf</span></div></div>
+            <div class="util-stat"><div class="util-stat-label">This Month</div><div class="util-stat-val" id="util-gas-month">&mdash;<span class="util-stat-unit">ccf</span></div></div>
+            <div class="util-stat"><div class="util-stat-label">Est. Cost</div><div class="util-stat-val" id="util-gas-cost">&mdash;</div></div>
+          </div>
+          <div class="util-foot" id="util-gas-foot"><span class="dot"></span> Waiting for Beehive meter reader</div>
+        </div>
+      </div>
+
+      <!-- ELECTRIC -->
+      <div class="util-card util-e">
+        <div class="util-banner"><img src="./images/util-electric.jpg" alt="Cumberland Electric (CEMC) meter"></div>
+        <div class="util-accent"></div>
+        <div class="util-body">
+          <div class="util-head">
+            <span style="font-size:18px">&#9889;</span>
+            <div style="flex:1;min-width:0">
+              <div class="util-head-name">Electric</div>
+              <div class="util-head-prov">Cumberland Electric &bull; DIY CT monitor</div>
+            </div>
+            <span class="util-chip" id="util-elec-chip">WAITING</span>
+          </div>
+          <div class="util-stats">
+            <div class="util-stat"><div class="util-stat-label">Now</div><div class="util-stat-val" id="util-elec-now">&mdash;<span class="util-stat-unit">kW</span></div></div>
+            <div class="util-stat"><div class="util-stat-label">Today</div><div class="util-stat-val" id="util-elec-today">&mdash;<span class="util-stat-unit">kWh</span></div></div>
+            <div class="util-stat"><div class="util-stat-label">This Month</div><div class="util-stat-val" id="util-elec-month">&mdash;<span class="util-stat-unit">kWh</span></div></div>
+          </div>
+          <div class="util-foot" id="util-elec-foot"><span class="dot"></span> Waiting for Beehive energy monitor</div>
+        </div>
+      </div>
+
     </div>
 
     <!-- Quick Access -->
@@ -3483,7 +3583,7 @@ function acctSaveHa(){
   localStorage.setItem('ha_token',inp.value.trim());
   acctRefreshStatus();
   if(msg){msg.style.color='#22c55e';msg.textContent='Saved! Will connect on home WiFi.';}
-  setTimeout(function(){var f=document.getElementById('acct-ha');if(f)f.classList.remove('open');checkBeehive(false);loadCameras();loadHomeStatus();},1500);
+  setTimeout(function(){var f=document.getElementById('acct-ha');if(f)f.classList.remove('open');checkBeehive(false);loadCameras();loadHomeStatus();loadUtilities();},1500);
 }
 function acctSaveLux(){
   var email=(document.getElementById('acct-lux-email')?document.getElementById('acct-lux-email').value:'').trim();
@@ -4923,6 +5023,7 @@ function hccSection(id, btn) {
   if (btn) btn.classList.add('active');
   if (id === 'irrigation' && !window._irrLoaded) { window._irrLoaded = true; loadIrrigation(); }
   if (id === 'home' && !window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
+  if (id === 'home') { loadUtilities(); }
   if (id === 'climate') { loadClimate(); }
   if (id === 'weather') {
     /* Windy radar iframe self-loads with calendar=now; no manual refresh needed */
@@ -5160,6 +5261,7 @@ function beehiveOnline(base, d) {
     if (prompt) prompt.style.display = 'none';
     loadCameras();
     loadHomeStatus();
+    loadUtilities();
   } else {
     var prompt = document.getElementById('haTokenPrompt');
     if (prompt) prompt.style.display = 'block';
@@ -5230,6 +5332,7 @@ function saveHaToken() {
         if (prompt) prompt.style.display = 'none';
         loadCameras();
         loadHomeStatus();
+        loadUtilities();
       } else {
         throw new Error('unexpected_response');
       }
@@ -5366,6 +5469,72 @@ function loadHomeStatus() {
   .catch(function(){ if (rows) rows.innerHTML='<div style="font-size:11px;color:#ff6262">Status unavailable — check token</div>'; });
 }
 
+// ── UTILITIES (Water / Gas / Electric) ───────────────────────────────────
+// Live values come from Home Assistant sensors created by the Beehive meter
+// reader: RTL-SDR + rtl_433 for WATER (Itron ERT-SCM MIU, endpoint 79453337,
+// unencrypted) and GAS (Itron 100G ERT); DIY ATM90E32 CT monitor for ELECTRIC.
+// Until those exact sensors exist in Beehive, the cards stay in the "Waiting"
+// placeholder state. >>> When a meter goes live, drop its real entity_id in
+// UTIL_ENTITIES below and that card lights up automatically. <<<
+var UTIL_ENTITIES = {
+  water_today: null, water_month: null, water_flow: null,
+  gas_today: null,   gas_month: null,   gas_cost: null,
+  elec_now: null,    elec_today: null,  elec_month: null
+};
+
+function loadUtilities() {
+  var token = getHaToken();
+  var base = localStorage.getItem('ha_base') || HA_BASE;
+  if (!token || !base) return; // no Beehive yet → keep placeholders
+  var configured = Object.keys(UTIL_ENTITIES).some(function(k){ return !!UTIL_ENTITIES[k]; });
+  if (!configured) return;      // meters not wired into Beehive yet → keep placeholders
+  fetch(base + '/api/states', {
+    headers: { 'Authorization': 'Bearer ' + token },
+    signal: AbortSignal.timeout(5000)
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(states){
+    if (!Array.isArray(states)) return;
+    var byId = {};
+    states.forEach(function(s){ byId[s.entity_id] = s; });
+    function val(key){
+      var id = UTIL_ENTITIES[key]; if (!id) return null;
+      var s = byId[id]; if (!s) return null;
+      var n = parseFloat(s.state); return isNaN(n) ? null : n;
+    }
+    function put(elId, v, digits){
+      if (v == null) return;
+      var el = document.getElementById(elId); if (!el) return;
+      var unit = el.querySelector('.util-stat-unit');
+      el.textContent = (digits != null ? v.toFixed(digits) : String(v));
+      if (unit) el.appendChild(unit);
+    }
+    function live(group){
+      var c = document.getElementById('util-' + group + '-chip');
+      if (c) { c.textContent = 'LIVE'; c.classList.add('live'); }
+      var f = document.getElementById('util-' + group + '-foot');
+      if (f) { f.classList.add('live'); f.innerHTML = '<span class="dot"></span> Live from Beehive'; }
+    }
+    var w = [val('water_today'), val('water_month'), val('water_flow')];
+    if (w.some(function(x){ return x != null; })) {
+      put('util-water-today', w[0], 0); put('util-water-month', w[1], 0); put('util-water-flow', w[2], 1);
+      live('water');
+    }
+    var g = [val('gas_today'), val('gas_month'), val('gas_cost')];
+    if (g.some(function(x){ return x != null; })) {
+      put('util-gas-today', g[0], 1); put('util-gas-month', g[1], 1);
+      if (g[2] != null) { var ge = document.getElementById('util-gas-cost'); if (ge) ge.textContent = '$' + g[2].toFixed(2); }
+      live('gas');
+    }
+    var e = [val('elec_now'), val('elec_today'), val('elec_month')];
+    if (e.some(function(x){ return x != null; })) {
+      put('util-elec-now', e[0], 2); put('util-elec-today', e[1], 1); put('util-elec-month', e[2], 0);
+      live('elec');
+    }
+  })
+  .catch(function(){ /* unreachable → keep placeholders, no error shown */ });
+}
+
 function blinkSendPin() {
   var pin = (document.getElementById('blinkPinInput') || {}).value || '';
   var status = document.getElementById('blinkPinStatus');
@@ -5384,7 +5553,7 @@ function blinkSendPin() {
   .then(function(r) {
     if (r.ok || r.status === 200) {
       if (status) { status.style.color='#22c55e'; status.textContent='✓ Code sent! Loading cameras…'; }
-      setTimeout(function() { loadCameras(); loadHomeStatus(); }, 2000);
+      setTimeout(function() { loadCameras(); loadHomeStatus(); loadUtilities(); }, 2000);
     } else {
       return r.text().then(function(t) { throw new Error(r.status + ' ' + t.slice(0,80)); });
     }
