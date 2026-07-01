@@ -565,9 +565,8 @@ html,body{
 /* ── UTILITIES (Water / Gas / Electric meter cards, HOME) ───────────────── */
 .util-list{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
 .util-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.30)}
-.util-banner{width:100%;height:104px;overflow:hidden;background:#0b0b0f}
-.util-banner img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
-.util-w .util-banner img{object-position:center 30%}
+.util-banner{width:100%;overflow:hidden;background:#0b0b0f;line-height:0}
+.util-banner img{width:100%;height:auto;display:block}
 .util-accent{height:3px;width:100%;background:var(--dim)}
 .util-w .util-accent{background:var(--info,#38bdf8)}
 .util-g .util-accent{background:#f97316}
@@ -1339,12 +1338,20 @@ html,body{
         <span class="hcc-badge-next">NEXT</span>
       </div>
       <div class="hcc-module-row hcc-module-future">
-        <span class="hcc-module-icon">&#128168;</span>
+        <span class="hcc-module-icon">&#128737;&#65039;</span>
         <div class="hcc-module-info">
-          <div class="hcc-module-name">Gas &amp; Smoke Detectors</div>
-          <div class="hcc-module-desc">ESP32 sensors for gas &amp; smoke trend monitoring</div>
+          <div class="hcc-module-name">DIY Zigbee Alarm &amp; Safety Layer</div>
+          <div class="hcc-module-desc">Siren + smoke/CO/gas/leak/freeze sensors + water-main shutoff, all into Beehive. Panic bar already triggers it. (Plan saved — safety first, clean &amp; simple.)</div>
         </div>
-        <span class="hcc-badge-future">FUTURE</span>
+        <span class="hcc-badge-future">PLANNED</span>
+      </div>
+      <div class="hcc-module-row hcc-module-future">
+        <span class="hcc-module-icon">&#128663;</span>
+        <div class="hcc-module-info">
+          <div class="hcc-module-name">Garage Door (myQ &rarr; Beehive)</div>
+          <div class="hcc-module-desc">Local control via ratgdo (myQ cloud is blocked from HA) — open/close + status, ties into alarm &amp; away scenes</div>
+        </div>
+        <span class="hcc-badge-future">PLANNED</span>
       </div>
     </div>
 

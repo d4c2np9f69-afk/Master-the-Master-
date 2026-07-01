@@ -424,11 +424,7 @@ The Beelink J45 runs Home Assistant = the central hub. Devices connect THREE way
    3. Settings → Integrations → Add Integration → "Orbit B-Hyve" → enter email/password
    4. If still fails: Settings → System → Logs → search "B-Hyve login attempt" to see exact HTTP response from each of 9 API attempts
 
-4. **Blink 2FA completion** — Jeff needs to:
-   1. Go to HA → Settings → Integrations → Add Integration → search "Blink"
-   2. Blink sends a 6-digit code to Jeff's phone
-   3. Open HCC app → HOME → CAMERAS section → enter code in the PIN field → tap SEND
-   4. Cameras will then appear in the app
+4. **Blink cameras — BLOCKED by an upstream HA bug (⏰ STANDING REMINDER: check for the fix EVERY session).** As of 2026 the Home Assistant **Blink integration 2FA flow is broken for everyone** — after entering credentials the setup "succeeds" without ever showing the SMS PIN field, so it can't complete (session cookies dropped between login and 2FA; Blink spams repeat SMS codes). Not Jeff's fault, not fixable in our app. **Jeff asked me to keep checking.** → **Each session, web-search + check these issues for a released fix:** home-assistant/core **#173419** and **#173520** (missing 2FA PIN input), **#168029** (invalid auth), and fronzbot/**blinkpy #1217**. When a fixed HA version ships: tell Jeff to update HA, then Settings → Integrations → Add "Blink" → enter the SMS PIN → cameras flow into the app (HOME → Cameras) via the existing `loadCameras()`. Interim workaround (only if Jeff wants cameras NOW): pin/downgrade HA to a version before the break, or wait — recommend wait. **Do this AFTER the J45 is on internal (fresh HA install may already carry the fix).**
 
 5. **GPS map calibration** — After first real mow with ESP32 sensor running, calibrate the aerial map:
    1. YARD tab → scroll to Yard Map
