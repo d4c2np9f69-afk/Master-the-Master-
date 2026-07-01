@@ -412,7 +412,7 @@ The Beelink J45 runs Home Assistant = the central hub. Devices connect THREE way
 
 1. ~~**LUX setpoint control**~~ — **FIXED and confirmed working** (`b360583`). Root cause: LUX API uses `POST /api/device` for writes, NOT PUT. PUT always returned 500. Code now tries POST first, PUT as fallback. Jeff confirmed 73°F setpoint change reflected in official LUX app.
 
-2. **Test irrigation Run Zone + Rain Delay** — Browser-side WebSocket fix deployed (commit `c4d32e6`). Jeff taps Run on any zone — should work without `ws_timeout`. If it still errors, check browser console for WebSocket errors (Safari → Develop → Web Inspector → Console).
+2. **Irrigation "Last Watered" — CONFIRMED not available from B-Hyve's REST API (2026-07, verified via `/api/irrigation?debug=2` on Jeff's device).** The device object has no last-watered field, `status.watering_statuses` is `[]`, `status.watering_status` is just `{clear_on_idle:true}`, and `/watering_events` 404s. The Orbit app builds history from an always-on WebSocket; a polling app can't pull it. App now self-records the time when it OBSERVES an active run (`localStorage.irr_last_seen`) and shows a clean `—` otherwise (not the old misleading "No history"). **Proper fix = read last-watered from Home Assistant's B-Hyve integration** (HA stays connected 24/7 and records every run) — gated on getting B-Hyve into Beehive (see item 3 + the J45 reinstall). Do NOT re-chase a REST history endpoint; it doesn't exist. Run Zone / Rain Delay control still works via the browser WebSocket (`?tk=1`).
 
 3. **B-Hyve invalid_auth** — Jeff ran `sh bhyve` and saw `invalid_auth` in the HA config form. Jeff needs to:
    1. Run `sh bhyve` in HA Terminal again (gets updated files including strings.json)
