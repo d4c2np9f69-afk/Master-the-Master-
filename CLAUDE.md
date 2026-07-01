@@ -490,6 +490,12 @@ Jeff is building a wireless meter reader to pull his water usage into Beehive �
 
 **Data flow:** Kamstrup 621 → encrypted wM-Bus @915MHz → CC1101 → ESP32 (CRC + AES-128 decrypt) → MQTT → Home Assistant → (planned) HCC app via HA `/api/states`
 
+**KEY STORAGE (decided 2026-07):** the AES meter key lives in **Jeff's Apple Passwords**
+(entry for meter S/N `25394131`) — readable, encrypted, syncs to all his devices. Its
+operational home once the J45 is set up = HA **`secrets.yaml`** (wmbusmeters add-on). **Do
+NOT** store it in Cloudflare (app code can't reach the J45 decoder; encrypted CF secrets
+can't be read back) and **NEVER** commit the key to this repo.
+
 **BLOCKER — AES-128 decryption key + WHICH radio is read:**
 - Each Kamstrup meter has a unique per-meter AES-128 key. Without it the Kamstrup wM-Bus telegrams decode to gibberish.
 - When Jeff calls WHUD, ask BOTH: (1) the **"AES-128 encryption/decryption key (OMS/meter key) for my meter"** in **hex** (give meter S/N `25394131`); AND (2) **"Is my meter read by the Kamstrup's built-in radio, or by the separate radio module (`EFW`/`100WD`, endpoint `79453337`) in my pit, and what system does that use?"** — the answer tells us which RF source to decode.
