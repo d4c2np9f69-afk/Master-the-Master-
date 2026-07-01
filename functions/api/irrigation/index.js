@@ -93,6 +93,23 @@ export async function onRequestGet({ env, request }) {
       }));
     }
 
+    // Compact plain-text debug (screenshot-friendly) — ?debug=2
+    if (url.searchParams.get('debug') === '2') {
+      const short = (o) => o == null ? 'null' : JSON.stringify(o).slice(0, 700);
+      const txt = [
+        'last_watered: ' + (lastWateredFromEvents || 'null'),
+        'history: ' + history.length + ' items',
+        'statusKeys: ' + Object.keys(st).join(', '),
+        '',
+        'watering_status = ' + short(st.watering_status),
+        '',
+        'watering_statuses = ' + short(st.watering_statuses),
+        '',
+        'next_start_programs = ' + short(st.next_start_programs)
+      ].join('\n');
+      return new Response(txt, { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+    }
+
     const status = timer.status || {};
     const watering = status.watering_status || {};
     const activeStations = watering.stations || [];
