@@ -366,6 +366,7 @@ If any tests fail, fix them before doing anything else.
 - **06-29 (Style A redesign):** Jeff picked "Apple Clean" from 3 rendered mockups. Unified to ONE system font (killed the Georgia serif mix that looked choppy; `--font`+`--serif`→Apple stack), made light-mode chrome **white top-to-bottom** (header + nav), clean header title (non-italic), tighter card-title spacing. Verified all sections both themes, zero JS errors.
 - **06-29:** Radar → Windy embed restored + "NWS Radar ↗" popout (RadarScope link was dead). **Light/Dark theme** added (header toggle, default light, token-driven `html.light` override; swapped hardcoded light text → tokens so light mode reads cleanly; dark unchanged). Verified all 5 sections + YARD subtabs + LOG MOW modal in both themes, zero JS errors.
 - **06-27/28:** Voice→Alexa swap (removed in-app voice that mis-dialed contacts); SW network-first (hcc-v6); WU Recognized badge; **hero grade module** + **visual consistency tokens/`statusColor()`** (gold standards above); weather fixes (radar OSM tiles, unified mow verdict via `applyMowVerdict`, alert dedup, Lawn Water Need + `/api/drought`, Spotter/NOAA anchors, mPING token-ready); whole-home utilities planning (below).
+- **07-01:** WHUD supervisor briefed Jeff in person → **water meter blocker RESOLVED**: read via unencrypted Itron `100WD` MIU, **ERT-SCM**, endpoint **`79453337`**, ~915–930 MHz, SCM/min + hourly big read, **no AES key**, European timestamps (convert to Central). Both meters now read by one **RTL-SDR + rtl_433** (CC1101/ESP32 = backup). Sewer authority corrected to **City of White House** (no seasonal rate). AES key stored in Apple Passwords (not needed for this path). Panic/house-hero verified HOME-only.
 
 ---
 
@@ -475,7 +476,14 @@ Jeff is building a wireless meter reader to pull his water usage into Beehive �
 
 **Hardware:**
 - **Meter:** Kamstrup **flowIQ 2100** (CONFIRMED from clear meter photos 2026-07). Type No `02U23C036EC`, 5/8" 25 GPM, 250 PSI, IP68, mfg 2023. **S/N `25394131`** (suffix `/W8/2…`), **Con. `0100200123033`**, **Ver `K1`**. LCD read `0012636.56 Gal` at photo time. Kamstrup flowIQ family broadcasts encrypted **wireless M-Bus** (wmbusmeters driver ~ flowiq2200/multical21).
-- **⚠️ CRITICAL FINDING (2026-07 photos) — there is a SEPARATE external AMR radio in the pit, WIRED to the Kamstrup register** (gray cable from the meter → a white pit transmitter). Module markings: **MODEL `100WD`**, **`EFW-1300-401`**, **endpoint S/N `79453337`**, **FCC ID `EFW…`**, **IC `8640-100WD`**. This third-party MIU (NOT Kamstrup's own radio) is very likely **how WHUD actually reads the meter.** Implication: the over-the-air signal may be this MIU's protocol, **not** Kamstrup wM-Bus — which could change the whole decode path. TWO possible RF sources to test: (a) the Kamstrup register's own wM-Bus (needs the AES key — pursue), and (b) the `100WD` MIU (need to ID its band/protocol from a clean FCC-ID photo + ask the utility). Do NOT tamper with the utility-owned MIU/wiring. **Likely the Itron `100W` water sibling of the confirmed gas `100G` ERT** (model naming + same pit-MIU style) — if so it's unencrypted Itron ERT, **no key needed** either. The FCC ID read as `EFW…` on the dirty label but may actually be Itron `EO9…`; a clean closeup of THIS water module (not the gas one) settles it. NOTE: the `100G`/`EO9100GDLA` label is the **GAS** meter, not this.
+- **✅ READ PATH CONFIRMED (2026-07, WHUD meter supervisor came to the house and briefed Jeff in person):** WHUD reads the meter via the **separate external MIU in the pit** (MODEL `100WD` / `EFW-1300-401`, IC `8640-100WD`), NOT the Kamstrup register's own radio. Confirmed specs:
+  - **Endpoint / ERT ID: `79453337`** — this is the ID we filter on.
+  - **UNENCRYPTED — open, no key.** ← the AES-key blocker is DEAD. We do not need it.
+  - **Protocol: Itron `ERT-SCM`** (Standard Consumption Message) — same family as the gas meter.
+  - **Frequency: hops across ~`915–930 MHz`** on each transmit (standard Itron ISM behavior; RTL-SDR scans the band).
+  - **Cadence: an `SCM` every ~1 minute + a larger read hourly.**
+  - **⚠️ TIMESTAMP QUIRK: the meter reports EUROPEAN time** (Kamstrup is Danish) — **convert to Central (America/Chicago) in the decode/display code** wherever a meter timestamp is used.
+  - **Net effect:** water is now read the SAME way as gas — unencrypted Itron ERT via **RTL-SDR + rtl_433/rtlamr**. No CC1101, no ESP32, no AES key. One dongle reads both meters. Do NOT tamper with the utility-owned MIU/wiring.
 - **Radio:** Qoroos **CC1101** sub-GHz transceiver with SMA antenna, tuned to **915 MHz** (US)
 - **Brain:** **ESP32** WROOM-32 (30-pin NodeMCU, CP2102 USB)
 - **Wiring:** CC1101 → ESP32 SPI (SCK→GPIO18, MOSI→GPIO23, MISO→GPIO19, CSN→GPIO5, GDO0/GDO2 → spare GPIOs), VCC→3V3, GND→GND
@@ -490,16 +498,13 @@ Jeff is building a wireless meter reader to pull his water usage into Beehive �
 
 **Data flow:** Kamstrup 621 → encrypted wM-Bus @915MHz → CC1101 → ESP32 (CRC + AES-128 decrypt) → MQTT → Home Assistant → (planned) HCC app via HA `/api/states`
 
-**KEY STORAGE (decided 2026-07):** the AES meter key lives in **Jeff's Apple Passwords**
-(entry for meter S/N `25394131`) — readable, encrypted, syncs to all his devices. Its
-operational home once the J45 is set up = HA **`secrets.yaml`** (wmbusmeters add-on). **Do
-NOT** store it in Cloudflare (app code can't reach the J45 decoder; encrypted CF secrets
-can't be read back) and **NEVER** commit the key to this repo.
-
-**BLOCKER — AES-128 decryption key + WHICH radio is read:**
-- Each Kamstrup meter has a unique per-meter AES-128 key. Without it the Kamstrup wM-Bus telegrams decode to gibberish.
-- When Jeff calls WHUD, ask BOTH: (1) the **"AES-128 encryption/decryption key (OMS/meter key) for my meter"** in **hex** (give meter S/N `25394131`); AND (2) **"Is my meter read by the Kamstrup's built-in radio, or by the separate radio module (`EFW`/`100WD`, endpoint `79453337`) in my pit, and what system does that use?"** — the answer tells us which RF source to decode.
-- If WHUD reads the EFW/100WD MIU, the Kamstrup AES key may be moot for their read path, but the Kamstrup register often still emits wM-Bus we can decode independently with the key — so still get the key.
+**~~BLOCKER~~ RESOLVED (2026-07):** The AES-128 key question is moot — the utility reads the
+unencrypted `100WD` MIU (ERT-SCM, endpoint `79453337`), so **our decode path needs NO key.**
+We read that MIU with RTL-SDR + rtl_433/rtlamr, same as gas. (Jeff did save an entry in Apple
+Passwords earlier as a just-in-case; it's not needed for this read path. If we ever wanted the
+Kamstrup register's OWN encrypted wM-Bus instead, that would need the key — but there's no
+reason to now.) The **CC1101 + ESP32 + wM-Bus/AES firmware stack Jeff built is now a backup
+path only** — the RTL-SDR is the primary, simpler route for BOTH meters.
 
 **Reader box — placement + remaining hardware:**
 - The reader box is a **Wi-Fi device** → does NOT need to be near the HCC/HA. Put it where it best HEARS the meters; it just needs power + Wi-Fi and sends to HA over Wi-Fi.
