@@ -58,51 +58,39 @@ export async function onRequestGet({ env, request }) {
       return Response.json({ ok: false, error: 'no_timer_device_found', devices_found: (devices||[]).map(d=>d.type) }, { status: 404 });
     }
 
-    // Watering history — the device object does NOT carry "last watered"; the
-    // /watering_events endpoint does. Fetch it defensively (never break status if it fails).
+    // Watering history — the B-Hyve device object has NO "last watered" field, and
+    // /watering_events 404s (doesn't exist). The data lives in status.watering_status
+    // (current) and status.watering_statuses (recent runs). Derive last-watered from
+    // whichever timestamp field is present; debug dumps the raw objects to confirm it.
     const debug = url.searchParams.get('debug') === '1';
-    const dbg = { deviceKeys: Object.keys(timer), statusKeys: Object.keys(timer.status || {}), events: [] };
+    const st = timer.status || {};
+    const dbg = {
+      deviceKeys: Object.keys(timer),
+      statusKeys: Object.keys(st),
+      watering_status: st.watering_status || null,
+      watering_statuses: st.watering_statuses || null,
+      next_start_programs: st.next_start_programs || null
+    };
     let lastWateredFromEvents = null;
     let history = [];
-    const nowMs = Date.now();
-    const startISO = new Date(nowMs - 30 * 864e5).toISOString();
-    const endISO = new Date(nowMs + 864e5).toISOString();
-    const eventUrls = [
-      `${API_BASE}/watering_events?device_id=${timer.id}&start_time=${encodeURIComponent(startISO)}&end_time=${encodeURIComponent(endISO)}`,
-      `${API_BASE}/watering_events?device_id=${timer.id}`,
-      `${API_BASE}/devices/${timer.id}/watering_events`
-    ];
-    for (const eu of eventUrls) {
-      try {
-        const wr = await fetch(eu, { headers: devHeaders });
-        const bodyText = await wr.text().catch(() => '');
-        dbg.events.push({ url: eu.replace(API_BASE, ''), status: wr.status, sample: bodyText.slice(0, 300) });
-        if (!wr.ok || !bodyText) continue;
-        let raw; try { raw = JSON.parse(bodyText); } catch (_) { continue; }
-        const events = [];
-        const push = (e) => { if (e && (e.end_time || e.start_time || e.started_watering_station_at)) events.push(e); };
-        if (Array.isArray(raw)) {
-          raw.forEach(item => {
-            if (item && Array.isArray(item.watering_events)) item.watering_events.forEach(push);
-            else if (item && Array.isArray(item.irrigation)) item.irrigation.forEach(push);
-            else push(item);
-          });
-        } else if (raw && Array.isArray(raw.watering_events)) {
-          raw.watering_events.forEach(push);
-        }
-        const ts = (e) => new Date(e.end_time || e.start_time || e.started_watering_station_at || 0).getTime();
-        events.sort((a, b) => ts(b) - ts(a));
-        if (events.length) {
-          const e0 = events[0];
-          lastWateredFromEvents = e0.end_time || e0.start_time || e0.started_watering_station_at || null;
-          history = events.slice(0, 10).map(e => ({
-            time: e.end_time || e.start_time || e.started_watering_station_at || null,
-            station: (e.station != null ? e.station : (e.current_station != null ? e.current_station : null)),
-            run_time: (e.run_time != null ? e.run_time : (e.watering_time != null ? e.watering_time : null))
-          }));
-          break; // got history — stop trying other endpoints
-        }
-      } catch (e) { dbg.events.push({ url: eu.replace(API_BASE, ''), error: String(e).slice(0, 120) }); }
+    const TFIELDS = ['last_watering_time', 'stopped_watering_station_at', 'started_watering_station_at', 'end_time', 'start_time', 'wateringStationAt', 'completed_at', 'water_event_at'];
+    const pickTime = (o) => {
+      if (!o || typeof o !== 'object') return null;
+      for (const k of TFIELDS) { if (o[k]) return o[k]; }
+      return null;
+    };
+    const records = [];
+    if (st.watering_status && typeof st.watering_status === 'object') records.push(st.watering_status);
+    if (Array.isArray(st.watering_statuses)) st.watering_statuses.forEach(r => { if (r && typeof r === 'object') records.push(r); });
+    const withTime = records.map(r => ({ r, t: pickTime(r) })).filter(x => x.t);
+    withTime.sort((a, b) => new Date(b.t).getTime() - new Date(a.t).getTime());
+    if (withTime.length) {
+      lastWateredFromEvents = withTime[0].t;
+      history = withTime.slice(0, 10).map(x => ({
+        time: x.t,
+        station: (x.r.station != null ? x.r.station : (x.r.current_station != null ? x.r.current_station : null)),
+        run_time: (x.r.run_time != null ? x.r.run_time : (x.r.watering_time != null ? x.r.watering_time : null))
+      }));
     }
 
     const status = timer.status || {};
