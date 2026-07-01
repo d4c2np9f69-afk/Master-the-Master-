@@ -3741,7 +3741,11 @@ function loadIrrigationDirect(){
     .then(function(d){
       if(!d || !d.ok || !d.device){ throw new Error(d && d.error || 'no data'); }
       var dev=d.device;
-      IRR={active:dev.active_station||null,lastWatered:dev.last_watered||null,nextStart:dev.next_start_time||null,loaded:true};
+      // B-Hyve's REST API doesn't expose watering history; remember the time whenever
+      // WE catch an active run so at least app-observed / app-triggered runs get recorded.
+      try{ if(dev.active_station!=null) localStorage.setItem('irr_last_seen', new Date().toISOString()); }catch(e){}
+      var lastSeen = dev.last_watered || (function(){try{return localStorage.getItem('irr_last_seen');}catch(e){return null;}})() || null;
+      IRR={active:dev.active_station||null,lastWatered:lastSeen,nextStart:dev.next_start_time||null,loaded:true};
       var sc=document.getElementById('irrSetupCard'); if(sc) sc.style.display='none';
       var zp=document.getElementById('irrZonesCard'); if(zp) zp.style.display='none';
       function set(id,v){var e=document.getElementById(id); if(e) e.innerHTML=v;}
@@ -3788,8 +3792,8 @@ function loadIrrigationDirect(){
       iset('irrIntelSmartZones', smartCount+'/'+(d.zones||[]).length, smartCount>0?'#4aa3ff':null);
       if(dev.next_start_time){ try{ iset('irrIntelNext', new Date(dev.next_start_time).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})); }catch(e){ iset('irrIntelNext','Scheduled'); } }
       else { iset('irrIntelNext','No schedule set'); }
-      if(dev.last_watered){ try{ iset('irrIntelLast', new Date(dev.last_watered).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})); }catch(e){ iset('irrIntelLast','—'); } }
-      else { iset('irrIntelLast','No history'); }
+      if(lastSeen){ try{ iset('irrIntelLast', new Date(lastSeen).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})); }catch(e){ iset('irrIntelLast','—'); } }
+      else { iset('irrIntelLast','—','var(--muted)'); }
       iset('irrIntelConn', dev.connected?'&#128994; Online':'&#128993; Check B-Hyve App', dev.connected?'#22c55e':'#ffd24a');
       iset('irrIntelMode', (dev.run_mode||'AUTO').toString().toUpperCase(), dev.run_mode==='off'?'#ff6262':dev.run_mode==='manual'?'#ffd24a':'#22c55e');
       renderUsage();
