@@ -60,19 +60,35 @@ export async function onRequestGet({ env, request }) {
 
     // Watering history — the device object does NOT carry "last watered"; the
     // /watering_events endpoint does. Fetch it defensively (never break status if it fails).
+    const debug = url.searchParams.get('debug') === '1';
+    const dbg = { deviceKeys: Object.keys(timer), statusKeys: Object.keys(timer.status || {}), events: [] };
     let lastWateredFromEvents = null;
     let history = [];
-    try {
-      const wr = await fetch(`${API_BASE}/watering_events?device_id=${timer.id}`, { headers: devHeaders });
-      if (wr.ok) {
-        const raw = await wr.json();
+    const nowMs = Date.now();
+    const startISO = new Date(nowMs - 30 * 864e5).toISOString();
+    const endISO = new Date(nowMs + 864e5).toISOString();
+    const eventUrls = [
+      `${API_BASE}/watering_events?device_id=${timer.id}&start_time=${encodeURIComponent(startISO)}&end_time=${encodeURIComponent(endISO)}`,
+      `${API_BASE}/watering_events?device_id=${timer.id}`,
+      `${API_BASE}/devices/${timer.id}/watering_events`
+    ];
+    for (const eu of eventUrls) {
+      try {
+        const wr = await fetch(eu, { headers: devHeaders });
+        const bodyText = await wr.text().catch(() => '');
+        dbg.events.push({ url: eu.replace(API_BASE, ''), status: wr.status, sample: bodyText.slice(0, 300) });
+        if (!wr.ok || !bodyText) continue;
+        let raw; try { raw = JSON.parse(bodyText); } catch (_) { continue; }
         const events = [];
         const push = (e) => { if (e && (e.end_time || e.start_time || e.started_watering_station_at)) events.push(e); };
         if (Array.isArray(raw)) {
           raw.forEach(item => {
             if (item && Array.isArray(item.watering_events)) item.watering_events.forEach(push);
+            else if (item && Array.isArray(item.irrigation)) item.irrigation.forEach(push);
             else push(item);
           });
+        } else if (raw && Array.isArray(raw.watering_events)) {
+          raw.watering_events.forEach(push);
         }
         const ts = (e) => new Date(e.end_time || e.start_time || e.started_watering_station_at || 0).getTime();
         events.sort((a, b) => ts(b) - ts(a));
@@ -84,9 +100,10 @@ export async function onRequestGet({ env, request }) {
             station: (e.station != null ? e.station : (e.current_station != null ? e.current_station : null)),
             run_time: (e.run_time != null ? e.run_time : (e.watering_time != null ? e.watering_time : null))
           }));
+          break; // got history — stop trying other endpoints
         }
-      }
-    } catch (_) { /* history is best-effort — do not fail the whole request */ }
+      } catch (e) { dbg.events.push({ url: eu.replace(API_BASE, ''), error: String(e).slice(0, 120) }); }
+    }
 
     const status = timer.status || {};
     const watering = status.watering_status || {};
@@ -121,6 +138,7 @@ export async function onRequestGet({ env, request }) {
       zones,
       history
     };
+    if (debug) resp._debug = dbg;
     // Include session token when browser needs it for direct WebSocket control
     if (url.searchParams.get('tk') === '1') resp._token = token;
     return Response.json(resp);

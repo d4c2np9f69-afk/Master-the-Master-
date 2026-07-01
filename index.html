@@ -3799,9 +3799,12 @@ function renderReadiness(){
   (ALERTS||[]).forEach(function(a){
     if(!a||!a.event) return;
     var evl=a.event.toLowerCase();
-    var bad=/warning/.test(evl) || /extreme|severe/i.test(a.severity||'');
+    // Only "don't be outside right now" hazards HARD-block mowing. Heat / wind /
+    // most others are a TIMING caution (mow early AM or evening), not NOT-READY.
+    var hardStop=/tornado|severe thunderstorm|flash flood|hurricane|extreme wind/.test(evl);
     var icon=/freeze|frost|cold|wind chill/.test(evl)?'&#129398;':/wind/.test(evl)?'&#128168;':/heat/.test(evl)?'&#129397;':/thunder|tornado|storm/.test(evl)?'&#9928;':'&#9888;';
-    rs.push([icon, a.event, bad?'bad':'warn']);
+    var label=/heat/.test(evl)?(a.event+' — mow early AM or evening, avoid peak heat'):a.event;
+    rs.push([icon, label, hardStop?'bad':'warn']);
   });
   var hasFreeze=(ALERTS||[]).some(function(a){ return a&&/freeze|frost|hard freeze|wind chill/i.test(a.event||''); });
   // Don't mow frosted grass (morning + freeze/frost alert)
