@@ -58,6 +58,36 @@ export async function onRequestGet({ env, request }) {
       return Response.json({ ok: false, error: 'no_timer_device_found', devices_found: (devices||[]).map(d=>d.type) }, { status: 404 });
     }
 
+    // Watering history — the device object does NOT carry "last watered"; the
+    // /watering_events endpoint does. Fetch it defensively (never break status if it fails).
+    let lastWateredFromEvents = null;
+    let history = [];
+    try {
+      const wr = await fetch(`${API_BASE}/watering_events?device_id=${timer.id}`, { headers: devHeaders });
+      if (wr.ok) {
+        const raw = await wr.json();
+        const events = [];
+        const push = (e) => { if (e && (e.end_time || e.start_time || e.started_watering_station_at)) events.push(e); };
+        if (Array.isArray(raw)) {
+          raw.forEach(item => {
+            if (item && Array.isArray(item.watering_events)) item.watering_events.forEach(push);
+            else push(item);
+          });
+        }
+        const ts = (e) => new Date(e.end_time || e.start_time || e.started_watering_station_at || 0).getTime();
+        events.sort((a, b) => ts(b) - ts(a));
+        if (events.length) {
+          const e0 = events[0];
+          lastWateredFromEvents = e0.end_time || e0.start_time || e0.started_watering_station_at || null;
+          history = events.slice(0, 10).map(e => ({
+            time: e.end_time || e.start_time || e.started_watering_station_at || null,
+            station: (e.station != null ? e.station : (e.current_station != null ? e.current_station : null)),
+            run_time: (e.run_time != null ? e.run_time : (e.watering_time != null ? e.watering_time : null))
+          }));
+        }
+      }
+    } catch (_) { /* history is best-effort — do not fail the whole request */ }
+
     const status = timer.status || {};
     const watering = status.watering_status || {};
     const activeStations = watering.stations || [];
@@ -85,10 +115,11 @@ export async function onRequestGet({ env, request }) {
         run_mode: status.run_mode || 'auto',
         rain_delay: status.rain_delay || 0,
         active_station: activeZone,
-        last_watered: timer.last_watering_end_time || null,
+        last_watered: lastWateredFromEvents || timer.last_watering_end_time || null,
         next_start_time: status.next_start_time || timer.next_start_time || null
       },
-      zones
+      zones,
+      history
     };
     // Include session token when browser needs it for direct WebSocket control
     if (url.searchParams.get('tk') === '1') resp._token = token;

@@ -2670,9 +2670,25 @@ function loadWeather(){
       var nextProb=ppA.slice(12,48); var riskNext=nextProb.length?Math.max.apply(null,nextProb.concat([0])):0;
       var rainNext=prA.slice(12,48).reduce(function(a,b){return a+(b||0);},0);
       setc('wxRainNext',riskNext+'% / '+rainNext.toFixed(2)+'"',riskNext>60?'#ff6262':riskNext>30?'#ffd24a':'#22c55e');
-      // Lightning risk from thunderstorm weather codes (95/96/99) in next 24h
-      var storm=(d.hourly.weathercode||[]).slice(0,24).some(function(x){return x===95||x===96||x===99;});
-      setc('wxLightning',storm?'RISK':'NONE',storm?'#ff6262':'#22c55e');
+      // Lightning: NEAR-TERM thunderstorm risk, aligned to the current hour and
+      // gated by precip probability (weathercodes 95/96/99). "Any storm in 24h"
+      // read RISK almost every summer day in TN — this reports what's actually near.
+      (function(){
+        var hc=d.hourly.weathercode||[], pp=d.hourly.precipitation_probability||[], ht=d.hourly.time||[];
+        var nowMs=Date.now(), idx=0;
+        for(var i=0;i<ht.length;i++){ if(new Date(ht[i]).getTime()>=nowMs){ idx=i; break; } }
+        function stormIn(hrs){
+          for(var j=idx;j<Math.min(idx+hrs,hc.length);j++){
+            var c=hc[j];
+            if((c===95||c===96||c===99) && (pp[j]==null || pp[j]>=30)) return true;
+          }
+          return false;
+        }
+        var lt = stormIn(6) ? ['RISK','#ff6262']        // storms likely within ~6h
+               : stormIn(24) ? ['POSSIBLE','#ffd24a']    // later today/tonight
+               : ['NONE','#22c55e'];
+        setc('wxLightning',lt[0],lt[1]);
+      })();
       // Forecast fallbacks (the live station overrides these in loadStation)
       setc('wxFirmness',soil,soil==='FIRM'?'#22c55e':soil==='MOIST'?'#ffd24a':'#ff6262');
       var tF=Math.round(c.temperature_2m);
