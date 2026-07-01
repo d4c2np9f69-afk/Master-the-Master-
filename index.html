@@ -587,6 +587,23 @@ html,body{
 .util-foot .dot{width:7px;height:7px;border-radius:50%;background:#9a9a9a;flex-shrink:0}
 .util-foot.live .dot{background:var(--ok,#22c55e)}
 
+/* ── WHITE HOUSE DISPATCH (contacts/emergency directory, HOME top) ───────── */
+.dispatch-card{position:relative;width:100%;margin:0 0 16px;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 4px 18px rgba(0,0,0,.35)}
+.dispatch-card img{width:100%;display:block}
+.dispatch-card .hotspot{position:absolute;z-index:5;display:block;border-radius:9px;-webkit-tap-highlight-color:transparent}
+.dispatch-card .hotspot:active,.dispatch-card .hotspot:focus{background:rgba(255,206,120,.30);outline:none}
+.dispatch-card .mayor    {left:2.6%;top:19.4%;width:31.5%;height:9.6%}
+.dispatch-card .alderman {left:2.6%;top:30.7%;width:31.5%;height:9.6%}
+.dispatch-card .water    {left:2.6%;top:42.6%;width:31.5%;height:9.6%}
+.dispatch-card .sewer    {left:2.6%;top:53.9%;width:31.5%;height:9.6%}
+.dispatch-card .electric {left:2.6%;top:65.2%;width:31.5%;height:9.6%}
+.dispatch-card .gas      {left:2.6%;top:76.5%;width:31.5%;height:8.7%}
+.dispatch-card .police {left:34.8%;top:19.4%;width:30.4%;height:9.6%}
+.dispatch-card .fire   {left:34.8%;top:30.7%;width:30.4%;height:9.6%}
+.dispatch-card .house-main{left:65.9%;top:19.4%;width:31.5%;height:9.6%}
+.dispatch-card .house-tty {left:65.9%;top:30.7%;width:31.5%;height:9.6%}
+.dispatch-card .emergency{left:2.6%;top:85.6%;width:94.8%;height:9%}
+
 /* ── PANIC BUTTON ───────────────────────────────────────────────────────── */
 .hcc-panic-btn{
   width:100%;padding:12px 16px;
@@ -976,6 +993,22 @@ html,body{
 
   <div class="content">
 
+    <!-- ── WHITE HOUSE DISPATCH — tap any row to call ── -->
+    <section class="dispatch-card" aria-label="White House Dispatch — emergency and utility contacts">
+      <img src="./images/white-house-dispatch.jpg" alt="White House Dispatch contact directory">
+      <a class="hotspot mayor" href="tel:6156724350" aria-label="Call Mayor John Corbitt"></a>
+      <a class="hotspot alderman" href="tel:6156724350" aria-label="Call Alderman Sam Matthews"></a>
+      <a class="hotspot water" href="tel:6156724110" aria-label="Call White House Utility District"></a>
+      <a class="hotspot sewer" href="tel:6156723654" aria-label="Call White House Sewer Department"></a>
+      <a class="hotspot electric" href="tel:8009872362" aria-label="Call Cumberland Electric CEMC"></a>
+      <a class="hotspot gas" href="tel:8007527504" aria-label="Call Piedmont Natural Gas"></a>
+      <a class="hotspot police" href="tel:6153844911" aria-label="Call Police Dispatch non-emergency"></a>
+      <a class="hotspot fire" href="tel:6156725338" aria-label="Call White House Fire Department"></a>
+      <a class="hotspot house-main" href="tel:2022243121" aria-label="Call U.S. House Switchboard"></a>
+      <a class="hotspot house-tty" href="tel:2022251904" aria-label="Call U.S. House TTY"></a>
+      <a class="hotspot emergency" role="button" tabindex="0" onclick="hccPanic();return false;" aria-label="Emergency panic — asks you to confirm first"></a>
+    </section>
+
     <!-- Active NWS alerts strip — taps through to WEATHER section -->
     <div class="home-alert-strip" id="homeAlertStrip" onclick="hccSection('weather',document.getElementById('snav-weather'));setTimeout(function(){document.getElementById('wxAlertsCard')&&document.getElementById('wxAlertsCard').scrollIntoView({behavior:'smooth'})},200)">
       <span style="font-size:22px;flex-shrink:0">🚨</span>
@@ -1283,10 +1316,9 @@ html,body{
       <span class="sec-hdr-label">Safety &bull; Emergency</span>
     </div>
 
-    <button class="hcc-panic-btn" onclick="hccPanic()">
-      <span class="hcc-panic-icon">&#128680;</span>
-      <span>PANIC / EMERGENCY</span>
-    </button>
+    <div style="font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:12px;padding:9px 12px;background:rgba(224,28,28,.06);border:1px solid rgba(224,28,28,.2);border-radius:10px">
+      &#128680; <b style="color:var(--text)">Panic</b> is the red <b style="color:var(--text)">EMERGENCY</b> bar at the top of Home &mdash; tap it and confirm to trigger the Beehive panic alert.
+    </div>
 
     <div style="font-size:10px;font-weight:700;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">SAFETY MODULES</div>
     <div class="hcc-module-list">
