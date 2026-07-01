@@ -1,5 +1,13 @@
 # Beehive Setup — Install Home Assistant OS on the Beelink J45 (the dedicated brain)
 
+> **PROGRESS (2026-07):** ✅ Step 0 backup done + downloaded. ✅ Ubuntu boot stick made
+> (16 GB, **Ubuntu 26.04 desktop**, via Rufus after `diskpart clean` fixed the stuck
+> protected partition). **NEXT = Step 3:** boot the J45 from the Ubuntu stick → "Try Ubuntu"
+> → confirm it sees the internal ~128 GB drive → Step 4 flash HA OS to internal → restore.
+> Single-stick path: **download the HA OS `.img.xz` + Balena Etcher inside the live Ubuntu**
+> (it has internet over ethernet), so the one stick is enough. Remember: the external HA drive
+> is never touched, so an interrupted install can't leave Jeff worse than he is now.
+
 **Goal:** Get Beehive OFF the flaky external USB drive and installed on the J45's
 **internal drive**, so it boots on its own, runs reliably, and frees both USB ports
 for the RTL-SDR. The J45 is dedicated to Beehive, so we wipe the old Windows 10.
