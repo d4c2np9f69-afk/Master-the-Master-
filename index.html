@@ -1317,7 +1317,7 @@ html,body{
     </div>
 
     <div style="font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:12px;padding:9px 12px;background:rgba(224,28,28,.06);border:1px solid rgba(224,28,28,.2);border-radius:10px">
-      &#128680; <b style="color:var(--text)">Panic</b> is the red <b style="color:var(--text)">EMERGENCY</b> bar at the top of Home &mdash; tap it and confirm to trigger the Beehive panic alert.
+      &#128680; <b style="color:var(--text)">Panic</b> is the red <b style="color:var(--text)">EMERGENCY</b> bar at the top of Home &mdash; tap it and confirm to sound the alarm sirens + lights and alert Jeff, Angela &amp; Braxton. (Call 911 yourself if needed.)
     </div>
 
     <div style="font-size:10px;font-weight:700;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">SAFETY MODULES</div>
@@ -5202,16 +5202,16 @@ function refreshRadar(){
 }
 
 function hccPanic() {
-  if (!confirm('EMERGENCY ALERT\n\nThis will:\n\u2022 Trigger Beehive panic automation\n\u2022 Flash all smart lights\n\u2022 Log event with timestamp\n\nProceed?')) return;
+  if (!confirm('\ud83d\udea8 PANIC ALARM\n\nThis will:\n\u2022 Sound the alarm sirens + strobe lights\n\u2022 Alert Jeff, Angela & Braxton\n\n(Call 911 yourself if you need emergency services.)\n\nTrigger the alarm now?')) return;
   var t = new Date().toLocaleTimeString();
   fetch(HA_BASE + '/api/webhook/hcc-panic-button', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({triggered: t, source: 'HCC App'})
+    body: JSON.stringify({ action: 'panic', siren: true, lights: true, notify: ['jeff','angela','braxton'], triggered: t, source: 'HCC App' })
   }).then(function() {
-    alert('\u26a0\ufe0f PANIC TRIGGERED at ' + t + '\n\nBeehive notified. Lights flashing.');
+    alert('\ud83d\udea8 PANIC TRIGGERED at ' + t + '\n\nSirens + lights on. Jeff, Angela & Braxton alerted.\n\nCall 911 if you need emergency services.');
   }).catch(function() {
-    alert('\u26a0\ufe0f Panic logged at ' + t + '\n\nNote: Beehive not reachable from this network.\nIf emergency, call 911.');
+    alert('\u26a0\ufe0f Could not reach Beehive at ' + t + '\n\nThe alarm may NOT have triggered (you\u2019re off home WiFi or Beehive is offline).\n\nCall 911 directly if this is an emergency.');
   });
 }
 

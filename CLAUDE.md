@@ -344,7 +344,8 @@ If any tests fail, fix them before doing anything else.
 | Modals (LOG MOW/SERVICE, UPDATE HOURS) | working |
 | 7 YARD tabs; GPS map + calibration + telemetry sim | working |
 | Sensor data (battery/RPM/GPS) | working when ESP32 connected |
-| Engine hours baseline 5.9h; Panic button HOME-only | correct |
+| Engine hours baseline 5.9h | correct |
+| Panic = red EMERGENCY bar in the White House Dispatch card (HOME top); standalone panic button removed | app fires webhook; **HA automation pending** (see below) |
 | Hero grade module + status tokens (gold standards above) | done |
 | Light/Dark theme toggle (header ☀️/🌙, persists in `hcc_theme`) | done — **default light** |
 | CLIMATE / LUX thermostat + setpoint (POST /api/device) | WORKING — live confirmed |
@@ -367,6 +368,7 @@ If any tests fail, fix them before doing anything else.
 - **06-29:** Radar → Windy embed restored + "NWS Radar ↗" popout (RadarScope link was dead). **Light/Dark theme** added (header toggle, default light, token-driven `html.light` override; swapped hardcoded light text → tokens so light mode reads cleanly; dark unchanged). Verified all 5 sections + YARD subtabs + LOG MOW modal in both themes, zero JS errors.
 - **06-27/28:** Voice→Alexa swap (removed in-app voice that mis-dialed contacts); SW network-first (hcc-v6); WU Recognized badge; **hero grade module** + **visual consistency tokens/`statusColor()`** (gold standards above); weather fixes (radar OSM tiles, unified mow verdict via `applyMowVerdict`, alert dedup, Lawn Water Need + `/api/drought`, Spotter/NOAA anchors, mPING token-ready); whole-home utilities planning (below).
 - **07-01:** WHUD supervisor briefed Jeff in person → **water meter blocker RESOLVED**: read via unencrypted Itron `100WD` MIU, **ERT-SCM**, endpoint **`79453337`**, ~915–930 MHz, SCM/min + hourly big read, **no AES key**, European timestamps (convert to Central). Both meters now read by one **RTL-SDR + rtl_433** (CC1101/ESP32 = backup). Sewer authority corrected to **City of White House** (no seasonal rate). AES key stored in Apple Passwords (not needed for this path). Panic/house-hero verified HOME-only.
+- **07-01:** Added **White House Dispatch** card (top of HOME, below hero) — branded tap-to-call directory (officials, utilities, police/fire non-emerg, US House switchboard/TTY), %-positioned hotspots over `images/white-house-dispatch.jpg` (aligned + verified). **Panic redesign:** red EMERGENCY bar now = the panic button (fires `hccPanic` with a confirm; **no raw tel:911** — Jeff calls 911 himself); removed the standalone panic button. New panic intent = **sound alarm sirens + lights + alert Jeff/Angela/Braxton**; app POSTs `{action:panic,siren,lights,notify:[...]}` to webhook `hcc-panic-button`. The actual sirens/lights/alerts are a **Beehive automation** (blueprint saved: `docs/beehive/panic_alarm_automation.md`) — pending J45 setup + alarm integration + HA Companion on the 3 phones.
 - **07-01:** Built **HOME Utilities strip** — 3 compact branded cards (Water=White House Utilities/flowIQ, Gas=Piedmont/Itron 100G, Electric=CEMC) with color-coded accents + Today/Month/Now data tiles. Images `images/util-{water,gas,electric}.jpg` (compact 104px cover banners, NOT auto-graded — own `.util-*` classes). Cards show clean "Waiting for Beehive meter reader" placeholders until live; `loadUtilities()` fills from HA when the `UTIL_ENTITIES` entity_ids are set (all null now → placeholders, no false readings). Verified both themes, zero JS errors.
 
 ---
@@ -437,7 +439,9 @@ The Beelink J45 runs Home Assistant = the central hub. Devices connect THREE way
 
 6. **Verify sensor data live** — After Jeff hard-refreshes the app, confirm battery voltage, RPM, and mileage display. If still `0.00V` and `—`, run the curl test in the Cloudflare Infrastructure section above.
 
-7. **Wire the HOME Utilities strip to live data** — UI is built (3 cards). When each meter is reading in Beehive, set the real HA entity_ids in `UTIL_ENTITIES` (in `loadUtilities()`): water_today/month/flow, gas_today/month/cost, elec_now/today/month. Card auto-lights (chip → LIVE, foot → "Live from Beehive"). Remember: convert the water meter's European timestamp → Central. Gas cost = ccf × Piedmont rate; water/sewer cost feeds the City-of-White-House sewer claim.
+7. **Build the Beehive PANIC automation** — app already fires webhook `hcc-panic-button` with `{action:panic,siren,lights,notify:[jeff,angela,braxton]}`. Build the HA side per **`docs/beehive/panic_alarm_automation.md`**: siren on + lights strobe + Critical push to the 3 phones (HA Companion app). Needs: alarm brand/model → siren entity; light entities; HA Companion installed on Jeff/Angela/Braxton iPhones. Optional real phone call = Twilio (later). Does NOT dial 911 (Jeff does that).
+
+8. **Wire the HOME Utilities strip to live data** — UI is built (3 cards). When each meter is reading in Beehive, set the real HA entity_ids in `UTIL_ENTITIES` (in `loadUtilities()`): water_today/month/flow, gas_today/month/cost, elec_now/today/month. Card auto-lights (chip → LIVE, foot → "Live from Beehive"). Remember: convert the water meter's European timestamp → Central. Gas cost = ccf × Piedmont rate; water/sewer cost feeds the City-of-White-House sewer claim.
 
 8. **Lighthouse performance** — Score 60/100. Low priority. Main cause: unminified 300KB index.html.
 
