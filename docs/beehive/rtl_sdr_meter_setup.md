@@ -10,10 +10,34 @@ electric meters). No Zadig/SDR#/Windows drivers — the add-on ships the Linux d
 
 ---
 
-## What we still need (grab when convenient)
-- ✅ **Water ERT ID: `79453337`**, protocol **ERT-SCM** (confirmed by the WHUD meter supervisor).
-- ⏳ **Gas ERT ID** — we only have a partial (`…333930…`). Snap the full barcode/ERT ID off the
-  Itron 100G module so we filter to Jeff's gas meter. (Can start with water only.)
+## ✅ LIVE (2026-07-02) — both meters reading via rtlamr2mqtt
+Confirmed by listen-mode discovery + rtlamr2mqtt publishing:
+- **Water:** ID **`79453337`**, protocol **`scm+`** (NOT plain scm — that's the key), raw reading `129105`.
+- **Gas:** ID **`33393066`**, protocol **`scm`** (barcode on the Itron 100G matched exactly), raw `883384`.
+- Reception is excellent (SDR hears ~20 neighborhood meters). rtlamr center 912.6 MHz.
+- **WORKING config** (listen_mode off, both meters):
+```yaml
+general:
+  sleep_for: 60
+  verbosity: info
+  listen_mode: false
+custom_parameters: {}
+mqtt:
+  ha_autodiscovery_topic: homeassistant
+  ha_status_topic: homeassistant/status
+  base_topic: rtlamr
+  discovery_interval: 300
+meters:
+  - id: "79453337"
+    protocol: scm+
+    name: water_meter
+  - id: "33393066"
+    protocol: scm
+    name: gas_meter
+```
+- HA entities: **`sensor.water_meter`**, **`sensor.gas_meter`** (raw counts).
+- **STILL TO DO:** (1) add a `format:` per meter to match the real dials (water raw `129105` ≈ 12,910.5 gal → likely `format: "#####.#"`; confirm gas format vs its dial); (2) HA utility_meter/derivative helpers for today/month/flow; (3) wire `UTIL_ENTITIES` in the app.
+- **Discovery tip:** `listen_mode: true` + `meters: []` runs rtlamr `-msgtype=all` with no filter → logs every meter's ID + type. That's how we found the protocols/IDs.
 
 ---
 
