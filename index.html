@@ -1115,7 +1115,7 @@ html,body{
             <span class="util-chip" id="util-water-chip">WAITING</span>
           </div>
           <div class="util-stats">
-            <div class="util-stat"><div class="util-stat-label">Today</div><div class="util-stat-val" id="util-water-today">&mdash;<span class="util-stat-unit">gal</span></div></div>
+            <div class="util-stat"><div class="util-stat-label">Reading</div><div class="util-stat-val" id="util-water-today">&mdash;<span class="util-stat-unit">gal</span></div></div>
             <div class="util-stat"><div class="util-stat-label">This Month</div><div class="util-stat-val" id="util-water-month">&mdash;<span class="util-stat-unit">gal</span></div></div>
             <div class="util-stat"><div class="util-stat-label">Flow</div><div class="util-stat-val" id="util-water-flow">&mdash;<span class="util-stat-unit">gpm</span></div></div>
           </div>
@@ -1137,7 +1137,7 @@ html,body{
             <span class="util-chip" id="util-gas-chip">WAITING</span>
           </div>
           <div class="util-stats">
-            <div class="util-stat"><div class="util-stat-label">Today</div><div class="util-stat-val" id="util-gas-today">&mdash;<span class="util-stat-unit">ccf</span></div></div>
+            <div class="util-stat"><div class="util-stat-label">Reading</div><div class="util-stat-val" id="util-gas-today">&mdash;<span class="util-stat-unit">ccf</span></div></div>
             <div class="util-stat"><div class="util-stat-label">This Month</div><div class="util-stat-val" id="util-gas-month">&mdash;<span class="util-stat-unit">ccf</span></div></div>
             <div class="util-stat"><div class="util-stat-label">Est. Cost</div><div class="util-stat-val" id="util-gas-cost">&mdash;</div></div>
           </div>
@@ -5525,8 +5525,6 @@ function loadUtilities() {
   var token = getHaToken();
   var base = localStorage.getItem('ha_base') || HA_BASE;
   if (!token || !base) return; // no Beehive yet → keep placeholders
-  var configured = Object.keys(UTIL_ENTITIES).some(function(k){ return !!UTIL_ENTITIES[k]; });
-  if (!configured) return;      // meters not wired into Beehive yet → keep placeholders
   fetch(base + '/api/states', {
     headers: { 'Authorization': 'Bearer ' + token },
     signal: AbortSignal.timeout(5000)
@@ -5534,18 +5532,25 @@ function loadUtilities() {
   .then(function(r){ return r.json(); })
   .then(function(states){
     if (!Array.isArray(states)) return;
-    var byId = {};
-    states.forEach(function(s){ byId[s.entity_id] = s; });
-    function val(key){
-      var id = UTIL_ENTITIES[key]; if (!id) return null;
-      var s = byId[id]; if (!s) return null;
-      var n = parseFloat(s.state); return isNaN(n) ? null : n;
+    // Auto-find the rtlamr2mqtt meter sensors by name (Beehive devices: water_meter / gas_meter).
+    function meterRaw(kw){
+      var v = null;
+      states.forEach(function(s){
+        if (!s || typeof s.entity_id !== 'string') return;
+        if (s.entity_id.indexOf('sensor.') !== 0) return;
+        var id = s.entity_id.toLowerCase();
+        var fn = ((s.attributes && s.attributes.friendly_name) || '').toLowerCase();
+        if (id.indexOf(kw) >= 0 || fn.indexOf(kw) >= 0) {
+          var n = parseFloat(s.state);
+          if (!isNaN(n)) v = n;
+        }
+      });
+      return v;
     }
-    function put(elId, v, digits){
-      if (v == null) return;
+    function put(elId, txt){
       var el = document.getElementById(elId); if (!el) return;
       var unit = el.querySelector('.util-stat-unit');
-      el.textContent = (digits != null ? v.toFixed(digits) : String(v));
+      el.textContent = txt;
       if (unit) el.appendChild(unit);
     }
     function live(group){
@@ -5554,21 +5559,17 @@ function loadUtilities() {
       var f = document.getElementById('util-' + group + '-foot');
       if (f) { f.classList.add('live'); f.innerHTML = '<span class="dot"></span> Live from Beehive'; }
     }
-    var w = [val('water_today'), val('water_month'), val('water_flow')];
-    if (w.some(function(x){ return x != null; })) {
-      put('util-water-today', w[0], 0); put('util-water-month', w[1], 0); put('util-water-flow', w[2], 1);
+    // WATER — rtlamr raw is tenths of a gallon → ÷10 = gallons (flowIQ 2100)
+    var wraw = meterRaw('water_meter');
+    if (wraw != null) {
+      put('util-water-today', (wraw / 10).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
       live('water');
     }
-    var g = [val('gas_today'), val('gas_month'), val('gas_cost')];
-    if (g.some(function(x){ return x != null; })) {
-      put('util-gas-today', g[0], 1); put('util-gas-month', g[1], 1);
-      if (g[2] != null) { var ge = document.getElementById('util-gas-cost'); if (ge) ge.textContent = '$' + g[2].toFixed(2); }
+    // GAS — rtlamr raw is cubic feet → ÷100 = CCF (Piedmont's billing unit)
+    var graw = meterRaw('gas_meter');
+    if (graw != null) {
+      put('util-gas-today', (graw / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
       live('gas');
-    }
-    var e = [val('elec_now'), val('elec_today'), val('elec_month')];
-    if (e.some(function(x){ return x != null; })) {
-      put('util-elec-now', e[0], 2); put('util-elec-today', e[1], 1); put('util-elec-month', e[2], 0);
-      live('elec');
     }
   })
   .catch(function(){ /* unreachable → keep placeholders, no error shown */ });
