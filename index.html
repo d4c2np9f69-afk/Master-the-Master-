@@ -2924,9 +2924,13 @@ function applyMowVerdict(){
   var rainToday = (STATION && STATION.precipTotal!=null) ? Number(STATION.precipTotal) : 0;
   var risk = (WX && WX.loaded && WX.risk!=null) ? WX.risk : 0;
   var temp = (STATION && STATION.temp!=null) ? Math.round(STATION.temp) : (WX&&WX.temp!=null?WX.temp:null);
-  var mow='YES', soil='FIRM';
+  var mow='YES', soil='FIRM', heatNote=false;
   if(risk>55 || rainToday>0.35){ mow='NO'; soil='WET'; }
   else if(risk>30 || rainToday>0.12){ mow='CAUTION'; soil='MOIST'; }
+  // Extreme heat (heat index ≥103°F, i.e. Heat Stress = EXTREME) is never "good to mow" —
+  // downgrade a clear verdict to caution and tell Jeff to mow early AM or evening.
+  var hidx=(STATION&&STATION.heatIndex!=null)?Number(STATION.heatIndex):(STATION&&STATION.temp!=null?Number(STATION.temp):null);
+  if(hidx!=null && hidx>=103 && mow==='YES'){ mow='CAUTION'; heatNote=true; }
   WX={status:mow, temp:temp, risk:risk, soil:soil, dewOnGrass:(WX&&WX.dewOnGrass)||'DRY', rainToday:rainToday, loaded:true};
   // Soil cell matches the verdict
   var sc=document.getElementById('wxSoil');
@@ -2935,7 +2939,7 @@ function applyMowVerdict(){
   var banner=document.getElementById('wxBanner');
   if(banner){
     if(mow==='YES'){ banner.className='wx-banner wx-go'; banner.innerHTML='&#10003; GOOD TO MOW'; }
-    else if(mow==='CAUTION'){ banner.className='wx-banner wx-caution'; banner.innerHTML='&#9888; MOW WITH CAUTION'; }
+    else if(mow==='CAUTION'){ banner.className='wx-banner wx-caution'; banner.innerHTML='&#9888; MOW WITH CAUTION'+(heatNote?'<span style="display:block;font-size:11px;font-weight:600;opacity:.85;margin-top:2px">Extreme heat &mdash; mow early AM or evening</span>':''); }
     else { banner.className='wx-banner wx-no'; banner.innerHTML='&#128683; DO NOT MOW'; }
   }
   if(typeof renderReadiness==='function') renderReadiness();
