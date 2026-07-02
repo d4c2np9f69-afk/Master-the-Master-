@@ -36,7 +36,10 @@ meters:
     name: gas_meter
 ```
 - HA entities: **`sensor.water_meter`**, **`sensor.gas_meter`** (raw counts).
-- **STILL TO DO:** (1) add a `format:` per meter to match the real dials (water raw `129105` ≈ 12,910.5 gal → likely `format: "#####.#"`; confirm gas format vs its dial); (2) HA utility_meter/derivative helpers for today/month/flow; (3) wire `UTIL_ENTITIES` in the app.
+- **CALIBRATION CONFIRMED (2026-07-02, verified against the physical dials):**
+  - **Water:** raw **÷ 10 = gallons.** raw `129105` → `12,910.5 gal` (LCD read `12,914.94` — gap = usage between reads + SDR is 0.1-gal resolution vs LCD 0.01). flowIQ 2100.
+  - **Gas:** raw **÷ 100 = CCF.** raw `883384` → `8,833.84 CCF` (matches the 4 dials ~8833). Elster AC-250, Itron 100G. (1 CCF ≈ 1.037 therm for Piedmont $.)
+- **STILL TO DO (app polish):** (1) show the live readings in the app's Utility cards — apply ÷10 (water) / ÷100 (gas) in `loadUtilities()`; (2) HA **utility_meter** helpers on `sensor.water_meter`/`sensor.gas_meter` for **today/month**, **derivative** helper for **flow/now**; (3) set `UTIL_ENTITIES` to those helper entity_ids. App reads via HA token (works on Jeff's phone on home wifi).
 - **Discovery tip:** `listen_mode: true` + `meters: []` runs rtlamr `-msgtype=all` with no filter → logs every meter's ID + type. That's how we found the protocols/IDs.
 
 ---
