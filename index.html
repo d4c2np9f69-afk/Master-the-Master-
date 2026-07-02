@@ -2904,6 +2904,11 @@ function loadStation(){
       if(note){ note.textContent=(isReal?'📡 ':'🌐 ')+(s.station||'')+(s.neighborhood?' · '+s.neighborhood:'')+(s.obsTimeLocal?' · '+s.obsTimeLocal.split(' ')[1]:''); }
       // Update weather hero with real temp
       var ht=document.getElementById('wxHeroTemp'); if(ht&&s.temp!=null) ht.innerHTML=Math.round(s.temp)+'&#176;';
+      // Sync the HOME hero (and thus the WEATHER hero, via the observer) to the REAL
+      // station temp — otherwise the observer keeps overwriting the hero with the cooler
+      // Open-Meteo forecast, so the hero disagreed with the card (card uses the station).
+      var hwx=document.getElementById('heroWeather');
+      if(hwx&&s.temp!=null&&/\d+\s*°F/.test(hwx.innerHTML)){ hwx.innerHTML=hwx.innerHTML.replace(/\d+\s*°F/, Math.round(s.temp)+'&#176;F'); }
       // Single source of truth: recompute the mow verdict from REAL station rain +
       // forecast rain risk, so the banner, the cells, and readiness all agree.
       applyMowVerdict();
