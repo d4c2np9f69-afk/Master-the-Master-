@@ -5222,41 +5222,22 @@ function checkBeehive(manual) {
   var ver   = document.getElementById('beehiveVersion');
   if (dot) dot.style.background = '#ffd24a';
 
-  // Nabu Casa (https) first — it's the only base that works off home WiFi and isn't
-  // blocked by mixed-content. Then any stored base, then the local IP as a last resort.
-  var stored = localStorage.getItem('ha_base');
-  var candidates = [HA_NABU];
-  if (stored && candidates.indexOf(stored) < 0) candidates.push(stored);
-  if (candidates.indexOf(HA_IP) < 0) candidates.push(HA_IP);
-
-  // HA's /api/ requires the bearer token; without it we can't confirm "online".
   var token = getHaToken();
-  var headers = token ? { 'Authorization': 'Bearer ' + token } : undefined;
-
-  function tryNext(list) {
-    if (!list.length) {
+  // Go through the /api/ha proxy — server-side, so no CORS / mixed-content / browser
+  // timeout race. The browser timeout is deliberately longer than the proxy's own (20s).
+  haFetch('/api/', { signal: AbortSignal.timeout(25000) })
+    .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(d) {
+      if (d && (d.message === 'API running.' || d.version)) { beehiveOnline(HA_NABU, d); }
+      else { throw new Error('unexpected'); }
+    })
+    .catch(function() {
       if (dot)   dot.style.background = '#e01c1c';
       if (title) { title.textContent = 'Beehive Offline'; title.style.color = '#ff6262'; }
       if (ver)   ver.textContent = token ? 'Not reachable — check Beehive / Nabu Casa' : 'Enter your HA token below to connect';
-      // Chicken-and-egg fix: with no token we can't confirm "online", but the token box
-      // used to only show once online — so it never appeared. Surface it when offline+no token.
+      // With no token we can't confirm "online" — surface the token box so it can be entered.
       if (!token) { var p = document.getElementById('haTokenPrompt'); if (p) p.style.display = 'block'; }
-      return;
-    }
-    var base = list[0];
-    // Fresh timeout PER attempt (not shared across candidates) and generous enough for
-    // the Nabu Casa remote relay — a shared 2.5s budget was falsely reporting "offline".
-    var opts = { signal: AbortSignal.timeout(9000) };
-    if (headers) opts.headers = headers;
-    fetch(base + '/api/', opts)
-      .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(function(d) {
-        if (d && (d.message === 'API running.' || d.version)) { beehiveOnline(base, {}); }
-        else { tryNext(list.slice(1)); }
-      })
-      .catch(function() { tryNext(list.slice(1)); });
-  }
-  tryNext(candidates);
+    });
 }
 
 setTimeout(function() { checkBeehive(false); }, 800);
@@ -5267,6 +5248,24 @@ setInterval(function(){ if (getHaToken()) { checkBeehive(false); loadUtilities()
 // ── HA TOKEN & HOME DATA ─────────────────────────────────────────────────
 function getHaToken() {
   return localStorage.getItem('ha_token') || '';
+}
+
+// Route every HA call through our own /api/ha proxy (same-origin → no CORS, no
+// mixed content, server-side timeout). The browser passes its token + chosen base;
+// the Function relays server-to-server to Nabu Casa. This is why irrigation/weather
+// never break — HA now works the same way.
+function haFetch(path, opts) {
+  opts = opts || {};
+  var base = localStorage.getItem('ha_base') || HA_BASE;
+  var token = getHaToken();
+  var headers = {};
+  if (opts.headers) { for (var k in opts.headers) headers[k] = opts.headers[k]; }
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  if (base) headers['X-HA-Base'] = base;
+  var init = { method: opts.method || 'GET', headers: headers };
+  if (opts.body != null) init.body = opts.body;
+  if (opts.signal) init.signal = opts.signal;
+  return fetch('/api/ha?path=' + encodeURIComponent(path), init);
 }
 
 function saveHaToken() {
@@ -5282,7 +5281,7 @@ function saveHaToken() {
   if (btn) { btn.textContent = 'Verifying…'; btn.style.opacity = '0.7'; }
   if (status) status.innerHTML = '';
   // Try to verify — if we can't reach Beehive, that's OK, token is saved
-  fetch(base + '/api/', { headers: { 'Authorization': 'Bearer ' + token }, signal: AbortSignal.timeout(5000) })
+  haFetch('/api/', { signal: AbortSignal.timeout(25000) })
     .then(function(r) {
       if (r.status === 401) throw new Error('unauthorized');
       if (!r.ok) throw new Error('http_' + r.status);
@@ -5319,10 +5318,7 @@ function loadCameras() {
   var placeholder = document.getElementById('blinkPlaceholder');
   if (grid) grid.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">&#128247; Loading cameras&hellip;</div>';
   if (grid) grid.style.display = 'block';
-  fetch(base + '/api/states', {
-    headers: { 'Authorization': 'Bearer ' + token },
-    signal: AbortSignal.timeout(5000)
-  })
+  haFetch('/api/states', { signal: AbortSignal.timeout(25000) })
   .then(function(r) {
     if (r.status === 401) throw new Error('unauthorized');
     if (!r.ok) throw new Error('http_' + r.status);
@@ -5394,10 +5390,7 @@ function loadHomeStatus() {
   var card = document.getElementById('homeStatusCard');
   var rows = document.getElementById('homeStatusRows');
   if (card) card.style.display = 'block';
-  fetch(base + '/api/states', {
-    headers: { 'Authorization': 'Bearer ' + token },
-    signal: AbortSignal.timeout(9000)
-  })
+  haFetch('/api/states', { signal: AbortSignal.timeout(25000) })
   .then(function(r) { return r.json(); })
   .then(function(states) {
     if (!rows) return;
@@ -5452,12 +5445,8 @@ function loadUtilities() {
     var f = document.getElementById('util-' + group + '-foot');
     if (f){ f.classList.remove('live'); f.innerHTML = '<span class="dot"></span> ' + txt; }
   }
-  fetch(base + '/api/states', {
-    headers: { 'Authorization': 'Bearer ' + token },
-    signal: AbortSignal.timeout(9000)   // /api/states is a big payload over the Nabu Casa relay
-  })
-  .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r; })
-  .then(function(r){ return r.json(); })
+  haFetch('/api/states', { signal: AbortSignal.timeout(25000) })
+  .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
   .then(function(states){
     if (!Array.isArray(states)) return;
     // Auto-find the rtlamr2mqtt meter sensors by name (Beehive devices: water_meter / gas_meter).
