@@ -565,8 +565,10 @@ html,body{
 /* ── UTILITIES (Water / Gas / Electric meter cards, HOME) ───────────────── */
 .util-list{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
 .util-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.30)}
-.util-banner{width:100%;overflow:hidden;background:#0b0b0f;line-height:0}
+.util-banner{display:block;width:100%;overflow:hidden;background:#0b0b0f;line-height:0;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .util-banner img{width:100%;height:auto;display:block}
+.util-banner:active{opacity:.85}
+.util-banner-call{position:absolute;right:8px;bottom:8px;z-index:2;display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;letter-spacing:.5px;color:#fff;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.4);border-radius:20px;padding:4px 9px;line-height:1}
 .util-accent{height:3px;width:100%;background:var(--dim)}
 .util-w .util-accent{background:var(--info,#38bdf8)}
 .util-g .util-accent{background:#f97316}
@@ -1096,7 +1098,7 @@ html,body{
 
       <!-- WATER -->
       <div class="util-card util-w">
-        <div class="util-banner"><img src="./images/util-water.jpg" alt="White House Utilities water meter"></div>
+        <a class="util-banner" href="tel:6156724110" aria-label="Call White House Utility District customer service"><img src="./images/util-water.jpg" alt="White House Utilities water meter"><span class="util-banner-call">&#128222; CALL</span></a>
         <div class="util-accent"></div>
         <div class="util-body">
           <div class="util-head">
@@ -1118,14 +1120,14 @@ html,body{
 
       <!-- GAS -->
       <div class="util-card util-g">
-        <div class="util-banner"><img src="./images/util-gas.jpg" alt="Piedmont Natural Gas meter"></div>
+        <a class="util-banner" href="tel:8007527504" aria-label="Call Spire Energy customer service"><img src="./images/util-gas.jpg" alt="Spire Energy gas meter"><span class="util-banner-call">&#128222; CALL</span></a>
         <div class="util-accent"></div>
         <div class="util-body">
           <div class="util-head">
             <span style="font-size:18px">&#128293;</span>
             <div style="flex:1;min-width:0">
               <div class="util-head-name">Natural Gas</div>
-              <div class="util-head-prov">Piedmont Natural Gas &bull; Itron 100G ERT</div>
+              <div class="util-head-prov">Spire Energy &bull; Itron 100G ERT</div>
             </div>
             <span class="util-chip" id="util-gas-chip">WAITING</span>
           </div>
@@ -1140,7 +1142,7 @@ html,body{
 
       <!-- ELECTRIC -->
       <div class="util-card util-e">
-        <div class="util-banner"><img src="./images/util-electric.jpg" alt="Cumberland Electric (CEMC) meter"></div>
+        <a class="util-banner" href="tel:8009872362" aria-label="Call Cumberland Electric CEMC customer service"><img src="./images/util-electric.jpg" alt="Cumberland Electric (CEMC) meter"><span class="util-banner-call">&#128222; CALL</span></a>
         <div class="util-accent"></div>
         <div class="util-body">
           <div class="util-head">
@@ -2888,13 +2890,18 @@ function applyMowVerdict(){
   var rainToday = (STATION && STATION.precipTotal!=null) ? Number(STATION.precipTotal) : 0;
   var risk = (WX && WX.loaded && WX.risk!=null) ? WX.risk : 0;
   var temp = (STATION && STATION.temp!=null) ? Math.round(STATION.temp) : (WX&&WX.temp!=null?WX.temp:null);
-  var mow='YES', soil='FIRM', heatNote=false;
+  var mow='YES', soil='FIRM', heatNote=false, dewNote=false;
   if(risk>55 || rainToday>0.35){ mow='NO'; soil='WET'; }
   else if(risk>30 || rainToday>0.12){ mow='CAUTION'; soil='MOIST'; }
   // Extreme heat (heat index ≥103°F, i.e. Heat Stress = EXTREME) is never "good to mow" —
   // downgrade a clear verdict to caution and tell Jeff to mow early AM or evening.
   var hidx=(STATION&&STATION.heatIndex!=null)?Number(STATION.heatIndex):(STATION&&STATION.temp!=null?Number(STATION.temp):null);
   if(hidx!=null && hidx>=103 && mow==='YES'){ mow='CAUTION'; heatNote=true; }
+  // Wet dew on the grass — don't mow yet. Keeps this WEATHER verdict in agreement with the
+  // YARD readiness card, which also flags heavy dew (they used to disagree: "GOOD TO MOW" here
+  // vs "let it dry first" there).
+  var dewWet=(WX && WX.dewOnGrass==='WET');
+  if(dewWet && mow==='YES'){ mow='CAUTION'; dewNote=true; }
   WX={status:mow, temp:temp, risk:risk, soil:soil, dewOnGrass:(WX&&WX.dewOnGrass)||'DRY', rainToday:rainToday, loaded:true};
   // Soil cell matches the verdict
   var sc=document.getElementById('wxSoil');
@@ -2903,7 +2910,7 @@ function applyMowVerdict(){
   var banner=document.getElementById('wxBanner');
   if(banner){
     if(mow==='YES'){ banner.className='wx-banner wx-go'; banner.innerHTML='&#10003; GOOD TO MOW'; }
-    else if(mow==='CAUTION'){ banner.className='wx-banner wx-caution'; banner.innerHTML='&#9888; MOW WITH CAUTION'+(heatNote?'<span style="display:block;font-size:11px;font-weight:600;opacity:.85;margin-top:2px">Extreme heat &mdash; mow early AM or evening</span>':''); }
+    else if(mow==='CAUTION'){ banner.className='wx-banner wx-caution'; banner.innerHTML='&#9888; MOW WITH CAUTION'+(heatNote?'<span style="display:block;font-size:11px;font-weight:600;opacity:.85;margin-top:2px">Extreme heat &mdash; mow early AM or evening</span>':'')+(dewNote?'<span style="display:block;font-size:11px;font-weight:600;opacity:.85;margin-top:2px">Heavy dew &mdash; let the grass dry first</span>':''); }
     else { banner.className='wx-banner wx-no'; banner.innerHTML='&#128683; DO NOT MOW'; }
   }
   if(typeof renderReadiness==='function') renderReadiness();
@@ -4754,8 +4761,23 @@ setInterval(loadAlerts, 5*60*1000);
     return pts;
   }
 
+  // Preload the man-with-mower marker image (Jeff's emoji). Redraw once it's ready.
+  var _mowerImg=new Image(); var _mowerImgReady=false;
+  _mowerImg.onload=function(){ _mowerImgReady=true; if(window._lastTrack) drawYardMap(window._lastTrack); };
+  _mowerImg.src='./images/mower-marker.png';
   function _drawMowerIcon(ctx,x,y,angle,scale){
     scale=scale||1;
+    // Emoji-style marker: draw the man+mower image upright (heading not applied — reads
+    // like a map pin). Falls back to the drawn mower until the image finishes loading.
+    if(_mowerImgReady){
+      var s=40*scale;
+      ctx.save();
+      ctx.translate(x,y);
+      ctx.shadowColor='rgba(0,0,0,.55)'; ctx.shadowBlur=6*scale; ctx.shadowOffsetY=2*scale;
+      ctx.drawImage(_mowerImg,-s/2,-s/2,s,s);
+      ctx.restore();
+      return;
+    }
     ctx.save();
     ctx.translate(x,y);
     ctx.rotate(angle);
