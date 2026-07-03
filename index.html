@@ -5512,6 +5512,47 @@ function loadUtilities() {
     fill('util-water-flow',  'sensor.water_flow',  1);
     fill('util-gas-month',   'sensor.gas_month',   2);
     fill('util-gas-cost',    'sensor.gas_cost',    2, '$');
+
+    // ── Computed details (fallback when the HA helper sensors don't exist yet) ──
+    // Derive This-Month usage, Flow, and Est. Cost in-app from the raw meter readings,
+    // tracked in localStorage across polls. If Jeff later builds the HA utility_meter/
+    // derivative helpers, those (filled above) take priority and this is skipped.
+    var GAS_RATE_PER_CCF = 1.10; // Piedmont ESTIMATE — Jeff can give the exact $/ccf to correct.
+    function rollMeter(key, curVal){
+      var now = Date.now();
+      var ym = new Date().getFullYear() + '-' + (new Date().getMonth() + 1); // month bucket
+      var st = {};
+      try { st = JSON.parse(localStorage.getItem(key) || '{}'); } catch (e) { st = {}; }
+      var res = { flow: null, month: null };
+      // Flow = change since the last sample, per minute (meter is cumulative like an odometer).
+      if (st.lastVal != null && st.lastT) {
+        var dv = curVal - st.lastVal;
+        var dm = (now - st.lastT) / 60000;
+        if (dm > 0.1 && dv >= 0 && dv < 100000) res.flow = dv / dm;
+      }
+      // This-month = usage since the first reading seen this calendar month.
+      if (st.ym !== ym || st.monthStart == null || curVal < st.monthStart) {
+        st.ym = ym; st.monthStart = curVal;
+      }
+      res.month = Math.max(0, curVal - st.monthStart);
+      st.lastVal = curVal; st.lastT = now;
+      try { localStorage.setItem(key, JSON.stringify(st)); } catch (e) {}
+      return res;
+    }
+    if (wraw != null) {
+      var wr = rollMeter('util_roll_water', wraw / 10);
+      if (num('sensor.water_month') == null && wr.month != null)
+        put('util-water-month', wr.month.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+      if (num('sensor.water_flow') == null && wr.flow != null)
+        put('util-water-flow', wr.flow.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+    }
+    if (graw != null) {
+      var gr = rollMeter('util_roll_gas', graw / 100);
+      if (num('sensor.gas_month') == null && gr.month != null)
+        put('util-gas-month', gr.month.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+      if (num('sensor.gas_cost') == null && gr.month != null)
+        put('util-gas-cost', '$' + (gr.month * GAS_RATE_PER_CCF).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    }
     // ELECTRIC (DIY ATM90E32 monitor — later). Accept a couple of common names.
     var eNow = (num('sensor.electric_now') != null) ? 'sensor.electric_now'
              : (num('sensor.electric_power') != null) ? 'sensor.electric_power' : null;
