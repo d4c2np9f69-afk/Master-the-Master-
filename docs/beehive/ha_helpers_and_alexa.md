@@ -19,7 +19,7 @@ The raw meters read in odd units (water in tenths-of-a-gallon, gas in cubic feet
 2. **Name:** `Water Gallons`
 3. **State template:**
    ```
-   {{ (states('sensor.water_meter') | float(0) / 10) | round(1) }}
+   {{ (states('sensor.water_meter_reading') | float(0) / 10) | round(1) }}
    ```
 4. **Unit of measurement:** `gal`
 5. **Device class:** `Water`   •   **State class:** `Total increasing`
@@ -30,7 +30,7 @@ The raw meters read in odd units (water in tenths-of-a-gallon, gas in cubic feet
 2. **Name:** `Gas CCF`
 3. **State template:**
    ```
-   {{ (states('sensor.gas_meter') | float(0) / 100) | round(2) }}
+   {{ (states('sensor.gas_meter_reading') | float(0) / 100) | round(2) }}
    ```
 4. **Unit of measurement:** `CCF`
 5. **Device class:** `Gas`   •   **State class:** `Total increasing`

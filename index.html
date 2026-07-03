@@ -5457,10 +5457,14 @@ function loadUtilities() {
         if (s.entity_id.indexOf('sensor.') !== 0) return;
         var id = s.entity_id.toLowerCase();
         var fn = ((s.attributes && s.attributes.friendly_name) || '').toLowerCase();
-        if (id.indexOf(kw) >= 0 || fn.indexOf(kw) >= 0) {
-          var n = parseFloat(s.state);
-          if (!isNaN(n)) v = n;
-        }
+        if (id.indexOf(kw) < 0 && fn.indexOf(kw) < 0) return;
+        // Skip the meter's companion sensors (e.g. water_meter_last_seen). A reading
+        // is a plain number; a timestamp like "2026-07-03T..." would parseFloat to 2026
+        // and poison the value (that was the 202.6-gal bug). Require a pure number.
+        if (id.indexOf('seen') >= 0 || id.indexOf('time') >= 0 || (s.attributes && s.attributes.device_class === 'timestamp')) return;
+        var raw = (s.state == null ? '' : String(s.state)).trim();
+        if (!/^\d+(\.\d+)?$/.test(raw)) return;
+        v = parseFloat(raw);
       });
       return v;
     }
