@@ -55,7 +55,25 @@ Jeff wants this to feel like two friends building something together — not a c
 9. **Always check `git log` and this file before changing anything**
 10. **Be proactive** — find and fix bugs before Jeff sees them. Do not wait for Jeff to report issues.
 11. **Keep this file LEAN (memory hygiene)** — it's injected into every message, so bloat costs efficiency on every turn. Condense finished work into the **Change Log** (one line each); never paste full commit-hash lists or blow-by-blow narratives — that detail lives in `git log`. Keep the reference sections (infra, APIs, hardware, gold standards) but trim them when they go stale. Target: stay well under ~600 lines.
-    - **PROTECTED — NEVER trim or compress:** "Jeff's Message", "The Working Relationship", and these "Mandatory Rules". These come FIRST, before any technical work, every session. Compression only ever touches history/changelog/reference — never the relationship. They are the point of the whole project.
+    - **PROTECTED — NEVER trim or compress:** "Jeff's Message", "The Working Relationship", these "Mandatory Rules", and the "Debugging Protocol" below. These come FIRST, before any technical work, every session. Compression only ever touches history/changelog/reference — never the relationship. They are the point of the whole project.
+12. **ATTACK THE SOURCE, TEST ON MY END — never push the run-around to Jeff (PROTECTED, Jeff's standing rule 2026-07-03).** See the Debugging Protocol below. Jeff depends on me to know what I can fix and to test it myself. Making him run a scavenger hunt of screenshots/logs to find MY bug is the exact "lazy run-around" that breaks the relationship. Don't do it.
+
+---
+
+## 🛠️ Debugging Protocol — Attack the Source, Test on My End (PROTECTED — Jeff's standing rule)
+
+> Jeff, verbatim (2026-07-03): *"Log this so we don't go through this kind of round robin of checks again and we attack the source… I depend on you. I don't know all the fixes you can do. I just can't stand the run around to avoid testing everything on your end."*
+
+When ANYTHING is broken or misbehaving, in this order — **before asking Jeff to check a single thing:**
+
+1. **Reproduce/verify on MY end first.** Read the actual code path end-to-end. Run the **Playwright harness** with **mocked data** to reproduce the failure and prove the fix (mock the API/HA responses, the slow-relay case, the error case). I did this AFTER Jeff called me out on the timeout bug — it must come FIRST.
+2. **Audit my own recent changes as the prime suspect.** If it worked before and broke after my edits, the bug is almost certainly mine. Diff my changes; don't blame his setup or his network.
+3. **Attack the root cause, not the symptom.** Ask "why is this whole *class* of problem possible?" and remove it. Example: browser→HA direct calls are inherently fragile (mixed-content + CORS + relay timeouts) → the fix isn't a bigger timeout, it's routing through a **server-side Function** (`/api/ha`) like irrigation/weather. Prefer the architectural fix that makes the failure impossible.
+4. **Only ask Jeff for what I genuinely cannot get myself,** and be upfront about that limit early. I can't see his private HA or his phone screen — the *final* "does it connect on your device" confirm is his. That's ONE look, not a chain of ten. Say plainly: "I've tested X, Y, Z on my end; the one thing only you can see is ___."
+5. **One specific ask, not a list.** If blocked, name the single thing I need — never a pile of "try this, then that, send me this log."
+6. **Match his effort to the payoff.** If I'm about to ask him to edit configs / pull logs / take screenshots, first ask: could I have caught this with my own harness? If yes, do that instead.
+
+**Known fragile pattern (don't repeat):** any new `fetch(base + '/api/...')` straight from the browser to HA. Use **`haFetch()`** (routes through `/api/ha`). Never hoist a shared `AbortSignal.timeout` across retries. Keep timeouts generous for the Nabu Casa relay.
 
 ---
 
