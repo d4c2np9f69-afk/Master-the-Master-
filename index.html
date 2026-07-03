@@ -1406,7 +1406,9 @@ html,body{
       <div class="card-title">&#127780; Weather Conditions at 301</div>
       <div class="wx-grid">
         <div class="wx-card"><div class="wx-lbl">Temperature</div><div class="wx-val" id="wxTemp">--</div></div>
+        <div class="wx-card"><div class="wx-lbl">Feels Like</div><div class="wx-val" id="wxFeels">--</div></div>
         <div class="wx-card"><div class="wx-lbl">Dew Point</div><div class="wx-val" id="wxDew">--</div></div>
+        <div class="wx-card"><div class="wx-lbl">Humidity</div><div class="wx-val" id="wxHumidity">--</div></div>
         <div class="wx-card"><div class="wx-lbl">Wind Dir</div><div class="wx-val" id="wxWindDir">--</div></div>
         <div class="wx-card"><div class="wx-lbl">UV Index</div><div class="wx-val" id="wxUV">--</div></div>
         <div class="wx-card"><div class="wx-lbl">Pressure</div><div class="wx-val" id="wxPressure">--</div></div>
@@ -1464,7 +1466,7 @@ html,body{
         <a href="https://www.wunderground.com/dashboard/pws/KTNWHITE21" target="_blank" rel="noopener" style="flex:1;text-align:center;text-decoration:none;padding:10px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.3);border-radius:8px;color:#38bdf8;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#128202; PWS Data</a>
       </div>
       <div style="display:flex;gap:8px;margin-top:8px">
-        <a href="https://mping.nssl.noaa.gov/" target="_blank" rel="noopener" style="flex:1;text-align:center;text-decoration:none;padding:10px;background:rgba(249,115,22,.2);border:1px solid rgba(249,115,22,.5);border-radius:8px;color:#fb923c;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#127783; Report to mPING &#8599;</a>
+        <a href="https://apps.apple.com/us/app/mping/id584383400" target="_blank" rel="noopener" style="flex:1;text-align:center;text-decoration:none;padding:10px;background:rgba(249,115,22,.2);border:1px solid rgba(249,115,22,.5);border-radius:8px;color:#fb923c;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#127783; Report to mPING &#8599;</a>
         <a href="https://tunein.com/radio/NOAA-Weather-Radio-16255-s95242/" target="_blank" rel="noopener" style="flex:1;text-align:center;text-decoration:none;padding:10px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.3);border-radius:8px;color:#a78bfa;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#128251; NOAA Radio &#9654;</a>
       </div>
       <div class="wx-note" style="margin-top:8px">NOAA Radio opens the live Nashville KIG79 broadcast (162.550 MHz) &bull; Spotter Map shows live spotter positions &bull; Report to mPING opens the official NOAA app to submit precip reports</div>
@@ -1482,12 +1484,12 @@ html,body{
         straight to NOAA/OU. Opens the official mPING app where you tap the type and hit submit.
       </div>
 
-      <a href="https://mping.nssl.noaa.gov/" target="_blank" rel="noopener" class="btn-full"
+      <a href="https://apps.apple.com/us/app/mping/id584383400" target="_blank" rel="noopener" class="btn-full"
         style="display:block;text-align:center;text-decoration:none;background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.4);border-radius:10px;padding:13px;color:#fb923c;font-size:14px;font-weight:800;font-family:var(--serif);letter-spacing:.5px">
-        &#127783; Open mPING to Report &#8599;
+        &#127783; Open mPING App to Report &#8599;
       </a>
 
-      <div class="wx-note" style="margin-top:8px">Reports go directly to NOAA/OU &bull; Enter &amp; submit in the official mPING app &bull; <span style="color:rgba(249,115,22,.7)">mping.nssl.noaa.gov</span></div>
+      <div class="wx-note" style="margin-top:8px">Opens the official <b>mPING app</b> (App Store) &bull; tap <b>Open</b>, pick the weather type, hit <b>Submit</b> &bull; the website only shows the map &mdash; the app is where you report.</div>
     </div>
 
     <!-- WEATHER STATION -->
@@ -2854,6 +2856,10 @@ function loadStation(){
       // Temps
       if(s.temp!=null)  set('wxTemp',  Math.round(s.temp)+'&#176;F');
       if(s.dewpt!=null) set('wxDew',   Math.round(s.dewpt)+'&#176;F');
+      // Feels like (heat index) — color it when it's a real heat concern
+      var feels=(s.heatIndex!=null)?s.heatIndex:s.temp;
+      if(feels!=null){ var fc=feels>=103?'#ff6262':feels>=90?'#ff8c42':''; setc('wxFeels', Math.round(feels)+'&#176;F', fc); }
+      if(s.humidity!=null) set('wxHumidity', Math.round(s.humidity)+'%');
       // Heat stress
       var hi=(s.heatIndex!=null)?s.heatIndex:s.temp;
       if(hi!=null){
