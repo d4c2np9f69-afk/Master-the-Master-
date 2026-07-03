@@ -5424,18 +5424,17 @@ function loadHomeStatus() {
 }
 
 // ── UTILITIES (Water / Gas / Electric) ───────────────────────────────────
-// Live values come from Home Assistant sensors created by the Beehive meter
-// reader: RTL-SDR + rtl_433 for WATER (Itron ERT-SCM MIU, endpoint 79453337,
-// unencrypted) and GAS (Itron 100G ERT); DIY ATM90E32 CT monitor for ELECTRIC.
-// Until those exact sensors exist in Beehive, the cards stay in the "Waiting"
-// placeholder state. >>> When a meter goes live, drop its real entity_id in
-// UTIL_ENTITIES below and that card lights up automatically. <<<
-var UTIL_ENTITIES = {
-  water_today: null, water_month: null, water_flow: null,
-  gas_today: null,   gas_month: null,   gas_cost: null,
-  elec_now: null,    elec_today: null,  elec_month: null
-};
-
+// The "Reading" tiles auto-find the raw rtlamr2mqtt meters (sensor.water_meter
+// ÷10 = gal, sensor.gas_meter ÷100 = ccf). The This-Month / Flow / Cost /
+// Electric tiles read named HA helper sensors that Jeff builds in Beehive
+// (see docs/beehive/ha_helpers_and_alexa.md). Any helper that doesn't exist yet
+// is skipped, so the tile just stays as a placeholder — nothing breaks.
+//   Expected helper entity_ids (name them EXACTLY these when building in HA):
+//     sensor.water_month  (utility_meter, monthly, gallons)
+//     sensor.water_flow   (derivative, gpm)
+//     sensor.gas_month    (utility_meter, monthly, ccf)
+//     sensor.gas_cost     (template, $ this month)
+//     sensor.electric_now / electric_today / electric_month (DIY monitor, later)
 function loadUtilities() {
   var token = getHaToken();
   var base = localStorage.getItem('ha_base') || HA_BASE;
@@ -5486,6 +5485,27 @@ function loadUtilities() {
       put('util-gas-today', (graw / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
       live('gas');
     }
+
+    // ── HA helper sensors (utility_meter / derivative / template) ──
+    // Fill the This-Month / Flow / Cost / Electric tiles. Skipped silently until
+    // Jeff builds each helper in Beehive (docs/beehive/ha_helpers_and_alexa.md).
+    var byId = {};
+    states.forEach(function(s){ if (s && typeof s.entity_id === 'string') byId[s.entity_id] = s; });
+    function num(entId){ var s = byId[entId]; if (!s) return null; var n = parseFloat(s.state); return isNaN(n) ? null : n; }
+    function fill(elId, entId, digits, prefix){
+      var n = num(entId); if (n == null) return;
+      put(elId, (prefix || '') + n.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits }));
+    }
+    fill('util-water-month', 'sensor.water_month', 1);
+    fill('util-water-flow',  'sensor.water_flow',  1);
+    fill('util-gas-month',   'sensor.gas_month',   2);
+    fill('util-gas-cost',    'sensor.gas_cost',    2, '$');
+    // ELECTRIC (DIY ATM90E32 monitor — later). Accept a couple of common names.
+    var eNow = (num('sensor.electric_now') != null) ? 'sensor.electric_now'
+             : (num('sensor.electric_power') != null) ? 'sensor.electric_power' : null;
+    if (eNow) { fill('util-elec-now', eNow, 2); live('elec'); }
+    fill('util-elec-today', 'sensor.electric_today', 1);
+    fill('util-elec-month', 'sensor.electric_month', 0);
   })
   .catch(function(){ /* unreachable → keep placeholders, no error shown */ });
 }
