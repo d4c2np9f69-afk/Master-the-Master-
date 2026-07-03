@@ -26,7 +26,10 @@ from homeassistant.config_entries import (
 from homeassistant.const import CONF_PASSWORD, CONF_PIN, CONF_USERNAME
 from homeassistant.core import callback
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.aiohttp_client import (
+    async_create_clientsession,
+    async_get_clientsession,
+)
 
 try:
     from .const import DOMAIN, HARDWARE_ID
@@ -93,15 +96,22 @@ class BlinkConfigFlow(ConfigFlow, domain=DOMAIN):
         """Initialize the blink flow."""
         self.auth: Auth | None = None
         self.blink: Blink | None = None
+        self._session = None
 
     async def _handle_user_input(self, user_input: dict[str, Any]):
         """Handle user input."""
+        # Root-cause fix for the 2FA "empty_cookies / Login failed" bug: HA's SHARED
+        # client session drops the auth cookies between the login step and the 2FA step,
+        # so Blink rejects the PIN with "Empty Cookies." Use ONE dedicated session (its own
+        # cookie jar), created once and reused for both login + 2FA, so the cookies survive.
+        if self._session is None:
+            self._session = async_create_clientsession(self.hass)
         self.auth = Auth(
             {**user_input, "hardware_id": HARDWARE_ID},
             no_prompt=True,
-            session=async_get_clientsession(self.hass),
+            session=self._session,
         )
-        self.blink = Blink(session=async_get_clientsession(self.hass))
+        self.blink = Blink(session=self._session)
         self.blink.auth = self.auth
 
         await self.async_set_unique_id(user_input[CONF_USERNAME])
