@@ -609,7 +609,8 @@ Loads: (1) washer/dryer, (2) stove/oven combo unit (range), (3) dishwasher, (4) 
 
 - **Email:** jeff.loewen@comcast.net
 - **Cloudflare account:** credentials already configured — never ask for them
-- **Home Assistant instance:** "Beehive" — accessible at `homeassistant.local` or local IP
+- **Home Assistant instance:** "Beehive" — local `homeassistant.local`/`192.168.1.66`; **remote (primary) `https://kmtpozwheqwww9t5uxhhvzzso1tvagro.ui.nabu.casa`** (Nabu Casa / HA Cloud)
+- **Weather Underground PWS:** station **`KTNWHITE21`**, API key **`0e87ee079c0147a787ee079c01d7a75d`** (Jeff owns the station → free PWS key). Used by `functions/api/weather.js` AND the HA "Weather Underground" integration (so Alexa can read his real station — see `docs/beehive/ha_helpers_and_alexa.md`).
 - **Mower:** Toro TimeMaster 21200
 - **Jeff wired his own house** — he is skilled and comfortable doing his own electrical work in the breaker panel. Never suggest hiring an electrician. Talk to him as a capable peer on electrical/hardware.
 - **Jeff is almost 60 and learning** the software/AI side — be patient and clear there, never condescending. But on hands-on hardware/electrical/firmware he is experienced. Make it enjoyable.
