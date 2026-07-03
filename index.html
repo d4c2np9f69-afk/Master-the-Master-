@@ -5257,6 +5257,9 @@ function checkBeehive(manual) {
 }
 
 setTimeout(function() { checkBeehive(false); }, 800);
+// Self-heal: re-check Beehive + re-read the meters every 60s, so an HA restart (or a
+// momentarily-quiet meter) recovers on its own — no manual refresh. Guarded to token.
+setInterval(function(){ if (getHaToken()) { checkBeehive(false); loadUtilities(); } }, 60000);
 
 // ── HA TOKEN & HOME DATA ─────────────────────────────────────────────────
 function getHaToken() {
@@ -5442,10 +5445,15 @@ function loadUtilities() {
   var token = getHaToken();
   var base = localStorage.getItem('ha_base') || HA_BASE;
   if (!token || !base) return; // no Beehive yet → keep placeholders
+  function utilFoot(group, txt){
+    var f = document.getElementById('util-' + group + '-foot');
+    if (f){ f.classList.remove('live'); f.innerHTML = '<span class="dot"></span> ' + txt; }
+  }
   fetch(base + '/api/states', {
     headers: { 'Authorization': 'Bearer ' + token },
     signal: AbortSignal.timeout(5000)
   })
+  .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r; })
   .then(function(r){ return r.json(); })
   .then(function(states){
     if (!Array.isArray(states)) return;
@@ -5492,6 +5500,11 @@ function loadUtilities() {
       put('util-gas-today', (graw / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
       live('gas');
     }
+    // Beehive is reachable, but a meter is momentarily quiet — e.g. rtlamr2mqtt just
+    // restarted and hasn't re-published yet (its readings aren't retained). Say so,
+    // instead of the same "Waiting" as a dead connection. Self-heals on the next poll.
+    if (wraw == null) utilFoot('water', 'Meter reader reconnecting…');
+    if (graw == null) utilFoot('gas', 'Meter reader reconnecting…');
 
     // ── HA helper sensors (utility_meter / derivative / template) ──
     // Fill the This-Month / Flow / Cost / Electric tiles. Skipped silently until
@@ -5514,7 +5527,12 @@ function loadUtilities() {
     fill('util-elec-today', 'sensor.electric_today', 1);
     fill('util-elec-month', 'sensor.electric_month', 0);
   })
-  .catch(function(){ /* unreachable → keep placeholders, no error shown */ });
+  .catch(function(){
+    // Couldn't reach Beehive this moment (HA restarting, off home network, token issue).
+    // Distinct from "reconnecting" above so we can tell a dead link from a quiet meter.
+    utilFoot('water', 'Beehive unreachable — retrying…');
+    utilFoot('gas',   'Beehive unreachable — retrying…');
+  });
 }
 
 function blinkSendPin() {
