@@ -5231,8 +5231,7 @@ function checkBeehive(manual) {
 
   // HA's /api/ requires the bearer token; without it we can't confirm "online".
   var token = getHaToken();
-  var opts = { signal: AbortSignal.timeout(2500) };
-  if (token) opts.headers = { 'Authorization': 'Bearer ' + token };
+  var headers = token ? { 'Authorization': 'Bearer ' + token } : undefined;
 
   function tryNext(list) {
     if (!list.length) {
@@ -5245,8 +5244,12 @@ function checkBeehive(manual) {
       return;
     }
     var base = list[0];
+    // Fresh timeout PER attempt (not shared across candidates) and generous enough for
+    // the Nabu Casa remote relay — a shared 2.5s budget was falsely reporting "offline".
+    var opts = { signal: AbortSignal.timeout(9000) };
+    if (headers) opts.headers = headers;
     fetch(base + '/api/', opts)
-      .then(function(r) { return r.json(); })
+      .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function(d) {
         if (d && (d.message === 'API running.' || d.version)) { beehiveOnline(base, {}); }
         else { tryNext(list.slice(1)); }
@@ -5393,7 +5396,7 @@ function loadHomeStatus() {
   if (card) card.style.display = 'block';
   fetch(base + '/api/states', {
     headers: { 'Authorization': 'Bearer ' + token },
-    signal: AbortSignal.timeout(5000)
+    signal: AbortSignal.timeout(9000)
   })
   .then(function(r) { return r.json(); })
   .then(function(states) {
@@ -5451,7 +5454,7 @@ function loadUtilities() {
   }
   fetch(base + '/api/states', {
     headers: { 'Authorization': 'Bearer ' + token },
-    signal: AbortSignal.timeout(5000)
+    signal: AbortSignal.timeout(9000)   // /api/states is a big payload over the Nabu Casa relay
   })
   .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r; })
   .then(function(r){ return r.json(); })
