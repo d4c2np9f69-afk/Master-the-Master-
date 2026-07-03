@@ -35,7 +35,10 @@ meters:
     protocol: scm
     name: gas_meter
 ```
-- HA entities: **`sensor.water_meter`**, **`sensor.gas_meter`** (raw counts).
+- HA entities (rtlamr2mqtt names them `<name>_reading` + a `<name>_last_seen` timestamp):
+  **`sensor.water_meter_reading`**, **`sensor.gas_meter_reading`** (raw counts).
+  ⚠️ Read the `_reading` entity, NOT `_last_seen` — a timestamp parseFloats to 2026 and showed
+  202.6 gal (fixed 07-03 in `meterRaw`: skip `*_seen`/timestamp entities, require a pure number).
 - **CALIBRATION CONFIRMED (2026-07-02, verified against the physical dials):**
   - **Water:** raw **÷ 10 = gallons.** raw `129105` → `12,910.5 gal` (LCD read `12,914.94` — gap = usage between reads + SDR is 0.1-gal resolution vs LCD 0.01). flowIQ 2100.
   - **Gas:** raw **÷ 100 = CCF.** raw `883384` → `8,833.84 CCF` (matches the 4 dials ~8833). Elster AC-250, Itron 100G. (1 CCF ≈ 1.037 therm for Piedmont $.)
