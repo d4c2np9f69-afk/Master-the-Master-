@@ -898,13 +898,6 @@ html,body{
 .wx-notif-btn{padding:6px 12px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:8px;color:#22c55e;font-size:10px;font-weight:800;font-family:inherit;cursor:pointer}
 .wx-notif-btn.granted{background:rgba(34,197,94,.2);border-color:rgba(34,197,94,.55);color:#4ade80}
 .wx-notif-btn.denied{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:#fca5a5;cursor:default}
-/* ── mPING quick report ── */
-.mping-type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.mping-type-btn{padding:10px 4px 8px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:10px;font-weight:700;font-family:var(--serif);cursor:pointer;text-align:center;line-height:1.3;transition:background .15s,border-color .15s;-webkit-tap-highlight-color:transparent}
-.mping-type-btn span{display:block;font-size:9px;margin-top:3px;letter-spacing:.3px}
-.mping-type-btn.sel{background:rgba(249,115,22,.25);border-color:rgba(249,115,22,.7);color:#fb923c}
-.mping-hail.sel{background:rgba(251,191,36,.2);border-color:rgba(251,191,36,.6);color:#fbbf24}
-.mping-tornado.sel{background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.6);color:#fca5a5}
 /* ── Home alert strip ── */
 .home-alert-strip{display:none;border-radius:10px;padding:10px 13px;margin-bottom:10px;background:rgba(220,38,38,.16);border:1px solid rgba(220,38,38,.45);cursor:pointer;-webkit-tap-highlight-color:transparent}
 .home-alert-strip.show{display:flex;align-items:center;gap:10px}
@@ -1492,59 +1485,30 @@ html,body{
         <a href="https://www.wunderground.com/dashboard/pws/KTNWHITE21" target="_blank" rel="noopener" style="flex:1;text-align:center;text-decoration:none;padding:10px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.3);border-radius:8px;color:#38bdf8;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#128202; PWS Data</a>
       </div>
       <div style="display:flex;gap:8px;margin-top:8px">
-        <button onclick="mpingScrollToReport()" style="flex:1;padding:10px;background:rgba(249,115,22,.2);border:1px solid rgba(249,115,22,.5);border-radius:8px;color:#fb923c;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#127783; Quick mPING Report &#8595;</button>
+        <a href="https://mping.nssl.noaa.gov/" target="_blank" rel="noopener" style="flex:1;text-align:center;text-decoration:none;padding:10px;background:rgba(249,115,22,.2);border:1px solid rgba(249,115,22,.5);border-radius:8px;color:#fb923c;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#127783; Report to mPING &#8599;</a>
         <a href="https://tunein.com/radio/NOAA-Weather-Radio-16255-s95242/" target="_blank" rel="noopener" style="flex:1;text-align:center;text-decoration:none;padding:10px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.3);border-radius:8px;color:#a78bfa;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#128251; NOAA Radio &#9654;</a>
       </div>
-      <div class="wx-note" style="margin-top:8px">NOAA Radio opens the live Nashville KIG79 broadcast (162.550 MHz) &bull; Spotter Map shows live spotter positions &bull; Submit precip reports in-app via Quick mPING below</div>
+      <div class="wx-note" style="margin-top:8px">NOAA Radio opens the live Nashville KIG79 broadcast (162.550 MHz) &bull; Spotter Map shows live spotter positions &bull; Report to mPING opens the official NOAA app to submit precip reports</div>
     </div>
 
-    <!-- mPING QUICK REPORT — native in-app submission to NOAA mPING -->
+    <!-- mPING REPORT — direct link to the official NOAA/OU mPING app (in-app submit is not permitted by NSSL) -->
     <div class="card cat-weather" id="mpingCard">
       <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
-        <span>&#127783; Quick Precip Report &bull; mPING / NOAA</span>
+        <span>&#127783; Submit a Precip Report &bull; mPING / NOAA</span>
         <span style="font-size:9px;color:var(--muted);letter-spacing:.4px">jlo301</span>
       </div>
 
-      <!-- Status banner -->
-      <div id="mpingBanner" class="wx-banner wx-load" style="display:none"></div>
-
-      <!-- Type selection: Precipitation -->
-      <div style="font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin:10px 0 6px">Precipitation Type</div>
-      <div id="mpingPrecipBtns" class="mping-type-grid">
-        <button class="mping-type-btn" data-type-id="1" onclick="mpingSelect(this)">☀️<br><span>None</span></button>
-        <button class="mping-type-btn" data-type-id="3" onclick="mpingSelect(this)">🌦<br><span>Drizzle</span></button>
-        <button class="mping-type-btn" data-type-id="2" onclick="mpingSelect(this)">🌧<br><span>Rain</span></button>
-        <button class="mping-type-btn" data-type-id="4" onclick="mpingSelect(this)">🌨<br><span>Frz Rain</span></button>
-        <button class="mping-type-btn" data-type-id="6" onclick="mpingSelect(this)">🧊<br><span>Sleet</span></button>
-        <button class="mping-type-btn" data-type-id="7" onclick="mpingSelect(this)">❄️<br><span>Snow</span></button>
-        <button class="mping-type-btn" data-type-id="8" onclick="mpingSelect(this)">🌩<br><span>Mixed</span></button>
+      <div style="font-size:12px;color:var(--muted);line-height:1.5;margin:8px 0 12px">
+        Report what you see &mdash; rain, snow, sleet, freezing rain, hail, or a funnel &mdash;
+        straight to NOAA/OU. Opens the official mPING app where you tap the type and hit submit.
       </div>
 
-      <!-- Convective -->
-      <div style="font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin:10px 0 6px">Convective</div>
-      <div class="mping-type-grid">
-        <button class="mping-type-btn mping-hail" data-type-id="12" onclick="mpingSelect(this)">⛈<br><span>Small Hail</span></button>
-        <button class="mping-type-btn mping-hail" data-type-id="11" onclick="mpingSelect(this)">⛈<br><span>Hail</span></button>
-        <button class="mping-type-btn mping-tornado" data-type-id="14" onclick="mpingSelect(this)">🌪<br><span>Funnel</span></button>
-        <button class="mping-type-btn mping-tornado" data-type-id="13" onclick="mpingSelect(this)">🌪<br><span>Tornado</span></button>
-      </div>
+      <a href="https://mping.nssl.noaa.gov/" target="_blank" rel="noopener" class="btn-full"
+        style="display:block;text-align:center;text-decoration:none;background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.4);border-radius:10px;padding:13px;color:#fb923c;font-size:14px;font-weight:800;font-family:var(--serif);letter-spacing:.5px">
+        &#127783; Open mPING to Report &#8599;
+      </a>
 
-      <!-- Location row -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding:8px 10px;background:rgba(0,0,0,.3);border-radius:8px;border:1px solid var(--border)">
-        <div>
-          <div style="font-size:10px;font-weight:700;color:var(--text)" id="mpingLocLabel">&#128204; Using KTNWHITE21 station</div>
-          <div style="font-size:9px;color:var(--muted);margin-top:2px">36.477° N, 86.660° W &bull; White House, TN</div>
-        </div>
-        <button onclick="mpingUseGPS()" style="padding:6px 10px;background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.3);border-radius:6px;color:var(--gold);font-size:10px;font-weight:700;font-family:inherit;cursor:pointer">&#128204; GPS</button>
-      </div>
-
-      <!-- Submit -->
-      <button id="mpingSubmitBtn" class="btn-full" onclick="mpingSubmit()" disabled
-        style="margin-top:10px;background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.3);border-radius:10px;padding:13px;color:#fb923c;font-size:14px;font-weight:800;font-family:var(--serif);letter-spacing:.5px;cursor:not-allowed;opacity:.5;transition:all .2s">
-        Select a Type to Report
-      </button>
-
-      <div class="wx-note" style="margin-top:8px">Reports go directly to NOAA &bull; Credited to spotter jlo301 &bull; <span style="color:rgba(249,115,22,.7)">NOAA/OU mPING v2</span></div>
+      <div class="wx-note" style="margin-top:8px">Reports go directly to NOAA/OU &bull; Enter &amp; submit in the official mPING app &bull; <span style="color:rgba(249,115,22,.7)">mping.nssl.noaa.gov</span></div>
     </div>
 
     <!-- WEATHER STATION -->
@@ -3197,81 +3161,10 @@ function escHtml(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-/* ===== mPING Quick Report ===== */
-var _mpingSelectedId=null, _mpingLat=36.477, _mpingLon=-86.66, _mpingUsingGPS=false;
-
-function mpingSelect(btn){
-  // Deselect all
-  document.querySelectorAll('.mping-type-btn').forEach(function(b){ b.classList.remove('sel'); });
-  btn.classList.add('sel');
-  _mpingSelectedId=parseInt(btn.getAttribute('data-type-id'),10);
-  var label=btn.querySelector('span')? btn.querySelector('span').textContent : btn.textContent.replace(/[^\w\s]/g,'').trim();
-  var submitBtn=document.getElementById('mpingSubmitBtn');
-  if(submitBtn){
-    submitBtn.textContent='Submit: '+label+' → NOAA mPING';
-    submitBtn.disabled=false;
-    submitBtn.style.opacity='1'; submitBtn.style.cursor='pointer';
-    submitBtn.style.background='rgba(249,115,22,.25)'; submitBtn.style.borderColor='rgba(249,115,22,.6)';
-  }
-}
-
-function mpingUseGPS(){
-  if(!navigator.geolocation){ alert('GPS not available on this device'); return; }
-  var lbl=document.getElementById('mpingLocLabel');
-  if(lbl) lbl.textContent='📡 Getting GPS…';
-  navigator.geolocation.getCurrentPosition(
-    function(pos){
-      _mpingLat=Math.round(pos.coords.latitude*10000)/10000;
-      _mpingLon=Math.round(pos.coords.longitude*10000)/10000;
-      _mpingUsingGPS=true;
-      if(lbl) lbl.textContent='📍 GPS: '+_mpingLat+'° N, '+Math.abs(_mpingLon)+'° W';
-    },
-    function(){ if(lbl) lbl.textContent='⚠️ GPS failed — using station location'; },
-    {timeout:8000,maximumAge:30000}
-  );
-}
-
-function mpingScrollToReport(){
-  var card=document.getElementById('mpingCard');
-  if(card) setTimeout(function(){ card.scrollIntoView({behavior:'smooth',block:'start'}); },100);
-}
-
-function mpingSubmit(){
-  if(!_mpingSelectedId) return;
-  var banner=document.getElementById('mpingBanner');
-  var submitBtn=document.getElementById('mpingSubmitBtn');
-  if(banner){ banner.className='wx-banner wx-load'; banner.style.display='block'; banner.innerHTML='&#128260; Submitting report to NOAA mPING…'; }
-  if(submitBtn){ submitBtn.disabled=true; submitBtn.style.opacity='.5'; }
-
-  fetch('/api/mping',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({typeId:_mpingSelectedId, lat:_mpingLat, lon:_mpingLon})
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(d){
-    if(d.ok){
-      if(banner){
-        banner.className='wx-banner wx-go';
-        banner.innerHTML='&#10003; Report submitted! NOAA mPING accepted it'+(d.id?' (ID '+d.id+')':'')+' &bull; Thank you, jlo301';
-      }
-      // Reset selection after a moment
-      setTimeout(function(){
-        document.querySelectorAll('.mping-type-btn').forEach(function(b){ b.classList.remove('sel'); });
-        _mpingSelectedId=null;
-        if(submitBtn){ submitBtn.disabled=true; submitBtn.style.opacity='.5'; submitBtn.style.cursor='not-allowed'; submitBtn.textContent='Select a Type to Report'; submitBtn.style.background='rgba(249,115,22,.15)'; submitBtn.style.borderColor='rgba(249,115,22,.3)'; }
-      },5000);
-    } else {
-      var errMsg=d.error||'Submission failed';
-      if(banner){ banner.className='wx-banner wx-caution'; banner.innerHTML='&#9888; '+escHtml(errMsg.substring(0,120))+'<br><span style="font-size:9px;color:var(--muted)">Check connection or try mping.nssl.noaa.gov</span>'; }
-      if(submitBtn){ submitBtn.disabled=false; submitBtn.style.opacity='1'; }
-    }
-  })
-  .catch(function(e){
-    if(banner){ banner.className='wx-banner wx-caution'; banner.innerHTML='&#9888; Network error — try again'; }
-    if(submitBtn){ submitBtn.disabled=false; submitBtn.style.opacity='1'; }
-  });
-}
+/* ===== mPING — direct link only =====
+   NSSL (Kim Elmore, 2026-07-02) confirmed mPING allows NO automated/app reports
+   (human-observed only, no API key ever). In-app submit is impossible, so the card
+   just opens the official mPING app (mping.nssl.noaa.gov) for Jeff to submit. No JS needed. */
 
 /* ===== NEXRAD Radar — RainViewer + Leaflet ===== */
 var _rMap=null, _rLayer=null, _rFrames=[], _rIdx=0, _rPlaying=false, _rTimer=null;
@@ -5265,7 +5158,12 @@ function hccPanic() {
 
 
 // ── BEEHIVE STATUS CHECK ─────────────────────────────────────────────────────
-var HA_BASE = localStorage.getItem('ha_base') || 'http://homeassistant.local:8123';
+// Nabu Casa (HA Cloud) remote URL — secure HTTPS front door for Beehive. This is what
+// makes the app reach HA from anywhere: the app is an https page and browsers block it
+// from fetching the local http HA (mixed content), so we go through this https URL.
+// Access still requires the long-lived token (stored only in this browser's localStorage).
+var HA_NABU = 'https://kmtpozwheqwww9t5uxhhvzzso1tvagro.ui.nabu.casa';
+var HA_BASE = localStorage.getItem('ha_base') || HA_NABU;
 var HA_IP   = 'http://192.168.1.66:8123';
 
 function copyCmd(el, text) {
@@ -5324,19 +5222,27 @@ function checkBeehive(manual) {
   var ver   = document.getElementById('beehiveVersion');
   if (dot) dot.style.background = '#ffd24a';
 
-  // Try hostname, then fall back to direct IP
-  var candidates = [HA_BASE];
-  if (HA_BASE !== HA_IP) candidates.push(HA_IP);
+  // Nabu Casa (https) first — it's the only base that works off home WiFi and isn't
+  // blocked by mixed-content. Then any stored base, then the local IP as a last resort.
+  var stored = localStorage.getItem('ha_base');
+  var candidates = [HA_NABU];
+  if (stored && candidates.indexOf(stored) < 0) candidates.push(stored);
+  if (candidates.indexOf(HA_IP) < 0) candidates.push(HA_IP);
+
+  // HA's /api/ requires the bearer token; without it we can't confirm "online".
+  var token = getHaToken();
+  var opts = { signal: AbortSignal.timeout(2500) };
+  if (token) opts.headers = { 'Authorization': 'Bearer ' + token };
 
   function tryNext(list) {
     if (!list.length) {
       if (dot)   dot.style.background = '#e01c1c';
       if (title) { title.textContent = 'Beehive Offline'; title.style.color = '#ff6262'; }
-      if (ver)   ver.textContent = 'Not reachable — must be on home WiFi';
+      if (ver)   ver.textContent = token ? 'Not reachable — check Beehive / Nabu Casa' : 'Enter your HA token below to connect';
       return;
     }
     var base = list[0];
-    fetch(base + '/api/', { signal: AbortSignal.timeout(2500) })
+    fetch(base + '/api/', opts)
       .then(function(r) { return r.json(); })
       .then(function(d) {
         if (d && (d.message === 'API running.' || d.version)) { beehiveOnline(base, {}); }

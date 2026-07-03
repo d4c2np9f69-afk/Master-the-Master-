@@ -352,12 +352,13 @@ If any tests fail, fix them before doing anything else.
 | Irrigation → HA first, direct B-Hyve fallback; zone control via browser WebSocket | done — needs live test |
 | Weather: KTNWHITE21 live data, NWS alerts (deduped by id), 10-day (Open-Meteo), radar (OSM tiles), Lawn Water Need + /api/drought | done — radar/notifs need device confirm |
 | Alexa button (opens Alexa app); in-app voice REMOVED | done |
-| mPING submit | ❌ DEAD END — NSSL (Kim Elmore, 2026-07-02) confirmed mPING allows **NO automated/app reports** (human-observed only, no API key ever). In-app submit is impossible; repurpose the card to open the **official mPING app**. Do NOT chase a token. |
+| mPING submit | ✅ DONE (07-03) — card now just opens the **official mPING app** (`mping.nssl.noaa.gov`) for Jeff to submit by hand. In-app submit is impossible (NSSL/Kim Elmore 07-02: NO automated/app reports ever, no API key). Removed the type-picker UI + `mpingSelect/Submit/UseGPS` JS + `.mping-*` CSS + `/api/mping` call. Do NOT rebuild in-app submit. |
 
 ---
 
 ## Change Log (highlights — full detail in `git log`)
 
+- **07-03:** **App↔Beehive connectivity wired** — added `HA_NABU` = Nabu Casa remote URL (`https://kmtpozwheqwww9t5uxhhvzzso1tvagro.ui.nabu.casa`) as the app's primary HA base (secure https → fixes the mixed-content "Beehive Offline"). `checkBeehive()` now tries Nabu Casa first (even if a stale local `ha_base` is cached) and sends the bearer token (HA `/api/` needs auth to confirm online). Local IP kept as home-WiFi fallback. **mPING repurposed** — killed the in-app submit (type picker + JS + CSS + `/api/mping`); card + weather button now open the official mPING app for Jeff to submit by hand.
 - **06-23/24:** Fixed blank page (stray `<script>` in JS block), dead sensor data (MOWER_KV binding — see `getKV` dual-check), GPS persistence, all modal CSS. Created this file. Extracted hero photos (2.1MB→295KB).
 - **06-24:** Warm cream-gold palette app-wide; panic button HOME-only; Beehive-first irrigation.
 - **06-25:** Real aerial GPS map + calibration (`localStorage.yard_map_calib`) + telemetry sim; YARD hero photo; B-Hyve HA custom integration (`beehive/custom_components/bhyve/`).
