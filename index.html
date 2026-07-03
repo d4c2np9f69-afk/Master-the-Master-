@@ -1114,10 +1114,11 @@ html,body{
             </div>
             <span class="util-chip" id="util-water-chip">WAITING</span>
           </div>
-          <div class="util-stats">
+          <div class="util-stats" style="grid-template-columns:repeat(2,1fr)">
             <div class="util-stat"><div class="util-stat-label">Reading</div><div class="util-stat-val" id="util-water-today">&mdash;<span class="util-stat-unit">gal</span></div></div>
-            <div class="util-stat"><div class="util-stat-label">This Month</div><div class="util-stat-val" id="util-water-month">&mdash;<span class="util-stat-unit">gal</span></div></div>
+            <div class="util-stat"><div class="util-stat-label">This Cycle</div><div class="util-stat-val" id="util-water-month">&mdash;<span class="util-stat-unit">gal</span></div></div>
             <div class="util-stat"><div class="util-stat-label">Flow</div><div class="util-stat-val" id="util-water-flow">&mdash;<span class="util-stat-unit">gpm</span></div></div>
+            <div class="util-stat"><div class="util-stat-label">Est. Water $</div><div class="util-stat-val" id="util-water-cost">&mdash;</div></div>
           </div>
           <div class="util-foot" id="util-water-foot"><span class="dot"></span> Waiting for Beehive meter reader</div>
         </div>
@@ -5559,9 +5560,17 @@ function loadUtilities() {
     // derivative helpers, those (filled above) take priority and this is skipped.
     var GAS_RATE_PER_CCF = 1.12; // TN residential all-in ≈ $1.12/CCF (EIA $11.23/Mcf, Jan 2026;
                                  // Spire kept Piedmont's TN rates). Jeff can refine from a bill.
-    function rollMeter(key, curVal){
+    var WATER_BASE = 10.32, WATER_PER_GAL = 0.00908; // WHUD rates eff 2026-01-01 (meters < 1")
+    // WHUD reads the meter ~the 21st, so the billing cycle "belongs" to the month whose
+    // 21st most recently passed. Usage/cost track that cycle, not the calendar month.
+    function whudCycleKey(){
+      var d = new Date(), y = d.getFullYear(), m = d.getMonth();
+      if (d.getDate() < 21) { m--; if (m < 0) { m = 11; y--; } }
+      return 'whud-' + y + '-' + (m + 1);
+    }
+    function rollMeter(key, curVal, periodKey){
       var now = Date.now();
-      var ym = new Date().getFullYear() + '-' + (new Date().getMonth() + 1); // month bucket
+      var ym = periodKey || (new Date().getFullYear() + '-' + (new Date().getMonth() + 1));
       var st = {};
       try { st = JSON.parse(localStorage.getItem(key) || '{}'); } catch (e) { st = {}; }
       var res = { flow: null, month: null };
@@ -5571,7 +5580,7 @@ function loadUtilities() {
         var dm = (now - st.lastT) / 60000;
         if (dm > 0.1 && dv >= 0 && dv < 100000) res.flow = dv / dm;
       }
-      // This-month = usage since the first reading seen this calendar month.
+      // Usage since the first reading seen in this billing period.
       if (st.ym !== ym || st.monthStart == null || curVal < st.monthStart) {
         st.ym = ym; st.monthStart = curVal;
       }
@@ -5581,11 +5590,15 @@ function loadUtilities() {
       return res;
     }
     if (wraw != null) {
-      var wr = rollMeter('util_roll_water', wraw / 10);
+      var wr = rollMeter('util_roll_water', wraw / 10, whudCycleKey());
       if (num('sensor.water_month') == null && wr.month != null)
         put('util-water-month', wr.month.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
       if (num('sensor.water_flow') == null && wr.flow != null)
         put('util-water-flow', wr.flow.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+      // Est. water charge = base + gallons this cycle × per-gallon (matches the WHUD bill's
+      // "Water Charges" line; sewer + sales tax are billed on top of this).
+      if (wr.month != null)
+        put('util-water-cost', '$' + (WATER_BASE + wr.month * WATER_PER_GAL).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
     }
     if (graw != null) {
       var gr = rollMeter('util_roll_gas', graw / 100);
