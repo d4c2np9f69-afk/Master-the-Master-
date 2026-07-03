@@ -5517,7 +5517,8 @@ function loadUtilities() {
     // Derive This-Month usage, Flow, and Est. Cost in-app from the raw meter readings,
     // tracked in localStorage across polls. If Jeff later builds the HA utility_meter/
     // derivative helpers, those (filled above) take priority and this is skipped.
-    var GAS_RATE_PER_CCF = 1.10; // Piedmont ESTIMATE — Jeff can give the exact $/ccf to correct.
+    var GAS_RATE_PER_CCF = 1.12; // TN residential all-in ≈ $1.12/CCF (EIA $11.23/Mcf, Jan 2026;
+                                 // Spire kept Piedmont's TN rates). Jeff can refine from a bill.
     function rollMeter(key, curVal){
       var now = Date.now();
       var ym = new Date().getFullYear() + '-' + (new Date().getMonth() + 1); // month bucket
