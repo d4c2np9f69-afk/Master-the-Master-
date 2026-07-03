@@ -1401,21 +1401,12 @@ html,body{
       </div>
     </div>
 
-    <!-- MOWING CONDITIONS -->
-    <div class="card cat-weather">
-      <div class="card-title">&#127780; Mowing Conditions &bull; White House, TN</div>
-      <div class="wx-banner wx-load" id="wxBanner">&#128260; Loading weather&hellip;</div>
+    <!-- WEATHER CONDITIONS AT 301 (mowing/soil metrics moved to YARD) -->
+    <div class="card cat-weather" id="wxConditionsCard">
+      <div class="card-title">&#127780; Weather Conditions at 301</div>
       <div class="wx-grid">
         <div class="wx-card"><div class="wx-lbl">Temperature</div><div class="wx-val" id="wxTemp">--</div></div>
         <div class="wx-card"><div class="wx-lbl">Dew Point</div><div class="wx-val" id="wxDew">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Rain Risk</div><div class="wx-val" id="wxRisk">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Soil Condition</div><div class="wx-val" id="wxSoil">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Soil Temp</div><div class="wx-val" id="wxSoilTemp">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Dew on Grass</div><div class="wx-val" id="wxGrassDew">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Soil Firmness</div><div class="wx-val" id="wxFirmness">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Rain 24&ndash;48h</div><div class="wx-val" id="wxRainNext">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Heat Stress</div><div class="wx-val" id="wxHeatStress">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Lightning</div><div class="wx-val" id="wxLightning">--</div></div>
         <div class="wx-card"><div class="wx-lbl">Wind Dir</div><div class="wx-val" id="wxWindDir">--</div></div>
         <div class="wx-card"><div class="wx-lbl">UV Index</div><div class="wx-val" id="wxUV">--</div></div>
         <div class="wx-card"><div class="wx-lbl">Pressure</div><div class="wx-val" id="wxPressure">--</div></div>
@@ -1423,13 +1414,6 @@ html,body{
       </div>
       <div id="wxStationNote" class="wx-note"></div>
       <button class="btn-full btn-gray" onclick="loadWeather()">&#128260; Refresh Weather</button>
-    </div>
-
-    <!-- READY TO MOW -->
-    <div class="card cat-weather" id="readyCard" style="border-width:2px">
-      <div class="card-title">&#127807; Ready to Mow?</div>
-      <div id="readyBanner" class="wx-banner wx-load wx-banner-lg">&#8987; Checking&hellip;</div>
-      <div id="readyReasons"></div>
     </div>
 
     <!-- LIVE RADAR (Windy embed — animated/interactive) -->
@@ -1455,18 +1439,6 @@ html,body{
       <div id="wxFcGrid" class="fc-scroll" style="margin-top:10px"></div>
       <div id="wxFcNote" class="wx-note" style="margin-top:6px"></div>
       <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadForecast()">&#128260; Refresh Forecast</button>
-    </div>
-
-    <!-- LAWN WATER NEED — station rain + drought → irrigation guidance -->
-    <div class="card cat-weather" id="wxWaterCard">
-      <div class="card-title">&#128167; Lawn Water Need</div>
-      <div id="wxWaterVerdict" class="wx-banner wx-load">&#8987; Loading rain &amp; drought&hellip;</div>
-      <ul class="spec-list" style="margin-top:6px">
-        <li><span class="sk">Rain Today (station)</span><span class="sv" id="wxRainToday">&mdash;</span></li>
-        <li><span class="sk">Current Rain Rate</span><span class="sv" id="wxRain7">&mdash;</span></li>
-        <li><span class="sk">Drought Status (37188)</span><span class="sv" id="wxDroughtCat">&mdash;</span></li>
-      </ul>
-      <div class="wx-note" id="wxDroughtNote" style="margin-top:6px">U.S. Drought Monitor &bull; Robertson County &bull; KTNWHITE21 rainfall</div>
     </div>
 
     <!-- SPOTTER NETWORK -->
@@ -1611,6 +1583,18 @@ html,body{
     </div>
 
     <!-- ZONES PREVIEW — shown until B-Hyve connects and populates irrZones -->
+    <!-- LAWN WATER NEED (moved from Weather — watering guidance) -->
+    <div class="card cat-wx" id="wxWaterCard">
+      <div class="card-title">&#128167; Lawn Water Need</div>
+      <div id="wxWaterVerdict" class="wx-banner wx-load">&#8987; Loading rain &amp; drought&hellip;</div>
+      <ul class="spec-list" style="margin-top:6px">
+        <li><span class="sk">Rain Today (station)</span><span class="sv" id="wxRainToday">&mdash;</span></li>
+        <li><span class="sk">Current Rain Rate</span><span class="sv" id="wxRain7">&mdash;</span></li>
+        <li><span class="sk">Drought Status (37188)</span><span class="sv" id="wxDroughtCat">&mdash;</span></li>
+      </ul>
+      <div class="wx-note" id="wxDroughtNote" style="margin-top:6px">U.S. Drought Monitor &bull; Robertson County &bull; KTNWHITE21 rainfall</div>
+    </div>
+
     <div class="card cat-status" id="irrZonesCard">
       <div class="card-title">&#127807; Your Zones &bull; Water Hog</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.6">Connect B-Hyve to enable live status and zone control. Zone names will update automatically once connected.</div>
@@ -1680,7 +1664,7 @@ html,body{
 
   <!-- Quick jumps to related sections -->
   <div class="sec-jump-bar">
-    <button class="sec-jump-btn sec-jump-wx" onclick="hccSection('weather',document.getElementById('snav-weather'));setTimeout(function(){hccScroll('wxBanner')},50)">&#9925; WEATHER</button>
+    <button class="sec-jump-btn sec-jump-wx" onclick="hccSection('weather',document.getElementById('snav-weather'));setTimeout(function(){hccScroll('wxConditionsCard')},50)">&#9925; WEATHER</button>
     <button class="sec-jump-btn sec-jump-irr" onclick="hccSection('irrigation',document.getElementById('snav-irr'));setTimeout(function(){hccScroll('irrigationCard')},50)">&#128688; IRRIGATION</button>
   </div>
 
@@ -1705,6 +1689,30 @@ html,body{
     <span class="lg"><span class="dot" style="background:var(--c-fitness);color:var(--c-fitness)"></span>Fitness</span>
     <span class="lg"><span class="dot" style="background:var(--c-weather);color:var(--c-weather)"></span>Weather</span>
   </div>
+  <!-- MOWING CONDITIONS (mower-specific — moved here from Weather) -->
+  <div class="card cat-weather">
+    <div class="card-title">&#127807; Mowing Conditions</div>
+    <div class="wx-banner wx-load" id="wxBanner">&#128260; Loading conditions&hellip;</div>
+    <div class="wx-grid">
+      <div class="wx-card"><div class="wx-lbl">Rain Risk</div><div class="wx-val" id="wxRisk">--</div></div>
+      <div class="wx-card"><div class="wx-lbl">Soil Condition</div><div class="wx-val" id="wxSoil">--</div></div>
+      <div class="wx-card"><div class="wx-lbl">Soil Temp</div><div class="wx-val" id="wxSoilTemp">--</div></div>
+      <div class="wx-card"><div class="wx-lbl">Dew on Grass</div><div class="wx-val" id="wxGrassDew">--</div></div>
+      <div class="wx-card"><div class="wx-lbl">Soil Firmness</div><div class="wx-val" id="wxFirmness">--</div></div>
+      <div class="wx-card"><div class="wx-lbl">Rain 24&ndash;48h</div><div class="wx-val" id="wxRainNext">--</div></div>
+      <div class="wx-card"><div class="wx-lbl">Heat Stress</div><div class="wx-val" id="wxHeatStress">--</div></div>
+      <div class="wx-card"><div class="wx-lbl">Lightning</div><div class="wx-val" id="wxLightning">--</div></div>
+    </div>
+    <button class="btn-full btn-gray" onclick="loadWeather()">&#128260; Refresh Conditions</button>
+  </div>
+
+  <!-- READY TO MOW (moved here from Weather) -->
+  <div class="card cat-weather" id="readyCard" style="border-width:2px">
+    <div class="card-title">&#127807; Ready to Mow?</div>
+    <div id="readyBanner" class="wx-banner wx-load wx-banner-lg">&#8987; Checking&hellip;</div>
+    <div id="readyReasons"></div>
+  </div>
+
   <div class="card cat-sensor">
     <div class="card-title">&#128225; Engine Hour Sensor Data</div>
     <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">Pulls engine hours, battery, RPM, GPS distance, and mowing speed from the WiFi/GPS sensor. GPS distance feeds the Fitness miles walked tracker automatically. Hours only ever move forward.</div>
@@ -2752,9 +2760,12 @@ function loadWeather(){
   var b=document.getElementById('wxBanner');
   if(b){ b.className='wx-banner wx-load'; b.innerHTML='&#128260; Loading weather...'; }
   var ctrl=new AbortController();
-  var t=setTimeout(function(){ ctrl.abort(); },10000);
-  fetch('https://api.open-meteo.com/v1/forecast?latitude=36.477&longitude=-86.66&current=temperature_2m,relative_humidity_2m&hourly=precipitation_probability,precipitation,soil_temperature_0cm,weathercode&temperature_unit=fahrenheit&precipitation_unit=inch&past_days=0&forecast_days=3&timezone=America%2FChicago',{signal:ctrl.signal})
-    .then(function(r){ clearTimeout(t); return r.json(); })
+  var t=setTimeout(function(){ ctrl.abort(); },12000);
+  // Server-side proxy (was a direct browser call to api.open-meteo.com that flaked out and
+  // left Rain Risk / Soil Temp / Dew on Grass / Rain 24-48h / Lightning blank).
+  fetch('/api/mowconditions',{signal:ctrl.signal,cache:'no-store'})
+    .then(function(r){ clearTimeout(t); if(!r.ok) throw new Error('mowconditions '+r.status); return r.json(); })
+    .then(function(d){ if(d && d.error) throw new Error(d.error); return d; })
     .then(function(d){
       var c=d.current;
       var risk=Math.max.apply(null,(d.hourly.precipitation_probability||[]).slice(0,6).concat([0]));
@@ -2812,7 +2823,11 @@ function loadWeather(){
       }
       WX={status:mow,temp:Math.round(c.temperature_2m),risk:risk,soil:soil,dewOnGrass:dewOnGrass,loaded:true};
       var hw=document.getElementById('heroWeather');
-      if(hw){var wCode=c.weathercode||0;var wIcon=wCode===0?'&#9728;&#65039;':wCode<3?'&#9925;':wCode<50?'&#9729;':wCode<70?'&#127783;&#65039;':wCode<80?'&#10052;':'&#26928;&#65039;';hw.innerHTML=wIcon+' '+Math.round(c.temperature_2m)+'&#176;F';}
+      var wCode=(d.hourly.weathercode&&d.hourly.weathercode.length)?d.hourly.weathercode[0]:(c.weathercode||0);
+      if(hw){var wIcon=wCode===0?'&#9728;&#65039;':wCode<3?'&#9925;':wCode<50?'&#9729;':wCode<70?'&#127783;&#65039;':wCode<80?'&#10052;':'&#26928;&#65039;';hw.innerHTML=wIcon+' '+Math.round(c.temperature_2m)+'&#176;F';}
+      // Weather hero subtitle = actual sky condition (not the mow verdict — that's on YARD now).
+      var hdesc=document.getElementById('wxHeroDesc');
+      if(hdesc){var phr={0:'Clear',1:'Mostly Clear',2:'Partly Cloudy',3:'Overcast',45:'Fog',48:'Fog',51:'Drizzle',53:'Drizzle',55:'Drizzle',61:'Light Rain',63:'Rain',65:'Heavy Rain',71:'Snow',73:'Snow',75:'Snow',80:'Showers',81:'Showers',82:'Showers',95:'Thunderstorm',96:'Thunderstorm',99:'Thunderstorm'};hdesc.textContent=phr[wCode]||'Partly Cloudy';}
       renderReadiness();
       loadStation();
     })
@@ -5167,19 +5182,11 @@ function hccPanic() {
     var ht = document.getElementById('wxHeroTemp');
     var hd = document.getElementById('wxHeroDesc');
     if (hw && ht) ht.innerHTML = hw.innerHTML || '--&deg;';
-    if (hd) {
-      var b = document.getElementById('wxBanner');
-      if (b) {
-        var txt = b.textContent.replace(/^[⏳⚠✓💧☀⛅🌧🌩🌨✅❌\s]/u,'').trim();
-        var isData = txt.length > 0 && txt.indexOf('Refresh') === -1 && txt.indexOf('Loading') === -1 && txt.indexOf('load') === -1 && txt.indexOf('failed') === -1 && txt.indexOf('Error') === -1;
-        hd.textContent = isData ? txt : '';
-      }
-    }
+    // wxHeroDesc (weather hero subtitle) is set directly from the sky condition in
+    // loadWeather now — the mow verdict no longer bleeds onto the Weather hero.
   });
   var hw = document.getElementById('heroWeather');
   if (hw) observer.observe(hw, {childList:true, subtree:true, characterData:true});
-  var wb = document.getElementById('wxBanner');
-  if (wb) observer.observe(wb, {childList:true, subtree:true, characterData:true});
 })();
 
 
