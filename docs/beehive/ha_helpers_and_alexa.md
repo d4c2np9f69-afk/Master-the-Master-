@@ -153,21 +153,39 @@ backyard. **That built-in answer can't be replaced** (Amazon owns it). What we C
 your **real station** numbers so you ask for them by name, or say a custom phrase and she reads
 them out. First we get KTNWHITE21 into Home Assistant, then expose it to Alexa.
 
-### 7a. Pull KTNWHITE21 into Home Assistant (native — you own the station)
-1. HA → **Settings → Devices & Services → + ADD INTEGRATION** → search **"Weather Underground"**.
-2. **API key:** `0e87ee079c0147a787ee079c01d7a75d`  *(your own PWS key — the app already uses it)*
-   - If it ever rejects the key, get a fresh free one from wunderground.com → your **KTNWHITE21
-     device dashboard → API Keys** (PWS owners get a free key).
-3. **Station ID / PWS ID:** `KTNWHITE21`
-4. Finish. HA creates a **`weather.ktnwhite21`** entity **plus sensors**: temperature, humidity,
-   wind speed/gust/direction, pressure, dewpoint, precip, UV, etc. — all your real backyard data.
-5. Rename them friendly in **Settings → Entities** (e.g. `sensor.ktnwhite21_temperature` →
-   alias **"Backyard Temperature"**). Friendly names = what you'll say to Alexa.
+### 7a. Pull KTNWHITE21 into Home Assistant (REST sensor — reuses our own feed)
+**Note:** current HA has **no built-in Weather Underground integration** (removed years ago when WU
+locked down their API — it won't appear in Add Integration). The clean path is a REST sensor pointed
+at our own `https://toro1-5rz.pages.dev/api/weather`, which already returns Jeff's real KTNWHITE21
+data as JSON (`temp`, `heatIndex`, `humidity`, `windSpeed`, …) **with an automatic Open-Meteo backup**
+baked into the Function. No API key in HA, no HACS.
 
-> Alternative (no WU integration): a `configuration.yaml` REST sensor pointed at our own feed —
-> `https://toro1-5rz.pages.dev/api/weather` returns the same real numbers as JSON
-> (`temp`, `humidity`, `windSpeed`, `heatIndex`, …). The native integration above is cleaner, so
-> use it first; this is only a fallback if the key path gives trouble.
+Add this to `configuration.yaml` (paste, don't hand-type; put it after the `http:` block), then
+restart HA:
+```yaml
+rest:
+  - resource: https://toro1-5rz.pages.dev/api/weather
+    scan_interval: 300
+    sensor:
+      - name: Backyard Temperature
+        value_template: "{{ value_json.temp }}"
+        unit_of_measurement: "°F"
+        device_class: temperature
+      - name: Backyard Feels Like
+        value_template: "{{ value_json.heatIndex }}"
+        unit_of_measurement: "°F"
+        device_class: temperature
+      - name: Backyard Humidity
+        value_template: "{{ value_json.humidity }}"
+        unit_of_measurement: "%"
+        device_class: humidity
+      - name: Backyard Wind
+        value_template: "{{ value_json.windSpeed }}"
+        unit_of_measurement: "mph"
+```
+Creates `sensor.backyard_temperature`, `_feels_like`, `_humidity`, `_wind` — real backyard data.
+(Alternative if you prefer clicking to YAML: install a "Weather Underground PWS" custom integration
+via HACS with key `0e87ee079c0147a787ee079c01d7a75d` + station `KTNWHITE21`.)
 
 ### 7b. Expose the weather sensors to Alexa
 1. HA → **Settings → Voice assistants → Expose** → add: **Backyard Temperature**, **Humidity**,
