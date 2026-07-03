@@ -5239,6 +5239,9 @@ function checkBeehive(manual) {
       if (dot)   dot.style.background = '#e01c1c';
       if (title) { title.textContent = 'Beehive Offline'; title.style.color = '#ff6262'; }
       if (ver)   ver.textContent = token ? 'Not reachable — check Beehive / Nabu Casa' : 'Enter your HA token below to connect';
+      // Chicken-and-egg fix: with no token we can't confirm "online", but the token box
+      // used to only show once online — so it never appeared. Surface it when offline+no token.
+      if (!token) { var p = document.getElementById('haTokenPrompt'); if (p) p.style.display = 'block'; }
       return;
     }
     var base = list[0];

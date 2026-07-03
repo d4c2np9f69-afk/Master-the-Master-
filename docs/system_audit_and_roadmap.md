@@ -37,7 +37,28 @@ Full-system review + the plan to make Beehive robust, fully-featured, and reliab
 Then in the app: set `ha_base` to that https URL (the app already stores `ha_base` in localStorage;
 we add a field or hardcode it). `checkBeehive` + `loadUtilities` fetch the https URL with the token →
 **Beehive shows online, meters go live, and it works even off home WiFi.**
-→ **DECISION NEEDED FROM JEFF: Option A (Nabu Casa, easiest) or B (Cloudflare Tunnel, free).**
+→ **DECISION: Option A — Nabu Casa. DONE (07-03).** URL `https://kmtpozwheqwww9t5uxhhvzzso1tvagro.ui.nabu.casa`;
+app's `HA_NABU` default points at it and `checkBeehive` tries it first with the bearer token.
+
+### 3b. TWO more requirements for the browser to actually read HA (both needed)
+Pointing at the https URL is necessary but **not sufficient** — the app is a *cross-origin* browser
+page (`https://toro1-5rz.pages.dev`) calling HA. Two things must also be true:
+1. **Token** — HA's `/api/` requires auth. The app must send `Authorization: Bearer <long-lived token>`.
+   Jeff enters the token once in the app (HOME → Beehive card, or Account → Home Assistant); it's
+   stored only in his browser's localStorage. ✅ app now sends it in `checkBeehive` + all HA fetches.
+2. **CORS allow-list (the usual silent blocker)** — a browser will not let one origin read another
+   unless the target says it's allowed. HA only sends CORS headers for origins in
+   `http.cors_allowed_origins`. **Jeff must add the app's origin to HA's `configuration.yaml`:**
+   ```yaml
+   http:
+     cors_allowed_origins:
+       - https://toro1-5rz.pages.dev
+   ```
+   then **restart HA**. Without this the fetch fails with a network/CORS error that looks
+   identical to "offline," even with a valid token + the https URL. This is almost certainly why
+   the app stayed "Beehive Offline" even after Nabu Casa. (Editing config: File editor / Studio
+   Code Server add-on, or SSH `nano /config/configuration.yaml`. Note: if an `http:` block already
+   exists, add `cors_allowed_origins:` under it — don't create a second `http:`.)
 
 ## 4. HA build-out — the "bells & whistles" (after connectivity)
 Once the app is talking to HA reliably:
