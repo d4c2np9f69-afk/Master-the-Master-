@@ -100,10 +100,11 @@ class BlinkConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def _handle_user_input(self, user_input: dict[str, Any]):
         """Handle user input."""
-        # Root-cause fix for the 2FA "empty_cookies / Login failed" bug: HA's SHARED
-        # client session drops the auth cookies between the login step and the 2FA step,
-        # so Blink rejects the PIN with "Empty Cookies." Use ONE dedicated session (its own
-        # cookie jar), created once and reused for both login + 2FA, so the cookies survive.
+        # Use ONE dedicated client session (own cookie jar) reused across the login + 2FA
+        # steps, so the OAuth cookies/CSRF survive between the two config-flow steps.
+        # (The MAIN fix for the "Login failed" bug is the blinkpy 0.25.7 bump in
+        # manifest.json — Blink now signals 2FA with HTTP 202 + tsv fields, which 0.25.2
+        # didn't recognize; 0.25.7 does. This dedicated session is belt-and-suspenders.)
         if self._session is None:
             self._session = async_create_clientsession(self.hass)
         self.auth = Auth(

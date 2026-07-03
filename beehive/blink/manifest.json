@@ -21,6 +21,6 @@
   "integration_type": "hub",
   "iot_class": "cloud_polling",
   "loggers": ["blinkpy"],
-  "requirements": ["blinkpy==0.25.2"],
-  "version": "2026.7.0-hcc-cookiefix"
+  "requirements": ["blinkpy==0.25.7"],
+  "version": "2026.7.0-hcc-blinkpy257"
 }
