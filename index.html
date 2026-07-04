@@ -2121,23 +2121,24 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <div class="wx-note">Live from Beehive &middot; auto-refreshes every minute</div>
     </div>
 
-    <!-- LIGHTING — control the lights Beehive can see (SYLVANIA WiFi, etc.) -->
+    <!-- LIGHTS & PLUGS — controls HA light.* + switch.* (SYLVANIA WiFi plugs);
+         irrigation switches are excluded so this never fires the sprinklers. -->
     <div class="card" id="lightsCard">
-      <div class="card-title">&#128161; Lighting <span id="lightsConn" class="irr-conn"></span></div>
-      <div id="lightsBanner" class="wx-banner wx-load">&#128260; Loading lights&hellip;</div>
+      <div class="card-title">&#128161; Lights &amp; Plugs <span id="lightsConn" class="irr-conn"></span></div>
+      <div id="lightsBanner" class="wx-banner wx-load">&#128260; Loading&hellip;</div>
       <div id="lightsMaster" style="display:none">
         <div style="display:flex;gap:8px;margin-bottom:8px">
           <button class="btn-full btn-green" onclick="lightsAll(true)">&#128161; ALL ON</button>
           <button class="btn-full btn-gray" onclick="lightsAll(false)">&#9788; ALL OFF</button>
         </div>
-        <div style="display:flex;gap:8px;margin-bottom:4px">
+        <div id="lightsBrightRow" style="display:none;gap:8px;margin-bottom:4px">
           <button class="btn-full btn-gray" onclick="lightsBrightness(100)">100%</button>
           <button class="btn-full btn-gray" onclick="lightsBrightness(50)">50%</button>
           <button class="btn-full btn-gray" onclick="lightsBrightness(25)">25%</button>
         </div>
         <div id="lightsList"></div>
       </div>
-      <div id="lightsHint" style="display:none;font-size:12px;color:var(--muted);line-height:1.6;margin:4px 0 2px">No lights in Beehive yet. Add your <b>SYLVANIA Smart WiFi</b> bulbs to Beehive (Settings &rarr; Devices &rarr; Add Integration &rarr; <b>Tuya</b>) and they&rsquo;ll show up here to control &amp; automate.</div>
+      <div id="lightsHint" style="display:none;font-size:12px;color:var(--muted);line-height:1.6;margin:4px 0 2px">No lights or plugs in Beehive yet. Add your <b>SYLVANIA Smart WiFi plugs</b> to Beehive (Settings &rarr; Devices &rarr; Add Integration &rarr; <b>Tuya</b>) and they&rsquo;ll show up here to control &amp; automate.</div>
       <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadLights()">&#128260; Refresh</button>
       <div class="wx-note">Live from Beehive</div>
     </div>
@@ -5785,34 +5786,49 @@ function guardianTestAlerts(){
   .catch(function(){ grdShow('&#128276; Test Alerts', 'Couldn\'t reach Beehive — try on home WiFi.'); });
 }
 
-// ── LIGHTING (Home Guardian) ──────────────────────────────────────────────
-// Controls whatever lights Beehive can see (SYLVANIA Smart WiFi once added via
-// the Tuya integration, plus any other HA light.* entities). Same service-call
-// pattern as Away Mode / Test Alerts — all through the /api/ha proxy.
-function lightSvc(service, body){
-  return haFetch('/api/services/light/' + service, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+// ── LIGHTS & PLUGS (Home Guardian) ────────────────────────────────────────
+// Controls HA light.* AND switch.* (Jeff's SYLVANIA Smart WiFi are PLUGS → they
+// come in as switch.* not light.*). B-Hyve irrigation is also switch.* — it's
+// EXCLUDED here so this card can never fire the sprinklers. On/off uses the
+// generic homeassistant.turn_on/off (works for both domains); brightness uses
+// light.turn_on and only shows for dimmable bulbs. All via the /api/ha proxy.
+function haToggleSvc(service, body){
+  return haFetch('/api/services/homeassistant/' + service, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+}
+function lightIsIrrigation(s){
+  var id = s.entity_id.toLowerCase(), a = s.attributes || {};
+  return id.indexOf('bhyve') >= 0 || id.indexOf('orbit') >= 0 || id.indexOf('zone') >= 0
+      || id.indexOf('sprinkler') >= 0 || id.indexOf('irrig') >= 0
+      || ('is_watering' in a) || ('zone_name' in a);
+}
+function lightIsDimmable(d){
+  if (d.entity_id.indexOf('light.') !== 0) return false;
+  var m = (d.attributes && d.attributes.supported_color_modes) || [];
+  return m.some(function(x){ return x && x !== 'onoff'; });
 }
 function lightToggle(entity, on){
-  lightSvc(on ? 'turn_on' : 'turn_off', { entity_id: entity }).then(function(){ setTimeout(loadLights, 600); });
+  haToggleSvc(on ? 'turn_on' : 'turn_off', { entity_id: entity }).then(function(){ setTimeout(loadLights, 600); });
 }
 function lightsAll(on){
   var ids = (window._lights || []).map(function(l){ return l.entity_id; });
   if (!ids.length) return;
-  lightSvc(on ? 'turn_on' : 'turn_off', { entity_id: ids }).then(function(){ setTimeout(loadLights, 700); });
+  haToggleSvc(on ? 'turn_on' : 'turn_off', { entity_id: ids }).then(function(){ setTimeout(loadLights, 700); });
 }
 function lightsBrightness(pct){
-  var ids = (window._lights || []).map(function(l){ return l.entity_id; });
-  if (!ids.length) return;
-  lightSvc('turn_on', { entity_id: ids, brightness_pct: pct }).then(function(){ setTimeout(loadLights, 700); });
+  var ids = (window._dimmable || []).map(function(l){ return l.entity_id; });
+  if (!ids.length) return; // only dimmable bulbs; plugs are on/off only
+  haFetch('/api/services/light/turn_on', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ entity_id: ids, brightness_pct: pct }) })
+    .then(function(){ setTimeout(loadLights, 700); });
 }
 function loadLights(){
   var banner = document.getElementById('lightsBanner');
   var master = document.getElementById('lightsMaster');
   var hint   = document.getElementById('lightsHint');
   var conn   = document.getElementById('lightsConn');
+  var brow   = document.getElementById('lightsBrightRow');
   function set(cls, html){ if (banner){ banner.className = 'wx-banner ' + cls; banner.innerHTML = html; } }
   if (!getHaToken()){
-    set('wx-load', '&#128161; Connect Beehive on HOME to control your lights');
+    set('wx-load', '&#128161; Connect Beehive on HOME to control your lights &amp; plugs');
     if (master) master.style.display = 'none';
     if (hint) hint.style.display = 'none';
     if (conn) conn.textContent = '';
@@ -5823,23 +5839,30 @@ function loadLights(){
   .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
   .then(function(states){
     if (!Array.isArray(states)) throw new Error('bad');
-    var lights = states.filter(function(s){ return s.entity_id.indexOf('light.') === 0; });
-    window._lights = lights;
-    if (!lights.length){
-      set('wx-caution', '&#128161; No lights in Beehive yet');
+    var devs = states.filter(function(s){
+      if (s.entity_id.indexOf('light.') === 0) return true;
+      if (s.entity_id.indexOf('switch.') === 0) return !lightIsIrrigation(s); // plugs, not sprinklers
+      return false;
+    });
+    window._lights = devs;
+    window._dimmable = devs.filter(lightIsDimmable);
+    if (!devs.length){
+      set('wx-caution', '&#128161; No lights or plugs in Beehive yet');
       if (master) master.style.display = 'none';
       if (hint) hint.style.display = 'block';
       if (conn){ conn.textContent = '● LIVE'; conn.style.color = '#22c55e'; }
       return;
     }
     if (hint) hint.style.display = 'none';
-    var on = lights.filter(function(l){ return l.state === 'on'; }).length;
-    set(on > 0 ? 'wx-go' : 'wx-load', '&#128161; ' + on + ' of ' + lights.length + ' on');
+    if (brow) brow.style.display = window._dimmable.length ? 'flex' : 'none';
+    var on = devs.filter(function(l){ return l.state === 'on'; }).length;
+    set(on > 0 ? 'wx-go' : 'wx-load', '&#128161; ' + on + ' of ' + devs.length + ' on');
     var html = '';
-    lights.forEach(function(l){
-      var name = (l.attributes && l.attributes.friendly_name) || l.entity_id.replace('light.', '').replace(/_/g, ' ');
+    devs.forEach(function(l){
+      var isPlug = l.entity_id.indexOf('switch.') === 0;
+      var name = (l.attributes && l.attributes.friendly_name) || l.entity_id.replace(/^(light|switch)\./, '').replace(/_/g, ' ');
       var isOn = l.state === 'on';
-      html += '<div class="hs-row"><span class="hs-icon">&#128161;</span>'
+      html += '<div class="hs-row"><span class="hs-icon">' + (isPlug ? '&#128268;' : '&#128161;') + '</span>'
         + '<span class="hs-label">' + name + '</span>'
         + '<button class="grd-light-toggle ' + (isOn ? 'on' : 'off') + '" onclick="lightToggle(\'' + l.entity_id + '\',' + (!isOn) + ')">' + (isOn ? 'ON' : 'OFF') + '</button></div>';
     });
