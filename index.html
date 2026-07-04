@@ -57,6 +57,7 @@ button{font-family:inherit;cursor:pointer}
   --a-irr:#22c55e;
   --a-yard:#c0392b;
   --a-climate:#f97316;
+  --a-guardian:#3d7dd8;
   /* ── SEMANTIC STATUS TOKENS — single source of truth for good/caution/bad/info.
      Use these (or statusColor()/.s-* classes) everywhere; never hardcode the hexes. */
   --ok:#22c55e;
@@ -116,6 +117,7 @@ html.light{
   --a-irr:#15803d;
   --a-yard:#b03a2e;
   --a-climate:#ea580c;
+  --a-guardian:#2563eb;
   /* card-category title colors used around the app */
   --c-sensor:#1d4ed8;
   --c-status:#15803d;
@@ -309,6 +311,7 @@ html,body{
 #snav-irr.active    {border-bottom-color:var(--a-irr);background:rgba(34,197,94,.04)}
 #snav-yard.active   {border-bottom-color:var(--a-yard);background:rgba(192,57,43,.05)}
 #snav-climate.active{border-bottom-color:#f97316;background:rgba(249,115,22,.04)}
+#snav-guardian.active{border-bottom-color:var(--a-guardian);background:rgba(61,125,216,.05)}
 
 /* ── SECTIONS ───────────────────────────────────────────────────────────── */
 .hcc-section{display:none}
@@ -382,6 +385,12 @@ html,body{
 }
 /* Yard hero grade now handled by the reusable .hcc-hero-grade module */
 .yard-hero-art{width:100%}
+/* Guardian (security) hero — bottom overlay, steel-blue base */
+.sec-hero-guardian{background:#0a1224}
+.sec-hero-guardian .sec-hero-overlay{
+  background:linear-gradient(to top,rgba(0,0,0,.74) 0%,rgba(0,0,0,.25) 48%,transparent 72%);
+  justify-content:flex-end;padding:0 16px 16px;
+}
 .yard-hero-title{
   font-family:Georgia,'Times New Roman',serif;
   font-size:clamp(15px,4.5vw,21px);font-weight:400;font-style:italic;
@@ -858,6 +867,11 @@ html,body{
 .hs-warn{color:#ffd24a}
 .hs-red{color:#ef4444}
 .hs-neutral{color:var(--text)}
+.hs-dim{color:var(--dim);font-weight:700}
+/* Home Guardian action buttons */
+.grd-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0 6px}
+.grd-actions .btn-full{margin:0;padding:13px 8px}
+.grd-checks .hs-icon{font-size:15px}
 /* ── NEXRAD Radar ── */
 .wx-radar-leaflet{height:280px;border-radius:10px;overflow:hidden;background:#111;position:relative}
 .radar-ctrl{display:flex;gap:6px;margin-top:8px}
@@ -971,6 +985,9 @@ html,body{
   </button>
   <button class="snav-btn" id="snav-climate" onclick="hccSection('climate',this)">
     <span class="snav-icon">&#127777;&#65039;</span><span>CLIMATE</span>
+  </button>
+  <button class="snav-btn" id="snav-guardian" onclick="hccSection('guardian',this)">
+    <span class="snav-icon">&#128737;&#65039;</span><span>GUARDIAN</span>
   </button>
 </nav>
 
@@ -2134,6 +2151,57 @@ html,body{
   </div>
 </div><!-- /section-climate -->
 
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SECTION 6: HOME GUARDIAN  (whole-home safety + security watch)
+     ══════════════════════════════════════════════════════════════════════════ -->
+<div id="section-guardian" class="hcc-section">
+
+  <!-- Guardian hero -->
+  <div class="sec-hero sec-hero-guardian">
+    <img src="./images/hero-security.jpg" alt="Home Guardian — Security Command Center" onerror="this.style.display='none'">
+    <div class="sec-hero-overlay">
+      <div class="sec-hero-status" id="guardianHeroStatus">Standing watch over 301</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- GUARDIAN STATUS CARD -->
+    <div class="card" id="guardianCard">
+      <div class="card-title">&#128737;&#65039; Home Guardian <span id="guardianConn" class="irr-conn"></span></div>
+      <div id="guardianBanner" class="wx-banner wx-banner-lg wx-load">&#128737;&#65039; Checking the house&hellip;</div>
+
+      <div class="grd-checks" id="guardianChecks">
+        <div class="hs-row"><span class="hs-icon">&#128101;</span><span class="hs-label">People</span><span class="hs-val hs-dim" id="grd-people">&mdash;</span></div>
+        <div class="hs-row"><span class="hs-icon">&#128167;</span><span class="hs-label">Water</span><span class="hs-val hs-dim" id="grd-water">&mdash;</span></div>
+        <div class="hs-row"><span class="hs-icon">&#9889;</span><span class="hs-label">Electric</span><span class="hs-val hs-dim" id="grd-electric">&mdash;</span></div>
+        <div class="hs-row"><span class="hs-icon">&#128293;</span><span class="hs-label">Gas</span><span class="hs-val hs-dim" id="grd-gas">&mdash;</span></div>
+        <div class="hs-row"><span class="hs-icon">&#127777;&#65039;</span><span class="hs-label">HVAC</span><span class="hs-val hs-dim" id="grd-hvac">&mdash;</span></div>
+        <div class="hs-row"><span class="hs-icon">&#128663;</span><span class="hs-label">Garage</span><span class="hs-val hs-dim" id="grd-garage">&mdash;</span></div>
+        <div class="hs-row"><span class="hs-icon">&#128682;</span><span class="hs-label">Doors</span><span class="hs-val hs-dim" id="grd-doors">&mdash;</span></div>
+        <div class="hs-row"><span class="hs-icon">&#128225;</span><span class="hs-label">Devices</span><span class="hs-val hs-dim" id="grd-devices">&mdash;</span></div>
+      </div>
+
+      <div class="grd-actions">
+        <button class="btn-full btn-gray" onclick="guardianNightCheck()">&#127765; NIGHT CHECK</button>
+        <button class="btn-full btn-gray" onclick="guardianAwayMode()">&#128663; AWAY MODE</button>
+        <button class="btn-full btn-gray" onclick="guardianDetails()">&#128203; SYSTEM DETAILS</button>
+        <button class="btn-full btn-gray" onclick="guardianTestAlerts()">&#128276; TEST ALERTS</button>
+      </div>
+
+      <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadGuardian()">&#128260; Refresh</button>
+      <div class="wx-note">Live from Beehive &middot; auto-refreshes every minute</div>
+    </div>
+
+    <!-- SETUP HINT (shown until Beehive token is set) -->
+    <div class="card" id="guardianSetupCard" style="display:none">
+      <div class="card-title">&#128737;&#65039; Connect Beehive</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6">Home Guardian watches your people, utilities, HVAC, garage, doors and devices through Beehive (Home Assistant). Go to the <b>HOME</b> tab and connect your Beehive token, then these checks go live. Rows marked <i>&ldquo;Sensor pending&rdquo;</i> light up as you add each sensor.</div>
+    </div>
+
+  </div>
+</div><!-- /section-guardian -->
+
 <!-- CART FAB -->
 <button class="cart-fab" id="cartFab" onclick="showModal('cart')">&#128722;<span id="cartCount">0</span></button>
 
@@ -2141,6 +2209,17 @@ html,body{
 <div class="modal-ov" id="modal" onclick="closeModal()">
   <div class="modal-box" onclick="event.stopPropagation()">
     <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- Home Guardian popup (Night Check / Away Mode / Details / Test Alerts) -->
+<div class="modal-ov" id="grdModal" onclick="grdClose()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div id="grdModalTitle" style="font-size:17px;font-weight:800;color:var(--text)"></div>
+      <button onclick="grdClose()" style="background:none;border:none;color:var(--muted);font-size:24px;line-height:1;cursor:pointer;font-family:inherit">&times;</button>
+    </div>
+    <div id="grdModalBody" style="font-size:13px;line-height:1.6;color:var(--text)"></div>
   </div>
 </div>
 
@@ -5015,6 +5094,7 @@ function hccSection(id, btn) {
   if (id === 'home' && !window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
   if (id === 'home') { loadUtilities(); }
   if (id === 'climate') { loadClimate(); }
+  if (id === 'guardian') { loadGuardian(); }
   if (id === 'weather') {
     /* Windy radar iframe self-loads with calendar=now; no manual refresh needed */
     if (!window._forecastLoaded) { window._forecastLoaded = true; loadForecast(); }
@@ -5047,8 +5127,8 @@ function hccSection(id, btn) {
 
 /* ===== Swipe navigation ===== */
 (function(){
-  var SECTIONS=['home','weather','irrigation','yard','climate'];
-  var NAV_IDS=['snav-home','snav-weather','snav-irr','snav-yard','snav-climate'];
+  var SECTIONS=['home','weather','irrigation','yard','climate','guardian'];
+  var NAV_IDS=['snav-home','snav-weather','snav-irr','snav-yard','snav-climate','snav-guardian'];
   var startX=0, startY=0, startScrollY=0;
   var THRESHOLD=60, MAX_VERT=80;
   var _hScrollEl=null, _hScrollStart=0;
@@ -5249,6 +5329,7 @@ function beehiveOnline(base, d) {
     loadCameras();
     loadHomeStatus();
     loadUtilities();
+    loadGuardian();
   } else {
     var prompt = document.getElementById('haTokenPrompt');
     if (prompt) prompt.style.display = 'block';
@@ -5284,7 +5365,7 @@ function checkBeehive(manual) {
 setTimeout(function() { checkBeehive(false); }, 800);
 // Self-heal: re-check Beehive + re-read the meters every 60s, so an HA restart (or a
 // momentarily-quiet meter) recovers on its own — no manual refresh. Guarded to token.
-setInterval(function(){ if (getHaToken()) { checkBeehive(false); loadUtilities(); } }, 60000);
+setInterval(function(){ if (getHaToken()) { checkBeehive(false); loadUtilities(); loadGuardian(); } }, 60000);
 
 // ── HA TOKEN & HOME DATA ─────────────────────────────────────────────────
 function getHaToken() {
@@ -5464,6 +5545,231 @@ function loadHomeStatus() {
     rows.innerHTML = html;
   })
   .catch(function(){ if (rows) rows.innerHTML='<div style="font-size:11px;color:#ff6262">Status unavailable — check token</div>'; });
+}
+
+// ── HOME GUARDIAN ─────────────────────────────────────────────────────────
+// Whole-home safety/security watch. Reads HA once (through the /api/ha proxy) and
+// derives 8 checks. Anything whose hardware isn't in Beehive yet shows an honest
+// "Sensor pending" (dim) — never a faked "NORMAL". Same fetch pattern as Utilities.
+function grdSet(id, txt, cls){
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = txt;
+  el.className = 'hs-val ' + (cls || 'hs-dim');
+}
+function grdConn(txt, color){
+  var c = document.getElementById('guardianConn');
+  if (c){ c.textContent = txt; c.style.color = color; }
+}
+function grdBanner(cls, html){
+  var b = document.getElementById('guardianBanner');
+  if (b){ b.className = 'wx-banner wx-banner-lg ' + cls; b.innerHTML = html; }
+}
+function grdPlaceholder(){
+  grdBanner('wx-load', '&#128737;&#65039; Connect Beehive on HOME to activate');
+  grdConn('', '');
+  grdSet('grd-people', '—', 'hs-dim');
+  grdSet('grd-water', 'Sensor pending', 'hs-dim');
+  grdSet('grd-electric', 'Meter pending', 'hs-dim');
+  grdSet('grd-gas', 'Sensor pending', 'hs-dim');
+  grdSet('grd-hvac', '—', 'hs-dim');
+  grdSet('grd-garage', 'Sensor pending', 'hs-dim');
+  grdSet('grd-doors', 'Sensor pending', 'hs-dim');
+  grdSet('grd-devices', '—', 'hs-dim');
+  var s = document.getElementById('guardianSetupCard'); if (s) s.style.display = 'block';
+}
+function loadGuardian(){
+  if (!getHaToken()) { grdPlaceholder(); return; }
+  var setup = document.getElementById('guardianSetupCard'); if (setup) setup.style.display = 'none';
+  grdConn('●', '#ffd24a');
+  haFetch('/api/states', { signal: AbortSignal.timeout(25000) })
+  .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  .then(function(states){
+    if (!Array.isArray(states)) throw new Error('bad_response');
+    window._grdStates = states;
+    function dom(p){ return states.filter(function(s){ return s.entity_id.indexOf(p) === 0; }); }
+    function onState(kw, cls, needOn){
+      // true if any binary_sensor whose id/name contains kw is currently 'on'
+      return states.some(function(s){
+        if (s.entity_id.indexOf('binary_sensor.') !== 0) return false;
+        var id = (s.entity_id + ' ' + ((s.attributes && s.attributes.friendly_name) || '')).toLowerCase();
+        return id.indexOf(kw) >= 0 && s.state === 'on';
+      });
+    }
+    function hasSensor(kw){
+      return states.some(function(s){
+        var id = (s.entity_id + ' ' + ((s.attributes && s.attributes.friendly_name) || '')).toLowerCase();
+        return id.indexOf(kw) >= 0;
+      });
+    }
+    var alerts = 0, warns = 0;
+
+    // PEOPLE — person.* home count, else device_tracker
+    var persons = dom('person.');
+    var trackers = dom('device_tracker.');
+    var home = null;
+    if (persons.length) home = persons.filter(function(p){ return p.state === 'home'; }).length;
+    else if (trackers.length) home = trackers.filter(function(t){ return t.state === 'home'; }).length;
+    if (home != null) grdSet('grd-people', home + (home === 1 ? ' HOME' : ' HOME'), home > 0 ? 'hs-ok' : 'hs-warn');
+    else grdSet('grd-people', '—', 'hs-dim');
+
+    // WATER — leak sensor trips red; else a live water meter reads NORMAL
+    if (onState('leak', 'water') || onState('water', 'water') && hasSensor('moisture')) { grdSet('grd-water', 'LEAK', 'hs-red'); alerts++; }
+    else if (hasSensor('water_meter')) grdSet('grd-water', 'NORMAL', 'hs-ok');
+    else grdSet('grd-water', 'Sensor pending', 'hs-dim');
+
+    // GAS — smoke/CO/gas alarm trips red; else a live gas meter reads NORMAL
+    if (onState('gas', '') || onState('smoke', '') || onState('carbon', '')) { grdSet('grd-gas', 'ALERT', 'hs-red'); alerts++; }
+    else if (hasSensor('gas_meter')) grdSet('grd-gas', 'NORMAL', 'hs-ok');
+    else grdSet('grd-gas', 'Sensor pending', 'hs-dim');
+
+    // ELECTRIC — a power sensor (W/kW or device_class power) means the energy monitor is in
+    var hasPower = states.some(function(s){
+      if (s.entity_id.indexOf('sensor.') !== 0) return false;
+      var a = s.attributes || {}, id = s.entity_id.toLowerCase();
+      return a.device_class === 'power' || a.unit_of_measurement === 'W' || a.unit_of_measurement === 'kW'
+        || id.indexOf('power') >= 0 || id.indexOf('electric') >= 0;
+    });
+    if (hasPower) grdSet('grd-electric', 'NORMAL', 'hs-ok');
+    else grdSet('grd-electric', 'Meter pending', 'hs-dim');
+
+    // HVAC — from an HA climate entity (hvac_action / state)
+    var climate = dom('climate.');
+    if (climate.length){
+      var c = climate[0], a = c.attributes || {};
+      var act = String(a.hvac_action || '').toLowerCase(), st = String(c.state || '').toLowerCase();
+      if (act === 'cooling' || st === 'cool') grdSet('grd-hvac', 'Cooling normally', 'hs-ok');
+      else if (act === 'heating' || st === 'heat') grdSet('grd-hvac', 'Heating normally', 'hs-ok');
+      else if (act === 'idle' || st === 'auto') grdSet('grd-hvac', 'Idle', 'hs-ok');
+      else if (st === 'off' || act === 'off') { grdSet('grd-hvac', 'Off', 'hs-warn'); }
+      else grdSet('grd-hvac', (c.state || '—'), 'hs-neutral');
+    } else grdSet('grd-hvac', '—', 'hs-dim');
+
+    // GARAGE — a cover/binary_sensor named "garage"
+    var garage = states.filter(function(s){
+      var id = s.entity_id.toLowerCase();
+      return (s.entity_id.indexOf('cover.') === 0 && id.indexOf('garage') >= 0)
+          || (s.entity_id.indexOf('binary_sensor.') === 0 && id.indexOf('garage') >= 0);
+    });
+    if (garage.length){
+      var open = garage.some(function(g){ return g.state === 'open' || g.state === 'on'; });
+      grdSet('grd-garage', open ? 'OPEN' : 'CLOSED', open ? 'hs-warn' : 'hs-ok');
+      if (open) warns++;
+    } else grdSet('grd-garage', 'Sensor pending', 'hs-dim');
+
+    // DOORS — contact sensors (door/window), garage excluded (it has its own row)
+    var doors = states.filter(function(s){
+      var id = s.entity_id.toLowerCase();
+      if (id.indexOf('garage') >= 0) return false;
+      if (s.entity_id.indexOf('binary_sensor.') === 0) return (id.indexOf('door') >= 0 || id.indexOf('window') >= 0);
+      if (s.entity_id.indexOf('cover.') === 0) return id.indexOf('door') >= 0;
+      return false;
+    });
+    if (doors.length){
+      var openD = doors.filter(function(d){ return d.state === 'open' || d.state === 'on'; }).length;
+      grdSet('grd-doors', openD > 0 ? openD + ' OPEN' : 'SECURE', openD > 0 ? 'hs-warn' : 'hs-ok');
+      if (openD > 0) warns++;
+    } else grdSet('grd-doors', 'Sensor pending', 'hs-dim');
+
+    // DEVICES — online vs total across the real device domains
+    var DEVDOM = ['light.','switch.','sensor.','binary_sensor.','cover.','lock.','climate.','camera.','media_player.','fan.','vacuum.','number.','select.'];
+    var devs = states.filter(function(s){ return DEVDOM.some(function(p){ return s.entity_id.indexOf(p) === 0; }); });
+    if (devs.length){
+      var offline = devs.filter(function(s){ return s.state === 'unavailable' || s.state === 'unknown'; }).length;
+      var online = devs.length - offline;
+      var dcls = offline === 0 ? 'hs-ok' : (offline > devs.length * 0.15 ? 'hs-red' : 'hs-warn');
+      grdSet('grd-devices', online + ' / ' + devs.length + ' ONLINE', dcls);
+      if (offline > 0) warns++;
+    } else grdSet('grd-devices', '—', 'hs-dim');
+
+    // OVERALL — banner
+    if (alerts > 0) grdBanner('wx-no', '&#128721; ALERT — CHECK NOW');
+    else if (warns > 0) grdBanner('wx-caution', '&#9888;&#65039; ATTENTION');
+    else grdBanner('wx-go', '&#128737;&#65039; PROTECTED');
+    grdConn('● LIVE', '#22c55e');
+  })
+  .catch(function(){
+    grdBanner('wx-load', '&#128737;&#65039; Beehive unreachable — check your token on HOME');
+    grdConn('● OFFLINE', '#ff6262');
+  });
+}
+
+// Guardian popup helpers
+function grdShow(title, html){
+  var t = document.getElementById('grdModalTitle'), b = document.getElementById('grdModalBody'), m = document.getElementById('grdModal');
+  if (t) t.innerHTML = title;
+  if (b) b.innerHTML = html;
+  if (m) m.className = 'modal-ov show';
+}
+function grdClose(){ var m = document.getElementById('grdModal'); if (m) m.className = 'modal-ov'; }
+
+function grdRow(ok, label, detail){
+  return '<div class="hs-row"><span class="hs-icon">' + (ok ? '✅' : '⚠️') + '</span>'
+    + '<span class="hs-label">' + label + '</span>'
+    + '<span class="hs-val ' + (ok ? 'hs-ok' : 'hs-warn') + '">' + detail + '</span></div>';
+}
+
+function guardianNightCheck(){
+  if (!getHaToken()) { grdShow('&#127765; Night Check', 'Connect Beehive on the <b>HOME</b> tab first — then Night Check verifies your doors, garage, locks and lights before bed.'); return; }
+  grdShow('&#127765; Night Check', '<div style="color:var(--muted)">Checking the house…</div>');
+  haFetch('/api/states', { signal: AbortSignal.timeout(25000) })
+  .then(function(r){ return r.json(); })
+  .then(function(states){
+    if (!Array.isArray(states)) throw new Error('bad');
+    var rows = '', anyIssue = false, any = false;
+    // Doors
+    var doors = states.filter(function(s){ var id = s.entity_id.toLowerCase(); return s.entity_id.indexOf('binary_sensor.') === 0 && (id.indexOf('door') >= 0 || id.indexOf('window') >= 0) && id.indexOf('garage') < 0; });
+    if (doors.length){ any = true; var od = doors.filter(function(d){ return d.state === 'on' || d.state === 'open'; }).length; if (od) anyIssue = true; rows += grdRow(od === 0, 'Doors / windows', od === 0 ? 'Secure' : od + ' open'); }
+    // Garage
+    var gar = states.filter(function(s){ var id = s.entity_id.toLowerCase(); return (s.entity_id.indexOf('cover.') === 0 || s.entity_id.indexOf('binary_sensor.') === 0) && id.indexOf('garage') >= 0; });
+    if (gar.length){ any = true; var go = gar.some(function(g){ return g.state === 'open' || g.state === 'on'; }); if (go) anyIssue = true; rows += grdRow(!go, 'Garage', go ? 'OPEN' : 'Closed'); }
+    // Locks
+    var locks = states.filter(function(s){ return s.entity_id.indexOf('lock.') === 0; });
+    if (locks.length){ any = true; var un = locks.filter(function(l){ return l.state !== 'locked'; }).length; if (un) anyIssue = true; rows += grdRow(un === 0, 'Locks (' + locks.length + ')', un === 0 ? 'All locked' : un + ' unlocked'); }
+    // Lights
+    var lights = states.filter(function(s){ return s.entity_id.indexOf('light.') === 0; });
+    if (lights.length){ any = true; var on = lights.filter(function(l){ return l.state === 'on'; }).length; rows += grdRow(on === 0, 'Lights', on === 0 ? 'All off' : on + ' still on'); }
+    if (!any) rows = '<div style="color:var(--muted)">No door / garage / lock / light sensors in Beehive yet. As you add them, Night Check will report each one here.</div>';
+    var head = any ? (anyIssue ? '<div class="wx-banner wx-caution" style="margin-bottom:10px">&#9888;&#65039; A few things need a look</div>' : '<div class="wx-banner wx-go" style="margin-bottom:10px">&#127769; All secure — good night</div>') : '';
+    grdShow('&#127765; Night Check', head + rows + '<div class="wx-note" style="margin-top:10px">Tip: build a &ldquo;Good Night&rdquo; scene in Beehive to shut it all down with one tap.</div>');
+  })
+  .catch(function(){ grdShow('&#127765; Night Check', 'Couldn\'t reach Beehive — try again on home WiFi.'); });
+}
+
+function guardianAwayMode(){
+  if (!getHaToken()) { grdShow('&#128663; Away Mode', 'Connect Beehive on the <b>HOME</b> tab first.'); return; }
+  if (!confirm('Turn on Away Mode? This runs your "Away" scene in Beehive (thermostat setback, lights off, sensors armed).')) return;
+  grdShow('&#128663; Away Mode', '<div style="color:var(--muted)">Activating…</div>');
+  haFetch('/api/states', { signal: AbortSignal.timeout(20000) })
+  .then(function(r){ return r.json(); })
+  .then(function(states){
+    var ids = {}; states.forEach(function(s){ ids[s.entity_id] = 1; });
+    var candidates = [['scene','scene.away'],['scene','scene.away_mode'],['scene','scene.leaving'],['script','script.away'],['script','script.away_mode']];
+    var pick = candidates.filter(function(t){ return ids[t[1]]; })[0];
+    if (!pick){ grdShow('&#128663; Away Mode', 'No <b>Away</b> scene found in Beehive yet.<br><br>Create a scene named <b>Away</b> (Settings &rarr; Automations &amp; Scenes &rarr; Scenes) — set the thermostat back, lights off, arm your sensors — and this button will run it.'); return; }
+    haFetch('/api/services/' + pick[0] + '/turn_on', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ entity_id: pick[1] }) })
+    .then(function(r){ grdShow('&#128663; Away Mode', r.ok ? '&#9989; Away Mode activated — ran <b>' + pick[1] + '</b>.' : 'Couldn\'t activate — check Beehive.'); loadGuardian(); })
+    .catch(function(){ grdShow('&#128663; Away Mode', 'Couldn\'t reach Beehive.'); });
+  })
+  .catch(function(){ grdShow('&#128663; Away Mode', 'Couldn\'t reach Beehive — try on home WiFi.'); });
+}
+
+function guardianDetails(){
+  var states = window._grdStates;
+  if (!states){ grdShow('&#128203; System Details', getHaToken() ? 'Loading… open this again in a moment.' : 'Connect Beehive on the <b>HOME</b> tab to see system details.'); loadGuardian(); return; }
+  var counts = {}; states.forEach(function(s){ var d = s.entity_id.split('.')[0]; counts[d] = (counts[d] || 0) + 1; });
+  var order = Object.keys(counts).sort(function(a,b){ return counts[b] - counts[a]; });
+  var rows = ''; order.forEach(function(d){ rows += '<div class="hs-row"><span class="hs-label">' + d + '</span><span class="hs-val hs-neutral">' + counts[d] + '</span></div>'; });
+  grdShow('&#128203; System Details', '<div class="wx-note" style="margin-bottom:8px">' + states.length + ' entities in Beehive</div>' + rows
+    + '<button class="btn-full btn-gray" style="margin-top:14px" onclick="openBeehive(\'/lovelace/0\')">Open Beehive Dashboard ↗</button>');
+}
+
+function guardianTestAlerts(){
+  if (!getHaToken()) { grdShow('&#128276; Test Alerts', 'Connect Beehive on the <b>HOME</b> tab first.'); return; }
+  grdShow('&#128276; Test Alerts', '<div style="color:var(--muted)">Sending a test alert to Beehive…</div>');
+  haFetch('/api/services/persistent_notification/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: 'HCC Home Guardian', message: '✅ Test alert from the HCC app — your alert path is working.' }) })
+  .then(function(r){ grdShow('&#128276; Test Alerts', r.ok ? '&#9989; Test alert sent — it will show in Beehive notifications (and on any phone running the Home Assistant app).' : 'Couldn\'t send — check your token on HOME.'); })
+  .catch(function(){ grdShow('&#128276; Test Alerts', 'Couldn\'t reach Beehive — try on home WiFi.'); });
 }
 
 // ── UTILITIES (Water / Gas / Electric) ───────────────────────────────────

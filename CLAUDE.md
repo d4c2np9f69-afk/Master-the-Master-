@@ -99,7 +99,7 @@ A Progressive Web App (PWA) for Jeff's Toro TimeMaster 21200 lawn mower. Single 
 - **Active branch:** `claude/time-master-project-liq1jw`
 - **`main` branch:** contains only `Toro_TimeMaster_PWA_Package.zip` — do NOT use it for deploys
 
-The app has four sections: **YARD** (mower data), **HOME**, **WEATHER**, **IRRIGATION**.
+The app has six sections: **HOME**, **WEATHER**, **IRRIGATION**, **YARD** (mower data), **CLIMATE**, **GUARDIAN** (whole-home safety/security watch).
 
 ---
 
@@ -239,8 +239,8 @@ source, lastSync, engine_running
 - Button row: `.mbtns`
 - Buttons: `.mbtn` / `.mbtn.primary` / `.mbtn.secondary`
 - Green button: `.btn-green`
-- Nav buttons: `button.snav-btn` with IDs `#snav-home`, `#snav-weather`, `#snav-irr`, `#snav-yard`, `#snav-climate`
-- Sections: `#section-home`, `#section-weather`, `#section-irrigation`, `#section-yard`, `#section-climate`
+- Nav buttons: `button.snav-btn` with IDs `#snav-home`, `#snav-weather`, `#snav-irr`, `#snav-yard`, `#snav-climate`, `#snav-guardian` (also update the swipe-nav `SECTIONS`/`NAV_IDS` arrays when adding a tab)
+- Sections: `#section-home`, `#section-weather`, `#section-irrigation`, `#section-yard`, `#section-climate`, `#section-guardian`
 - YARD tabs: `button.tab`
 
 ---
@@ -355,7 +355,7 @@ If any tests fail, fix them before doing anything else.
 
 ## Current State (updated 2026-06-28)
 
-**App:** 5 sections (HOME/WEATHER/IRRIGATION/YARD/CLIMATE). 26/26 Playwright tests passing, zero JS errors. Service worker **hcc-v6** (network-first HTML so updates always land).
+**App:** 6 sections (HOME/WEATHER/IRRIGATION/YARD/CLIMATE/GUARDIAN). Zero JS errors, both themes verified. Service worker **hcc-v6** (network-first HTML so updates always land).
 
 | Area | State |
 |---|---|
@@ -376,6 +376,7 @@ If any tests fail, fix them before doing anything else.
 
 ## Change Log (highlights — full detail in `git log`)
 
+- **07-04:** 🛡️ **NEW SECTION — HOME GUARDIAN** (this fulfills the long-planned SECURITY section; Jeff's mockup). 6th nav tab `#snav-guardian` / `#section-guardian`, own accent `--a-guardian` (steel-blue), hero `images/hero-security.jpg`, Section-Kit only. One `haFetch('/api/states')` in `loadGuardian()` derives 8 checks — **People** (person./device_tracker home count), **Water** (leak sensor→red, else live meter=NORMAL), **Electric** (power sensor present=NORMAL, else "Meter pending"), **Gas** (smoke/CO/gas alarm→red, else meter=NORMAL), **HVAC** (climate.* hvac_action), **Garage** (cover/binary_sensor named garage), **Doors** (contact sensors, garage excluded), **Devices** (online/total across real domains) — plus an overall **PROTECTED / ATTENTION / ALERT** banner. Hardware not in Beehive yet shows honest **"Sensor pending"** (dim), never a faked value. 4 action buttons: **NIGHT CHECK** (doors/garage/locks/lights bedtime summary modal), **AWAY MODE** (runs a `scene.away`/`script.away` if it exists, else tells Jeff to make one), **SYSTEM DETAILS** (entity-count breakdown + open HA dashboard), **TEST ALERTS** (fires `persistent_notification.create` to prove the alert path). Own bottom-sheet modal `#grdModal` (`grdShow/grdClose`). Auto-refreshes in the 60s self-heal loop + on token connect. Verified in the Playwright harness with mocked HA states: section renders, all 8 checks populate, all 4 buttons open modals, placeholder path (no token) works, both light+dark clean, zero JS errors. **As you add real sensors** (Zigbee contacts/leak, garage tilt, energy monitor) the rows light up automatically — no code change. Overall status still needs its live device confirm (Jeff's Beehive).
 - **07-03:** 🧹 **Section restructure for continuity (Jeff's request — app grew from mower-app to HCC).** Clean separation, no duplicated info: **WEATHER = "Weather Conditions at 301"** (pure weather: temp/dew/wind/UV/pressure/rain-rate + radar/forecast/alerts/spotter/mPING/station/burn). **YARD dashboard** now holds the mower-specific **Mowing Conditions** (mow verdict banner `wxBanner` + rain-risk/soil/dew-on-grass/heat-stress/lightning tiles) and **Ready to Mow?** (`readyCard`) — moved from Weather. **IRRIGATION** now holds **Lawn Water Need** (`wxWaterCard`). Each metric ID lives in ONE section (audited: 0 duplicate IDs). Weather hero subtitle shows sky condition, not the mow verdict. **Blank-tiles fix:** `loadWeather()` now fetches new server-side **`functions/api/mowconditions.js`** (Open-Meteo hourly proxy) instead of a direct browser call to api.open-meteo.com that was flaking → Rain Risk / Soil Temp / Dew on Grass / Rain 24-48h / Lightning populate reliably. New sensor/weather tile? Put it in the section that owns it and use `haFetch`/a Function, never a raw browser fetch.
 - **07-03:** **Batch: utility tap-to-call (banners dial provider CS), dispatch card → Spire image + all 13 hotspots recalibrated (verified by overlay), man+mower GPS marker (`images/mower-marker.png`), mow verdict now matches across cards (wet dew → CAUTION), gas card → Spire branding.** Water bill captured (WHUD, meter 25394131, cycle ~21st, rates $10.32+$0.00908/gal) — reading-scale reconciliation (bill 9640 vs sensor 12,984) still pending Jeff's physical LCD read.
 - **07-03:** 🎉 **Alexa now reads the REAL backyard weather** — Jeff exposed `Backyard Temperature`/`Humidity` to Amazon Alexa (HA → Voice assistants → Expose) + discovered; "Alexa, what's the backyard temperature?" reads the live KTNWHITE21 value. The "Alexa's weather is always wrong" complaint is resolved (Amazon's native weather intent can't be overridden — we expose the real sensors instead). Weather goal COMPLETE.
@@ -469,7 +470,7 @@ The Beelink J45 runs Home Assistant = the central hub. Devices connect THREE way
 
 6. **Verify sensor data live** — After Jeff hard-refreshes the app, confirm battery voltage, RPM, and mileage display. If still `0.00V` and `—`, run the curl test in the Cloudflare Infrastructure section above.
 
-7. **Build the Beehive PANIC automation** — app already fires webhook `hcc-panic-button` with `{action:panic,siren,lights,notify:[jeff,angela,braxton]}`. Build the HA side per **`docs/beehive/panic_alarm_automation.md`**: siren on + lights strobe + Critical push to the 3 phones (HA Companion app). **Alarm = DIY Zigbee build, NOT a commercial panel and NOT purchased yet** — Jeff will add a **Zigbee coordinator stick** (~$20, e.g. Sonoff Zigbee 3.0 Dongle) into a free J45 USB port + Zigbee **siren** (~$25-35, becomes the `siren.*` entity) + contact/motion/leak sensors + smart plugs (Zigbee2MQTT or ZHA). Sequence: J45 first → RTL-SDR meters → THEN the Zigbee alarm layer. Also needs HA Companion on Jeff/Angela/Braxton iPhones. Optional real phone call = Twilio (later). Does NOT dial 911 (Jeff does that). **Future SECURITY section** will surface all this — hero art saved at **`images/hero-security.jpg`** ("Smart Security Systems / Security Command Center", Springfield Armory + 2A branding). The poster's phone mockup IS the build blueprint: tiles **Cameras · Doors · Locks · Sensors · Environment · Activity** + an **ARMED/DISARMED** status shield + a live camera grid. Build with Section Kit + its own `--a-security` accent, live tiles from HA `/api/states`, once the Zigbee alarm hardware is in.
+7. **Build the Beehive PANIC automation** — app already fires webhook `hcc-panic-button` with `{action:panic,siren,lights,notify:[jeff,angela,braxton]}`. Build the HA side per **`docs/beehive/panic_alarm_automation.md`**: siren on + lights strobe + Critical push to the 3 phones (HA Companion app). **Alarm = DIY Zigbee build, NOT a commercial panel and NOT purchased yet** — Jeff will add a **Zigbee coordinator stick** (~$20, e.g. Sonoff Zigbee 3.0 Dongle) into a free J45 USB port + Zigbee **siren** (~$25-35, becomes the `siren.*` entity) + contact/motion/leak sensors + smart plugs (Zigbee2MQTT or ZHA). Sequence: J45 first → RTL-SDR meters → THEN the Zigbee alarm layer. Also needs HA Companion on Jeff/Angela/Braxton iPhones. Optional real phone call = Twilio (later). Does NOT dial 911 (Jeff does that). **✅ BUILT as the HOME GUARDIAN section (07-04)** — `#section-guardian`, accent `--a-guardian`, hero `images/hero-security.jpg`, live checks from HA `/api/states` via `loadGuardian()` (see change log). It already surfaces People/Water/Electric/Gas/HVAC/Garage/Doors/Devices + PROTECTED banner + NIGHT CHECK/AWAY MODE/SYSTEM DETAILS/TEST ALERTS. As the Zigbee alarm hardware (siren/contacts/leak/motion) comes online in Beehive, those rows auto-light and the panic automation ties in — no app rebuild needed. Camera grid still lives on HOME (`loadCameras`); can be added to Guardian later if Jeff wants it consolidated.
 
 8. **Wire the HOME Utilities strip to live data** — UI is built (3 cards). When each meter is reading in Beehive, set the real HA entity_ids in `UTIL_ENTITIES` (in `loadUtilities()`): water_today/month/flow, gas_today/month/cost, elec_now/today/month. Card auto-lights (chip → LIVE, foot → "Live from Beehive"). Remember: convert the water meter's European timestamp → Central. Gas cost = ccf × Piedmont rate; water/sewer cost feeds the City-of-White-House sewer claim.
 
