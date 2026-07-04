@@ -5589,16 +5589,39 @@ function loadUtilities() {
       try { localStorage.setItem(key, JSON.stringify(st)); } catch (e) {}
       return res;
     }
+    function putWaterCycle(cyc){
+      put('util-water-month', cyc.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+      put('util-water-cost', '$' + (WATER_BASE + cyc * WATER_PER_GAL).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    }
+    // Usage this billing cycle from HA's RECORDED HISTORY (the reading at/after the cycle
+    // start), so it shows real gallons instead of 0.0 on a freshly-started tracker. Falls
+    // back to the local rollMeter baseline if history isn't reachable.
+    function waterCycleFromHistory(curGal){
+      var wEnt = null;
+      states.forEach(function(s){ if (s && typeof s.entity_id === 'string'){ var id=s.entity_id.toLowerCase(); if (id.indexOf('water_meter')>=0 && id.indexOf('reading')>=0) wEnt=s.entity_id; } });
+      if (!wEnt) return;
+      var d=new Date(), yy=d.getFullYear(), mm=d.getMonth();
+      if (d.getDate()<21){ mm--; if(mm<0){mm=11;yy--;} }
+      var cycleStart=new Date(yy,mm,21,0,0,0);
+      haFetch('/api/history/period/'+cycleStart.toISOString()+'?filter_entity_id='+wEnt+'&minimal_response', { signal: AbortSignal.timeout(15000) })
+        .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+        .then(function(hist){
+          var arr=(hist && hist[0]) || [], base=null;
+          for (var i=0;i<arr.length;i++){ var v=parseFloat(arr[i].state); if(!isNaN(v)){ base=v/10; break; } }
+          if (base==null) return;
+          putWaterCycle(Math.max(0, curGal - base));
+        })
+        .catch(function(){});
+    }
     if (wraw != null) {
-      var wr = rollMeter('util_roll_water', wraw / 10, whudCycleKey());
-      if (num('sensor.water_month') == null && wr.month != null)
-        put('util-water-month', wr.month.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+      var wgal = wraw / 10;
+      var wr = rollMeter('util_roll_water', wgal, whudCycleKey());
       if (num('sensor.water_flow') == null && wr.flow != null)
         put('util-water-flow', wr.flow.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
-      // Est. water charge = base + gallons this cycle × per-gallon (matches the WHUD bill's
-      // "Water Charges" line; sewer + sales tax are billed on top of this).
-      if (wr.month != null)
-        put('util-water-cost', '$' + (WATER_BASE + wr.month * WATER_PER_GAL).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+      if (num('sensor.water_month') == null) {
+        if (wr.month != null) putWaterCycle(wr.month);   // immediate local estimate
+        waterCycleFromHistory(wgal);                     // refine from HA history (overrides)
+      }
     }
     if (graw != null) {
       var gr = rollMeter('util_roll_gas', graw / 100);
