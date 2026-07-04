@@ -385,12 +385,17 @@ html,body{
 }
 /* Yard hero grade now handled by the reusable .hcc-hero-grade module */
 .yard-hero-art{width:100%}
-/* Guardian (security) hero — bottom overlay, steel-blue base */
-.sec-hero-guardian{background:#0a1224}
+/* Guardian hero — title is baked into the photo (bottom), so the live status
+   overlay sits at the TOP (same treatment as the weather hero). Own aspect
+   ratio = the image's true 1200x900 so the baked-in title never crops. */
+.sec-hero-guardian{aspect-ratio:1200/900;height:auto;max-height:480px;background:#0a1224}
+.sec-hero-guardian img{object-fit:cover;object-position:center center}
 .sec-hero-guardian .sec-hero-overlay{
-  background:linear-gradient(to top,rgba(0,0,0,.74) 0%,rgba(0,0,0,.25) 48%,transparent 72%);
-  justify-content:flex-end;padding:0 16px 16px;
+  background:linear-gradient(to bottom,rgba(0,0,0,.6) 0%,rgba(0,0,0,.15) 42%,transparent 65%);
+  justify-content:flex-start;padding:12px 16px 0;
+  text-shadow:0 1px 8px rgba(0,0,0,.9);
 }
+.sec-hero-guardian .sec-hero-status{color:rgba(240,225,190,.85)}
 .yard-hero-title{
   font-family:Georgia,'Times New Roman',serif;
   font-size:clamp(15px,4.5vw,21px);font-weight:400;font-style:italic;
@@ -982,9 +987,6 @@ html,body{
   </button>
   <button class="snav-btn" id="snav-yard" onclick="hccSection('yard',this)">
     <span class="snav-icon">&#127807;</span><span>YARD</span>
-  </button>
-  <button class="snav-btn" id="snav-climate" onclick="hccSection('climate',this)">
-    <span class="snav-icon">&#127777;&#65039;</span><span>CLIMATE</span>
   </button>
   <button class="snav-btn" id="snav-guardian" onclick="hccSection('guardian',this)">
     <span class="snav-icon">&#128737;&#65039;</span><span>GUARDIAN</span>
@@ -2068,22 +2070,53 @@ html,body{
 
 </div><!-- /section-yard -->
 
+<!-- LUX thermostat lives in the HOME GUARDIAN section (below) — CLIMATE tab removed 07-04.
+     Cards moved verbatim; loadClimate()/luxSetMode()/etc unchanged. -->
+<template id="luxCardsMoved"></template>
 <!-- ══════════════════════════════════════════════════════════════════════════
-     SECTION 5: CLIMATE (LUX Thermostat)
+     SECTION 5: HOME GUARDIAN  (whole-home safety + security + HVAC)
+     — CLIMATE tab removed 07-04; LUX thermostat folded in below.
      ══════════════════════════════════════════════════════════════════════════ -->
-<div id="section-climate" class="hcc-section">
+<div id="section-guardian" class="hcc-section">
 
-  <!-- Climate hero — swap in hero-climate.jpg once photo is ready -->
-  <div class="sec-hero sec-hero-climate">
-    <img src="./images/hero-climate.jpg" alt="Climate" onerror="this.style.display='none'">
+  <!-- Guardian hero -->
+  <div class="sec-hero sec-hero-guardian">
+    <img src="./images/hero-guardian.jpg" alt="Home Guardian — Protect · Monitor · Automate" onerror="this.style.display='none'">
     <div class="sec-hero-overlay">
-      <div class="sec-hero-status" id="climateHeroStatus"></div>
+      <div class="sec-hero-status" id="guardianHeroStatus">Standing watch over 301</div>
     </div>
   </div>
 
   <div class="content">
 
-    <!-- THERMOSTAT STATUS CARD -->
+    <!-- GUARDIAN STATUS CARD -->
+    <div class="card" id="guardianCard">
+      <div class="card-title">&#128737;&#65039; Home Guardian <span id="guardianConn" class="irr-conn"></span></div>
+      <div id="guardianBanner" class="wx-banner wx-banner-lg wx-load">&#128737;&#65039; Checking the house&hellip;</div>
+
+      <div class="grd-checks" id="guardianChecks">
+        <div class="hs-row"><span class="hs-icon">&#128101;</span><span class="hs-label">People</span><span class="hs-val hs-dim" id="grd-people">&mdash;</span></div>
+        <div class="hs-row"><span class="hs-icon">&#128167;</span><span class="hs-label">Water</span><span class="hs-val hs-dim" id="grd-water">&mdash;</span></div>
+        <div class="hs-row"><span class="hs-icon">&#9889;</span><span class="hs-label">Electric</span><span class="hs-val hs-dim" id="grd-electric">&mdash;</span></div>
+        <div class="hs-row"><span class="hs-icon">&#128293;</span><span class="hs-label">Gas</span><span class="hs-val hs-dim" id="grd-gas">&mdash;</span></div>
+        <div class="hs-row"><span class="hs-icon">&#127777;&#65039;</span><span class="hs-label">HVAC</span><span class="hs-val hs-dim" id="grd-hvac">&mdash;</span></div>
+        <div class="hs-row"><span class="hs-icon">&#128663;</span><span class="hs-label">Garage</span><span class="hs-val hs-dim" id="grd-garage">&mdash;</span></div>
+        <div class="hs-row"><span class="hs-icon">&#128682;</span><span class="hs-label">Doors</span><span class="hs-val hs-dim" id="grd-doors">&mdash;</span></div>
+        <div class="hs-row"><span class="hs-icon">&#128225;</span><span class="hs-label">Devices</span><span class="hs-val hs-dim" id="grd-devices">&mdash;</span></div>
+      </div>
+
+      <div class="grd-actions">
+        <button class="btn-full btn-gray" onclick="guardianNightCheck()">&#127765; NIGHT CHECK</button>
+        <button class="btn-full btn-gray" onclick="guardianAwayMode()">&#128663; AWAY MODE</button>
+        <button class="btn-full btn-gray" onclick="guardianDetails()">&#128203; SYSTEM DETAILS</button>
+        <button class="btn-full btn-gray" onclick="guardianTestAlerts()">&#128276; TEST ALERTS</button>
+      </div>
+
+      <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadGuardian()">&#128260; Refresh</button>
+      <div class="wx-note">Live from Beehive &middot; auto-refreshes every minute</div>
+    </div>
+
+    <!-- LUX THERMOSTAT (folded in from the old CLIMATE tab) -->
     <div class="card" id="luxCard">
       <div class="card-title">&#127777;&#65039; LUX Thermostat <span id="luxConn" class="irr-conn"></span></div>
       <div id="luxBanner" class="wx-banner wx-load">&#128260; Loading thermostat&hellip;</div>
@@ -2135,7 +2168,7 @@ html,body{
       <div class="wx-note" style="margin-top:6px">Live from LUX Connected Home</div>
     </div>
 
-    <!-- SETUP CARD -->
+    <!-- LUX ACCOUNT SETUP CARD -->
     <div class="card" id="luxSetupCard">
       <div class="card-title">&#9881; LUX Account</div>
       <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px">Enter your LUX Connected Home login to enable thermostat control from this app.</div>
@@ -2146,51 +2179,6 @@ html,body{
       <button onclick="saveLuxCreds()" style="width:100%;padding:11px;background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.4);border-radius:8px;color:#f97316;font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:.5px">&#127777;&#65039; Connect Thermostat</button>
       <div id="luxCredsMsg" style="font-size:11px;margin-top:8px;text-align:center;min-height:18px;color:var(--muted)"></div>
       <div style="font-size:10px;color:var(--muted);margin-top:10px;border-top:1px solid rgba(220,195,145,.1);padding-top:10px">Use the same email and password as the LUX Connected Home app on your phone.</div>
-    </div>
-
-  </div>
-</div><!-- /section-climate -->
-
-<!-- ══════════════════════════════════════════════════════════════════════════
-     SECTION 6: HOME GUARDIAN  (whole-home safety + security watch)
-     ══════════════════════════════════════════════════════════════════════════ -->
-<div id="section-guardian" class="hcc-section">
-
-  <!-- Guardian hero -->
-  <div class="sec-hero sec-hero-guardian">
-    <img src="./images/hero-security.jpg" alt="Home Guardian — Security Command Center" onerror="this.style.display='none'">
-    <div class="sec-hero-overlay">
-      <div class="sec-hero-status" id="guardianHeroStatus">Standing watch over 301</div>
-    </div>
-  </div>
-
-  <div class="content">
-
-    <!-- GUARDIAN STATUS CARD -->
-    <div class="card" id="guardianCard">
-      <div class="card-title">&#128737;&#65039; Home Guardian <span id="guardianConn" class="irr-conn"></span></div>
-      <div id="guardianBanner" class="wx-banner wx-banner-lg wx-load">&#128737;&#65039; Checking the house&hellip;</div>
-
-      <div class="grd-checks" id="guardianChecks">
-        <div class="hs-row"><span class="hs-icon">&#128101;</span><span class="hs-label">People</span><span class="hs-val hs-dim" id="grd-people">&mdash;</span></div>
-        <div class="hs-row"><span class="hs-icon">&#128167;</span><span class="hs-label">Water</span><span class="hs-val hs-dim" id="grd-water">&mdash;</span></div>
-        <div class="hs-row"><span class="hs-icon">&#9889;</span><span class="hs-label">Electric</span><span class="hs-val hs-dim" id="grd-electric">&mdash;</span></div>
-        <div class="hs-row"><span class="hs-icon">&#128293;</span><span class="hs-label">Gas</span><span class="hs-val hs-dim" id="grd-gas">&mdash;</span></div>
-        <div class="hs-row"><span class="hs-icon">&#127777;&#65039;</span><span class="hs-label">HVAC</span><span class="hs-val hs-dim" id="grd-hvac">&mdash;</span></div>
-        <div class="hs-row"><span class="hs-icon">&#128663;</span><span class="hs-label">Garage</span><span class="hs-val hs-dim" id="grd-garage">&mdash;</span></div>
-        <div class="hs-row"><span class="hs-icon">&#128682;</span><span class="hs-label">Doors</span><span class="hs-val hs-dim" id="grd-doors">&mdash;</span></div>
-        <div class="hs-row"><span class="hs-icon">&#128225;</span><span class="hs-label">Devices</span><span class="hs-val hs-dim" id="grd-devices">&mdash;</span></div>
-      </div>
-
-      <div class="grd-actions">
-        <button class="btn-full btn-gray" onclick="guardianNightCheck()">&#127765; NIGHT CHECK</button>
-        <button class="btn-full btn-gray" onclick="guardianAwayMode()">&#128663; AWAY MODE</button>
-        <button class="btn-full btn-gray" onclick="guardianDetails()">&#128203; SYSTEM DETAILS</button>
-        <button class="btn-full btn-gray" onclick="guardianTestAlerts()">&#128276; TEST ALERTS</button>
-      </div>
-
-      <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadGuardian()">&#128260; Refresh</button>
-      <div class="wx-note">Live from Beehive &middot; auto-refreshes every minute</div>
     </div>
 
     <!-- SETUP HINT (shown until Beehive token is set) -->
@@ -5093,8 +5081,7 @@ function hccSection(id, btn) {
   if (id === 'irrigation' && !window._irrLoaded) { window._irrLoaded = true; loadIrrigation(); }
   if (id === 'home' && !window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
   if (id === 'home') { loadUtilities(); }
-  if (id === 'climate') { loadClimate(); }
-  if (id === 'guardian') { loadGuardian(); }
+  if (id === 'guardian') { loadGuardian(); loadClimate(); }
   if (id === 'weather') {
     /* Windy radar iframe self-loads with calendar=now; no manual refresh needed */
     if (!window._forecastLoaded) { window._forecastLoaded = true; loadForecast(); }
@@ -5127,8 +5114,8 @@ function hccSection(id, btn) {
 
 /* ===== Swipe navigation ===== */
 (function(){
-  var SECTIONS=['home','weather','irrigation','yard','climate','guardian'];
-  var NAV_IDS=['snav-home','snav-weather','snav-irr','snav-yard','snav-climate','snav-guardian'];
+  var SECTIONS=['home','weather','irrigation','yard','guardian'];
+  var NAV_IDS=['snav-home','snav-weather','snav-irr','snav-yard','snav-guardian'];
   var startX=0, startY=0, startScrollY=0;
   var THRESHOLD=60, MAX_VERT=80;
   var _hScrollEl=null, _hScrollStart=0;

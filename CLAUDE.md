@@ -99,7 +99,9 @@ A Progressive Web App (PWA) for Jeff's Toro TimeMaster 21200 lawn mower. Single 
 - **Active branch:** `claude/time-master-project-liq1jw`
 - **`main` branch:** contains only `Toro_TimeMaster_PWA_Package.zip` — do NOT use it for deploys
 
-The app has six sections: **HOME**, **WEATHER**, **IRRIGATION**, **YARD** (mower data), **CLIMATE**, **GUARDIAN** (whole-home safety/security watch).
+The app has five sections: **HOME**, **WEATHER**, **IRRIGATION**, **YARD** (mower data), **GUARDIAN** (whole-home safety/security/alarm watch — LUX thermostat lives here too; the old CLIMATE tab was folded in).
+
+**🛡️ HOME GUARDIAN is the designated home for ALL Home Assistant security, home-alarm, and system checks (Jeff, 07-04).** Every future security/alarm feature goes here: cameras, door/window contacts, motion, leak/smoke, the Zigbee siren + ARM/DISARM, the panic automation surface, and any new "is-the-house-OK" check. Don't scatter these onto HOME — build them into `#section-guardian` with the Section Kit + `--a-guardian` accent, live from HA `/api/states` via `loadGuardian()`.
 
 ---
 
@@ -239,8 +241,8 @@ source, lastSync, engine_running
 - Button row: `.mbtns`
 - Buttons: `.mbtn` / `.mbtn.primary` / `.mbtn.secondary`
 - Green button: `.btn-green`
-- Nav buttons: `button.snav-btn` with IDs `#snav-home`, `#snav-weather`, `#snav-irr`, `#snav-yard`, `#snav-climate`, `#snav-guardian` (also update the swipe-nav `SECTIONS`/`NAV_IDS` arrays when adding a tab)
-- Sections: `#section-home`, `#section-weather`, `#section-irrigation`, `#section-yard`, `#section-climate`, `#section-guardian`
+- Nav buttons: `button.snav-btn` with IDs `#snav-home`, `#snav-weather`, `#snav-irr`, `#snav-yard`, `#snav-guardian` (also update the swipe-nav `SECTIONS`/`NAV_IDS` arrays — and keep them in the SAME order as the section DOM — when adding/removing a tab)
+- Sections: `#section-home`, `#section-weather`, `#section-irrigation`, `#section-yard`, `#section-guardian` (LUX thermostat `#luxCard`/`#luxSetupCard` live inside `#section-guardian`)
 - YARD tabs: `button.tab`
 
 ---
@@ -355,7 +357,7 @@ If any tests fail, fix them before doing anything else.
 
 ## Current State (updated 2026-06-28)
 
-**App:** 6 sections (HOME/WEATHER/IRRIGATION/YARD/CLIMATE/GUARDIAN). Zero JS errors, both themes verified. Service worker **hcc-v6** (network-first HTML so updates always land).
+**App:** 5 sections (HOME/WEATHER/IRRIGATION/YARD/GUARDIAN). CLIMATE tab removed 07-04 — LUX thermostat folded into GUARDIAN. Zero JS errors, both themes verified. Service worker **hcc-v6** (network-first HTML so updates always land).
 
 | Area | State |
 |---|---|
@@ -376,6 +378,7 @@ If any tests fail, fix them before doing anything else.
 
 ## Change Log (highlights — full detail in `git log`)
 
+- **07-04:** 🧹 **CLIMATE tab removed — LUX thermostat folded into HOME GUARDIAN; Guardian reordered ahead of it (now the 5th/last tab).** Jeff's call: Climate would only ever hold the thermostat, so that nav slot is better spent on Guardian, which will grow into the whole HA security/alarm hub. LUX cards (`#luxCard`/`#luxSetupCard`) moved verbatim into `#section-guardian` (all `loadClimate`/`luxSetMode`/`luxAdjust`/`saveLuxCreds` JS unchanged; `guardian` tab now calls `loadGuardian()`+`loadClimate()`). New personalized hero `images/hero-guardian.jpg` (Jeff's brick house at dusk, "HOME GUARDIAN · PROTECT · MONITOR · AUTOMATE" baked in) — replaced the stock security poster; own aspect-ratio 1200/900 so the baked title never crops, status overlay moved to top. Removed `#snav-climate`; dropped `climate` from swipe `SECTIONS`/`NAV_IDS`. (A few inert `#section-climate`/`#snav-climate` CSS rules left behind — harmless, no matching elements.) Verified in harness: 5 tabs, LUX renders inside Guardian, all checks/buttons work, both themes, zero JS errors.
 - **07-04:** 🛡️ **NEW SECTION — HOME GUARDIAN** (this fulfills the long-planned SECURITY section; Jeff's mockup). 6th nav tab `#snav-guardian` / `#section-guardian`, own accent `--a-guardian` (steel-blue), hero `images/hero-security.jpg`, Section-Kit only. One `haFetch('/api/states')` in `loadGuardian()` derives 8 checks — **People** (person./device_tracker home count), **Water** (leak sensor→red, else live meter=NORMAL), **Electric** (power sensor present=NORMAL, else "Meter pending"), **Gas** (smoke/CO/gas alarm→red, else meter=NORMAL), **HVAC** (climate.* hvac_action), **Garage** (cover/binary_sensor named garage), **Doors** (contact sensors, garage excluded), **Devices** (online/total across real domains) — plus an overall **PROTECTED / ATTENTION / ALERT** banner. Hardware not in Beehive yet shows honest **"Sensor pending"** (dim), never a faked value. 4 action buttons: **NIGHT CHECK** (doors/garage/locks/lights bedtime summary modal), **AWAY MODE** (runs a `scene.away`/`script.away` if it exists, else tells Jeff to make one), **SYSTEM DETAILS** (entity-count breakdown + open HA dashboard), **TEST ALERTS** (fires `persistent_notification.create` to prove the alert path). Own bottom-sheet modal `#grdModal` (`grdShow/grdClose`). Auto-refreshes in the 60s self-heal loop + on token connect. Verified in the Playwright harness with mocked HA states: section renders, all 8 checks populate, all 4 buttons open modals, placeholder path (no token) works, both light+dark clean, zero JS errors. **As you add real sensors** (Zigbee contacts/leak, garage tilt, energy monitor) the rows light up automatically — no code change. Overall status still needs its live device confirm (Jeff's Beehive).
 - **07-03:** 🧹 **Section restructure for continuity (Jeff's request — app grew from mower-app to HCC).** Clean separation, no duplicated info: **WEATHER = "Weather Conditions at 301"** (pure weather: temp/dew/wind/UV/pressure/rain-rate + radar/forecast/alerts/spotter/mPING/station/burn). **YARD dashboard** now holds the mower-specific **Mowing Conditions** (mow verdict banner `wxBanner` + rain-risk/soil/dew-on-grass/heat-stress/lightning tiles) and **Ready to Mow?** (`readyCard`) — moved from Weather. **IRRIGATION** now holds **Lawn Water Need** (`wxWaterCard`). Each metric ID lives in ONE section (audited: 0 duplicate IDs). Weather hero subtitle shows sky condition, not the mow verdict. **Blank-tiles fix:** `loadWeather()` now fetches new server-side **`functions/api/mowconditions.js`** (Open-Meteo hourly proxy) instead of a direct browser call to api.open-meteo.com that was flaking → Rain Risk / Soil Temp / Dew on Grass / Rain 24-48h / Lightning populate reliably. New sensor/weather tile? Put it in the section that owns it and use `haFetch`/a Function, never a raw browser fetch.
 - **07-03:** **Batch: utility tap-to-call (banners dial provider CS), dispatch card → Spire image + all 13 hotspots recalibrated (verified by overlay), man+mower GPS marker (`images/mower-marker.png`), mow verdict now matches across cards (wet dew → CAUTION), gas card → Spire branding.** Water bill captured (WHUD, meter 25394131, cycle ~21st, rates $10.32+$0.00908/gal) — reading-scale reconciliation (bill 9640 vs sensor 12,984) still pending Jeff's physical LCD read.
