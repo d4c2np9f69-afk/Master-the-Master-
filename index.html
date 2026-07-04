@@ -877,6 +877,11 @@ html,body{
 .grd-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0 6px}
 .grd-actions .btn-full{margin:0;padding:13px 8px}
 .grd-checks .hs-icon{font-size:15px}
+/* Lighting per-light on/off pill */
+.grd-light-toggle{padding:5px 14px;border-radius:14px;font-size:11px;font-weight:800;letter-spacing:.5px;font-family:inherit;cursor:pointer;border:1px solid var(--border);background:rgba(255,255,255,.06);color:var(--muted)}
+.grd-light-toggle.on{background:rgba(34,197,94,.16);color:var(--ok);border-color:rgba(34,197,94,.45)}
+html.light .grd-light-toggle{background:rgba(40,32,20,.05)}
+html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;border-color:rgba(21,128,61,.4)}
 /* ── NEXRAD Radar ── */
 .wx-radar-leaflet{height:280px;border-radius:10px;overflow:hidden;background:#111;position:relative}
 .radar-ctrl{display:flex;gap:6px;margin-top:8px}
@@ -2114,6 +2119,27 @@ html,body{
 
       <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadGuardian()">&#128260; Refresh</button>
       <div class="wx-note">Live from Beehive &middot; auto-refreshes every minute</div>
+    </div>
+
+    <!-- LIGHTING — control the lights Beehive can see (SYLVANIA WiFi, etc.) -->
+    <div class="card" id="lightsCard">
+      <div class="card-title">&#128161; Lighting <span id="lightsConn" class="irr-conn"></span></div>
+      <div id="lightsBanner" class="wx-banner wx-load">&#128260; Loading lights&hellip;</div>
+      <div id="lightsMaster" style="display:none">
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <button class="btn-full btn-green" onclick="lightsAll(true)">&#128161; ALL ON</button>
+          <button class="btn-full btn-gray" onclick="lightsAll(false)">&#9788; ALL OFF</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:4px">
+          <button class="btn-full btn-gray" onclick="lightsBrightness(100)">100%</button>
+          <button class="btn-full btn-gray" onclick="lightsBrightness(50)">50%</button>
+          <button class="btn-full btn-gray" onclick="lightsBrightness(25)">25%</button>
+        </div>
+        <div id="lightsList"></div>
+      </div>
+      <div id="lightsHint" style="display:none;font-size:12px;color:var(--muted);line-height:1.6;margin:4px 0 2px">No lights in Beehive yet. Add your <b>SYLVANIA Smart WiFi</b> bulbs to Beehive (Settings &rarr; Devices &rarr; Add Integration &rarr; <b>Tuya</b>) and they&rsquo;ll show up here to control &amp; automate.</div>
+      <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadLights()">&#128260; Refresh</button>
+      <div class="wx-note">Live from Beehive</div>
     </div>
 
     <!-- LUX THERMOSTAT (folded in from the old CLIMATE tab) -->
@@ -5081,7 +5107,7 @@ function hccSection(id, btn) {
   if (id === 'irrigation' && !window._irrLoaded) { window._irrLoaded = true; loadIrrigation(); }
   if (id === 'home' && !window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
   if (id === 'home') { loadUtilities(); }
-  if (id === 'guardian') { loadGuardian(); loadClimate(); }
+  if (id === 'guardian') { loadGuardian(); loadLights(); loadClimate(); }
   if (id === 'weather') {
     /* Windy radar iframe self-loads with calendar=now; no manual refresh needed */
     if (!window._forecastLoaded) { window._forecastLoaded = true; loadForecast(); }
@@ -5352,7 +5378,7 @@ function checkBeehive(manual) {
 setTimeout(function() { checkBeehive(false); }, 800);
 // Self-heal: re-check Beehive + re-read the meters every 60s, so an HA restart (or a
 // momentarily-quiet meter) recovers on its own — no manual refresh. Guarded to token.
-setInterval(function(){ if (getHaToken()) { checkBeehive(false); loadUtilities(); loadGuardian(); } }, 60000);
+setInterval(function(){ if (getHaToken()) { checkBeehive(false); loadUtilities(); loadGuardian(); loadLights(); } }, 60000);
 
 // ── HA TOKEN & HOME DATA ─────────────────────────────────────────────────
 function getHaToken() {
@@ -5757,6 +5783,74 @@ function guardianTestAlerts(){
   haFetch('/api/services/persistent_notification/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: 'HCC Home Guardian', message: '✅ Test alert from the HCC app — your alert path is working.' }) })
   .then(function(r){ grdShow('&#128276; Test Alerts', r.ok ? '&#9989; Test alert sent — it will show in Beehive notifications (and on any phone running the Home Assistant app).' : 'Couldn\'t send — check your token on HOME.'); })
   .catch(function(){ grdShow('&#128276; Test Alerts', 'Couldn\'t reach Beehive — try on home WiFi.'); });
+}
+
+// ── LIGHTING (Home Guardian) ──────────────────────────────────────────────
+// Controls whatever lights Beehive can see (SYLVANIA Smart WiFi once added via
+// the Tuya integration, plus any other HA light.* entities). Same service-call
+// pattern as Away Mode / Test Alerts — all through the /api/ha proxy.
+function lightSvc(service, body){
+  return haFetch('/api/services/light/' + service, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+}
+function lightToggle(entity, on){
+  lightSvc(on ? 'turn_on' : 'turn_off', { entity_id: entity }).then(function(){ setTimeout(loadLights, 600); });
+}
+function lightsAll(on){
+  var ids = (window._lights || []).map(function(l){ return l.entity_id; });
+  if (!ids.length) return;
+  lightSvc(on ? 'turn_on' : 'turn_off', { entity_id: ids }).then(function(){ setTimeout(loadLights, 700); });
+}
+function lightsBrightness(pct){
+  var ids = (window._lights || []).map(function(l){ return l.entity_id; });
+  if (!ids.length) return;
+  lightSvc('turn_on', { entity_id: ids, brightness_pct: pct }).then(function(){ setTimeout(loadLights, 700); });
+}
+function loadLights(){
+  var banner = document.getElementById('lightsBanner');
+  var master = document.getElementById('lightsMaster');
+  var hint   = document.getElementById('lightsHint');
+  var conn   = document.getElementById('lightsConn');
+  function set(cls, html){ if (banner){ banner.className = 'wx-banner ' + cls; banner.innerHTML = html; } }
+  if (!getHaToken()){
+    set('wx-load', '&#128161; Connect Beehive on HOME to control your lights');
+    if (master) master.style.display = 'none';
+    if (hint) hint.style.display = 'none';
+    if (conn) conn.textContent = '';
+    return;
+  }
+  if (conn){ conn.textContent = '●'; conn.style.color = '#ffd24a'; }
+  haFetch('/api/states', { signal: AbortSignal.timeout(25000) })
+  .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  .then(function(states){
+    if (!Array.isArray(states)) throw new Error('bad');
+    var lights = states.filter(function(s){ return s.entity_id.indexOf('light.') === 0; });
+    window._lights = lights;
+    if (!lights.length){
+      set('wx-caution', '&#128161; No lights in Beehive yet');
+      if (master) master.style.display = 'none';
+      if (hint) hint.style.display = 'block';
+      if (conn){ conn.textContent = '● LIVE'; conn.style.color = '#22c55e'; }
+      return;
+    }
+    if (hint) hint.style.display = 'none';
+    var on = lights.filter(function(l){ return l.state === 'on'; }).length;
+    set(on > 0 ? 'wx-go' : 'wx-load', '&#128161; ' + on + ' of ' + lights.length + ' on');
+    var html = '';
+    lights.forEach(function(l){
+      var name = (l.attributes && l.attributes.friendly_name) || l.entity_id.replace('light.', '').replace(/_/g, ' ');
+      var isOn = l.state === 'on';
+      html += '<div class="hs-row"><span class="hs-icon">&#128161;</span>'
+        + '<span class="hs-label">' + name + '</span>'
+        + '<button class="grd-light-toggle ' + (isOn ? 'on' : 'off') + '" onclick="lightToggle(\'' + l.entity_id + '\',' + (!isOn) + ')">' + (isOn ? 'ON' : 'OFF') + '</button></div>';
+    });
+    var list = document.getElementById('lightsList'); if (list) list.innerHTML = html;
+    if (master) master.style.display = 'block';
+    if (conn){ conn.textContent = '● LIVE'; conn.style.color = '#22c55e'; }
+  })
+  .catch(function(){
+    set('wx-load', '&#128161; Beehive unreachable — check your token on HOME');
+    if (conn){ conn.textContent = '● OFFLINE'; conn.style.color = '#ff6262'; }
+  });
 }
 
 // ── UTILITIES (Water / Gas / Electric) ───────────────────────────────────
