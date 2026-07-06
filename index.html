@@ -1766,6 +1766,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         <span id="hcBatt" style="flex:1;min-width:70px;text-align:center;padding:7px 4px;border-radius:8px;font-size:11.5px;font-weight:700;background:#23262e;color:#8b93a1;">BATT &mdash;</span>
         <span id="hcWifi" style="flex:1;min-width:70px;text-align:center;padding:7px 4px;border-radius:8px;font-size:11.5px;font-weight:700;background:#23262e;color:#8b93a1;">WIFI &mdash;</span>
       </div>
+      <div id="sensorHealthNote" style="display:none;font-size:11px;line-height:1.55;color:#ffb454;background:rgba(255,180,84,.08);border:1px solid rgba(255,180,84,.28);border-radius:8px;padding:8px 10px;margin-bottom:6px"></div>
     </div>
     <div style="display:flex;flex-direction:column;gap:7px">
       <button class="btn-full btn-gray" onclick="mowerSync(true)">&#128260; Sync From Sensor Now</button>
@@ -1833,34 +1834,22 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
   </div>
   <div class="card cat-gps">
     <div class="card-title">&#128506; Yard Map &bull; GPS Mowing Track <span id="mapCalibBadge" style="display:none;font-size:10px;font-weight:600;color:#d4af37;margin-left:6px">&#128205; Calibrated</span></div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5">Real aerial photo of your property. Mowing path draws in Toro red as you go. Tap <strong style="color:#d4af37">Calibrate Map</strong> to lock the GPS track to the aerial image.</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5">Real aerial photo of your property. Your mow path draws in Toro red automatically. To line it up with the photo, tap <strong style="color:#d4af37">Pin Track to Photo</strong> &mdash; then just tap where you <em>started</em> and where you <em>ended</em>. No coordinates to type.</div>
     <div style="position:relative">
       <canvas id="yardMap" style="width:100%;height:320px;display:block;border-radius:8px;cursor:default" onclick="onMapClick(event)" ontouchstart="onMapClick(event)"></canvas>
       <div id="calibDot" style="display:none;position:absolute;width:16px;height:16px;border-radius:50%;background:#ffd700;border:2px solid #fff;transform:translate(-50%,-50%);pointer-events:none;box-shadow:0 0 10px rgba(255,215,0,.9)"></div>
     </div>
     <div id="yardMapMsg" style="font-size:10px;color:#666;text-align:center;margin-top:6px">No GPS track yet &mdash; it&rsquo;ll appear after your first mow with the sensor installed.</div>
     <div id="mapCalibPanel" style="display:none;background:rgba(15,25,15,.96);border:1px solid #3a5a3a;border-radius:8px;padding:13px;margin-top:10px">
-      <div style="color:#d4af37;font-weight:700;font-size:13px;margin-bottom:6px">&#128205; Map Calibration</div>
-      <div id="calibStatus" style="color:#9ab9ab;font-size:12px;margin-bottom:10px;line-height:1.6">Tap a known point on the aerial map above, then enter its GPS coordinates and tap Add Point. Repeat for a second point (ideally front yard and back yard).</div>
-      <div id="calibPointList" style="margin-bottom:8px;font-size:11px"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-        <div>
-          <div style="font-size:10px;color:#9ab9ab;margin-bottom:3px">Latitude (e.g. 32.8995)</div>
-          <input id="calibLat" type="number" step="0.000001" placeholder="32.8995" style="width:100%;box-sizing:border-box;background:#0a120a;border:1px solid #3a5a3a;color:#ede8df;padding:8px;border-radius:5px;font-size:13px">
-        </div>
-        <div>
-          <div style="font-size:10px;color:#9ab9ab;margin-bottom:3px">Longitude (e.g. -97.0339)</div>
-          <input id="calibLon" type="number" step="0.000001" placeholder="-97.0339" style="width:100%;box-sizing:border-box;background:#0a120a;border:1px solid #3a5a3a;color:#ede8df;padding:8px;border-radius:5px;font-size:13px">
-        </div>
-      </div>
+      <div style="color:#d4af37;font-weight:700;font-size:13px;margin-bottom:6px">&#128205; Pin Track to Photo</div>
+      <div id="calibStatus" style="color:#9ab9ab;font-size:12px;margin-bottom:10px;line-height:1.6">On the photo above, tap where you <b>started</b> mowing.</div>
       <div style="display:flex;gap:8px">
-        <button onclick="addCalibPt()" style="flex:1;background:#1a3a1a;border:1px solid #4a8a4a;color:#7ee787;padding:9px;border-radius:7px;font-size:13px;font-weight:600">+ Add Point</button>
-        <button onclick="saveMapCalib()" style="flex:1;background:#1a1a08;border:1px solid #d4af37;color:#d4af37;padding:9px;border-radius:7px;font-size:13px;font-weight:600">&#10003; Save</button>
-        <button onclick="cancelMapCalib()" style="background:#2a1212;border:1px solid #6a3030;color:#ff6262;padding:9px 13px;border-radius:7px;font-size:13px">&#10005;</button>
+        <button onclick="startMapCalib()" style="flex:1;background:#1a1a08;border:1px solid #d4af37;color:#d4af37;padding:9px;border-radius:7px;font-size:13px;font-weight:600">&#8635; Start over</button>
+        <button onclick="cancelMapCalib()" style="background:#2a1212;border:1px solid #6a3030;color:#ff6262;padding:9px 13px;border-radius:7px;font-size:13px">Cancel</button>
       </div>
     </div>
     <div id="calibBtnRow" style="margin-top:10px;display:flex;gap:8px">
-      <button onclick="startMapCalib()" style="flex:1;background:#121a12;border:1px solid #2a4a2a;color:#9ab9ab;padding:9px;border-radius:7px;font-size:12px">&#128205; Calibrate</button>
+      <button onclick="startMapCalib()" style="flex:1;background:#1a1a08;border:1px solid #d4af37;color:#d4af37;padding:9px;border-radius:7px;font-size:12px;font-weight:600">&#128205; Pin Track to Photo</button>
       <button onclick="runGpsSim()" id="simBtn" style="flex:1;background:#2a1212;border:1px solid #ff6262;color:#ff6262;padding:9px;border-radius:7px;font-size:12px;font-weight:600">&#9654; Simulate</button>
       <button onclick="clearMapCalib()" id="clearCalibBtn" style="display:none;background:#1a1212;border:1px solid #5a2a2a;color:#ff6262;padding:9px 14px;border-radius:7px;font-size:12px">&#10005;</button>
     </div>
@@ -4584,6 +4573,14 @@ setInterval(loadAlerts, 5*60*1000);
         } else chip('hcBatt','BATT \u2014','unk');
         if(wifi!=null) chip('hcWifi','WIFI '+wifi.toFixed(0)+'dBm', wifi>-80?'ok':'bad');
         else           chip('hcWifi','WIFI \u2014','unk');
+        // Actionable note when a sub-sensor is offline (so "MPU MISSING" isn't cryptic).
+        var noteEl=document.getElementById('sensorHealthNote');
+        if(noteEl){
+          var note='';
+          if(d.mpu_ok===0) note='\u26a0 Motion sensor (MPU6050) offline \u2014 <b>Vibration, Pitch/Roll, Tip Risk and RPM all come from it</b>, so they show \u2014 until it\u2019s back. Check the sensor box\u2019s MPU6050 I\u00b2C wiring (SDA / SCL) and power (3V3 / GND), reseat the connector, then power-cycle the box.';
+          else if(d.gps_rx===0) note='\u26a0 GPS module silent \u2014 no satellite data. Make sure the GPS antenna has clear sky view; the first fix after power-up can take 1\u20132 minutes.';
+          if(note){ noteEl.style.display=''; noteEl.innerHTML=note; } else { noteEl.style.display='none'; }
+        }
         if(isStub){
           setMsg('Sensor box not connected yet \u2014 start the engine and the data will appear', '#f0a500');
         } else if(isHeartbeat){
@@ -4620,7 +4617,7 @@ setInterval(loadAlerts, 5*60*1000);
   })();
 
   // \u2500\u2500 MAP CALIBRATION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-  var _mapCalib=null, _calibMode=false, _calibPending=[], _pendingDot=null;
+  var _mapCalib=null, _calibMode=false, _calibPending=[], _pendingDot=null, _pinStep=0;
   (function(){
     try{ var s=localStorage.getItem('yard_map_calib'); if(s) _mapCalib=JSON.parse(s); }catch(e){}
   })();
@@ -4632,51 +4629,58 @@ setInterval(loadAlerts, 5*60*1000);
     if(clearBtn) clearBtn.style.display=(_mapCalib&&_mapCalib.length>=2)?'':'none';
   }
 
+  // 2-point SIMILARITY transform (translation + uniform scale + ROTATION) built from
+  // two GPS↔pixel correspondences. Handles a track that runs diagonally / a photo that
+  // isn't perfectly north-up — the old version mapped lon→x and lat→y independently
+  // (north-up only). GPS is projected to a local flat plane first (lon×cos(lat), −lat)
+  // so small-yard distances are ~linear.
   function gpsToXY(lat,lon,w,h){
     if(!_mapCalib||_mapCalib.length<2) return null;
     var p1=_mapCalib[0],p2=_mapCalib[1];
-    var dLon=p2.lon-p1.lon, dLat=p2.lat-p1.lat;
-    if(Math.abs(dLon)<1e-10||Math.abs(dLat)<1e-10) return null;
-    var nx=p1.fx+(lon-p1.lon)*(p2.fx-p1.fx)/dLon;
-    var ny=p1.fy+(lat-p1.lat)*(p2.fy-p1.fy)/dLat;
+    var cosL=Math.cos((p1.lat||0)*Math.PI/180)||1;
+    function loc(la,lo){ return {x:lo*cosL, y:-la}; }
+    var L1=loc(p1.lat,p1.lon), L2=loc(p2.lat,p2.lon);
+    var dx=L2.x-L1.x, dy=L2.y-L1.y;
+    var denom=dx*dx+dy*dy;
+    if(denom<1e-16) return null;                    // start≈end → can't scale
+    var dfx=p2.fx-p1.fx, dfy=p2.fy-p1.fy;
+    var a=(dx*dfx+dy*dfy)/denom;                     // (dfx+i·dfy)/(dx+i·dy) = a+i·b
+    var b=(dx*dfy-dy*dfx)/denom;
+    var L=loc(lat,lon), ux=L.x-L1.x, uy=L.y-L1.y;
+    var nx=p1.fx + a*ux - b*uy;
+    var ny=p1.fy + b*ux + a*uy;
     return {x:nx*w, y:ny*h};
   }
 
-  function _calibStatusMsg(){
+  // \u2500\u2500 PIN TRACK TO PHOTO \u2014 two taps, zero coordinate typing \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+  // The app already knows the GPS of the track's first & last points, so the user
+  // just taps where the path STARTED and ENDED on the aerial. Those two pixel\u2194GPS
+  // pairs feed gpsToXY's similarity transform. No lat/lon entry = no "invalid
+  // coordinates" ever again.
+  function _calibSay(txt, color){
     var el=document.getElementById('calibStatus'); if(!el) return;
-    el.style.color='#9ab9ab';
-    if(_calibPending.length===0&&!_pendingDot)
-      el.textContent='Tap a known point on the aerial map above, then enter its GPS coordinates.';
-    else if(_pendingDot&&_calibPending.length===0)
-      el.textContent='Point #1 tapped \u2713 \u2014 enter the GPS coordinates below, then tap Add Point.';
-    else if(_calibPending.length===1&&!_pendingDot)
-      el.textContent='Point #1 saved \u2713 \u2014 now tap a second point on the map (e.g. back corner of yard).';
-    else if(_calibPending.length===1&&_pendingDot)
-      el.textContent='Point #2 tapped \u2713 \u2014 enter the GPS coordinates, then tap Add Point.';
-    else
-      el.textContent=_calibPending.length+' points saved \u2713 \u2014 tap Save to apply, or add more points for better accuracy.';
-    var list=document.getElementById('calibPointList'); if(!list) return;
-    var html='';
-    for(var i=0;i<_calibPending.length;i++){
-      var p=_calibPending[i];
-      html+='<div style="color:#7ee787;margin-bottom:2px">\u2713 Pt '+(i+1)+': '+p.lat.toFixed(6)+'\u00b0N, '+p.lon.toFixed(6)+'\u00b0</div>';
-    }
-    list.innerHTML=html;
+    el.style.color=color||'#9ab9ab'; el.innerHTML=txt;
   }
-
   function startMapCalib(){
-    _calibMode=true; _calibPending=[]; _pendingDot=null;
+    var track=window._lastTrack;
+    _calibMode=true; _calibPending=[]; _pinStep=0; _pendingDot=null;
     var panel=document.getElementById('mapCalibPanel');
     var btnRow=document.getElementById('calibBtnRow');
     if(panel) panel.style.display='';
     if(btnRow) btnRow.style.display='none';
+    if(!track||track.length<2){
+      _calibMode=false;
+      if(panel) panel.style.display='';
+      _calibSay('No GPS track yet. Mow with the sensor running (or tap &#9654; Simulate) to lay down a path first &mdash; then pin it to the photo.', '#ffb454');
+      return;
+    }
     var c=document.getElementById('yardMap'); if(c) c.style.cursor='crosshair';
-    _calibStatusMsg();
-    drawYardMap(window._lastTrack||[]);
+    _calibSay('On the photo, tap where you <b>STARTED</b> mowing (the start of the red path).');
+    drawYardMap(track);
   }
 
   function cancelMapCalib(){
-    _calibMode=false; _pendingDot=null; _calibPending=[];
+    _calibMode=false; _pendingDot=null; _calibPending=[]; _pinStep=0;
     var panel=document.getElementById('mapCalibPanel');
     var btnRow=document.getElementById('calibBtnRow');
     var dot=document.getElementById('calibDot');
@@ -4689,51 +4693,33 @@ setInterval(loadAlerts, 5*60*1000);
 
   function onMapClick(e){
     if(!_calibMode) return;
-    e.preventDefault();
+    if(e&&e.preventDefault) e.preventDefault();
     var c=document.getElementById('yardMap'); if(!c) return;
+    var track=window._lastTrack; if(!track||track.length<2){ cancelMapCalib(); return; }
     var rect=c.getBoundingClientRect();
-    var src=e.touches?e.touches[0]:e;
-    var cx=src.clientX-rect.left, cy=src.clientY-rect.top;
-    _pendingDot={fx:cx/rect.width, fy:cy/rect.height};
-    var dot=document.getElementById('calibDot');
-    if(dot){ dot.style.display=''; dot.style.left=cx+'px'; dot.style.top=cy+'px'; }
-    _calibStatusMsg();
-    drawYardMap(window._lastTrack||[]);
-  }
-
-  function addCalibPt(){
-    if(!_pendingDot){
-      var el=document.getElementById('calibStatus');
-      if(el){ el.style.color='#ff9944'; el.textContent='Tap a point on the aerial map first, then enter its coordinates.'; }
-      return;
+    var src=(e.touches&&e.touches[0])?e.touches[0]:e;
+    var fx=(src.clientX-rect.left)/rect.width, fy=(src.clientY-rect.top)/rect.height;
+    if(fx<0||fx>1||fy<0||fy>1) return;
+    var ep = _pinStep===0 ? track[0] : track[track.length-1];
+    var lat=(ep&&ep.lat!=null)?ep.lat:ep[0];
+    var lon=(ep&&ep.lon!=null)?ep.lon:ep[1];
+    _calibPending.push({fx:fx, fy:fy, lat:lat, lon:lon});
+    _pinStep++;
+    if(_pinStep<2){
+      _calibSay('Start pinned &#10003; &mdash; now tap where you <b>ENDED</b> (the blue dot at the end of the path).');
+      drawYardMap(track);
+    } else {
+      _mapCalib=_calibPending.slice();
+      try{ localStorage.setItem('yard_map_calib',JSON.stringify(_mapCalib)); }catch(err){}
+      _calibMode=false;
+      var panel=document.getElementById('mapCalibPanel'); if(panel) panel.style.display='none';
+      var btnRow=document.getElementById('calibBtnRow'); if(btnRow) btnRow.style.display='flex';
+      c.style.cursor='default';
+      _refreshCalibUI();
+      drawYardMap(track);
+      var msg=document.getElementById('yardMapMsg');
+      if(msg) msg.innerHTML='&#10003; Track pinned to the photo. Tap &#10005; to redo it.';
     }
-    var lat=parseFloat(document.getElementById('calibLat').value);
-    var lon=parseFloat(document.getElementById('calibLon').value);
-    var el=document.getElementById('calibStatus');
-    if(isNaN(lat)||isNaN(lon)||Math.abs(lat)>90||Math.abs(lon)>180){
-      if(el){ el.style.color='#ff6262'; el.textContent='Invalid coordinates \u2014 enter latitude like 32.8995 and longitude like -97.0339'; }
-      return;
-    }
-    _calibPending.push({fx:_pendingDot.fx, fy:_pendingDot.fy, lat:lat, lon:lon});
-    _pendingDot=null;
-    document.getElementById('calibLat').value='';
-    document.getElementById('calibLon').value='';
-    var dot=document.getElementById('calibDot'); if(dot) dot.style.display='none';
-    _calibStatusMsg();
-    drawYardMap(window._lastTrack||[]);
-  }
-
-  function saveMapCalib(){
-    if(_calibPending.length<2){
-      var el=document.getElementById('calibStatus');
-      if(el){ el.style.color='#ff6262'; el.textContent='Need at least 2 calibration points before saving.'; }
-      return;
-    }
-    _mapCalib=_calibPending.slice();
-    localStorage.setItem('yard_map_calib',JSON.stringify(_mapCalib));
-    cancelMapCalib();
-    _refreshCalibUI();
-    drawYardMap(window._lastTrack||[]);
   }
 
   function clearMapCalib(){
@@ -4778,9 +4764,9 @@ setInterval(loadAlerts, 5*60*1000);
         ctx.shadowBlur=0;
         ctx.fillStyle='#000'; ctx.font='bold 11px sans-serif';
         ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillText(ci+1,cpx,cpy);
+        ctx.fillText(ci===0?'S':'E',cpx,cpy);
       }
-      if(msg) msg.textContent=_calibPending.length===0?'Tap the aerial map to set calibration point #1':_calibPending.length+' point(s) set \u2014 add more or tap Save';
+      if(msg) msg.textContent=_calibPending.length===0?'Tap where you STARTED mowing':'Now tap where you ENDED';
       return;
     }
 
@@ -4845,8 +4831,6 @@ setInterval(loadAlerts, 5*60*1000);
   window.onMapClick=onMapClick;
   window.startMapCalib=startMapCalib;
   window.cancelMapCalib=cancelMapCalib;
-  window.addCalibPt=addCalibPt;
-  window.saveMapCalib=saveMapCalib;
   window.clearMapCalib=clearMapCalib;
   _refreshCalibUI();
   window.addEventListener('resize',function(){ if(window._lastTrack) drawYardMap(window._lastTrack); });
