@@ -1678,6 +1678,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <div class="spec-label">Hour Meter</div>
           <div class="hour-meter-box"><div class="hour-meter-num" id="hdrHours">2.5</div></div>
           <div class="hour-meter-unit">HRS</div>
+          <div id="hdrHoursCal" style="display:none;font-size:8px;color:var(--muted);line-height:1.15;margin-top:1px"></div>
         </div>
       </div>
       <div class="spec-item"><div class="spec-icon">&#10084;</div><div><div class="spec-label">Condition</div><div class="spec-val" id="hdrCond" style="color:var(--green)">99%</div></div></div>
@@ -2600,6 +2601,13 @@ function updateDashboard(){
   var el;
   el=document.getElementById('mainHours');   if(el) el.textContent=hrsStr;
   el=document.getElementById('hdrHours');    if(el) el.textContent=hrsStr;
+  el=document.getElementById('hdrHoursCal');
+  if(el){
+    if(S.hoursCalibratedAt){
+      var cd=new Date(S.hoursCalibratedAt);
+      el.style.display=''; el.textContent='set '+cd.toLocaleDateString(undefined,{month:'short',day:'numeric'});
+    } else { el.style.display='none'; }
+  }
   el=document.getElementById('hdrCond');   if(el){ el.textContent=h.overall+'%'; el.style.color=hc(h.overall); }
   el=document.getElementById('dashCond');  if(el){ el.textContent=h.overall+'%'; el.style.color=hc(h.overall); }
   el=document.getElementById('healthPct'); if(el){ el.textContent=h.overall+'%'; el.style.color=hc(h.overall); }
@@ -4073,7 +4081,7 @@ function showModal(type, preKey){
       +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">Set the <b>true</b> engine hours from the mower&rsquo;s physical hour meter. This is the master override &mdash; it sets the hours <b>everywhere</b> and re-syncs the sensor baseline so future hours stay correct. Use it any time the sensor misses a mow.</div>'
       +'<label class="mlabel">True Hour Meter Reading</label>'
       +'<input class="minput" id="mi-newhrs" type="number" step="0.1" inputmode="decimal" value="'+S.hours.toFixed(1)+'">'
-      +'<div style="font-size:10px;color:var(--muted);margin-bottom:8px">App currently shows: '+S.hours.toFixed(1)+' hrs &middot; read the real number off the mower and enter it here</div>'
+      +'<div style="font-size:10px;color:var(--muted);margin-bottom:8px">App currently shows: '+S.hours.toFixed(1)+' hrs &middot; read the real number off the mower and enter it here'+(S.hoursCalibratedAt?(' &middot; last set by hand '+new Date(S.hoursCalibratedAt).toLocaleDateString()):'')+'</div>'
       +'<div class="mbtns"><button class="mbtn primary" onclick="saveHours()">&#128190; Set Master Hours</button><button class="mbtn secondary" onclick="closeModal()">Cancel</button></div>';
   } else if(type==='editlog'){
     var entry=S.log.find(function(x){ return x.id===preKey; });
@@ -4162,6 +4170,7 @@ function saveHours(){
   var sensorHrs = (typeof S.lastSensorHours==='number') ? S.lastSensorHours : 0;
   S.hoursBaseline = Math.round((n - sensorHrs)*100)/100;
   S.hours = n;
+  S.hoursCalibratedAt = Date.now();
   save(); closeModal(); renderAll();
   if(typeof toast==='function') toast('✓ Master hours set to '+n.toFixed(1)+' hrs');
 }
