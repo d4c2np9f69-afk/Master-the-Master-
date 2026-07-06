@@ -1685,7 +1685,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <div class="hdr-btns">
       <button class="hdr-btn red" onclick="showModal('mow')">&#127807; LOG MOW</button>
       <button class="hdr-btn outline" onclick="showModal('svc')">&#128295; LOG SERVICE</button>
-      <button class="hdr-btn outline" onclick="showModal('hours')">&#9201; UPDATE HOURS</button>
+      <button class="hdr-btn outline" onclick="showModal('hours')">&#9201; SET HOURS</button>
     </div>
   </div>
 
@@ -1715,6 +1715,11 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <span class="lg"><span class="dot" style="background:var(--c-service);color:var(--c-service)"></span>Service</span>
     <span class="lg"><span class="dot" style="background:var(--c-fitness);color:var(--c-fitness)"></span>Fitness</span>
     <span class="lg"><span class="dot" style="background:var(--c-weather);color:var(--c-weather)"></span>Weather</span>
+  </div>
+  <!-- PRE-MOW RESET REMINDER -->
+  <div id="preMowReminder" style="display:flex;align-items:center;gap:9px;background:linear-gradient(90deg,rgba(212,175,55,.12),rgba(212,175,55,.04));border:1px solid rgba(212,175,55,.3);border-radius:10px;padding:9px 12px;margin-bottom:10px">
+    <span style="font-size:17px;flex-shrink:0">&#128260;</span>
+    <span style="font-size:11.5px;color:var(--text);line-height:1.45"><b>Before you mow:</b> press <b>RESET</b> on the sensor box &mdash; it gives the motion sensor a clean start (vibration &amp; RPM), a faster GPS lock, and a fresh track for this mow.</span>
   </div>
   <!-- MOWING CONDITIONS (mower-specific — moved here from Weather) -->
   <div class="card cat-weather">
@@ -2340,6 +2345,12 @@ if(typeof S.sensorMiles!=='number') S.sensorMiles=0;
 if(typeof S.sensorSpeedMph!=='number') S.sensorSpeedMph=0;
 if(!S.purchases) S.purchases=[];
 if(!Array.isArray(S.sensorTrack)) S.sensorTrack=[];
+// Master hour calibration: hoursBaseline is added to the sensor's cumulative runtime.
+// It's re-synced whenever Jeff sets the true hours (from the mower's physical meter),
+// so the total stays correct even if the sensor ever misses a mow. lastSensorHours =
+// the most recent cumulative runtime we saw, used to recompute the baseline.
+if(typeof S.hoursBaseline!=='number') S.hoursBaseline=5.9;
+if(typeof S.lastSensorHours!=='number') S.lastSensorHours=0;
 function uid(){ return 'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 // backfill ids on any pre-existing log entries
 if(S.log) S.log.forEach(function(x){ if(!x.id) x.id=uid(); });
@@ -4058,12 +4069,12 @@ function showModal(type, preKey){
       +'<div style="font-size:10px;color:var(--muted);margin-bottom:8px">Auto-filled to 4.0 mi for a full yard &mdash; edit for partial mows</div>'
       +'<div class="mbtns"><button class="mbtn primary" onclick="saveMow()">&#128190; Save Mow</button><button class="mbtn secondary" onclick="closeModal()">Cancel</button></div>';
   } else if(type==='hours'){
-    mc.innerHTML='<div class="modal-title">&#9201; UPDATE HOUR METER</div>'
-      +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Update the hour meter reading without logging a mow. All service intervals will recalculate automatically.</div>'
-      +'<label class="mlabel">New Hour Meter Reading</label>'
-      +'<input class="minput" id="mi-newhrs" type="number" step="0.1" value="'+S.hours.toFixed(1)+'">'
-      +'<div style="font-size:10px;color:var(--muted);margin-bottom:8px">Current reading: '+S.hours.toFixed(1)+' hrs</div>'
-      +'<div class="mbtns"><button class="mbtn primary" onclick="saveHours()">&#128190; Update</button><button class="mbtn secondary" onclick="closeModal()">Cancel</button></div>';
+    mc.innerHTML='<div class="modal-title">&#9201; MASTER HOUR CALIBRATION</div>'
+      +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">Set the <b>true</b> engine hours from the mower&rsquo;s physical hour meter. This is the master override &mdash; it sets the hours <b>everywhere</b> and re-syncs the sensor baseline so future hours stay correct. Use it any time the sensor misses a mow.</div>'
+      +'<label class="mlabel">True Hour Meter Reading</label>'
+      +'<input class="minput" id="mi-newhrs" type="number" step="0.1" inputmode="decimal" value="'+S.hours.toFixed(1)+'">'
+      +'<div style="font-size:10px;color:var(--muted);margin-bottom:8px">App currently shows: '+S.hours.toFixed(1)+' hrs &middot; read the real number off the mower and enter it here</div>'
+      +'<div class="mbtns"><button class="mbtn primary" onclick="saveHours()">&#128190; Set Master Hours</button><button class="mbtn secondary" onclick="closeModal()">Cancel</button></div>';
   } else if(type==='editlog'){
     var entry=S.log.find(function(x){ return x.id===preKey; });
     if(!entry){ closeModal(); return; }
@@ -4143,8 +4154,16 @@ function saveMow(){
 
 function saveHours(){
   var n=parseFloat(document.getElementById('mi-newhrs').value);
-  if(isNaN(n)||n<S.hours){ alert('Enter '+S.hours.toFixed(1)+' hrs or greater'); return; }
-  S.hours=n; save(); closeModal(); renderAll();
+  if(isNaN(n)||n<0){ alert('Enter the hours from the mower’s hour meter, e.g. 9.2'); return; }
+  // Master override: allow correcting DOWN too (sensor over-count), with a confirm.
+  if(n < S.hours && !confirm('Set hours DOWN from '+S.hours.toFixed(1)+' to '+n.toFixed(1)+' hrs? This is a manual master override.')) return;
+  // Re-sync the baseline against the sensor's last known runtime so future sensor
+  // hours keep totaling correctly: total = hoursBaseline + sensorHrs.
+  var sensorHrs = (typeof S.lastSensorHours==='number') ? S.lastSensorHours : 0;
+  S.hoursBaseline = Math.round((n - sensorHrs)*100)/100;
+  S.hours = n;
+  save(); closeModal(); renderAll();
+  if(typeof toast==='function') toast('✓ Master hours set to '+n.toFixed(1)+' hrs');
 }
 
 // Match a free-text custom title to a service RULE by keywords
@@ -4466,7 +4485,9 @@ setInterval(loadAlerts, 5*60*1000);
   // Hours already on the mower the day you install the sensor. The sensor counts
   // up from 0, so displayed hours = BASELINE + sensor hours. Set this to whatever
   // this dashboard reads on install day (right now that's 5.4).
-  var MOWER_BASELINE = 5.9;
+  // Baseline is now the calibratable one (S.hoursBaseline), re-synced by Master Hour
+  // Calibration. Falls back to 5.9 for a fresh install.
+  var MOWER_BASELINE = (typeof S!=='undefined' && typeof S.hoursBaseline==='number') ? S.hoursBaseline : 5.9;
 
   function setMsg(txt, color){
     var m=document.getElementById('sensorMsg');
@@ -4494,7 +4515,12 @@ setInterval(loadAlerts, 5*60*1000);
         var isStub = (d.source === 'stub');
         var isHeartbeat = (d.source === 'heartbeat' || d.engine_running === false);
         var sensorHrs = (typeof d.hours === 'number') ? d.hours : 0;
-        var total = Math.round((MOWER_BASELINE + sensorHrs)*10)/10;
+        // Remember the sensor's latest cumulative runtime so Master Hour Calibration
+        // can re-sync the baseline against it. (Skip stub/heartbeat with no hours.)
+        if(typeof S!=='undefined' && typeof d.hours === 'number') S.lastSensorHours = sensorHrs;
+        // Read the baseline LIVE each sync (calibration can change S.hoursBaseline).
+        var baseHrs = (typeof S!=='undefined' && typeof S.hoursBaseline==='number') ? S.hoursBaseline : MOWER_BASELINE;
+        var total = Math.round((baseHrs + sensorHrs)*10)/10;
         var changed = false;
         // Never move hours backward; only advance when the sensor total is higher.
         if(typeof S!=='undefined' && total > S.hours){
