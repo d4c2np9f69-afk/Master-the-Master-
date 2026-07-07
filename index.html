@@ -2133,8 +2133,22 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         </div>
         <div id="lightsList"></div>
       </div>
-      <div id="lightsHint" style="display:none;font-size:12px;color:var(--muted);line-height:1.6;margin:4px 0 2px">No lights or plugs in Beehive yet. Add your <b>SYLVANIA Smart WiFi plugs</b> to Beehive (Settings &rarr; Devices &rarr; Add Integration &rarr; <b>Tuya</b>) and they&rsquo;ll show up here to control &amp; automate.</div>
+      <div id="lightsHint" style="display:none;font-size:12px;color:var(--muted);line-height:1.6;margin:4px 0 2px">No lights or plugs in Beehive yet. Add a smart plug (Smart Life &rarr; then the HA <b>Tuya</b> integration) and it shows up here automatically to control &amp; automate.</div>
       <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadLights()">&#128260; Refresh</button>
+      <div class="wx-note">Live from Beehive</div>
+    </div>
+
+    <!-- ROBOT VACUUM — its own card; only shows when a vacuum.* entity exists -->
+    <div class="card" id="vacuumCard" style="display:none">
+      <div class="card-title">&#129302; <span id="vacName">Robot Vacuum</span> <span id="vacConn" class="irr-conn"></span></div>
+      <div id="vacBanner" class="wx-banner wx-load">&#128260; Loading&hellip;</div>
+      <div class="grd-actions">
+        <button class="btn-full btn-green" onclick="vacDo('start')">&#9654; Clean</button>
+        <button class="btn-full btn-gray" onclick="vacDo('pause')">&#9208;&#65039; Pause</button>
+        <button class="btn-full btn-gray" onclick="vacDo('return_to_base')">&#127968; Dock</button>
+        <button class="btn-full btn-gray" onclick="vacDo('locate')">&#128269; Find</button>
+      </div>
+      <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadVacuum()">&#128260; Refresh</button>
       <div class="wx-note">Live from Beehive</div>
     </div>
 
@@ -5127,7 +5141,7 @@ function hccSection(id, btn) {
   if (id === 'irrigation' && !window._irrLoaded) { window._irrLoaded = true; loadIrrigation(); }
   if (id === 'home' && !window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
   if (id === 'home') { loadUtilities(); }
-  if (id === 'guardian') { loadGuardian(); loadLights(); loadClimate(); }
+  if (id === 'guardian') { loadGuardian(); loadLights(); loadVacuum(); loadClimate(); }
   if (id === 'weather') {
     /* Windy radar iframe self-loads with calendar=now; no manual refresh needed */
     if (!window._forecastLoaded) { window._forecastLoaded = true; loadForecast(); }
@@ -5398,7 +5412,7 @@ function checkBeehive(manual) {
 setTimeout(function() { checkBeehive(false); }, 800);
 // Self-heal: re-check Beehive + re-read the meters every 60s, so an HA restart (or a
 // momentarily-quiet meter) recovers on its own — no manual refresh. Guarded to token.
-setInterval(function(){ if (getHaToken()) { checkBeehive(false); loadUtilities(); loadGuardian(); loadLights(); } }, 60000);
+setInterval(function(){ if (getHaToken()) { checkBeehive(false); loadUtilities(); loadGuardian(); loadLights(); loadVacuum(); } }, 60000);
 
 // ── HA TOKEN & HOME DATA ─────────────────────────────────────────────────
 function getHaToken() {
@@ -5858,9 +5872,18 @@ function loadLights(){
   .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
   .then(function(states){
     if (!Array.isArray(states)) throw new Error('bad');
+    // A robot vacuum (e.g. Sharky) exposes setting switches (child-lock, DND, mop…) —
+    // keep those OUT of Lights & Plugs; the vacuum gets its own card below.
+    var vacStems = states.filter(function(s){ return s.entity_id.indexOf('vacuum.') === 0; })
+      .map(function(s){ return s.entity_id.slice(7); });
+    function isVacuumSwitch(s){
+      var id = s.entity_id.toLowerCase();
+      if (/child.?lock|do.?not.?disturb|_dnd\b|mop|clean_mode|find_?robot|locate|voice/.test(id)) return true;
+      return vacStems.some(function(st){ return st && id.indexOf(st) >= 0; });
+    }
     var devs = states.filter(function(s){
       if (s.entity_id.indexOf('light.') === 0) return true;
-      if (s.entity_id.indexOf('switch.') === 0) return !lightIsIrrigation(s); // plugs, not sprinklers
+      if (s.entity_id.indexOf('switch.') === 0) return !lightIsIrrigation(s) && !isVacuumSwitch(s); // plugs, not sprinklers or vacuum settings
       return false;
     });
     window._lights = devs;
@@ -5902,6 +5925,48 @@ function loadLights(){
   })
   .catch(function(){
     set('wx-load', '&#128161; Beehive unreachable — check your token on HOME');
+    if (conn){ conn.textContent = '● OFFLINE'; conn.style.color = '#ff6262'; }
+  });
+}
+
+// ── ROBOT VACUUM (Home Guardian) ──────────────────────────────────────────
+// Controls a HA vacuum.* entity (Sharky). Card hides itself when no vacuum exists.
+function vacSvc(action, body){
+  return haFetch('/api/services/vacuum/' + action, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
+}
+function vacDo(action){
+  var e = window._vacEntity; if (!e) return;
+  vacSvc(action, { entity_id: e }).then(function(){ setTimeout(loadVacuum, 1500); });
+}
+function loadVacuum(){
+  var card = document.getElementById('vacuumCard');
+  var banner = document.getElementById('vacBanner');
+  var conn = document.getElementById('vacConn');
+  if (!getHaToken()){ if (card) card.style.display = 'none'; return; }
+  haFetch('/api/states', { signal: AbortSignal.timeout(25000) })
+  .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  .then(function(states){
+    if (!Array.isArray(states)) throw new Error('bad');
+    var vac = states.filter(function(s){ return s.entity_id.indexOf('vacuum.') === 0; })[0];
+    if (!vac){ if (card) card.style.display = 'none'; return; }
+    window._vacEntity = vac.entity_id;
+    if (card) card.style.display = '';
+    var a = vac.attributes || {};
+    var nm = document.getElementById('vacName'); if (nm) nm.textContent = a.friendly_name || 'Robot Vacuum';
+    var st = String(vac.state || '').toLowerCase();
+    var batt = (typeof a.battery_level === 'number') ? ' &middot; &#128267; ' + a.battery_level + '%' : '';
+    var cls = 'wx-load', txt = st ? (st.charAt(0).toUpperCase() + st.slice(1)) : 'Unknown';
+    if (st === 'cleaning'){ cls = 'wx-go'; txt = '&#129529; Cleaning'; }
+    else if (st === 'returning'){ cls = 'wx-caution'; txt = '&#127968; Returning to dock'; }
+    else if (st === 'paused'){ cls = 'wx-caution'; txt = '&#9208;&#65039; Paused'; }
+    else if (st === 'docked'){ cls = 'wx-load'; txt = '&#127968; Docked &middot; charging'; }
+    else if (st === 'idle'){ cls = 'wx-load'; txt = 'Idle'; }
+    else if (st === 'error'){ cls = 'wx-no'; txt = '&#9888;&#65039; Error' + (a.error ? ' — ' + a.error : ''); }
+    if (banner){ banner.className = 'wx-banner ' + cls; banner.innerHTML = txt + batt; }
+    if (conn){ conn.textContent = '● LIVE'; conn.style.color = '#22c55e'; }
+  })
+  .catch(function(){
+    if (banner){ banner.className = 'wx-banner wx-load'; banner.innerHTML = '&#129302; Beehive unreachable — check your token on HOME'; }
     if (conn){ conn.textContent = '● OFFLINE'; conn.style.color = '#ff6262'; }
   });
 }
