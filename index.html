@@ -5866,9 +5866,20 @@ function loadLights(){
     window._lights = devs;
     window._dimmable = devs.filter(lightIsDimmable);
     if (!devs.length){
-      set('wx-caution', '&#128161; No lights or plugs in Beehive yet');
+      set('wx-caution', '&#128161; No lights or plugs matched yet');
       if (master) master.style.display = 'none';
-      if (hint) hint.style.display = 'block';
+      if (hint){
+        hint.style.display = 'block';
+        // Diagnostic: show exactly what Beehive handed us, so we can see the plug's
+        // real entity name (only Jeff can see his HA — this surfaces it in-app).
+        var sw = states.filter(function(s){ return s.entity_id.indexOf('switch.') === 0; }).map(function(s){ return s.entity_id; });
+        var li = states.filter(function(s){ return s.entity_id.indexOf('light.') === 0; }).map(function(s){ return s.entity_id; });
+        hint.innerHTML = 'No <b>light.</b> or <b>switch.</b> devices found yet. Add a smart plug to Beehive and it shows up here automatically.'
+          + '<div style="margin-top:8px;font-size:10px;color:var(--dim);word-break:break-all;line-height:1.5">'
+          + '&#128269; Diagnostic &mdash; Beehive returned <b>' + states.length + '</b> entities.<br>'
+          + 'switch.*: ' + (sw.length ? sw.join(', ') : '<i>none</i>') + '<br>'
+          + 'light.*: ' + (li.length ? li.join(', ') : '<i>none</i>') + '</div>';
+      }
       if (conn){ conn.textContent = '● LIVE'; conn.style.color = '#22c55e'; }
       return;
     }
