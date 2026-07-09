@@ -1487,14 +1487,14 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         <li><span class="sk">NWS Office</span><span class="sv">OHX &bull; Nashville</span></li>
       </ul>
       <div style="display:flex;gap:8px;margin-top:12px">
-        <a href="https://www.spotternetwork.org/pages/maps" target="_blank" rel="noopener" style="flex:1;text-align:center;text-decoration:none;padding:10px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:8px;color:#22c55e;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#128506; Spotter Map</a>
+        <a href="https://www.spotternetwork.org/" target="_blank" rel="noopener" style="flex:1;text-align:center;text-decoration:none;padding:10px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:8px;color:#22c55e;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#128506; Spotter Network</a>
         <a href="https://www.wunderground.com/dashboard/pws/KTNWHITE21" target="_blank" rel="noopener" style="flex:1;text-align:center;text-decoration:none;padding:10px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.3);border-radius:8px;color:#38bdf8;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#128202; PWS Data</a>
       </div>
       <div style="display:flex;gap:8px;margin-top:8px">
         <a href="https://apps.apple.com/us/app/mping/id584383400" target="_blank" rel="noopener" style="flex:1;text-align:center;text-decoration:none;padding:10px;background:rgba(249,115,22,.2);border:1px solid rgba(249,115,22,.5);border-radius:8px;color:#fb923c;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#127783; Report to mPING &#8599;</a>
-        <a href="https://tunein.com/radio/NOAA-Weather-Radio-16255-s95242/" target="_blank" rel="noopener" style="flex:1;text-align:center;text-decoration:none;padding:10px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.3);border-radius:8px;color:#a78bfa;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#128251; NOAA Radio &#9654;</a>
+        <a href="https://tunein.com/search/?query=NOAA%20Weather%20Radio%20Nashville" target="_blank" rel="noopener" style="flex:1;text-align:center;text-decoration:none;padding:10px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.3);border-radius:8px;color:#a78bfa;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#128251; NOAA Radio &#9654;</a>
       </div>
-      <div class="wx-note" style="margin-top:8px">NOAA Radio opens the live Nashville KIG79 broadcast (162.550 MHz) &bull; Spotter Map shows live spotter positions &bull; Report to mPING opens the official NOAA app to submit precip reports</div>
+      <div class="wx-note" style="margin-top:8px">NOAA Radio finds the live Nashville-area NOAA Weather Radio stream (162.550 MHz) on TuneIn &bull; Spotter Network opens your spotter site &bull; Report to mPING opens the official NOAA app to submit precip reports</div>
     </div>
 
     <!-- mPING REPORT — direct link to the official NOAA/OU mPING app (in-app submit is not permitted by NSSL) -->
@@ -5649,7 +5649,7 @@ function loadGuardian(){
         return id.indexOf(kw) >= 0;
       });
     }
-    var alerts = 0, warns = 0;
+    var alertReasons = [], warnReasons = [];
 
     // PEOPLE — person.* home count, else device_tracker
     var persons = dom('person.');
@@ -5657,16 +5657,16 @@ function loadGuardian(){
     var home = null;
     if (persons.length) home = persons.filter(function(p){ return p.state === 'home'; }).length;
     else if (trackers.length) home = trackers.filter(function(t){ return t.state === 'home'; }).length;
-    if (home != null) grdSet('grd-people', home + (home === 1 ? ' HOME' : ' HOME'), home > 0 ? 'hs-ok' : 'hs-warn');
+    if (home != null) grdSet('grd-people', home + ' HOME', home > 0 ? 'hs-ok' : 'hs-neutral');
     else grdSet('grd-people', '—', 'hs-dim');
 
     // WATER — leak sensor trips red; else a live water meter reads NORMAL
-    if (onState('leak', 'water') || onState('water', 'water') && hasSensor('moisture')) { grdSet('grd-water', 'LEAK', 'hs-red'); alerts++; }
+    if (onState('leak', 'water') || onState('water', 'water') && hasSensor('moisture')) { grdSet('grd-water', 'LEAK', 'hs-red'); alertReasons.push('Water leak'); }
     else if (hasSensor('water_meter')) grdSet('grd-water', 'NORMAL', 'hs-ok');
     else grdSet('grd-water', 'Sensor pending', 'hs-dim');
 
     // GAS — smoke/CO/gas alarm trips red; else a live gas meter reads NORMAL
-    if (onState('gas', '') || onState('smoke', '') || onState('carbon', '')) { grdSet('grd-gas', 'ALERT', 'hs-red'); alerts++; }
+    if (onState('gas', '') || onState('smoke', '') || onState('carbon', '')) { grdSet('grd-gas', 'ALERT', 'hs-red'); alertReasons.push('Gas / smoke alarm'); }
     else if (hasSensor('gas_meter')) grdSet('grd-gas', 'NORMAL', 'hs-ok');
     else grdSet('grd-gas', 'Sensor pending', 'hs-dim');
 
@@ -5701,7 +5701,7 @@ function loadGuardian(){
     if (garage.length){
       var open = garage.some(function(g){ return g.state === 'open' || g.state === 'on'; });
       grdSet('grd-garage', open ? 'OPEN' : 'CLOSED', open ? 'hs-warn' : 'hs-ok');
-      if (open) warns++;
+      if (open) warnReasons.push('Garage open');
     } else grdSet('grd-garage', 'Sensor pending', 'hs-dim');
 
     // DOORS — contact sensors (door/window), garage excluded (it has its own row)
@@ -5715,7 +5715,7 @@ function loadGuardian(){
     if (doors.length){
       var openD = doors.filter(function(d){ return d.state === 'open' || d.state === 'on'; }).length;
       grdSet('grd-doors', openD > 0 ? openD + ' OPEN' : 'SECURE', openD > 0 ? 'hs-warn' : 'hs-ok');
-      if (openD > 0) warns++;
+      if (openD > 0) warnReasons.push(openD + ' door' + (openD > 1 ? 's' : '') + ' open');
     } else grdSet('grd-doors', 'Sensor pending', 'hs-dim');
 
     // DEVICES — online vs total across the real device domains
@@ -5724,14 +5724,17 @@ function loadGuardian(){
     if (devs.length){
       var offline = devs.filter(function(s){ return s.state === 'unavailable' || s.state === 'unknown'; }).length;
       var online = devs.length - offline;
-      var dcls = offline === 0 ? 'hs-ok' : (offline > devs.length * 0.15 ? 'hs-red' : 'hs-warn');
+      var frac = offline / devs.length;
+      // A single blip offline is normal (sensors sleep, devices unplug) — only flag a
+      // meaningful chunk (>15%). Below that it's just an FYI, not an ATTENTION.
+      var dcls = offline === 0 ? 'hs-ok' : (frac > 0.15 ? 'hs-red' : 'hs-neutral');
       grdSet('grd-devices', online + ' / ' + devs.length + ' ONLINE', dcls);
-      if (offline > 0) warns++;
+      if (frac > 0.15) warnReasons.push(offline + ' devices offline');
     } else grdSet('grd-devices', '—', 'hs-dim');
 
     // OVERALL — banner
-    if (alerts > 0) grdBanner('wx-no', '&#128721; ALERT — CHECK NOW');
-    else if (warns > 0) grdBanner('wx-caution', '&#9888;&#65039; ATTENTION');
+    if (alertReasons.length) grdBanner('wx-no', '&#128721; ALERT &mdash; ' + alertReasons.join(' &middot; '));
+    else if (warnReasons.length) grdBanner('wx-caution', '&#9888;&#65039; ATTENTION &mdash; ' + warnReasons.join(' &middot; '));
     else grdBanner('wx-go', '&#128737;&#65039; PROTECTED');
     grdConn('● LIVE', '#22c55e');
   })
