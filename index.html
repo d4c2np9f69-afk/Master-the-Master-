@@ -862,6 +862,27 @@ html,body{
 .cam-no-img{display:flex;align-items:center;justify-content:center;height:100%;font-size:28px;opacity:.3}
 .cam-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.7);padding:5px 8px 2px;text-transform:uppercase;letter-spacing:.5px}
 .cam-state{font-size:9px;color:var(--muted);padding:0 8px 6px}
+/* Camera controls (Refresh All / Arm / full-control panel) */
+.cam-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.cam-tool-btn{flex:0 0 auto;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:11px;font-weight:800;letter-spacing:.4px;padding:9px 12px;cursor:pointer;font-family:inherit}
+.cam-tool-btn.primary{background:linear-gradient(135deg,#2a3550,#1b2436);border-color:rgba(56,189,248,.4);color:#bfe3ff}
+.cam-tool-btn:active{transform:translateY(1px)}
+.cam-tool-status{font-size:10px;font-weight:600;margin-left:auto}
+.cam-hint{font-size:10px;color:var(--muted);margin:0 2px 8px;opacity:.85}
+.cam-refresh-badge{position:absolute;top:5px;right:5px;font-size:11px;background:rgba(0,0,0,.45);border-radius:20px;padding:2px 5px;line-height:1;opacity:.85}
+.cv-imgwrap{position:relative;width:100%;aspect-ratio:16/9;background:#0a0a0a;border-radius:10px;overflow:hidden;margin-bottom:10px}
+.cv-img{width:100%;height:100%;object-fit:cover;display:block}
+.cv-no{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:40px;opacity:.4;color:var(--muted)}
+.cv-status{font-size:12px;min-height:16px;text-align:center;margin-bottom:8px;color:var(--muted)}
+.cv-btns{display:flex;gap:8px;margin-bottom:12px}
+.cv-btn{flex:1;background:var(--card);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:12px;font-weight:800;letter-spacing:.4px;padding:12px 8px;cursor:pointer;font-family:inherit}
+.cv-btn.primary{background:linear-gradient(135deg,#2a3550,#1b2436);border-color:rgba(56,189,248,.45);color:#bfe3ff}
+.cv-btn:active{transform:translateY(1px)}
+.cv-info{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:4px 12px;margin-bottom:10px}
+.cv-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13px;color:var(--muted);border-bottom:1px solid var(--border)}
+.cv-row:last-child{border-bottom:none}
+.cv-row b{color:var(--text);font-weight:700}
+.cv-note{font-size:10px;color:var(--muted);line-height:1.5;opacity:.85}
 /* Home status rows */
 .hs-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
 .hs-row:last-child{border-bottom:none}
@@ -5509,34 +5530,38 @@ function loadCameras() {
       return;
     }
     if (placeholder) placeholder.style.display = 'none';
-    var html = '<div class="camera-grid">';
+    // Cache states so the full-control panel can find each camera's sensors/alarm
+    window._camStates = states;
+    var alarm = states.filter(function(s){ return s.entity_id.indexOf('alarm_control_panel.') === 0; })[0];
+    window._camAlarm = alarm ? alarm.entity_id : null;
+    // Toolbar: Refresh All (+ Arm/Disarm if a Blink sync module alarm panel exists)
+    var armBtn = '';
+    if (window._camAlarm) {
+      var armed = (alarm.state || '').indexOf('armed') === 0;
+      armBtn = '<button class="cam-tool-btn" onclick="event.stopPropagation();blinkArm(\'' + (armed ? 'disarm' : 'arm') + '\',this)">'
+        + (armed ? '&#128275; DISARM' : '&#128274; ARM') + '</button>';
+    }
+    var html = '<div class="cam-toolbar">'
+      + '<button class="cam-tool-btn primary" onclick="blinkRefreshAll(this)">&#128260; REFRESH ALL</button>'
+      + armBtn
+      + '<span id="camToolStatus" class="cam-tool-status"></span>'
+      + '</div>';
+    html += '<div class="cam-hint">Tap a camera for full control &mdash; live snapshot, save clip, motion.</div>';
+    html += '<div class="camera-grid">';
     cameras.forEach(function(cam) {
       var name = (cam.attributes && cam.attributes.friendly_name) ? cam.attributes.friendly_name : cam.entity_id.replace('camera.','').replace(/_/g,' ');
-      var imgId = 'cam-img-' + cam.entity_id.replace(/[^a-z0-9]/gi,'_');
-      html += '<div class="camera-card" onclick="openBeehive(\'/lovelace/0\')">'
-        + '<div class="cam-img-wrap"><img id="' + imgId + '" class="cam-img" alt="' + name + '" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="></div>'
+      var key = cam.entity_id.replace(/[^a-z0-9]/gi,'_');
+      html += '<div class="camera-card" onclick="camView(\'' + cam.entity_id + '\')">'
+        + '<div class="cam-img-wrap"><img id="cam-img-' + key + '" class="cam-img" alt="' + name + '" '
+        + 'src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" '
+        + 'onerror="camImgFail(this)"><span class="cam-refresh-badge">&#128260;</span></div>'
         + '<div class="cam-label">' + name + '</div>'
-        + '<div class="cam-state">' + (cam.state || '') + '</div>'
+        + '<div class="cam-state" id="cam-state-' + key + '">' + (cam.state || '') + '</div>'
         + '</div>';
     });
     html += '</div>';
     grid.innerHTML = html;
-    cameras.forEach(function(cam) {
-      var imgEl = document.getElementById('cam-img-' + cam.entity_id.replace(/[^a-z0-9]/gi,'_'));
-      if (!imgEl) return;
-      fetch(base + '/api/camera_proxy/' + cam.entity_id, {
-        headers: { 'Authorization': 'Bearer ' + token },
-        signal: AbortSignal.timeout(8000)
-      })
-      .then(function(r) { return r.blob(); })
-      .then(function(blob) {
-        var url = URL.createObjectURL(blob);
-        if (imgEl) imgEl.src = url;
-      })
-      .catch(function() {
-        if (imgEl && imgEl.parentElement) imgEl.parentElement.innerHTML = '<div class="cam-no-img">&#128247;</div>';
-      });
-    });
+    cameras.forEach(function(cam){ blinkSetStill(cam); });
   })
   .catch(function(err) {
     var msg = err && err.message === 'unauthorized'
@@ -5549,6 +5574,170 @@ function loadCameras() {
       if (prompt) prompt.style.display = 'block';
       localStorage.removeItem('ha_token');
     }
+  });
+}
+
+// ── Camera full-control helpers (Blink, no subscription needed) ──────────────
+// HA camera stills load reliably as a signed image URL straight from the secure
+// Nabu Casa host (an <img> load isn't subject to CORS the way a fetch() is —
+// that's why the old blob-fetch showed icons). Force https so an installed
+// https PWA never hits mixed-content on a cached local http base.
+function camImgBase() {
+  var base = localStorage.getItem('ha_base') || HA_BASE;
+  return (base && base.indexOf('https') === 0) ? base : HA_NABU;
+}
+function blinkStillSrc(cam) {
+  var pic = cam && cam.attributes && cam.attributes.entity_picture;
+  if (!pic) return '';
+  return camImgBase() + pic + (pic.indexOf('?') > -1 ? '&' : '?') + '_=' + Date.now();
+}
+function blinkSetStill(cam) {
+  var el = document.getElementById('cam-img-' + cam.entity_id.replace(/[^a-z0-9]/gi,'_'));
+  if (!el) return;
+  var src = blinkStillSrc(cam);
+  if (src) el.src = src; else camImgFail(el);
+}
+function camImgFail(el) {
+  if (el && el.parentElement) {
+    var badge = el.parentElement.querySelector('.cam-refresh-badge');
+    el.parentElement.innerHTML = '<div class="cam-no-img">&#128247;</div>' + (badge ? badge.outerHTML : '');
+  }
+}
+// Ask a Blink camera to capture a fresh image (free — no subscription)
+function blinkTrigger(entityId) {
+  return haFetch('/api/services/blink/trigger_camera', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ entity_id: entityId })
+  });
+}
+function camToolStatus(msg, color) {
+  var s = document.getElementById('camToolStatus');
+  if (s) { s.innerHTML = msg || ''; s.style.color = color || 'var(--muted)'; }
+}
+// Refresh All: tell every camera to grab a new photo, then reload the stills
+function blinkRefreshAll(btn) {
+  var cams = (window._camStates || []).filter(function(s){ return s.entity_id.indexOf('camera.') === 0; });
+  if (!cams.length) return;
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
+  camToolStatus('&#128248; Capturing fresh shots&hellip;', 'var(--info)');
+  Promise.all(cams.map(function(c){ return blinkTrigger(c.entity_id).catch(function(){}); }))
+    .then(function(){
+      // Blink needs a few seconds to capture + upload the new thumbnail
+      setTimeout(function(){
+        blinkReloadStills().then(function(){
+          camToolStatus('&#9989; Updated ' + new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}), 'var(--ok)');
+          if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+        });
+      }, 7000);
+    });
+}
+// Re-pull states and swap each still's image (+ state text) with no full re-render
+function blinkReloadStills() {
+  return haFetch('/api/states', { signal: AbortSignal.timeout(25000) })
+    .then(function(r){ return r.json(); })
+    .then(function(states){
+      if (!Array.isArray(states)) return;
+      window._camStates = states;
+      states.filter(function(s){ return s.entity_id.indexOf('camera.') === 0; }).forEach(function(cam){
+        blinkSetStill(cam);
+        var st = document.getElementById('cam-state-' + cam.entity_id.replace(/[^a-z0-9]/gi,'_'));
+        if (st) st.textContent = cam.state || '';
+      });
+    })
+    .catch(function(){});
+}
+// Arm / disarm the Blink sync module (motion detection) — free
+function blinkArm(mode, btn) {
+  if (!window._camAlarm) return;
+  var svc = mode === 'disarm' ? 'alarm_disarm' : 'alarm_arm_away';
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
+  camToolStatus(mode === 'disarm' ? '&#128275; Disarming&hellip;' : '&#128274; Arming&hellip;', 'var(--info)');
+  haFetch('/api/services/alarm_control_panel/' + svc, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ entity_id: window._camAlarm })
+  }).then(function(r){
+    if (!r.ok) throw new Error('http');
+    camToolStatus(mode === 'disarm' ? '&#9989; Motion off' : '&#9989; Motion armed', 'var(--ok)');
+    setTimeout(loadCameras, 1500);
+  }).catch(function(){
+    camToolStatus('&#10060; Couldn\'t change arm state', 'var(--bad)');
+    if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+  });
+}
+// Full-control panel for one camera
+function camView(entityId) {
+  var states = window._camStates || [];
+  var cam = states.filter(function(s){ return s.entity_id === entityId; })[0];
+  if (!cam) return;
+  var name = (cam.attributes && cam.attributes.friendly_name) || entityId.replace('camera.','').replace(/_/g,' ');
+  var stem = entityId.replace('camera.','');
+  // Pull any related Blink sensors that share this camera's name stem
+  function findSensor(kind) {
+    var hit = states.filter(function(s){
+      return s.entity_id.indexOf(stem) > -1 && s.entity_id.indexOf(kind) > -1;
+    })[0];
+    return hit ? hit : null;
+  }
+  var batt = findSensor('battery'), temp = findSensor('temperature'), wifi = findSensor('wifi'), motion = findSensor('motion');
+  var rows = '';
+  function row(icon,label,val){ return '<div class="cv-row"><span>' + icon + ' ' + label + '</span><b>' + val + '</b></div>'; }
+  rows += row('&#128246;','Status', cam.state || '&mdash;');
+  if (batt) rows += row('&#128267;','Battery', batt.state + (batt.attributes && batt.attributes.unit_of_measurement ? batt.attributes.unit_of_measurement : ''));
+  if (temp) rows += row('&#127777;&#65039;','Temp', temp.state + '&deg;');
+  if (wifi) rows += row('&#128246;','WiFi', wifi.state + (wifi.attributes && wifi.attributes.unit_of_measurement ? wifi.attributes.unit_of_measurement : ''));
+  if (motion) rows += row('&#127939;','Motion', motion.state === 'on' ? 'Detected' : 'Clear');
+  var big = blinkStillSrc(cam);
+  var imgHtml = big
+    ? '<img id="camViewImg" class="cv-img" alt="' + name + '" src="' + big + '" onerror="this.style.display=\'none\';var n=document.getElementById(\'camViewNo\');if(n)n.style.display=\'flex\'">'
+    : '';
+  var body = '<div class="cv-imgwrap"><div id="camViewNo" class="cv-no" style="display:' + (big ? 'none' : 'flex') + '">&#128247;<div style="font-size:11px;margin-top:6px;font-weight:600">Tap &ldquo;Take New Snapshot&rdquo;</div></div>' + imgHtml + '</div>'
+    + '<div id="camViewStatus" class="cv-status"></div>'
+    + '<div class="cv-btns">'
+    + '<button class="cv-btn primary" onclick="camSnap(\'' + entityId + '\',this)">&#128248; TAKE NEW SNAPSHOT</button>'
+    + '<button class="cv-btn" onclick="camSaveClip(\'' + entityId + '\',this)">&#128190; SAVE CLIP</button>'
+    + '</div>'
+    + '<div class="cv-info">' + rows + '</div>'
+    + '<div class="cv-note">Live snapshots &amp; clips are free Blink features &mdash; no subscription. Clips save to your Beehive local storage.</div>';
+  grdShow('&#128247; ' + name, body);
+}
+// Take a fresh snapshot from inside the panel
+function camSnap(entityId, btn) {
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; btn.innerHTML = '&#128248; CAPTURING&hellip;'; }
+  var s = document.getElementById('camViewStatus');
+  if (s) { s.innerHTML = 'Asking the camera for a fresh shot&hellip;'; s.style.color = 'var(--info)'; }
+  blinkTrigger(entityId).then(function(){
+    setTimeout(function(){
+      blinkReloadStills().then(function(){
+        var cam = (window._camStates || []).filter(function(x){ return x.entity_id === entityId; })[0];
+        var img = document.getElementById('camViewImg');
+        var no = document.getElementById('camViewNo');
+        var src = cam ? blinkStillSrc(cam) : '';
+        if (src && img) { img.src = src; img.style.display = 'block'; if (no) no.style.display = 'none'; }
+        else if (src && no) { no.style.display = 'none'; }
+        if (s) { s.innerHTML = '&#9989; Snapshot updated'; s.style.color = 'var(--ok)'; }
+        if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.innerHTML = '&#128248; TAKE NEW SNAPSHOT'; }
+      });
+    }, 7000);
+  }).catch(function(){
+    if (s) { s.innerHTML = '&#10060; Couldn\'t reach the camera'; s.style.color = 'var(--bad)'; }
+    if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.innerHTML = '&#128248; TAKE NEW SNAPSHOT'; }
+  });
+}
+// Save recent motion clip(s) to Beehive local storage (free — needs local storage set up)
+function camSaveClip(entityId, btn) {
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
+  var s = document.getElementById('camViewStatus');
+  if (s) { s.innerHTML = 'Saving recent clip to Beehive&hellip;'; s.style.color = 'var(--info)'; }
+  haFetch('/api/services/blink/save_recent_clips', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ entity_id: entityId, file_path: '/media/blink/' + entityId.replace('camera.','') + '_{}.mp4' })
+  }).then(function(r){
+    if (!r.ok) throw new Error('http');
+    if (s) { s.innerHTML = '&#9989; Saved to Beehive &rarr; Media &rarr; blink'; s.style.color = 'var(--ok)'; }
+    if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+  }).catch(function(){
+    if (s) { s.innerHTML = '&#9888;&#65039; No recent clip to save (or storage path not set)'; s.style.color = 'var(--warn)'; }
+    if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
   });
 }
 
