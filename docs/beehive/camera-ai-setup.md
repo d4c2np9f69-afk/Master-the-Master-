@@ -79,7 +79,7 @@ action:
   - delay: "00:00:03"
   - variables:
       objs: "{{ state_attr('image_processing.doorbell_ai','summary') }}"
-  - service: notify.mobile_app_jeff              # <-- Jeff's phone / family group
+  - service: notify.mobile_app_jeffs_iphone      # confirmed 07-10 (Jeff's iPhone)
     data:
       title: "🎥 Front Doorbell"
       message: >
