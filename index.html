@@ -899,6 +899,19 @@ html,body{
 .cam-ov-cam{font-size:13px}
 .cam-ov-name{font-size:13px;font-weight:800;letter-spacing:.6px;color:#fff;text-transform:uppercase}
 .cam-ov-state{margin-left:auto;font-size:10px;color:rgba(255,255,255,.72);text-transform:capitalize}
+/* Clip browser / player */
+.clip-list{max-height:56vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.clip-entry{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.clip-entry:active{opacity:.7}
+.clip-cam{font-size:20px;flex:0 0 auto}
+.clip-meta{flex:1;min-width:0}
+.clip-name{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clip-time{font-size:11px;color:var(--muted)}
+.clip-play{font-size:16px;flex:0 0 auto;color:var(--info);padding:4px}
+.clip-player-wrap{margin-bottom:14px}
+.clip-player-wrap video{width:100%;border-radius:10px;background:#000;max-height:50vh}
+.clip-now{font-size:11px;color:var(--muted);margin-top:4px;text-align:center}
+.clip-empty{text-align:center;padding:20px;color:var(--muted);font-size:12px;line-height:1.6}
 /* Home status rows */
 .hs-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
 .hs-row:last-child{border-bottom:none}
@@ -5579,6 +5592,7 @@ function loadCameras() {
     // Toolbar
     html += '<div class="cam-toolbar">'
       + '<button class="cam-tool-btn primary" onclick="blinkRefreshAll(this)">&#128260; REFRESH ALL</button>'
+      + '<button class="cam-tool-btn" onclick="loadClips()">&#127909; CLIPS</button>'
       + armBtn
       + '<span id="camToolStatus" class="cam-tool-status"></span>'
       + '</div>';
@@ -5732,6 +5746,7 @@ function camView(entityId) {
     + '<div class="cv-btns">'
     + '<button class="cv-btn primary" onclick="camSnap(\'' + entityId + '\',this)">&#128248; TAKE NEW SNAPSHOT</button>'
     + '<button class="cv-btn" onclick="camSaveClip(\'' + entityId + '\',this)">&#128190; SAVE CLIP</button>'
+    + '<button class="cv-btn" onclick="loadClips(\'' + entityId + '\')">&#127909; VIEW SAVED CLIPS</button>'
     + '</div>'
     + '<div class="cv-info">' + rows + '</div>'
     + '<div class="cv-note">Live snapshots &amp; clips are free Blink features &mdash; no subscription. Clips save to your Beehive local storage.</div>';
@@ -5775,6 +5790,98 @@ function camSaveClip(entityId, btn) {
   }).catch(function(){
     if (s) { s.innerHTML = '&#9888;&#65039; No recent clip to save (or storage path not set)'; s.style.color = 'var(--warn)'; }
     if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+  });
+}
+
+// ── In-App Clip Player (browse + play saved Blink clips from Beehive) ──────
+function clipParseName(filename) {
+  var name = (filename || '').replace(/\.\w+$/, '');
+  var parts = name.split(/[-_](\d{4}[-_]\d{2}|T\d{2})/);
+  if (parts.length > 1) name = parts[0];
+  return name.replace(/_/g, ' ').replace(/^\w|\s\w/g, function(c){ return c.toUpperCase(); }).trim() || 'Clip';
+}
+function clipParseTime(filename) {
+  var m = (filename || '').match(/(\d{4})[-_]?(\d{2})[-_]?(\d{2})[-_T]?(\d{2})[-_:]?(\d{2})/);
+  if (m) { try { var d = new Date(m[1]+'-'+m[2]+'-'+m[3]+'T'+m[4]+':'+m[5]); if (!isNaN(d.getTime())) return d.toLocaleDateString()+' '+d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}); } catch(e){} }
+  return filename || '';
+}
+function loadClips(camFilter) {
+  if (!getHaToken()) { grdShow('&#127909; Saved Clips', 'Connect Beehive on the <b>HOME</b> tab first.'); return; }
+  grdShow('&#127909; Saved Clips', '<div style="text-align:center;padding:20px;color:var(--muted)">&#127909; Scanning Beehive for saved clips&hellip;</div>');
+  var contentId = 'media-source://media_source/local/blink';
+  haFetch('/api/media_source/browse_media?media_content_id=' + encodeURIComponent(contentId))
+  .then(function(r) {
+    if (!r.ok) throw new Error('http_' + r.status);
+    return r.json();
+  })
+  .then(function(data) {
+    var children = (data && data.children) || [];
+    var clips = children.filter(function(c) { return c.can_play || c.media_class === 'video' || (c.title && /\.(mp4|mov|avi|mkv)$/i.test(c.title)); });
+    if (camFilter) {
+      var stem = camFilter.replace('camera.','').toLowerCase();
+      clips = clips.filter(function(c) { return c.title && c.title.toLowerCase().indexOf(stem) > -1; });
+    }
+    if (clips.length === 0) {
+      grdShow('&#127909; Saved Clips', '<div class="clip-empty">&#127909;<br><br>No clips saved yet.'
+        + (camFilter ? '<br><br>Tap <b>SAVE CLIP</b> on this camera after a motion event.' : '<br><br>Tap a camera &rarr; <b>SAVE CLIP</b> to start saving.')
+        + '<br><br><span style="font-size:10px">Clips save to Beehive &rarr; Media &rarr; blink</span></div>');
+      return;
+    }
+    clips.sort(function(a,b) { return (b.title||'').localeCompare(a.title||''); });
+    window._clipItems = clips;
+    var body = '<div id="clipPlayerWrap" class="clip-player-wrap" style="display:none"></div>';
+    body += '<div class="clip-list">';
+    clips.forEach(function(clip, i) {
+      var camName = clipParseName(clip.title);
+      var time = clipParseTime(clip.title);
+      body += '<div class="clip-entry" onclick="playClip(' + i + ')">'
+        + '<span class="clip-cam">&#127916;</span>'
+        + '<div class="clip-meta"><div class="clip-name">' + camName + '</div><div class="clip-time">' + time + '</div></div>'
+        + '<span class="clip-play">&#9654;&#65039;</span></div>';
+    });
+    body += '</div>';
+    body += '<div style="text-align:center;margin-top:10px;font-size:10px;color:var(--muted)">' + clips.length + ' clip' + (clips.length !== 1 ? 's' : '') + ' on Beehive</div>';
+    var heading = '&#127909; Saved Clips';
+    if (camFilter) {
+      var cn = (camFilter.replace('camera.','').replace(/_/g,' ')).replace(/^\w|\s\w/g, function(c){ return c.toUpperCase(); });
+      heading += ' &middot; ' + cn;
+    }
+    grdShow(heading, body);
+  })
+  .catch(function(err) {
+    var detail = err && err.message ? err.message : '';
+    var msg;
+    if (detail.indexOf('404') > -1 || detail.indexOf('not_found') > -1) {
+      msg = '&#127909;<br><br>No blink clips folder on Beehive yet.<br><br>Save your first clip: tap a camera &rarr; <b>SAVE CLIP</b>.';
+    } else {
+      msg = '&#127909;<br><br>Couldn\'t browse clips on Beehive.<br><br><span style="font-size:10px">' + detail + '</span>';
+    }
+    grdShow('&#127909; Saved Clips', '<div class="clip-empty">' + msg + '</div>');
+  });
+}
+function playClip(index) {
+  var clip = (window._clipItems || [])[index];
+  if (!clip) return;
+  var wrap = document.getElementById('clipPlayerWrap');
+  if (!wrap) return;
+  wrap.style.display = 'block';
+  wrap.innerHTML = '<div style="text-align:center;padding:10px;color:var(--muted)">Loading clip&hellip;</div>';
+  var mediaPath = (clip.media_content_id || '').replace('media-source://media_source/', '/media/');
+  haFetch('/api/auth/sign_path', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path: mediaPath, expires: 300 })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (!data || !data.path) throw new Error('no_path');
+    var videoUrl = camImgBase() + data.path;
+    wrap.innerHTML = '<video controls autoplay playsinline style="width:100%;border-radius:10px;background:#000;max-height:50vh">'
+      + '<source src="' + videoUrl + '" type="video/mp4">Your browser does not support video.</video>'
+      + '<div class="clip-now">&#9654; ' + (clip.title || 'Clip') + '</div>';
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  })
+  .catch(function() {
+    wrap.innerHTML = '<div style="text-align:center;padding:10px;color:var(--warn)">&#9888;&#65039; Couldn\'t load clip &mdash; try again.</div>';
   });
 }
 
