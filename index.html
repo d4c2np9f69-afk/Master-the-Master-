@@ -884,7 +884,7 @@ html,body{
 .cv-row b{color:var(--text);font-weight:700}
 .cv-note{font-size:10px;color:var(--muted);line-height:1.5;opacity:.85}
 /* Camera section banner + big tiles (mockup-style) */
-.cam-hero{position:relative;width:100%;aspect-ratio:1300/1330;border-radius:14px;overflow:hidden;margin-bottom:10px;background:#0a0a0a}
+.cam-hero{position:relative;width:100%;aspect-ratio:1300/980;border-radius:14px;overflow:hidden;margin-bottom:10px;background:#0a0a0a}
 .cam-hero img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
 .cam-hero-ov{display:none}
 .cam-hero-title{display:none}
@@ -923,14 +923,29 @@ html,body{
 .clip-empty{text-align:center;padding:20px;color:var(--muted);font-size:12px;line-height:1.6}
 /* ── HART OF THE HIVE STATUS DASHBOARD ─────────────────────────────────── */
 .hive-dash{position:relative;width:100%;border-radius:14px;overflow:hidden;margin-bottom:16px;background:#080a0c}
-.hive-dash-img{width:100%;display:block;object-fit:cover;max-height:420px}
-.hive-chips{position:absolute;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 10px 12px;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.72) 30%,rgba(0,0,0,.88) 100%)}
-.hive-chip{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 4px 7px;border-radius:10px;background:rgba(12,18,26,.72);border:1px solid rgba(56,189,248,.18);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .2s,background .2s;min-height:48px}
-.hive-chip:active{background:rgba(56,189,248,.14);border-color:rgba(56,189,248,.45)}
-.hive-chip-icon{font-size:17px;line-height:1}
-.hive-chip-lbl{font-size:8px;font-weight:800;letter-spacing:.7px;color:rgba(200,215,235,.82);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-.hive-chip .hive-dot{width:6px;height:6px;border-radius:50%;position:absolute;top:5px;right:5px}
-.hive-chip{position:relative}
+.hive-dash-img{width:100%;display:block}
+.hive-chips{position:absolute;inset:0;pointer-events:none}
+.hive-chip{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:5px 4px 4px;border-radius:7px;background:rgba(4,10,18,.55);border:1px solid rgba(56,189,248,.28);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);cursor:pointer;pointer-events:auto;-webkit-tap-highlight-color:transparent;transition:border-color .2s,background .2s,box-shadow .2s;box-shadow:0 0 8px rgba(56,189,248,.08)}
+.hive-chip:active{background:rgba(56,189,248,.2);border-color:rgba(56,189,248,.55);box-shadow:0 0 14px rgba(56,189,248,.3)}
+.hive-chip-icon{font-size:14px;line-height:1}
+.hive-chip-lbl{font-size:6.5px;font-weight:800;letter-spacing:.6px;color:rgba(180,210,240,.9);text-transform:uppercase;white-space:nowrap}
+.hive-chip .hive-dot{width:5px;height:5px;border-radius:50%;position:absolute;top:3px;right:3px}
+/* Chip positions — placed on the monitor screens of the command center */
+/* Left monitor panel */
+.hive-chip.hc-light{top:15%;left:3%;width:11%}
+.hive-chip.hc-alexa{top:15%;left:16%;width:11%}
+/* Right monitor panel */
+.hive-chip.hc-voice{top:15%;right:3%;width:11%}
+.hive-chip.hc-accounts{top:15%;right:16%;width:11%}
+/* Mid-left + mid-right monitors */
+.hive-chip.hc-cast{top:41%;left:3%;width:14%}
+.hive-chip.hc-watch{top:41%;right:3%;width:14%}
+/* Center hexagon — the core */
+.hive-chip.hc-hive{top:27%;left:50%;transform:translateX(-50%);width:22%;padding:8px 6px 7px}
+.hive-chip.hc-hive .hive-chip-icon{font-size:18px}
+.hive-chip.hc-hive .hive-chip-lbl{font-size:8px;letter-spacing:1px}
+/* Bottom center console — SYSTEM STATUS area */
+.hive-chip.hc-fitness{top:62%;left:50%;transform:translateX(-50%);width:22%}
 html.light .hive-chips{background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.55) 30%,rgba(0,0,0,.78) 100%)}
 /* Home status rows */
 .hs-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
@@ -1111,37 +1126,37 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <div class="hive-dash" id="hiveDash">
       <img class="hive-dash-img" src="./images/hart-of-hive.jpg" alt="Hart of the Hive — Systems Online">
       <div class="hive-chips">
-        <div class="hive-chip" onclick="toggleTheme()" id="hiveTheme" title="Switch light / dark">
+        <div class="hive-chip hc-light" onclick="toggleTheme()" id="hiveTheme" title="Switch light / dark">
           <span class="hive-chip-icon" id="hiveThemeIcon">&#9728;&#65039;</span>
           <span class="hive-chip-lbl" id="hiveThemeLbl">LIGHT</span>
         </div>
-        <div class="hive-chip" onclick="openAlexaApp()" title="Open Alexa app">
+        <div class="hive-chip hc-alexa" onclick="openAlexaApp()" title="Open Alexa app">
           <span class="hive-chip-icon">&#127908;</span>
           <span class="hive-chip-lbl">ALEXA</span>
         </div>
-        <div class="hive-chip" onclick="castOpen()" title="Cast to TV">
+        <div class="hive-chip hc-cast" onclick="castOpen()" title="Cast to TV">
           <span class="hive-chip-icon">&#128250;</span>
           <span class="hive-chip-lbl">CAST</span>
         </div>
-        <div class="hive-chip" onclick="openBeehive()" id="hiveBeehive" title="Beehive status">
+        <div class="hive-chip hc-hive" onclick="openBeehive()" id="hiveBeehive" title="Beehive status">
           <span class="hive-dot" id="hiveDot" style="background:#444"></span>
           <span class="hive-chip-icon">&#129303;</span>
           <span class="hive-chip-lbl">HIVE</span>
         </div>
-        <div class="hive-chip" onclick="hiveShowAccounts()" title="Connected accounts">
+        <div class="hive-chip hc-accounts" onclick="hiveShowAccounts()" title="Connected accounts">
           <span class="hive-chip-icon">&#128273;</span>
           <span class="hive-chip-lbl">ACCOUNTS</span>
         </div>
-        <div class="hive-chip" onclick="hiveShowVoice()" title="Alexa voice skills">
+        <div class="hive-chip hc-voice" onclick="hiveShowVoice()" title="Alexa voice skills">
           <span class="hive-chip-icon">&#128266;</span>
           <span class="hive-chip-lbl">VOICE</span>
         </div>
-        <div class="hive-chip" title="Apple Watch safety">
+        <div class="hive-chip hc-watch" title="Apple Watch safety">
           <span class="hive-chip-icon">&#8987;</span>
           <span class="hive-chip-lbl">WATCH</span>
-          <span class="hive-dot" style="background:var(--ok);top:5px;right:5px"></span>
+          <span class="hive-dot" style="background:var(--ok);top:3px;right:3px"></span>
         </div>
-        <div class="hive-chip" onclick="hccSection('yard',document.getElementById('snav-yard'));setTimeout(function(){var e=document.getElementById('fitMiles');if(e)e.scrollIntoView({behavior:'smooth',block:'center'})},300)" title="Fitness — miles walked mowing">
+        <div class="hive-chip hc-fitness" onclick="hccSection('yard',document.getElementById('snav-yard'));setTimeout(function(){var e=document.getElementById('fitMiles');if(e)e.scrollIntoView({behavior:'smooth',block:'center'})},300)" title="Fitness — miles walked mowing">
           <span class="hive-chip-icon">&#128694;</span>
           <span class="hive-chip-lbl" id="hiveFit">FITNESS</span>
         </div>

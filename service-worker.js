@@ -1,4 +1,4 @@
-const CACHE_NAME = "hcc-v6";
+const CACHE_NAME = "hcc-v7";
 const CRITICAL_ASSETS = [
   "./",
   "./index.html",
@@ -9,7 +9,11 @@ const CRITICAL_ASSETS = [
 const OPTIONAL_ASSETS = [
   "./images/hero-home.jpg",
   "./images/hero-irr.jpg",
-  "./images/hero-yard.jpg"
+  "./images/hero-yard.jpg",
+  "./images/hero-guardian.jpg",
+  "./images/hero-cameras.jpg",
+  "./images/hart-of-hive.jpg",
+  "./images/white-house-dispatch.jpg"
 ];
 
 self.addEventListener("install", event => {
@@ -42,7 +46,6 @@ self.addEventListener("fetch", event => {
   }
 
   // HTML / navigation requests: NETWORK-FIRST so code fixes always land.
-  // Cache-first on the HTML was hiding every update behind the old cached copy.
   const isHTML = event.request.mode === "navigate" ||
     url.pathname === "/" || url.pathname.endsWith("/index.html");
   if (isHTML) {
@@ -58,7 +61,26 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // Everything else (icons, images, manifest): cache-first is fine
+  // Images: STALE-WHILE-REVALIDATE — serve cached instantly, update in background.
+  // This fixes the bug where new hero images never showed because old ones were cached forever.
+  const isImage = url.pathname.startsWith("/images/") || url.pathname.endsWith(".jpg") || url.pathname.endsWith(".png");
+  if (isImage) {
+    event.respondWith(
+      caches.match(event.request).then(cached => {
+        const fetchPromise = fetch(event.request).then(resp => {
+          if (resp.ok) {
+            const copy = resp.clone();
+            caches.open(CACHE_NAME).then(c => c.put(event.request, copy));
+          }
+          return resp;
+        }).catch(() => cached);
+        return cached || fetchPromise;
+      })
+    );
+    return;
+  }
+
+  // Everything else (icons, manifest, fonts): cache-first
   event.respondWith(
     caches.match(event.request).then(r => r || fetch(event.request))
   );
