@@ -15,9 +15,13 @@ fee, no per-month anything — he already pays for Claude/Clyde, Nabu Casa, and 
 - **Beehive (Beelink J45, `192.168.1.66`)** — weak Pentium, no GPU, runs the whole house.
   **Keep it PURE HA.** Do NOT put media/AI on it.
 - **The beast (`301Server`, `192.168.1.194`)** — **the designated AI + media brain.**
-  6-core CPU, ~2 TB storage + a 500 GB external SSD, **Nvidia GPU (model TBD — run
-  `nvidia-smi`; Jeff thinks "T750")**, **runs 24/7**, sits in the viewing room, has
-  unused partitions. Also runs Clyde (Claude Code).
+  6-core CPU, ~2 TB storage + a 500 GB external SSD, **Nvidia GeForce GTX 1050 Ti, 4 GB
+  VRAM (confirmed via `nvidia-smi` 07-09)**, **runs 24/7**, sits in the viewing room, has
+  unused partitions, **OS = Windows**. Also runs Clyde (Claude Code).
+  → Detection plan settled: **CodeProject.AI Server on Windows (uses the 1050 Ti CUDA)**
+  does snapshot object-detection (person/car/animal — no RTSP needed, fits Blink); add
+  **LLM Vision** (small local model on the 1050 Ti, or free Gemini tier) for package +
+  rich scene descriptions. Frigate/blinkbridge NOT needed for this path.
 - **Blink cameras** — snapshot/event only (no live RTSP), motion clips stored free on the
   Sync Module 2 USB. A **VLC media_player** is already set up in HA (Telnet).
 - **Screens/AV:** Vizio TV + sound (hardwired, is the beast's monitor); Apple TV (bedroom);
