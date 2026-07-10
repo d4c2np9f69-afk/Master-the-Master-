@@ -883,6 +883,22 @@ html,body{
 .cv-row:last-child{border-bottom:none}
 .cv-row b{color:var(--text);font-weight:700}
 .cv-note{font-size:10px;color:var(--muted);line-height:1.5;opacity:.85}
+/* Camera section banner + big tiles (mockup-style) */
+.cam-hero{position:relative;width:100%;aspect-ratio:1210/360;max-height:180px;border-radius:14px;overflow:hidden;margin-bottom:10px;background:#0a0a0a}
+.cam-hero img{width:100%;height:100%;object-fit:cover;object-position:center 32%;display:block}
+.cam-hero-ov{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:14px;background:linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(0,0,0,.05) 45%,rgba(0,0,0,.72) 100%)}
+.cam-hero-title{font-size:19px;font-weight:800;letter-spacing:2px;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.7)}
+.cam-hero-badge{display:inline-flex;align-items:center;gap:7px;align-self:flex-start;margin-top:8px;background:rgba(8,18,10,.72);border:1px solid rgba(34,197,94,.45);border-radius:20px;padding:6px 12px;font-size:11px;font-weight:700;color:#dfeee2}
+.cam-hero-dot,.cam-ov-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,.85);flex:0 0 auto}
+.cam-grid-big{display:flex;flex-direction:column;gap:10px}
+.cam-card-big{position:relative;width:100%;aspect-ratio:16/9;background:#0a0a0a;border-radius:12px;overflow:hidden;cursor:pointer;border:1px solid var(--border)}
+.cam-card-big .cam-no-img{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:46px;opacity:.22;color:var(--muted)}
+.cam-img-big{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cam-card-big .cam-refresh-badge{position:absolute;top:8px;right:8px;font-size:12px;background:rgba(0,0,0,.5);border-radius:20px;padding:3px 6px;line-height:1;opacity:.85}
+.cam-ov{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:7px;padding:18px 12px 10px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.82))}
+.cam-ov-cam{font-size:13px}
+.cam-ov-name{font-size:13px;font-weight:800;letter-spacing:.6px;color:#fff;text-transform:uppercase}
+.cam-ov-state{margin-left:auto;font-size:10px;color:rgba(255,255,255,.72);text-transform:capitalize}
 /* Home status rows */
 .hs-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
 .hs-row:last-child{border-bottom:none}
@@ -5551,22 +5567,36 @@ function loadCameras() {
       armBtn = '<button class="cam-tool-btn" onclick="event.stopPropagation();blinkArm(\'' + (armed ? 'disarm' : 'arm') + '\',this)">'
         + (armed ? '&#128275; DISARM' : '&#128274; ARM') + '</button>';
     }
-    var html = '<div class="cam-toolbar">'
+    var camCount = cameras.length;
+    // Banner (house photo, cropped so the baked "Home Command Center" text stays hidden)
+    var html = '<div class="cam-hero">'
+      + '<img src="./images/hero-home.jpg" alt="Security Cameras">'
+      + '<div class="cam-hero-ov">'
+      +   '<div class="cam-hero-title">SECURITY &middot; CAMERAS</div>'
+      +   '<div class="cam-hero-badge"><span class="cam-hero-dot"></span>All Cameras Ready &middot; Protected &middot; ' + camCount + ' Camera' + (camCount > 1 ? 's' : '') + '</div>'
+      + '</div>'
+      + '</div>';
+    // Toolbar
+    html += '<div class="cam-toolbar">'
       + '<button class="cam-tool-btn primary" onclick="blinkRefreshAll(this)">&#128260; REFRESH ALL</button>'
       + armBtn
       + '<span id="camToolStatus" class="cam-tool-status"></span>'
       + '</div>';
     html += '<div class="cam-hint">Tap a camera for full control &mdash; live snapshot, save clip, motion.</div>';
-    html += '<div class="camera-grid">';
+    // Big full-width tiles with the label overlaid on the image (mockup style)
+    html += '<div class="cam-grid-big">';
     cameras.forEach(function(cam) {
       var name = (cam.attributes && cam.attributes.friendly_name) ? cam.attributes.friendly_name : cam.entity_id.replace('camera.','').replace(/_/g,' ');
       var key = cam.entity_id.replace(/[^a-z0-9]/gi,'_');
-      html += '<div class="camera-card" onclick="camView(\'' + cam.entity_id + '\')">'
-        + '<div class="cam-img-wrap"><img id="cam-img-' + key + '" class="cam-img" alt="' + name + '" '
+      html += '<div class="cam-card-big" onclick="camView(\'' + cam.entity_id + '\')">'
+        + '<div class="cam-no-img">&#128247;</div>'
+        + '<img id="cam-img-' + key + '" class="cam-img-big" alt="' + name + '" '
         + 'src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" '
-        + 'onerror="camImgFail(this)"><span class="cam-refresh-badge">&#128260;</span></div>'
-        + '<div class="cam-label">' + name + '</div>'
-        + '<div class="cam-state" id="cam-state-' + key + '">' + (cam.state || '') + '</div>'
+        + 'onerror="camImgFail(this)">'
+        + '<span class="cam-refresh-badge">&#128260;</span>'
+        + '<div class="cam-ov"><span class="cam-ov-dot"></span><span class="cam-ov-cam">&#128247;</span>'
+        + '<span class="cam-ov-name">' + name + '</span>'
+        + '<span class="cam-ov-state" id="cam-state-' + key + '">' + (cam.state || '') + '</span></div>'
         + '</div>';
     });
     html += '</div>';
@@ -5605,14 +5635,11 @@ function blinkSetStill(cam) {
   var el = document.getElementById('cam-img-' + cam.entity_id.replace(/[^a-z0-9]/gi,'_'));
   if (!el) return;
   var src = blinkStillSrc(cam);
-  if (src) el.src = src; else camImgFail(el);
+  if (src) { el.src = src; el.style.visibility = 'visible'; } else camImgFail(el);
 }
-function camImgFail(el) {
-  if (el && el.parentElement) {
-    var badge = el.parentElement.querySelector('.cam-refresh-badge');
-    el.parentElement.innerHTML = '<div class="cam-no-img">&#128247;</div>' + (badge ? badge.outerHTML : '');
-  }
-}
+// On failure/absence, just hide the img so the backdrop camera icon shows through
+// (keeps the overlaid label + refresh badge intact).
+function camImgFail(el) { if (el) el.style.visibility = 'hidden'; }
 // Ask a Blink camera to capture a fresh image (free — no subscription)
 function blinkTrigger(entityId) {
   return haFetch('/api/services/blink/trigger_camera', {
