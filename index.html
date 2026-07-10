@@ -884,11 +884,11 @@ html,body{
 .cv-row b{color:var(--text);font-weight:700}
 .cv-note{font-size:10px;color:var(--muted);line-height:1.5;opacity:.85}
 /* Camera section banner + big tiles (mockup-style) */
-.cam-hero{position:relative;width:100%;aspect-ratio:1210/360;max-height:180px;border-radius:14px;overflow:hidden;margin-bottom:10px;background:#0a0a0a}
-.cam-hero img{width:100%;height:100%;object-fit:cover;object-position:center 32%;display:block}
-.cam-hero-ov{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:14px;background:linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(0,0,0,.05) 45%,rgba(0,0,0,.72) 100%)}
-.cam-hero-title{font-size:19px;font-weight:800;letter-spacing:2px;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.7)}
-.cam-hero-badge{display:inline-flex;align-items:center;gap:7px;align-self:flex-start;margin-top:8px;background:rgba(8,18,10,.72);border:1px solid rgba(34,197,94,.45);border-radius:20px;padding:6px 12px;font-size:11px;font-weight:700;color:#dfeee2}
+.cam-hero{position:relative;width:100%;aspect-ratio:1300/1330;border-radius:14px;overflow:hidden;margin-bottom:10px;background:#0a0a0a}
+.cam-hero img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
+.cam-hero-ov{display:none}
+.cam-hero-title{display:none}
+.cam-hero-badge{display:none}
 .cam-hero-dot,.cam-ov-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,.85);flex:0 0 auto}
 .cam-grid-big{display:flex;flex-direction:column;gap:10px}
 .cam-card-big{position:relative;width:100%;aspect-ratio:16/9;background:#0a0a0a;border-radius:12px;overflow:hidden;cursor:pointer;border:1px solid var(--border)}
@@ -912,6 +912,17 @@ html,body{
 .clip-player-wrap video{width:100%;border-radius:10px;background:#000;max-height:50vh}
 .clip-now{font-size:11px;color:var(--muted);margin-top:4px;text-align:center}
 .clip-empty{text-align:center;padding:20px;color:var(--muted);font-size:12px;line-height:1.6}
+/* ── HART OF THE HIVE STATUS DASHBOARD ─────────────────────────────────── */
+.hive-dash{position:relative;width:100%;border-radius:14px;overflow:hidden;margin-bottom:16px;background:#080a0c}
+.hive-dash-img{width:100%;display:block;object-fit:cover;max-height:420px}
+.hive-chips{position:absolute;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 10px 12px;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.72) 30%,rgba(0,0,0,.88) 100%)}
+.hive-chip{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 4px 7px;border-radius:10px;background:rgba(12,18,26,.72);border:1px solid rgba(56,189,248,.18);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .2s,background .2s;min-height:48px}
+.hive-chip:active{background:rgba(56,189,248,.14);border-color:rgba(56,189,248,.45)}
+.hive-chip-icon{font-size:17px;line-height:1}
+.hive-chip-lbl{font-size:8px;font-weight:800;letter-spacing:.7px;color:rgba(200,215,235,.82);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.hive-chip .hive-dot{width:6px;height:6px;border-radius:50%;position:absolute;top:5px;right:5px}
+.hive-chip{position:relative}
+html.light .hive-chips{background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.55) 30%,rgba(0,0,0,.78) 100%)}
 /* Home status rows */
 .hs-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
 .hs-row:last-child{border-bottom:none}
@@ -1009,9 +1020,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <div class="app-hdr-title">HOME COMMAND CENTER</div>
     <div class="app-hdr-sub">Manage &bull; Maintain &bull; Monitor</div>
   </div>
-  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Switch light / dark"><span id="themeIcon">&#9728;&#65039;</span><span id="themeLbl">LIGHT</span></button>
-  <button class="cast-btn" id="castBtn" onclick="castOpen()" title="Cast to TV">&#128250;<span>CAST</span></button>
-  <button class="alexa-btn" id="alexaBtn" onclick="openAlexaApp()" title="Open Alexa">&#127908;<span>ALEXA</span></button>
+  <span id="beehiveDotHdr" style="width:9px;height:9px;border-radius:50%;background:#444;flex-shrink:0;transition:background .3s;margin-right:4px" title="Beehive status"></span>
 </div>
 
 <!-- Cast-to-TV helper sheet -->
@@ -1087,6 +1096,47 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <span style="font-size:22px;flex-shrink:0">🚨</span>
       <div class="home-alert-strip-text" id="homeAlertText">NWS Alert active — tap to view</div>
       <span style="font-size:16px;color:rgba(252,165,165,.6)">&#8250;</span>
+    </div>
+
+    <!-- ── HART OF THE HIVE — status dashboard ── -->
+    <div class="hive-dash" id="hiveDash">
+      <img class="hive-dash-img" src="./images/hart-of-hive.jpg" alt="Hart of the Hive — Systems Online">
+      <div class="hive-chips">
+        <div class="hive-chip" onclick="toggleTheme()" id="hiveTheme" title="Switch light / dark">
+          <span class="hive-chip-icon" id="hiveThemeIcon">&#9728;&#65039;</span>
+          <span class="hive-chip-lbl" id="hiveThemeLbl">LIGHT</span>
+        </div>
+        <div class="hive-chip" onclick="openAlexaApp()" title="Open Alexa app">
+          <span class="hive-chip-icon">&#127908;</span>
+          <span class="hive-chip-lbl">ALEXA</span>
+        </div>
+        <div class="hive-chip" onclick="castOpen()" title="Cast to TV">
+          <span class="hive-chip-icon">&#128250;</span>
+          <span class="hive-chip-lbl">CAST</span>
+        </div>
+        <div class="hive-chip" onclick="openBeehive()" id="hiveBeehive" title="Beehive status">
+          <span class="hive-dot" id="hiveDot" style="background:#444"></span>
+          <span class="hive-chip-icon">&#129303;</span>
+          <span class="hive-chip-lbl">HIVE</span>
+        </div>
+        <div class="hive-chip" onclick="hiveShowAccounts()" title="Connected accounts">
+          <span class="hive-chip-icon">&#128273;</span>
+          <span class="hive-chip-lbl">ACCOUNTS</span>
+        </div>
+        <div class="hive-chip" onclick="hiveShowVoice()" title="Alexa voice skills">
+          <span class="hive-chip-icon">&#128266;</span>
+          <span class="hive-chip-lbl">VOICE</span>
+        </div>
+        <div class="hive-chip" title="Apple Watch safety">
+          <span class="hive-chip-icon">&#8987;</span>
+          <span class="hive-chip-lbl">WATCH</span>
+          <span class="hive-dot" style="background:var(--ok);top:5px;right:5px"></span>
+        </div>
+        <div class="hive-chip" onclick="hccSection('yard',document.getElementById('snav-yard'));setTimeout(function(){var e=document.getElementById('fitMiles');if(e)e.scrollIntoView({behavior:'smooth',block:'center'})},300)" title="Fitness — miles walked mowing">
+          <span class="hive-chip-icon">&#128694;</span>
+          <span class="hive-chip-lbl" id="hiveFit">FITNESS</span>
+        </div>
+      </div>
     </div>
 
     <!-- Beehive / Home Assistant -->
@@ -1254,21 +1304,11 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <button class="qa-btn qa-btn-irr" onclick="hccSection('irrigation',document.getElementById('snav-irr'))">&#128688; IRRIGATION<br><span class="qa-sub">B-Hyve &bull; Zones &bull; Rain</span></button>
     </div>
 
-    <!-- ── CONNECTED ACCOUNTS HUB ── -->
-    <div class="sec-hdr" style="margin-top:16px">
-      <span class="sec-hdr-icon">&#128273;</span>
-      <span class="sec-hdr-label">Connected Accounts</span>
-    </div>
-    <div class="card" id="connAcctCard">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">Your logins are saved on this device. Tap any service to set up or update.</div>
-
-      <!-- Beehive / HA -->
+    <!-- Connected Accounts — now rendered into grdModal via hiveShowAccounts() -->
+    <div id="connAcctCard" style="display:none">
       <div class="acct-row" onclick="acctToggle('acct-ha')">
         <span class="acct-icon">&#127968;</span>
-        <div class="acct-info">
-          <div class="acct-name">Beehive &bull; Home Assistant</div>
-          <div class="acct-desc" id="acct-ha-desc">Long-Lived Access Token</div>
-        </div>
+        <div class="acct-info"><div class="acct-name">Beehive &bull; Home Assistant</div><div class="acct-desc" id="acct-ha-desc">Long-Lived Access Token</div></div>
         <span class="acct-badge acct-badge-no" id="acct-ha-badge">NOT SET</span>
       </div>
       <div class="acct-form" id="acct-ha">
@@ -1279,14 +1319,9 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         </div>
         <div id="acct-ha-msg" style="font-size:11px;text-align:center;margin-top:7px;min-height:14px"></div>
       </div>
-
-      <!-- LUX Thermostat -->
       <div class="acct-row" onclick="acctToggle('acct-lux')">
         <span class="acct-icon">&#127777;&#65039;</span>
-        <div class="acct-info">
-          <div class="acct-name">LUX Thermostat</div>
-          <div class="acct-desc" id="acct-lux-desc">LUX Connected Home account</div>
-        </div>
+        <div class="acct-info"><div class="acct-name">LUX Thermostat</div><div class="acct-desc" id="acct-lux-desc">LUX Connected Home account</div></div>
         <span class="acct-badge acct-badge-no" id="acct-lux-badge">NOT SET</span>
       </div>
       <div class="acct-form" id="acct-lux">
@@ -1298,14 +1333,9 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         </div>
         <div id="acct-lux-msg" style="font-size:11px;text-align:center;margin-top:7px;min-height:14px"></div>
       </div>
-
-      <!-- B-Hyve Irrigation -->
       <div class="acct-row" onclick="acctToggle('acct-bhyve')">
         <span class="acct-icon">&#128688;</span>
-        <div class="acct-info">
-          <div class="acct-name">B-Hyve Irrigation</div>
-          <div class="acct-desc" id="acct-bhyve-desc">Orbit B-Hyve account</div>
-        </div>
+        <div class="acct-info"><div class="acct-name">B-Hyve Irrigation</div><div class="acct-desc" id="acct-bhyve-desc">Orbit B-Hyve account</div></div>
         <span class="acct-badge acct-badge-no" id="acct-bhyve-badge">NOT SET</span>
       </div>
       <div class="acct-form" id="acct-bhyve">
@@ -1330,60 +1360,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 
   </div>
 
-  <!-- Alexa Voice Control — INSIDE section-home -->
-  <div class="content">
-    <div class="sec-hdr" style="margin-top:8px">
-      <span class="sec-hdr-icon">&#128266;</span>
-      <span class="sec-hdr-label">Voice Control &bull; Alexa</span>
-    </div>
-    <div class="card" style="padding:14px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-        <div class="alexa-ring"><span style="font-size:18px">&#128266;</span></div>
-        <div>
-          <div style="font-size:13px;font-weight:800;color:var(--text);font-family:var(--serif)">Amazon Alexa</div>
-          <div style="font-size:11px;color:var(--muted)">Enable skills in the Alexa app to use voice control</div>
-        </div>
-      </div>
-
-      <div class="alexa-skill-row" id="alexa-row-lux">
-        <span class="alexa-skill-icon">&#127777;</span>
-        <div class="alexa-skill-info">
-          <div class="alexa-skill-name">LUX Connected Home</div>
-          <div class="alexa-skill-cmd">"Alexa, set the thermostat to 72"</div>
-        </div>
-        <button class="alexa-enable-btn" id="alexa-btn-lux" onclick="alexaToggle('lux','https://www.amazon.com/dp/B07DFLWF7C')">Enable &#8599;</button>
-      </div>
-
-      <div class="alexa-skill-row" id="alexa-row-bhyve">
-        <span class="alexa-skill-icon">&#128167;</span>
-        <div class="alexa-skill-info">
-          <div class="alexa-skill-name">Orbit B-Hyve</div>
-          <div class="alexa-skill-cmd">"Alexa, tell B-Hyve to run Front Lawn"</div>
-        </div>
-        <button class="alexa-enable-btn" id="alexa-btn-bhyve" onclick="alexaToggle('bhyve','https://www.amazon.com/dp/B077YNWR5H')">Enable &#8599;</button>
-      </div>
-
-      <div class="alexa-skill-row" id="alexa-row-ha">
-        <span class="alexa-skill-icon">&#127968;</span>
-        <div class="alexa-skill-info">
-          <div class="alexa-skill-name">Home Assistant (Nabu Casa)</div>
-          <div class="alexa-skill-cmd">"Alexa, turn on the porch light" — full HA control</div>
-        </div>
-        <button class="alexa-enable-btn" id="alexa-btn-ha" onclick="alexaToggle('ha','https://www.nabucasa.com')">Setup &#8599;</button>
-      </div>
-
-      <div style="margin-top:12px;padding:9px 12px;background:rgba(26,156,219,.07);border:1px solid rgba(26,156,219,.18);border-radius:8px">
-        <div style="font-size:10px;font-weight:800;color:rgba(77,184,232,.8);letter-spacing:.8px;margin-bottom:3px">QUICK COMMANDS</div>
-        <div style="font-size:11px;color:var(--muted);line-height:1.7">
-          &#8220;Alexa, set the thermostat to 70&#8221;<br>
-          &#8220;Alexa, what&#x27;s the temperature inside?&#8221;<br>
-          &#8220;Alexa, tell B-Hyve to water for 10 minutes&#8221;
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Safety — INSIDE section-home -->
+  <!-- Safety — INSIDE section-home (Apple Watch + Alexa moved to Hart of the Hive) -->
   <div class="content">
     <div class="sec-hdr" style="margin-top:8px">
       <span class="sec-hdr-icon">&#128737;&#65039;</span>
@@ -1396,22 +1373,6 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 
     <div style="font-size:10px;font-weight:700;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">SAFETY MODULES</div>
     <div class="hcc-module-list">
-      <div class="hcc-module-row" style="border-color:rgba(34,197,94,.25);background:rgba(34,197,94,.06)">
-        <span class="hcc-module-icon">&#8987;</span>
-        <div class="hcc-module-info">
-          <div class="hcc-module-name">Apple Watch — Fall Detection</div>
-          <div class="hcc-module-desc">Active on Jeff's &amp; Angela's watches — fall detection + emergency contacts</div>
-        </div>
-        <span class="hcc-badge-live">LIVE</span>
-      </div>
-      <div class="hcc-module-row hcc-module-next">
-        <span class="hcc-module-icon">&#8987;</span>
-        <div class="hcc-module-info">
-          <div class="hcc-module-name">Apple Watch Panic Shortcut</div>
-          <div class="hcc-module-desc">Shortcut button on Angela's &amp; Jeff's watches → alerts + siren</div>
-        </div>
-        <span class="hcc-badge-next">NEXT</span>
-      </div>
       <div class="hcc-module-row hcc-module-future">
         <span class="hcc-module-icon">&#128737;&#65039;</span>
         <div class="hcc-module-info">
@@ -4507,10 +4468,13 @@ function currentTheme(){ return document.documentElement.classList.contains('lig
 function syncThemeBtn(){
   var t=currentTheme();
   var icon=document.getElementById('themeIcon'), lbl=document.getElementById('themeLbl');
-  if(icon) icon.innerHTML = t==='light' ? '&#9728;&#65039;' : '&#127769;'; // ☀️ / 🌙
+  if(icon) icon.innerHTML = t==='light' ? '&#9728;&#65039;' : '&#127769;';
   if(lbl) lbl.textContent = t==='light' ? 'LIGHT' : 'DARK';
+  var hi=document.getElementById('hiveThemeIcon'), hl=document.getElementById('hiveThemeLbl');
+  if(hi) hi.innerHTML = t==='light' ? '&#9728;&#65039;' : '&#127769;';
+  if(hl) hl.textContent = t==='light' ? 'LIGHT' : 'DARK';
   var meta=document.querySelector('meta[name="theme-color"]');
-  if(meta) meta.setAttribute('content', t==='light' ? '#ffffff' : '#04040a'); // match white header in light mode
+  if(meta) meta.setAttribute('content', t==='light' ? '#ffffff' : '#04040a');
 }
 function toggleTheme(){
   var next = currentTheme()==='light' ? 'dark' : 'light';
@@ -5328,6 +5292,43 @@ function openAlexaApp() {
 function castOpen(){ var o=document.getElementById('castOv'); if(o) o.classList.add('show'); }
 function castClose(){ var o=document.getElementById('castOv'); if(o) o.classList.remove('show'); }
 
+function hiveShowAccounts(){
+  var src=document.getElementById('connAcctCard');
+  if(!src) return;
+  var h='<div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">Your logins are saved on this device. Tap any service to set up or update.</div>'
+    + src.innerHTML;
+  grdShow('&#128273; Connected Accounts', h);
+  acctRefreshStatus();
+}
+
+function hiveShowVoice(){
+  var h='<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'
+    + '<div class="alexa-ring"><span style="font-size:18px">&#128266;</span></div>'
+    + '<div><div style="font-size:13px;font-weight:800;color:var(--text);font-family:var(--serif)">Amazon Alexa</div>'
+    + '<div style="font-size:11px;color:var(--muted)">Enable skills in the Alexa app to use voice control</div></div></div>';
+  var skills=[
+    {id:'lux',icon:'&#127777;',name:'LUX Connected Home',cmd:'"Alexa, set the thermostat to 72"',url:'https://www.amazon.com/dp/B07DFLWF7C'},
+    {id:'bhyve',icon:'&#128167;',name:'Orbit B-Hyve',cmd:'"Alexa, tell B-Hyve to run Front Lawn"',url:'https://www.amazon.com/dp/B077YNWR5H'},
+    {id:'ha',icon:'&#127968;',name:'Home Assistant (Nabu Casa)',cmd:'"Alexa, turn on the porch light" — full HA control',url:'https://www.nabucasa.com'}
+  ];
+  for(var i=0;i<skills.length;i++){
+    var s=skills[i], active=localStorage.getItem('alexa_skill_'+s.id)==='1';
+    h+='<div class="alexa-skill-row">'
+      + '<span class="alexa-skill-icon">'+s.icon+'</span>'
+      + '<div class="alexa-skill-info"><div class="alexa-skill-name">'+s.name+'</div>'
+      + '<div class="alexa-skill-cmd">'+s.cmd+'</div></div>'
+      + '<button class="alexa-enable-btn'+(active?' active':'')+'" id="alexa-btn-'+s.id+'" onclick="alexaToggle(\''+s.id+'\',\''+s.url+'\')">'+(active?'&#9989; Active':'Enable &#8599;')+'</button>'
+      + '</div>';
+  }
+  h+='<div style="margin-top:12px;padding:9px 12px;background:rgba(26,156,219,.07);border:1px solid rgba(26,156,219,.18);border-radius:8px">'
+    + '<div style="font-size:10px;font-weight:800;color:rgba(77,184,232,.8);letter-spacing:.8px;margin-bottom:3px">QUICK COMMANDS</div>'
+    + '<div style="font-size:11px;color:var(--muted);line-height:1.7">'
+    + '&#8220;Alexa, set the thermostat to 70&#8221;<br>'
+    + '&#8220;Alexa, what&#x27;s the temperature inside?&#8221;<br>'
+    + '&#8220;Alexa, tell B-Hyve to water for 10 minutes&#8221;</div></div>';
+  grdShow('&#128266; Voice Control &bull; Alexa', h);
+}
+
 // Reload the Windy radar iframe to pull the newest frames
 function refreshRadar(){
   var f=document.getElementById('wxRadarFrame'); if(!f) return;
@@ -5425,6 +5426,9 @@ function beehiveOnline(base, d) {
   var steps  = document.getElementById('beehiveSetupSteps');
   var toggle = document.getElementById('beehiveSetupToggle');
   if (dot)   dot.style.background = '#22c55e';
+  var hd = document.getElementById('hiveDot'), hh = document.getElementById('beehiveDotHdr');
+  if (hd) hd.style.background = '#22c55e';
+  if (hh) hh.style.background = '#22c55e';
   if (title) { title.textContent = '\u{1FAB4} Beehive Online'; title.style.color = '#22c55e'; }
   if (ver)   ver.textContent = 'Home Assistant' + (d&&d.version?' '+d.version:'') + ' — ' + base.replace('http://','');
   if (steps) steps.style.display = 'none';
@@ -5450,10 +5454,11 @@ function checkBeehive(manual) {
   var title = document.getElementById('beehiveTitle');
   var ver   = document.getElementById('beehiveVersion');
   if (dot) dot.style.background = '#ffd24a';
+  var hd = document.getElementById('hiveDot'), hh = document.getElementById('beehiveDotHdr');
+  if (hd) hd.style.background = '#ffd24a';
+  if (hh) hh.style.background = '#ffd24a';
 
   var token = getHaToken();
-  // Go through the /api/ha proxy — server-side, so no CORS / mixed-content / browser
-  // timeout race. The browser timeout is deliberately longer than the proxy's own (20s).
   haFetch('/api/', { signal: AbortSignal.timeout(25000) })
     .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(function(d) {
@@ -5462,9 +5467,10 @@ function checkBeehive(manual) {
     })
     .catch(function() {
       if (dot)   dot.style.background = '#e01c1c';
+      if (hd)    hd.style.background = '#e01c1c';
+      if (hh)    hh.style.background = '#e01c1c';
       if (title) { title.textContent = 'Beehive Offline'; title.style.color = '#ff6262'; }
       if (ver)   ver.textContent = token ? 'Not reachable — check Beehive / Nabu Casa' : 'Enter your HA token below to connect';
-      // With no token we can't confirm "online" — surface the token box so it can be entered.
       if (!token) { var p = document.getElementById('haTokenPrompt'); if (p) p.style.display = 'block'; }
     });
 }
@@ -5583,11 +5589,7 @@ function loadCameras() {
     var camCount = cameras.length;
     // Banner (house photo, cropped so the baked "Home Command Center" text stays hidden)
     var html = '<div class="cam-hero">'
-      + '<img src="./images/hero-home.jpg" alt="Security Cameras">'
-      + '<div class="cam-hero-ov">'
-      +   '<div class="cam-hero-title">SECURITY &middot; CAMERAS</div>'
-      +   '<div class="cam-hero-badge"><span class="cam-hero-dot"></span>All Cameras Ready &middot; Protected &middot; ' + camCount + ' Camera' + (camCount > 1 ? 's' : '') + '</div>'
-      + '</div>'
+      + '<img src="./images/hero-cameras.jpg" alt="Home Guardian Smart Security System">'
       + '</div>';
     // Toolbar
     html += '<div class="cam-toolbar">'
