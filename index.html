@@ -899,6 +899,15 @@ html,body{
 .cam-ov-cam{font-size:13px}
 .cam-ov-name{font-size:13px;font-weight:800;letter-spacing:.6px;color:#fff;text-transform:uppercase}
 .cam-ov-state{margin-left:auto;font-size:10px;color:rgba(255,255,255,.72);text-transform:capitalize}
+/* AI detection badge on camera tiles */
+.cam-ai-badge{position:absolute;top:8px;left:8px;display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.7);border:1px solid rgba(56,189,248,.35);border-radius:16px;padding:3px 9px 3px 7px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:2;max-width:calc(100% - 60px);overflow:hidden}
+.cam-ai-badge .ai-icon{font-size:12px;flex:0 0 auto}
+.cam-ai-badge .ai-label{font-size:10px;font-weight:700;color:#fff;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cam-ai-badge .ai-time{font-size:9px;color:rgba(255,255,255,.55);white-space:nowrap;margin-left:2px}
+.cam-ai-badge.ai-person{border-color:rgba(56,189,248,.5)}
+.cam-ai-badge.ai-vehicle{border-color:rgba(255,210,74,.5)}
+.cam-ai-badge.ai-animal{border-color:rgba(34,197,94,.5)}
+.cam-ai-badge.ai-package{border-color:rgba(168,85,247,.5)}
 /* Clip browser / player */
 .clip-list{max-height:56vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .clip-entry{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer}
@@ -5577,6 +5586,8 @@ function loadCameras() {
     if (placeholder) placeholder.style.display = 'none';
     // Cache states so the full-control panel can find each camera's sensors/alarm
     window._camStates = states;
+    var aiDetections = aiParseDetections(states);
+    window._camAI = aiDetections;
     var alarm = states.filter(function(s){ return s.entity_id.indexOf('alarm_control_panel.') === 0; })[0];
     window._camAlarm = alarm ? alarm.entity_id : null;
     // Toolbar: Refresh All (+ Arm/Disarm if a Blink sync module alarm panel exists)
@@ -5604,11 +5615,13 @@ function loadCameras() {
     cameras.forEach(function(cam) {
       var name = (cam.attributes && cam.attributes.friendly_name) ? cam.attributes.friendly_name : cam.entity_id.replace('camera.','').replace(/_/g,' ');
       var key = cam.entity_id.replace(/[^a-z0-9]/gi,'_');
+      var aiBadge = aiBadgeHtml(cam.entity_id, aiDetections);
       html += '<div class="cam-card-big" onclick="camView(\'' + cam.entity_id + '\')">'
         + '<div class="cam-no-img">&#128247;</div>'
         + '<img id="cam-img-' + key + '" class="cam-img-big" alt="' + name + '" '
         + 'src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" '
         + 'onerror="camImgFail(this)">'
+        + aiBadge
         + '<span class="cam-refresh-badge">&#128260;</span>'
         + '<div class="cam-ov"><span class="cam-ov-dot"></span><span class="cam-ov-cam">&#128247;</span>'
         + '<span class="cam-ov-name">' + name + '</span>'
@@ -5739,6 +5752,7 @@ function camView(entityId) {
   if (temp) rows += row('&#127777;&#65039;','Temp', temp.state + '&deg;');
   if (wifi) rows += row('&#128246;','WiFi', wifi.state + (wifi.attributes && wifi.attributes.unit_of_measurement ? wifi.attributes.unit_of_measurement : ''));
   if (motion) rows += row('&#127939;','Motion', motion.state === 'on' ? 'Detected' : 'Clear');
+  rows += aiDetailRows(entityId);
   var big = blinkStillSrc(cam);
   var imgHtml = big
     ? '<img id="camViewImg" class="cv-img" alt="' + name + '" src="' + big + '" onerror="this.style.display=\'none\';var n=document.getElementById(\'camViewNo\');if(n)n.style.display=\'flex\'">'
@@ -5793,6 +5807,133 @@ function camSaveClip(entityId, btn) {
     if (s) { s.innerHTML = '&#9888;&#65039; No recent clip to save (or storage path not set)'; s.style.color = 'var(--warn)'; }
     if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
   });
+}
+
+// ── AI Object Detection (CodeProject.AI on the beast → HA image_processing) ─
+// Detection data arrives via HA image_processing.* entities or sensor.* entities
+// created by the HACS CodeProject.AI integration. Each entity's state = count of
+// detections; attributes.summary/objects carry the labels. We also cache the
+// last-known detection per camera in localStorage so it persists across reloads.
+var AI_LABELS = {person:'🧑',car:'🚗',truck:'🚗',motorcycle:'🏍️',bicycle:'🚲',bus:'🚗',dog:'🐕',cat:'🐈',bird:'🐦',package:'📦',bear:'🐻',horse:'🐴',cow:'🐄',sheep:'🐑',backpack:'🎒',umbrella:'☂️',handbag:'👜',suitcase:'🧳'};
+var AI_CLASS = {person:'ai-person',car:'ai-vehicle',truck:'ai-vehicle',motorcycle:'ai-vehicle',bus:'ai-vehicle',dog:'ai-animal',cat:'ai-animal',bird:'ai-animal',bear:'ai-animal',horse:'ai-animal',cow:'ai-animal',sheep:'ai-animal',package:'ai-package',backpack:'ai-package',suitcase:'ai-package'};
+function aiDetectIcon(label) { return AI_LABELS[(label||'').toLowerCase()] || '🔍'; }
+function aiDetectClass(label) { return AI_CLASS[(label||'').toLowerCase()] || ''; }
+function aiRelTime(ts) {
+  if (!ts) return '';
+  var d = new Date(ts), now = Date.now(), diff = now - d.getTime();
+  if (isNaN(d.getTime())) return '';
+  if (diff < 60000) return 'just now';
+  if (diff < 3600000) return Math.floor(diff/60000) + 'm ago';
+  if (diff < 86400000) return Math.floor(diff/3600000) + 'h ago';
+  return d.toLocaleDateString([], {month:'short',day:'numeric'});
+}
+function aiCacheKey() { return 'hcc_ai_detections'; }
+function aiLoadCache() { try { return JSON.parse(localStorage.getItem(aiCacheKey())) || {}; } catch(e){ return {}; } }
+function aiSaveCache(obj) { try { localStorage.setItem(aiCacheKey(), JSON.stringify(obj)); } catch(e){} }
+
+// Parse AI detection data from HA states for all cameras.
+// Returns { 'camera.xyz': { label, confidence, time, count } }
+function aiParseDetections(states) {
+  if (!Array.isArray(states)) return {};
+  var result = {};
+  var cache = aiLoadCache();
+  // Look for image_processing.* entities (HACS CodeProject.AI integration)
+  states.forEach(function(s) {
+    var eid = s.entity_id || '';
+    var isIP = eid.indexOf('image_processing.') === 0;
+    var isSensor = eid.indexOf('sensor.') === 0 && (eid.indexOf('codeproject') > -1 || eid.indexOf('doods') > -1 || eid.indexOf('deepstack') > -1 || eid.indexOf('object_detect') > -1);
+    if (!isIP && !isSensor) return;
+    // Match to a camera by the entity's camera_entity attribute or name similarity
+    var attrs = s.attributes || {};
+    var camId = attrs.camera_entity || '';
+    if (!camId) {
+      // Try matching by name: image_processing.codeprojectai_blink_front_right → camera.blink_front_right
+      var stem = eid.replace(/^(image_processing|sensor)\./, '').replace(/^codeprojectai_/, '').replace(/^doods_/, '').replace(/^deepstack_/, '');
+      camId = 'camera.' + stem;
+    }
+    // Parse detections from attributes
+    var objs = attrs.objects || attrs.detections || [];
+    var summary = attrs.summary || {};
+    var count = parseInt(s.state, 10) || 0;
+    var ts = s.last_changed || s.last_updated || '';
+    if (count > 0 && objs.length > 0) {
+      var best = objs[0];
+      if (typeof best === 'string') best = { name: best, confidence: 0 };
+      var label = best.name || best.label || best.type || 'Object';
+      var conf = best.confidence || best.score || 0;
+      if (typeof conf === 'number' && conf <= 1) conf = Math.round(conf * 100);
+      result[camId] = { label: label, confidence: conf, time: ts, count: count, all: objs };
+    } else if (count > 0 && Object.keys(summary).length > 0) {
+      var topLabel = Object.keys(summary).sort(function(a,b){ return summary[b]-summary[a]; })[0];
+      result[camId] = { label: topLabel, confidence: 0, time: ts, count: summary[topLabel] || count, all: [] };
+    }
+    // Update cache
+    if (result[camId]) {
+      cache[camId] = result[camId];
+    }
+  });
+  // Also check camera entities themselves for AI attributes (some integrations attach directly)
+  states.forEach(function(s) {
+    if (s.entity_id.indexOf('camera.') !== 0) return;
+    var attrs = s.attributes || {};
+    if (attrs.ai_label || attrs.last_detection || attrs.object_detected) {
+      var label = attrs.ai_label || attrs.last_detection || attrs.object_detected;
+      var conf = attrs.ai_confidence || attrs.detection_confidence || 0;
+      if (typeof conf === 'number' && conf <= 1) conf = Math.round(conf * 100);
+      result[s.entity_id] = result[s.entity_id] || {
+        label: label, confidence: conf,
+        time: attrs.ai_detected_at || attrs.last_detection_time || s.last_changed || '',
+        count: 1, all: []
+      };
+      cache[s.entity_id] = result[s.entity_id];
+    }
+  });
+  aiSaveCache(cache);
+  return result;
+}
+
+// Build HTML for the AI badge on a camera tile
+function aiBadgeHtml(camId, detections) {
+  var det = detections[camId];
+  if (!det) {
+    // Check cache for a recent-ish detection (within 24h)
+    var cache = aiLoadCache();
+    det = cache[camId];
+    if (det && det.time) {
+      var age = Date.now() - new Date(det.time).getTime();
+      if (age > 86400000) det = null; // stale >24h, hide
+    }
+  }
+  if (!det) return '';
+  var icon = aiDetectIcon(det.label);
+  var cls = aiDetectClass(det.label);
+  var lbl = (det.label || 'Object').charAt(0).toUpperCase() + (det.label || 'Object').slice(1);
+  if (det.count > 1) lbl += ' +' + (det.count - 1);
+  var time = aiRelTime(det.time);
+  return '<div class="cam-ai-badge ' + cls + '">'
+    + '<span class="ai-icon">' + icon + '</span>'
+    + '<span class="ai-label">' + lbl + '</span>'
+    + (time ? '<span class="ai-time">&middot; ' + time + '</span>' : '')
+    + '</div>';
+}
+
+// Build detection info rows for the camView panel
+function aiDetailRows(camId) {
+  var cache = aiLoadCache();
+  var det = cache[camId];
+  if (!det) return '';
+  var rows = '<div class="cv-row"><span>🤖 AI Detection</span><b>' + aiDetectIcon(det.label) + ' '
+    + (det.label || 'Object').charAt(0).toUpperCase() + (det.label || '').slice(1) + '</b></div>';
+  if (det.confidence > 0) rows += '<div class="cv-row"><span>📊 Confidence</span><b>' + det.confidence + '%</b></div>';
+  if (det.time) rows += '<div class="cv-row"><span>⏱️ Detected</span><b>' + aiRelTime(det.time) + '</b></div>';
+  if (det.all && det.all.length > 1) {
+    var others = det.all.slice(1, 4).map(function(o) {
+      var n = o.name || o.label || o.type || '?';
+      return aiDetectIcon(n) + ' ' + n;
+    }).join(', ');
+    rows += '<div class="cv-row"><span>👁️ Also seen</span><b>' + others + '</b></div>';
+  }
+  return rows;
 }
 
 // ── In-App Clip Player (browse + play saved Blink clips from Beehive) ──────
