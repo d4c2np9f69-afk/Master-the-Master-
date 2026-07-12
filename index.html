@@ -1037,24 +1037,32 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 /* ── SPLASH SCREEN ─────────────────────────────────────────────────────────── */
 #splashScreen{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;background:#04040a;transition:opacity .5s ease,visibility .5s ease}
 #splashScreen.hide{opacity:0;visibility:hidden;pointer-events:none}
-.splash-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%}
-.splash-bg.portrait{display:block;object-position:center 20%}
+.splash-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center}
+.splash-bg.portrait{display:block}
 .splash-bg.landscape{display:none}
 @media(min-width:768px){
 .splash-bg.portrait{display:none}
 .splash-bg.landscape{display:block}
 }
-.splash-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,4,10,.25) 0%,rgba(4,4,10,.05) 40%,rgba(4,4,10,.35) 75%,rgba(4,4,10,.85) 100%);z-index:1}
-@media(max-width:767px){
-.splash-overlay{background:linear-gradient(180deg,rgba(4,4,10,.15) 0%,rgba(4,4,10,.02) 30%,rgba(4,4,10,.20) 58%,rgba(4,4,10,.75) 78%,rgba(4,4,10,1) 88%)}
-}
+.splash-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,4,10,.45) 0%,rgba(4,4,10,.10) 25%,rgba(4,4,10,.05) 40%,rgba(4,4,10,.35) 70%,rgba(4,4,10,.90) 100%);z-index:1}
+.splash-content{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;padding:0;pointer-events:none}
+.splash-top{display:flex;flex-direction:column;align-items:center;padding-top:max(8vh, 40px);padding-top:max(calc(8vh + env(safe-area-inset-top,0px)), 40px)}
+.splash-title{font-family:var(--font);font-size:clamp(36px, 11vw, 80px);font-weight:800;letter-spacing:0.05em;margin:0;line-height:1;background:linear-gradient(180deg,#faf0c8 0%,#e8c84a 18%,#d4af37 35%,#b8860b 55%,#d4af37 70%,#f5dfa0 88%,#fffbe6 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 12px rgba(0,0,0,.7)) drop-shadow(0 0 40px rgba(0,0,0,.3))}
+.splash-sub{display:flex;align-items:center;gap:14px;margin-top:10px}
+.splash-sub-rule{height:1px;width:clamp(30px,8vw,60px);background:linear-gradient(90deg,transparent,rgba(212,175,55,.55),transparent)}
+.splash-sub-text{font-family:var(--font);font-size:clamp(11px, 3vw, 18px);font-weight:600;letter-spacing:0.20em;color:rgba(235,215,175,.9);text-transform:uppercase;white-space:nowrap;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+.splash-tagline{font-family:var(--font);font-style:italic;font-size:clamp(15px, 3.8vw, 24px);color:rgba(212,175,55,.9);margin-top:8px;text-shadow:0 1px 10px rgba(0,0,0,.6)}
+.splash-mid{flex:1;display:flex;align-items:flex-end;justify-content:center;padding-bottom:12vh;pointer-events:auto}
+.splash-enter{display:inline-flex;align-items:center;gap:14px;padding:16px 52px;border:1.5px solid rgba(212,175,55,.5);border-radius:14px;background:rgba(4,4,10,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-family:var(--font);font-size:clamp(17px, 4.2vw, 26px);font-weight:700;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;transition:background .2s,border-color .2s,box-shadow .2s;box-shadow:0 4px 30px rgba(0,0,0,.4),0 0 20px rgba(212,175,55,.08);background-image:linear-gradient(180deg,#f5dfa0,#d4af37 50%,#b8860b);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.splash-enter:active{border-color:rgba(212,175,55,.8);box-shadow:0 4px 30px rgba(0,0,0,.4),0 0 25px rgba(212,175,55,.2)}
+.splash-enter .chevron{font-size:1.1em}
+.splash-bottom{width:100%;flex-shrink:0}
 .splash-status{
   display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:0;
   width:100%;
   padding:10px 6px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));
   background:rgba(4,4,10,.98);
   border-top:1px solid rgba(212,175,55,.15);
-  position:absolute;bottom:0;left:0;right:0;z-index:2;
 }
 .splash-stat{display:flex;align-items:center;gap:6px;padding:4px 14px;white-space:nowrap}
 .splash-stat .ss-icon{font-size:16px;opacity:.8}
@@ -1144,15 +1152,31 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 <body>
 
 <!-- ══ SPLASH / LANDING SCREEN ══════════════════════════════════════════════ -->
-<div id="splashScreen" onclick="dismissSplash()" style="cursor:pointer">
+<div id="splashScreen" style="cursor:pointer">
   <img src="images/splash-portrait.jpg" alt="Loewen Home at dusk" class="splash-bg portrait">
   <img src="images/splash-landscape.jpg" alt="Loewen Home at dusk" class="splash-bg landscape">
   <div class="splash-overlay"></div>
-  <div class="splash-status">
-    <div class="splash-stat"><span class="ss-icon">🛡</span><span class="ss-label">Security:</span><span class="ss-val ss-green" id="splSecurity">--</span></div>
-    <div class="splash-stat"><span class="ss-icon">📡</span><span class="ss-label">Network:</span><span class="ss-val ss-green" id="splNetwork">--</span></div>
-    <div class="splash-stat"><span class="ss-icon">⚡</span><span class="ss-label">Power:</span><span class="ss-val ss-green" id="splPower">--</span></div>
-    <div class="splash-stat"><span class="ss-icon">🌡</span><span class="ss-label">Climate:</span><span class="ss-val ss-gold" id="splClimate">--</span></div>
+  <div class="splash-content" onclick="dismissSplash()">
+    <div class="splash-top">
+      <div class="splash-title">LOEWEN HOME</div>
+      <div class="splash-sub">
+        <span class="splash-sub-rule"></span>
+        <span class="splash-sub-text">Home Command Center</span>
+        <span class="splash-sub-rule"></span>
+      </div>
+      <div class="splash-tagline">Everything. In One Place.</div>
+    </div>
+    <div class="splash-mid">
+      <div class="splash-enter">ENTER <span class="chevron">&#x203A;</span></div>
+    </div>
+    <div class="splash-bottom">
+      <div class="splash-status">
+        <div class="splash-stat"><span class="ss-icon">🛡</span><span class="ss-label">Security:</span><span class="ss-val ss-green" id="splSecurity">--</span></div>
+        <div class="splash-stat"><span class="ss-icon">📡</span><span class="ss-label">Network:</span><span class="ss-val ss-green" id="splNetwork">--</span></div>
+        <div class="splash-stat"><span class="ss-icon">⚡</span><span class="ss-label">Power:</span><span class="ss-val ss-green" id="splPower">--</span></div>
+        <div class="splash-stat"><span class="ss-icon">🌡</span><span class="ss-label">Climate:</span><span class="ss-val ss-gold" id="splClimate">--</span></div>
+      </div>
+    </div>
   </div>
 </div>
 
