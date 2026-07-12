@@ -1033,9 +1033,53 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 .cast-step .t{font-size:12.5px;color:var(--text);line-height:1.4}
 .cast-note{font-size:10.5px;color:var(--muted);margin-top:12px;line-height:1.5}
 .cast-close{width:100%;margin-top:16px;padding:12px;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.4);border-radius:10px;color:var(--gold);font-size:13px;font-weight:800;font-family:inherit;cursor:pointer}
+
+/* ── SPLASH SCREEN ─────────────────────────────────────────────────────────── */
+#splashScreen{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;background:#04040a;transition:opacity .5s ease,visibility .5s ease}
+#splashScreen.hide{opacity:0;visibility:hidden;pointer-events:none}
+.splash-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%}
+.splash-bg.portrait{display:block}
+.splash-bg.landscape{display:none}
+@media(min-width:768px){
+.splash-bg.portrait{display:none}
+.splash-bg.landscape{display:block}
+}
+.splash-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,4,10,.25) 0%,rgba(4,4,10,.05) 40%,rgba(4,4,10,.35) 75%,rgba(4,4,10,.85) 100%);z-index:1}
+.splash-status{
+  display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:0;
+  width:100%;
+  padding:10px 6px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));
+  background:rgba(10,10,14,.92);
+  border-top:1px solid rgba(212,175,55,.15);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  position:absolute;bottom:0;left:0;right:0;z-index:2;
+}
+.splash-stat{display:flex;align-items:center;gap:6px;padding:4px 14px;white-space:nowrap}
+.splash-stat .ss-icon{font-size:16px;opacity:.8}
+.splash-stat .ss-label{font-size:12px;color:rgba(255,255,255,.6);font-weight:500}
+.splash-stat .ss-val{font-size:12px;font-weight:700}
+.ss-green{color:#22c55e}
+.ss-gold{color:#d4af37}
+@media(max-width:400px){
+.splash-stat{padding:3px 8px}
+.splash-stat .ss-label,.splash-stat .ss-val{font-size:11px}
+}
 </style>
 </head>
 <body>
+
+<!-- ══ SPLASH / LANDING SCREEN ══════════════════════════════════════════════ -->
+<div id="splashScreen" onclick="dismissSplash()" style="cursor:pointer">
+  <img src="images/splash-portrait.jpg" alt="Loewen Home at dusk" class="splash-bg portrait">
+  <img src="images/splash-landscape.jpg" alt="Loewen Home at dusk" class="splash-bg landscape">
+  <div class="splash-overlay"></div>
+  <div class="splash-status">
+    <div class="splash-stat"><span class="ss-icon">🛡</span><span class="ss-label">Security:</span><span class="ss-val ss-green" id="splSecurity">--</span></div>
+    <div class="splash-stat"><span class="ss-icon">📡</span><span class="ss-label">Network:</span><span class="ss-val ss-green" id="splNetwork">--</span></div>
+    <div class="splash-stat"><span class="ss-icon">⚡</span><span class="ss-label">Power:</span><span class="ss-val ss-green" id="splPower">--</span></div>
+    <div class="splash-stat"><span class="ss-icon">🌡</span><span class="ss-label">Climate:</span><span class="ss-val ss-gold" id="splClimate">--</span></div>
+  </div>
+</div>
 
 <!-- ══ APP HEADER ═══════════════════════════════════════════════════════════ -->
 <div class="app-hdr">
@@ -4506,6 +4550,55 @@ function toggleTheme(){
   try{ localStorage.setItem('hcc_theme', next); }catch(e){}
   syncThemeBtn();
 }
+
+/* ===== SPLASH SCREEN ===== */
+function dismissSplash(){
+  var el = document.getElementById('splashScreen');
+  if(!el) return;
+  el.classList.add('hide');
+  setTimeout(function(){ el.remove(); }, 600);
+  try{ sessionStorage.setItem('hcc_splash','1'); }catch(e){}
+}
+function splashStatus(){
+  var tok = getHaToken();
+  if(!tok){
+    var s=document.getElementById('splSecurity'); if(s) s.textContent='Armed';
+    var n=document.getElementById('splNetwork');  if(n) n.textContent='Online';
+    var p=document.getElementById('splPower');    if(p) p.textContent='Normal';
+    var c=document.getElementById('splClimate');  if(c) c.textContent='--°F';
+    return;
+  }
+  haFetch('/api/states').then(function(r){ return r.json(); }).then(function(states){
+    var sec='Armed', net='Online', pwr='Normal', clim='--°F';
+    for(var i=0;i<states.length;i++){
+      var e=states[i];
+      if(e.entity_id.indexOf('alarm_control_panel.')===0){
+        sec = e.state==='armed_away'||e.state==='armed_home'||e.state==='armed_night' ? 'Armed' : e.state==='disarmed' ? 'Disarmed' : e.state.replace(/_/g,' ');
+      }
+      if(e.entity_id==='climate.cs1_dd_fb' || e.entity_id.indexOf('climate.')===0){
+        var t = e.attributes && e.attributes.current_temperature;
+        if(t) clim = Math.round(t)+'°F';
+      }
+    }
+    var s=document.getElementById('splSecurity'); if(s){ s.textContent=sec; s.className='ss-val '+(sec==='Armed'?'ss-green':'ss-gold'); }
+    var n=document.getElementById('splNetwork');  if(n){ n.textContent=net; n.className='ss-val ss-green'; }
+    var p=document.getElementById('splPower');    if(p){ p.textContent=pwr; p.className='ss-val ss-green'; }
+    var c=document.getElementById('splClimate');  if(c){ c.textContent=clim; }
+  }).catch(function(){
+    var s=document.getElementById('splSecurity'); if(s) s.textContent='Armed';
+    var n=document.getElementById('splNetwork');  if(n) n.textContent='Online';
+    var p=document.getElementById('splPower');    if(p) p.textContent='Normal';
+    var c=document.getElementById('splClimate');  if(c) c.textContent='--°F';
+  });
+}
+(function(){
+  if(sessionStorage.getItem('hcc_splash')){
+    var el=document.getElementById('splashScreen');
+    if(el) el.remove();
+  } else {
+    splashStatus();
+  }
+})();
 
 // INIT
 applyHeroGrades();

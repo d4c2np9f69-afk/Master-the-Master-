@@ -61,20 +61,26 @@ fee, no per-month anything — he already pays for Claude/Clyde, Nabu Casa, and 
 
 - **Phase 1 (free, start now):** local AI detection on the beast + in-app clip player.
   Works on any TV. Immediate win, zero hardware.
-- **Phase 2:** confirm the theater brain — beast-drives-the-screen (preferred, free) or add a
-  Shield — and wire the TV pop-up.
-- **Phase 3:** full HA theater scenes + Vizio/sound orchestration.
+- **Phase 2 — DECIDED (07-10, Jeff's call): beast-as-media-center via Kodi.**
+  Beast runs **Kodi** (free media center) → HDMI → Vizio TV. HA sends camera alerts to
+  Kodi via `kodi.call_method` → `GUI.ShowNotification` → toast overlay on the TV screen,
+  fades after 8s. Fire TV Stick stays as secondary HDMI input for 4K DRM streaming.
+  **NOT** simple ADB from Beehive to Fire TV — Jeff wants it routed through the beast.
+  Full setup guide: **`docs/beehive/media-center-setup.md`**.
+- **Phase 3:** full HA theater scenes + Vizio/sound orchestration + TTS announcements.
 
 ## Division of labor
 
-- **Claude (cloud):** app-side — the in-app clip player + wiring the "what did it see"
-  text/snapshot into camera alerts. Owns all app code.
-- **Clyde (beast) + Jeff:** beast-side — install the local vision AI (Ollama/CodeProject.AI),
-  HACS LLM Vision, the HA automations, media/Kodi. Clyde treats app code as READ-ONLY.
+- **Claude (cloud):** app-side — the in-app clip player + AI detection badge display on
+  camera tiles (✅ DONE 07-10). Owns all app code.
+- **Clyde (beast) + Jeff:** beast-side — install Kodi + CodeProject.AI, wire HA automations.
+  Clyde treats app code as READ-ONLY.
 
-## Open questions before finalizing
+## Answered questions (from prior sessions)
 
-1. **`nvidia-smi`** on the beast → exact GPU + VRAM (sizes the local AI).
-2. Which **screen** does Jeff watch in that room — the Vizio, or a separate TV?
-3. Beast OS = Windows → run the AI via Docker/WSL, or use one of the unused partitions for a
-   small Linux install dedicated to AI/media?
+1. **GPU:** GTX 1050 Ti, 4 GB VRAM (confirmed `nvidia-smi` 07-09). Enough for CodeProject.AI
+   YOLO + small vision model. Not enough for a full local LLM — use free Gemini tier for
+   rich scene descriptions if wanted.
+2. **Screen:** Vizio TV in the viewing room = beast's monitor (hardwired HDMI).
+3. **OS:** Windows. Kodi + CodeProject.AI both run native on Windows — no Docker/WSL/Linux
+   partition needed.
