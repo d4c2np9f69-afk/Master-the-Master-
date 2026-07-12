@@ -1038,20 +1038,22 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 #splashScreen{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;background:#04040a;transition:opacity .5s ease,visibility .5s ease}
 #splashScreen.hide{opacity:0;visibility:hidden;pointer-events:none}
 .splash-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%}
-.splash-bg.portrait{display:block}
+.splash-bg.portrait{display:block;object-position:center 20%}
 .splash-bg.landscape{display:none}
 @media(min-width:768px){
 .splash-bg.portrait{display:none}
 .splash-bg.landscape{display:block}
 }
 .splash-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,4,10,.25) 0%,rgba(4,4,10,.05) 40%,rgba(4,4,10,.35) 75%,rgba(4,4,10,.85) 100%);z-index:1}
+@media(max-width:767px){
+.splash-overlay{background:linear-gradient(180deg,rgba(4,4,10,.15) 0%,rgba(4,4,10,.02) 30%,rgba(4,4,10,.20) 58%,rgba(4,4,10,.75) 78%,rgba(4,4,10,1) 88%)}
+}
 .splash-status{
   display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:0;
   width:100%;
   padding:10px 6px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));
-  background:rgba(10,10,14,.92);
+  background:rgba(4,4,10,.98);
   border-top:1px solid rgba(212,175,55,.15);
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   position:absolute;bottom:0;left:0;right:0;z-index:2;
 }
 .splash-stat{display:flex;align-items:center;gap:6px;padding:4px 14px;white-space:nowrap}
