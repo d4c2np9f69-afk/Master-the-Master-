@@ -16,7 +16,7 @@
 <title>Home Command Center</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Cinzel:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════════════════════════
    HOME COMMAND CENTER  ·  Single Design System
@@ -314,8 +314,10 @@ html,body{
 #snav-guardian.active{border-bottom-color:var(--a-guardian);background:rgba(61,125,216,.05)}
 
 /* ── SECTIONS ───────────────────────────────────────────────────────────── */
+.hero-slot{display:none}
+.hero-slot.active{display:block;width:100%;max-width:100%;margin:0 auto}
 .hcc-section{display:none}
-.hcc-section.active{display:block}
+.hcc-section.active{display:block;width:100%;max-width:1400px;margin:0 auto}
 
 /* ── SECTION HERO (Weather, Irrigation, Yard) ───────────────────────────── */
 .sec-hero{
@@ -1033,19 +1035,155 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 .cast-step .t{font-size:12.5px;color:var(--text);line-height:1.4}
 .cast-note{font-size:10.5px;color:var(--muted);margin-top:12px;line-height:1.5}
 .cast-close{width:100%;margin-top:16px;padding:12px;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.4);border-radius:10px;color:var(--gold);font-size:13px;font-weight:800;font-family:inherit;cursor:pointer}
+
+/* ── SPLASH SCREEN ─────────────────────────────────────────────────────────── */
+#splashScreen{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;background:#04040a;transition:opacity .5s ease,visibility .5s ease}
+#splashScreen.hide{opacity:0;visibility:hidden;pointer-events:none}
+.splash-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center}
+.splash-bg.portrait{display:block}
+.splash-bg.landscape{display:none}
+@media(min-width:768px){
+.splash-bg.portrait{display:none}
+.splash-bg.landscape{display:block}
+}
+.splash-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,4,10,.45) 0%,rgba(4,4,10,.10) 25%,rgba(4,4,10,.05) 40%,rgba(4,4,10,.35) 70%,rgba(4,4,10,.90) 100%);z-index:1}
+.splash-content{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;padding:0;pointer-events:none}
+.splash-top{display:flex;flex-direction:column;align-items:center;padding-top:max(8vh, 40px);padding-top:max(calc(8vh + env(safe-area-inset-top,0px)), 40px)}
+.splash-title{font-family:'Cinzel',serif;font-size:clamp(36px, 11vw, 80px);font-weight:600;letter-spacing:0.06em;margin:0;line-height:1;background:linear-gradient(180deg,#FFF2C9 0%,#F2D18B 25%,#DDB66A 50%,#B67C33 75%,#5A3716 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 1px rgba(70,40,15,.75)) drop-shadow(-1px -1px 0 rgba(255,242,201,.3)) drop-shadow(1px 1px 0 rgba(90,55,22,.4)) drop-shadow(0 3px 8px rgba(0,0,0,.55)) drop-shadow(0 0 12px rgba(255,210,130,.55))}
+.splash-sub{display:flex;align-items:center;gap:14px;margin-top:10px}
+.splash-sub-rule{height:1.5px;width:clamp(30px,10vw,80px);background:linear-gradient(90deg,transparent,#DDB66A,transparent)}
+.splash-sub-text{font-family:'Cinzel',serif;font-size:clamp(11px, 3vw, 18px);font-weight:600;letter-spacing:0.35em;color:#EED39C;text-transform:uppercase;white-space:nowrap;text-shadow:0 1px 6px rgba(0,0,0,.5),0 0 8px rgba(255,210,130,.25)}
+.splash-tagline{font-family:'Cinzel',serif;font-style:italic;font-size:clamp(15px, 3.8vw, 24px);color:#EED39C;margin-top:8px;text-shadow:0 1px 6px rgba(0,0,0,.5),0 0 8px rgba(255,210,130,.15)}
+.splash-mid{flex:1;display:flex;align-items:flex-end;justify-content:center;padding-bottom:12vh;pointer-events:auto}
+.splash-enter{display:inline-flex;align-items:center;gap:14px;padding:16px 52px;border:1.5px solid rgba(221,182,106,.4);border-radius:14px;background:rgba(4,4,10,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-family:'Cinzel',serif;font-size:clamp(17px, 4.2vw, 26px);font-weight:700;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;transition:background .2s,border-color .2s,box-shadow .2s;box-shadow:0 4px 30px rgba(0,0,0,.4),0 0 20px rgba(255,210,130,.1);background-image:linear-gradient(180deg,#FFF2C9,#DDB66A 50%,#B67C33);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.splash-enter:active{border-color:rgba(212,175,55,.8);box-shadow:0 4px 30px rgba(0,0,0,.4),0 0 25px rgba(212,175,55,.2)}
+.splash-enter .chevron{font-size:1.1em}
+.splash-bottom{width:100%;flex-shrink:0}
+.splash-status{
+  display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:0;
+  width:100%;
+  padding:10px 6px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));
+  background:rgba(4,4,10,.98);
+  border-top:1px solid rgba(212,175,55,.15);
+}
+.splash-stat{display:flex;align-items:center;gap:6px;padding:4px 14px;white-space:nowrap}
+.splash-stat .ss-icon{font-size:16px;opacity:.8}
+.splash-stat .ss-label{font-size:12px;color:rgba(255,255,255,.6);font-weight:500}
+.splash-stat .ss-val{font-size:12px;font-weight:700}
+.ss-green{color:#22c55e}
+.ss-gold{color:#d4af37}
+@media(max-width:400px){
+.splash-stat{padding:3px 8px}
+.splash-stat .ss-label,.splash-stat .ss-val{font-size:11px}
+}
+
+/* ── WIDE-SCREEN RESPONSIVE (tablet / web / TV / Fire TV) ─────────────── */
+/* hcc-wrap is now applied via .hcc-section.active above */
+@media(min-width:768px){
+  .hcc-section.active{padding:0 24px}
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-climate,.sec-hero-guardian{max-height:560px}
+  .house-hero{aspect-ratio:16/9}
+  .card{padding:22px}
+  .card-title{font-size:12px;letter-spacing:1px}
+  .app-hdr-title{font-size:18px}
+  .snav-btn{font-size:9px;padding:12px 8px 10px}
+  .snav-icon{font-size:22px}
+  .spec-list .sk{font-size:13px}
+  .spec-list .sv{font-size:13px}
+}
+@media(min-width:1200px){
+  .hcc-section.active{padding:0 40px}
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-climate,.sec-hero-guardian{max-height:680px}
+  .app-hdr{padding:14px 28px}
+  .app-hdr-title{font-size:22px}
+  .app-hdr-sub{font-size:10px;letter-spacing:4px}
+  .app-hdr-badge{padding:7px 14px;font-size:14px;border-radius:8px}
+  .sec-nav{justify-content:center}
+  .snav-btn{min-width:120px;font-size:10px;letter-spacing:2px;padding:14px 12px 12px}
+  .snav-icon{font-size:26px}
+  .card{padding:26px 28px;border-radius:18px;margin-bottom:18px}
+  .card-title{font-size:13px;letter-spacing:1.2px}
+  .sec-hero-title{font-size:32px}
+  .sec-hero-weather .sec-hero-title{font-size:56px}
+  .sec-hero-status{font-size:14px}
+  .modal-box{max-width:600px;padding:28px 24px 42px}
+  .splash-status .splash-stat .ss-label,.splash-status .splash-stat .ss-val{font-size:14px}
+}
+@media(min-width:1920px){
+  .hcc-section.active{max-width:1800px;padding:0 60px}
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-climate,.sec-hero-guardian{max-height:800px}
+  .app-hdr{padding:18px 40px}
+  .app-hdr-title{font-size:26px}
+  .app-hdr-sub{font-size:12px}
+  .app-hdr-badge{padding:8px 16px;font-size:16px}
+  .snav-btn{min-width:160px;font-size:12px;letter-spacing:2.5px;padding:16px 16px 14px}
+  .snav-icon{font-size:30px}
+  .card{padding:30px 32px;margin-bottom:22px}
+  .card-title{font-size:14px}
+  .sec-hero-title{font-size:38px}
+  .sec-hero-weather .sec-hero-title{font-size:64px}
+  .sec-hero-status{font-size:16px}
+  .sec-hero-badge{font-size:14px;padding:4px 14px}
+  .spec-list .sk,.spec-list .sv{font-size:15px}
+  .modal-box{max-width:720px;padding:32px 28px 48px}
+  .btn-full{font-size:14px;padding:16px}
+  .splash-status .splash-stat .ss-label,.splash-status .splash-stat .ss-val{font-size:16px}
+  .splash-status .splash-stat .ss-icon{font-size:20px}
+}
+@media(min-width:2560px){
+  .hcc-section.active{max-width:2200px;padding:0 80px}
+  .app-hdr{padding:22px 60px}
+  .app-hdr-title{font-size:32px}
+  .app-hdr-sub{font-size:14px}
+  .app-hdr-badge{padding:10px 20px;font-size:20px;border-radius:10px}
+  .snav-btn{min-width:200px;font-size:14px;padding:20px 20px 16px}
+  .snav-icon{font-size:36px}
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-climate,.sec-hero-guardian{max-height:1000px}
+  .card{padding:36px 40px;border-radius:22px;margin-bottom:28px}
+  .card-title{font-size:16px;letter-spacing:1.5px}
+  .sec-hero-title{font-size:46px}
+  .sec-hero-weather .sec-hero-title{font-size:80px}
+  .sec-hero-status{font-size:18px}
+  .sec-hero-badge{font-size:16px;padding:5px 18px}
+  .spec-list .sk,.spec-list .sv{font-size:17px}
+  .modal-box{max-width:900px}
+  .btn-full{font-size:16px;padding:18px}
+}
 </style>
 </head>
 <body>
 
-<!-- ══ APP HEADER ═══════════════════════════════════════════════════════════ -->
-<div class="app-hdr">
-  <div class="app-hdr-badge">HCC</div>
-  <div class="app-hdr-text">
-    <div class="app-hdr-title">HOME COMMAND CENTER</div>
-    <div class="app-hdr-sub">Manage &bull; Maintain &bull; Monitor</div>
+<!-- ══ SPLASH / LANDING SCREEN ══════════════════════════════════════════════ -->
+<div id="splashScreen" style="cursor:pointer">
+  <img src="images/splash-portrait.jpg" alt="Loewen Home at dusk" class="splash-bg portrait">
+  <img src="images/splash-landscape.jpg" alt="Loewen Home at dusk" class="splash-bg landscape">
+  <div class="splash-overlay"></div>
+  <div class="splash-content" onclick="dismissSplash()">
+    <div class="splash-top">
+      <div class="splash-title">LOEWEN HOME</div>
+      <div class="splash-sub">
+        <span class="splash-sub-rule"></span>
+        <span class="splash-sub-text">Home Command Center</span>
+        <span class="splash-sub-rule"></span>
+      </div>
+      <div class="splash-tagline">Everything. In One Place.</div>
+    </div>
+    <div class="splash-mid">
+      <div class="splash-enter">ENTER <span class="chevron">&#x203A;</span></div>
+    </div>
+    <div class="splash-bottom">
+      <div class="splash-status">
+        <div class="splash-stat"><span class="ss-icon">🛡</span><span class="ss-label">Security:</span><span class="ss-val ss-green" id="splSecurity">--</span></div>
+        <div class="splash-stat"><span class="ss-icon">📡</span><span class="ss-label">Network:</span><span class="ss-val ss-green" id="splNetwork">--</span></div>
+        <div class="splash-stat"><span class="ss-icon">⚡</span><span class="ss-label">Power:</span><span class="ss-val ss-green" id="splPower">--</span></div>
+        <div class="splash-stat"><span class="ss-icon">🌡</span><span class="ss-label">Climate:</span><span class="ss-val ss-gold" id="splClimate">--</span></div>
+      </div>
+    </div>
   </div>
-  <span id="beehiveDotHdr" style="width:9px;height:9px;border-radius:50%;background:#444;flex-shrink:0;transition:background .3s;margin-right:4px" title="Beehive status"></span>
 </div>
+
+<!-- APP HEADER removed per Jeff's layout redesign (07-14) — beehive dot moved to Hart of the Hive -->
+<span id="beehiveDotHdr" style="display:none"></span>
 
 <!-- Cast-to-TV helper sheet -->
 <div class="cast-ov" id="castOv" onclick="if(event.target===this)castClose()">
@@ -1058,6 +1196,60 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <div class="cast-step"><div class="n">4</div><div class="t">Come back here &mdash; the app is now on the big screen. Drive it from your phone.</div></div>
     <div class="cast-note">&#128161; No AirPlay TV? Use a <b>Lightning-to-HDMI</b> adapter into any TV's HDMI port. &middot; Tip: turn on <b>Do Not Disturb</b> so texts don't pop up on the TV.</div>
     <button class="cast-close" onclick="castClose()">GOT IT</button>
+  </div>
+</div>
+
+<!-- ══ SECTION HEROES (above nav per Jeff's 07-14 layout redesign) ═══════ -->
+<div class="hero-slot active" id="hero-home">
+  <div class="house-hero">
+    <img src="./images/hero-home.jpg" alt="Loewen Home">
+    <div class="house-hero-overlay"></div>
+    <div class="house-hero-content">
+      <div id="heroWeather"></div>
+    </div>
+  </div>
+</div>
+<div class="hero-slot" id="hero-weather">
+  <div class="sec-hero sec-hero-weather">
+    <img src="./images/hero-weather.jpg" alt="Weather">
+    <div class="sec-hero-overlay">
+      <div class="wx-hero-row">
+        <div>
+          <div class="sec-hero-title" id="wxHeroTemp"></div>
+          <div class="wx-hero-cond" id="wxHeroDesc"></div>
+          <div class="wx-hero-loc">White House, TN &bull; 37188</div>
+        </div>
+        <div style="text-align:right;padding-bottom:6px">
+          <div style="font-size:9px;font-weight:600;letter-spacing:1.5px;color:rgba(210,180,120,.5);text-transform:uppercase;margin-bottom:4px;font-family:var(--serif)">Station</div>
+          <div style="font-size:11px;font-weight:600;color:rgba(240,220,175,.8);font-family:var(--serif)">&#127894; KTNWHITE21</div>
+          <div style="font-size:9px;font-weight:700;color:rgba(212,175,55,.65);letter-spacing:.5px;margin-top:2px;font-family:var(--serif)">WU Recognized</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="hero-slot" id="hero-irrigation">
+  <div class="sec-hero sec-hero-irr">
+    <img src="./images/hero-irr.jpg" alt="Irrigation">
+    <div class="sec-hero-overlay">
+      <div class="sec-hero-status" id="irrHeroStatus"></div>
+    </div>
+  </div>
+</div>
+<div class="hero-slot" id="hero-yard">
+  <div class="sec-hero sec-hero-yard">
+    <img src="./images/hero-yard.jpg" alt="Toro TimeMaster 30&quot;">
+    <div class="sec-hero-overlay">
+      <div class="sec-hero-status" id="yardHeroStatus"></div>
+    </div>
+  </div>
+</div>
+<div class="hero-slot" id="hero-guardian">
+  <div class="sec-hero sec-hero-guardian">
+    <img src="./images/hero-guardian.jpg" alt="Home Guardian — Protect · Monitor · Automate" onerror="this.style.display='none'">
+    <div class="sec-hero-overlay">
+      <div class="sec-hero-status" id="guardianHeroStatus">Standing watch over 301</div>
+    </div>
   </div>
 </div>
 
@@ -1086,15 +1278,6 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
      ══════════════════════════════════════════════════════════════════════════ -->
 <div id="section-home" class="hcc-section active">
 
-  <!-- Home hero — only shows when HOME tab is active -->
-  <div class="house-hero">
-    <img src="./images/hero-home.jpg" alt="Home Command Center">
-    <div class="house-hero-overlay"></div>
-    <div class="house-hero-content">
-      <div id="heroWeather"></div>
-    </div>
-  </div>
-
   <div class="content">
 
     <!-- ── WHITE HOUSE DISPATCH — tap any row to call ── -->
@@ -1120,93 +1303,6 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <span style="font-size:22px;flex-shrink:0">🚨</span>
       <div class="home-alert-strip-text" id="homeAlertText">NWS Alert active — tap to view</div>
       <span style="font-size:16px;color:rgba(252,165,165,.6)">&#8250;</span>
-    </div>
-
-    <!-- ── HART OF THE HIVE — status dashboard ── -->
-    <div class="hive-dash" id="hiveDash">
-      <img class="hive-dash-img" src="./images/hart-of-hive.jpg" alt="Hart of the Hive — Systems Online">
-      <div class="hive-chips">
-        <div class="hive-chip hc-light" onclick="toggleTheme()" id="hiveTheme" title="Switch light / dark">
-          <span class="hive-chip-icon" id="hiveThemeIcon">&#9728;&#65039;</span>
-          <span class="hive-chip-lbl" id="hiveThemeLbl">LIGHT</span>
-        </div>
-        <div class="hive-chip hc-alexa" onclick="openAlexaApp()" title="Open Alexa app">
-          <span class="hive-chip-icon">&#127908;</span>
-          <span class="hive-chip-lbl">ALEXA</span>
-        </div>
-        <div class="hive-chip hc-cast" onclick="castOpen()" title="Cast to TV">
-          <span class="hive-chip-icon">&#128250;</span>
-          <span class="hive-chip-lbl">CAST</span>
-        </div>
-        <div class="hive-chip hc-hive" onclick="openBeehive()" id="hiveBeehive" title="Beehive status">
-          <span class="hive-dot" id="hiveDot" style="background:#444"></span>
-          <span class="hive-chip-icon">&#129303;</span>
-          <span class="hive-chip-lbl">HIVE</span>
-        </div>
-        <div class="hive-chip hc-accounts" onclick="hiveShowAccounts()" title="Connected accounts">
-          <span class="hive-chip-icon">&#128273;</span>
-          <span class="hive-chip-lbl">ACCOUNTS</span>
-        </div>
-        <div class="hive-chip hc-voice" onclick="hiveShowVoice()" title="Alexa voice skills">
-          <span class="hive-chip-icon">&#128266;</span>
-          <span class="hive-chip-lbl">VOICE</span>
-        </div>
-        <div class="hive-chip hc-watch" title="Apple Watch safety">
-          <span class="hive-chip-icon">&#8987;</span>
-          <span class="hive-chip-lbl">WATCH</span>
-          <span class="hive-dot" style="background:var(--ok);top:3px;right:3px"></span>
-        </div>
-        <div class="hive-chip hc-fitness" onclick="hccSection('yard',document.getElementById('snav-yard'));setTimeout(function(){var e=document.getElementById('fitMiles');if(e)e.scrollIntoView({behavior:'smooth',block:'center'})},300)" title="Fitness — miles walked mowing">
-          <span class="hive-chip-icon">&#128694;</span>
-          <span class="hive-chip-lbl" id="hiveFit">FITNESS</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Beehive / Home Assistant -->
-    <div class="sec-hdr">
-      <span class="sec-hdr-icon">&#129303;</span>
-      <span class="sec-hdr-label">Beehive &bull; Home Assistant</span>
-    </div>
-
-    <div id="beehiveCard" class="hcc-cta-card" style="border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.03)">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-        <span id="beehiveDot" style="width:10px;height:10px;border-radius:50%;background:#444;flex-shrink:0;transition:background .3s"></span>
-        <div style="flex:1">
-          <div id="beehiveTitle" style="font-size:13px;font-weight:800;color:var(--text)">Beehive — Checking&hellip;</div>
-          <div id="beehiveVersion" style="font-size:10px;color:var(--muted);margin-top:1px">Home Assistant</div>
-        </div>
-        <button onclick="checkBeehive(true)" class="icon-btn">&#128260;</button>
-      </div>
-      <button onclick="openBeehive()" class="btn-beehive">OPEN BEEHIVE &#8599;</button>
-
-      <!-- Setup steps — hidden when Beehive is online; collapsed by default when offline -->
-      <button id="beehiveSetupToggle" onclick="var s=document.getElementById('beehiveSetupSteps');var open=s.style.display!=='none';s.style.display=open?'none':'block';this.textContent=open?'▼ Show setup instructions':'▲ Hide setup instructions';" style="background:none;border:none;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:6px 0 4px;cursor:pointer;width:100%;text-align:left">▼ Show setup instructions</button>
-      <div id="beehiveSetupSteps" style="display:none">
-        <div style="font-size:10px;font-weight:800;color:var(--dim);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:10px">HOW TO ACTIVATE BEEHIVE</div>
-        <div style="display:flex;gap:10px;margin-bottom:10px;align-items:flex-start">
-          <div style="width:20px;height:20px;border-radius:50%;background:#1a5fb4;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">1</div>
-          <div style="flex:1">
-            <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px">At the <code style="background:rgba(255,255,255,.1);padding:1px 5px;border-radius:4px;font-size:10px">ha &gt;</code> screen — run these two commands:</div>
-            <div onclick="copyCmd(this,'ha addons install a0d7b954_ssh')" style="font-family:monospace;font-size:11px;background:#0d1117;border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;color:#4aff9e;cursor:pointer;margin-bottom:4px;word-break:break-all" title="Tap to copy">ha addons install a0d7b954_ssh</div>
-            <div onclick="copyCmd(this,'ha addons start a0d7b954_ssh')" style="font-family:monospace;font-size:11px;background:#0d1117;border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;color:#4aff9e;cursor:pointer;word-break:break-all" title="Tap to copy">ha addons start a0d7b954_ssh</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:10px;margin-bottom:10px;align-items:flex-start">
-          <div style="width:20px;height:20px;border-radius:50%;background:#1a5fb4;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">2</div>
-          <div style="flex:1">
-            <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px">Open Beehive &rarr; Settings &rarr; Add-ons &rarr; Terminal &rarr; OPEN</div>
-            <button onclick="openBeehive('/hassio/addon/a0d7b954_ssh/info')" class="btn-beehive">OPEN BEEHIVE &#8599;</button>
-          </div>
-        </div>
-        <div style="display:flex;gap:10px;align-items:flex-start">
-          <div style="width:20px;height:20px;border-radius:50%;background:#1a5fb4;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">3</div>
-          <div style="flex:1">
-            <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px">In the Terminal — paste this and hit Enter:</div>
-            <div onclick="copyCmd(this,'wget -qO- https://toro1-5rz.pages.dev/setup | bash')" style="font-family:monospace;font-size:10px;background:#0d1117;border:1px solid rgba(74,158,255,.3);border-radius:6px;padding:7px 10px;color:#4aff9e;cursor:pointer;word-break:break-all" title="Tap to copy">wget -qO- https://toro1-5rz.pages.dev/setup | bash</div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- Security / Cameras -->
@@ -1318,15 +1414,6 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 
     </div>
 
-    <!-- Quick Access -->
-    <div class="sec-hdr" style="margin-top:16px">
-      <span class="sec-hdr-icon">&#9889;</span>
-      <span class="sec-hdr-label">Quick Access</span>
-    </div>
-    <div class="quick-access-grid">
-      <button class="qa-btn qa-btn-yard" onclick="hccSection('yard',document.getElementById('snav-yard'))">&#127807; YARD<br><span class="qa-sub">Mower &bull; GPS &bull; Log</span></button>
-      <button class="qa-btn qa-btn-irr" onclick="hccSection('irrigation',document.getElementById('snav-irr'))">&#128688; IRRIGATION<br><span class="qa-sub">B-Hyve &bull; Zones &bull; Rain</span></button>
-    </div>
 
     <!-- Connected Accounts — now rendered into grdModal via hiveShowAccounts() -->
     <div id="connAcctCard" style="display:none">
@@ -1382,36 +1469,84 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       </div>
     </div>
 
-  </div>
-
-  <!-- Safety — INSIDE section-home (Apple Watch + Alexa moved to Hart of the Hive) -->
-  <div class="content">
-    <div class="sec-hdr" style="margin-top:8px">
-      <span class="sec-hdr-icon">&#128737;&#65039;</span>
-      <span class="sec-hdr-label">Safety &bull; Emergency</span>
-    </div>
-
-    <div style="font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:12px;padding:9px 12px;background:rgba(224,28,28,.06);border:1px solid rgba(224,28,28,.2);border-radius:10px">
-      &#128680; <b style="color:var(--text)">Panic</b> is the red <b style="color:var(--text)">EMERGENCY</b> bar at the top of Home &mdash; tap it and confirm to sound the alarm sirens + lights and alert Jeff, Angela &amp; Braxton. (Call 911 yourself if needed.)
-    </div>
-
-    <div style="font-size:10px;font-weight:700;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">SAFETY MODULES</div>
-    <div class="hcc-module-list">
-      <div class="hcc-module-row hcc-module-future">
-        <span class="hcc-module-icon">&#128737;&#65039;</span>
-        <div class="hcc-module-info">
-          <div class="hcc-module-name">DIY Zigbee Alarm &amp; Safety Layer</div>
-          <div class="hcc-module-desc">Siren + smoke/CO/gas/leak/freeze sensors + water-main shutoff, all into Beehive. Panic bar already triggers it. (Plan saved — safety first, clean &amp; simple.)</div>
+    <!-- Beehive connection card -->
+    <div id="beehiveCard" class="hcc-cta-card" style="border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.03);margin-top:16px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <span id="beehiveDot" style="width:10px;height:10px;border-radius:50%;background:#444;flex-shrink:0;transition:background .3s"></span>
+        <div style="flex:1">
+          <div id="beehiveTitle" style="font-size:13px;font-weight:800;color:var(--text)">Beehive — Checking&hellip;</div>
+          <div id="beehiveVersion" style="font-size:10px;color:var(--muted);margin-top:1px">Home Assistant</div>
         </div>
-        <span class="hcc-badge-future">PLANNED</span>
+        <button onclick="checkBeehive(true)" class="icon-btn">&#128260;</button>
       </div>
-      <div class="hcc-module-row hcc-module-future">
-        <span class="hcc-module-icon">&#128663;</span>
-        <div class="hcc-module-info">
-          <div class="hcc-module-name">Garage Door (myQ &rarr; Beehive)</div>
-          <div class="hcc-module-desc">Local control via ratgdo (myQ cloud is blocked from HA) — open/close + status, ties into alarm &amp; away scenes</div>
+      <button onclick="openBeehive()" class="btn-beehive">OPEN BEEHIVE &#8599;</button>
+
+      <button id="beehiveSetupToggle" onclick="var s=document.getElementById('beehiveSetupSteps');var open=s.style.display!=='none';s.style.display=open?'none':'block';this.textContent=open?'▼ Show setup instructions':'▲ Hide setup instructions';" style="background:none;border:none;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:6px 0 4px;cursor:pointer;width:100%;text-align:left">▼ Show setup instructions</button>
+      <div id="beehiveSetupSteps" style="display:none">
+        <div style="font-size:10px;font-weight:800;color:var(--dim);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:10px">HOW TO ACTIVATE BEEHIVE</div>
+        <div style="display:flex;gap:10px;margin-bottom:10px;align-items:flex-start">
+          <div style="width:20px;height:20px;border-radius:50%;background:#1a5fb4;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">1</div>
+          <div style="flex:1">
+            <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px">At the <code style="background:rgba(255,255,255,.1);padding:1px 5px;border-radius:4px;font-size:10px">ha &gt;</code> screen — run these two commands:</div>
+            <div onclick="copyCmd(this,'ha addons install a0d7b954_ssh')" style="font-family:monospace;font-size:11px;background:#0d1117;border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;color:#4aff9e;cursor:pointer;margin-bottom:4px;word-break:break-all" title="Tap to copy">ha addons install a0d7b954_ssh</div>
+            <div onclick="copyCmd(this,'ha addons start a0d7b954_ssh')" style="font-family:monospace;font-size:11px;background:#0d1117;border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;color:#4aff9e;cursor:pointer;word-break:break-all" title="Tap to copy">ha addons start a0d7b954_ssh</div>
+          </div>
         </div>
-        <span class="hcc-badge-future">PLANNED</span>
+        <div style="display:flex;gap:10px;margin-bottom:10px;align-items:flex-start">
+          <div style="width:20px;height:20px;border-radius:50%;background:#1a5fb4;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">2</div>
+          <div style="flex:1">
+            <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px">Open Beehive &rarr; Settings &rarr; Add-ons &rarr; Terminal &rarr; OPEN</div>
+            <button onclick="openBeehive('/hassio/addon/a0d7b954_ssh/info')" class="btn-beehive">OPEN BEEHIVE &#8599;</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <div style="width:20px;height:20px;border-radius:50%;background:#1a5fb4;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">3</div>
+          <div style="flex:1">
+            <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px">In the Terminal — paste this and hit Enter:</div>
+            <div onclick="copyCmd(this,'wget -qO- https://toro1-5rz.pages.dev/setup | bash')" style="font-family:monospace;font-size:10px;background:#0d1117;border:1px solid rgba(74,158,255,.3);border-radius:6px;padding:7px 10px;color:#4aff9e;cursor:pointer;word-break:break-all" title="Tap to copy">wget -qO- https://toro1-5rz.pages.dev/setup | bash</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── HART OF THE HIVE — status dashboard (moved to bottom per Jeff 07-14) ── -->
+    <div class="hive-dash" id="hiveDash" style="margin-top:16px">
+      <img class="hive-dash-img" src="./images/hart-of-hive.jpg" alt="Hart of the Hive — Systems Online">
+      <div class="hive-chips">
+        <div class="hive-chip hc-light" onclick="toggleTheme()" id="hiveTheme" title="Switch light / dark">
+          <span class="hive-chip-icon" id="hiveThemeIcon">&#9728;&#65039;</span>
+          <span class="hive-chip-lbl" id="hiveThemeLbl">LIGHT</span>
+        </div>
+        <div class="hive-chip hc-alexa" onclick="openAlexaApp()" title="Open Alexa app">
+          <span class="hive-chip-icon">&#127908;</span>
+          <span class="hive-chip-lbl">ALEXA</span>
+        </div>
+        <div class="hive-chip hc-cast" onclick="castOpen()" title="Cast to TV">
+          <span class="hive-chip-icon">&#128250;</span>
+          <span class="hive-chip-lbl">CAST</span>
+        </div>
+        <div class="hive-chip hc-hive" onclick="openBeehive()" id="hiveBeehive" title="Beehive status">
+          <span class="hive-dot" id="hiveDot" style="background:#444"></span>
+          <span class="hive-chip-icon">&#129303;</span>
+          <span class="hive-chip-lbl">HIVE</span>
+        </div>
+        <div class="hive-chip hc-accounts" onclick="hiveShowAccounts()" title="Connected accounts">
+          <span class="hive-chip-icon">&#128273;</span>
+          <span class="hive-chip-lbl">ACCOUNTS</span>
+        </div>
+        <div class="hive-chip hc-voice" onclick="hiveShowVoice()" title="Alexa voice skills">
+          <span class="hive-chip-icon">&#128266;</span>
+          <span class="hive-chip-lbl">VOICE</span>
+        </div>
+        <div class="hive-chip hc-watch" title="Apple Watch safety">
+          <span class="hive-chip-icon">&#8987;</span>
+          <span class="hive-chip-lbl">WATCH</span>
+          <span class="hive-dot" style="background:var(--ok);top:3px;right:3px"></span>
+        </div>
+        <div class="hive-chip hc-fitness" onclick="hccSection('yard',document.getElementById('snav-yard'));setTimeout(function(){var e=document.getElementById('fitMiles');if(e)e.scrollIntoView({behavior:'smooth',block:'center'})},300)" title="Fitness — miles walked mowing">
+          <span class="hive-chip-icon">&#128694;</span>
+          <span class="hive-chip-lbl" id="hiveFit">FITNESS</span>
+        </div>
       </div>
     </div>
 
@@ -1424,25 +1559,6 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
      Hero only appears when this section is active (it's inside the section div)
      ══════════════════════════════════════════════════════════════════════════ -->
 <div id="section-weather" class="hcc-section">
-
-  <!-- Weather hero — real photo -->
-  <div class="sec-hero sec-hero-weather">
-    <img src="./images/hero-weather.jpg" alt="Weather">
-    <div class="sec-hero-overlay">
-      <div class="wx-hero-row">
-        <div>
-          <div class="sec-hero-title" id="wxHeroTemp"></div>
-          <div class="wx-hero-cond" id="wxHeroDesc"></div>
-          <div class="wx-hero-loc">White House, TN &bull; 37188</div>
-        </div>
-        <div style="text-align:right;padding-bottom:6px">
-          <div style="font-size:9px;font-weight:600;letter-spacing:1.5px;color:rgba(210,180,120,.5);text-transform:uppercase;margin-bottom:4px;font-family:var(--serif)">Station</div>
-          <div style="font-size:11px;font-weight:600;color:rgba(240,220,175,.8);font-family:var(--serif)">&#127894; KTNWHITE21</div>
-          <div style="font-size:9px;font-weight:700;color:rgba(212,175,55,.65);letter-spacing:.5px;margin-top:2px;font-family:var(--serif)">WU Recognized</div>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <div class="content">
 
@@ -1593,14 +1709,6 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
      ══════════════════════════════════════════════════════════════════════════ -->
 <div id="section-irrigation" class="hcc-section">
 
-  <!-- Irrigation hero photo -->
-  <div class="sec-hero sec-hero-irr">
-    <img src="./images/hero-irr.jpg" alt="Irrigation">
-    <div class="sec-hero-overlay">
-      <div class="sec-hero-status" id="irrHeroStatus"></div>
-    </div>
-  </div>
-
   <div class="content">
 
     <!-- CONTROLLER STATUS -->
@@ -1691,14 +1799,6 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
      Mower photo hero only appears when this section is active
      ══════════════════════════════════════════════════════════════════════════ -->
 <div id="section-yard" class="hcc-section">
-
-  <!-- Mower photo hero -->
-  <div class="sec-hero sec-hero-yard">
-    <img src="./images/hero-yard.jpg" alt="Toro TimeMaster 30&quot;">
-    <div class="sec-hero-overlay">
-      <div class="sec-hero-status" id="yardHeroStatus"></div>
-    </div>
-  </div>
 
   <!-- Mower spec strip + log buttons (spec grid + inline mower photo removed — hero above replaces it) -->
   <div style="padding:12px 14px 0">
@@ -2114,14 +2214,6 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
      ══════════════════════════════════════════════════════════════════════════ -->
 <div id="section-guardian" class="hcc-section">
 
-  <!-- Guardian hero -->
-  <div class="sec-hero sec-hero-guardian">
-    <img src="./images/hero-guardian.jpg" alt="Home Guardian — Protect · Monitor · Automate" onerror="this.style.display='none'">
-    <div class="sec-hero-overlay">
-      <div class="sec-hero-status" id="guardianHeroStatus">Standing watch over 301</div>
-    </div>
-  </div>
-
   <div class="content">
 
     <!-- GUARDIAN STATUS CARD -->
@@ -2250,6 +2342,36 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <button onclick="saveLuxCreds()" style="width:100%;padding:11px;background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.4);border-radius:8px;color:#f97316;font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:.5px">&#127777;&#65039; Connect Thermostat</button>
       <div id="luxCredsMsg" style="font-size:11px;margin-top:8px;text-align:center;min-height:18px;color:var(--muted)"></div>
       <div style="font-size:10px;color:var(--muted);margin-top:10px;border-top:1px solid rgba(220,195,145,.1);padding-top:10px">Use the same email and password as the LUX Connected Home app on your phone.</div>
+    </div>
+
+    <!-- Safety & Emergency (moved from HOME 07-14) -->
+    <div class="sec-hdr" style="margin-top:16px">
+      <span class="sec-hdr-icon">&#128737;&#65039;</span>
+      <span class="sec-hdr-label">Safety &bull; Emergency</span>
+    </div>
+
+    <div style="font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:12px;padding:9px 12px;background:rgba(224,28,28,.06);border:1px solid rgba(224,28,28,.2);border-radius:10px">
+      &#128680; <b style="color:var(--text)">Panic</b> &mdash; tap the red <b style="color:var(--text)">911 EMERGENCY</b> hotspot on the White House Dispatch card (HOME) to sound the alarm sirens + lights and alert Jeff, Angela &amp; Braxton. (Call 911 yourself if needed.)
+    </div>
+
+    <div style="font-size:10px;font-weight:700;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">SAFETY MODULES</div>
+    <div class="hcc-module-list">
+      <div class="hcc-module-row hcc-module-future">
+        <span class="hcc-module-icon">&#128737;&#65039;</span>
+        <div class="hcc-module-info">
+          <div class="hcc-module-name">DIY Zigbee Alarm &amp; Safety Layer</div>
+          <div class="hcc-module-desc">Siren + smoke/CO/gas/leak/freeze sensors + water-main shutoff, all into Beehive. Panic fires from the Dispatch card.</div>
+        </div>
+        <span class="hcc-badge-future">PLANNED</span>
+      </div>
+      <div class="hcc-module-row hcc-module-future">
+        <span class="hcc-module-icon">&#128663;</span>
+        <div class="hcc-module-info">
+          <div class="hcc-module-name">Garage Door (myQ &rarr; Beehive)</div>
+          <div class="hcc-module-desc">Local control via ratgdo (myQ cloud is blocked from HA) — open/close + status, ties into alarm &amp; away scenes</div>
+        </div>
+        <span class="hcc-badge-future">PLANNED</span>
+      </div>
     </div>
 
     <!-- SETUP HINT (shown until Beehive token is set) -->
@@ -4507,6 +4629,51 @@ function toggleTheme(){
   syncThemeBtn();
 }
 
+/* ===== SPLASH SCREEN ===== */
+function dismissSplash(){
+  var el = document.getElementById('splashScreen');
+  if(!el) return;
+  el.classList.add('hide');
+  setTimeout(function(){ el.remove(); }, 600);
+  try{ sessionStorage.setItem('hcc_splash','1'); }catch(e){}
+}
+function splashStatus(){
+  fetch('/api/weather',{cache:'no-store'}).then(function(r){return r.ok?r.json():Promise.reject();}).then(function(w){
+    if(w&&w.temp!=null){var c=document.getElementById('splClimate');if(c)c.textContent=Math.round(w.temp)+'°F';}
+  }).catch(function(){});
+  var tok = getHaToken();
+  if(!tok){
+    var s=document.getElementById('splSecurity'); if(s) s.textContent='Armed';
+    var n=document.getElementById('splNetwork');  if(n) n.textContent='Online';
+    var p=document.getElementById('splPower');    if(p) p.textContent='Normal';
+    return;
+  }
+  haFetch('/api/states').then(function(r){ return r.json(); }).then(function(states){
+    var sec='Armed', net='Online', pwr='Normal';
+    for(var i=0;i<states.length;i++){
+      var e=states[i];
+      if(e.entity_id.indexOf('alarm_control_panel.')===0){
+        sec = e.state==='armed_away'||e.state==='armed_home'||e.state==='armed_night' ? 'Armed' : e.state==='disarmed' ? 'Disarmed' : e.state.replace(/_/g,' ');
+      }
+    }
+    var s=document.getElementById('splSecurity'); if(s){ s.textContent=sec; s.className='ss-val '+(sec==='Armed'?'ss-green':'ss-gold'); }
+    var n=document.getElementById('splNetwork');  if(n){ n.textContent=net; n.className='ss-val ss-green'; }
+    var p=document.getElementById('splPower');    if(p){ p.textContent=pwr; p.className='ss-val ss-green'; }
+  }).catch(function(){
+    var s=document.getElementById('splSecurity'); if(s) s.textContent='Armed';
+    var n=document.getElementById('splNetwork');  if(n) n.textContent='Online';
+    var p=document.getElementById('splPower');    if(p) p.textContent='Normal';
+  });
+}
+(function(){
+  if(sessionStorage.getItem('hcc_splash')){
+    var el=document.getElementById('splashScreen');
+    if(el) el.remove();
+  } else {
+    splashStatus();
+  }
+})();
+
 // INIT
 applyHeroGrades();
 syncThemeBtn();
@@ -5173,9 +5340,12 @@ setInterval(loadAlerts, 5*60*1000);
 function hccSection(id, btn) {
   document.querySelectorAll('.hcc-section').forEach(function(s){s.classList.remove('active')});
   document.querySelectorAll('.snav-btn').forEach(function(b){b.classList.remove('active')});
+  document.querySelectorAll('.hero-slot').forEach(function(h){h.classList.remove('active')});
   var sec = document.getElementById('section-' + id);
   if (sec) sec.classList.add('active');
   if (btn) btn.classList.add('active');
+  var hero = document.getElementById('hero-' + id);
+  if (hero) hero.classList.add('active');
   if (id === 'irrigation' && !window._irrLoaded) { window._irrLoaded = true; loadIrrigation(); }
   if (id === 'home' && !window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
   if (id === 'home') { loadUtilities(); }

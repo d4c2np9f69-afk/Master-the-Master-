@@ -1,4 +1,4 @@
-const CACHE_NAME = "hcc-v7";
+const CACHE_NAME = "hcc-v8";
 const CRITICAL_ASSETS = [
   "./",
   "./index.html",
@@ -13,7 +13,9 @@ const OPTIONAL_ASSETS = [
   "./images/hero-guardian.jpg",
   "./images/hero-cameras.jpg",
   "./images/hart-of-hive.jpg",
-  "./images/white-house-dispatch.jpg"
+  "./images/white-house-dispatch.jpg",
+  "./images/splash-portrait.jpg",
+  "./images/splash-landscape.jpg"
 ];
 
 self.addEventListener("install", event => {
