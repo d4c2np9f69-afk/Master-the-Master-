@@ -61,12 +61,22 @@ fee, no per-month anything — he already pays for Claude/Clyde, Nabu Casa, and 
 
 - **Phase 1 (free, start now):** local AI detection on the beast + in-app clip player.
   Works on any TV. Immediate win, zero hardware.
-- **Phase 2 — DECIDED (07-10, Jeff's call): beast-as-media-center via Kodi.**
-  Beast runs **Kodi** (free media center) → HDMI → Vizio TV. HA sends camera alerts to
-  Kodi via `kodi.call_method` → `GUI.ShowNotification` → toast overlay on the TV screen,
-  fades after 8s. Fire TV Stick stays as secondary HDMI input for 4K DRM streaming.
-  **NOT** simple ADB from Beehive to Fire TV — Jeff wants it routed through the beast.
-  Full setup guide: **`docs/beehive/media-center-setup.md`**.
+- **Phase 2 — SUPERSEDED (07-14, Jeff's call): Fire TV + `alexa_media_player` kept as the
+  real TV pop-up path, not Kodi.** The original 07-10 decision below was to route TV
+  alerts through Kodi on the beast; in practice, the 07-11 session built (and got working)
+  the ADB-paired Fire TV + `alexa_media_player` HACS route instead — a `media_player.
+  play_media` call that mimics the spoken "show me the [camera] camera" command, wired
+  into `AI Object Detected Notify`/`AI Show Camera on Fire TV` in `packages/hcc.yaml`.
+  That's what's live today; a 07-14 audit found it had gone quiet for 3 days (see
+  `CLAUDE.md` 07-14 changelog entry — root cause was CodeProject.AI silently not
+  restarting after a reboot, now fixed with delayed-start + failure-recovery). Jeff chose
+  (07-14) to keep this path rather than switch to Kodi. **Kodi was installed on the beast
+  but never finished** (web remote-control never enabled, never added to HA, launched once
+  for 3 minutes total) — leave it installed/unused rather than build it out further unless
+  priorities change. `docs/beehive/media-center-setup.md` describes the Kodi route that
+  was NOT taken; treat it as reference/superseded, not a live setup guide.
+  ~~Original 07-10 plan (not what got built): beast runs Kodi → HDMI → Vizio TV, HA sends
+  alerts via `kodi.call_method` → `GUI.ShowNotification`, Fire TV stays secondary-only.~~
 - **Phase 3:** full HA theater scenes + Vizio/sound orchestration + TTS announcements.
 
 ## Division of labor
