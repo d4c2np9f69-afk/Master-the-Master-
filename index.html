@@ -315,7 +315,7 @@ html,body{
 
 /* ── SECTIONS ───────────────────────────────────────────────────────────── */
 .hero-slot{display:none}
-.hero-slot.active{display:block;width:100%;max-width:100%;margin:0 auto}
+.hero-slot.active{display:block;width:100%;max-width:100%;margin:0 auto;padding-top:max(11px, calc(env(safe-area-inset-top) + 4px))}
 .hcc-section{display:none}
 .hcc-section.active{display:block;width:100%;max-width:1400px;margin:0 auto}
 
@@ -943,7 +943,7 @@ html,body{
 .hive-chip.hc-cast{top:41%;left:3%;width:14%}
 .hive-chip.hc-watch{top:41%;right:3%;width:14%}
 /* Center hexagon — the core */
-.hive-chip.hc-hive{top:27%;left:50%;transform:translateX(-50%);width:22%;padding:8px 6px 7px}
+.hive-chip.hc-hive{top:65%;left:50%;transform:translateX(-50%);width:22%;padding:8px 6px 7px}
 .hive-chip.hc-hive .hive-chip-icon{font-size:18px}
 .hive-chip.hc-hive .hive-chip-lbl{font-size:8px;letter-spacing:1px}
 /* Bottom center console — SYSTEM STATUS area */
@@ -1457,15 +1457,6 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <button onclick="acctClear('bhyve')" title="Remove saved credentials" style="padding:9px 14px;background:rgba(255,0,0,.08);border:1px solid rgba(255,0,0,.2);border-radius:8px;color:#ff6262;font-size:13px;font-weight:800;cursor:pointer">&#10005;</button>
         </div>
         <div id="acct-bhyve-msg" style="font-size:11px;text-align:center;margin-top:7px;min-height:14px"></div>
-      </div>
-    </div>
-
-    <!-- Home Status — populated when HA token available -->
-    <div id="homeStatusCard" style="display:none" class="card cat-status">
-      <div class="card-title">&#127968; Home Status</div>
-      <div id="homeStatusRows"></div>
-      <div style="margin-top:8px">
-        <button onclick="loadHomeStatus()" class="btn-full btn-gray" style="font-size:11px">&#128260; Refresh Status</button>
       </div>
     </div>
 
@@ -2241,6 +2232,15 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 
       <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadGuardian()">&#128260; Refresh</button>
       <div class="wx-note">Live from Beehive &middot; auto-refreshes every minute</div>
+    </div>
+
+    <!-- Home Status — populated when HA token available -->
+    <div id="homeStatusCard" style="display:none" class="card cat-status">
+      <div class="card-title">&#127968; Home Status</div>
+      <div id="homeStatusRows"></div>
+      <div style="margin-top:8px">
+        <button onclick="loadHomeStatus()" class="btn-full btn-gray" style="font-size:11px">&#128260; Refresh Status</button>
+      </div>
     </div>
 
     <!-- LIGHTS & PLUGS — controls HA light.* + switch.* (SYLVANIA WiFi plugs);
