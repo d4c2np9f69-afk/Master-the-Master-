@@ -940,14 +940,17 @@ html,body{
 .hive-chip.hc-voice{top:15%;right:3%;width:11%}
 .hive-chip.hc-accounts{top:15%;right:16%;width:11%}
 /* Mid-left + mid-right monitors */
-.hive-chip.hc-cast{top:41%;left:3%;width:14%}
-.hive-chip.hc-watch{top:41%;right:3%;width:14%}
+.hive-chip.hc-cast{top:48%;left:3%;width:14%}
+.hive-chip.hc-watch{top:48%;right:3%;width:14%}
 /* Center hexagon — the core */
-.hive-chip.hc-hive{top:27%;left:50%;transform:translateX(-50%);width:22%;padding:8px 6px 7px}
+.hive-chip.hc-hive{top:30%;left:50%;transform:translateX(-50%);width:22%;padding:8px 6px 7px}
 .hive-chip.hc-hive .hive-chip-icon{font-size:18px}
 .hive-chip.hc-hive .hive-chip-lbl{font-size:8px;letter-spacing:1px}
-/* Bottom center console — SYSTEM STATUS area */
-.hive-chip.hc-fitness{top:72%;left:50%;transform:translateX(-50%);width:22%}
+/* Chair area — FITNESS on the chair back */
+.hive-chip.hc-fitness{top:68%;left:50%;transform:translateX(-50%);width:22%}
+/* Under the chair — Open Beehive */
+.hive-chip.hc-beehive{top:88%;left:50%;transform:translateX(-50%);width:26%;padding:6px 8px 5px}
+.hive-chip.hc-beehive .hive-chip-lbl{font-size:7px;letter-spacing:.8px}
 html.light .hive-chips{background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.55) 30%,rgba(0,0,0,.78) 100%)}
 /* Home status rows */
 .hs-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
@@ -1537,6 +1540,11 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         <div class="hive-chip hc-fitness" onclick="hccSection('yard',document.getElementById('snav-yard'));setTimeout(function(){var e=document.getElementById('fitMiles');if(e)e.scrollIntoView({behavior:'smooth',block:'center'})},300)" title="Fitness — miles walked mowing">
           <span class="hive-chip-icon">&#128694;</span>
           <span class="hive-chip-lbl" id="hiveFit">FITNESS</span>
+        </div>
+        <div class="hive-chip hc-beehive" onclick="openBeehive()" id="hiveBeehiveBtn" title="Open Beehive dashboard">
+          <span class="hive-dot" id="hiveDot2" style="background:#444"></span>
+          <span class="hive-chip-icon">&#127793;</span>
+          <span class="hive-chip-lbl">OPEN BEEHIVE</span>
         </div>
       </div>
     </div>
@@ -5620,9 +5628,10 @@ function beehiveOnline(base, d) {
   var steps  = document.getElementById('beehiveSetupSteps');
   var toggle = document.getElementById('beehiveSetupToggle');
   if (dot)   dot.style.background = '#22c55e';
-  var hd = document.getElementById('hiveDot'), hh = document.getElementById('beehiveDotHdr');
+  var hd = document.getElementById('hiveDot'), hh = document.getElementById('beehiveDotHdr'), hd2 = document.getElementById('hiveDot2');
   if (hd) hd.style.background = '#22c55e';
   if (hh) hh.style.background = '#22c55e';
+  if (hd2) hd2.style.background = '#22c55e';
   if (title) { title.textContent = '\u{1FAB4} Beehive Online'; title.style.color = '#22c55e'; }
   if (ver)   ver.textContent = 'Home Assistant' + (d&&d.version?' '+d.version:'') + ' — ' + base.replace('http://','');
   if (steps) steps.style.display = 'none';
@@ -5648,9 +5657,10 @@ function checkBeehive(manual) {
   var title = document.getElementById('beehiveTitle');
   var ver   = document.getElementById('beehiveVersion');
   if (dot) dot.style.background = '#ffd24a';
-  var hd = document.getElementById('hiveDot'), hh = document.getElementById('beehiveDotHdr');
+  var hd = document.getElementById('hiveDot'), hh = document.getElementById('beehiveDotHdr'), hd2 = document.getElementById('hiveDot2');
   if (hd) hd.style.background = '#ffd24a';
   if (hh) hh.style.background = '#ffd24a';
+  if (hd2) hd2.style.background = '#ffd24a';
 
   var token = getHaToken();
   haFetch('/api/', { signal: AbortSignal.timeout(25000) })
@@ -5663,6 +5673,7 @@ function checkBeehive(manual) {
       if (dot)   dot.style.background = '#e01c1c';
       if (hd)    hd.style.background = '#e01c1c';
       if (hh)    hh.style.background = '#e01c1c';
+      if (hd2)   hd2.style.background = '#e01c1c';
       if (title) { title.textContent = 'Beehive Offline'; title.style.color = '#ff6262'; }
       if (ver)   ver.textContent = token ? 'Not reachable — check Beehive / Nabu Casa' : 'Enter your HA token below to connect';
       if (!token) { var p = document.getElementById('haTokenPrompt'); if (p) p.style.display = 'block'; }
