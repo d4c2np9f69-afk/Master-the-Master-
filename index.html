@@ -2422,6 +2422,17 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 
 
 <script>
+// POLYFILL: AbortSignal.timeout() doesn't exist on Safari 15 (iOS <16, e.g. old iPads capped
+// at iOS 15.8.x) — every haFetch()/fetch() call in this file uses it for request timeouts,
+// so without this shim the very first call throws synchronously and silently freezes the UI
+// on whatever "Checking…" state it was in (no error ever shown, since the .catch() never runs).
+if (typeof AbortSignal.timeout !== 'function') {
+  AbortSignal.timeout = function(ms) {
+    var ctrl = new AbortController();
+    setTimeout(function () { ctrl.abort(); }, ms);
+    return ctrl.signal;
+  };
+}
 // STATE
 var DEFAULT_STATE = {
   "hours": 5.9,
