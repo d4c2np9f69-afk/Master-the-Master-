@@ -1473,7 +1473,14 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         </div>
         <button onclick="checkBeehive(true)" class="icon-btn">&#128260;</button>
       </div>
-      <button onclick="openBeehive()" class="btn-beehive">OPEN BEEHIVE &#8599;</button>
+      <div id="beehiveTokenInline" style="display:none;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.25);border-radius:10px;padding:12px;margin-bottom:10px">
+        <div style="font-size:11px;font-weight:800;color:rgba(212,175,55,.9);margin-bottom:6px">&#128273; Paste Your Token to Connect</div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:8px;line-height:1.5">In Beehive: tap your name (bottom left) &rarr; Security &rarr; Long-Lived Access Tokens &rarr; Create Token &rarr; copy &rarr; paste below</div>
+        <input id="haTokenInline" type="password" placeholder="Paste token here&hellip;" style="width:100%;box-sizing:border-box;background:rgba(0,0,0,.4);border:1px solid rgba(212,175,55,.3);border-radius:8px;padding:9px 12px;color:#ede8df;font-size:13px;margin-bottom:8px;font-family:inherit">
+        <button onclick="saveHaTokenInline()" style="width:100%;padding:10px;background:linear-gradient(135deg,#5a3e00,#3a2800);border:1px solid rgba(212,175,55,.4);border-radius:8px;color:rgba(212,175,55,.95);font-size:12px;font-weight:800;letter-spacing:.5px;cursor:pointer">&#128275; CONNECT TO BEEHIVE</button>
+        <div id="haTokenInlineStatus" style="font-size:11px;text-align:center;margin-top:8px;min-height:16px"></div>
+      </div>
+      <button onclick="openBeehive()" class="btn-beehive" id="openBeehiveBtn">OPEN BEEHIVE &#8599;</button>
 
       <button id="beehiveSetupToggle" onclick="var s=document.getElementById('beehiveSetupSteps');var open=s.style.display!=='none';s.style.display=open?'none':'block';this.textContent=open?'▼ Show setup instructions':'▲ Hide setup instructions';" style="background:none;border:none;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:6px 0 4px;cursor:pointer;width:100%;text-align:left">▼ Show setup instructions</button>
       <div id="beehiveSetupSteps" style="display:none">
@@ -5640,6 +5647,10 @@ function beehiveOnline(base, d) {
   if (token) {
     var prompt = document.getElementById('haTokenPrompt');
     if (prompt) prompt.style.display = 'none';
+    var il = document.getElementById('beehiveTokenInline');
+    if (il) il.style.display = 'none';
+    var ob = document.getElementById('openBeehiveBtn');
+    if (ob) ob.style.display = '';
     loadCameras();
     loadHomeStatus();
     loadUtilities();
@@ -5647,6 +5658,10 @@ function beehiveOnline(base, d) {
   } else {
     var prompt = document.getElementById('haTokenPrompt');
     if (prompt) prompt.style.display = 'block';
+    var il = document.getElementById('beehiveTokenInline');
+    if (il) il.style.display = 'block';
+    var ob = document.getElementById('openBeehiveBtn');
+    if (ob) ob.style.display = 'none';
     var placeholder = document.getElementById('blinkPlaceholder');
     if (placeholder) placeholder.style.display = 'none';
   }
@@ -5675,12 +5690,22 @@ function checkBeehive(manual) {
       if (hh)    hh.style.background = '#e01c1c';
       if (hd2)   hd2.style.background = '#e01c1c';
       if (title) { title.textContent = 'Beehive Offline'; title.style.color = '#ff6262'; }
-      if (ver)   ver.textContent = token ? 'Not reachable — check Beehive / Nabu Casa' : 'Enter your HA token below to connect';
-      if (!token) { var p = document.getElementById('haTokenPrompt'); if (p) p.style.display = 'block'; }
+      if (ver)   ver.textContent = token ? 'Not reachable — check Beehive / Nabu Casa' : 'Paste your token below to connect';
+      if (!token) {
+        var p = document.getElementById('haTokenPrompt'); if (p) p.style.display = 'block';
+        var il = document.getElementById('beehiveTokenInline'); if (il) il.style.display = 'block';
+        var ob = document.getElementById('openBeehiveBtn'); if (ob) ob.style.display = 'none';
+      }
     });
 }
 
-setTimeout(function() { checkBeehive(false); }, 800);
+setTimeout(function() {
+  if (!getHaToken()) {
+    var il = document.getElementById('beehiveTokenInline'); if (il) il.style.display = 'block';
+    var ob = document.getElementById('openBeehiveBtn'); if (ob) ob.style.display = 'none';
+  }
+  checkBeehive(false);
+}, 800);
 // Self-heal: re-check Beehive + re-read the meters every 60s, so an HA restart (or a
 // momentarily-quiet meter) recovers on its own — no manual refresh. Guarded to token.
 setInterval(function(){ if (getHaToken()) { checkBeehive(false); loadUtilities(); loadGuardian(); loadLights(); loadVacuum(); } }, 60000);
@@ -5747,6 +5772,49 @@ function saveHaToken() {
           : '✅ Token saved — Beehive will connect automatically on home WiFi';
         status.innerHTML = '<span style="color:' + (err.message === 'unauthorized' ? '#e05555' : '#22c55e') + '">' + msg + '</span>';
       }
+    });
+}
+
+function saveHaTokenInline() {
+  var inp = document.getElementById('haTokenInline');
+  if (!inp || !inp.value.trim()) return;
+  var token = inp.value.trim();
+  localStorage.setItem('ha_token', token);
+  acctRefreshStatus();
+  var status = document.getElementById('haTokenInlineStatus');
+  if (status) status.innerHTML = '<span style="color:#ffd24a">Verifying&hellip;</span>';
+  haFetch('/api/', { signal: AbortSignal.timeout(25000) })
+    .then(function(r) {
+      if (r.status === 401) throw new Error('unauthorized');
+      if (!r.ok) throw new Error('http_' + r.status);
+      return r.json();
+    })
+    .then(function(d) {
+      if (d && (d.message === 'API running.' || d.version)) {
+        if (status) status.innerHTML = '<span style="color:#22c55e">&#9989; Connected! Loading cameras &amp; home data&hellip;</span>';
+        var il = document.getElementById('beehiveTokenInline');
+        if (il) setTimeout(function(){ il.style.display = 'none'; }, 1500);
+        var prompt = document.getElementById('haTokenPrompt');
+        if (prompt) prompt.style.display = 'none';
+        var ob = document.getElementById('openBeehiveBtn');
+        if (ob) ob.style.display = '';
+        loadCameras();
+        loadHomeStatus();
+        loadUtilities();
+        loadGuardian();
+        loadLights();
+        loadVacuum();
+        checkBeehive(false);
+      } else { throw new Error('unexpected_response'); }
+    })
+    .catch(function(err) {
+      if (status) {
+        var msg = err.message === 'unauthorized'
+          ? '<span style="color:#e05555">&#10060; Token rejected &mdash; create a NEW token in Beehive and paste it</span>'
+          : '<span style="color:#22c55e">&#9989; Token saved &mdash; will connect when on home WiFi</span>';
+        status.innerHTML = msg;
+      }
+      if (err.message === 'unauthorized') localStorage.removeItem('ha_token');
     });
 }
 
