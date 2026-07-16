@@ -668,6 +668,12 @@ html,body{
 .btn-red{background:linear-gradient(135deg,#c01010,#780000);color:#fff;box-shadow:0 2px 12px rgba(180,0,0,.28)}
 .btn-green{background:linear-gradient(135deg,#166534,#14532d);color:#fff}
 .btn-gray{background:rgba(255,255,255,.07);color:var(--muted);border:1px solid var(--border)}
+.ftv-dpad{width:52px;height:52px;border-radius:50%;border:1px solid var(--border);background:rgba(255,255,255,.07);color:var(--text);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;transition:background .15s}
+.ftv-dpad:active{background:rgba(56,189,248,.25)}
+.ftv-ok{width:58px;height:58px;font-size:13px;font-weight:800;letter-spacing:.5px;background:rgba(56,189,248,.15);border-color:rgba(56,189,248,.4);color:var(--text)}
+html.light .ftv-dpad{background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.15);color:var(--text)}
+html.light .ftv-dpad:active{background:rgba(56,189,248,.2)}
+html.light .ftv-ok{background:rgba(56,189,248,.1);border-color:rgba(56,189,248,.35)}
 .hcc-arm-btn{flex:1;padding:10px;border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:800;letter-spacing:.8px;font-family:inherit}
 .hdr-btns{display:flex;gap:8px;margin-top:8px}
 .hdr-btn{flex:1;min-width:0;padding:10px 8px;border-radius:10px;font-size:11px;font-weight:800;letter-spacing:.5px;border:none;text-align:center;font-family:inherit}
@@ -1539,10 +1545,10 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <span class="hive-chip-icon">&#128266;</span>
           <span class="hive-chip-lbl">VOICE</span>
         </div>
-        <div class="hive-chip hc-watch" title="Apple Watch safety">
-          <span class="hive-chip-icon">&#8987;</span>
+        <div class="hive-chip hc-watch" onclick="fireTvOpen()" title="Fire TV Remote">
+          <span class="hive-chip-icon">&#128250;</span>
           <span class="hive-chip-lbl">WATCH</span>
-          <span class="hive-dot" style="background:var(--ok);top:3px;right:3px"></span>
+          <span class="hive-dot" id="fireTvDot" style="background:#444;top:3px;right:3px"></span>
         </div>
         <div class="hive-chip hc-fitness" onclick="hccSection('yard',document.getElementById('snav-yard'));setTimeout(function(){var e=document.getElementById('fitMiles');if(e)e.scrollIntoView({behavior:'smooth',block:'center'})},300)" title="Fitness — miles walked mowing">
           <span class="hive-chip-icon">&#128694;</span>
@@ -5511,6 +5517,137 @@ function openAlexaApp() {
 // Control Center action), so this shows the quick steps instead of faking it.
 function castOpen(){ var o=document.getElementById('castOv'); if(o) o.classList.add('show'); }
 function castClose(){ var o=document.getElementById('castOv'); if(o) o.classList.remove('show'); }
+
+var FIRE_TV_ENTITY = 'media_player.fire_tv_viewing_room';
+var FIRE_TV_REMOTE = 'remote.fire_tv_viewing_room';
+
+function fireTvOpen() {
+  if (!getHaToken()) {
+    grdShow('&#128250; Fire TV', '<div style="color:var(--muted);font-size:12px;line-height:1.6">Connect Beehive on the <b>HOME</b> tab first to control the Fire TV.</div>');
+    return;
+  }
+  grdShow('&#128250; Fire TV', '<div style="color:var(--muted);text-align:center;padding:20px 0">Loading Fire TV&hellip;</div>');
+  haFetch('/api/states/' + FIRE_TV_ENTITY, { signal: AbortSignal.timeout(15000) })
+    .then(function(r) { if (!r.ok) throw new Error('http_' + r.status); return r.json(); })
+    .then(function(tv) { fireTvRender(tv); })
+    .catch(function() {
+      grdShow('&#128250; Fire TV', '<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px 0">Could not reach Fire TV &mdash; check Beehive connection.</div>');
+    });
+}
+
+function fireTvRender(tv) {
+  var st = tv.state || 'unknown';
+  var a = tv.attributes || {};
+  var app = a.app_name || '';
+  var title = a.media_title || '';
+  var artist = a.media_artist || '';
+  var pic = a.entity_picture || '';
+  var isOn = st !== 'off' && st !== 'standby' && st !== 'unavailable';
+  var dot = document.getElementById('fireTvDot');
+  if (dot) dot.style.background = isOn ? 'var(--ok)' : '#444';
+
+  var stateLabel = st === 'playing' ? '&#9654; Playing' : st === 'paused' ? '&#9208; Paused' : st === 'idle' ? '&#128308; Idle' : st === 'off' ? '&#9899; Off' : st === 'standby' ? '&#128164; Standby' : st;
+  var stateColor = st === 'playing' ? 'var(--ok)' : st === 'paused' ? 'var(--warn)' : 'var(--muted)';
+
+  var h = '<div style="text-align:center;margin-bottom:14px">';
+  h += '<div style="font-size:13px;font-weight:700;color:' + stateColor + ';margin-bottom:4px">' + stateLabel + '</div>';
+  if (app) h += '<div style="font-size:11px;color:var(--muted)">' + app + '</div>';
+  h += '</div>';
+
+  if (pic) {
+    var imgUrl = camImgBase() + pic;
+    h += '<div style="text-align:center;margin-bottom:14px"><img src="' + imgUrl + '" style="max-width:100%;max-height:180px;border-radius:10px;border:1px solid var(--border)" onerror="this.style.display=\'none\'"></div>';
+  }
+
+  if (title) {
+    h += '<div style="text-align:center;margin-bottom:14px">';
+    h += '<div style="font-size:13px;font-weight:700;color:var(--text)">' + title + '</div>';
+    if (artist) h += '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + artist + '</div>';
+    h += '</div>';
+  }
+
+  if (!isOn) {
+    h += '<div style="text-align:center;margin-bottom:16px"><button onclick="fireTvCmd(\'power\')" class="btn-full btn-green" style="max-width:200px;margin:0 auto">&#9654; TURN ON</button></div>';
+  } else {
+    h += '<div style="display:flex;justify-content:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">';
+    h += '<button onclick="fireTvCmd(\'power\')" class="btn-full btn-red" style="flex:0 0 auto;width:auto;padding:8px 14px;font-size:11px">&#9211; OFF</button>';
+    h += '<button onclick="fireTvCmd(\'home\')" class="btn-full btn-gray" style="flex:0 0 auto;width:auto;padding:8px 14px;font-size:11px">&#127968; HOME</button>';
+    h += '<button onclick="fireTvCmd(\'back\')" class="btn-full btn-gray" style="flex:0 0 auto;width:auto;padding:8px 14px;font-size:11px">&#9194; BACK</button>';
+    h += '</div>';
+
+    h += '<div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:14px">';
+    h += '<button onclick="fireTvCmd(\'up\')" class="ftv-dpad">&#9650;</button>';
+    h += '<div style="display:flex;gap:6px;align-items:center">';
+    h += '<button onclick="fireTvCmd(\'left\')" class="ftv-dpad">&#9664;</button>';
+    h += '<button onclick="fireTvCmd(\'select\')" class="ftv-dpad ftv-ok">OK</button>';
+    h += '<button onclick="fireTvCmd(\'right\')" class="ftv-dpad">&#9654;</button>';
+    h += '</div>';
+    h += '<button onclick="fireTvCmd(\'down\')" class="ftv-dpad">&#9660;</button>';
+    h += '</div>';
+
+    h += '<div style="display:flex;justify-content:center;gap:8px;margin-bottom:12px">';
+    h += '<button onclick="fireTvCmd(\'play_pause\')" class="btn-full btn-gray" style="flex:0 0 auto;width:auto;padding:8px 16px;font-size:12px">&#9199; Play/Pause</button>';
+    h += '</div>';
+
+    h += '<div style="display:flex;justify-content:center;gap:8px;margin-bottom:6px">';
+    h += '<button onclick="fireTvCmd(\'volume_down\')" class="btn-full btn-gray" style="flex:0 0 auto;width:auto;padding:8px 14px;font-size:11px">&#128265; Vol &minus;</button>';
+    h += '<button onclick="fireTvCmd(\'mute\')" class="btn-full btn-gray" style="flex:0 0 auto;width:auto;padding:8px 14px;font-size:11px">&#128263; Mute</button>';
+    h += '<button onclick="fireTvCmd(\'volume_up\')" class="btn-full btn-gray" style="flex:0 0 auto;width:auto;padding:8px 14px;font-size:11px">&#128266; Vol +</button>';
+    h += '</div>';
+  }
+
+  h += '<div style="text-align:center;margin-top:10px"><button onclick="fireTvOpen()" class="btn-full btn-gray" style="max-width:160px;margin:0 auto;font-size:10px;padding:7px 12px">&#128260; Refresh</button></div>';
+
+  grdShow('&#128250; Fire TV &mdash; Viewing Room', h);
+}
+
+function fireTvCmd(cmd) {
+  if (cmd === 'power') {
+    haFetch('/api/states/' + FIRE_TV_ENTITY, { signal: AbortSignal.timeout(10000) })
+      .then(function(r) { return r.json(); })
+      .then(function(tv) {
+        var svc = (tv.state === 'off' || tv.state === 'standby') ? 'turn_on' : 'turn_off';
+        return haFetch('/api/services/media_player/' + svc, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ entity_id: FIRE_TV_ENTITY }),
+          signal: AbortSignal.timeout(10000)
+        });
+      })
+      .then(function() { setTimeout(fireTvOpen, 1500); });
+    return;
+  }
+  if (cmd === 'play_pause') {
+    haFetch('/api/services/media_player/media_play_pause', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ entity_id: FIRE_TV_ENTITY }),
+      signal: AbortSignal.timeout(10000)
+    }).then(function() { setTimeout(fireTvOpen, 1000); });
+    return;
+  }
+  if (cmd === 'volume_up' || cmd === 'volume_down' || cmd === 'mute') {
+    var svc = cmd === 'mute' ? 'volume_mute' : cmd;
+    var body = { entity_id: FIRE_TV_ENTITY };
+    if (cmd === 'mute') body.is_volume_muted = true;
+    haFetch('/api/services/media_player/' + svc, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(10000)
+    });
+    return;
+  }
+  var keyMap = { home: 'HOME', back: 'BACK', up: 'UP', down: 'DOWN', left: 'LEFT', right: 'RIGHT', select: 'CENTER' };
+  var key = keyMap[cmd];
+  if (!key) return;
+  haFetch('/api/services/remote/send_command', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ entity_id: FIRE_TV_REMOTE, command: key }),
+    signal: AbortSignal.timeout(10000)
+  });
+}
 
 function hiveShowAccounts(){
   var src=document.getElementById('connAcctCard');
