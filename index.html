@@ -58,6 +58,7 @@ button{font-family:inherit;cursor:pointer}
   --a-yard:#c0392b;
   --a-climate:#f97316;
   --a-guardian:#3d7dd8;
+  --a-car:#7b8a9e;
   /* ── SEMANTIC STATUS TOKENS — single source of truth for good/caution/bad/info.
      Use these (or statusColor()/.s-* classes) everywhere; never hardcode the hexes. */
   --ok:#22c55e;
@@ -118,6 +119,7 @@ html.light{
   --a-yard:#b03a2e;
   --a-climate:#ea580c;
   --a-guardian:#2563eb;
+  --a-car:#5a6577;
   /* card-category title colors used around the app */
   --c-sensor:#1d4ed8;
   --c-status:#15803d;
@@ -312,6 +314,7 @@ html,body{
 #snav-yard.active   {border-bottom-color:var(--a-yard);background:rgba(192,57,43,.05)}
 #snav-climate.active{border-bottom-color:#f97316;background:rgba(249,115,22,.04)}
 #snav-guardian.active{border-bottom-color:var(--a-guardian);background:rgba(61,125,216,.05)}
+#snav-car.active{border-bottom-color:var(--a-car);background:rgba(123,138,158,.06)}
 
 /* ── SECTIONS ───────────────────────────────────────────────────────────── */
 .hero-slot{display:none}
@@ -398,6 +401,43 @@ html,body{
   text-shadow:0 1px 8px rgba(0,0,0,.9);
 }
 .sec-hero-guardian .sec-hero-status{color:rgba(240,225,190,.85)}
+/* Car hero — Mercedes GLE interior mockup with baked-in title/tabs at bottom */
+.sec-hero-car{aspect-ratio:1320/865;height:auto;max-height:480px;background:#0a0a12}
+.sec-hero-car img{object-fit:cover;object-position:center center}
+.sec-hero-car .sec-hero-overlay{
+  background:linear-gradient(to bottom,rgba(0,0,0,.5) 0%,rgba(0,0,0,.1) 40%,transparent 65%);
+  justify-content:flex-start;padding:12px 16px 0;
+  text-shadow:0 1px 8px rgba(0,0,0,.9);
+}
+.sec-hero-car .sec-hero-status{color:rgba(240,225,190,.85)}
+/* Car section sub-tabs (scoped to avoid YARD tab conflict) */
+#section-car .car-content{display:none;padding:16px 14px 72px}
+#section-car .car-content.active{display:block}
+.car-tabs{
+  display:flex;gap:0;background:var(--surface);border-bottom:1px solid var(--border);
+  overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+  position:sticky;top:58px;z-index:100;
+}
+.car-tabs::-webkit-scrollbar{display:none}
+.car-tab{
+  flex:0 0 auto;padding:12px 13px;
+  font-size:9px;font-weight:900;letter-spacing:1.6px;
+  color:var(--dim);background:none;border:none;
+  white-space:nowrap;border-bottom:3px solid transparent;
+  transition:color .15s,border-color .15s;
+  font-family:inherit;cursor:pointer;
+}
+.car-tab.active{color:var(--text);border-bottom-color:var(--a-car)}
+html.light .car-tabs{background:#fff}
+.car-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.car-stat{background:var(--card2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 12px;text-align:center}
+.car-stat-icon{font-size:22px;margin-bottom:4px}
+.car-stat-val{font-size:18px;font-weight:800;color:var(--text);font-family:var(--mono)}
+.car-stat-lbl{font-size:9px;font-weight:700;letter-spacing:1.2px;color:var(--muted);text-transform:uppercase;margin-top:2px}
+.car-tire-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0;max-width:280px;margin-left:auto;margin-right:auto}
+.car-tire{background:var(--card2);border:1px solid var(--border);border-radius:var(--radius);padding:10px;text-align:center}
+.car-tire-pos{font-size:8px;font-weight:800;letter-spacing:1.5px;color:var(--dim);text-transform:uppercase}
+.car-tire-val{font-size:16px;font-weight:800;color:var(--text);margin-top:2px}
 .yard-hero-title{
   font-family:Georgia,'Times New Roman',serif;
   font-size:clamp(15px,4.5vw,21px);font-weight:400;font-style:italic;
@@ -426,7 +466,7 @@ html,body{
 .sec-hero-placeholder-label{font-size:10px;font-weight:800;letter-spacing:2px;color:var(--dim);text-transform:uppercase}
 
 /* ── CONTENT WRAPPER ────────────────────────────────────────────────────── */
-.content{padding:16px 14px 72px}
+.content{padding:18px 14px 72px}
 #section-yard .content{display:none}
 #section-yard .content.active{display:block}
 
@@ -436,7 +476,7 @@ html,body{
   border:1px solid var(--border);
   border-radius:16px;
   padding:18px;
-  margin-bottom:14px;
+  margin-bottom:18px;
   box-shadow:0 4px 20px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.04);
 }
 .card-title{
@@ -1084,7 +1124,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 /* hcc-wrap is now applied via .hcc-section.active above */
 @media(min-width:768px){
   .hcc-section.active{padding:0 24px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-climate,.sec-hero-guardian{max-height:560px}
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-climate,.sec-hero-guardian,.sec-hero-car{max-height:560px}
   .house-hero{aspect-ratio:16/9}
   .card{padding:22px}
   .card-title{font-size:12px;letter-spacing:1px}
@@ -1096,7 +1136,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 }
 @media(min-width:1200px){
   .hcc-section.active{padding:0 40px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-climate,.sec-hero-guardian{max-height:680px}
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-climate,.sec-hero-guardian,.sec-hero-car{max-height:680px}
   .app-hdr{padding:14px 28px}
   .app-hdr-title{font-size:22px}
   .app-hdr-sub{font-size:10px;letter-spacing:4px}
@@ -1114,7 +1154,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 }
 @media(min-width:1920px){
   .hcc-section.active{max-width:1800px;padding:0 60px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-climate,.sec-hero-guardian{max-height:800px}
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-climate,.sec-hero-guardian,.sec-hero-car{max-height:800px}
   .app-hdr{padding:18px 40px}
   .app-hdr-title{font-size:26px}
   .app-hdr-sub{font-size:12px}
@@ -1141,7 +1181,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
   .app-hdr-badge{padding:10px 20px;font-size:20px;border-radius:10px}
   .snav-btn{min-width:200px;font-size:14px;padding:20px 20px 16px}
   .snav-icon{font-size:36px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-climate,.sec-hero-guardian{max-height:1000px}
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-climate,.sec-hero-guardian,.sec-hero-car{max-height:1000px}
   .card{padding:36px 40px;border-radius:22px;margin-bottom:28px}
   .card-title{font-size:16px;letter-spacing:1.5px}
   .sec-hero-title{font-size:46px}
@@ -1255,6 +1295,14 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     </div>
   </div>
 </div>
+<div class="hero-slot" id="hero-car">
+  <div class="sec-hero sec-hero-car">
+    <img src="./images/hero-car.jpg" alt="Mercedes-Benz GLE 350 4MATIC — Pinnacle Trim Command Center" onerror="this.style.display='none'">
+    <div class="sec-hero-overlay">
+      <div class="sec-hero-status" id="carHeroStatus">Pinnacle Trim Command Center</div>
+    </div>
+  </div>
+</div>
 
 <!-- ══ SECTION NAV ═══════════════════════════════════════════════════════════ -->
 <nav class="sec-nav" role="navigation" aria-label="Sections">
@@ -1273,6 +1321,9 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
   </button>
   <button class="snav-btn" id="snav-guardian" onclick="hccSection('guardian',this)">
     <span class="snav-icon">&#128737;&#65039;</span><span>GUARDIAN</span>
+  </button>
+  <button class="snav-btn" id="snav-car" onclick="hccSection('car',this)">
+    <span class="snav-icon">&#128663;</span><span>CAR</span>
   </button>
 </nav>
 
@@ -2397,6 +2448,271 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 
   </div>
 </div><!-- /section-guardian -->
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SECTION 6: CAR  (Mercedes-Benz GLE 350 4MATIC — Pinnacle Trim)
+     ══════════════════════════════════════════════════════════════════════════ -->
+<div id="section-car" class="hcc-section">
+
+  <div class="car-tabs">
+    <button class="car-tab active" onclick="carTab('car-status',this)">VEHICLE STATUS</button>
+    <button class="car-tab" onclick="carTab('car-diag',this)">DIAGNOSTICS</button>
+    <button class="car-tab" onclick="carTab('car-maint',this)">MAINTENANCE</button>
+    <button class="car-tab" onclick="carTab('car-trip',this)">TRIP &amp; FUEL</button>
+    <button class="car-tab" onclick="carTab('car-climate',this)">CLIMATE</button>
+    <button class="car-tab" onclick="carTab('car-assist',this)">ASSISTANCE</button>
+    <button class="car-tab" onclick="carTab('car-settings',this)">SETTINGS</button>
+  </div>
+
+  <!-- ── VEHICLE STATUS TAB ──────────────────────────────────────────────── -->
+  <div id="tab-car-status" class="car-content active">
+    <div class="card">
+      <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">&#128663; Vehicle Status</div>
+      <div class="wx-banner wx-go" style="margin:10px 0">Everything in Control</div>
+
+      <div class="car-stat-grid">
+        <div class="car-stat">
+          <div class="car-stat-icon">&#9981;</div>
+          <div class="car-stat-val" id="carOdo">--</div>
+          <div class="car-stat-lbl">Odometer (mi)</div>
+        </div>
+        <div class="car-stat">
+          <div class="car-stat-icon">&#9981;</div>
+          <div class="car-stat-val" id="carFuel">--</div>
+          <div class="car-stat-lbl">Fuel Level</div>
+        </div>
+        <div class="car-stat">
+          <div class="car-stat-icon">&#128267;</div>
+          <div class="car-stat-val" id="carBatt">--</div>
+          <div class="car-stat-lbl">Battery (V)</div>
+        </div>
+        <div class="car-stat">
+          <div class="car-stat-icon">&#128274;</div>
+          <div class="car-stat-val" id="carLock">--</div>
+          <div class="car-stat-lbl">Lock Status</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">Tire Pressure (PSI)</div>
+        <div class="car-tire-grid">
+          <div class="car-tire"><div class="car-tire-pos">Front Left</div><div class="car-tire-val" id="carTireFL">--</div></div>
+          <div class="car-tire"><div class="car-tire-pos">Front Right</div><div class="car-tire-val" id="carTireFR">--</div></div>
+          <div class="car-tire"><div class="car-tire-pos">Rear Left</div><div class="car-tire-val" id="carTireRL">--</div></div>
+          <div class="car-tire"><div class="car-tire-pos">Rear Right</div><div class="car-tire-val" id="carTireRR">--</div></div>
+        </div>
+      </div>
+
+      <ul class="spec-list" style="margin-top:14px">
+        <li><span class="sk">Oil Life</span><span class="sv" id="carOil">--</span></li>
+        <li><span class="sk">Range Remaining</span><span class="sv" id="carRange">--</span></li>
+        <li><span class="sk">Windows</span><span class="sv" id="carWindows">All Closed</span></li>
+        <li><span class="sk">Lights</span><span class="sv" id="carLights">Off</span></li>
+      </ul>
+      <div class="wx-note" style="margin-top:12px">Connect Mercedes me to see live data</div>
+    </div>
+  </div>
+
+  <!-- ── DIAGNOSTICS TAB ─────────────────────────────────────────────────── -->
+  <div id="tab-car-diag" class="car-content">
+    <div class="card">
+      <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">&#128147; Diagnostics &mdash; Real-Time Health</div>
+
+      <ul class="spec-list">
+        <li><span class="sk">&#128994; Engine</span><span class="sv s-ok" id="carDiagEngine">Normal</span></li>
+        <li><span class="sk">&#128994; Transmission</span><span class="sv s-ok" id="carDiagTrans">Normal</span></li>
+        <li><span class="sk">&#128994; Brakes</span><span class="sv s-ok" id="carDiagBrakes">Normal</span></li>
+        <li><span class="sk">&#128994; Emissions</span><span class="sv s-ok" id="carDiagEmissions">Normal</span></li>
+        <li><span class="sk">&#128994; ABS</span><span class="sv s-ok" id="carDiagABS">Normal</span></li>
+        <li><span class="sk">&#128994; Airbags</span><span class="sv s-ok" id="carDiagAirbags">Normal</span></li>
+        <li><span class="sk">&#128994; 4MATIC AWD</span><span class="sv s-ok" id="carDiag4M">Normal</span></li>
+        <li><span class="sk">Check Engine</span><span class="sv" id="carDiagCEL">No Codes</span></li>
+      </ul>
+
+      <div class="card" style="margin-top:14px">
+        <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">OBD-II Codes</div>
+        <div id="carOBDCodes" style="font-size:12px;color:var(--muted);line-height:1.6">No active diagnostic trouble codes</div>
+      </div>
+      <div class="wx-note" style="margin-top:12px">Connect an OBD-II adapter for live diagnostics</div>
+    </div>
+  </div>
+
+  <!-- ── MAINTENANCE TAB ─────────────────────────────────────────────────── -->
+  <div id="tab-car-maint" class="car-content">
+    <div class="card">
+      <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">&#128295; Maintenance &mdash; Stay Ahead</div>
+
+      <ul class="spec-list">
+        <li><span class="sk">Next Service</span><span class="sv" id="carNextSvc">--</span></li>
+        <li><span class="sk">Oil Change</span><span class="sv" id="carOilChange">--</span></li>
+        <li><span class="sk">Tire Rotation</span><span class="sv" id="carTireRot">--</span></li>
+        <li><span class="sk">Brake Pads (Front)</span><span class="sv" id="carBrakeFront">--</span></li>
+        <li><span class="sk">Brake Pads (Rear)</span><span class="sv" id="carBrakeRear">--</span></li>
+        <li><span class="sk">Air Filter</span><span class="sv" id="carAirFilter">--</span></li>
+        <li><span class="sk">Cabin Filter</span><span class="sv" id="carCabinFilter">--</span></li>
+        <li><span class="sk">Wiper Blades</span><span class="sv" id="carWipers">--</span></li>
+        <li><span class="sk">Coolant</span><span class="sv" id="carCoolant">--</span></li>
+        <li><span class="sk">Transmission Fluid</span><span class="sv" id="carTransFluid">--</span></li>
+      </ul>
+
+      <button class="btn-full btn-gray" style="margin-top:14px" onclick="carLogService()">&#128221; LOG SERVICE</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">Service History</div>
+      <div id="carServiceHistory" style="font-size:12px;color:var(--muted);line-height:1.6">No service entries yet &mdash; tap LOG SERVICE to start tracking</div>
+    </div>
+  </div>
+
+  <!-- ── TRIP & FUEL TAB ─────────────────────────────────────────────────── -->
+  <div id="tab-car-trip" class="car-content">
+    <div class="card">
+      <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">&#9981; Trip &amp; Fuel &mdash; Efficiency Matters</div>
+
+      <div class="car-stat-grid">
+        <div class="car-stat">
+          <div class="car-stat-icon">&#128663;</div>
+          <div class="car-stat-val" id="carTripDist">--</div>
+          <div class="car-stat-lbl">Trip Distance (mi)</div>
+        </div>
+        <div class="car-stat">
+          <div class="car-stat-icon">&#9201;</div>
+          <div class="car-stat-val" id="carTripTime">--</div>
+          <div class="car-stat-lbl">Trip Time</div>
+        </div>
+        <div class="car-stat">
+          <div class="car-stat-icon">&#9981;</div>
+          <div class="car-stat-val" id="carMPG">--</div>
+          <div class="car-stat-lbl">AVG MPG</div>
+        </div>
+        <div class="car-stat">
+          <div class="car-stat-icon">&#128176;</div>
+          <div class="car-stat-val" id="carFuelCost">--</div>
+          <div class="car-stat-lbl">Est. Fuel Cost</div>
+        </div>
+      </div>
+
+      <ul class="spec-list" style="margin-top:14px">
+        <li><span class="sk">Range Remaining</span><span class="sv" id="carTripRange">--</span></li>
+        <li><span class="sk">Avg Speed</span><span class="sv" id="carAvgSpeed">--</span></li>
+        <li><span class="sk">Fuel Used</span><span class="sv" id="carFuelUsed">--</span></li>
+        <li><span class="sk">Fuel Type</span><span class="sv">Premium (91+)</span></li>
+        <li><span class="sk">Tank Size</span><span class="sv">22.5 gal</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">Fuel Log</div>
+      <div id="carFuelLog" style="font-size:12px;color:var(--muted);line-height:1.6">No fuel entries yet</div>
+      <button class="btn-full btn-gray" style="margin-top:10px" onclick="carLogFuel()">&#9981; LOG FILL-UP</button>
+    </div>
+  </div>
+
+  <!-- ── CLIMATE TAB ─────────────────────────────────────────────────────── -->
+  <div id="tab-car-climate" class="car-content">
+    <div class="card">
+      <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">&#127777;&#65039; Climate &mdash; Perfect Comfort</div>
+
+      <div class="car-stat-grid">
+        <div class="car-stat">
+          <div class="car-stat-icon">&#127777;&#65039;</div>
+          <div class="car-stat-val" id="carInteriorTemp">--</div>
+          <div class="car-stat-lbl">Interior Temp</div>
+        </div>
+        <div class="car-stat">
+          <div class="car-stat-icon">&#127790;</div>
+          <div class="car-stat-val" id="carExteriorTemp">--</div>
+          <div class="car-stat-lbl">Exterior Temp</div>
+        </div>
+      </div>
+
+      <ul class="spec-list" style="margin-top:14px">
+        <li><span class="sk">A/C</span><span class="sv" id="carAC">--</span></li>
+        <li><span class="sk">Driver Seat Heat</span><span class="sv" id="carSeatL">Off</span></li>
+        <li><span class="sk">Passenger Seat Heat</span><span class="sv" id="carSeatR">Off</span></li>
+        <li><span class="sk">Steering Wheel Heat</span><span class="sv" id="carSteeringHeat">Off</span></li>
+        <li><span class="sk">Rear Climate</span><span class="sv" id="carRearClimate">--</span></li>
+        <li><span class="sk">Defrost</span><span class="sv" id="carDefrost">Off</span></li>
+      </ul>
+
+      <div style="margin-top:14px">
+        <button class="btn-full btn-gray" onclick="carRemoteStart()">&#128273; REMOTE START + CLIMATE</button>
+      </div>
+      <div class="wx-note" style="margin-top:8px">Requires Mercedes me connect subscription</div>
+    </div>
+  </div>
+
+  <!-- ── ASSISTANCE TAB ──────────────────────────────────────────────────── -->
+  <div id="tab-car-assist" class="car-content">
+    <div class="card">
+      <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">&#128222; Assistance &mdash; We've Got You</div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+        <a href="tel:18003671700" class="btn-full btn-gray" style="text-decoration:none;text-align:center;display:block">&#128222; Mercedes-Benz Roadside Assistance<br><span style="font-size:10px;font-weight:400;opacity:.7">1-800-367-1700 (24/7)</span></a>
+        <a href="tel:18003674747" class="btn-full btn-gray" style="text-decoration:none;text-align:center;display:block">&#128222; Mercedes-Benz Customer Service<br><span style="font-size:10px;font-weight:400;opacity:.7">1-800-FOR-MERC (367-4747)</span></a>
+      </div>
+
+      <ul class="spec-list" style="margin-top:14px">
+        <li><span class="sk">VIN</span><span class="sv" id="carVIN">--</span></li>
+        <li><span class="sk">Model Year</span><span class="sv" id="carYear">--</span></li>
+        <li><span class="sk">Insurance</span><span class="sv" id="carInsurance">--</span></li>
+        <li><span class="sk">Policy #</span><span class="sv" id="carPolicy">--</span></li>
+      </ul>
+
+      <div class="card" style="margin-top:14px">
+        <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">Emergency Contacts</div>
+        <div id="carEmergencyContacts" style="font-size:12px;color:var(--muted);line-height:1.6">Tap Settings to add your emergency contacts, insurance info, and VIN</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SETTINGS TAB ────────────────────────────────────────────────────── -->
+  <div id="tab-car-settings" class="car-content">
+    <div class="card">
+      <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">&#9881;&#65039; Settings &mdash; Your Preferences</div>
+
+      <ul class="spec-list" style="margin-top:10px">
+        <li><span class="sk">Vehicle</span><span class="sv">Mercedes-Benz GLE 350 4MATIC</span></li>
+        <li><span class="sk">Trim</span><span class="sv">Pinnacle</span></li>
+        <li><span class="sk">Engine</span><span class="sv">2.0L I-4 Turbo (255 hp)</span></li>
+        <li><span class="sk">Drivetrain</span><span class="sv">4MATIC All-Wheel Drive</span></li>
+        <li><span class="sk">Transmission</span><span class="sv">9G-TRONIC 9-Speed Auto</span></li>
+        <li><span class="sk">Fuel</span><span class="sv">Premium Unleaded (91+)</span></li>
+        <li><span class="sk">Tank</span><span class="sv">22.5 gal</span></li>
+        <li><span class="sk">Curb Weight</span><span class="sv">4,740 lbs</span></li>
+        <li><span class="sk">Towing Capacity</span><span class="sv">7,700 lbs</span></li>
+      </ul>
+
+      <div class="card" style="margin-top:14px">
+        <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">Vehicle Profile</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+          <div style="font-size:12px;color:var(--muted);line-height:1.5">
+            Enter your VIN and vehicle details so maintenance schedules, part numbers, and service history are all tied to your specific GLE.
+          </div>
+          <button class="btn-full btn-gray" onclick="carEditProfile()">&#9999;&#65039; EDIT VEHICLE PROFILE</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">Mercedes me connect</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6">
+          When connected, live vehicle data (fuel, tires, lock status, remote start) flows into the app automatically. The GLE 350 Pinnacle includes 3 years of Mercedes me connect services.
+        </div>
+        <button class="btn-full btn-gray" style="margin-top:10px" onclick="carConnectMerc()">&#128279; CONNECT MERCEDES ME</button>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">Alert Preferences</div>
+        <ul class="spec-list" style="margin-top:8px">
+          <li><span class="sk">Low Fuel Alert</span><span class="sv">1/4 Tank</span></li>
+          <li><span class="sk">Service Due Alert</span><span class="sv">500 mi before</span></li>
+          <li><span class="sk">Tire Pressure Alert</span><span class="sv">Below 30 PSI</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /section-car -->
 
 <!-- CART FAB -->
 <button class="cart-fab" id="cartFab" onclick="showModal('cart')">&#128722;<span id="cartCount">0</span></button>
@@ -5408,8 +5724,8 @@ function hccSection(id, btn) {
 
 /* ===== Swipe navigation ===== */
 (function(){
-  var SECTIONS=['home','weather','irrigation','yard','guardian'];
-  var NAV_IDS=['snav-home','snav-weather','snav-irr','snav-yard','snav-guardian'];
+  var SECTIONS=['home','weather','irrigation','yard','guardian','car'];
+  var NAV_IDS=['snav-home','snav-weather','snav-irr','snav-yard','snav-guardian','snav-car'];
   var startX=0, startY=0, startScrollY=0;
   var THRESHOLD=60, MAX_VERT=80;
   var _hScrollEl=null, _hScrollStart=0;
@@ -5594,6 +5910,34 @@ function fireTvCmd(cmd) {
     }).then(function() { setTimeout(fireTvOpen, 1000); });
     return;
   }
+}
+
+function carTab(id, btn) {
+  document.querySelectorAll('#section-car .car-content').forEach(function(c){ c.classList.remove('active'); });
+  document.querySelectorAll('#section-car .car-tab').forEach(function(t){ t.classList.remove('active'); });
+  var el = document.getElementById('tab-' + id);
+  if (el) el.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+function carLogService() {
+  grdShow('&#128295; Log Car Service', '<div style="font-size:12px;color:var(--muted);line-height:1.6">Service logging coming soon. This will track oil changes, tire rotations, brake work, and all maintenance for your GLE 350.</div>');
+}
+
+function carLogFuel() {
+  grdShow('&#9981; Log Fill-Up', '<div style="font-size:12px;color:var(--muted);line-height:1.6">Fuel logging coming soon. Track every fill-up to monitor fuel economy and costs.</div>');
+}
+
+function carRemoteStart() {
+  grdShow('&#128273; Remote Start', '<div style="font-size:12px;color:var(--muted);line-height:1.6">Remote start requires Mercedes me connect. Once connected, you can pre-condition the cabin from the app &mdash; start the engine, set the temperature, and let it warm up or cool down before you walk out.</div>');
+}
+
+function carEditProfile() {
+  grdShow('&#9999;&#65039; Vehicle Profile', '<div style="font-size:12px;color:var(--muted);line-height:1.6">Vehicle profile editor coming soon. Enter your VIN, purchase date, color, and plate number so everything is in one place.</div>');
+}
+
+function carConnectMerc() {
+  grdShow('&#128279; Mercedes me connect', '<div style="font-size:12px;color:var(--muted);line-height:1.6">Mercedes me connect integration is planned. This will pull live vehicle data &mdash; fuel level, tire pressure, lock status, location, and remote climate control &mdash; straight into the app.<br><br>Your GLE 350 Pinnacle includes 3 years of connected services.</div>');
 }
 
 function hiveShowAccounts(){
