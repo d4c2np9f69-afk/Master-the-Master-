@@ -2509,6 +2509,11 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         <li><span class="sk">Windows</span><span class="sv" id="carWindows">All Closed</span></li>
         <li><span class="sk">Lights</span><span class="sv" id="carLights">Off</span></li>
       </ul>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn-full btn-green" style="flex:1" onclick="carLockCmd('lock')">&#128274; LOCK</button>
+        <button class="btn-full btn-red" style="flex:1" onclick="carLockCmd('unlock')">&#128275; UNLOCK</button>
+      </div>
+      <button class="btn-full btn-gray" style="margin-top:8px" onclick="carFlashLights()">&#128261; FLASH LIGHTS</button>
       <div class="wx-note" style="margin-top:12px">Connect Mercedes me to see live data</div>
     </div>
   </div>
@@ -2636,7 +2641,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       </ul>
 
       <div style="margin-top:14px">
-        <button class="btn-full btn-gray" onclick="carRemoteStart()">&#128273; REMOTE START + CLIMATE</button>
+        <button class="btn-full btn-gray" onclick="carRemoteClimate()">&#128273; REMOTE START + CLIMATE</button>
       </div>
       <div class="wx-note" style="margin-top:8px">Requires Mercedes me connect subscription</div>
     </div>
@@ -5692,6 +5697,7 @@ function hccSection(id, btn) {
   if (id === 'home' && !window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
   if (id === 'home') { loadUtilities(); }
   if (id === 'guardian') { loadGuardian(); loadLights(); loadVacuum(); loadClimate(); }
+  if (id === 'car') { loadCar(); }
   if (id === 'weather') {
     /* Windy radar iframe self-loads with calendar=now; no manual refresh needed */
     if (!window._forecastLoaded) { window._forecastLoaded = true; loadForecast(); }
@@ -5940,6 +5946,178 @@ function carConnectMerc() {
   grdShow('&#128279; Mercedes me connect', '<div style="font-size:12px;color:var(--muted);line-height:1.6">Mercedes me connect integration is planned. This will pull live vehicle data &mdash; fuel level, tire pressure, lock status, location, and remote climate control &mdash; straight into the app.<br><br>Your GLE 350 Pinnacle includes 3 years of connected services.</div>');
 }
 
+function loadCar() {
+  if (!getHaToken()) return;
+  haFetch('/api/states', { signal: AbortSignal.timeout(25000) })
+  .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  .then(function(states){
+    if (!Array.isArray(states)) return;
+    function find(kw) {
+      return states.filter(function(s){
+        var id = s.entity_id.toLowerCase();
+        var name = ((s.attributes && s.attributes.friendly_name) || '').toLowerCase();
+        return (id + ' ' + name).indexOf(kw) >= 0;
+      });
+    }
+    function val(kw, fallback) {
+      var m = find(kw);
+      return m.length && m[0].state !== 'unavailable' && m[0].state !== 'unknown' ? m[0] : null;
+    }
+    function set(id, txt) { var el = document.getElementById(id); if (el) el.textContent = txt; }
+
+    var odo = val('odometer');
+    if (odo) set('carOdo', parseFloat(odo.state).toLocaleString());
+
+    var fuel = val('fuel_level') || val('tank_level');
+    if (fuel) set('carFuel', fuel.state + '%');
+
+    var range = val('range') || val('fuel_range');
+    if (range) { set('carRange', parseFloat(range.state).toFixed(0) + ' mi'); set('carTripRange', parseFloat(range.state).toFixed(0) + ' mi'); }
+
+    var lock = val('lock.');
+    if (lock) {
+      var locked = lock.state === 'locked';
+      set('carLock', locked ? 'Locked' : 'Unlocked');
+      var lockEl = document.getElementById('carLock');
+      if (lockEl) lockEl.style.color = locked ? 'var(--ok)' : 'var(--bad)';
+    }
+
+    var oil = val('oil_level') || val('oil');
+    if (oil) set('carOil', oil.state + '%');
+
+    var batt = val('starter_battery') || val('battery_state');
+    if (batt) set('carBatt', batt.state);
+
+    var tireFL = val('tire_pressure_front_left') || val('tirepressure_frontleft');
+    var tireFR = val('tire_pressure_front_right') || val('tirepressure_frontright');
+    var tireRL = val('tire_pressure_rear_left') || val('tirepressure_rearleft');
+    var tireRR = val('tire_pressure_rear_right') || val('tirepressure_rearright');
+    if (tireFL) set('carTireFL', parseFloat(tireFL.state).toFixed(1));
+    if (tireFR) set('carTireFR', parseFloat(tireFR.state).toFixed(1));
+    if (tireRL) set('carTireRL', parseFloat(tireRL.state).toFixed(1));
+    if (tireRR) set('carTireRR', parseFloat(tireRR.state).toFixed(1));
+
+    var windows = find('window').filter(function(s){ return s.entity_id.indexOf('binary_sensor.') === 0; });
+    if (windows.length) {
+      var anyOpen = windows.some(function(s){ return s.state === 'on'; });
+      set('carWindows', anyOpen ? 'Open' : 'All Closed');
+      var wEl = document.getElementById('carWindows');
+      if (wEl) wEl.style.color = anyOpen ? 'var(--warn)' : '';
+    }
+
+    var engine = val('engine_light') || val('check_engine');
+    if (engine) {
+      var celOn = engine.state === 'on';
+      set('carDiagEngine', celOn ? 'CHECK ENGINE' : 'Normal');
+      set('carDiagCEL', celOn ? 'Active' : 'No Codes');
+      var engEl = document.getElementById('carDiagEngine');
+      if (engEl) engEl.className = celOn ? 'sv s-bad' : 'sv s-ok';
+    }
+
+    var brake = val('brake_fluid') || val('brake');
+    if (brake) {
+      var brkWarn = brake.state === 'on';
+      set('carDiagBrakes', brkWarn ? 'WARNING' : 'Normal');
+      var brkEl = document.getElementById('carDiagBrakes');
+      if (brkEl) brkEl.className = brkWarn ? 'sv s-bad' : 'sv s-ok';
+    }
+
+    var wash = val('wash_water') || val('washer_fluid');
+    if (wash) {
+      var washLow = wash.state === 'on';
+      set('carDiagEmissions', washLow ? 'LOW FLUID' : 'Normal');
+    }
+
+    var svc = val('service_interval') || val('next_service');
+    if (svc) {
+      var a = svc.attributes || {};
+      var dist = a.distance || a.distance_to_service;
+      set('carNextSvc', dist ? dist + ' mi' : svc.state);
+    }
+
+    var precond = val('precond') || val('preheat');
+    if (precond) set('carAC', precond.state === 'on' ? 'Pre-conditioning' : 'Off');
+
+    var tracker = val('device_tracker.');
+    if (tracker && tracker.attributes) {
+      var a = tracker.attributes;
+      if (a.latitude && a.longitude) {
+        window._carLocation = { lat: a.latitude, lon: a.longitude, heading: a.heading || null };
+      }
+    }
+
+    var note = document.querySelector('#tab-car-status .wx-note');
+    if (note && (odo || fuel || lock)) note.textContent = 'Live from Mercedes me via Beehive';
+
+    var banner = document.querySelector('#tab-car-status .wx-banner');
+    if (banner && lock) {
+      var issues = [];
+      if (lock && lock.state !== 'locked') issues.push('Unlocked');
+      if (windows.length && windows.some(function(s){ return s.state === 'on'; })) issues.push('Window open');
+      if (engine && engine.state === 'on') issues.push('Check Engine');
+      if (issues.length) {
+        banner.textContent = issues.join(' · ');
+        banner.className = 'wx-banner wx-caution';
+      } else {
+        banner.textContent = 'Everything in Control';
+        banner.className = 'wx-banner wx-go';
+      }
+    }
+  })
+  .catch(function(e){ });
+}
+
+function carLockCmd(action) {
+  if (!getHaToken()) { grdShow('Lock', 'Connect Beehive first (HOME tab).'); return; }
+  var lock = null;
+  if (window._grdStates) {
+    lock = window._grdStates.filter(function(s){ return s.entity_id.indexOf('lock.') === 0; })[0];
+  }
+  if (!lock) { grdShow('Lock', 'No lock entity found — check mbapi2020 in Beehive.'); return; }
+  var svc = action === 'lock' ? 'lock/lock' : 'lock/unlock';
+  haFetch('/api/services/' + svc, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ entity_id: lock.entity_id })
+  }).then(function(r){
+    grdShow(action === 'lock' ? '&#128274; Locked' : '&#128275; Unlocked',
+      r.ok ? 'Command sent to Mercedes.' : 'Failed — check Beehive.');
+    setTimeout(loadCar, 3000);
+  });
+}
+
+function carFlashLights() {
+  if (!getHaToken()) { grdShow('Flash Lights', 'Connect Beehive first (HOME tab).'); return; }
+  haFetch('/api/services/button/press', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ entity_id: 'button.mercedes_gle_350_sigpos_start' })
+  }).then(function(r){
+    grdShow('&#128261; Flash Lights', r.ok ? 'Lights flashing — look for your GLE!' : 'Failed — check Beehive.');
+  });
+}
+
+function carRemoteClimate() {
+  if (!getHaToken()) { grdShow('Remote Start', 'Connect Beehive first (HOME tab).'); return; }
+  var sw = null;
+  if (window._grdStates) {
+    sw = window._grdStates.filter(function(s){
+      return (s.entity_id.indexOf('switch.') === 0 || s.entity_id.indexOf('button.') === 0)
+        && (s.entity_id.indexOf('preheat') >= 0 || s.entity_id.indexOf('precond') >= 0 || s.entity_id.indexOf('preclimat') >= 0);
+    })[0];
+  }
+  if (!sw) { grdShow('Remote Start', 'No preconditioning entity found — check mbapi2020 in Beehive.'); return; }
+  var svc = sw.entity_id.indexOf('button.') === 0 ? 'button/press' : 'switch/turn_on';
+  haFetch('/api/services/' + svc, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ entity_id: sw.entity_id })
+  }).then(function(r){
+    grdShow('&#128273; Remote Climate', r.ok ? 'Pre-conditioning started — your GLE is warming up / cooling down.' : 'Failed — check Beehive.');
+    setTimeout(loadCar, 5000);
+  });
+}
+
 function hiveShowAccounts(){
   var src=document.getElementById('connAcctCard');
   if(!src) return;
@@ -6147,7 +6325,7 @@ setTimeout(function() {
 }, 800);
 // Self-heal: re-check Beehive + re-read the meters every 60s, so an HA restart (or a
 // momentarily-quiet meter) recovers on its own — no manual refresh. Guarded to token.
-setInterval(function(){ if (getHaToken()) { checkBeehive(false); loadUtilities(); loadGuardian(); loadLights(); loadVacuum(); } }, 60000);
+setInterval(function(){ if (getHaToken()) { checkBeehive(false); loadUtilities(); loadGuardian(); loadLights(); loadVacuum(); loadCar(); } }, 60000);
 
 // ── HA TOKEN & HOME DATA ─────────────────────────────────────────────────
 function getHaToken() {
