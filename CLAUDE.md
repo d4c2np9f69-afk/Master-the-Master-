@@ -370,7 +370,7 @@ If any tests fail, fix them before doing anything else.
 | 6 nav buttons + swipe navigation | working |
 | Modals (LOG MOW/SERVICE, SET HOURS) | working |
 | 7 YARD tabs; GPS map + "Pin Track to Photo" calibration + telemetry sim | working |
-| CAR section — 7 sub-tabs (Status/Diag/Maint/Trip/Climate/Assist/Settings) | working (07-16) |
+| CAR section — 7 sub-tabs + `loadCar()` live via mbapi2020 + lock/unlock/flash | wired (07-17) |
 | Sensor data (battery/RPM/GPS) | working when ESP32 connected |
 | Engine hours baseline + Master Hour Calibration | correct (Jeff's real = 9.2h) |
 | Panic = red EMERGENCY bar (token-gated, routes through `/api/ha` proxy) | app fires webhook; **HA automation pending** |
@@ -390,7 +390,8 @@ If any tests fail, fix them before doing anything else.
 
 ## Change Log (highlights — full detail in `git log`)
 
-- **07-16:** 🚗 **NEW SECTION — CAR (Mercedes GLE 350 Pinnacle Trim Command Center).** 6th nav tab `#snav-car` / `#section-car`, own accent `--a-car` (#7b8a9e dark / #5a6577 light), hero `images/hero-car.jpg` (interior cockpit), 7 sub-tabs (Vehicle Status, Diagnostics, Maintenance, Trip & Fuel, Climate, Driver Assist, Settings) via scoped `carTab()` function. Section-Kit cards with `.car-stat-grid`/`.car-tire-grid` layouts. SW bumped to `hcc-v10`. Verified in Playwright: all tabs switch, hero active, other sections unbroken, zero JS errors, both themes clean.
+- **07-17:** 🚗 **CAR section wired to live Mercedes data** via mbapi2020 HACS integration. `loadCar()` fetches `/api/states` and populates odometer, fuel level, range, lock status, oil, battery, tire pressures (all 4), windows, engine/brake/wash warnings, service interval, preconditioning, GPS. LOCK/UNLOCK + FLASH LIGHTS buttons on Vehicle Status tab. Remote Climate button wired to preconditioning entity. Status banner updates dynamically. Added to 60s self-heal interval. **Pending:** Jeff installs mbapi2020 via HACS on Beehive (see setup instructions).
+- **07-16:** 🚗 **NEW SECTION — CAR (Mercedes GLE 350 Pinnacle Trim Command Center).** 7 sub-tabs via scoped `carTab()`, accent `--a-car`, hero `images/hero-car.jpg`. SW bumped to `hcc-v10`. Verified: all tabs, both themes, zero JS errors.
 - **07-15 (coworker):** 🖥️ **iPad Air 2 wall-display setup IN PROGRESS.** `AbortSignal.timeout` polyfill fixed app hanging on Safari 15 (polyfill at top of `<script>` block). HA token "HCC ipad token" pasted but Jeff said "rest of pages didn't log in" — unresolved (may just be Irrigation's separate B-Hyve login). Add-to-Home-Screen + Guided Access not yet completed. Roku TV investigated → Fire TV Stick path chosen (pending purchase).
 - **07-15 (coworker):** 🎯 **Fire TV universal pause/resume FIXED** — `cmd media_session dispatch pause` replaces broken `input keyevent 127` (confirmed live: genuine pause + exact-position resume on DVR). Blink fast-poll automation added (30s vs 5min default). Auto-return reverted to HOME key (Fubo app-relaunch was cold-starting, losing playback position).
 - **07-14 (coworker):** 🎉 **Fire TV camera pop-up FIXED via ADB/browser** (`am start -a VIEW -d <entity_picture URL>`) — `alexa_media_player` synthetic commands confirmed dead end. CodeProject.AI Server restarted (had silently died on reboot 3 days prior). `packages/hcc.yaml` editing lesson: use Terminal add-on (sed), not Studio Code Server (Prettier corrupts flow-YAML).
