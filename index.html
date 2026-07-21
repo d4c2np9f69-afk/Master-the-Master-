@@ -6023,8 +6023,13 @@ function loadCar() {
     var range = val('range') || val('fuel_range');
     if (range) { set('carRange', parseFloat(range.state).toFixed(0) + ' mi'); set('carTripRange', parseFloat(range.state).toFixed(0) + ' mi'); }
 
-    var lock = val('lock.');
-    if (lock) {
+    var lockEnts = states.filter(function(s){
+      if (s.entity_id.indexOf('lock.') !== 0) return false;
+      var id = s.entity_id.toLowerCase();
+      return id.indexOf('mercedes') >= 0 || id.indexOf('gle') >= 0 || id.indexOf('mbapi') >= 0;
+    });
+    var lock = lockEnts.length ? lockEnts[0] : null;
+    if (lock && lock.state !== 'unavailable' && lock.state !== 'unknown') {
       var locked = lock.state === 'locked';
       set('carLock', locked ? 'Locked' : 'Unlocked');
       var lockEl = document.getElementById('carLock');
@@ -6130,9 +6135,13 @@ function carLockCmd(action) {
   if (!getHaToken()) { grdShow('Lock', 'Connect Beehive first (HOME tab).'); return; }
   var lock = null;
   if (window._grdStates) {
-    lock = window._grdStates.filter(function(s){ return s.entity_id.indexOf('lock.') === 0; })[0];
+    lock = window._grdStates.filter(function(s){
+      if (s.entity_id.indexOf('lock.') !== 0) return false;
+      var id = s.entity_id.toLowerCase();
+      return id.indexOf('mercedes') >= 0 || id.indexOf('gle') >= 0 || id.indexOf('mbapi') >= 0;
+    })[0];
   }
-  if (!lock) { grdShow('Lock', 'No lock entity found — check mbapi2020 in Beehive.'); return; }
+  if (!lock) { grdShow('Lock', 'No Mercedes lock entity found — check mbapi2020 in Beehive.'); return; }
   var svc = action === 'lock' ? 'lock/lock' : 'lock/unlock';
   haFetch('/api/services/' + svc, {
     method: 'POST',
@@ -7191,7 +7200,7 @@ function guardianNightCheck(){
     var gar = states.filter(function(s){ var id = s.entity_id.toLowerCase(); return (s.entity_id.indexOf('cover.') === 0 || s.entity_id.indexOf('binary_sensor.') === 0) && id.indexOf('garage') >= 0; });
     if (gar.length){ any = true; var go = gar.some(function(g){ return g.state === 'open' || g.state === 'on'; }); if (go) anyIssue = true; rows += grdRow(!go, 'Garage', go ? 'OPEN' : 'Closed'); }
     // Locks
-    var locks = states.filter(function(s){ return s.entity_id.indexOf('lock.') === 0; });
+    var locks = states.filter(function(s){ if (s.entity_id.indexOf('lock.') !== 0) return false; var id = s.entity_id.toLowerCase(); return id.indexOf('mercedes') < 0 && id.indexOf('gle') < 0 && id.indexOf('mbapi') < 0; });
     if (locks.length){ any = true; var un = locks.filter(function(l){ return l.state !== 'locked'; }).length; if (un) anyIssue = true; rows += grdRow(un === 0, 'Locks (' + locks.length + ')', un === 0 ? 'All locked' : un + ' unlocked'); }
     // Lights
     var lights = states.filter(function(s){ return s.entity_id.indexOf('light.') === 0; });
