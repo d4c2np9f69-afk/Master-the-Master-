@@ -1,5 +1,6 @@
 /service-worker.js
-  Cache-Control: no-cache
+  Cache-Control: no-cache, no-store, must-revalidate
+  CDN-Cache-Control: no-store
 
 /
   Cache-Control: no-cache

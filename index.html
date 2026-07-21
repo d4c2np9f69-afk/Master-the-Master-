@@ -5066,6 +5066,10 @@ function splashStatus(){
   }
 })();
 
+// Service worker registration — updateViaCache:'none' forces the browser to always
+// check the network for SW updates, bypassing any CDN/HTTP cache on the JS file.
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/service-worker.js',{updateViaCache:'none'});}
+
 // INIT
 applyHeroGrades();
 syncThemeBtn();
