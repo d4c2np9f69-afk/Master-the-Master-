@@ -1,4 +1,4 @@
-const CACHE_NAME = "hcc-v10";
+const CACHE_NAME = "hcc-v11";
 const CRITICAL_ASSETS = [
   "./",
   "./index.html",
@@ -53,7 +53,7 @@ self.addEventListener("fetch", event => {
     url.pathname === "/" || url.pathname.endsWith("/index.html");
   if (isHTML) {
     event.respondWith(
-      fetch(event.request)
+      fetch(event.request, { cache: "no-cache" })
         .then(resp => {
           const copy = resp.clone();
           caches.open(CACHE_NAME).then(c => c.put(event.request, copy));
