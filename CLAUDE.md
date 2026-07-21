@@ -320,6 +320,7 @@ index.html                   — entire PWA (single file, ~580KB, ~7372 lines)
 service-worker.js            — cache version: hcc-v10
 manifest.json                — PWA manifest
 functions/api/hours.js       — GET/POST sensor data ↔ Cloudflare KV
+functions/api/auth.js        — family login: POST {password} → validates against KV, returns ha_token (see Family Login section below)
 functions/api/ha.js           — server-side proxy to HA (Nabu Casa)
 functions/api/climate.js     — GET/POST LUX thermostat via Azure B2C + myluxstat.io API
 functions/api/weather.js     — WU KTNWHITE21 + Open-Meteo fallback
@@ -331,6 +332,19 @@ beehive/esphome/hcc-mower.yaml    — ESP32 heartbeat config (NOT yet flashed to
 images/                      — hero-home.jpg, hero-irr.jpg, hero-yard.jpg, hero-guardian.jpg, hero-car.jpg
 icons/                       — icon-192.png, icon-512.png
 ```
+
+---
+
+## Family Login (`functions/api/auth.js`) — added 07-21
+
+**Purpose:** lets Jeff/family log into the app with just a shared password instead of each device needing its own HA Long-Lived Access Token pasted in manually. The server holds the real HA token; the app only ever handles the password.
+
+**How it works:**
+- `POST /api/auth {"action":"setup","password":"...","ha_token":"..."}` — **one-time only.** Hashes the password (SHA-256) and stores `auth_hash` + `auth_ha_token` in the same KV namespace as `MOWER_KV`/`HCC_KV`. **Refuses to run again if `auth_hash` already exists** (returns `{"error":"already_setup"}`) — this is a safety rail so a stray repeat call can't silently overwrite the real credentials.
+- `POST /api/auth {"password":"..."}` — normal login. Hashes the submitted password, compares to `auth_hash` in KV; on match returns `{"ok":true,"ha_token":"..."}` so the app can use HA without Jeff re-entering the token per device.
+- **Setup confirmed done and verified working 2026-07-21** (coworker session) — ran setup, then confirmed a plain login round-trips correctly and returns the HA token. **Do not run `action:"setup"` again** — it will just get rejected with `already_setup` since it's already configured; that's expected, not a bug.
+- **To reset the password or rotate the HA token:** delete the `auth_hash` key (and `auth_ha_token` if rotating the token too) from KV via the Cloudflare dashboard (Workers & Pages → KV → the `MOWER_KV`/`HCC_KV` namespace), then run `action:"setup"` again with the new values.
+- **The actual password and HA token are intentionally NOT recorded in this file or anywhere in the repo** — they only live hashed/stored in Cloudflare KV. If a future session needs to change them, ask Jeff directly rather than searching here for them.
 
 ---
 
@@ -390,6 +404,7 @@ If any tests fail, fix them before doing anything else.
 
 ## Change Log (highlights — full detail in `git log`)
 
+- **07-21 (coworker):** 🔑 **Family Login one-time setup completed + verified** (`functions/api/auth.js`, added by cloud session). Ran the `action:"setup"` call with Jeff's password + HA Long-Lived Access Token — stored hashed/plain in KV (`auth_hash`/`auth_ha_token`). Verified end-to-end: a normal `{"password":...}` login call correctly returns `{"ok":true,"ha_token":"..."}`. See new **Family Login** section above Key Files for the mechanism, reset procedure, and why the actual credentials are deliberately NOT written anywhere in this repo. Also noticed commit `70dba84` (cloud session, same day) expanded `_headers` to force `no-cache` on `/` and `/index.html` too, on top of the `service-worker.js` fix from 07-20 — belt-and-suspenders for the stale-content bug. **`loewenhome.com` custom domain was still showing the old cached `service-worker.js` header as of the last check this session** (over an hour after the fix went live on `toro1-5rz.pages.dev`) — still likely needs a manual Cloudflare dashboard cache purge; see 07-20 entry below for the checking method.
 - **07-20 (coworker):** 🔧 **Root-cause fix for the recurring "stale content" bug — `service-worker.js` was cacheable for 4 hours.** Jeff reported `loewenhome.com` still showing old content after a fix went live. Diagnosis: `index.html` was already correctly `Cache-Control: max-age=0, must-revalidate`, but `service-worker.js` itself — the file whose only job is to detect updates — was being served with Cloudflare Pages' default `public, max-age=14400, must-revalidate` (4h). Browsers could go hours (longer if offline through that window) without even requesting the new SW file, so none of the earlier fixes (hcc-v3/v6/v10 bumps, network-first HTML) fully stuck. **Fix: added `_headers` file at repo root** (Cloudflare Pages native config) forcing `/service-worker.js` → `Cache-Control: no-cache`, so the browser always revalidates it. Commit `173270a`, pushed to the deploy branch. **Verified live on `toro1-5rz.pages.dev`** (curl confirms `no-cache` now returned). **⚠️ NOT yet confirmed on `loewenhome.com` (the custom domain)** — same curl test there still returns the old `max-age=14400` header several minutes after deploy. Likely Cloudflare Pages custom-domain header propagation lag, or a zone-level Cache Rule on the `loewenhome.com` Cloudflare zone overriding `_headers`. This local session has no Cloudflare API/dashboard access to purge cache or inspect zone Cache Rules — **next session (cloud, has Cloudflare credentials) should re-check `curl -sI https://loewenhome.com/service-worker.js` for `Cache-Control: no-cache`; if still stale, purge cache for that URL in the Cloudflare dashboard (Caching → Configuration → Purge Cache, or purge by URL) and/or check for a Cache Rule on the zone that's overriding origin headers.**
 - **07-17:** 🚗 **CAR section wired to live Mercedes data** via mbapi2020 HACS integration. `loadCar()` fetches `/api/states` and populates odometer, fuel level, range, lock status, oil, battery, tire pressures (all 4), windows, engine/brake/wash warnings, service interval, preconditioning, GPS. LOCK/UNLOCK + FLASH LIGHTS buttons on Vehicle Status tab. Remote Climate button wired to preconditioning entity. Status banner updates dynamically. Added to 60s self-heal interval. **Pending:** Jeff installs mbapi2020 via HACS on Beehive (see setup instructions).
 - **07-16:** 🚗 **NEW SECTION — CAR (Mercedes GLE 350 Pinnacle Trim Command Center).** 7 sub-tabs via scoped `carTab()`, accent `--a-car`, hero `images/hero-car.jpg`. SW bumped to `hcc-v10`. Verified: all tabs, both themes, zero JS errors.
