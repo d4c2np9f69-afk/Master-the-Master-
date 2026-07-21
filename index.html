@@ -1101,6 +1101,13 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 .splash-enter{display:inline-flex;align-items:center;gap:14px;padding:16px 52px;border:1.5px solid rgba(221,182,106,.4);border-radius:14px;background:rgba(4,4,10,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-family:'Cinzel',serif;font-size:clamp(17px, 4.2vw, 26px);font-weight:700;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;transition:background .2s,border-color .2s,box-shadow .2s;box-shadow:0 4px 30px rgba(0,0,0,.4),0 0 20px rgba(255,210,130,.1);background-image:linear-gradient(180deg,#FFF2C9,#DDB66A 50%,#B67C33);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .splash-enter:active{border-color:rgba(212,175,55,.8);box-shadow:0 4px 30px rgba(0,0,0,.4),0 0 25px rgba(212,175,55,.2)}
 .splash-enter .chevron{font-size:1.1em}
+.splash-login-box{display:flex;flex-direction:column;align-items:center;gap:10px;width:min(280px,80vw);pointer-events:auto}
+.splash-input{width:100%;box-sizing:border-box;padding:12px 16px;background:rgba(0,0,0,.5);border:1px solid rgba(221,182,106,.35);border-radius:10px;color:#EED39C;font-size:15px;font-family:inherit;text-align:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);outline:none}
+.splash-input::placeholder{color:rgba(238,211,156,.35)}
+.splash-input:focus{border-color:rgba(221,182,106,.7);box-shadow:0 0 12px rgba(212,175,55,.15)}
+.splash-login-msg{font-size:12px;min-height:18px;text-align:center}
+.splash-guest{font-size:clamp(12px,3vw,15px);color:rgba(238,211,156,.4);cursor:pointer;margin-top:16px;letter-spacing:.3px;pointer-events:auto;transition:color .2s}
+.splash-guest:hover{color:rgba(238,211,156,.7)}
 .splash-bottom{width:100%;flex-shrink:0}
 .splash-status{
   display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:0;
@@ -1201,7 +1208,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
   <img src="images/splash-portrait.jpg" alt="Loewen Home at dusk" class="splash-bg portrait">
   <img src="images/splash-landscape.jpg" alt="Loewen Home at dusk" class="splash-bg landscape">
   <div class="splash-overlay"></div>
-  <div class="splash-content" onclick="dismissSplash()">
+  <div class="splash-content">
     <div class="splash-top">
       <div class="splash-title">LOEWEN HOME</div>
       <div class="splash-sub">
@@ -1212,7 +1219,12 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <div class="splash-tagline">Everything. In One Place.</div>
     </div>
     <div class="splash-mid">
-      <div class="splash-enter">ENTER <span class="chevron">&#x203A;</span></div>
+      <div class="splash-login-box" id="splashLoginBox">
+        <input id="splashPass" type="password" placeholder="Family password" class="splash-input" onkeydown="if(event.key==='Enter')splashLogin()">
+        <button onclick="splashLogin()" class="splash-enter" style="width:100%;justify-content:center">LOG IN</button>
+        <div id="splashLoginMsg" class="splash-login-msg"></div>
+      </div>
+      <div class="splash-guest" onclick="dismissSplash()">Enter as Guest &#x203A;</div>
     </div>
     <div class="splash-bottom">
       <div class="splash-status">
@@ -4984,6 +4996,35 @@ function dismissSplash(){
   setTimeout(function(){ el.remove(); }, 600);
   try{ sessionStorage.setItem('hcc_splash','1'); }catch(e){}
 }
+function splashLogin(){
+  var inp=document.getElementById('splashPass');
+  var msg=document.getElementById('splashLoginMsg');
+  if(!inp||!inp.value.trim()){if(msg){msg.style.color='#ff6262';msg.textContent='Enter the family password';}return;}
+  var btn=document.querySelector('#splashLoginBox .splash-enter');
+  if(btn){btn.textContent='Checking…';btn.style.opacity='.6';btn.style.pointerEvents='none';}
+  fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:inp.value.trim()})})
+    .then(function(r){return r.json().then(function(d){return{status:r.status,data:d};});})
+    .then(function(res){
+      if(res.data.ok&&res.data.ha_token){
+        localStorage.setItem('ha_token',res.data.ha_token);
+        localStorage.setItem('hcc_theme','dark');
+        document.documentElement.classList.remove('light');
+        syncThemeBtn();
+        if(msg){msg.style.color='#22c55e';msg.textContent='Welcome home!';}
+        setTimeout(function(){
+          dismissSplash();
+          checkBeehive(false);loadCameras();loadHomeStatus();loadUtilities();loadGuardian();loadLights();loadVacuum();loadCar();acctRefreshStatus();
+        },600);
+      } else {
+        if(msg){msg.style.color='#ff6262';msg.textContent=res.data.error==='not_setup'?'Login not set up yet':'Wrong password';}
+        if(btn){btn.textContent='LOG IN';btn.style.opacity='1';btn.style.pointerEvents='';}
+      }
+    })
+    .catch(function(){
+      if(msg){msg.style.color='#ff6262';msg.textContent='Connection error — try again';}
+      if(btn){btn.textContent='LOG IN';btn.style.opacity='1';btn.style.pointerEvents='';}
+    });
+}
 function splashStatus(){
   fetch('/api/weather',{cache:'no-store'}).then(function(r){return r.ok?r.json():Promise.reject();}).then(function(w){
     if(w&&w.temp!=null){var c=document.getElementById('splClimate');if(c)c.textContent=Math.round(w.temp)+'°F';}
@@ -5013,9 +5054,13 @@ function splashStatus(){
   });
 }
 (function(){
+  var el=document.getElementById('splashScreen');
+  if(!el) return;
   if(sessionStorage.getItem('hcc_splash')){
-    var el=document.getElementById('splashScreen');
-    if(el) el.remove();
+    el.remove();
+  } else if(localStorage.getItem('ha_token')){
+    el.remove();
+    try{sessionStorage.setItem('hcc_splash','1');}catch(e){}
   } else {
     splashStatus();
   }
