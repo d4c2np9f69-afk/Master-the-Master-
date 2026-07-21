@@ -6046,7 +6046,11 @@ function loadCar() {
     if (tireRL) set('carTireRL', parseFloat(tireRL.state).toFixed(1));
     if (tireRR) set('carTireRR', parseFloat(tireRR.state).toFixed(1));
 
-    var windows = find('window').filter(function(s){ return s.entity_id.indexOf('binary_sensor.') === 0; });
+    var windows = find('window').filter(function(s){
+      if (s.entity_id.indexOf('binary_sensor.') !== 0) return false;
+      var id = s.entity_id.toLowerCase();
+      return id.indexOf('mercedes') >= 0 || id.indexOf('gle') >= 0 || id.indexOf('mbapi') >= 0;
+    });
     if (windows.length) {
       var anyOpen = windows.some(function(s){ return s.state === 'on'; });
       set('carWindows', anyOpen ? 'Open' : 'All Closed');
@@ -7110,10 +7114,11 @@ function loadGuardian(){
       if (open) warnReasons.push('Garage open');
     } else grdSet('grd-garage', 'Sensor pending', 'hs-dim');
 
-    // DOORS — contact sensors (door/window), garage excluded (it has its own row)
+    // DOORS — contact sensors (door/window), garage + car (Mercedes) excluded
     var doors = states.filter(function(s){
       var id = s.entity_id.toLowerCase();
       if (id.indexOf('garage') >= 0) return false;
+      if (id.indexOf('mercedes') >= 0 || id.indexOf('gle') >= 0 || id.indexOf('mbapi') >= 0) return false;
       if (s.entity_id.indexOf('binary_sensor.') === 0) return (id.indexOf('door') >= 0 || id.indexOf('window') >= 0);
       if (s.entity_id.indexOf('cover.') === 0) return id.indexOf('door') >= 0;
       return false;
@@ -7174,7 +7179,7 @@ function guardianNightCheck(){
     if (!Array.isArray(states)) throw new Error('bad');
     var rows = '', anyIssue = false, any = false;
     // Doors
-    var doors = states.filter(function(s){ var id = s.entity_id.toLowerCase(); return s.entity_id.indexOf('binary_sensor.') === 0 && (id.indexOf('door') >= 0 || id.indexOf('window') >= 0) && id.indexOf('garage') < 0; });
+    var doors = states.filter(function(s){ var id = s.entity_id.toLowerCase(); return s.entity_id.indexOf('binary_sensor.') === 0 && (id.indexOf('door') >= 0 || id.indexOf('window') >= 0) && id.indexOf('garage') < 0 && id.indexOf('mercedes') < 0 && id.indexOf('gle') < 0 && id.indexOf('mbapi') < 0; });
     if (doors.length){ any = true; var od = doors.filter(function(d){ return d.state === 'on' || d.state === 'open'; }).length; if (od) anyIssue = true; rows += grdRow(od === 0, 'Doors / windows', od === 0 ? 'Secure' : od + ' open'); }
     // Garage
     var gar = states.filter(function(s){ var id = s.entity_id.toLowerCase(); return (s.entity_id.indexOf('cover.') === 0 || s.entity_id.indexOf('binary_sensor.') === 0) && id.indexOf('garage') >= 0; });
