@@ -6052,19 +6052,16 @@ function loadCar() {
       return id.indexOf('mercedes') >= 0 || id.indexOf('gle') >= 0 || id.indexOf('mbapi') >= 0;
     });
     if (windows.length) {
-      var openWins = windows.filter(function(s){ return s.state === 'on'; });
-      if (openWins.length) {
-        var names = openWins.map(function(s){
-          var n = (s.attributes && s.attributes.friendly_name) || s.entity_id;
-          n = n.replace(/mercedes|gle|350|benz/gi, '').replace(/window/gi, '').replace(/[_\s]+/g, ' ').trim();
-          return n || 'unknown';
-        });
-        set('carWindows', names.join(', ') + ' open');
-      } else {
-        set('carWindows', 'All Closed');
-      }
+      var anyOpen = false;
+      windows.forEach(function(s){
+        var id = s.entity_id.toLowerCase();
+        var inverted = id.indexOf('_closed') >= 0;
+        var isOpen = inverted ? s.state === 'off' : s.state === 'on';
+        if (isOpen) anyOpen = true;
+      });
+      set('carWindows', anyOpen ? 'Open' : 'All Closed');
       var wEl = document.getElementById('carWindows');
-      if (wEl) wEl.style.color = openWins.length ? 'var(--warn)' : '';
+      if (wEl) wEl.style.color = anyOpen ? 'var(--warn)' : '';
     }
 
     var engine = val('engine_light') || val('check_engine');
