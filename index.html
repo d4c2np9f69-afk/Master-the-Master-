@@ -6219,11 +6219,29 @@ function carRemoteClimate() {
   });
 }
 
-function carMaxCool() {
-  if (!getHaToken()) { grdShow('MAX COOL', 'Connect Beehive first (HOME tab).'); return; }
-  if (!window._grdStates) { grdShow('MAX COOL', 'No vehicle data yet — refresh CAR tab first.'); return; }
-  var states = window._grdStates;
-  var steps = [];
+function carFindMerc(states, keywords) {
+  return states.filter(function(s){
+    var id = s.entity_id.toLowerCase();
+    if (id.indexOf('mercedes') < 0 && id.indexOf('gle') < 0 && id.indexOf('mbapi') < 0) return false;
+    return keywords.some(function(k){ return id.indexOf(k) >= 0; });
+  });
+}
+function carMaxEntity(ent, steps) {
+  var id = ent.entity_id;
+  if (id.indexOf('switch.') === 0) {
+    steps.push(haFetch('/api/services/switch/turn_on', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({entity_id: id}) }));
+  } else if (id.indexOf('button.') === 0) {
+    steps.push(haFetch('/api/services/button/press', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({entity_id: id}) }));
+  } else if (id.indexOf('number.') === 0) {
+    var max = (ent.attributes && ent.attributes.max) || 3;
+    steps.push(haFetch('/api/services/number/set_value', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({entity_id: id, value: max}) }));
+  } else if (id.indexOf('select.') === 0) {
+    var opts = (ent.attributes && ent.attributes.options) || [];
+    var hi = opts[opts.length - 1] || 'high';
+    steps.push(haFetch('/api/services/select/select_option', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({entity_id: id, option: hi}) }));
+  }
+}
+function carStartPrecond(states, steps) {
   var precond = states.filter(function(s){
     return (s.entity_id.indexOf('switch.') === 0 || s.entity_id.indexOf('button.') === 0)
       && (s.entity_id.indexOf('preheat') >= 0 || s.entity_id.indexOf('precond') >= 0 || s.entity_id.indexOf('preclimat') >= 0);
@@ -6232,28 +6250,28 @@ function carMaxCool() {
     var svc = precond.entity_id.indexOf('button.') === 0 ? 'button/press' : 'switch/turn_on';
     steps.push(haFetch('/api/services/' + svc, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({entity_id: precond.entity_id}) }));
   }
-  var ventEnts = states.filter(function(s){
-    var id = s.entity_id.toLowerCase();
-    return (id.indexOf('mercedes') >= 0 || id.indexOf('gle') >= 0 || id.indexOf('mbapi') >= 0)
-      && (id.indexOf('seat_vent') >= 0 || id.indexOf('ventilat') >= 0);
-  });
-  ventEnts.forEach(function(v){
-    if (v.entity_id.indexOf('switch.') === 0) {
-      steps.push(haFetch('/api/services/switch/turn_on', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({entity_id: v.entity_id}) }));
-    } else if (v.entity_id.indexOf('number.') === 0) {
-      var max = (v.attributes && v.attributes.max) || 3;
-      steps.push(haFetch('/api/services/number/set_value', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({entity_id: v.entity_id, value: max}) }));
-    } else if (v.entity_id.indexOf('select.') === 0) {
-      var opts = (v.attributes && v.attributes.options) || [];
-      var hi = opts[opts.length - 1] || 'high';
-      steps.push(haFetch('/api/services/select/select_option', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({entity_id: v.entity_id, option: hi}) }));
+  return !!precond;
+}
+
+function carMaxCool() {
+  if (!getHaToken()) { grdShow('MAX COOL', 'Connect Beehive first (HOME tab).'); return; }
+  if (!window._grdStates) { grdShow('MAX COOL', 'No vehicle data yet — refresh CAR tab first.'); return; }
+  var states = window._grdStates;
+  var steps = [];
+  var hasPrecond = carStartPrecond(states, steps);
+  carFindMerc(states, ['seat_vent','ventilat','cooled_seat']).forEach(function(e){ carMaxEntity(e, steps); });
+  carFindMerc(states, ['rear_vent','rear_seat_vent','rear_cooled']).forEach(function(e){ carMaxEntity(e, steps); });
+  carFindMerc(states, ['zone_temp','climate_temp','temperature_setpoint','target_temp']).forEach(function(e){
+    if (e.entity_id.indexOf('number.') === 0) {
+      var min = (e.attributes && e.attributes.min) || 60;
+      steps.push(haFetch('/api/services/number/set_value', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({entity_id: e.entity_id, value: min}) }));
     }
   });
-  if (!steps.length) { grdShow('MAX COOL', 'No preconditioning or seat ventilation entities found — check mbapi2020 in Beehive.'); return; }
+  if (!steps.length) { grdShow('MAX COOL', 'No climate entities found — check mbapi2020 in Beehive.'); return; }
   Promise.all(steps).then(function(results){
     var ok = results.every(function(r){ return r.ok; });
-    var msg = ok ? 'A/C blasting + seat cooling ON. Your GLE will be ice cold.' : 'Some commands may have failed — check Beehive.';
-    if (!precond) msg = 'Seat cooling ON. Start the car with REMOTE START for full MAX COOL.';
+    var msg = ok ? 'A/C blasting + all seat cooling ON. Your GLE will be ice cold.' : 'Some commands may have failed — check Beehive.';
+    if (!hasPrecond) msg = 'Seat cooling ON. Tap REMOTE START first for full MAX COOL.';
     grdShow('&#10052;&#65039; MAX COOL', msg);
     setTimeout(loadCar, 5000);
   }).catch(function(){
@@ -6266,46 +6284,22 @@ function carMaxHeat() {
   if (!window._grdStates) { grdShow('MAX HEAT', 'No vehicle data yet — refresh CAR tab first.'); return; }
   var states = window._grdStates;
   var steps = [];
-  var precond = states.filter(function(s){
-    return (s.entity_id.indexOf('switch.') === 0 || s.entity_id.indexOf('button.') === 0)
-      && (s.entity_id.indexOf('preheat') >= 0 || s.entity_id.indexOf('precond') >= 0 || s.entity_id.indexOf('preclimat') >= 0);
-  })[0];
-  if (precond) {
-    var svc = precond.entity_id.indexOf('button.') === 0 ? 'button/press' : 'switch/turn_on';
-    steps.push(haFetch('/api/services/' + svc, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({entity_id: precond.entity_id}) }));
-  }
-  var heatEnts = states.filter(function(s){
-    var id = s.entity_id.toLowerCase();
-    return (id.indexOf('mercedes') >= 0 || id.indexOf('gle') >= 0 || id.indexOf('mbapi') >= 0)
-      && (id.indexOf('seat_heat') >= 0 || id.indexOf('heated_seat') >= 0 || id.indexOf('seat_heater') >= 0);
-  });
-  heatEnts.forEach(function(v){
-    if (v.entity_id.indexOf('switch.') === 0) {
-      steps.push(haFetch('/api/services/switch/turn_on', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({entity_id: v.entity_id}) }));
-    } else if (v.entity_id.indexOf('number.') === 0) {
-      var max = (v.attributes && v.attributes.max) || 3;
-      steps.push(haFetch('/api/services/number/set_value', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({entity_id: v.entity_id, value: max}) }));
-    } else if (v.entity_id.indexOf('select.') === 0) {
-      var opts = (v.attributes && v.attributes.options) || [];
-      var hi = opts[opts.length - 1] || 'high';
-      steps.push(haFetch('/api/services/select/select_option', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({entity_id: v.entity_id, option: hi}) }));
+  var hasPrecond = carStartPrecond(states, steps);
+  carFindMerc(states, ['seat_heat','heated_seat','seat_heater']).forEach(function(e){ carMaxEntity(e, steps); });
+  carFindMerc(states, ['rear_seat_heat','rear_heated_seat','rear_heater']).forEach(function(e){ carMaxEntity(e, steps); });
+  carFindMerc(states, ['steering_heat','heated_steering']).forEach(function(e){ carMaxEntity(e, steps); });
+  carFindMerc(states, ['defrost','defroster']).forEach(function(e){ carMaxEntity(e, steps); });
+  carFindMerc(states, ['zone_temp','climate_temp','temperature_setpoint','target_temp']).forEach(function(e){
+    if (e.entity_id.indexOf('number.') === 0) {
+      var max = (e.attributes && e.attributes.max) || 85;
+      steps.push(haFetch('/api/services/number/set_value', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({entity_id: e.entity_id, value: max}) }));
     }
   });
-  var steerEnts = states.filter(function(s){
-    var id = s.entity_id.toLowerCase();
-    return (id.indexOf('mercedes') >= 0 || id.indexOf('gle') >= 0 || id.indexOf('mbapi') >= 0)
-      && (id.indexOf('steering_heat') >= 0 || id.indexOf('heated_steering') >= 0);
-  });
-  steerEnts.forEach(function(v){
-    if (v.entity_id.indexOf('switch.') === 0) {
-      steps.push(haFetch('/api/services/switch/turn_on', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({entity_id: v.entity_id}) }));
-    }
-  });
-  if (!steps.length) { grdShow('MAX HEAT', 'No preconditioning or seat heater entities found — check mbapi2020 in Beehive.'); return; }
+  if (!steps.length) { grdShow('MAX HEAT', 'No climate entities found — check mbapi2020 in Beehive.'); return; }
   Promise.all(steps).then(function(results){
     var ok = results.every(function(r){ return r.ok; });
-    var msg = ok ? 'Heater blasting + seat warmers ON + steering wheel heat ON. Your GLE will be toasty.' : 'Some commands may have failed — check Beehive.';
-    if (!precond) msg = 'Seat warmers + steering wheel heat ON. Start the car with REMOTE START for full MAX HEAT.';
+    var msg = ok ? 'Heater blasting + all seat warmers + steering heat + defrost ON. Your GLE will be toasty.' : 'Some commands may have failed — check Beehive.';
+    if (!hasPrecond) msg = 'Seat warmers + steering heat + defrost ON. Tap REMOTE START first for full MAX HEAT.';
     grdShow('&#128293; MAX HEAT', msg);
     setTimeout(loadCar, 5000);
   }).catch(function(){
