@@ -6027,23 +6027,33 @@ function carCmdFail(title, r, e) {
   else if (r.data && r.data.error) detail = r.data.error;
   else if (r.body) detail = r.body.substring(0, 200);
   var hint = '';
-  if (r.status === 404 || r.status === 400) hint = 'Service mbapi2020.' + r.service + ' not found in Beehive. Is mbapi2020 installed and loaded?';
-  else if (r.status === 401) hint = 'HA token rejected. Re-login on the HOME tab.';
-  else if (r.status === 502) hint = 'Beehive unreachable via Nabu Casa.';
-  else hint = 'Check Beehive logs for details.';
+  var detailLower = detail.toLowerCase();
+  if (r.status === 400 && detailLower.indexOf('pull mode') >= 0) {
+    hint = 'mbapi2020 lost its WebSocket to Mercedes. In Beehive: Settings > Integrations > MercedesME 2020 > Reload. If it keeps happening, check your Mercedes Me Connect subscription.';
+  } else if (r.status === 400) {
+    hint = 'Beehive rejected the command. Possible causes: VIN not found, mbapi2020 not loaded, or pull mode. Open Beehive > Developer Tools > Services and test mbapi2020.' + r.service + ' there.';
+  } else if (r.status === 404) {
+    hint = 'Service mbapi2020.' + r.service + ' not registered. Is mbapi2020 installed + loaded in Beehive via HACS?';
+  } else if (r.status === 401) {
+    hint = 'HA token rejected. Re-login on the HOME tab.';
+  } else if (r.status === 502) {
+    hint = 'Beehive unreachable via Nabu Casa. Check that Nabu Casa / HA Cloud is enabled in Beehive.';
+  } else {
+    hint = 'Check Beehive logs for details (Settings > System > Logs).';
+  }
   grdShow(title, 'Failed (HTTP ' + r.status + ')' + (detail ? ': ' + detail : '') + '<br><br><span style="font-size:11px;color:var(--muted)">' + hint + '</span>');
 }
 function carRemoteStart() {
   if (!getHaToken()) { grdShow('Remote Start', 'Connect Beehive first (HOME tab).'); return; }
   carMbSvc('engine_start').then(function(r){
-    if (r.ok) { grdShow('&#128273; Remote Start', 'Engine started remotely. Climate will use your last settings. Runs for 10 minutes.'); setTimeout(loadCar, 5000); }
+    if (r.ok) { grdShow('&#128273; Remote Start', 'Command sent to Mercedes. Engine should start within 30 seconds &mdash; runs for about 10 minutes.<br><span style="font-size:11px;color:var(--muted)">If nothing happens, open CAR > Settings > Entity Scan to check connection status.</span>'); setTimeout(loadCar, 8000); }
     else carCmdFail('&#128273; Remote Start', r);
   }).catch(function(e){ carCmdFail('&#128273; Remote Start', null, e); });
 }
 function carRemoteStop() {
   if (!getHaToken()) { grdShow('Remote Stop', 'Connect Beehive first (HOME tab).'); return; }
   carMbSvc('engine_stop').then(function(r){
-    if (r.ok) { grdShow('&#128277; Engine Off', 'Engine stopped.'); setTimeout(loadCar, 3000); }
+    if (r.ok) { grdShow('&#128277; Engine Off', 'Stop command sent to Mercedes.'); setTimeout(loadCar, 5000); }
     else carCmdFail('&#128277; Engine Off', r);
   }).catch(function(e){ carCmdFail('&#128277; Engine Off', null, e); });
 }
@@ -6070,6 +6080,15 @@ function carScanEntities() {
       return id.indexOf('mercedes') >= 0 || id.indexOf('gle') >= 0 || id.indexOf('mbapi') >= 0;
     });
     if (!merc.length) { el.innerHTML = '<div style="color:var(--warn);font-size:12px">No Mercedes entities found. Make sure mbapi2020 is installed in Beehive via HACS.</div>'; return; }
+
+    var dataMode = null;
+    var dataModeEntity = null;
+    for (var di = 0; di < merc.length; di++) {
+      if (merc[di].entity_id.indexOf('data_mode') >= 0 || merc[di].entity_id.indexOf('datacollection') >= 0) {
+        dataMode = merc[di].state; dataModeEntity = merc[di].entity_id; break;
+      }
+    }
+
     var groups = {};
     merc.forEach(function(s){
       var domain = s.entity_id.split('.')[0];
@@ -6077,8 +6096,22 @@ function carScanEntities() {
       groups[domain].push(s);
     });
     var controllable = ['switch','button','number','select','lock','climate','light','cover','fan'];
-    var html = '<div style="font-size:11px;color:var(--ok);margin-bottom:4px;font-weight:600">' + merc.length + ' Mercedes entities found</div>';
-    html += '<div style="font-size:10px;color:var(--muted);margin-bottom:8px">VIN: ' + CAR_VIN + '</div>';
+    var html = '';
+
+    html += '<div style="font-size:12px;font-weight:800;margin-bottom:8px;color:var(--text)">CONNECTION HEALTH</div>';
+    html += '<div style="padding:8px;background:var(--surface);border-radius:8px;margin-bottom:12px;line-height:1.7;font-size:11px">';
+    if (dataMode) {
+      var isPush = dataMode.toLowerCase() === 'push';
+      html += '<div>' + (isPush ? '<b style="color:var(--ok)">DATA MODE: PUSH</b> &mdash; WebSocket active, commands will work' : '<b style="color:var(--bad)">DATA MODE: PULL</b> &mdash; WebSocket disconnected! Commands WILL NOT work.') + '</div>';
+      if (!isPush) {
+        html += '<div style="color:var(--muted);margin-top:4px">Fix: Beehive > Settings > Integrations > MercedesME 2020 > <b>Reload</b>. If it stays in pull mode, check Mercedes Me Connect subscription + MFA (must be OFF).</div>';
+      }
+    } else {
+      html += '<div style="color:var(--warn)"><b>DATA MODE: not found</b> &mdash; no data_mode sensor detected. Update mbapi2020 to v0.38.0+ via HACS.</div>';
+    }
+    html += '<div style="margin-top:4px">Entities: <b style="color:var(--ok)">' + merc.length + ' found</b> &middot; VIN: ' + CAR_VIN + '</div>';
+    html += '</div>';
+
     if (mbSvcs) {
       var svcNames = Object.keys(mbSvcs);
       html += '<div style="font-size:10px;margin-bottom:10px;padding:6px;background:var(--surface);border-radius:6px;line-height:1.6">';
@@ -6094,6 +6127,18 @@ function carScanEntities() {
       html += 'The mbapi2020 integration is not registering services. It may need to be reloaded or reinstalled in Beehive.';
       html += '</div>';
     }
+
+    html += '<div style="font-size:12px;font-weight:800;margin:12px 0 6px;color:var(--text)">COMMAND CHECKLIST</div>';
+    html += '<div style="padding:8px;background:var(--surface);border-radius:8px;margin-bottom:12px;line-height:1.8;font-size:11px;color:var(--muted)">';
+    html += 'If commands are accepted (no error) but nothing happens at the car:<br>';
+    html += '<b style="color:var(--text)">1.</b> Beehive > Integrations > MercedesME 2020 > Options > check <b>"Disable Capability Check"</b> (critical for North America)<br>';
+    html += '<b style="color:var(--text)">2.</b> Same options page > enter your Mercedes me <b>PIN</b> (required for engine start + unlock)<br>';
+    html += '<b style="color:var(--text)">3.</b> Mercedes Me app on phone > verify <b>Remote Services</b> subscription is active (not expired)<br>';
+    html += '<b style="color:var(--text)">4.</b> Mercedes account: <b>MFA must be OFF</b> for mbapi2020 to authenticate<br>';
+    html += '<b style="color:var(--text)">5.</b> HACS > mbapi2020 > update to <b>v0.38.0+</b> (fixes WebSocket reconnect bugs)<br>';
+    html += '</div>';
+
+    html += '<div style="font-size:12px;font-weight:800;margin:12px 0 6px;color:var(--text)">ALL ENTITIES</div>';
     Object.keys(groups).sort().forEach(function(domain){
       var isCtrl = controllable.indexOf(domain) >= 0;
       html += '<div style="font-size:11px;font-weight:700;color:' + (isCtrl ? 'var(--ok)' : 'var(--muted)') + ';margin:10px 0 4px;text-transform:uppercase">' + domain + (isCtrl ? ' (controllable)' : ' (read-only)') + '</div>';
@@ -6285,9 +6330,9 @@ function loadCar() {
 function carLockCmd(action) {
   if (!getHaToken()) { grdShow('Lock', 'Connect Beehive first (HOME tab).'); return; }
   var svc = action === 'lock' ? 'doors_lock' : 'doors_unlock';
-  var title = action === 'lock' ? '&#128274; Locked' : '&#128275; Unlocked';
+  var title = action === 'lock' ? '&#128274; Lock' : '&#128275; Unlock';
   carMbSvc(svc).then(function(r){
-    if (r.ok) { grdShow(title, 'Command sent to Mercedes.'); setTimeout(loadCar, 3000); }
+    if (r.ok) { grdShow(title, (action === 'lock' ? 'Lock' : 'Unlock') + ' command sent to Mercedes.<br><span style="font-size:11px;color:var(--muted)">Should take effect within 30 seconds.</span>'); setTimeout(loadCar, 5000); }
     else carCmdFail(title, r);
   }).catch(function(e){ carCmdFail(title, null, e); });
 }
@@ -6295,7 +6340,7 @@ function carLockCmd(action) {
 function carFlashLights() {
   if (!getHaToken()) { grdShow('Flash Lights', 'Connect Beehive first (HOME tab).'); return; }
   carMbSvc('sigpos_start').then(function(r){
-    if (r.ok) grdShow('&#128261; Flash Lights', 'Lights flashing — look for your GLE!');
+    if (r.ok) grdShow('&#128261; Flash Lights', 'Flash command sent &mdash; look for your GLE!');
     else carCmdFail('&#128261; Flash Lights', r);
   }).catch(function(e){ carCmdFail('&#128261; Flash Lights', null, e); });
 }
@@ -6308,15 +6353,15 @@ function carMaxCool() {
   var safe = function(p){ return p.catch(function(){ return {ok:false, status:0, service:'?'}; }); };
   Promise.all([
     safe(carMbSvc('engine_start')),
-    safe(carMbSvc('temperature_configure', { front_left:16, front_right:16, rear_left:16, rear_right:16 })),
+    safe(carMbSvc('temperature_configure', { front_left:"16", front_right:"16", rear_left:"16", rear_right:"16" })),
     safe(carMbSvc('preconditioning_configure_seats', { front_left:true, front_right:true, rear_left:true, rear_right:true }))
   ]).then(function(r){
     if (!ok(r[0])) { carCmdFail('&#10052;&#65039; MAX COOL', r[0]); return; }
-    var m = ['Engine + A/C started'];
-    if (ok(r[1])) m.push('all zones set to 61&#176;F');
+    var m = ['Engine + A/C commands sent'];
+    if (ok(r[1])) m.push('all zones 61&#176;F');
     if (ok(r[2])) m.push('seat cooling on');
-    grdShow('&#10052;&#65039; MAX COOL', m.join(', ') + '. Your GLE will be ice cold.');
-    setTimeout(loadCar, 5000);
+    grdShow('&#10052;&#65039; MAX COOL', m.join(', ') + '.<br><span style="font-size:11px;color:var(--muted)">Should take effect within 30 seconds.</span>');
+    setTimeout(loadCar, 8000);
   });
 }
 
@@ -6327,16 +6372,16 @@ function carMaxHeat() {
   Promise.all([
     safe(carMbSvc('engine_start')),
     safe(carMbSvc('auxheat_start')),
-    safe(carMbSvc('temperature_configure', { front_left:30, front_right:30, rear_left:30, rear_right:30 })),
+    safe(carMbSvc('temperature_configure', { front_left:"30", front_right:"30", rear_left:"30", rear_right:"30" })),
     safe(carMbSvc('preconditioning_configure_seats', { front_left:true, front_right:true, rear_left:true, rear_right:true }))
   ]).then(function(r){
     if (!ok(r[0])) { carCmdFail('&#128293; MAX HEAT', r[0]); return; }
-    var m = ['Engine started'];
+    var m = ['Engine + heater commands sent'];
     if (ok(r[1])) m.push('aux heater on');
-    if (ok(r[2])) m.push('all zones set to 86&#176;F');
+    if (ok(r[2])) m.push('all zones 86&#176;F');
     if (ok(r[3])) m.push('seat warmers on');
-    grdShow('&#128293; MAX HEAT', m.join(', ') + '. Your GLE will be toasty.');
-    setTimeout(loadCar, 5000);
+    grdShow('&#128293; MAX HEAT', m.join(', ') + '.<br><span style="font-size:11px;color:var(--muted)">Should take effect within 30 seconds.</span>');
+    setTimeout(loadCar, 8000);
   });
 }
 
