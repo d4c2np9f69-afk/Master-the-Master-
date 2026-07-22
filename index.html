@@ -2526,8 +2526,37 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         <button class="btn-full btn-red" style="flex:1" onclick="carLockCmd('unlock')">&#128275; UNLOCK</button>
       </div>
       <button class="btn-full btn-gray" style="margin-top:8px" onclick="carFlashLights()">&#128261; FLASH LIGHTS</button>
-      <button class="btn-full btn-gray" style="margin-top:8px" onclick="carRemoteClimate()">&#128273; REMOTE START + CLIMATE</button>
       <div class="wx-note" style="margin-top:12px">Connect Mercedes me to see live data</div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">&#127777;&#65039; Climate &amp; Comfort</div>
+
+      <div class="car-stat-grid">
+        <div class="car-stat">
+          <div class="car-stat-icon">&#127777;&#65039;</div>
+          <div class="car-stat-val" id="carInteriorTemp">--</div>
+          <div class="car-stat-lbl">Interior Temp</div>
+        </div>
+        <div class="car-stat">
+          <div class="car-stat-icon">&#127790;</div>
+          <div class="car-stat-val" id="carExteriorTemp">--</div>
+          <div class="car-stat-lbl">Exterior Temp</div>
+        </div>
+      </div>
+
+      <ul class="spec-list" style="margin-top:14px">
+        <li><span class="sk">A/C</span><span class="sv" id="carAC">--</span></li>
+        <li><span class="sk">Driver Seat Heat</span><span class="sv" id="carSeatL">Off</span></li>
+        <li><span class="sk">Passenger Seat Heat</span><span class="sv" id="carSeatR">Off</span></li>
+        <li><span class="sk">Driver Seat Air</span><span class="sv" id="carSeatAirL">Off</span></li>
+        <li><span class="sk">Passenger Seat Air</span><span class="sv" id="carSeatAirR">Off</span></li>
+        <li><span class="sk">Steering Wheel Heat</span><span class="sv" id="carSteeringHeat">Off</span></li>
+        <li><span class="sk">Rear Climate</span><span class="sv" id="carRearClimate">--</span></li>
+        <li><span class="sk">Defrost</span><span class="sv" id="carDefrost">Off</span></li>
+      </ul>
+
+      <button class="btn-full btn-gray" style="margin-top:14px" onclick="carRemoteClimate()">&#128273; REMOTE START + CLIMATE</button>
     </div>
   </div>
 
@@ -2629,34 +2658,11 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
   <!-- ── CLIMATE TAB ─────────────────────────────────────────────────────── -->
   <div id="tab-car-climate" class="car-content">
     <div class="card">
-      <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">&#127777;&#65039; Climate &mdash; Perfect Comfort</div>
-
-      <div class="car-stat-grid">
-        <div class="car-stat">
-          <div class="car-stat-icon">&#127777;&#65039;</div>
-          <div class="car-stat-val" id="carInteriorTemp">--</div>
-          <div class="car-stat-lbl">Interior Temp</div>
-        </div>
-        <div class="car-stat">
-          <div class="car-stat-icon">&#127790;</div>
-          <div class="car-stat-val" id="carExteriorTemp">--</div>
-          <div class="car-stat-lbl">Exterior Temp</div>
-        </div>
+      <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">&#127777;&#65039; Climate &amp; Comfort</div>
+      <div style="text-align:center;padding:24px 0;color:var(--muted);font-size:13px;line-height:1.6">
+        Climate controls are on the <b style="color:var(--text)">Vehicle Status</b> tab.<br>
+        <button class="btn-full btn-gray" style="margin-top:12px;max-width:260px" onclick="carTab('car-status',document.querySelector('.car-tab'))">Go to Vehicle Status</button>
       </div>
-
-      <ul class="spec-list" style="margin-top:14px">
-        <li><span class="sk">A/C</span><span class="sv" id="carAC">--</span></li>
-        <li><span class="sk">Driver Seat Heat</span><span class="sv" id="carSeatL">Off</span></li>
-        <li><span class="sk">Passenger Seat Heat</span><span class="sv" id="carSeatR">Off</span></li>
-        <li><span class="sk">Steering Wheel Heat</span><span class="sv" id="carSteeringHeat">Off</span></li>
-        <li><span class="sk">Rear Climate</span><span class="sv" id="carRearClimate">--</span></li>
-        <li><span class="sk">Defrost</span><span class="sv" id="carDefrost">Off</span></li>
-      </ul>
-
-      <div style="margin-top:14px">
-        <button class="btn-full btn-gray" onclick="carRemoteClimate()">&#128273; REMOTE START + CLIMATE</button>
-      </div>
-      <div class="wx-note" style="margin-top:8px">Requires Mercedes me connect subscription</div>
     </div>
   </div>
 
@@ -6102,6 +6108,26 @@ function loadCar() {
 
     var precond = val('precond') || val('preheat');
     if (precond) set('carAC', precond.state === 'on' ? 'Pre-conditioning' : 'Off');
+
+    var intTemp = val('interior_temperature') || val('incar_temp');
+    if (intTemp && intTemp.state !== 'unknown') set('carInteriorTemp', parseFloat(intTemp.state).toFixed(0) + '°');
+    var extTemp = val('exterior_temperature') || val('outcar_temp') || val('outside_temp');
+    if (extTemp && extTemp.state !== 'unknown') set('carExteriorTemp', parseFloat(extTemp.state).toFixed(0) + '°');
+
+    var seatHL = val('seat_heat_left') || val('seat_heater_front_left') || val('heated_seat_front_left');
+    if (seatHL) set('carSeatL', seatHL.state === 'off' || seatHL.state === '0' ? 'Off' : 'Level ' + seatHL.state);
+    var seatHR = val('seat_heat_right') || val('seat_heater_front_right') || val('heated_seat_front_right');
+    if (seatHR) set('carSeatR', seatHR.state === 'off' || seatHR.state === '0' ? 'Off' : 'Level ' + seatHR.state);
+
+    var seatAL = val('seat_vent_left') || val('seat_ventilation_front_left') || val('ventilated_seat_front_left');
+    if (seatAL) set('carSeatAirL', seatAL.state === 'off' || seatAL.state === '0' ? 'Off' : 'Level ' + seatAL.state);
+    var seatAR = val('seat_vent_right') || val('seat_ventilation_front_right') || val('ventilated_seat_front_right');
+    if (seatAR) set('carSeatAirR', seatAR.state === 'off' || seatAR.state === '0' ? 'Off' : 'Level ' + seatAR.state);
+
+    var steerHeat = val('steering_heat') || val('heated_steering');
+    if (steerHeat) set('carSteeringHeat', steerHeat.state === 'on' ? 'On' : 'Off');
+    var defrost = val('defrost') || val('defroster');
+    if (defrost) set('carDefrost', defrost.state === 'on' ? 'On' : 'Off');
 
     var tracker = val('device_tracker.');
     if (tracker && tracker.attributes) {
