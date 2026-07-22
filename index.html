@@ -6117,7 +6117,7 @@ function loadCar() {
     if (banner && lock) {
       var issues = [];
       if (lock && lock.state !== 'locked') issues.push('Unlocked');
-      if (windows.length && windows.some(function(s){ return s.state === 'on'; })) issues.push('Window open');
+      if (windows.length && windows.some(function(s){ var id = s.entity_id.toLowerCase(); var inv = id.indexOf('_closed') >= 0; return inv ? s.state === 'off' : s.state === 'on'; })) issues.push('Window open');
       if (engine && engine.state === 'on') issues.push('Check Engine');
       if (issues.length) {
         banner.textContent = issues.join(' · ');
@@ -6151,6 +6151,8 @@ function carLockCmd(action) {
     grdShow(action === 'lock' ? '&#128274; Locked' : '&#128275; Unlocked',
       r.ok ? 'Command sent to Mercedes.' : 'Failed — check Beehive.');
     setTimeout(loadCar, 3000);
+  }).catch(function(){
+    grdShow(action === 'lock' ? '&#128274; Lock' : '&#128275; Unlock', 'Could not reach Beehive.');
   });
 }
 
