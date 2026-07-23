@@ -1433,6 +1433,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
             <div class="util-stat"><div class="util-stat-label">Combined</div><div class="util-stat-val" id="util-combined-cost" style="font-weight:800">&mdash;</div></div>
           </div>
           <div id="util-irr-sewer-note" style="display:none;margin:8px 0 0;padding:8px 10px;border-radius:var(--radius);background:rgba(255,98,98,.08);border:1px solid rgba(255,98,98,.2);font-size:11px;line-height:1.5;color:var(--text)"></div>
+          <div id="util-water-history" style="display:none;margin:10px 0 0"></div>
           <div class="util-foot" id="util-water-foot"><span class="dot"></span> Waiting for Beehive meter reader</div>
         </div>
       </div>
@@ -7615,9 +7616,57 @@ function loadVacuum(){
 //     sensor.gas_cost     (template, $ this month)
 //     sensor.electric_now / electric_today / electric_month (DIY monitor, later)
 function loadUtilities() {
+  var WATER_BASE = 10.32, WATER_PER_GAL = 0.00908;
+  var SEWER_BASE = 22.74, SEWER_PER_GAL = 0.00982;
+  var WH_KEY = 'water_billing_history';
+  function whudCycleKey(){
+    var d = new Date(), y = d.getFullYear(), m = d.getMonth();
+    if (d.getDate() < 21) { m--; if (m < 0) { m = 11; y--; } }
+    return 'whud-' + y + '-' + (m + 1);
+  }
+  function getWaterHistory(){ try { return JSON.parse(localStorage.getItem(WH_KEY) || '[]'); } catch(e){ return []; } }
+  function saveWaterHistory(arr){ try { localStorage.setItem(WH_KEY, JSON.stringify(arr.slice(-24))); } catch(e){} }
+  function renderWaterHistory(){
+    var el = document.getElementById('util-water-history');
+    if (!el) return;
+    var hist = getWaterHistory();
+    if (hist.length < 1) return;
+    var fmt = function(v){ return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    function label(ck){
+      var p = ck.replace('whud-','').split('-');
+      return months[parseInt(p[1],10)-1] + ' ' + p[0];
+    }
+    var totalWaste = 0;
+    var rows = '';
+    for (var i = hist.length - 1; i >= 0; i--) {
+      var h = hist[i];
+      totalWaste += h.waste || 0;
+      var isNow = (h.cycle === whudCycleKey());
+      rows += '<tr style="border-bottom:1px solid var(--border);' + (isNow ? 'font-weight:700' : '') + '">'
+        + '<td style="padding:4px 6px;font-size:11px">' + label(h.cycle) + (isNow ? ' *' : '') + '</td>'
+        + '<td style="padding:4px 6px;font-size:11px;text-align:right">' + Math.round(h.gal).toLocaleString() + '</td>'
+        + '<td style="padding:4px 6px;font-size:11px;text-align:right">' + fmt(h.water) + '</td>'
+        + '<td style="padding:4px 6px;font-size:11px;text-align:right">' + fmt(h.sewer) + '</td>'
+        + '<td style="padding:4px 6px;font-size:11px;text-align:right;color:var(--bad)">' + fmt(h.waste || 0) + '</td>'
+        + '</tr>';
+    }
+    el.style.display = '';
+    el.innerHTML = '<div style="font-size:9px;letter-spacing:1.5px;color:var(--muted);font-weight:800;text-transform:uppercase;margin:0 0 6px;padding-top:8px;border-top:1px solid var(--border)">Billing History</div>'
+      + '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'
+      + '<thead><tr style="border-bottom:2px solid var(--border)">'
+      + '<th style="padding:4px 6px;font-size:10px;text-align:left;color:var(--muted)">Cycle</th>'
+      + '<th style="padding:4px 6px;font-size:10px;text-align:right;color:var(--muted)">Gal</th>'
+      + '<th style="padding:4px 6px;font-size:10px;text-align:right;color:var(--muted)">Water</th>'
+      + '<th style="padding:4px 6px;font-size:10px;text-align:right;color:var(--muted)">Sewer</th>'
+      + '<th style="padding:4px 6px;font-size:10px;text-align:right;color:var(--bad)">Irr. Waste</th>'
+      + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
+      + (totalWaste > 0 ? '<div style="margin-top:8px;padding:8px 10px;border-radius:var(--radius);background:rgba(255,98,98,.10);border:1px solid rgba(255,98,98,.25);font-size:12px;font-weight:700;color:var(--text)">Total sewer overcharge tracked: <span style="color:var(--bad)">' + fmt(totalWaste) + '</span></div>' : '');
+  }
+  renderWaterHistory();
   var token = getHaToken();
   var base = localStorage.getItem('ha_base') || HA_BASE;
-  if (!token || !base) return; // no Beehive yet → keep placeholders
+  if (!token || !base) return;
   function utilFoot(group, txt){
     var f = document.getElementById('util-' + group + '-foot');
     if (f){ f.classList.remove('live'); f.innerHTML = '<span class="dot"></span> ' + txt; }
@@ -7696,15 +7745,6 @@ function loadUtilities() {
     // derivative helpers, those (filled above) take priority and this is skipped.
     var GAS_RATE_PER_CCF = 1.12; // TN residential all-in ≈ $1.12/CCF (EIA $11.23/Mcf, Jan 2026;
                                  // Spire kept Piedmont's TN rates). Jeff can refine from a bill.
-    var WATER_BASE = 10.32, WATER_PER_GAL = 0.00908; // WHUD rates eff 2026-01-01 (meters < 1")
-    var SEWER_BASE = 22.74, SEWER_PER_GAL = 0.00982; // City of White House sewer (mirrors WHUD meter)
-    // WHUD reads the meter ~the 21st, so the billing cycle "belongs" to the month whose
-    // 21st most recently passed. Usage/cost track that cycle, not the calendar month.
-    function whudCycleKey(){
-      var d = new Date(), y = d.getFullYear(), m = d.getMonth();
-      if (d.getDate() < 21) { m--; if (m < 0) { m = 11; y--; } }
-      return 'whud-' + y + '-' + (m + 1);
-    }
     function rollMeter(key, curVal, periodKey){
       var now = Date.now();
       var ym = periodKey || (new Date().getFullYear() + '-' + (new Date().getMonth() + 1));
@@ -7726,28 +7766,39 @@ function loadUtilities() {
       try { localStorage.setItem(key, JSON.stringify(st)); } catch (e) {}
       return res;
     }
-    function putWaterCycle(cyc){
-      put('util-water-month', cyc.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
-      var waterEst = WATER_BASE + cyc * WATER_PER_GAL;
-      var sewerEst = SEWER_BASE + cyc * SEWER_PER_GAL;
-      var fmt = function(v){ return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
-      put('util-water-cost', fmt(waterEst));
-      put('util-sewer-cost', fmt(sewerEst));
-      put('util-combined-cost', fmt(waterEst + sewerEst));
-      var irrGal = irrMonthlyGal();
-      if (irrGal > 0) {
-        var waste = irrGal * SEWER_PER_GAL;
-        var note = document.getElementById('util-irr-sewer-note');
-        if (note) {
-          note.style.display = '';
-          note.innerHTML = '<b style="color:var(--bad)">Sewer overcharge:</b> ~' + Math.round(irrGal).toLocaleString() + ' gal/mo is irrigation — never enters the sewer. That\'s <b>' + fmt(waste) + '/mo</b> in sewer charges on water that goes on the lawn. Ask City of WH about <b>seasonal sewer averaging</b> or an <b>irrigation meter</b> to eliminate this.';
-        }
-      }
-    }
     function irrMonthlyGal(){
       var total = 0;
       Object.keys(IRR_FLOW).forEach(function(s){ total += IRR_FLOW[s] * (IRR_RUNMIN[s] || 0); });
       return total * IRR_DAYS_WK * 4.33;
+    }
+    function putWaterCycle(cyc){
+      put('util-water-month', cyc.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+      var waterEst = WATER_BASE + cyc * WATER_PER_GAL;
+      var sewerEst = SEWER_BASE + cyc * SEWER_PER_GAL;
+      var irrGal = irrMonthlyGal();
+      var sewerWaste = irrGal > 0 ? irrGal * SEWER_PER_GAL : 0;
+      var fmt = function(v){ return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+      put('util-water-cost', fmt(waterEst));
+      put('util-sewer-cost', fmt(sewerEst));
+      put('util-combined-cost', fmt(waterEst + sewerEst));
+      if (irrGal > 0) {
+        var note = document.getElementById('util-irr-sewer-note');
+        if (note) {
+          note.style.display = '';
+          note.innerHTML = '<b style="color:var(--bad)">Sewer overcharge:</b> ~' + Math.round(irrGal).toLocaleString() + ' gal/mo is irrigation — never enters the sewer. That\'s <b>' + fmt(sewerWaste) + '/mo</b> in sewer charges on water that goes on the lawn. Ask City of WH about <b>seasonal sewer averaging</b> or an <b>irrigation meter</b> to eliminate this.';
+        }
+      }
+      var ck = whudCycleKey();
+      if (cyc > 0) {
+        var hist = getWaterHistory();
+        var found = false;
+        for (var i = 0; i < hist.length; i++) {
+          if (hist[i].cycle === ck) { hist[i].gal = cyc; hist[i].water = waterEst; hist[i].sewer = sewerEst; hist[i].irrGal = Math.round(irrGal); hist[i].waste = sewerWaste; hist[i].ts = Date.now(); found = true; break; }
+        }
+        if (!found) hist.push({ cycle: ck, gal: cyc, water: waterEst, sewer: sewerEst, irrGal: Math.round(irrGal), waste: sewerWaste, ts: Date.now() });
+        saveWaterHistory(hist);
+      }
+      renderWaterHistory();
     }
     // Usage this billing cycle from HA's RECORDED HISTORY (the reading at/after the cycle
     // start), so it shows real gallons instead of 0.0 on a freshly-started tracker. Falls
