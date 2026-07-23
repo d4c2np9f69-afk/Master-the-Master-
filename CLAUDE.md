@@ -551,8 +551,10 @@ The Beelink J45 runs Home Assistant = the central hub. Devices connect THREE way
 - **Radio:** Itron 100G ERT, FCC `EO9100GDLA`. **ERT ID** starts `…333930…` (need full digits to filter). **Unencrypted**, 900–920 MHz ISM. Same RTL-SDR reads both meters.
 - Raw ÷100 = CCF. **Waiting on Jeff's first Spire bill** for rate/cycle calibration.
 
-### ⚡ ELECTRIC — DIY ESP32 + ATM90E32AS (FUTURE BUILD)
-- **Provider:** Cumberland Electric (CEMC). **200A service**, Challenger panel, meter Landis+Gyr (Gridstream, NOT Itron — can't radio-read).
+### ⚡ ELECTRIC — Cumberland Electric (CEMC) · DIY ESP32 + ATM90E32AS (FUTURE BUILD)
+- **Provider:** Cumberland Electric Membership Corporation (CEMC). Account `4501007001`. **Meter `145590962`**, Landis+Gyr Gridstream (NOT Itron — can't radio-read). **200A service**, Challenger panel. Rate: 22-Residential Electric.
+- **Rates (validated from 06/30/2026 bill):** Base **$39.00** + Energy **$0.08657/kWh** + TVA Fuel **$0.02815/kWh** = **$0.11472/kWh all-in**. Math verified: $39 + 1,903 × $0.11472 + $2 cutoff fee = $259.31 ✓.
+- **Recent usage:** Jun 2026 = 1,903 kWh ($259.31). May = 1,205 kWh. Avg daily 61 kWh (range 31-82). Summer A/C drives big spikes (Jul 2025 peaked ~1,790 kWh).
 - **Plan:** 6-channel CircuitSetup ATM90E32 board (2 chips), ESPHome `atm90e32` component → HA. CT1+CT2 = 200A mains; CT3-6 = range/dryer/AC/well pump. 2× 9V AC-AC wall-warts for voltage. ~$90-110 DIY.
 - **Panel note:** discoloration = old owner's issue, inspected, stable 10+ years. DS18B20 temp probe = peace-of-mind. **Jeff wired the house — never suggest hiring an electrician.**
 - **Bake-in extras:** spare CT on well pump, DS18B20 panel temp, water-main motorized valve (~$50), buzzer.

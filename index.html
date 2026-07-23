@@ -1477,6 +1477,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
             <div class="util-stat"><div class="util-stat-label">Now</div><div class="util-stat-val" id="util-elec-now">&mdash;<span class="util-stat-unit">kW</span></div></div>
             <div class="util-stat"><div class="util-stat-label">Today</div><div class="util-stat-val" id="util-elec-today">&mdash;<span class="util-stat-unit">kWh</span></div></div>
             <div class="util-stat"><div class="util-stat-label">This Month</div><div class="util-stat-val" id="util-elec-month">&mdash;<span class="util-stat-unit">kWh</span></div></div>
+            <div class="util-stat"><div class="util-stat-label">Est. Cost</div><div class="util-stat-val" id="util-elec-cost">&mdash;</div></div>
           </div>
           <div class="util-foot" id="util-elec-foot"><span class="dot"></span> Waiting for Beehive energy monitor</div>
         </div>
@@ -7838,11 +7839,17 @@ function loadUtilities() {
         put('util-gas-cost', '$' + (gr.month * GAS_RATE_PER_CCF).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
     }
     // ELECTRIC (DIY ATM90E32 monitor — later). Accept a couple of common names.
+    var ELEC_BASE = 39.00, ELEC_PER_KWH = 0.11472; // CEMC: $39 base + $0.08657 energy + $0.02815 TVA fuel (bill 06/30/2026)
     var eNow = (num('sensor.electric_now') != null) ? 'sensor.electric_now'
              : (num('sensor.electric_power') != null) ? 'sensor.electric_power' : null;
     if (eNow) { fill('util-elec-now', eNow, 2); live('elec'); }
     fill('util-elec-today', 'sensor.electric_today', 1);
     fill('util-elec-month', 'sensor.electric_month', 0);
+    var eMonth = num('sensor.electric_month');
+    if (eMonth != null) {
+      var eCost = ELEC_BASE + eMonth * ELEC_PER_KWH;
+      put('util-elec-cost', '$' + eCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    }
   })
   .catch(function(){
     // Couldn't reach Beehive this moment (HA restarting, off home network, token issue).
