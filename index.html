@@ -1428,8 +1428,11 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
             <div class="util-stat"><div class="util-stat-label">Reading</div><div class="util-stat-val" id="util-water-today">&mdash;<span class="util-stat-unit">gal</span></div></div>
             <div class="util-stat"><div class="util-stat-label">This Cycle</div><div class="util-stat-val" id="util-water-month">&mdash;<span class="util-stat-unit">gal</span></div></div>
             <div class="util-stat"><div class="util-stat-label">Flow</div><div class="util-stat-val" id="util-water-flow">&mdash;<span class="util-stat-unit">gpm</span></div></div>
-            <div class="util-stat"><div class="util-stat-label">Est. Water+Sewer</div><div class="util-stat-val" id="util-water-cost">&mdash;</div></div>
+            <div class="util-stat"><div class="util-stat-label">Est. Water</div><div class="util-stat-val" id="util-water-cost">&mdash;</div></div>
+            <div class="util-stat"><div class="util-stat-label">Est. Sewer</div><div class="util-stat-val" id="util-sewer-cost">&mdash;</div></div>
+            <div class="util-stat"><div class="util-stat-label">Combined</div><div class="util-stat-val" id="util-combined-cost" style="font-weight:800">&mdash;</div></div>
           </div>
+          <div id="util-irr-sewer-note" style="display:none;margin:8px 0 0;padding:8px 10px;border-radius:var(--radius);background:rgba(255,98,98,.08);border:1px solid rgba(255,98,98,.2);font-size:11px;line-height:1.5;color:var(--text)"></div>
           <div class="util-foot" id="util-water-foot"><span class="dot"></span> Waiting for Beehive meter reader</div>
         </div>
       </div>
@@ -4054,7 +4057,7 @@ function renderUsage(){
     +'<div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0 2px;font-weight:800"><span>Per cycle</span><span><span style="color:#4aa3ff">'+cycle+' gal</span> &bull; <span style="color:#4ade80">'+fmtD(cycle*perGal)+'</span></span></div>'
     +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span style="color:var(--muted)">Weekly (~'+IRR_DAYS_WK+' days)</span><span style="font-weight:700">~'+weekly+' gal &bull; <span style="color:#4ade80">'+fmtD(weekly*perGal)+'</span></span></div>'
     +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span style="color:var(--muted)">Monthly</span><span style="font-weight:700;color:#4ade80">~'+fmtD(monthly*perGal)+'</span></div>'
-    +'<div style="font-size:9px;color:#888;margin-top:6px;line-height:1.55">WHUD 2026: water $0.00908 + sewer $0.01136/gal. 💡 <b>Irrigation water never enters the sewer</b> — ask WHUD about <b>seasonal sewer averaging</b> (or an irrigation meter) to drop the sewer half: water-only would be ~'+fmtD(waterOnlyMo)+'/mo. Flow est. from Hunter MP charts at 180°; your 82 psi confirms no pressure shortfall.</div>';
+    +'<div style="font-size:9px;color:#888;margin-top:6px;line-height:1.55">WHUD 2026: water $0.00908 + sewer $0.00982/gal. 💡 <b>Irrigation water never enters the sewer</b> — ask WHUD about <b>seasonal sewer averaging</b> (or an irrigation meter) to drop the sewer half: water-only would be ~'+fmtD(waterOnlyMo)+'/mo. Flow est. from Hunter MP charts at 180°; your 82 psi confirms no pressure shortfall.</div>';
 }
 
 // --- B-hyve CONTROL (PIN-gated) — start/stop zones + rain delay ---
@@ -7725,9 +7728,26 @@ function loadUtilities() {
     }
     function putWaterCycle(cyc){
       put('util-water-month', cyc.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
-      var waterOnly = WATER_BASE + cyc * WATER_PER_GAL;
-      var combined = waterOnly + SEWER_BASE + cyc * SEWER_PER_GAL;
-      put('util-water-cost', '$' + combined.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+      var waterEst = WATER_BASE + cyc * WATER_PER_GAL;
+      var sewerEst = SEWER_BASE + cyc * SEWER_PER_GAL;
+      var fmt = function(v){ return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+      put('util-water-cost', fmt(waterEst));
+      put('util-sewer-cost', fmt(sewerEst));
+      put('util-combined-cost', fmt(waterEst + sewerEst));
+      var irrGal = irrMonthlyGal();
+      if (irrGal > 0) {
+        var waste = irrGal * SEWER_PER_GAL;
+        var note = document.getElementById('util-irr-sewer-note');
+        if (note) {
+          note.style.display = '';
+          note.innerHTML = '<b style="color:var(--bad)">Sewer overcharge:</b> ~' + Math.round(irrGal).toLocaleString() + ' gal/mo is irrigation — never enters the sewer. That\'s <b>' + fmt(waste) + '/mo</b> in sewer charges on water that goes on the lawn. Ask City of WH about <b>seasonal sewer averaging</b> or an <b>irrigation meter</b> to eliminate this.';
+        }
+      }
+    }
+    function irrMonthlyGal(){
+      var total = 0;
+      Object.keys(IRR_FLOW).forEach(function(s){ total += IRR_FLOW[s] * (IRR_RUNMIN[s] || 0); });
+      return total * IRR_DAYS_WK * 4.33;
     }
     // Usage this billing cycle from HA's RECORDED HISTORY (the reading at/after the cycle
     // start), so it shows real gallons instead of 0.0 on a freshly-started tracker. Falls
