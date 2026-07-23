@@ -7744,8 +7744,9 @@ function loadUtilities() {
     // Derive This-Month usage, Flow, and Est. Cost in-app from the raw meter readings,
     // tracked in localStorage across polls. If Jeff later builds the HA utility_meter/
     // derivative helpers, those (filled above) take priority and this is skipped.
-    var GAS_RATE_PER_CCF = 1.12; // TN residential all-in ≈ $1.12/CCF (EIA $11.23/Mcf, Jan 2026;
-                                 // Spire kept Piedmont's TN rates). Jeff can refine from a bill.
+    var GAS_BASE = 13.44, GAS_HEAT = 1.068, GAS_PER_THERM = 1.235, GAS_FRANCHISE = 0.05;
+    // Piedmont/Spire 301 Residential: $13.44 base + $0.61809 dist + $0.61691 PGA = $1.235/therm
+    // Heat factor 1.068 converts CCF→therms. 5% local franchise fee. Validated from 3 bills (May-Jul 2026).
     function rollMeter(key, curVal, periodKey){
       var now = Date.now();
       var ym = periodKey || (new Date().getFullYear() + '-' + (new Date().getMonth() + 1));
@@ -7835,8 +7836,11 @@ function loadUtilities() {
       var gr = rollMeter('util_roll_gas', graw / 100);
       if (num('sensor.gas_month') == null && gr.month != null)
         put('util-gas-month', gr.month.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
-      if (num('sensor.gas_cost') == null && gr.month != null)
-        put('util-gas-cost', '$' + (gr.month * GAS_RATE_PER_CCF).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+      if (num('sensor.gas_cost') == null && gr.month != null) {
+        var gTherms = Math.round(gr.month * GAS_HEAT);
+        var gCost = (GAS_BASE + gTherms * GAS_PER_THERM) * (1 + GAS_FRANCHISE);
+        put('util-gas-cost', '$' + gCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+      }
     }
     // ELECTRIC (DIY ATM90E32 monitor — later). Accept a couple of common names.
     var ELEC_BASE = 39.00, ELEC_PER_KWH = 0.11472; // CEMC: $39 base + $0.08657 energy + $0.02815 TVA fuel (bill 06/30/2026)

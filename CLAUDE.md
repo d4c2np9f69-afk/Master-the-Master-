@@ -478,7 +478,7 @@ The Beelink J45 runs Home Assistant = the central hub. Devices connect THREE way
 
 ## Pending Items (Next Session Should Address These)
 
-0. **▶️ PICK UP HERE (updated 07-23).** CAR commands rewritten + diagnostics added. **Jeff action needed:** configure Mercedes me PIN in Beehive → Settings → Integrations → mbapi2020 → Options → enter PIN, + enable "Disable Capability Check." Without these, engine_start and doors_unlock will fail. **Water+sewer calibration DONE** — WHUD rates validated from bill ($10.32 + $0.00908/gal), sewer rates validated ($22.74 + $0.00982/gal), combined estimate live. **Remaining next steps:** (a) build **utility helper tiles** (This-Month/Flow/Cost) per `docs/beehive/ha_helpers_and_alexa.md`. (b) Fix `HCC — Freeze Warning` automation → repoint to `sensor.backyard_temperature`. (c) **⛽ GAS billing sync — WAITING on Jeff's first Spire bill.** (d) **iPad Air 2 wall-display setup** — AbortSignal.timeout Safari-15 polyfill deployed + working, but HA token persistence + "Add to Home Screen" + Guided Access still need final confirmation (see 07-15 changelog).
+0. **▶️ PICK UP HERE (updated 07-23).** CAR commands rewritten + diagnostics added. **Jeff action needed:** configure Mercedes me PIN in Beehive → Settings → Integrations → mbapi2020 → Options → enter PIN, + enable "Disable Capability Check." Without these, engine_start and doors_unlock will fail. **ALL THREE UTILITIES CALIBRATED** — water ($10.32 + $0.00908/gal), sewer ($22.74 + $0.00982/gal), gas ($13.44 + $1.235/therm × 1.05 franchise), electric ($39 + $0.11472/kWh). **Remaining next steps:** (a) build **utility helper tiles** (This-Month/Flow/Cost) per `docs/beehive/ha_helpers_and_alexa.md`. (b) Fix `HCC — Freeze Warning` automation → repoint to `sensor.backyard_temperature`. (c) ~~**⛽ GAS billing sync**~~ — ✅ DONE (3 Piedmont bills validated). (d) **iPad Air 2 wall-display setup** — AbortSignal.timeout Safari-15 polyfill deployed + working, but HA token persistence + "Add to Home Screen" + Guided Access still need final confirmation (see 07-15 changelog).
 
 1. ~~**LUX setpoint control**~~ — ✅ FIXED (`b360583`). POST not PUT. Jeff confirmed.
 
@@ -546,10 +546,13 @@ The Beelink J45 runs Home Assistant = the central hub. Devices connect THREE way
 - App shows **This Cycle** (since ~21st, `whudCycleKey()`) + **Est. Water+Sewer** combined cost. Divisor ÷10 = gallons.
 - Jeff's CC1101+ESP32+wM-Bus firmware stack = **backup only**. Primary = RTL-SDR.
 
-### 🔥 GAS — Piedmont · Itron 100G ERT
+### 🔥 GAS — Piedmont/Spire · Itron 100G ERT
+- **Provider:** Piedmont Natural Gas (transitioning to Spire as of 3/31/2026). Account `6100 0546 4779`. Rate: 301 Residential Service. Billing cycle ~5th of each month.
 - **Meter:** Elster AC-250, Piedmont# **`T821986`**, serial `10M225478`.
 - **Radio:** Itron 100G ERT, FCC `EO9100GDLA`. **ERT ID** starts `…333930…` (need full digits to filter). **Unencrypted**, 900–920 MHz ISM. Same RTL-SDR reads both meters.
-- Raw ÷100 = CCF. **Waiting on Jeff's first Spire bill** for rate/cycle calibration.
+- **Rates (validated from 3 bills, May-Jul 2026):** Base **$13.44** + Distribution **$0.61809/therm** + PGA **$0.61691/therm** = **$1.235/therm all-in**. Heat factor **1.068** (CCF→therms). Local franchise fee **5%**. Formula: `(13.44 + round(CCF × 1.068) × 1.235) × 1.05`. Verified to the penny on all 3 bills ($34.58 / $47.83 / $27.08).
+- **Recent usage:** May=17 therms ($34.58), Jun=26 therms ($47.83), Jul=10 therms ($27.08). Summer = low (water heater + cooking only); winter = high (furnace).
+- Raw ÷100 = CCF. RTL-SDR reads both water + gas meters on same dongle.
 
 ### ⚡ ELECTRIC — Cumberland Electric (CEMC) · DIY ESP32 + ATM90E32AS (FUTURE BUILD)
 - **Provider:** Cumberland Electric Membership Corporation (CEMC). Account `4501007001`. **Meter `145590962`**, Landis+Gyr Gridstream (NOT Itron — can't radio-read). **200A service**, Challenger panel. Rate: 22-Residential Electric.
