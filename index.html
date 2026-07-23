@@ -1428,7 +1428,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
             <div class="util-stat"><div class="util-stat-label">Reading</div><div class="util-stat-val" id="util-water-today">&mdash;<span class="util-stat-unit">gal</span></div></div>
             <div class="util-stat"><div class="util-stat-label">This Cycle</div><div class="util-stat-val" id="util-water-month">&mdash;<span class="util-stat-unit">gal</span></div></div>
             <div class="util-stat"><div class="util-stat-label">Flow</div><div class="util-stat-val" id="util-water-flow">&mdash;<span class="util-stat-unit">gpm</span></div></div>
-            <div class="util-stat"><div class="util-stat-label">Est. Water $</div><div class="util-stat-val" id="util-water-cost">&mdash;</div></div>
+            <div class="util-stat"><div class="util-stat-label">Est. Water+Sewer</div><div class="util-stat-val" id="util-water-cost">&mdash;</div></div>
           </div>
           <div class="util-foot" id="util-water-foot"><span class="dot"></span> Waiting for Beehive meter reader</div>
         </div>
@@ -4036,7 +4036,7 @@ function wxFcEmoji(cond){ return wxFcIcon(null, cond); }
 var IRR_FLOW={1:17.2,2:14.3,5:5.7};        // zone GPM (MP3500 x6/x5, MP3000 x3) — 82 psi supply, no shortfall
 var IRR_RUNMIN={1:20,2:18,5:8};            // representative run times (min)
 var IRR_DAYS_WK=3;                         // assumed watering days/week
-var RATE_WATER=0.00908, RATE_SEWER=0.01136; // $/gal — WHUD 2026
+var RATE_WATER=0.00908, RATE_SEWER=0.00982; // $/gal — WHUD water + City of WH sewer (validated from 3/8-4/7/26 bill)
 var IRR_INCLUDE_SEWER=true;                // set false if on an irrigation meter / seasonal sewer averaging
 function fmtD(n){ return '$'+(n>=100?Math.round(n).toString():n.toFixed(2)); }
 function renderUsage(){
@@ -7694,6 +7694,7 @@ function loadUtilities() {
     var GAS_RATE_PER_CCF = 1.12; // TN residential all-in ≈ $1.12/CCF (EIA $11.23/Mcf, Jan 2026;
                                  // Spire kept Piedmont's TN rates). Jeff can refine from a bill.
     var WATER_BASE = 10.32, WATER_PER_GAL = 0.00908; // WHUD rates eff 2026-01-01 (meters < 1")
+    var SEWER_BASE = 22.74, SEWER_PER_GAL = 0.00982; // City of White House sewer (mirrors WHUD meter)
     // WHUD reads the meter ~the 21st, so the billing cycle "belongs" to the month whose
     // 21st most recently passed. Usage/cost track that cycle, not the calendar month.
     function whudCycleKey(){
@@ -7724,7 +7725,9 @@ function loadUtilities() {
     }
     function putWaterCycle(cyc){
       put('util-water-month', cyc.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
-      put('util-water-cost', '$' + (WATER_BASE + cyc * WATER_PER_GAL).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+      var waterOnly = WATER_BASE + cyc * WATER_PER_GAL;
+      var combined = waterOnly + SEWER_BASE + cyc * SEWER_PER_GAL;
+      put('util-water-cost', '$' + combined.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
     }
     // Usage this billing cycle from HA's RECORDED HISTORY (the reading at/after the cycle
     // start), so it shows real gallons instead of 0.0 on a freshly-started tracker. Falls
