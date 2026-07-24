@@ -5770,12 +5770,15 @@ function hccSection(id, btn) {
   var hero = document.getElementById('hero-' + id);
   if (hero) hero.classList.add('active');
   if (id === 'irrigation' && !window._irrLoaded) { window._irrLoaded = true; loadIrrigation(); }
-  if (id === 'home' && !window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
-  if (id === 'home') { loadUtilities(); }
+  if (id === 'home') {
+    if (!window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
+    loadUtilities(); loadCameras(); loadHomeStatus();
+  }
   if (id === 'guardian') { loadGuardian(); loadLights(); loadVacuum(); loadClimate(); }
   if (id === 'car') { loadCar(); }
+  if (id === 'yard') { mowerSync(false); }
   if (id === 'weather') {
-    /* Windy radar iframe self-loads with calendar=now; no manual refresh needed */
+    loadWeather();
     if (!window._forecastLoaded) { window._forecastLoaded = true; loadForecast(); }
     if (!window._droughtLoaded) { window._droughtLoaded = true; loadDrought(); }
     // Auto-request notification permission on first WEATHER tab visit (this tap IS a user gesture)
@@ -6597,7 +6600,11 @@ setTimeout(function() {
 }, 800);
 // Self-heal: re-check Beehive + re-read the meters every 60s, so an HA restart (or a
 // momentarily-quiet meter) recovers on its own — no manual refresh. Guarded to token.
-setInterval(function(){ if (getHaToken()) { checkBeehive(false); loadUtilities(); loadGuardian(); loadLights(); loadVacuum(); loadCar(); } }, 60000);
+setInterval(function(){
+  mowerSync(false);
+  if (getHaToken()) { checkBeehive(false); loadCameras(); loadUtilities(); loadGuardian(); loadLights(); loadVacuum(); loadCar(); }
+}, 60000);
+setInterval(loadWeather, 5*60*1000);
 
 // ── HA TOKEN & HOME DATA ─────────────────────────────────────────────────
 function getHaToken() {
