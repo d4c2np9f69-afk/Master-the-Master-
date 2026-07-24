@@ -410,6 +410,19 @@ html,body{
   text-shadow:0 1px 8px rgba(0,0,0,.9);
 }
 .sec-hero-car .sec-hero-status{color:rgba(240,225,190,.85)}
+/* Vehicle picker strip */
+.car-picker{display:flex;gap:8px;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border)}
+.car-pick{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:10px 8px;border-radius:var(--radius);border:2px solid var(--border);
+  background:var(--card);color:var(--text);cursor:pointer;font-family:inherit;
+  transition:border-color .2s,background .2s;
+}
+.car-pick.active{border-color:var(--a-car);background:rgba(123,138,158,.12)}
+html.light .car-pick.active{background:rgba(90,101,119,.08)}
+.car-pick-icon{font-size:20px;line-height:1}
+.car-pick-name{font-size:13px;font-weight:800;letter-spacing:.5px}
+.car-pick-sub{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
 /* Car section sub-tabs (scoped to avoid YARD tab conflict) */
 #section-car .car-content{display:none;padding:16px 14px 72px}
 #section-car .car-content.active{display:block}
@@ -1309,7 +1322,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 </div>
 <div class="hero-slot" id="hero-car">
   <div class="sec-hero sec-hero-car">
-    <img src="./images/hero-car.jpg" alt="Mercedes-Benz GLE 350 4MATIC interior" onerror="this.style.display='none'">
+    <img id="carHeroImg" src="./images/hero-car.jpg" alt="Mercedes-Benz GLE 350 4MATIC" onerror="this.style.display='none'">
     <div class="sec-hero-overlay">
       <div class="sec-hero-status" id="carHeroStatus"></div>
     </div>
@@ -2467,11 +2480,26 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 </div><!-- /section-guardian -->
 
 <!-- ══════════════════════════════════════════════════════════════════════════
-     SECTION 6: CAR  (Mercedes-Benz GLE 350 4MATIC — Pinnacle Trim)
+     SECTION 6: VEHICLES  (Mercedes GLE 350 + Ford F-250 Super Duty)
      ══════════════════════════════════════════════════════════════════════════ -->
 <div id="section-car" class="hcc-section">
 
-  <div class="car-tabs">
+  <!-- ── VEHICLE PICKER ──────────────────────────────────────────────────── -->
+  <div class="car-picker">
+    <button class="car-pick active" id="pick-merc" onclick="carSwitchVehicle('merc')">
+      <span class="car-pick-icon">&#9733;</span>
+      <span class="car-pick-name">GLE 350</span>
+      <span class="car-pick-sub">Mercedes-Benz</span>
+    </button>
+    <button class="car-pick" id="pick-ford" onclick="carSwitchVehicle('ford')">
+      <span class="car-pick-icon">&#128666;</span>
+      <span class="car-pick-name">F-250</span>
+      <span class="car-pick-sub">Ford Super Duty</span>
+    </button>
+  </div>
+
+  <!-- ── MERCEDES TABS ───────────────────────────────────────────────────── -->
+  <div id="car-merc-tabs" class="car-tabs">
     <button class="car-tab active" onclick="carTab('car-status',this)">VEHICLE STATUS</button>
     <button class="car-tab" onclick="carTab('car-diag',this)">DIAGNOSTICS</button>
     <button class="car-tab" onclick="carTab('car-maint',this)">MAINTENANCE</button>
@@ -2479,6 +2507,14 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <button class="car-tab" onclick="carTab('car-climate',this)">CLIMATE</button>
     <button class="car-tab" onclick="carTab('car-assist',this)">ASSISTANCE</button>
     <button class="car-tab" onclick="carTab('car-settings',this)">SETTINGS</button>
+  </div>
+
+  <!-- ── FORD TABS ───────────────────────────────────────────────────────── -->
+  <div id="car-ford-tabs" class="car-tabs" style="display:none">
+    <button class="car-tab active" onclick="carTab('ford-status',this)">TRUCK STATUS</button>
+    <button class="car-tab" onclick="carTab('ford-specs',this)">SPECS</button>
+    <button class="car-tab" onclick="carTab('ford-maint',this)">MAINTENANCE</button>
+    <button class="car-tab" onclick="carTab('ford-mods',this)">MODS &amp; UPGRADES</button>
   </div>
 
   <!-- ── VEHICLE STATUS TAB ──────────────────────────────────────────────── -->
@@ -2760,6 +2796,132 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         <button class="btn-full btn-gray" onclick="carScanEntities()">&#128269; SCAN ENTITIES</button>
         <div id="carEntityScan" style="margin-top:10px"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- ══ FORD F-250 TAB CONTENT ════════════════════════════════════════════ -->
+
+  <!-- ── TRUCK STATUS TAB ──────────────────────────────────────────────── -->
+  <div id="tab-ford-status" class="car-content">
+    <div class="card">
+      <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">&#128666; Truck Status</div>
+      <div class="wx-banner wx-go" style="margin:10px 0">Ready to Roll</div>
+
+      <div class="car-stat-grid">
+        <div class="car-stat">
+          <div class="car-stat-icon">&#9981;</div>
+          <div class="car-stat-val" id="fordOdo">--</div>
+          <div class="car-stat-lbl">Odometer (mi)</div>
+        </div>
+        <div class="car-stat">
+          <div class="car-stat-icon">&#9981;</div>
+          <div class="car-stat-val" id="fordFuel">--</div>
+          <div class="car-stat-lbl">Fuel Level</div>
+        </div>
+        <div class="car-stat">
+          <div class="car-stat-icon">&#128267;</div>
+          <div class="car-stat-val" id="fordBatt">--</div>
+          <div class="car-stat-lbl">Battery (V)</div>
+        </div>
+        <div class="car-stat">
+          <div class="car-stat-icon">&#127777;</div>
+          <div class="car-stat-val" id="fordCoolant">--</div>
+          <div class="car-stat-lbl">Coolant Temp</div>
+        </div>
+      </div>
+
+      <ul class="spec-list" style="margin-top:14px">
+        <li><span class="sk">Engine RPM</span><span class="sv" id="fordRPM">--</span></li>
+        <li><span class="sk">Engine Load</span><span class="sv" id="fordLoad">--</span></li>
+        <li><span class="sk">Oil Pressure</span><span class="sv" id="fordOil">--</span></li>
+        <li><span class="sk">Intake Temp</span><span class="sv" id="fordIntake">--</span></li>
+        <li><span class="sk">Check Engine</span><span class="sv s-ok" id="fordCEL">No Codes</span></li>
+      </ul>
+
+      <div style="font-size:11px;color:var(--muted);margin-top:14px;text-align:center">
+        OBD-II diagnostics will appear here when the ESP32 sensor box is connected.
+        <br>See SPECS tab for hardware setup instructions.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FORD SPECS TAB ────────────────────────────────────────────────── -->
+  <div id="tab-ford-specs" class="car-content">
+    <div class="card">
+      <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">&#128203; Vehicle Specs</div>
+      <ul class="spec-list" style="margin-top:10px">
+        <li><span class="sk">Year</span><span class="sv">2001</span></li>
+        <li><span class="sk">Model</span><span class="sv">F-250 Super Duty</span></li>
+        <li><span class="sk">VIN</span><span class="sv" style="font-size:11px;letter-spacing:.5px">3FTNX21FX1MA23431</span></li>
+        <li><span class="sk">Engine</span><span class="sv">7.3L V8 Power Stroke Diesel</span></li>
+        <li><span class="sk">Drivetrain</span><span class="sv">4WD</span></li>
+        <li><span class="sk">Transmission</span><span class="sv">Automatic</span></li>
+        <li><span class="sk">Cab</span><span class="sv">Crew Cab</span></li>
+        <li><span class="sk">Fuel</span><span class="sv">Diesel</span></li>
+        <li><span class="sk">Tank</span><span class="sv">38 gal</span></li>
+        <li><span class="sk">Towing Capacity</span><span class="sv">12,500 lbs</span></li>
+        <li><span class="sk">Payload</span><span class="sv">3,980 lbs</span></li>
+        <li><span class="sk">Curb Weight</span><span class="sv">~6,500 lbs</span></li>
+      </ul>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">&#128225; OBD-II Sensor Setup</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-top:6px">
+        Your 2001 F-250 has an OBD-II port under the dash. To get live engine data into this app:
+      </div>
+      <ul style="font-size:12px;color:var(--text);line-height:1.8;margin:8px 0 0 16px;padding:0">
+        <li><b>Veepeak OBDCheck BLE+</b> (~$30) &mdash; plugs into OBD port</li>
+        <li><b>ESP32 + ESPHome</b> &mdash; reads BLE adapter, pushes to Beehive</li>
+        <li><b>Optional: GPS module</b> (NEO-6M, ~$12) for location tracking</li>
+      </ul>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px">
+        Once connected, this tab will show live RPM, coolant temp, battery voltage, engine load, and diagnostic trouble codes.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FORD MAINTENANCE TAB ──────────────────────────────────────────── -->
+  <div id="tab-ford-maint" class="car-content">
+    <div class="card">
+      <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">&#128295; Maintenance Log</div>
+
+      <ul class="spec-list" style="margin-top:10px">
+        <li><span class="sk">Oil &amp; Filter</span><span class="sv" id="fordSvcOil">Not logged</span></li>
+        <li><span class="sk">Fuel Filter</span><span class="sv" id="fordSvcFuelFilter">Not logged</span></li>
+        <li><span class="sk">Air Filter</span><span class="sv" id="fordSvcAirFilter">Not logged</span></li>
+        <li><span class="sk">Transmission Fluid</span><span class="sv" id="fordSvcTrans">Not logged</span></li>
+        <li><span class="sk">Coolant Flush</span><span class="sv" id="fordSvcCoolant">Not logged</span></li>
+        <li><span class="sk">Brake Pads</span><span class="sv" id="fordSvcBrakes">Not logged</span></li>
+        <li><span class="sk">Tires</span><span class="sv" id="fordSvcTires">Not logged</span></li>
+        <li><span class="sk">Glow Plugs</span><span class="sv" id="fordSvcGlow">Not logged</span></li>
+        <li><span class="sk">Batteries (Dual)</span><span class="sv" id="fordSvcBattery">Not logged</span></li>
+      </ul>
+
+      <button class="btn-full btn-green" style="margin-top:14px" onclick="fordLogService()">&#128295; LOG SERVICE</button>
+    </div>
+  </div>
+
+  <!-- ── FORD MODS & UPGRADES TAB ──────────────────────────────────────── -->
+  <div id="tab-ford-mods" class="car-content">
+    <div class="card">
+      <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">&#128296; Mods &amp; Upgrades</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-top:6px">
+        Track every mod and upgrade on the truck. Tap LOG MOD to add an entry.
+      </div>
+
+      <ul class="spec-list" style="margin-top:10px">
+        <li><span class="sk">Lift Kit</span><span class="sv" id="fordModLift">--</span></li>
+        <li><span class="sk">Wheels / Tires</span><span class="sv" id="fordModWheels">--</span></li>
+        <li><span class="sk">Exhaust</span><span class="sv" id="fordModExhaust">--</span></li>
+        <li><span class="sk">Tuner / Programmer</span><span class="sv" id="fordModTuner">--</span></li>
+        <li><span class="sk">Intake</span><span class="sv" id="fordModIntake">--</span></li>
+        <li><span class="sk">Headlights</span><span class="sv" id="fordModLights">--</span></li>
+        <li><span class="sk">Bumper / Grille</span><span class="sv" id="fordModBumper">--</span></li>
+        <li><span class="sk">Bed / Accessories</span><span class="sv" id="fordModBed">--</span></li>
+      </ul>
+
+      <button class="btn-full btn-gray" style="margin-top:14px" onclick="fordLogMod()">&#128296; LOG MOD</button>
     </div>
   </div>
 
@@ -5782,7 +5944,7 @@ function hccSection(id, btn) {
     loadUtilities(); loadCameras(); loadHomeStatus();
   }
   if (id === 'guardian') { loadGuardian(); loadLights(); loadVacuum(); loadClimate(); }
-  if (id === 'car') { loadCar(); }
+  if (id === 'car') { carSwitchVehicle(_activeVehicle); }
   if (id === 'yard') { mowerSync(false); }
   if (id === 'weather') {
     loadWeather();
@@ -6004,13 +6166,52 @@ function fireTvCmd(cmd) {
   }
 }
 
-function carTab(id, btn) {
+var _activeVehicle = localStorage.getItem('hcc_vehicle') || 'merc';
+
+function carSwitchVehicle(which) {
+  _activeVehicle = which;
+  localStorage.setItem('hcc_vehicle', which);
+  document.getElementById('pick-merc').classList.toggle('active', which === 'merc');
+  document.getElementById('pick-ford').classList.toggle('active', which === 'ford');
+  var mercTabs = document.getElementById('car-merc-tabs');
+  var fordTabs = document.getElementById('car-ford-tabs');
+  if (mercTabs) mercTabs.style.display = which === 'merc' ? '' : 'none';
+  if (fordTabs) fordTabs.style.display = which === 'ford' ? '' : 'none';
   document.querySelectorAll('#section-car .car-content').forEach(function(c){ c.classList.remove('active'); });
   document.querySelectorAll('#section-car .car-tab').forEach(function(t){ t.classList.remove('active'); });
+  var heroImg = document.getElementById('carHeroImg');
+  if (which === 'merc') {
+    if (heroImg) { heroImg.src = './images/hero-car.jpg'; heroImg.alt = 'Mercedes-Benz GLE 350 4MATIC'; heroImg.style.display = ''; }
+    var firstMerc = document.querySelector('#car-merc-tabs .car-tab');
+    if (firstMerc) { firstMerc.classList.add('active'); }
+    var statusTab = document.getElementById('tab-car-status');
+    if (statusTab) statusTab.classList.add('active');
+    loadCar();
+  } else {
+    if (heroImg) { heroImg.src = './images/hero-truck.jpg'; heroImg.alt = 'Ford F-250 Super Duty'; heroImg.style.display = ''; }
+    var firstFord = document.querySelector('#car-ford-tabs .car-tab');
+    if (firstFord) { firstFord.classList.add('active'); }
+    var fordTab = document.getElementById('tab-ford-status');
+    if (fordTab) fordTab.classList.add('active');
+  }
+}
+
+function carTab(id, btn) {
+  document.querySelectorAll('#section-car .car-content').forEach(function(c){ c.classList.remove('active'); });
+  var tabBar = _activeVehicle === 'ford' ? '#car-ford-tabs' : '#car-merc-tabs';
+  document.querySelectorAll(tabBar + ' .car-tab').forEach(function(t){ t.classList.remove('active'); });
   var el = document.getElementById('tab-' + id);
   if (el) el.classList.add('active');
   if (btn) btn.classList.add('active');
   if (id === 'car-settings') carUpdatePinStatus();
+}
+
+function fordLogService() {
+  grdShow('&#128295; Log F-250 Service', '<div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px">Service logging for the F-250 coming soon. Will track oil changes, fuel filters, glow plugs, and all diesel-specific maintenance.</div>');
+}
+
+function fordLogMod() {
+  grdShow('&#128296; Log F-250 Mod', '<div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px">Mod logging coming soon. Track every upgrade &mdash; lift, wheels, exhaust, tuner, lights, and more.</div>');
 }
 
 function carLogService() {
