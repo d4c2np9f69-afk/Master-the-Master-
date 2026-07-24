@@ -2740,10 +2740,8 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <div class="card" style="margin-top:14px">
         <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">&#128273; Mercedes PIN</div>
         <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-top:6px">
-          Your Mercedes me PIN is required for remote start, door unlock, and window controls. It's saved on this device only.
+          Your Mercedes me PIN is configured in <b>Beehive</b> (Home Assistant). Go to Settings &rarr; Integrations &rarr; MercedesME 2020 &rarr; Options &rarr; enter your PIN. The integration auto-applies it to commands that require it (remote start, unlock, windows). Also enable <b>"Disable Capability Check"</b> in the same options screen.
         </div>
-        <div id="carPinStatus" style="font-size:12px;margin-top:6px"></div>
-        <button class="btn-full btn-gray" style="margin-top:10px" onclick="carChangePinUI()">&#128273; CHANGE PIN</button>
       </div>
 
       <div class="card" style="margin-top:14px">
@@ -6053,8 +6051,6 @@ function carUpdatePinStatus() {
 }
 function carMbSvc(service, extra) {
   var d = { vin: CAR_VIN };
-  var pin = getCarPin();
-  if (pin && carNeedsPin(service)) d.pin = pin;
   if (extra) Object.keys(extra).forEach(function(k){ d[k] = extra[k]; });
   return haFetch('/api/services/mbapi2020/' + service, {
     method: 'POST', headers: {'Content-Type':'application/json'},
@@ -6092,14 +6088,10 @@ function carCmdFail(title, r, e) {
 }
 function carRemoteStart() {
   if (!getHaToken()) { grdShow('Remote Start', 'Connect Beehive first (HOME tab).'); return; }
-  function doStart() {
-    carMbSvc('engine_start').then(function(r){
-      if (r.ok) { grdShow('&#128273; Remote Start', 'Command sent to Mercedes. Engine should start within 30 seconds &mdash; runs for about 10 minutes.<br><span style="font-size:11px;color:var(--muted)">If nothing happens, open CAR > Settings > Entity Scan to check connection status.</span>'); setTimeout(loadCar, 8000); }
-      else carCmdFail('&#128273; Remote Start', r);
-    }).catch(function(e){ carCmdFail('&#128273; Remote Start', null, e); });
-  }
-  if (!getCarPin()) { carPromptPin(function(){ doStart(); }); return; }
-  doStart();
+  carMbSvc('engine_start').then(function(r){
+    if (r.ok) { grdShow('&#128273; Remote Start', 'Command sent to Mercedes. Engine should start within 30 seconds &mdash; runs for about 10 minutes.<br><span style="font-size:11px;color:var(--muted)">If nothing happens, open CAR > Settings > Entity Scan to check connection status.</span>'); setTimeout(loadCar, 8000); }
+    else carCmdFail('&#128273; Remote Start', r);
+  }).catch(function(e){ carCmdFail('&#128273; Remote Start', null, e); });
 }
 function carRemoteStop() {
   if (!getHaToken()) { grdShow('Remote Stop', 'Connect Beehive first (HOME tab).'); return; }
@@ -6388,7 +6380,6 @@ function carLockCmd(action) {
       else carCmdFail(title, r);
     }).catch(function(e){ carCmdFail(title, null, e); });
   }
-  if (action === 'unlock' && !getCarPin()) { carPromptPin(function(){ doLock(); }); return; }
   doLock();
 }
 
@@ -6420,7 +6411,6 @@ function carMaxCool() {
       setTimeout(loadCar, 8000);
     });
   }
-  if (!getCarPin()) { carPromptPin(function(){ doCool(); }); return; }
   doCool();
 }
 
@@ -6444,7 +6434,6 @@ function carMaxHeat() {
       setTimeout(loadCar, 8000);
     });
   }
-  if (!getCarPin()) { carPromptPin(function(){ doHeat(); }); return; }
   doHeat();
 }
 
