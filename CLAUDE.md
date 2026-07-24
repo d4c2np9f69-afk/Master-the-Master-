@@ -101,7 +101,7 @@ A Progressive Web App (PWA) for Jeff's Toro TimeMaster 21200 lawn mower. Single 
 - **Active branch:** `claude/time-master-project-liq1jw`
 - **`main` branch:** contains only `Toro_TimeMaster_PWA_Package.zip` — do NOT use it for deploys
 
-The app has six sections: **HOME**, **WEATHER**, **IRRIGATION**, **YARD** (mower data), **GUARDIAN** (whole-home safety/security/alarm watch — LUX thermostat lives here too; the old CLIMATE tab was folded in), **CAR** (Mercedes GLE 350 Pinnacle Trim Command Center with 7 sub-tabs).
+The app has six sections: **HOME**, **WEATHER**, **IRRIGATION**, **YARD** (mower data), **GUARDIAN** (whole-home safety/security/alarm watch — LUX thermostat lives here too; the old CLIMATE tab was folded in), **CAR** (vehicle switcher: Mercedes GLE 350 with 7 sub-tabs + Ford F-250 Super Duty with 4 sub-tabs).
 
 **🛡️ HOME GUARDIAN is the designated home for ALL Home Assistant security, home-alarm, and system checks (Jeff, 07-04).** Every future security/alarm feature goes here: cameras, door/window contacts, motion, leak/smoke, the Zigbee siren + ARM/DISARM, the panic automation surface, and any new "is-the-house-OK" check. Don't scatter these onto HOME — build them into `#section-guardian` with the Section Kit + `--a-guardian` accent, live from HA `/api/states` via `loadGuardian()`.
 
@@ -247,7 +247,8 @@ source, lastSync, engine_running
 - Nav buttons: `button.snav-btn` with IDs `#snav-home`, `#snav-weather`, `#snav-irr`, `#snav-yard`, `#snav-guardian`, `#snav-car` (also update the swipe-nav `SECTIONS`/`NAV_IDS` arrays — and keep them in the SAME order as the section DOM — when adding/removing a tab)
 - Sections: `#section-home`, `#section-weather`, `#section-irrigation`, `#section-yard`, `#section-guardian`, `#section-car` (LUX thermostat `#luxCard`/`#luxSetupCard` live inside `#section-guardian`)
 - YARD tabs: `button.tab`
-- CAR tabs: `button.car-tab` (scoped `carTab()` function, NOT global `showTab()`)
+- CAR tabs: `button.car-tab` (scoped `carTab()` function, NOT global `showTab()`); tab bars: `#car-merc-tabs` (Mercedes), `#car-ford-tabs` (Ford)
+- Vehicle picker: `.car-picker` strip with `button.car-pick` (IDs `#pick-merc`, `#pick-ford`); `carSwitchVehicle('merc'|'ford')` toggles vehicle
 
 ---
 
@@ -384,7 +385,7 @@ If any tests fail, fix them before doing anything else.
 | 6 nav buttons + swipe navigation | working |
 | Modals (LOG MOW/SERVICE, SET HOURS) | working |
 | 7 YARD tabs; GPS map + "Pin Track to Photo" calibration + telemetry sim | working |
-| CAR section — 7 sub-tabs + `loadCar()` live via mbapi2020 + lock/unlock/flash/remote start/MAX COOL/HEAT | LIVE (07-22) |
+| CAR section — vehicle switcher (GLE 350 7 tabs + F-250 4 tabs) + `loadCar()` live via mbapi2020 + lock/unlock/flash/remote start/MAX COOL/HEAT | LIVE (07-24) |
 | Sensor data (battery/RPM/GPS) | working when ESP32 connected |
 | Engine hours baseline + Master Hour Calibration | correct (Jeff's real = 9.2h) |
 | Panic = red EMERGENCY bar (token-gated, routes through `/api/ha` proxy) | app fires webhook; **HA automation pending** |
@@ -404,6 +405,7 @@ If any tests fail, fix them before doing anything else.
 
 ## Change Log (condensed — full detail always in `git log`; each line = one session's work)
 
+- **07-24 (later):** **Ford F-250 Super Duty added to CAR section with vehicle switcher.** Jeff purchased a 2001 F-250 (VIN `3FTNX21FX1MA23431`, 7.3L Power Stroke Diesel, 4WD, crew cab). Expanded CAR section with a two-button picker strip (GLE 350 / F-250) — hero image swaps dynamically, each vehicle has its own tab bar. Ford gets 4 tabs: Truck Status (OBD-II ready), Specs, Maintenance (diesel-specific: oil, fuel filter, glow plugs, dual batteries), Mods & Upgrades. Active vehicle persists in `localStorage` key `hcc_vehicle`. No HA connectivity for the F-250 (2001 = pre-connected-car era); OBD-II + ESP32 is the future path for live diagnostics. `carTab()` updated to scope tab deactivation to the active vehicle's tab bar. **Jeff should confirm specs** (assumed 7.3L Diesel/4WD/crew cab from VIN + photo).
 - **07-24 (late):** **CAR commands fixed — removed incorrect app-level PIN prompts.** Root cause: I added `carPromptPin()` wrappers that blocked commands with a PIN input modal, but mbapi2020 handles PIN from its integration options automatically — the app should never send a `pin` field. Also, Jeff enabled "Disable Capability Check" in mbapi2020 options (was why all commands except flash lights failed). Fix: removed PIN prompt wrappers from `carRemoteStart`, `carLockCmd`, `carMaxCool`, `carMaxHeat`; removed `pin` field from `carMbSvc()`; updated Settings PIN card to point to Beehive integration options. **Lesson: mbapi2020 PIN is configured server-side in HA integration options — never prompt for or send it from the app.**
 - **07-24:** **Fixed stale-data bug — app wasn't auto-refreshing sensors, cameras, or weather.** Root cause: the 60s self-heal interval refreshed Guardian/Lights/Vacuum/Utilities/Car but missed `mowerSync()`, `loadCameras()`, and `loadWeather()` — they only ran ONCE at startup. Also, section switching didn't reload data for HOME (cameras), WEATHER (weather), or YARD (sensors). Fix: section nav now calls the appropriate loader on every visit + 60s interval includes mowerSync+loadCameras + weather gets its own 5-min interval. **Lesson: when adding a new loader, add it to BOTH the section switch AND the periodic interval.**
 - **07-23:** **Sewer bill calibrated + water cost validated + billing history tracking.** City of WH sewer bill (3/8-4/7/26) → sewer base $22.74 + $0.00982/gal. WHUD bill confirmed rates ($10.32 + $0.00908/gal). Water + sewer now shown SEPARATELY (Jeff's request: building a case that sewer charges on irrigation water are waste). **Billing history** added: up to 24 cycles tracked in `localStorage` key `water_billing_history`, table renders per-cycle water/sewer/irrigation waste with cumulative sewer overcharge total. History functions hoisted to `loadUtilities()` scope so table shows even without Beehive connection. CAR `carCmdFail()` + diagnostics added. `temperature_configure` fixed to send strings not numbers.
@@ -476,11 +478,18 @@ The Beelink J45 runs Home Assistant = the central hub. Devices connect THREE way
 - **Display data** (in `loadCar()`): still uses entity-based `val()` lookups for read-only sensors.
 - **Commands**: always use `carMbSvc()` domain services, never entity-based `switch/turn_on` or `button/press`.
 
+**Ford F-250 Super Duty (added 07-24):**
+- **VIN:** `3FTNX21FX1MA23431` (2001, 7.3L V8 Power Stroke Diesel, 4WD, crew cab)
+- **Vehicle switcher:** `carSwitchVehicle('merc'|'ford')`, persists in `localStorage` key `hcc_vehicle`. Swaps hero image + tab bar.
+- **No connected-car features** — 2001 model predates FordPass Connect. No remote start/lock/GPS from HA.
+- **Future path:** OBD-II port (under dash) + Veepeak OBDCheck BLE+ (~$30) + ESP32/ESPHome → live RPM, coolant temp, battery voltage, engine load, DTCs. Optional GPS module (NEO-6M, ~$12) for location tracking.
+- **4 tabs:** Truck Status (OBD-II placeholders), Specs, Maintenance (diesel-specific: oil, fuel filter, glow plugs, dual batteries), Mods & Upgrades.
+
 ---
 
 ## Pending Items (Next Session Should Address These)
 
-0. **▶️ PICK UP HERE (updated 07-24).** ~~CAR commands fixed~~ — ✅ Jeff enabled "Disable Capability Check" + PIN in mbapi2020 options; app-level PIN prompts removed (they were wrong — mbapi2020 handles PIN server-side). **Jeff should hard-refresh the app and test Remote Start + Lock + Unlock.** **ALL THREE UTILITIES CALIBRATED** — water ($10.32 + $0.00908/gal), sewer ($22.74 + $0.00982/gal), gas ($13.44 + $1.235/therm × 1.05 franchise), electric ($39 + $0.11472/kWh). **Remaining next steps:** (a) build **utility helper tiles** (This-Month/Flow/Cost) per `docs/beehive/ha_helpers_and_alexa.md`. (b) Fix `HCC — Freeze Warning` automation → repoint to `sensor.backyard_temperature`. (c) ~~**⛽ GAS billing sync**~~ — ✅ DONE (3 Piedmont bills validated). (d) **iPad Air 2 wall-display setup** — AbortSignal.timeout Safari-15 polyfill deployed + working, but HA token persistence + "Add to Home Screen" + Guided Access still need final confirmation (see 07-15 changelog).
+0. **▶️ PICK UP HERE (updated 07-24).** ~~CAR commands fixed~~ — ✅. ~~F-250 vehicle switcher~~ — ✅ DONE (hero photo, picker, 4 Ford tabs, specs/maintenance/mods). **Jeff should confirm F-250 specs** (assumed 7.3L Power Stroke Diesel, 4WD, crew cab from VIN decode + photo). **Jeff should hard-refresh the app to see the vehicle switcher.** **Remaining next steps:** (a) build **utility helper tiles** (This-Month/Flow/Cost) per `docs/beehive/ha_helpers_and_alexa.md`. (b) Fix `HCC — Freeze Warning` automation → repoint to `sensor.backyard_temperature`. (c) **iPad Air 2 wall-display setup** — AbortSignal.timeout Safari-15 polyfill deployed + working, but HA token persistence + "Add to Home Screen" + Guided Access still need final confirmation. (d) **F-250 OBD-II sensor box** — Veepeak OBDCheck BLE+ (~$30) + ESP32 + optional GPS for live diagnostics.
 
 1. ~~**LUX setpoint control**~~ — ✅ FIXED (`b360583`). POST not PUT. Jeff confirmed.
 
