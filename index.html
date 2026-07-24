@@ -2738,6 +2738,15 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       </div>
 
       <div class="card" style="margin-top:14px">
+        <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">&#128273; Mercedes PIN</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-top:6px">
+          Your Mercedes me PIN is required for remote start, door unlock, and window controls. It's saved on this device only.
+        </div>
+        <div id="carPinStatus" style="font-size:12px;margin-top:6px"></div>
+        <button class="btn-full btn-gray" style="margin-top:10px" onclick="carChangePinUI()">&#128273; CHANGE PIN</button>
+      </div>
+
+      <div class="card" style="margin-top:14px">
         <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">Alert Preferences</div>
         <ul class="spec-list" style="margin-top:8px">
           <li><span class="sk">Low Fuel Alert</span><span class="sv">1/4 Tank</span></li>
@@ -6003,6 +6012,7 @@ function carTab(id, btn) {
   var el = document.getElementById('tab-' + id);
   if (el) el.classList.add('active');
   if (btn) btn.classList.add('active');
+  if (id === 'car-settings') carUpdatePinStatus();
 }
 
 function carLogService() {
@@ -6014,8 +6024,37 @@ function carLogFuel() {
 }
 
 var CAR_VIN = '4JGFB4KB0MA478988';
+var CAR_PIN_SERVICES = ['engine_start','doors_unlock','windows_open','sunroof_open','sunroof_tilt'];
+function getCarPin() { return localStorage.getItem('car_pin') || ''; }
+function setCarPin(p) { localStorage.setItem('car_pin', p); }
+function carNeedsPin(service) { return CAR_PIN_SERVICES.indexOf(service) >= 0; }
+function carPromptPin(cb) {
+  var existing = getCarPin();
+  if (existing) { cb(existing); return; }
+  grdShow('&#128273; Mercedes PIN Required', '<div style="font-size:12px;line-height:1.6;margin-bottom:12px">Enter your Mercedes me PIN to authorize this command. It will be saved on this device.</div>'
+    + '<input id="carPinInput" type="password" inputmode="numeric" maxlength="8" placeholder="Mercedes PIN" style="width:100%;box-sizing:border-box;background:rgba(0,0,0,.4);border:1px solid rgba(212,175,55,.3);border-radius:8px;padding:12px;color:#ede8df;font-size:18px;font-family:inherit;letter-spacing:6px;text-align:center;margin-bottom:10px">'
+    + '<div class="mbtns"><button class="mbtn primary" onclick="var p=document.getElementById(\'carPinInput\').value.trim();if(p){setCarPin(p);grdClose();window._carPinCb&&window._carPinCb(p);}">Save &amp; Continue</button><button class="mbtn secondary" onclick="grdClose()">Cancel</button></div>');
+  window._carPinCb = cb;
+}
+function carChangePinUI() {
+  grdShow('&#128273; Change Mercedes PIN', '<div style="font-size:12px;line-height:1.6;margin-bottom:12px">Enter your new Mercedes me PIN. This is the same PIN you set up in the Mercedes Me mobile app.</div>'
+    + '<input id="carPinInput" type="password" inputmode="numeric" maxlength="8" placeholder="New PIN" style="width:100%;box-sizing:border-box;background:rgba(0,0,0,.4);border:1px solid rgba(212,175,55,.3);border-radius:8px;padding:12px;color:#ede8df;font-size:18px;font-family:inherit;letter-spacing:6px;text-align:center;margin-bottom:10px">'
+    + '<div class="mbtns"><button class="mbtn primary" onclick="var p=document.getElementById(\'carPinInput\').value.trim();if(p){setCarPin(p);grdClose();carUpdatePinStatus();}">Save PIN</button>'
+    + '<button class="mbtn secondary" onclick="localStorage.removeItem(\'car_pin\');grdClose();carUpdatePinStatus();">Clear PIN</button>'
+    + '<button class="mbtn secondary" onclick="grdClose()">Cancel</button></div>');
+}
+function carUpdatePinStatus() {
+  var el = document.getElementById('carPinStatus');
+  if (!el) return;
+  var pin = getCarPin();
+  el.innerHTML = pin
+    ? '<span style="color:var(--ok)">&#10003; PIN saved on this device</span>'
+    : '<span style="color:var(--warn)">No PIN saved — remote start & unlock will prompt for it</span>';
+}
 function carMbSvc(service, extra) {
   var d = { vin: CAR_VIN };
+  var pin = getCarPin();
+  if (pin && carNeedsPin(service)) d.pin = pin;
   if (extra) Object.keys(extra).forEach(function(k){ d[k] = extra[k]; });
   return haFetch('/api/services/mbapi2020/' + service, {
     method: 'POST', headers: {'Content-Type':'application/json'},
@@ -6053,10 +6092,14 @@ function carCmdFail(title, r, e) {
 }
 function carRemoteStart() {
   if (!getHaToken()) { grdShow('Remote Start', 'Connect Beehive first (HOME tab).'); return; }
-  carMbSvc('engine_start').then(function(r){
-    if (r.ok) { grdShow('&#128273; Remote Start', 'Command sent to Mercedes. Engine should start within 30 seconds &mdash; runs for about 10 minutes.<br><span style="font-size:11px;color:var(--muted)">If nothing happens, open CAR > Settings > Entity Scan to check connection status.</span>'); setTimeout(loadCar, 8000); }
-    else carCmdFail('&#128273; Remote Start', r);
-  }).catch(function(e){ carCmdFail('&#128273; Remote Start', null, e); });
+  function doStart() {
+    carMbSvc('engine_start').then(function(r){
+      if (r.ok) { grdShow('&#128273; Remote Start', 'Command sent to Mercedes. Engine should start within 30 seconds &mdash; runs for about 10 minutes.<br><span style="font-size:11px;color:var(--muted)">If nothing happens, open CAR > Settings > Entity Scan to check connection status.</span>'); setTimeout(loadCar, 8000); }
+      else carCmdFail('&#128273; Remote Start', r);
+    }).catch(function(e){ carCmdFail('&#128273; Remote Start', null, e); });
+  }
+  if (!getCarPin()) { carPromptPin(function(){ doStart(); }); return; }
+  doStart();
 }
 function carRemoteStop() {
   if (!getHaToken()) { grdShow('Remote Stop', 'Connect Beehive first (HOME tab).'); return; }
@@ -6339,10 +6382,14 @@ function carLockCmd(action) {
   if (!getHaToken()) { grdShow('Lock', 'Connect Beehive first (HOME tab).'); return; }
   var svc = action === 'lock' ? 'doors_lock' : 'doors_unlock';
   var title = action === 'lock' ? '&#128274; Lock' : '&#128275; Unlock';
-  carMbSvc(svc).then(function(r){
-    if (r.ok) { grdShow(title, (action === 'lock' ? 'Lock' : 'Unlock') + ' command sent to Mercedes.<br><span style="font-size:11px;color:var(--muted)">Should take effect within 30 seconds.</span>'); setTimeout(loadCar, 5000); }
-    else carCmdFail(title, r);
-  }).catch(function(e){ carCmdFail(title, null, e); });
+  function doLock() {
+    carMbSvc(svc).then(function(r){
+      if (r.ok) { grdShow(title, (action === 'lock' ? 'Lock' : 'Unlock') + ' command sent to Mercedes.<br><span style="font-size:11px;color:var(--muted)">Should take effect within 30 seconds.</span>'); setTimeout(loadCar, 5000); }
+      else carCmdFail(title, r);
+    }).catch(function(e){ carCmdFail(title, null, e); });
+  }
+  if (action === 'unlock' && !getCarPin()) { carPromptPin(function(){ doLock(); }); return; }
+  doLock();
 }
 
 function carFlashLights() {
@@ -6357,40 +6404,48 @@ function carRemoteClimate() { carRemoteStart(); }
 
 function carMaxCool() {
   if (!getHaToken()) { grdShow('MAX COOL', 'Connect Beehive first (HOME tab).'); return; }
-  var ok = function(r){ return r && r.ok; };
-  var safe = function(p){ return p.catch(function(){ return {ok:false, status:0, service:'?'}; }); };
-  Promise.all([
-    safe(carMbSvc('engine_start')),
-    safe(carMbSvc('temperature_configure', { front_left:"16", front_right:"16", rear_left:"16", rear_right:"16" })),
-    safe(carMbSvc('preconditioning_configure_seats', { front_left:true, front_right:true, rear_left:true, rear_right:true }))
-  ]).then(function(r){
-    if (!ok(r[0])) { carCmdFail('&#10052;&#65039; MAX COOL', r[0]); return; }
-    var m = ['Engine + A/C commands sent'];
-    if (ok(r[1])) m.push('all zones 61&#176;F');
-    if (ok(r[2])) m.push('seat cooling on');
-    grdShow('&#10052;&#65039; MAX COOL', m.join(', ') + '.<br><span style="font-size:11px;color:var(--muted)">Should take effect within 30 seconds.</span>');
-    setTimeout(loadCar, 8000);
-  });
+  function doCool() {
+    var ok = function(r){ return r && r.ok; };
+    var safe = function(p){ return p.catch(function(){ return {ok:false, status:0, service:'?'}; }); };
+    Promise.all([
+      safe(carMbSvc('engine_start')),
+      safe(carMbSvc('temperature_configure', { front_left:"16", front_right:"16", rear_left:"16", rear_right:"16" })),
+      safe(carMbSvc('preconditioning_configure_seats', { front_left:true, front_right:true, rear_left:true, rear_right:true }))
+    ]).then(function(r){
+      if (!ok(r[0])) { carCmdFail('&#10052;&#65039; MAX COOL', r[0]); return; }
+      var m = ['Engine + A/C commands sent'];
+      if (ok(r[1])) m.push('all zones 61&#176;F');
+      if (ok(r[2])) m.push('seat cooling on');
+      grdShow('&#10052;&#65039; MAX COOL', m.join(', ') + '.<br><span style="font-size:11px;color:var(--muted)">Should take effect within 30 seconds.</span>');
+      setTimeout(loadCar, 8000);
+    });
+  }
+  if (!getCarPin()) { carPromptPin(function(){ doCool(); }); return; }
+  doCool();
 }
 
 function carMaxHeat() {
   if (!getHaToken()) { grdShow('MAX HEAT', 'Connect Beehive first (HOME tab).'); return; }
-  var ok = function(r){ return r && r.ok; };
-  var safe = function(p){ return p.catch(function(){ return {ok:false, status:0, service:'?'}; }); };
-  Promise.all([
-    safe(carMbSvc('engine_start')),
-    safe(carMbSvc('auxheat_start')),
-    safe(carMbSvc('temperature_configure', { front_left:"30", front_right:"30", rear_left:"30", rear_right:"30" })),
-    safe(carMbSvc('preconditioning_configure_seats', { front_left:true, front_right:true, rear_left:true, rear_right:true }))
-  ]).then(function(r){
-    if (!ok(r[0])) { carCmdFail('&#128293; MAX HEAT', r[0]); return; }
-    var m = ['Engine + heater commands sent'];
-    if (ok(r[1])) m.push('aux heater on');
-    if (ok(r[2])) m.push('all zones 86&#176;F');
-    if (ok(r[3])) m.push('seat warmers on');
-    grdShow('&#128293; MAX HEAT', m.join(', ') + '.<br><span style="font-size:11px;color:var(--muted)">Should take effect within 30 seconds.</span>');
-    setTimeout(loadCar, 8000);
-  });
+  function doHeat() {
+    var ok = function(r){ return r && r.ok; };
+    var safe = function(p){ return p.catch(function(){ return {ok:false, status:0, service:'?'}; }); };
+    Promise.all([
+      safe(carMbSvc('engine_start')),
+      safe(carMbSvc('auxheat_start')),
+      safe(carMbSvc('temperature_configure', { front_left:"30", front_right:"30", rear_left:"30", rear_right:"30" })),
+      safe(carMbSvc('preconditioning_configure_seats', { front_left:true, front_right:true, rear_left:true, rear_right:true }))
+    ]).then(function(r){
+      if (!ok(r[0])) { carCmdFail('&#128293; MAX HEAT', r[0]); return; }
+      var m = ['Engine + heater commands sent'];
+      if (ok(r[1])) m.push('aux heater on');
+      if (ok(r[2])) m.push('all zones 86&#176;F');
+      if (ok(r[3])) m.push('seat warmers on');
+      grdShow('&#128293; MAX HEAT', m.join(', ') + '.<br><span style="font-size:11px;color:var(--muted)">Should take effect within 30 seconds.</span>');
+      setTimeout(loadCar, 8000);
+    });
+  }
+  if (!getCarPin()) { carPromptPin(function(){ doHeat(); }); return; }
+  doHeat();
 }
 
 function hiveShowAccounts(){
