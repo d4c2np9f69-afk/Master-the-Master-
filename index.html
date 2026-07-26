@@ -2361,6 +2361,32 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <div class="wx-note">Live from Beehive</div>
     </div>
 
+    <!-- GARAGE DOOR — myQ via Beehive; shows when a cover.*garage* entity exists -->
+    <div class="card" id="garageCard" style="display:none">
+      <div class="card-title">&#128663; Garage Door <span id="garageConn" class="irr-conn"></span></div>
+      <div id="garageBanner" class="wx-banner wx-load">&#128260; Loading&hellip;</div>
+      <div id="garageControls" style="display:none">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+          <div id="garageIcon" style="font-size:36px;line-height:1">&#128663;</div>
+          <div style="flex:1">
+            <div id="garageState" style="font-size:18px;font-weight:800;letter-spacing:.5px;color:var(--text)">--</div>
+            <div id="garageChanged" style="font-size:11px;color:var(--muted)"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <button class="btn-full btn-green" id="garageOpenBtn" onclick="garageToggle('open')">&#9650; OPEN</button>
+          <button class="btn-full btn-gray" id="garageCloseBtn" onclick="garageToggle('close')">&#9660; CLOSE</button>
+        </div>
+        <ul class="spec-list" id="garageSpecs">
+          <li><span class="sk">Name</span><span class="sv">Garage Door</span></li>
+          <li><span class="sk">Position</span><span class="sv">--</span></li>
+          <li><span class="sk">Connection</span><span class="sv">Local (ratgdo / ESPHome)</span></li>
+        </ul>
+      </div>
+      <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadGarage()">&#128260; Refresh</button>
+      <div class="wx-note">Live from Beehive &bull; ratgdo / ESPHome</div>
+    </div>
+
     <!-- ROBOT VACUUM — its own card; only shows when a vacuum.* entity exists -->
     <div class="card" id="vacuumCard" style="display:none">
       <div class="card-title">&#129302; <span id="vacName">Robot Vacuum</span> <span id="vacConn" class="irr-conn"></span></div>
@@ -2460,13 +2486,13 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         </div>
         <span class="hcc-badge-future">PLANNED</span>
       </div>
-      <div class="hcc-module-row hcc-module-future">
+      <div class="hcc-module-row hcc-module-future" id="garageModulePlanned" style="display:none">
         <span class="hcc-module-icon">&#128663;</span>
         <div class="hcc-module-info">
-          <div class="hcc-module-name">Garage Door (myQ &rarr; Beehive)</div>
-          <div class="hcc-module-desc">Local control via ratgdo (myQ cloud is blocked from HA) — open/close + status, ties into alarm &amp; away scenes</div>
+          <div class="hcc-module-name">Garage Door (ratgdo &rarr; Beehive)</div>
+          <div class="hcc-module-desc">Install the ratgdo board on your garage opener, then adopt it in Beehive via ESPHome. Open/close control + status will appear here automatically.</div>
         </div>
-        <span class="hcc-badge-future">PLANNED</span>
+        <span class="hcc-badge-future">SETUP</span>
       </div>
     </div>
 
@@ -5209,7 +5235,7 @@ function splashLogin(){
         if(msg){msg.style.color='#22c55e';msg.textContent='Welcome home!';}
         setTimeout(function(){
           dismissSplash();
-          checkBeehive(false);loadCameras();loadHomeStatus();loadUtilities();loadGuardian();loadLights();loadVacuum();loadCar();acctRefreshStatus();
+          checkBeehive(false);loadCameras();loadHomeStatus();loadUtilities();loadGuardian();loadLights();loadGarage();loadVacuum();loadCar();acctRefreshStatus();
         },600);
       } else {
         if(msg){msg.style.color='#ff6262';msg.textContent=res.data.error==='not_setup'?'Login not set up yet':'Wrong password';}
@@ -5943,7 +5969,7 @@ function hccSection(id, btn) {
     if (!window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
     loadUtilities(); loadCameras(); loadHomeStatus();
   }
-  if (id === 'guardian') { loadGuardian(); loadLights(); loadVacuum(); loadClimate(); }
+  if (id === 'guardian') { loadGuardian(); loadLights(); loadGarage(); loadVacuum(); loadClimate(); }
   if (id === 'car') { carSwitchVehicle(_activeVehicle); }
   if (id === 'yard') { mowerSync(false); }
   if (id === 'weather') {
@@ -6847,7 +6873,7 @@ setTimeout(function() {
 // momentarily-quiet meter) recovers on its own — no manual refresh. Guarded to token.
 setInterval(function(){
   mowerSync(false);
-  if (getHaToken()) { checkBeehive(false); loadCameras(); loadUtilities(); loadGuardian(); loadLights(); loadVacuum(); loadCar(); }
+  if (getHaToken()) { checkBeehive(false); loadCameras(); loadUtilities(); loadGuardian(); loadLights(); loadGarage(); loadVacuum(); loadCar(); }
 }, 60000);
 setInterval(loadWeather, 5*60*1000);
 
@@ -6944,6 +6970,7 @@ function saveHaTokenInline() {
         loadUtilities();
         loadGuardian();
         loadLights();
+        loadGarage();
         loadVacuum();
         checkBeehive(false);
       } else { throw new Error('unexpected_response'); }
@@ -7579,11 +7606,20 @@ function loadGuardian(){
       return (s.entity_id.indexOf('cover.') === 0 && id.indexOf('garage') >= 0)
           || (s.entity_id.indexOf('binary_sensor.') === 0 && id.indexOf('garage') >= 0);
     });
+    var gCover = garage.filter(function(s){ return s.entity_id.indexOf('cover.') === 0; })[0];
+    if (gCover) window._garageEntity = gCover.entity_id;
     if (garage.length){
       var open = garage.some(function(g){ return g.state === 'open' || g.state === 'on'; });
       grdSet('grd-garage', open ? 'OPEN' : 'CLOSED', open ? 'hs-warn' : 'hs-ok');
       if (open) warnReasons.push('Garage open');
-    } else grdSet('grd-garage', 'Sensor pending', 'hs-dim');
+      var gCard = document.getElementById('garageCard'); if (gCard) gCard.style.display = '';
+      var gPlan = document.getElementById('garageModulePlanned'); if (gPlan) gPlan.style.display = 'none';
+      if (gCover) loadGarage(gCover);
+    } else {
+      grdSet('grd-garage', 'Sensor pending', 'hs-dim');
+      var gCard2 = document.getElementById('garageCard'); if (gCard2) gCard2.style.display = 'none';
+      var gPlan2 = document.getElementById('garageModulePlanned'); if (gPlan2) gPlan2.style.display = '';
+    }
 
     // DOORS — contact sensors (door/window), garage + car (Mercedes) excluded
     var doors = states.filter(function(s){
@@ -7812,6 +7848,76 @@ function loadLights(){
     set('wx-load', '&#128161; Beehive unreachable — check your token on HOME');
     if (conn){ conn.textContent = '● OFFLINE'; conn.style.color = '#ff6262'; }
   });
+}
+
+// ── GARAGE DOOR (Home Guardian) ───────────────────────────────────────────
+// Controls a HA cover.*garage* entity (ratgdo / myQ). Card auto-shows when entity exists.
+function loadGarage(coverState){
+  var card = document.getElementById('garageCard');
+  var banner = document.getElementById('garageBanner');
+  var controls = document.getElementById('garageControls');
+  var conn = document.getElementById('garageConn');
+  if (!getHaToken()){ if (card) card.style.display = 'none'; return; }
+  function render(s){
+    if (!s){ if (banner) { banner.className = 'wx-banner wx-no'; banner.innerHTML = '&#128663; No garage entity found in Beehive'; } return; }
+    window._garageEntity = s.entity_id;
+    if (banner) banner.style.display = 'none';
+    if (controls) controls.style.display = '';
+    if (conn){ conn.textContent = '● LIVE'; conn.style.color = '#22c55e'; }
+    var st = String(s.state || '').toLowerCase();
+    var a = s.attributes || {};
+    var icon = document.getElementById('garageIcon');
+    var label = document.getElementById('garageState');
+    var changed = document.getElementById('garageChanged');
+    var openBtn = document.getElementById('garageOpenBtn');
+    var closeBtn = document.getElementById('garageCloseBtn');
+    if (st === 'open' || st === 'opening'){
+      if (icon) icon.innerHTML = '&#128310;';
+      if (label) { label.textContent = st === 'opening' ? 'OPENING…' : 'OPEN'; label.style.color = 'var(--warn)'; }
+      if (openBtn) openBtn.disabled = true;
+      if (closeBtn) closeBtn.disabled = false;
+    } else if (st === 'closed' || st === 'closing'){
+      if (icon) icon.innerHTML = '&#128663;';
+      if (label) { label.textContent = st === 'closing' ? 'CLOSING…' : 'CLOSED'; label.style.color = 'var(--ok)'; }
+      if (openBtn) openBtn.disabled = false;
+      if (closeBtn) closeBtn.disabled = true;
+    } else {
+      if (icon) icon.innerHTML = '&#128663;';
+      if (label) { label.textContent = st.toUpperCase() || '--'; label.style.color = 'var(--muted)'; }
+      if (openBtn) openBtn.disabled = false;
+      if (closeBtn) closeBtn.disabled = false;
+    }
+    if (changed && s.last_changed){
+      try { var d = new Date(s.last_changed); changed.textContent = 'Since ' + d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}); } catch(e){}
+    }
+    var specs = document.getElementById('garageSpecs');
+    if (specs){
+      var name = a.friendly_name || s.entity_id;
+      var pos = (typeof a.current_position === 'number') ? a.current_position + '%' : '--';
+      specs.innerHTML = '<li><span class="sk">Name</span><span class="sv">' + name + '</span></li>'
+        + '<li><span class="sk">Position</span><span class="sv">' + pos + '</span></li>'
+        + '<li><span class="sk">Connection</span><span class="sv">Local (ratgdo / ESPHome)</span></li>';
+    }
+  }
+  if (coverState){ render(coverState); return; }
+  haFetch('/api/states', { signal: AbortSignal.timeout(25000) })
+  .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  .then(function(states){
+    if (!Array.isArray(states)) throw new Error('bad');
+    var cover = states.filter(function(s){ return s.entity_id.indexOf('cover.') === 0 && s.entity_id.toLowerCase().indexOf('garage') >= 0; })[0];
+    render(cover);
+  })
+  .catch(function(){
+    if (banner){ banner.className = 'wx-banner wx-no'; banner.innerHTML = '&#128663; Beehive unreachable'; }
+    if (conn){ conn.textContent = '● OFFLINE'; conn.style.color = '#ff6262'; }
+  });
+}
+function garageToggle(action){
+  var eid = window._garageEntity; if (!eid) return;
+  var svc = action === 'open' ? 'open_cover' : 'close_cover';
+  haFetch('/api/services/cover/' + svc, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ entity_id: eid }) })
+  .then(function(){ setTimeout(loadGarage, 2000); })
+  .catch(function(){ alert('Garage command failed — check Beehive connection.'); });
 }
 
 // ── ROBOT VACUUM (Home Guardian) ──────────────────────────────────────────
