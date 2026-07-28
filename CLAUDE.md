@@ -508,7 +508,7 @@ The Beelink J45 runs Home Assistant = the central hub. Devices connect THREE way
 
 2. ~~**Irrigation "Last Watered"**~~ — ✅ FIXED. B-Hyve history endpoint = `GET /v1/watering_events/{device_id}` (path, not query). Jeff verified "Last Watered 7:30 AM."
 
-3. **B-Hyve invalid_auth** — Jeff needs to re-run `sh bhyve` in HA Terminal → restart → re-add "Orbit B-Hyve" integration.
+3. ~~**B-Hyve invalid_auth**~~ — ✅ RESOLVED. Integration is added and running correctly via the vendor cloud (see Cloud integrations list above). **Do not re-investigate or edit `custom_components/bhyve/coordinator.py` based on this line** — it's confirmed working as committed; any future auth issue needs a fresh real error before touching this code again.
 
 4. ~~**Blink cameras**~~ — ✅✅ DONE (07-09). All 6 live. Fix = deleted stale `custom_components/blink` override, used HA's built-in (blinkpy 0.25.6+ in core 2026.7.1). **NEVER re-add a `custom_components/blink` override.**
 

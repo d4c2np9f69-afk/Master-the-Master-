@@ -648,6 +648,7 @@ html.light .car-tabs{background:#fff}
 .util-head-prov{font-size:10px;color:var(--muted);margin-top:1px}
 .util-chip{margin-left:auto;font-size:9px;font-weight:900;letter-spacing:1px;padding:3px 8px;border-radius:10px;white-space:nowrap;background:rgba(150,150,150,.14);color:var(--muted);border:1px solid var(--border)}
 .util-chip.live{background:rgba(34,197,94,.14);color:var(--ok,#22c55e);border-color:rgba(34,197,94,.35)}
+.util-chip.est{background:rgba(56,189,248,.14);color:var(--info,#38bdf8);border-color:rgba(56,189,248,.35)}
 .util-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .util-stat{background:rgba(150,150,150,.08);border:1px solid var(--border);border-radius:10px;padding:9px 6px;text-align:center}
 .util-stat-label{font-size:9px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:var(--dim)}
@@ -656,6 +657,7 @@ html.light .car-tabs{background:#fff}
 .util-foot{font-size:10px;color:var(--muted);margin-top:10px;display:flex;align-items:center;gap:6px}
 .util-foot .dot{width:7px;height:7px;border-radius:50%;background:#9a9a9a;flex-shrink:0}
 .util-foot.live .dot{background:var(--ok,#22c55e)}
+.util-foot.est .dot{background:var(--info,#38bdf8)}
 
 /* ── WHITE HOUSE DISPATCH (contacts/emergency directory, HOME top) ───────── */
 .dispatch-card{position:relative;width:100%;margin:0 0 16px;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 4px 18px rgba(0,0,0,.35)}
@@ -8080,9 +8082,17 @@ function loadUtilities() {
     }
     function live(group){
       var c = document.getElementById('util-' + group + '-chip');
-      if (c) { c.textContent = 'LIVE'; c.classList.add('live'); }
+      if (c) { c.textContent = 'LIVE'; c.classList.remove('est'); c.classList.add('live'); }
       var f = document.getElementById('util-' + group + '-foot');
-      if (f) { f.classList.add('live'); f.innerHTML = '<span class="dot"></span> Live from Beehive'; }
+      if (f) { f.classList.remove('est'); f.classList.add('live'); f.innerHTML = '<span class="dot"></span> Live from Beehive'; }
+    }
+    // Distinct from live() — for modeled/estimated numbers (no real sensor backing them),
+    // so they're never visually confused with an actual live reading.
+    function estimated(group, txt){
+      var c = document.getElementById('util-' + group + '-chip');
+      if (c) { c.textContent = 'EST'; c.classList.remove('live'); c.classList.add('est'); }
+      var f = document.getElementById('util-' + group + '-foot');
+      if (f) { f.classList.remove('live'); f.classList.add('est'); f.innerHTML = '<span class="dot"></span> ' + txt; }
     }
     // WATER — prefer the converted `sensor.water_gallons` helper (template ÷10, already in
     // gallons — see docs/beehive/ha_helpers_and_alexa.md); fall back to the raw rtlamr ticks
@@ -8152,6 +8162,25 @@ function loadUtilities() {
       st.lastVal = curVal; st.lastT = now;
       try { localStorage.setItem(key, JSON.stringify(st)); } catch (e) {}
       return res;
+    }
+    // Electric "Today" estimate — SmartHub only exposes a MONTHLY running total via a normal
+    // HA entity (its hourly/daily data goes straight into HA's internal statistics store, not
+    // reachable via /api/states), so there's no server-side daily figure to read. Estimate it
+    // client-side the same way water/gas fall back locally: track the monthly total's value at
+    // the start of today; today's usage = current − that baseline. Resets on the calendar day,
+    // which won't perfectly line up with SmartHub's own ~6h poll cadence, but self-corrects.
+    function electricDayDelta(curMonthVal){
+      var key = 'util_roll_elec_day';
+      var d = new Date();
+      var dayKey = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+      var st = {};
+      try { st = JSON.parse(localStorage.getItem(key) || '{}'); } catch (e) { st = {}; }
+      if (st.day !== dayKey || st.dayStart == null || curMonthVal < st.dayStart) {
+        st.day = dayKey; st.dayStart = curMonthVal;
+      }
+      var delta = Math.max(0, curMonthVal - st.dayStart);
+      try { localStorage.setItem(key, JSON.stringify(st)); } catch (e) {}
+      return delta;
     }
     function irrMonthlyGal(){
       var total = 0;
@@ -8228,11 +8257,59 @@ function loadUtilities() {
         put('util-gas-cost', '$' + gCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
       }
     }
-    // ELECTRIC — SmartHub (CEMC) integration provides monthly kWh only (poll every 6h);
-    // no live Now/Today until a CT-clamp monitor (planned ATM90E32/ESP32 build) is installed.
-    // The SmartHub entity_id embeds the CEMC account number, so auto-find it by keyword
-    // instead of hardcoding.
+    // ELECTRIC — SmartHub (CEMC) exposes exactly one real entity: a MONTHLY running total,
+    // refreshed on its own ~6h cadence. It has no Now/Today entity at all — HA's own research
+    // (github.com/gagata/ha-smarthub-energy-sensor) confirms NISC SmartHub's backend never
+    // exposes instantaneous power, only settled interval reads, so true live Now/Today needs
+    // a CT-clamp monitor (planned ATM90E32/ESP32 build) regardless of this integration.
+    //
+    // Until that hardware exists, model it: every time the monthly total ticks up between app
+    // polls, fold that delta into a 24-bucket "typical kWh used during this hour of day"
+    // profile (util_elec_hour_profile in localStorage), EMA-updated so it keeps adapting to
+    // season/weather. That profile estimates (a) "Now" — the typical rate for the current
+    // hour — and (b) fills the gap between SmartHub's sparse real updates and the current
+    // moment for "Today". Both are clearly marked estimated (≈ prefix, EST chip) — never
+    // presented as a real sensor reading. Accuracy improves automatically the longer it runs.
     var ELEC_BASE = 39.00, ELEC_PER_KWH = 0.11472; // CEMC: $39 base + $0.08657 energy + $0.02815 TVA fuel (bill 06/30/2026)
+    var ELEC_PROFILE_KEY = 'util_elec_hour_profile', ELEC_SAMPLE_KEY = 'util_elec_last_sample';
+    function loadElecProfile(){ try { return JSON.parse(localStorage.getItem(ELEC_PROFILE_KEY) || '{}'); } catch (e) { return {}; } }
+    function saveElecProfile(p){ try { localStorage.setItem(ELEC_PROFILE_KEY, JSON.stringify(p)); } catch (e) {} }
+    // Folds one observed (prevTs,prevVal)→(curTs,curVal) delta into the hour-of-day profile,
+    // splitting it proportionally across every hour bucket the interval actually spans (a
+    // SmartHub gap routinely crosses several hours) rather than dumping it all in one bucket.
+    function updateElecProfile(prevTs, prevVal, curTs, curVal){
+      if (prevTs == null || curVal < prevVal) return; // no prior sample, or a month rollover
+      var totalMs = curTs - prevTs;
+      if (totalMs <= 0 || totalMs > 30 * 3600000) return; // ignore >30h gaps (HA restart etc.)
+      var totalKwh = curVal - prevVal;
+      var profile = loadElecProfile();
+      if (!profile.buckets) { profile.buckets = new Array(24).fill(0); profile.counts = new Array(24).fill(0); }
+      var t = prevTs;
+      while (t < curTs) {
+        var hourStart = new Date(t); hourStart.setMinutes(0, 0, 0);
+        var segEnd = Math.min(curTs, hourStart.getTime() + 3600000);
+        var segMs = segEnd - t;
+        var hod = hourStart.getHours();
+        var segRate = totalKwh * (segMs / totalMs) / (segMs / 3600000); // implied full-hour-equivalent rate
+        var n = profile.counts[hod] || 0;
+        var alpha = n < 5 ? 1 / (n + 1) : 0.15; // fast to converge early, then a slow-moving average
+        profile.buckets[hod] = profile.buckets[hod] * (1 - alpha) + segRate * alpha;
+        profile.counts[hod] = n + 1;
+        t = segEnd;
+      }
+      saveElecProfile(profile);
+    }
+    function estimateElecSpan(profile, fromTs, toTs){
+      if (!profile.buckets) return 0;
+      var total = 0, t = fromTs;
+      while (t < toTs) {
+        var hourStart = new Date(t); hourStart.setMinutes(0, 0, 0);
+        var segEnd = Math.min(toTs, hourStart.getTime() + 3600000);
+        total += (profile.buckets[hourStart.getHours()] || 0) * ((segEnd - t) / 3600000);
+        t = segEnd;
+      }
+      return total;
+    }
     var eNow = (num('sensor.electric_now') != null) ? 'sensor.electric_now'
              : (num('sensor.electric_power') != null) ? 'sensor.electric_power' : null;
     if (eNow) { fill('util-elec-now', eNow, 2); live('elec'); }
@@ -8241,9 +8318,31 @@ function loadUtilities() {
     var eMonth = num(eMonthEnt);
     if (eMonth != null) {
       put('util-elec-month', eMonth.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }));
-      if (!eNow) live('elec');
       var eCost = ELEC_BASE + eMonth * ELEC_PER_KWH;
       put('util-elec-cost', '$' + eCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+
+      var nowTs = Date.now(), lastSample = {};
+      try { lastSample = JSON.parse(localStorage.getItem(ELEC_SAMPLE_KEY) || '{}'); } catch (e) { lastSample = {}; }
+      if (lastSample.val != null && eMonth !== lastSample.val) updateElecProfile(lastSample.ts, lastSample.val, nowTs, eMonth);
+      if (lastSample.val == null || eMonth !== lastSample.val) {
+        try { localStorage.setItem(ELEC_SAMPLE_KEY, JSON.stringify({ ts: nowTs, val: eMonth })); } catch (e) {}
+        lastSample = { ts: nowTs, val: eMonth };
+      }
+
+      var profile = loadElecProfile();
+      var hod = new Date().getHours();
+      var estNow = (profile.counts && profile.counts[hod] > 0) ? profile.buckets[hod] : null;
+      var haveModel = estNow != null;
+      if (!eNow && estNow != null) put('util-elec-now', '≈' + estNow.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+      if (num('sensor.electric_today') == null) {
+        var todayReal = electricDayDelta(eMonth);              // measured since local midnight, as of the last real SmartHub sample
+        var gapEst = estimateElecSpan(profile, lastSample.ts, nowTs); // modeled fill from that sample to right now
+        put('util-elec-today', '≈' + (todayReal + gapEst).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+      }
+      if (!eNow) {
+        if (haveModel) estimated('elec', 'Month/Cost live from SmartHub · Now/Today modeled (≈) — accuracy improves over time');
+        else live('elec'); // real monthly data flowing, just not enough history yet to model Now/Today
+      }
     }
   })
   .catch(function(){
