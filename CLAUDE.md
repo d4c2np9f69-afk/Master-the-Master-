@@ -346,9 +346,11 @@ Expected: all tests passing. If any fail, fix them before doing anything else.
 
 ### 💧 WATER — WHUD · Kamstrup flowIQ 2100
 - Meter S/N `25394131`, billing cycle ~21st. Rates: Base $10.32 + $0.00908/gal (validated). Sewer (City of White House, mirrors the WHUD meter, no separate meter): Base $22.74 + $0.00982/gal (validated).
-- Read path (confirmed by WHUD supervisor): external MIU `100WD`, ERT ID `79453337`, unencrypted Itron ERT-SCM, 915–930 MHz, ~1 SCM/min, no AES key.
+- Read path (confirmed by WHUD supervisor): external MIU `100WD`, ERT ID `79453337`, unencrypted Itron ERT-SCM, protocol `scm+` (rtlamr2mqtt config), 915–930 MHz, ~1 SCM/min, no AES key.
 - Timestamps are European (Kamstrup is Danish) — convert to Central in code. Raw ÷10 = gallons.
 - App shows **This Cycle** (`whudCycleKey()`, resets ~21st) + Est. Water/Sewer/Combined + billing history + sewer-overcharge tracking (irrigation water is charged sewer fees it never actually generates).
+- **⚠️ Pit radio went silent 07-28 (~17:39 UTC) — confirmed hardware, not software (07-28).** Add-on (`6713e36e_rtlamr2mqtt`) running fine with correct ID/protocol; gas (same dongle/antenna/distance) kept receiving normally throughout. Proved via the add-on's own `listen_mode` (logs ANY reception of configured meters, no filtering) — gas showed up in <90s, water never appeared at all. This rules out config/software entirely; the external MIU itself isn't transmitting or isn't reaching the receiver. **Next step: Jeff calls WHUD** (closed when found) to report the MIU not transmitting — this is their equipment. The meter also has its own separate built-in Kamstrup wM-Bus radio, but that's typically AES-128 encrypted (would need a key from WHUD) and Jeff never built a receiver for it — not a real fallback right now.
+- Timing note (checked so this doesn't get blamed on the same-day recorder fix): recorder reset ~12:15 UTC 07-28; water kept transmitting fine for 5+ more hours after that, only going silent at ~17:39 UTC — the timing doesn't line up, so this looks like an independent, coincidental hardware failure, not a side effect of the recorder work.
 
 ### 🔥 GAS — Piedmont/Spire · Itron 100G ERT
 - Piedmont Natural Gas, transitioning to Spire (billing continues under Piedmont during transition). Account `6100 0546 4779`. Meter Elster AC-250, Piedmont# `T821986`. Billing cycle ~5th.
