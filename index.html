@@ -8241,9 +8241,16 @@ function loadUtilities() {
       var wr = rollMeter('util_roll_water', curWaterGal, whudCycleKey());
       if (num('sensor.water_flow') == null && wr.flow != null)
         put('util-water-flow', wr.flow.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
-      if (num('sensor.water_month') == null) {
-        if (wr.month != null) putWaterCycle(wr.month);   // immediate local estimate
-        waterCycleFromHistory(curWaterGal);               // refine from HA history (overrides)
+      // Est. Water / Est. Sewer / Combined / overcharge note all come from putWaterCycle() —
+      // always run it off whatever cycle-gallons value we have, whether that's HA's own
+      // water_month helper or the local fallback. Previously this was gated to the fallback
+      // path only, so once HA's helper existed the cost fields silently never populated.
+      var haWaterMonth = num('sensor.water_month');
+      if (haWaterMonth != null) {
+        putWaterCycle(haWaterMonth);
+      } else if (wr.month != null) {
+        putWaterCycle(wr.month);        // immediate local estimate
+        waterCycleFromHistory(curWaterGal); // refine from HA history (overrides)
       }
     }
     var curGasCcf = gCcf != null ? gCcf : (graw != null ? graw / 100 : null);
