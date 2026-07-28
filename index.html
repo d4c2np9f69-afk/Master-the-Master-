@@ -7963,17 +7963,21 @@ function loadVacuum(){
 }
 
 // ── UTILITIES (Water / Gas / Electric) ───────────────────────────────────
-// The "Reading" tiles auto-find the raw rtlamr2mqtt meters (sensor.water_meter
-// ÷10 = gal, sensor.gas_meter ÷100 = ccf). The This-Month / Flow / Cost /
-// Electric tiles read named HA helper sensors that Jeff builds in Beehive
-// (see docs/beehive/ha_helpers_and_alexa.md). Any helper that doesn't exist yet
-// is skipped, so the tile just stays as a placeholder — nothing breaks.
+// The "Reading" tiles prefer the converted HA helper sensors (sensor.water_gallons,
+// already ÷10 → gal; sensor.gas_ccf, already ÷100 → ccf), falling back to auto-finding
+// the raw rtlamr2mqtt meters (sensor.water_meter*/gas_meter*, doing the ÷10/÷100 client-side)
+// if those helpers don't exist yet. The This-Month / Flow / Cost tiles read named HA helper
+// sensors that Jeff builds in Beehive (see docs/beehive/ha_helpers_and_alexa.md). Electric's
+// "This Month" reads the SmartHub (CEMC) monthly-kWh entity, auto-found by keyword since its
+// id embeds the account number; Now/Today stay blank until a CT-clamp monitor exists. Any
+// helper that doesn't exist yet is skipped, so the tile just stays as a placeholder.
 //   Expected helper entity_ids (name them EXACTLY these when building in HA):
+//     sensor.water_gallons (template, ÷10, gal)   sensor.gas_ccf (template, ÷100, ccf)
 //     sensor.water_month  (utility_meter, monthly, gallons)
 //     sensor.water_flow   (derivative, gpm)
 //     sensor.gas_month    (utility_meter, monthly, ccf)
 //     sensor.gas_cost     (template, $ this month)
-//     sensor.electric_now / electric_today / electric_month (DIY monitor, later)
+//     sensor.electric_now / electric_today (DIY CT-clamp monitor, later)
 function loadUtilities() {
   var WATER_BASE = 10.32, WATER_PER_GAL = 0.00908;
   var SEWER_BASE = 22.74, SEWER_PER_GAL = 0.00982;
@@ -8034,6 +8038,21 @@ function loadUtilities() {
   .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
   .then(function(states){
     if (!Array.isArray(states)) return;
+    var byId = {};
+    states.forEach(function(s){ if (s && typeof s.entity_id === 'string') byId[s.entity_id] = s; });
+    function num(entId){ var s = byId[entId]; if (!s) return null; var n = parseFloat(s.state); return isNaN(n) ? null : n; }
+    // AND-match keywords against an entity_id (case-insensitive) — for sensors whose exact id
+    // varies (e.g. the SmartHub electric entity, which embeds the CEMC account number).
+    function findEntity(){
+      var kws = Array.prototype.slice.call(arguments);
+      var found = null;
+      states.forEach(function(s){
+        if (found || !s || typeof s.entity_id !== 'string') return;
+        var id = s.entity_id.toLowerCase();
+        if (kws.every(function(k){ return id.indexOf(k) >= 0; })) found = s.entity_id;
+      });
+      return found;
+    }
     // Auto-find the rtlamr2mqtt meter sensors by name (Beehive devices: water_meter / gas_meter).
     function meterRaw(kw){
       var v = null;
@@ -8065,30 +8084,38 @@ function loadUtilities() {
       var f = document.getElementById('util-' + group + '-foot');
       if (f) { f.classList.add('live'); f.innerHTML = '<span class="dot"></span> Live from Beehive'; }
     }
-    // WATER — rtlamr raw is tenths of a gallon → ÷10 = gallons (flowIQ 2100)
+    // WATER — prefer the converted `sensor.water_gallons` helper (template ÷10, already in
+    // gallons — see docs/beehive/ha_helpers_and_alexa.md); fall back to the raw rtlamr ticks
+    // (÷10) if that helper doesn't exist yet.
     var wraw = meterRaw('water_meter');
-    if (wraw != null) {
+    var wGal = num('sensor.water_gallons');
+    if (wGal != null) {
+      put('util-water-today', wGal.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+      live('water');
+    } else if (wraw != null) {
       put('util-water-today', (wraw / 10).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
       live('water');
     }
-    // GAS — rtlamr raw is cubic feet → ÷100 = CCF (Piedmont's billing unit)
+    // GAS — prefer the converted `sensor.gas_ccf` helper (template ÷100, already in CCF);
+    // fall back to the raw rtlamr ticks (÷100) if that helper doesn't exist yet.
     var graw = meterRaw('gas_meter');
-    if (graw != null) {
+    var gCcf = num('sensor.gas_ccf');
+    if (gCcf != null) {
+      put('util-gas-today', gCcf.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+      live('gas');
+    } else if (graw != null) {
       put('util-gas-today', (graw / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
       live('gas');
     }
     // Beehive is reachable, but a meter is momentarily quiet — e.g. rtlamr2mqtt just
     // restarted and hasn't re-published yet (its readings aren't retained). Say so,
     // instead of the same "Waiting" as a dead connection. Self-heals on the next poll.
-    if (wraw == null) utilFoot('water', 'Meter reader reconnecting…');
-    if (graw == null) utilFoot('gas', 'Meter reader reconnecting…');
+    if (wGal == null && wraw == null) utilFoot('water', 'Meter reader reconnecting…');
+    if (gCcf == null && graw == null) utilFoot('gas', 'Meter reader reconnecting…');
 
     // ── HA helper sensors (utility_meter / derivative / template) ──
     // Fill the This-Month / Flow / Cost / Electric tiles. Skipped silently until
     // Jeff builds each helper in Beehive (docs/beehive/ha_helpers_and_alexa.md).
-    var byId = {};
-    states.forEach(function(s){ if (s && typeof s.entity_id === 'string') byId[s.entity_id] = s; });
-    function num(entId){ var s = byId[entId]; if (!s) return null; var n = parseFloat(s.state); return isNaN(n) ? null : n; }
     function fill(elId, entId, digits, prefix){
       var n = num(entId); if (n == null) return;
       put(elId, (prefix || '') + n.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits }));
@@ -8180,18 +8207,19 @@ function loadUtilities() {
         })
         .catch(function(){});
     }
-    if (wraw != null) {
-      var wgal = wraw / 10;
-      var wr = rollMeter('util_roll_water', wgal, whudCycleKey());
+    var curWaterGal = wGal != null ? wGal : (wraw != null ? wraw / 10 : null);
+    if (curWaterGal != null) {
+      var wr = rollMeter('util_roll_water', curWaterGal, whudCycleKey());
       if (num('sensor.water_flow') == null && wr.flow != null)
         put('util-water-flow', wr.flow.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
       if (num('sensor.water_month') == null) {
         if (wr.month != null) putWaterCycle(wr.month);   // immediate local estimate
-        waterCycleFromHistory(wgal);                     // refine from HA history (overrides)
+        waterCycleFromHistory(curWaterGal);               // refine from HA history (overrides)
       }
     }
-    if (graw != null) {
-      var gr = rollMeter('util_roll_gas', graw / 100);
+    var curGasCcf = gCcf != null ? gCcf : (graw != null ? graw / 100 : null);
+    if (curGasCcf != null) {
+      var gr = rollMeter('util_roll_gas', curGasCcf);
       if (num('sensor.gas_month') == null && gr.month != null)
         put('util-gas-month', gr.month.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
       if (num('sensor.gas_cost') == null && gr.month != null) {
@@ -8200,15 +8228,20 @@ function loadUtilities() {
         put('util-gas-cost', '$' + gCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
       }
     }
-    // ELECTRIC (DIY ATM90E32 monitor — later). Accept a couple of common names.
+    // ELECTRIC — SmartHub (CEMC) integration provides monthly kWh only (poll every 6h);
+    // no live Now/Today until a CT-clamp monitor (planned ATM90E32/ESP32 build) is installed.
+    // The SmartHub entity_id embeds the CEMC account number, so auto-find it by keyword
+    // instead of hardcoding.
     var ELEC_BASE = 39.00, ELEC_PER_KWH = 0.11472; // CEMC: $39 base + $0.08657 energy + $0.02815 TVA fuel (bill 06/30/2026)
     var eNow = (num('sensor.electric_now') != null) ? 'sensor.electric_now'
              : (num('sensor.electric_power') != null) ? 'sensor.electric_power' : null;
     if (eNow) { fill('util-elec-now', eNow, 2); live('elec'); }
     fill('util-elec-today', 'sensor.electric_today', 1);
-    fill('util-elec-month', 'sensor.electric_month', 0);
-    var eMonth = num('sensor.electric_month');
+    var eMonthEnt = findEntity('smarthub', 'month') || 'sensor.electric_month';
+    var eMonth = num(eMonthEnt);
     if (eMonth != null) {
+      put('util-elec-month', eMonth.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }));
+      if (!eNow) live('elec');
       var eCost = ELEC_BASE + eMonth * ELEC_PER_KWH;
       put('util-elec-cost', '$' + eCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
     }
