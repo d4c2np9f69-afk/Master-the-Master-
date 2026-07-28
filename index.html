@@ -8236,11 +8236,40 @@ function loadUtilities() {
         })
         .catch(function(){});
     }
+    // Flow (gpm) needs two live samples to compute a rate, so it's blank on the very first
+    // poll of a session. Instead of waiting for a second live poll, pull the last couple of
+    // real readings HA already recorded (recorder history) and compute a real rate from
+    // those immediately. NOT a fallback for "no water flowing" — a genuine 0.0 gpm from
+    // rollMeter is left alone; this only fires when there's no rate to show yet at all.
+    function waterFlowFromHistory(){
+      var wEnt = null;
+      states.forEach(function(s){ if (s && typeof s.entity_id === 'string'){ var id=s.entity_id.toLowerCase(); if (id.indexOf('water_meter')>=0 && id.indexOf('reading')>=0) wEnt=s.entity_id; } });
+      if (!wEnt) return;
+      var since = new Date(Date.now() - 6 * 3600000).toISOString();
+      haFetch('/api/history/period/' + since + '?filter_entity_id=' + wEnt, { signal: AbortSignal.timeout(15000) })
+        .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+        .then(function(hist){
+          var arr = (hist && hist[0]) || [], pts = [];
+          for (var i = 0; i < arr.length; i++) {
+            var v = parseFloat(arr[i].state);
+            if (!isNaN(v)) pts.push({ t: new Date(arr[i].last_changed).getTime(), v: v / 10 });
+          }
+          if (pts.length < 2) return;
+          var a = pts[pts.length - 2], b = pts[pts.length - 1];
+          var dm = (b.t - a.t) / 60000;
+          if (dm <= 0.1) return;
+          var gpm = Math.max(0, (b.v - a.v) / dm);
+          put('util-water-flow', gpm.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+        })
+        .catch(function(){});
+    }
     var curWaterGal = wGal != null ? wGal : (wraw != null ? wraw / 10 : null);
     if (curWaterGal != null) {
       var wr = rollMeter('util_roll_water', curWaterGal, whudCycleKey());
-      if (num('sensor.water_flow') == null && wr.flow != null)
-        put('util-water-flow', wr.flow.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+      if (num('sensor.water_flow') == null) {
+        if (wr.flow != null) put('util-water-flow', wr.flow.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+        else waterFlowFromHistory();
+      }
       // Est. Water / Est. Sewer / Combined / overcharge note all come from putWaterCycle() —
       // always run it off whatever cycle-gallons value we have, whether that's HA's own
       // water_month helper or the local fallback. Previously this was gated to the fallback
@@ -8317,6 +8346,42 @@ function loadUtilities() {
       }
       return total;
     }
+    // One-time seed of the hour-of-day profile from HA's own recorder history, so Now/Today
+    // show a real (if rough) estimate right away instead of needing days of live polling to
+    // learn from a blank slate. Only pulls whatever the recorder actually retained — if HA's
+    // database was recently reset there may be little to find, but it's real data either way,
+    // never fabricated, and this runs once (skipped once the profile has anything learned).
+    function elecBackfillProfile(entId){
+      var profile = loadElecProfile();
+      if (profile.counts && profile.counts.some(function(n){ return n > 0; })) return;
+      var since = new Date(Date.now() - 30 * 86400000).toISOString();
+      haFetch('/api/history/period/' + since + '?filter_entity_id=' + entId, { signal: AbortSignal.timeout(15000) })
+        .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+        .then(function(hist){
+          var arr = (hist && hist[0]) || [], pts = [];
+          for (var i = 0; i < arr.length; i++) {
+            var v = parseFloat(arr[i].state);
+            if (!isNaN(v)) pts.push({ t: new Date(arr[i].last_changed).getTime(), v: v });
+          }
+          for (var j = 1; j < pts.length; j++) updateElecProfile(pts[j - 1].t, pts[j - 1].v, pts[j].t, pts[j].v);
+          // Seed "Today"'s baseline from the earliest reading recorder has FOR TODAY, instead
+          // of defaulting to "whatever the value is right now" — that default is what silently
+          // made Today always start at 0.0 the first time this code ever ran.
+          var d = new Date(), dayKey = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+          var todaysFirst = null;
+          for (var k = 0; k < pts.length; k++) {
+            var pd = new Date(pts[k].t);
+            if (pd.getFullYear() === d.getFullYear() && pd.getMonth() === d.getMonth() && pd.getDate() === d.getDate()) { todaysFirst = pts[k].v; break; }
+          }
+          if (todaysFirst != null) {
+            try {
+              var st = JSON.parse(localStorage.getItem('util_roll_elec_day') || '{}');
+              if (st.day !== dayKey) localStorage.setItem('util_roll_elec_day', JSON.stringify({ day: dayKey, dayStart: todaysFirst }));
+            } catch (e) {}
+          }
+        })
+        .catch(function(){});
+    }
     var eNow = (num('sensor.electric_now') != null) ? 'sensor.electric_now'
              : (num('sensor.electric_power') != null) ? 'sensor.electric_power' : null;
     if (eNow) { fill('util-elec-now', eNow, 2); live('elec'); }
@@ -8327,6 +8392,7 @@ function loadUtilities() {
       put('util-elec-month', eMonth.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }));
       var eCost = ELEC_BASE + eMonth * ELEC_PER_KWH;
       put('util-elec-cost', '$' + eCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+      elecBackfillProfile(eMonthEnt);
 
       var nowTs = Date.now(), lastSample = {};
       try { lastSample = JSON.parse(localStorage.getItem(ELEC_SAMPLE_KEY) || '{}'); } catch (e) { lastSample = {}; }
