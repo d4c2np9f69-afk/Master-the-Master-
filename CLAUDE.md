@@ -361,7 +361,7 @@ Expected: all tests passing. If any fail, fix them before doing anything else.
 ### ⚡ ELECTRIC — Cumberland Electric (CEMC)
 - **This Month + Cost: LIVE** via SmartHub — entity `sensor.electric_smarthub_energy_monthly_usage_4501007001` (monthly running total, ~6h refresh cadence, found by keyword via `findEntity('smarthub','month')`). Now/Today are estimated client-side (24-bucket hour-of-day model, seeded from HA recorder history, `≈` prefix/EST chip) since SmartHub exposes no instantaneous reading.
 - Account `4501007001`, meter `145590962` (Landis+Gyr Gridstream — not Itron, can't radio-read directly). 200A service, Challenger panel.
-- Rates (validated against the 06/30/2026 bill): Base $39.00 + Energy $0.08657/kWh + TVA Fuel $0.02815/kWh = $0.11472/kWh all-in.
+- Rates (validated against the 07/30/2026 bill, account 4501007001, 2,120 kWh billed): Base $39.00 + Energy $0.08657/kWh + TVA Fuel $0.02847/kWh = $0.11504/kWh all-in. TVA fuel is a pass-through surcharge that shifts most cycles — re-derive from each new bill photo Jeff provides rather than treating this as fixed.
 - **Future build:** 6-channel CircuitSetup ATM90E32 board (2 chips) + ESPHome `atm90e32` → HA, for real instant Now/Today. CT1+2=200A mains, CT3-6=range/dryer/AC/well pump. ~$90-110 DIY. **Jeff wired his own house — never suggest hiring an electrician.**
 
 ---

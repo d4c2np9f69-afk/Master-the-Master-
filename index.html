@@ -8306,7 +8306,7 @@ function loadUtilities() {
     // hour — and (b) fills the gap between SmartHub's sparse real updates and the current
     // moment for "Today". Both are clearly marked estimated (≈ prefix, EST chip) — never
     // presented as a real sensor reading. Accuracy improves automatically the longer it runs.
-    var ELEC_BASE = 39.00, ELEC_PER_KWH = 0.11472; // CEMC: $39 base + $0.08657 energy + $0.02815 TVA fuel (bill 06/30/2026)
+    var ELEC_BASE = 39.00, ELEC_PER_KWH = 0.11504; // CEMC: $39 base + $0.08657 energy + $0.02847 TVA fuel (bill 07/30/2026)
     var ELEC_PROFILE_KEY = 'util_elec_hour_profile', ELEC_SAMPLE_KEY = 'util_elec_last_sample';
     function loadElecProfile(){ try { return JSON.parse(localStorage.getItem(ELEC_PROFILE_KEY) || '{}'); } catch (e) { return {}; } }
     function saveElecProfile(p){ try { localStorage.setItem(ELEC_PROFILE_KEY, JSON.stringify(p)); } catch (e) {} }
