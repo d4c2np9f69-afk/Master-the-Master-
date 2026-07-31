@@ -8109,16 +8109,62 @@ function loadUtilities() {
       try { localStorage.setItem(key, JSON.stringify(st)); } catch (e) {}
       return delta;
     }
+    // Fast synchronous estimate from the fixed weekly schedule -- used immediately so the
+    // sewer-overcharge note isn't blank while irrGalFromHistory()'s HA history fetch is
+    // still in flight. Misses rain delays/skipped days/manual overrides, so it's always
+    // superseded by the real number the moment that resolves (see putWaterCycle below).
     function irrMonthlyGal(){
       var total = 0;
       Object.keys(IRR_FLOW).forEach(function(s){ total += IRR_FLOW[s] * (IRR_RUNMIN[s] || 0); });
       return total * IRR_DAYS_WK * 4.33;
     }
+    function irrSewerNoteHtml(irrGal, real){
+      var fmt = function(v){ return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+      var sewerWaste = irrGal * SEWER_PER_GAL;
+      var src = real ? '(from real B-Hyve run time this cycle)' : '(rough estimate from your weekly schedule)';
+      return '<b style="color:var(--bad)">Sewer overcharge</b> ' + src + ': ~' + Math.round(irrGal).toLocaleString()
+        + ' gal/mo is irrigation — never enters the sewer. That\'s <b>' + fmt(sewerWaste) + '/mo</b> in sewer charges on water that goes on the lawn. Ask City of WH about <b>seasonal sewer averaging</b> or an <b>irrigation meter</b> to eliminate this.';
+    }
+    // Real per-zone runtime this billing cycle, pulled from HA recorder history for every
+    // B-Hyve zone switch we have a configured GPM constant (IRR_FLOW) for -- replaces the
+    // irrMonthlyGal() schedule guess with actual on/off durations, so rain delays and
+    // skipped/manual-override days are reflected instead of assumed away (Jeff, 07-30).
+    function irrGalFromHistory(){
+      var zones = states.filter(function(s){
+        if (!s || typeof s.entity_id !== 'string' || s.entity_id.indexOf('switch.') !== 0) return false;
+        var at = s.attributes || {};
+        return at.station != null && IRR_FLOW[at.station] != null;
+      });
+      if (!zones.length) return;
+      var d = new Date(), yy = d.getFullYear(), mm = d.getMonth();
+      if (d.getDate() < 21) { mm--; if (mm < 0) { mm = 11; yy--; } }
+      var cycleStart = new Date(yy, mm, 21, 0, 0, 0);
+      Promise.all(zones.map(function(z){
+        return haFetch('/api/history/period/' + cycleStart.toISOString() + '?filter_entity_id=' + z.entity_id, { signal: AbortSignal.timeout(15000) })
+          .then(function(r){ return r.ok ? r.json() : []; })
+          .then(function(hist){
+            var arr = (hist && hist[0]) || [], onMinutes = 0, onSince = null;
+            for (var i = 0; i < arr.length; i++) {
+              var st = arr[i].state, t = new Date(arr[i].last_changed).getTime();
+              if (st === 'on' && onSince == null) onSince = t;
+              else if (st !== 'on' && onSince != null) { onMinutes += (t - onSince) / 60000; onSince = null; }
+            }
+            if (onSince != null) onMinutes += (Date.now() - onSince) / 60000; // still running right now
+            return onMinutes * IRR_FLOW[z.attributes.station];
+          })
+          .catch(function(){ return 0; });
+      })).then(function(gallonsPerZone){
+        var totalGal = gallonsPerZone.reduce(function(a, b){ return a + b; }, 0);
+        if (totalGal <= 0) return; // no real watering events found yet this cycle -- leave the schedule estimate showing
+        var note = document.getElementById('util-irr-sewer-note');
+        if (note) { note.style.display = ''; note.innerHTML = irrSewerNoteHtml(totalGal, true); }
+      });
+    }
     function putWaterCycle(cyc){
       put('util-water-month', cyc.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
       var waterEst = WATER_BASE + cyc * WATER_PER_GAL;
       var sewerEst = SEWER_BASE + cyc * SEWER_PER_GAL;
-      var irrGal = irrMonthlyGal();
+      var irrGal = irrMonthlyGal(); // immediate schedule-based estimate; irrGalFromHistory() below refines it
       var sewerWaste = irrGal > 0 ? irrGal * SEWER_PER_GAL : 0;
       var fmt = function(v){ return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
       put('util-water-cost', fmt(waterEst));
@@ -8126,11 +8172,9 @@ function loadUtilities() {
       put('util-combined-cost', fmt(waterEst + sewerEst));
       if (irrGal > 0) {
         var note = document.getElementById('util-irr-sewer-note');
-        if (note) {
-          note.style.display = '';
-          note.innerHTML = '<b style="color:var(--bad)">Sewer overcharge:</b> ~' + Math.round(irrGal).toLocaleString() + ' gal/mo is irrigation — never enters the sewer. That\'s <b>' + fmt(sewerWaste) + '/mo</b> in sewer charges on water that goes on the lawn. Ask City of WH about <b>seasonal sewer averaging</b> or an <b>irrigation meter</b> to eliminate this.';
-        }
+        if (note) { note.style.display = ''; note.innerHTML = irrSewerNoteHtml(irrGal, false); }
       }
+      irrGalFromHistory();
       var ck = whudCycleKey();
       if (cyc > 0) {
         var hist = getWaterHistory();
