@@ -142,7 +142,6 @@ html.light #section-home .sec-hdr-label{color:var(--a-home);}
 html.light #section-weather .sec-hdr-label{color:var(--a-wx);}
 html.light #section-irrigation .sec-hdr-label{color:var(--a-irr);}
 html.light #section-yard .sec-hdr-label{color:var(--a-yard);}
-html.light #section-climate .sec-hdr-label{color:var(--a-climate);}
 html.light .hcc-tile-name{color:#241f17;}
 html.light .hcc-module-name{color:#241f17;}
 html.light .hdr-btn.outline{background:rgba(60,45,15,.06);color:#3a3024;}
@@ -169,6 +168,7 @@ html.light .cast-close{background:var(--a-home);border:1px solid var(--a-home);c
 html.light .modal-ov{background:rgba(20,18,14,.45);}
 html.light .modal-box{background:#fff;border:1px solid var(--border);box-shadow:0 -8px 40px rgba(40,30,10,.25);}
 html.light .minput{background:#f5f5f7;border:1px solid #d9d9de;color:#1c1c1e;}
+html.light .mselect{background:#f5f5f7;border:1px solid #d9d9de;color:#1c1c1e;}
 html.light .mbtn.secondary{background:#f0f0f3;color:#3a3a3c;border:1px solid #e3e3e8!important;}
 /* Footer tagline strip → light (was a dark island at the bottom) */
 html.light .footer{background:#faf7f1;border-top-color:var(--border);}
@@ -312,7 +312,6 @@ html,body{
 #snav-weather.active{border-bottom-color:var(--a-wx);background:rgba(56,189,248,.04)}
 #snav-irr.active    {border-bottom-color:var(--a-irr);background:rgba(34,197,94,.04)}
 #snav-yard.active   {border-bottom-color:var(--a-yard);background:rgba(192,57,43,.05)}
-#snav-climate.active{border-bottom-color:#f97316;background:rgba(249,115,22,.04)}
 #snav-guardian.active{border-bottom-color:var(--a-guardian);background:rgba(61,125,216,.05)}
 #snav-car.active{border-bottom-color:var(--a-car);background:rgba(123,138,158,.06)}
 
@@ -544,8 +543,6 @@ html.light .car-tabs{background:#fff}
 #section-irrigation .sec-hdr-label{color:rgba(80,220,120,.7)}
 #section-yard .sec-hdr{border-color:rgba(192,57,43,.2)}
 #section-yard .sec-hdr-label{color:rgba(220,100,80,.7)}
-#section-climate .sec-hdr{border-color:rgba(249,115,22,.2)}
-#section-climate .sec-hdr-label{color:rgba(249,160,60,.75)}
 
 /* ── CLIMATE / LUX THERMOSTAT ───────────────────────────────────────────── */
 .lux-temp-row{display:flex;align-items:center;justify-content:space-around;padding:20px 10px 14px}
@@ -805,6 +802,8 @@ html.light .car-tabs{background:#fff}
 .health-box{background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:10px}
 .health-lbl{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
 .health-val{font-size:20px;font-weight:800;color:var(--text);margin-top:4px}
+.health-bar{height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;margin-top:6px}
+.health-fill{height:100%;border-radius:3px}
 .stat-boxes{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
 .stat-box{background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:10px}
 .stat-lbl{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-top:2px}
@@ -850,13 +849,22 @@ html.light .car-tabs{background:#fff}
 .hist-table th{font-size:10px;font-weight:800;letter-spacing:1px;color:#e6e6e8;padding:8px 6px;border-bottom:1px solid var(--border);text-align:left}
 .hist-table td{padding:8px 6px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top}
 .td-date{color:#ccc;white-space:nowrap;font-size:11px;font-weight:700}
+.td-svc{color:var(--text);font-size:12px;font-weight:700}
 .td-part{color:var(--gold);font-size:11px;font-weight:700}
 .td-cost{color:var(--green);font-size:11px;font-weight:800;white-space:nowrap}
+.td-note{color:var(--muted);font-size:11px;line-height:1.4}
 /* Parts / parts diagram cards */
 .part-card{background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:10px;margin-bottom:7px}
+.part-header{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}
+.part-name{font-size:13px;font-weight:800;color:var(--text)}
+.part-price{font-size:13px;font-weight:800;color:var(--green);white-space:nowrap;flex-shrink:0}
 .part-oem{font-size:10px;color:var(--gold);margin-top:2px;font-weight:700}
 .upg-card,.diag-item,.diag-desc,.upg-desc{background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:10px;margin-bottom:7px;font-size:12px}
 .upg-desc,.diag-desc{color:#d4d4d6;font-weight:500;line-height:1.55}
+.diag-item{display:flex;align-items:center;gap:10px}
+.diag-icon{font-size:20px;flex-shrink:0}
+.diag-body{flex:1;min-width:0}
+.diag-title{font-size:13px;font-weight:800;color:var(--text);margin-bottom:2px}
 .sk{color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.3px;flex:0 0 42%;text-transform:uppercase}
 .sv{color:rgba(235,215,175,.88);font-weight:600;font-size:12px;text-align:right;flex:1;font-family:var(--serif)}
 .spec-list{list-style:none;margin:0;padding:0}
@@ -868,6 +876,8 @@ html.light .car-tabs{background:#fff}
 .log-date{font-size:10px;color:#ccc;font-weight:700;margin-bottom:2px}
 .log-title{font-size:13px;font-weight:800;color:var(--text)}
 .log-note{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.45}
+.log-entry{background:var(--card2);border:1px solid var(--border2);border-left:3px solid var(--border2);border-radius:10px;padding:10px;margin-bottom:7px}
+.log-gain{font-size:11px;font-weight:800;color:var(--green);margin-top:3px}
 /* Mbtn (modal) */
 .mbtns{display:flex;gap:8px;margin-top:14px}
 .mbtn{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:inherit;letter-spacing:.4px}
@@ -881,10 +891,17 @@ html.light .car-tabs{background:#fff}
 .modal-title{font-size:15px;font-weight:900;letter-spacing:.5px;margin-bottom:16px;color:var(--text)}
 .mlabel{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;display:block}
 .minput{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(224,0,0,.3);background:rgba(14,14,18,.97);color:#fff;font-size:14px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:8px}
+.mselect{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(224,0,0,.3);background:rgba(14,14,18,.97);color:#fff;font-size:14px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:8px}
 .mrow{display:flex;gap:8px;margin-bottom:8px}
 .alert-item{display:flex;align-items:center;gap:9px;padding:10px;background:rgba(224,0,0,.07);border:1px solid rgba(224,0,0,.2);border-radius:10px;margin-bottom:6px}
 .alert-icon{font-size:20px;flex-shrink:0}
+.alert-body{flex:1;min-width:0}
 .alert-name{font-size:13px;font-weight:700}
+.alert-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.pill{display:inline-block;font-size:9px;font-weight:900;letter-spacing:.6px;padding:3px 8px;border-radius:10px;white-space:nowrap;background:rgba(150,150,150,.14);color:var(--muted);border:1px solid var(--border);flex-shrink:0}
+.pill-ok{background:rgba(34,197,94,.14);color:var(--ok,#22c55e);border-color:rgba(34,197,94,.35)}
+.pill-warn{background:rgba(255,210,74,.14);color:var(--warn,#ffd24a);border-color:rgba(255,210,74,.35)}
+.pill-bad{background:rgba(255,98,98,.14);color:var(--bad,#ff6262);border-color:rgba(255,98,98,.35)}
 /* Footer */
 .footer{background:#030306;border-top:1px solid rgba(255,255,255,.05);padding:12px;text-align:center}
 .footer p{font-size:9px;letter-spacing:2px;color:#2a2a34;font-weight:700;text-transform:uppercase}
@@ -1075,9 +1092,6 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 .home-alert-strip.show{display:flex;align-items:center;gap:10px}
 .home-alert-strip-text{flex:1;font-size:11px;font-weight:700;color:#fca5a5;font-family:var(--serif);line-height:1.35}
 /* ── Cast-to-TV helper ── */
-.theme-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;width:44px;height:44px;border-radius:12px;flex-shrink:0;cursor:pointer;margin-right:8px;background:linear-gradient(135deg,#2a2a2e,#161618);border:1px solid rgba(212,175,55,.35);color:rgba(240,220,175,.92);font-size:16px;transition:all .2s}
-.theme-btn span{font-size:7px;font-weight:800;letter-spacing:.5px;line-height:1}
-.theme-btn:active{transform:scale(.94)}
 .cast-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;width:44px;height:44px;border-radius:12px;flex-shrink:0;cursor:pointer;margin-right:8px;background:linear-gradient(135deg,#2a2a2e,#161618);border:1px solid rgba(212,175,55,.35);color:rgba(240,220,175,.92);font-size:16px;transition:all .2s}
 .cast-btn span{font-size:7px;font-weight:800;letter-spacing:.5px;line-height:1}
 .cast-btn:active{transform:scale(.94)}
@@ -4082,94 +4096,8 @@ function escHtml(s){
    (human-observed only, no API key ever). In-app submit is impossible, so the card
    just opens the official mPING app (mping.nssl.noaa.gov) for Jeff to submit. No JS needed. */
 
-/* ===== NEXRAD Radar — RainViewer + Leaflet ===== */
-var _rMap=null, _rLayer=null, _rFrames=[], _rIdx=0, _rPlaying=false, _rTimer=null;
-
-function ensureLeaflet(cb){
-  if(window.L){ cb(); return; }
-  var lnk=document.createElement('link');
-  lnk.rel='stylesheet';
-  lnk.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-  document.head.appendChild(lnk);
-  var sc=document.createElement('script');
-  sc.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-  sc.onload=cb;
-  sc.onerror=function(){ var n=document.getElementById('wxRadarTime'); if(n) n.textContent='Radar unavailable — check connection'; };
-  document.head.appendChild(sc);
-}
-
-function initRadarMap(){
-  ensureLeaflet(function(){
-    var el=document.getElementById('wxRadarMap');
-    if(!el) return;
-    if(_rMap){ _rMap.invalidateSize(); if(_rFrames.length===0) loadRadarFrames(); return; }
-    _rMap=window.L.map('wxRadarMap',{center:[36.477,-86.66],zoom:8,zoomControl:true,attributionControl:false});
-    // OpenStreetMap — universally reliable free tiles. NO CSS filter (filter blanks
-    // tiles on iOS Safari — that was the radar "grey box" bug).
-    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,subdomains:'abc',crossOrigin:true}).addTo(_rMap);
-    // Dedicated pane for NEXRAD overlay so it always sits above the basemap
-    _rMap.createPane('radarPane');
-    _rMap.getPane('radarPane').style.zIndex=450;
-    window.L.circleMarker([36.477,-86.66],{radius:7,color:'#d4af37',weight:2,fillColor:'#d4af37',fillOpacity:1})
-      .bindPopup('<b>KTNWHITE21</b><br>White House, TN<br>jalo301').addTo(_rMap);
-    // Multiple invalidateSize passes — the section animates in, so the container
-    // isn't fully sized at t=0. Without this Leaflet loads 0 tiles → grey box.
-    [120,400,800].forEach(function(ms){ setTimeout(function(){ if(_rMap) _rMap.invalidateSize(); }, ms); });
-    loadRadarFrames();
-  });
-}
-
-function loadRadarFrames(){
-  var note=document.getElementById('wxRadarTime');
-  if(note) note.textContent='Loading radar frames…';
-  fetch('https://api.rainviewer.com/public/weather-maps.json',{cache:'no-store'})
-    .then(function(r){return r.json();})
-    .then(function(data){
-      _rFrames=(data.radar.past||[]).concat(data.radar.nowcast||[]);
-      if(!_rFrames.length){if(note) note.textContent='No radar data — try again';return;}
-      _rIdx=_rFrames.length-1;
-      radarShowFrame(_rIdx);
-    })
-    .catch(function(){if(note) note.textContent='Radar unavailable — check connection';});
-}
-
-function radarShowFrame(idx){
-  if(!_rMap||!_rFrames.length) return;
-  _rIdx=Math.max(0,Math.min(idx,_rFrames.length-1));
-  if(_rLayer) _rMap.removeLayer(_rLayer);
-  _rLayer=window.L.tileLayer(
-    'https://tilecache.rainviewer.com/v2/radar/'+_rFrames[_rIdx].time+'/256/{z}/{x}/{y}/2/1_1.png',
-    {opacity:0.65,maxZoom:12,tileSize:256,pane:'radarPane'}
-  );
-  _rLayer.addTo(_rMap);
-  var note=document.getElementById('wxRadarTime');
-  if(note){
-    var d=new Date(_rFrames[_rIdx].time*1000);
-    var isLatest=_rIdx===_rFrames.length-1;
-    note.textContent=(isLatest?'Latest: ':'Frame '+(_rIdx+1)+'/'+_rFrames.length+': ')+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+(isLatest?' · LIVE':'');
-  }
-}
-
-function radarToggle(){
-  if(_rPlaying) radarPause(); else radarPlay();
-}
-function radarPlay(){
-  if(!_rFrames.length){loadRadarFrames();return;}
-  _rPlaying=true;
-  var btn=document.getElementById('wxRadarPlayBtn');
-  if(btn){btn.innerHTML='&#9646;&#9646; Pause';btn.classList.add('rca');}
-  _rTimer=setInterval(function(){_rIdx=(_rIdx+1)%_rFrames.length;radarShowFrame(_rIdx);},600);
-}
-function radarPause(){
-  _rPlaying=false;
-  clearInterval(_rTimer);
-  var btn=document.getElementById('wxRadarPlayBtn');
-  if(btn){btn.innerHTML='&#9654; Play';btn.classList.remove('rca');}
-}
-function radarStep(dir){
-  radarPause();
-  radarShowFrame(_rIdx+dir);
-}
+/* NEXRAD radar via RainViewer + Leaflet was superseded by the Windy iframe
+   radar (refreshRadar(), #wxRadarFrame) and removed as dead code 07-31. */
 
 /* ===== NWS 7-Day Forecast ===== */
 function loadForecast(){
@@ -4551,8 +4479,6 @@ function luxApplyState(t){
     else if(mode==='auto'){b.className='wx-banner wx-caution';b.innerHTML='&#128260; Auto &bull; Cool '+Math.round(LUX_STATE.cool_sp)+'° / Heat '+Math.round(LUX_STATE.heat_sp)+'°';}
     else{b.className='wx-banner wx-no';b.innerHTML='&#9646;&#9646; System Off';}
   }
-  var hs=document.getElementById('climateHeroStatus');
-  if(hs&&curT) hs.textContent=Math.round(curT)+'°F';
 }
 
 function luxAdjust(delta){
@@ -5223,9 +5149,6 @@ function applyHeroGrades(){
 function currentTheme(){ return document.documentElement.classList.contains('light') ? 'light' : 'dark'; }
 function syncThemeBtn(){
   var t=currentTheme();
-  var icon=document.getElementById('themeIcon'), lbl=document.getElementById('themeLbl');
-  if(icon) icon.innerHTML = t==='light' ? '&#9728;&#65039;' : '&#127769;';
-  if(lbl) lbl.textContent = t==='light' ? 'LIGHT' : 'DARK';
   var hi=document.getElementById('hiveThemeIcon'), hl=document.getElementById('hiveThemeLbl');
   if(hi) hi.innerHTML = t==='light' ? '&#9728;&#65039;' : '&#127769;';
   if(hl) hl.textContent = t==='light' ? 'LIGHT' : 'DARK';
@@ -6071,21 +5994,6 @@ function hccSection(id, btn) {
     hccSection(SECTIONS[next], document.getElementById(NAV_IDS[next]));
   },{passive:true});
 })();
-
-function drawWxStars() {
-  var el = document.getElementById('wxStarField');
-  if (!el) return;
-  var html = '';
-  var sizes = [1,1,1,2,2,1,1,2,1,1,2,1,3,1,1,2,1,1,2,1,1,1,2,1,1,2,1,1,1,2];
-  var delays = [0,.4,.8,1.2,1.6,2,2.4,2.8,.2,.6,1,1.4,1.8,2.2,2.6,0,.5,1,1.5,2,0,.3,.9,1.3,1.7,2.1,2.5,2.9,.7,1.1];
-  for (var i = 0; i < 30; i++) {
-    var x = Math.round(Math.random()*98);
-    var y = Math.round(Math.random()*85);
-    var s = sizes[i]; var d = delays[i];
-    html += '<div class="wx-star" style="left:'+x+'%;top:'+y+'%;width:'+s+'px;height:'+s+'px;animation-delay:'+d+'s"></div>';
-  }
-  el.innerHTML = html;
-}
 
 function alexaToggle(skill, url) {
   var key = 'alexa_skill_' + skill;
