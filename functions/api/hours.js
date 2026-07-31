@@ -42,7 +42,8 @@ export async function onRequestPost({ request, env }) {
       await fetch(`${env.HA_WEBHOOK_BASE}/api/webhook/hcc-mower-sensor`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
+        signal: AbortSignal.timeout(8000)
       });
     } catch (_) {}
   }

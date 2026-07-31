@@ -4593,7 +4593,7 @@ function loadIrrigation(){
 }
 
 function loadIrrigationFromHA(token,base,onFail){
-  fetch(base+'/api/states',{headers:{'Authorization':'Bearer '+token},signal:AbortSignal.timeout(5000)})
+  haFetch('/api/states',{signal:AbortSignal.timeout(25000)})
   .then(function(r){return r.json();})
   .then(function(states){
     // B-Hyve/Orbit entities in HA are switches with zone/bhyve/orbit in entity_id or attributes
@@ -4650,11 +4650,11 @@ function loadIrrigationFromHA(token,base,onFail){
 function haIrrToggle(entityId,onOff){
   var token=getHaToken(),base=localStorage.getItem('ha_base')||HA_BASE;
   if(!token||!base){alert('Beehive not connected');return;}
-  fetch(base+'/api/services/switch/turn_'+(onOff==='on'?'on':'off'),{
+  haFetch('/api/services/switch/turn_'+(onOff==='on'?'on':'off'),{
     method:'POST',
-    headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+    headers:{'Content-Type':'application/json'},
     body:JSON.stringify({entity_id:entityId}),
-    signal:AbortSignal.timeout(6000)
+    signal:AbortSignal.timeout(20000)
   }).then(function(){setTimeout(loadIrrigation,1500);})
   .catch(function(){alert('Beehive command failed — check connection');});
 }
@@ -8435,11 +8435,11 @@ function blinkSendPin() {
   var base = localStorage.getItem('ha_base') || HA_BASE;
   if (!token || !base) { if(status) { status.style.color='#ff6262'; status.textContent='Beehive not connected'; } return; }
   if (status) { status.style.color='var(--muted)'; status.textContent='Sending to Beehive…'; }
-  fetch(base + '/api/services/blink/send_pin', {
+  haFetch('/api/services/blink/send_pin', {
     method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ pin: pin }),
-    signal: AbortSignal.timeout(8000)
+    signal: AbortSignal.timeout(20000)
   })
   .then(function(r) {
     if (r.ok || r.status === 200) {
