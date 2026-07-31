@@ -636,27 +636,29 @@ html.light .car-tabs{background:#fff}
 /* ── UTILITIES (Water / Gas / Electric meter cards, HOME) ───────────────── */
 .util-list{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
 .util-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.30)}
-.util-banner{display:block;width:100%;overflow:hidden;background:#0b0b0f;line-height:0;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.util-banner{width:100%;overflow:hidden;background:#0b0b0f;line-height:0;position:relative}
 .util-banner img{width:100%;height:auto;display:block}
-.util-banner:active{opacity:.85}
-.util-banner-call{position:absolute;right:8px;bottom:8px;z-index:2;display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;letter-spacing:.5px;color:#fff;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.4);border-radius:20px;padding:4px 9px;line-height:1}
-.util-accent{height:3px;width:100%;background:var(--dim)}
-.util-w .util-accent{background:var(--info,#38bdf8)}
-.util-g .util-accent{background:#f97316}
-.util-e .util-accent{background:var(--gold,#d4af37)}
-.util-body{padding:12px 14px 13px}
-.util-head{display:flex;align-items:center;gap:9px;margin-bottom:11px}
+.util-banner-call{position:absolute;right:8px;top:8px;z-index:3;display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;letter-spacing:.5px;color:#fff;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.4);border-radius:20px;padding:5px 10px;line-height:1;text-decoration:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.util-banner-call:active{opacity:.8}
+.util-overlay-bottom{position:absolute;bottom:0;left:0;right:0;z-index:2;padding:24px 8px 8px}
+.util-overlay-bottom .util-stats{background:linear-gradient(to top,rgba(4,4,10,.92) 0%,rgba(4,4,10,.8) 65%,rgba(4,4,10,0) 100%);padding:16px 4px 4px;margin:-16px -4px -4px}
+.util-overlay-bottom .util-stat{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.util-overlay-bottom .util-stat-label{color:rgba(255,255,255,.8);text-shadow:0 1px 4px rgba(0,0,0,.9)}
+.util-overlay-bottom .util-stat-val{color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.95)}
+.util-overlay-bottom .util-stat-unit{color:rgba(255,255,255,.75)}
+.util-body{padding:11px 14px 13px}
+.util-head{display:flex;align-items:center;gap:9px;margin-bottom:10px}
 .util-head-name{font-size:13px;font-weight:800;color:var(--text);letter-spacing:.3px}
 .util-head-prov{font-size:10px;color:var(--muted);margin-top:1px}
 .util-chip{margin-left:auto;font-size:9px;font-weight:900;letter-spacing:1px;padding:3px 8px;border-radius:10px;white-space:nowrap;background:rgba(150,150,150,.14);color:var(--muted);border:1px solid var(--border)}
 .util-chip.live{background:rgba(34,197,94,.14);color:var(--ok,#22c55e);border-color:rgba(34,197,94,.35)}
 .util-chip.est{background:rgba(56,189,248,.14);color:var(--info,#38bdf8);border-color:rgba(56,189,248,.35)}
-.util-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.util-stat{background:rgba(150,150,150,.08);border:1px solid var(--border);border-radius:10px;padding:9px 6px;text-align:center}
-.util-stat-label{font-size:9px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:var(--dim)}
-.util-stat-val{font-size:17px;font-weight:800;color:var(--text);margin-top:3px;line-height:1.1;font-variant-numeric:tabular-nums}
-.util-stat-unit{font-size:9px;font-weight:700;color:var(--muted);margin-left:2px}
-.util-foot{font-size:10px;color:var(--muted);margin-top:10px;display:flex;align-items:center;gap:6px}
+.util-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.util-stat{background:rgba(150,150,150,.08);border:1px solid var(--border);border-radius:10px;padding:8px 4px;text-align:center}
+.util-stat-label{font-size:8.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--dim)}
+.util-stat-val{font-size:15px;font-weight:800;color:var(--text);margin-top:3px;line-height:1.1;font-variant-numeric:tabular-nums}
+.util-stat-unit{font-size:8.5px;font-weight:700;color:var(--muted);margin-left:2px}
+.util-foot{font-size:10px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:6px}
 .util-foot .dot{width:7px;height:7px;border-radius:50%;background:#9a9a9a;flex-shrink:0}
 .util-foot.live .dot{background:var(--ok,#22c55e)}
 .util-foot.est .dot{background:var(--info,#38bdf8)}
@@ -992,35 +994,17 @@ html.light .car-tabs{background:#fff}
 .clip-player-wrap video{width:100%;border-radius:10px;background:#000;max-height:50vh}
 .clip-now{font-size:11px;color:var(--muted);margin-top:4px;text-align:center}
 .clip-empty{text-align:center;padding:20px;color:var(--muted);font-size:12px;line-height:1.6}
-/* ── HART OF THE HIVE STATUS DASHBOARD ─────────────────────────────────── */
-.hive-dash{position:relative;width:100%;border-radius:14px;overflow:hidden;margin-bottom:16px;background:#080a0c}
-.hive-dash-img{width:100%;display:block}
-.hive-chips{position:absolute;inset:0;pointer-events:none}
-.hive-chip{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:5px 4px 4px;border-radius:7px;background:rgba(4,10,18,.55);border:1px solid rgba(56,189,248,.28);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);cursor:pointer;pointer-events:auto;-webkit-tap-highlight-color:transparent;transition:border-color .2s,background .2s,box-shadow .2s;box-shadow:0 0 8px rgba(56,189,248,.08)}
-.hive-chip:active{background:rgba(56,189,248,.2);border-color:rgba(56,189,248,.55);box-shadow:0 0 14px rgba(56,189,248,.3)}
-.hive-chip-icon{font-size:14px;line-height:1}
-.hive-chip-lbl{font-size:6.5px;font-weight:800;letter-spacing:.6px;color:rgba(180,210,240,.9);text-transform:uppercase;white-space:nowrap}
-.hive-chip .hive-dot{width:5px;height:5px;border-radius:50%;position:absolute;top:3px;right:3px}
-/* Chip positions — placed on the monitor screens of the command center */
-/* Left monitor panel */
-.hive-chip.hc-light{top:15%;left:3%;width:11%}
-.hive-chip.hc-alexa{top:15%;left:16%;width:11%}
-/* Right monitor panel */
-.hive-chip.hc-voice{top:15%;right:3%;width:11%}
-.hive-chip.hc-accounts{top:15%;right:16%;width:11%}
-/* Mid-left + mid-right monitors */
-.hive-chip.hc-cast{top:48%;left:3%;width:14%}
-.hive-chip.hc-watch{top:48%;right:3%;width:14%}
-/* Center hexagon — the core */
-.hive-chip.hc-hive{top:30%;left:50%;transform:translateX(-50%);width:22%;padding:8px 6px 7px}
-.hive-chip.hc-hive .hive-chip-icon{font-size:18px}
-.hive-chip.hc-hive .hive-chip-lbl{font-size:8px;letter-spacing:1px}
-/* Chair area — FITNESS on the chair back */
-.hive-chip.hc-fitness{top:68%;left:50%;transform:translateX(-50%);width:22%}
-/* Under the chair — Open Beehive */
-.hive-chip.hc-beehive{top:88%;left:50%;transform:translateX(-50%);width:26%;padding:6px 8px 5px}
-.hive-chip.hc-beehive .hive-chip-lbl{font-size:7px;letter-spacing:.8px}
-html.light .hive-chips{background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.55) 30%,rgba(0,0,0,.78) 100%)}
+/* ── QUICK ACTIONS GRID (Guardian) — was overlaid on the "Hart of the Hive"
+   photo; moved to a plain icon grid per Jeff 07-31, photo removed entirely ── */
+.hive-chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.hive-chip{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 4px 10px;border-radius:10px;background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.22);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .2s,background .2s}
+.hive-chip:active{background:rgba(56,189,248,.16);border-color:rgba(56,189,248,.4)}
+.hive-chip-icon{font-size:18px;line-height:1}
+.hive-chip-lbl{font-size:8.5px;font-weight:800;letter-spacing:.5px;color:var(--muted);text-transform:uppercase;white-space:nowrap}
+.hive-chip .hive-dot{width:6px;height:6px;border-radius:50%;position:absolute;top:6px;right:6px}
+.hive-chip.hc-beehive{grid-column:1/-1;flex-direction:row;padding:12px;background:linear-gradient(135deg,rgba(212,175,55,.16),rgba(212,175,55,.06));border-color:rgba(212,175,55,.4)}
+.hive-chip.hc-beehive .hive-chip-icon{font-size:20px}
+.hive-chip.hc-beehive .hive-chip-lbl{font-size:11px;letter-spacing:.8px;color:var(--gold,#d4af37)}
 /* Home status rows */
 .hs-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
 .hs-row:last-child{border-bottom:none}
@@ -1286,7 +1270,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 <!-- ══ SECTION HEROES (above nav per Jeff's 07-14 layout redesign) ═══════ -->
 <div class="hero-slot active" id="hero-home">
   <div class="house-hero">
-    <img src="./images/hero-home.jpg" alt="Loewen Home">
+    <img src="./images/hero-home-dusk.jpg" alt="Loewen Home">
     <div class="house-hero-overlay"></div>
     <div class="house-hero-content">
       <div id="heroWeather"></div>
@@ -1442,8 +1426,20 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 
       <!-- WATER -->
       <div class="util-card util-w">
-        <a class="util-banner" href="tel:6156724110" aria-label="Call White House Utility District customer service"><img src="./images/util-water.jpg" alt="White House Utilities water meter"><span class="util-banner-call">&#128222; CALL</span></a>
-        <div class="util-accent"></div>
+        <div class="util-banner">
+          <img src="./images/util-water.jpg" alt="White House Utilities water meter">
+          <a class="util-banner-call" href="tel:6156724110" aria-label="Call White House Utility District customer service">&#128222; CALL</a>
+          <div class="util-overlay-bottom">
+            <div class="util-stats" style="grid-template-columns:repeat(3,1fr)">
+              <div class="util-stat"><div class="util-stat-label">Reading</div><div class="util-stat-val" id="util-water-today">&mdash;<span class="util-stat-unit">gal</span></div></div>
+              <div class="util-stat"><div class="util-stat-label">This Cycle</div><div class="util-stat-val" id="util-water-month">&mdash;<span class="util-stat-unit">gal</span></div></div>
+              <div class="util-stat"><div class="util-stat-label">Flow</div><div class="util-stat-val" id="util-water-flow">&mdash;<span class="util-stat-unit">gpm</span></div></div>
+              <div class="util-stat"><div class="util-stat-label">Est. Water</div><div class="util-stat-val" id="util-water-cost">&mdash;</div></div>
+              <div class="util-stat"><div class="util-stat-label">Est. Sewer</div><div class="util-stat-val" id="util-sewer-cost">&mdash;</div></div>
+              <div class="util-stat"><div class="util-stat-label">Combined</div><div class="util-stat-val" id="util-combined-cost" style="font-weight:800">&mdash;</div></div>
+            </div>
+          </div>
+        </div>
         <div class="util-body">
           <div class="util-head">
             <span style="font-size:18px">&#128167;</span>
@@ -1453,24 +1449,25 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
             </div>
             <span class="util-chip" id="util-water-chip">WAITING</span>
           </div>
-          <div class="util-stats" style="grid-template-columns:repeat(2,1fr)">
-            <div class="util-stat"><div class="util-stat-label">Reading</div><div class="util-stat-val" id="util-water-today">&mdash;<span class="util-stat-unit">gal</span></div></div>
-            <div class="util-stat"><div class="util-stat-label">This Cycle</div><div class="util-stat-val" id="util-water-month">&mdash;<span class="util-stat-unit">gal</span></div></div>
-            <div class="util-stat"><div class="util-stat-label">Flow</div><div class="util-stat-val" id="util-water-flow">&mdash;<span class="util-stat-unit">gpm</span></div></div>
-            <div class="util-stat"><div class="util-stat-label">Est. Water</div><div class="util-stat-val" id="util-water-cost">&mdash;</div></div>
-            <div class="util-stat"><div class="util-stat-label">Est. Sewer</div><div class="util-stat-val" id="util-sewer-cost">&mdash;</div></div>
-            <div class="util-stat"><div class="util-stat-label">Combined</div><div class="util-stat-val" id="util-combined-cost" style="font-weight:800">&mdash;</div></div>
-          </div>
-          <div id="util-irr-sewer-note" style="display:none;margin:8px 0 0;padding:8px 10px;border-radius:var(--radius);background:rgba(255,98,98,.08);border:1px solid rgba(255,98,98,.2);font-size:11px;line-height:1.5;color:var(--text)"></div>
-          <div id="util-water-history" style="display:none;margin:10px 0 0"></div>
+          <div id="util-irr-sewer-note" style="display:none;margin:0 0 8px;padding:8px 10px;border-radius:var(--radius);background:rgba(255,98,98,.08);border:1px solid rgba(255,98,98,.2);font-size:11px;line-height:1.5;color:var(--text)"></div>
+          <div id="util-water-history" style="display:none;margin:0 0 8px"></div>
           <div class="util-foot" id="util-water-foot"><span class="dot"></span> Waiting for Beehive meter reader</div>
         </div>
       </div>
 
       <!-- GAS -->
       <div class="util-card util-g">
-        <a class="util-banner" href="tel:8007527504" aria-label="Call Spire Energy customer service"><img src="./images/util-gas.jpg" alt="Spire Energy gas meter"><span class="util-banner-call">&#128222; CALL</span></a>
-        <div class="util-accent"></div>
+        <div class="util-banner">
+          <img src="./images/util-gas.jpg" alt="Spire Energy gas meter">
+          <a class="util-banner-call" href="tel:8007527504" aria-label="Call Spire Energy customer service">&#128222; CALL</a>
+          <div class="util-overlay-bottom">
+            <div class="util-stats">
+              <div class="util-stat"><div class="util-stat-label">Reading</div><div class="util-stat-val" id="util-gas-today">&mdash;<span class="util-stat-unit">ccf</span></div></div>
+              <div class="util-stat"><div class="util-stat-label">This Month</div><div class="util-stat-val" id="util-gas-month">&mdash;<span class="util-stat-unit">ccf</span></div></div>
+              <div class="util-stat"><div class="util-stat-label">Est. Cost</div><div class="util-stat-val" id="util-gas-cost">&mdash;</div></div>
+            </div>
+          </div>
+        </div>
         <div class="util-body">
           <div class="util-head">
             <span style="font-size:18px">&#128293;</span>
@@ -1480,19 +1477,24 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
             </div>
             <span class="util-chip" id="util-gas-chip">WAITING</span>
           </div>
-          <div class="util-stats">
-            <div class="util-stat"><div class="util-stat-label">Reading</div><div class="util-stat-val" id="util-gas-today">&mdash;<span class="util-stat-unit">ccf</span></div></div>
-            <div class="util-stat"><div class="util-stat-label">This Month</div><div class="util-stat-val" id="util-gas-month">&mdash;<span class="util-stat-unit">ccf</span></div></div>
-            <div class="util-stat"><div class="util-stat-label">Est. Cost</div><div class="util-stat-val" id="util-gas-cost">&mdash;</div></div>
-          </div>
           <div class="util-foot" id="util-gas-foot"><span class="dot"></span> Waiting for Beehive meter reader</div>
         </div>
       </div>
 
       <!-- ELECTRIC -->
       <div class="util-card util-e">
-        <a class="util-banner" href="tel:8009872362" aria-label="Call Cumberland Electric CEMC customer service"><img src="./images/util-electric.jpg" alt="Cumberland Electric (CEMC) meter"><span class="util-banner-call">&#128222; CALL</span></a>
-        <div class="util-accent"></div>
+        <div class="util-banner">
+          <img src="./images/util-electric.jpg" alt="Cumberland Electric (CEMC) meter">
+          <a class="util-banner-call" href="tel:8009872362" aria-label="Call Cumberland Electric CEMC customer service">&#128222; CALL</a>
+          <div class="util-overlay-bottom">
+            <div class="util-stats" style="grid-template-columns:repeat(2,1fr)">
+              <div class="util-stat"><div class="util-stat-label">Now</div><div class="util-stat-val" id="util-elec-now">&mdash;<span class="util-stat-unit">kW</span></div></div>
+              <div class="util-stat"><div class="util-stat-label">Today</div><div class="util-stat-val" id="util-elec-today">&mdash;<span class="util-stat-unit">kWh</span></div></div>
+              <div class="util-stat"><div class="util-stat-label">This Month</div><div class="util-stat-val" id="util-elec-month">&mdash;<span class="util-stat-unit">kWh</span></div></div>
+              <div class="util-stat"><div class="util-stat-label">Est. Cost</div><div class="util-stat-val" id="util-elec-cost">&mdash;</div></div>
+            </div>
+          </div>
+        </div>
         <div class="util-body">
           <div class="util-head">
             <span style="font-size:18px">&#9889;</span>
@@ -1501,12 +1503,6 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
               <div class="util-head-prov">Cumberland Electric &bull; DIY CT monitor</div>
             </div>
             <span class="util-chip" id="util-elec-chip">WAITING</span>
-          </div>
-          <div class="util-stats">
-            <div class="util-stat"><div class="util-stat-label">Now</div><div class="util-stat-val" id="util-elec-now">&mdash;<span class="util-stat-unit">kW</span></div></div>
-            <div class="util-stat"><div class="util-stat-label">Today</div><div class="util-stat-val" id="util-elec-today">&mdash;<span class="util-stat-unit">kWh</span></div></div>
-            <div class="util-stat"><div class="util-stat-label">This Month</div><div class="util-stat-val" id="util-elec-month">&mdash;<span class="util-stat-unit">kWh</span></div></div>
-            <div class="util-stat"><div class="util-stat-label">Est. Cost</div><div class="util-stat-val" id="util-elec-cost">&mdash;</div></div>
           </div>
           <div class="util-foot" id="util-elec-foot"><span class="dot"></span> Waiting for Beehive energy monitor</div>
         </div>
@@ -1603,52 +1599,6 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
             <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px">In the Terminal — paste this and hit Enter:</div>
             <div onclick="copyCmd(this,'wget -qO- https://toro1-5rz.pages.dev/setup | bash')" style="font-family:monospace;font-size:10px;background:#0d1117;border:1px solid rgba(74,158,255,.3);border-radius:6px;padding:7px 10px;color:#4aff9e;cursor:pointer;word-break:break-all" title="Tap to copy">wget -qO- https://toro1-5rz.pages.dev/setup | bash</div>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── HART OF THE HIVE — status dashboard (moved to bottom per Jeff 07-14) ── -->
-    <div class="hive-dash" id="hiveDash" style="margin-top:16px">
-      <img class="hive-dash-img" src="./images/hart-of-hive.jpg" alt="Hart of the Hive — Systems Online">
-      <div class="hive-chips">
-        <div class="hive-chip hc-light" onclick="toggleTheme()" id="hiveTheme" title="Switch light / dark">
-          <span class="hive-chip-icon" id="hiveThemeIcon">&#9728;&#65039;</span>
-          <span class="hive-chip-lbl" id="hiveThemeLbl">LIGHT</span>
-        </div>
-        <div class="hive-chip hc-alexa" onclick="openAlexaApp()" title="Open Alexa app">
-          <span class="hive-chip-icon">&#127908;</span>
-          <span class="hive-chip-lbl">ALEXA</span>
-        </div>
-        <div class="hive-chip hc-cast" onclick="castOpen()" title="Cast to TV">
-          <span class="hive-chip-icon">&#128250;</span>
-          <span class="hive-chip-lbl">CAST</span>
-        </div>
-        <div class="hive-chip hc-hive" onclick="openBeehive()" id="hiveBeehive" title="Beehive status">
-          <span class="hive-dot" id="hiveDot" style="background:#444"></span>
-          <span class="hive-chip-icon">&#129303;</span>
-          <span class="hive-chip-lbl">HIVE</span>
-        </div>
-        <div class="hive-chip hc-accounts" onclick="hiveShowAccounts()" title="Connected accounts">
-          <span class="hive-chip-icon">&#128273;</span>
-          <span class="hive-chip-lbl">ACCOUNTS</span>
-        </div>
-        <div class="hive-chip hc-voice" onclick="hiveShowVoice()" title="Alexa voice skills">
-          <span class="hive-chip-icon">&#128266;</span>
-          <span class="hive-chip-lbl">VOICE</span>
-        </div>
-        <div class="hive-chip hc-watch" onclick="fireTvOpen()" title="Fire TV Remote">
-          <span class="hive-chip-icon">&#128250;</span>
-          <span class="hive-chip-lbl">WATCH</span>
-          <span class="hive-dot" id="fireTvDot" style="background:#444;top:3px;right:3px"></span>
-        </div>
-        <div class="hive-chip hc-fitness" onclick="hccSection('yard',document.getElementById('snav-yard'));setTimeout(function(){var e=document.getElementById('fitMiles');if(e)e.scrollIntoView({behavior:'smooth',block:'center'})},300)" title="Fitness — miles walked mowing">
-          <span class="hive-chip-icon">&#128694;</span>
-          <span class="hive-chip-lbl" id="hiveFit">FITNESS</span>
-        </div>
-        <div class="hive-chip hc-beehive" onclick="openBeehive()" id="hiveBeehiveBtn" title="Open Beehive dashboard">
-          <span class="hive-dot" id="hiveDot2" style="background:#444"></span>
-          <span class="hive-chip-icon">&#127793;</span>
-          <span class="hive-chip-lbl">OPEN BEEHIVE</span>
         </div>
       </div>
     </div>
@@ -2346,6 +2296,53 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <div class="wx-note">Live from Beehive &middot; auto-refreshes every minute</div>
     </div>
 
+    <!-- QUICK ACTIONS — moved here from the HOME "Hart of the Hive" photo overlay per Jeff 07-31;
+         same actions, no more picture, just a clean icon grid. -->
+    <div class="card cat-safety">
+      <div class="card-title">&#9889; Quick Actions</div>
+      <div class="hive-chips">
+        <div class="hive-chip hc-light" onclick="toggleTheme()" id="hiveTheme" title="Switch light / dark">
+          <span class="hive-chip-icon" id="hiveThemeIcon">&#9728;&#65039;</span>
+          <span class="hive-chip-lbl" id="hiveThemeLbl">LIGHT</span>
+        </div>
+        <div class="hive-chip hc-alexa" onclick="openAlexaApp()" title="Open Alexa app">
+          <span class="hive-chip-icon">&#127908;</span>
+          <span class="hive-chip-lbl">ALEXA</span>
+        </div>
+        <div class="hive-chip hc-cast" onclick="castOpen()" title="Cast to TV">
+          <span class="hive-chip-icon">&#128250;</span>
+          <span class="hive-chip-lbl">CAST</span>
+        </div>
+        <div class="hive-chip hc-hive" onclick="openBeehive()" id="hiveBeehive" title="Beehive status">
+          <span class="hive-dot" id="hiveDot" style="background:#444"></span>
+          <span class="hive-chip-icon">&#129303;</span>
+          <span class="hive-chip-lbl">HIVE</span>
+        </div>
+        <div class="hive-chip hc-accounts" onclick="hiveShowAccounts()" title="Connected accounts">
+          <span class="hive-chip-icon">&#128273;</span>
+          <span class="hive-chip-lbl">ACCOUNTS</span>
+        </div>
+        <div class="hive-chip hc-voice" onclick="hiveShowVoice()" title="Alexa voice skills">
+          <span class="hive-chip-icon">&#128266;</span>
+          <span class="hive-chip-lbl">VOICE</span>
+        </div>
+        <div class="hive-chip hc-watch" onclick="fireTvOpen()" title="Fire TV Remote">
+          <span class="hive-chip-icon">&#128250;</span>
+          <span class="hive-chip-lbl">WATCH</span>
+          <span class="hive-dot" id="fireTvDot" style="background:#444;top:3px;right:3px"></span>
+        </div>
+        <div class="hive-chip hc-fitness" onclick="hccSection('yard',document.getElementById('snav-yard'));setTimeout(function(){var e=document.getElementById('fitMiles');if(e)e.scrollIntoView({behavior:'smooth',block:'center'})},300)" title="Fitness — miles walked mowing">
+          <span class="hive-chip-icon">&#128694;</span>
+          <span class="hive-chip-lbl" id="hiveFit">FITNESS</span>
+        </div>
+        <div class="hive-chip hc-beehive" onclick="openBeehive()" id="hiveBeehiveBtn" title="Open Beehive dashboard">
+          <span class="hive-dot" id="hiveDot2" style="background:#444"></span>
+          <span class="hive-chip-icon">&#127793;</span>
+          <span class="hive-chip-lbl">OPEN BEEHIVE</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Home Status — populated when HA token available -->
     <div id="homeStatusCard" style="display:none" class="card cat-status">
       <div class="card-title">&#127968; Home Status</div>
@@ -2818,7 +2815,8 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <div class="card" style="margin-top:14px">
         <div class="card-title" style="border-left:3px solid var(--a-car);padding-left:10px">&#128273; Mercedes PIN</div>
         <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-top:6px">
-          Your Mercedes me PIN is configured in <b>Beehive</b> (Home Assistant). Go to Settings &rarr; Integrations &rarr; MercedesME 2020 &rarr; Options &rarr; enter your PIN. The integration auto-applies it to commands that require it (remote start, unlock, windows). Also enable <b>"Disable Capability Check"</b> in the same options screen.
+          <b style="color:var(--ok)">This app never asks for or stores your PIN &mdash; it lives ONLY in Beehive.</b><br><br>
+          Set it in <b>Beehive</b> (Home Assistant): Settings &rarr; Devices &amp; Services &rarr; MercedesME 2020 &rarr; Configure &rarr; <b>Security PIN</b> field, with <b>"Disable capabilities check"</b> also checked. Once that's saved there, remote start/unlock/windows work automatically from this app &mdash; nothing to enter here.
         </div>
       </div>
 
@@ -6995,6 +6993,7 @@ function saveHaTokenInline() {
     });
 }
 
+var _camLastAutoRefresh = 0;
 function loadCameras() {
   var token = getHaToken();
   var base = localStorage.getItem('ha_base') || HA_BASE;
@@ -7072,6 +7071,13 @@ function loadCameras() {
     html += '</div>';
     grid.innerHTML = html;
     cameras.forEach(function(cam){ blinkSetStill(cam); });
+    // Ask every camera for a fresh photo whenever this view opens, so Jeff isn't
+    // looking at a stale thumbnail from whenever motion last triggered one.
+    // Throttled — battery-powered Blink cameras shouldn't get hit on every tab switch.
+    if (Date.now() - _camLastAutoRefresh > 180000) {
+      _camLastAutoRefresh = Date.now();
+      blinkRefreshAll();
+    }
   })
   .catch(function(err) {
     var msg = err && err.message === 'unauthorized'
