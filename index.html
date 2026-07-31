@@ -7869,7 +7869,13 @@ function loadVacuum(){
     var nm = document.getElementById('vacName'); if (nm) nm.textContent = a.friendly_name || 'Robot Vacuum';
     var st = String(vac.state || '').toLowerCase();
     var batt = (typeof a.battery_level === 'number') ? ' &middot; &#128267; ' + a.battery_level + '%' : '';
-    var cls = 'wx-load', txt = st ? (st.charAt(0).toUpperCase() + st.slice(1)) : 'Unknown';
+    // Any state we don't explicitly recognize (unavailable, unresponsive, or anything
+    // the integration's cloud API reports) gets a "may be transient" framing instead of
+    // a bare capitalized word -- that raw word reading as a hard failure when the robot
+    // is often actually fine is what caused Jeff's "unresponsive but it's fine" report.
+    var cls = 'wx-caution', txt = st
+      ? '&#128268; Beehive reports &ldquo;' + (st.charAt(0).toUpperCase() + st.slice(1)) + '&rdquo; &mdash; often clears on its own, refresh to check'
+      : 'Unknown';
     if (st === 'cleaning'){ cls = 'wx-go'; txt = '&#129529; Cleaning'; }
     else if (st === 'returning'){ cls = 'wx-caution'; txt = '&#127968; Returning to dock'; }
     else if (st === 'paused'){ cls = 'wx-caution'; txt = '&#9208;&#65039; Paused'; }
