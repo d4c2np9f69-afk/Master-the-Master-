@@ -517,6 +517,8 @@ html.light .car-tabs{background:#fff}
 .cat-service .card-title::before{background:var(--amber);box-shadow:0 0 10px var(--amber)}
 .cat-fitness .card-title::before{background:#a855f7;box-shadow:0 0 10px #a855f7}
 .cat-safety .card-title::before{background:var(--red);box-shadow:0 0 10px var(--red)}
+.cat-gps .card-title::before{background:#38bdf8;box-shadow:0 0 10px #38bdf8}
+.cat-wx .card-title::before{background:#38bdf8;box-shadow:0 0 10px #38bdf8}
 /* CTA cards */
 .hcc-cta-card{
   background:rgba(255,255,255,.035);
@@ -806,6 +808,18 @@ html.light .car-tabs{background:#fff}
 .stat-lbl{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-top:2px}
 .stat-num{font-size:20px;font-weight:800;color:var(--text)}
 .vgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.vbtn{display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;cursor:pointer;padding:9px 6px;border-radius:8px;font-size:11px;font-weight:700;font-family:inherit;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text)}
+.vbtn.v-am{border-color:rgba(255,153,0,.4);color:#ff9900}
+.vbtn.v-hd{border-color:rgba(247,130,22,.4);color:#f78216}
+.vbtn.v-toro{border-color:rgba(212,175,55,.4);color:var(--gold)}
+.vbtn.v-eb{border-color:rgba(134,80,172,.4);color:#8650ac}
+.vbtn.v-wm{border-color:rgba(0,113,206,.4);color:#0071ce}
+.vbtn.v-yt{border-color:rgba(255,0,0,.4);color:#ff3b3b}
+.filter-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.upg-btns{display:flex;gap:8px;margin-top:8px}
+.upg-btn{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;cursor:pointer;padding:9px 6px;border-radius:8px;font-size:11px;font-weight:700;font-family:inherit;border:none}
+.upg-btn.upg-red{background:linear-gradient(135deg,#c01010,#780000);color:#fff}
+.upg-btn.upg-gray{background:rgba(255,255,255,.07);color:var(--muted);border:1px solid var(--border)}
 .status-ok{background:linear-gradient(135deg,rgba(34,197,94,.15),rgba(34,197,94,.04));border-color:rgba(34,197,94,.4)!important}
 .status-text{font-size:12px;font-weight:700}
 .status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2.4s ease-in-out infinite}
@@ -902,7 +916,7 @@ html.light .car-tabs{background:#fff}
 .cart-fab{position:fixed;bottom:20px;right:16px;z-index:400}
 .cart-btn{background:linear-gradient(135deg,#1a1a28,#0d0d18);border:1px solid rgba(74,158,255,.35);border-radius:50px;padding:10px 18px;color:#4a9eff;font-size:12px;font-weight:800;letter-spacing:.8px;font-family:inherit;box-shadow:0 4px 20px rgba(0,0,0,.5),0 0 16px rgba(74,158,255,.1)}
 /* vid-btn */
-.vid-btn{background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:10px;color:var(--muted);padding:8px 12px;font-size:12px;font-weight:700;font-family:inherit}
+.vid-btn{background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:10px;color:var(--muted);padding:8px 12px;font-size:12px;font-weight:700;font-family:inherit;text-decoration:none;cursor:pointer;white-space:nowrap;flex-shrink:0}
 /* Responsive */
 @media(min-width:600px){
   .hdr-specs{grid-template-columns:repeat(6,1fr)}
@@ -1778,7 +1792,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <div class="wu-badge-stars">&#9733; &#9733; &#9733;</div>
         </div>
       </div>
-      <button class="btn-full btn-gray" style="margin-top:10px" onclick="window.open('https://www.wunderground.com/dashboard/pws/KTNWHITE21','_blank','noopener')">&#128202; Open Station Dashboard</button>
+      <a href="https://www.wunderground.com/dashboard/pws/KTNWHITE21" target="_blank" rel="noopener" class="btn-full btn-gray" style="margin-top:10px;display:block;text-align:center;text-decoration:none">&#128202; Open Station Dashboard</a>
     </div>
 
     <!-- BRUSH BURN CONDITIONS -->
@@ -2152,10 +2166,10 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <div class="card-title">&#128208; Exploded Parts Diagrams &bull; Model 21200 &amp; B&amp;S 14D935</div>
     <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">Full interactive blow-apart diagrams matched to your serial (401338948) and engine. Tap any part in the diagram to get its OEM number.</div>
     <div style="display:flex;flex-direction:column;gap:7px">
-      <button class="btn-full btn-red" onclick="window.open('https://www.partstree.com/models/21200-toro-30-timemaster-walk-behind-mower-sn-400000000-402081999','_blank','noopener')">&#128208; Toro TimeMaster 21200 &mdash; Mower Diagrams</button>
-      <button class="btn-full btn-gray" onclick="window.open('https://www.ereplacementparts.com/toro-21200-402082000403599999-timemaster-30in-lawn-mower-parts-c-121776_127291_646117.html','_blank','noopener')">&#128208; Toro 21200 &mdash; eReplacementParts (alt)</button>
-      <button class="btn-full btn-red" onclick="window.open('https://www.partstree.com/models/14d935-0111-f1-briggs-stratton-vertical-engine','_blank','noopener')">&#128295; B&amp;S 14D935-0111-F1 &mdash; Engine Diagrams</button>
-      <button class="btn-full btn-gray" onclick="window.open('https://www.jackssmallengines.com/jacks-parts-lookup/manufacturer/briggs-stratton/briggs-stratton-engine/100000-19z999-series/14d900-to-14d999/14d935-0111-f1','_blank','noopener')">&#128208; B&amp;S 14D935 &mdash; Jack's (alt source)</button>
+      <a href="https://www.partstree.com/models/21200-toro-30-timemaster-walk-behind-mower-sn-400000000-402081999" target="_blank" rel="noopener" class="btn-full btn-red" style="display:block;text-align:center;text-decoration:none">&#128208; Toro TimeMaster 21200 &mdash; Mower Diagrams</a>
+      <a href="https://www.ereplacementparts.com/toro-21200-402082000403599999-timemaster-30in-lawn-mower-parts-c-121776_127291_646117.html" target="_blank" rel="noopener" class="btn-full btn-gray" style="display:block;text-align:center;text-decoration:none">&#128208; Toro 21200 &mdash; eReplacementParts (alt)</a>
+      <a href="https://www.partstree.com/models/14d935-0111-f1-briggs-stratton-vertical-engine" target="_blank" rel="noopener" class="btn-full btn-red" style="display:block;text-align:center;text-decoration:none">&#128295; B&amp;S 14D935-0111-F1 &mdash; Engine Diagrams</a>
+      <a href="https://www.jackssmallengines.com/jacks-parts-lookup/manufacturer/briggs-stratton/briggs-stratton-engine/100000-19z999-series/14d900-to-14d999/14d935-0111-f1" target="_blank" rel="noopener" class="btn-full btn-gray" style="display:block;text-align:center;text-decoration:none">&#128208; B&amp;S 14D935 &mdash; Jack's (alt source)</a>
     </div>
   </div>
   <div id="partsList"></div>
@@ -2167,7 +2181,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <div class="card-title">&#128269; Quick Diagnose &mdash; Tap Video for Fix</div>
     <div id="diagList"></div>
   </div>
-  <button class="btn-full btn-red" onclick="window.open('https://www.youtube.com/results?search_query=Toro+TimeMaster+21200+tune+up','_blank','noopener')">&#9654; Full TimeMaster Tune-Up Guide</button>
+  <a href="https://www.youtube.com/results?search_query=Toro+TimeMaster+21200+tune+up" target="_blank" rel="noopener" class="btn-full btn-red" style="display:block;text-align:center;text-decoration:none">&#9654; Full TimeMaster Tune-Up Guide</a>
 </div>
 
 <!-- UPGRADES TAB -->
@@ -2264,10 +2278,10 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
   <div class="card cat-specs">
     <p class="spec-section-hdr">Manuals &amp; Diagrams</p>
     <div style="display:flex;flex-direction:column;gap:7px;margin-top:6px">
-      <button class="btn-full btn-red" onclick="window.open('https://www.manualslib.com/products/Toro-Timemaster-21200-10835427.html','_blank','noopener')">&#128196; TimeMaster 21200 Official Manual</button>
-      <button class="btn-full btn-gray" onclick="window.open('https://www.toro.com/en/parts','_blank','noopener')">&#128308; Toro OEM Parts Lookup</button>
-      <button class="btn-full btn-gray" onclick="window.open('https://www.partstree.com/models/14d935-0111-f1-briggs-stratton-vertical-engine','_blank','noopener')">&#128295; B&amp;S Engine Diagrams</button>
-      <button class="btn-full btn-gray" onclick="window.open('https://www.youtube.com/results?search_query=Toro+TimeMaster+21200','_blank','noopener')">&#9654; YouTube &mdash; TimeMaster 21200</button>
+      <a href="https://www.manualslib.com/products/Toro-Timemaster-21200-10835427.html" target="_blank" rel="noopener" class="btn-full btn-red" style="display:block;text-align:center;text-decoration:none">&#128196; TimeMaster 21200 Official Manual</a>
+      <a href="https://www.toro.com/en/parts" target="_blank" rel="noopener" class="btn-full btn-gray" style="display:block;text-align:center;text-decoration:none">&#128308; Toro OEM Parts Lookup</a>
+      <a href="https://www.partstree.com/models/14d935-0111-f1-briggs-stratton-vertical-engine" target="_blank" rel="noopener" class="btn-full btn-gray" style="display:block;text-align:center;text-decoration:none">&#128295; B&amp;S Engine Diagrams</a>
+      <a href="https://www.youtube.com/results?search_query=Toro+TimeMaster+21200" target="_blank" rel="noopener" class="btn-full btn-gray" style="display:block;text-align:center;text-decoration:none">&#9654; YouTube &mdash; TimeMaster 21200</a>
     </div>
   </div>
 
@@ -3091,7 +3105,7 @@ var DEFAULT_STATE = {
     }
   ]
 };
-var S = JSON.parse(localStorage.getItem('toro21200') || 'null') || DEFAULT_STATE;
+var S; try { S = JSON.parse(localStorage.getItem('toro21200') || 'null') || DEFAULT_STATE; } catch (e) { S = DEFAULT_STATE; }
 if(!S.done) S.done={blade:0,oil:0,air:0,deck:0,spark:0,belt:0,fuel:0,trans:0,carb:0,wheel:0,cable:0,premow:0,batt25:0,coilgap:0,airrepl:0,storage:0,postmow:0,clearcoat:0};
 if(!S.cart) S.cart=[];
 if(!S.log) S.log=[];
@@ -3107,10 +3121,24 @@ if(!Array.isArray(S.sensorTrack)) S.sensorTrack=[];
 if(typeof S.hoursBaseline!=='number') S.hoursBaseline=5.9;
 if(typeof S.lastSensorHours!=='number') S.lastSensorHours=0;
 function uid(){ return 'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+// window.open() is a no-op in an installed iOS PWA — a real, programmatically-clicked
+// <a> element still navigates, so use this instead of window.open() everywhere.
+function openExternal(url){
+  var a=document.createElement('a');
+  a.href=url; a.target='_blank'; a.rel='noopener';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
 // backfill ids on any pre-existing log entries
 if(S.log) S.log.forEach(function(x){ if(!x.id) x.id=uid(); });
 function save(){
   try { localStorage.setItem('toro21200', JSON.stringify(S)); return true; }
+  catch(e){
+    if(typeof toast==='function'){ toast('\u26A0 Storage full \u2014 export a backup &amp; delete some photos'); }
+    return false;
+  }
+}
+function safeSetItem(key,val){
+  try { localStorage.setItem(key,val); return true; }
   catch(e){
     if(typeof toast==='function'){ toast('\u26A0 Storage full \u2014 export a backup &amp; delete some photos'); }
     return false;
@@ -3167,7 +3195,7 @@ function importData(input){
     try {
       var parsed = JSON.parse(ev.target.result);
       var d = parsed && parsed.data ? parsed.data : parsed;   // accept wrapped or raw
-      if(!d || typeof d.hours==='undefined'){ throw new Error('Not a valid Toro backup'); }
+      if(!d || typeof d.hours!=='number' || isNaN(d.hours)){ throw new Error('Not a valid Toro backup'); }
       if(!confirm('This will REPLACE all current data with the backup. Continue?')){ input.value=''; return; }
       S = d;
       // re-apply migration guards
@@ -3461,7 +3489,7 @@ function renderServices(){
       out+='<div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:6px">'+lastTxt+dateTxt+' &middot; Next @ '+r.next.toFixed(1)+' hrs &middot; '+r.rem.toFixed(1)+' remaining &middot; Every '+r.interval+' hrs</div>';
       out+='<div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-bottom:8px"><div style="height:100%;width:'+r.pct+'%;background:'+hc(r.pct)+';border-radius:2px"></div></div>';
       out+='<div style="display:flex;gap:6px">';
-      out+='<button onclick="window.open(RULES.find(function(x){return x.key===\''+r.key+'\'}).video,\'_blank\',\'noopener\')" style="flex:1;padding:9px;border-radius:8px;background:linear-gradient(135deg,var(--red),var(--red2));border:none;color:#fff;font-size:11px;font-weight:700;cursor:pointer">&#9654; Video</button>';
+      out+='<a href="'+r.video+'" target="_blank" rel="noopener" style="flex:1;padding:9px;border-radius:8px;background:linear-gradient(135deg,var(--red),var(--red2));border:none;color:#fff;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none">&#9654; Video</a>';
       out+='<button onclick="showTab(\'parts\',document.querySelectorAll(\'.tab\')[3])" style="flex:1;padding:9px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:#ddd;font-size:11px;font-weight:700;cursor:pointer">&#128230; Parts</button>';
       out+='<button onclick="showModal(\'svc\',\''+r.key+'\')" style="flex:0 0 auto;padding:9px 12px;border-radius:8px;background:linear-gradient(135deg,#166534,#14532d);border:none;color:#fff;font-size:11px;font-weight:700;cursor:pointer">&#10003; Log</button>';
       out+='</div></div>';
@@ -3481,19 +3509,19 @@ function renderParts(filter){
     if(filter==='ALL'||filter==='OEM'){
       out+='<div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;font-weight:700">OEM SOURCES</div>';
       out+='<div class="vgrid">';
-      out+='<button class="vbtn v-am" onclick="window.open(PARTS['+i+'].aurl,\'_blank\',\'noopener\')">&#128722; Amazon</button>';
-      out+='<button class="vbtn v-hd" onclick="window.open(PARTS['+i+'].hd,\'_blank\',\'noopener\')">&#127978; Home Depot</button>';
-      out+='<button class="vbtn v-toro" onclick="window.open(PARTS['+i+'].toro,\'_blank\',\'noopener\')">&#128308; Toro.com</button>';
-      out+='<button class="vbtn v-eb" onclick="window.open(PARTS['+i+'].eb,\'_blank\',\'noopener\')">&#128296; eBay</button>';
+      out+='<a class="vbtn v-am" href="'+p.aurl+'" target="_blank" rel="noopener">&#128722; Amazon</a>';
+      out+='<a class="vbtn v-hd" href="'+p.hd+'" target="_blank" rel="noopener">&#127978; Home Depot</a>';
+      out+='<a class="vbtn v-toro" href="'+p.toro+'" target="_blank" rel="noopener">&#128308; Toro.com</a>';
+      out+='<a class="vbtn v-eb" href="'+p.eb+'" target="_blank" rel="noopener">&#128296; eBay</a>';
       out+='</div>';
     }
     if((filter==='ALL'||filter==='AM')&&p.am&&p.am!=='None'&&p.am!=='Same'){
       out+='<div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin:7px 0 4px;font-weight:700">AFTERMARKET &middot; '+p.am+' &middot; <span style="color:var(--green)">'+p.amPrice+'</span></div>';
       out+='<div class="vgrid">';
-      out+='<button class="vbtn v-am" onclick="window.open(PARTS['+i+'].amurl,\'_blank\',\'noopener\')">&#128722; Amazon</button>';
-      out+='<button class="vbtn v-wm" onclick="window.open(PARTS['+i+'].wm,\'_blank\',\'noopener\')">&#128717; Walmart</button>';
-      out+='<button class="vbtn v-eb" onclick="window.open(PARTS['+i+'].eb,\'_blank\',\'noopener\')">&#128296; eBay</button>';
-      out+='<button class="vbtn v-yt" onclick="window.open(PARTS['+i+'].vid,\'_blank\',\'noopener\')">&#9654; Video</button>';
+      out+='<a class="vbtn v-am" href="'+p.amurl+'" target="_blank" rel="noopener">&#128722; Amazon</a>';
+      out+='<a class="vbtn v-wm" href="'+p.wm+'" target="_blank" rel="noopener">&#128717; Walmart</a>';
+      out+='<a class="vbtn v-eb" href="'+p.eb+'" target="_blank" rel="noopener">&#128296; eBay</a>';
+      out+='<a class="vbtn v-yt" href="'+p.vid+'" target="_blank" rel="noopener">&#9654; Video</a>';
       out+='</div>';
     }
     out+='<button class="cart-btn '+(inCart?'incart':'add')+'" onclick="addToCart('+i+')">'+(inCart?'&#10003; In Cart':'+ Add to Cart')+'</button>';
@@ -3506,7 +3534,7 @@ function renderDiag(){
   var dl=document.getElementById('diagList');
   if(!dl) return;
   dl.innerHTML=DIAG.map(function(d,i){
-    return '<div class="diag-item"><div class="diag-icon">'+d.icon+'</div><div class="diag-body"><div class="diag-title">'+d.title+'</div><div class="diag-desc">'+d.desc+'</div></div><button class="vid-btn" onclick="window.open(DIAG['+i+'].vid,\'_blank\',\'noopener\')">&#9654; Video</button></div>';
+    return '<div class="diag-item"><div class="diag-icon">'+d.icon+'</div><div class="diag-body"><div class="diag-title">'+d.title+'</div><div class="diag-desc">'+d.desc+'</div></div><a class="vid-btn" href="'+d.vid+'" target="_blank" rel="noopener">&#9654; Video</a></div>';
   }).join('');
 }
 
@@ -3525,7 +3553,7 @@ function renderUpgrades(){
     } else {
       tag='<span class="pill pill-ok" style="margin-left:6px">AT '+u.recAt+'h ('+(u.recAt-S.hours).toFixed(1)+'h away)</span>';
     }
-    return '<div class="upg-card"><div class="upg-header"><div><div class="upg-name">&#11014; '+u.name+tag+'</div><div class="upg-desc">'+u.desc+'</div></div><div class="part-price">'+u.price+'</div></div><div class="upg-btns"><button class="upg-btn upg-red" onclick="window.open(UPGRADES['+i+'].url,\'_blank\',\'noopener\')">&#128722; Shop Amazon</button><button class="upg-btn upg-gray" onclick="window.open(\'https://www.google.com/search?q=\'+encodeURIComponent(UPGRADES['+i+'].name)+\'+lawn+mower\',\'_blank\',\'noopener\')">&#128269; More Options</button></div></div>';
+    return '<div class="upg-card"><div class="upg-header"><div><div class="upg-name">&#11014; '+u.name+tag+'</div><div class="upg-desc">'+u.desc+'</div></div><div class="part-price">'+u.price+'</div></div><div class="upg-btns"><a class="upg-btn upg-red" href="'+u.url+'" target="_blank" rel="noopener">&#128722; Shop Amazon</a><a class="upg-btn upg-gray" href="https://www.google.com/search?q='+encodeURIComponent(u.name)+'+lawn+mower" target="_blank" rel="noopener">&#128269; More Options</a></div></div>';
   }).join('');
 }
 
@@ -4267,8 +4295,7 @@ function saveBhyveCreds(){
   var email=(e.value||'').trim(), pass=(p.value||'').trim();
   var msg=document.getElementById('bhyveCredsMsg');
   if(!email||!pass){ if(msg){msg.style.color='#ff6262';msg.textContent='Enter both email and password.';} return; }
-  localStorage.setItem('bhyve_email',email);
-  localStorage.setItem('bhyve_pass',pass);
+  if(!safeSetItem('bhyve_email',email)||!safeSetItem('bhyve_pass',pass)){ if(msg){msg.style.color='#ff6262';msg.textContent='Save failed — storage full.';} return; }
   if(msg){msg.style.color='#22c55e';msg.textContent='Saved! Connecting…';}
   acctRefreshStatus();
   loadIrrigation();
@@ -4411,7 +4438,7 @@ function acctRefreshStatus(){
 function acctSaveHa(){
   var inp=document.getElementById('acct-ha-token'),msg=document.getElementById('acct-ha-msg');
   if(!inp||!inp.value.trim()){if(msg){msg.style.color='#ff6262';msg.textContent='Paste a token first.';}return;}
-  localStorage.setItem('ha_token',inp.value.trim());
+  if(!safeSetItem('ha_token',inp.value.trim())){ if(msg){msg.style.color='#ff6262';msg.textContent='Save failed — storage full.';} return; }
   acctRefreshStatus();
   if(msg){msg.style.color='#22c55e';msg.textContent='Saved! Will connect on home WiFi.';}
   setTimeout(function(){var f=document.getElementById('acct-ha');if(f)f.classList.remove('open');checkBeehive(false);loadCameras();loadHomeStatus();loadUtilities();},1500);
@@ -4421,7 +4448,7 @@ function acctSaveLux(){
   var pass=(document.getElementById('acct-lux-pass')?document.getElementById('acct-lux-pass').value:'').trim();
   var msg=document.getElementById('acct-lux-msg');
   if(!email||!pass){if(msg){msg.style.color='#ff6262';msg.textContent='Enter both email and password.';}return;}
-  localStorage.setItem('lux_email',email);localStorage.setItem('lux_pass',pass);
+  if(!safeSetItem('lux_email',email)||!safeSetItem('lux_pass',pass)){ if(msg){msg.style.color='#ff6262';msg.textContent='Save failed — storage full.';} return; }
   acctRefreshStatus();
   if(msg){msg.style.color='#22c55e';msg.textContent='Saved! Connecting…';}
   setTimeout(function(){var f=document.getElementById('acct-lux');if(f)f.classList.remove('open');loadClimate();},1200);
@@ -4431,7 +4458,7 @@ function acctSaveBhyve(){
   var pass=(document.getElementById('acct-bhyve-pass')?document.getElementById('acct-bhyve-pass').value:'').trim();
   var msg=document.getElementById('acct-bhyve-msg');
   if(!email||!pass){if(msg){msg.style.color='#ff6262';msg.textContent='Enter both email and password.';}return;}
-  localStorage.setItem('bhyve_email',email);localStorage.setItem('bhyve_pass',pass);
+  if(!safeSetItem('bhyve_email',email)||!safeSetItem('bhyve_pass',pass)){ if(msg){msg.style.color='#ff6262';msg.textContent='Save failed — storage full.';} return; }
   acctRefreshStatus();
   if(msg){msg.style.color='#22c55e';msg.textContent='Saved!';}
   setTimeout(function(){var f=document.getElementById('acct-bhyve');if(f)f.classList.remove('open');loadIrrigation();},1200);
@@ -4890,7 +4917,7 @@ function showModal(type, preKey){
         return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:13px;font-weight:700;color:#fff">'+p.name+'</div><div style="font-size:10px;color:var(--muted)">'+p.oem+' &middot; '+p.price+'</div></div><button onclick="removeFromCart('+i+')" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer">&#10005;</button></div>';
       }).join('');
       var q=encodeURIComponent(S.cart.map(function(c){ return c.oem; }).join(' '));
-      cartHtml+='<button class="btn-full btn-red" style="margin-top:12px" onclick="window.open(\'https://www.amazon.com/s?k='+q+'\',\'_blank\',\'noopener\')">&#128722; Shop All on Amazon</button>';
+      cartHtml+='<a href="https://www.amazon.com/s?k='+q+'" target="_blank" rel="noopener" class="btn-full btn-red" style="margin-top:12px;display:block;text-align:center;text-decoration:none">&#128722; Shop All on Amazon</a>';
       cartHtml+='<button class="btn-full btn-gray" style="margin-top:6px" onclick="exportCart()">&#128203; Export Parts List</button>';
       cartHtml+='<button class="btn-full btn-gray" style="margin-top:6px" onclick="S.cart=[];save();updateCart();closeModal()">Clear Cart</button>';
     }
@@ -4911,7 +4938,7 @@ function saveMow(){
   var noteTxt=document.getElementById('mi-note').value+' &middot; '+dur.toFixed(1)+' '+(dur===1?'hr':'hrs')+(mi>0?' &middot; '+mi.toFixed(1)+' mi':'');
   S.log.unshift({id:uid(),date:new Date().toISOString().slice(0,10),hrs:n,type:'mow',title:'Mow #'+num,note:noteTxt,gain:(mi>0?'&#128694; +'+mi.toFixed(1)+' mi':''),miles:mi});
   S.miles=(S.miles||0)+mi;
-  S.hours=n; save(); closeModal(); renderAll();
+  S.hours=n; if(!save()) return; closeModal(); renderAll();
 }
 
 function saveHours(){
@@ -4925,7 +4952,7 @@ function saveHours(){
   S.hoursBaseline = Math.round((n - sensorHrs)*100)/100;
   S.hours = n;
   S.hoursCalibratedAt = Date.now();
-  save(); closeModal(); renderAll();
+  if(!save()) return; closeModal(); renderAll();
   if(typeof toast==='function') toast('✓ Master hours set to '+n.toFixed(1)+' hrs');
 }
 
@@ -4959,7 +4986,9 @@ function matchRuleFromText(text){
 
 function saveSvc(){
   var key=document.getElementById('mi-svc').value;
-  var n=parseFloat(document.getElementById('mi-svchrs').value)||S.hours;
+  var hrsInput=document.getElementById('mi-svchrs').value;
+  var n=hrsInput.trim()===''?S.hours:parseFloat(hrsInput);
+  if(isNaN(n)||n<0){ alert('Enter the hours at time of service, e.g. '+S.hours.toFixed(1)); return; }
   var note=document.getElementById('mi-svcnote').value||'Service completed';
   var title,gain='',resetMsg='';
   if(key==='custom'){
@@ -4982,7 +5011,7 @@ function saveSvc(){
   var entry={id:uid(),date:new Date().toISOString().slice(0,10),hrs:n,type:'service',title:title,note:note,gain:gain};
   if(pendingPhoto){ entry.photo=pendingPhoto; pendingPhoto=null; }
   S.log.unshift(entry);
-  save(); closeModal(); renderAll();
+  if(!save()) return; closeModal(); renderAll();
   // Confirmation so it's obvious the log registered
   if(resetMsg){ toast('\u2713 Logged \u2014 "'+resetMsg+'" countdown reset to '+n.toFixed(1)+' hrs'); }
   else { toast('\u2713 Logged \u2014 custom entry saved (no countdown matched)'); }
@@ -5079,7 +5108,7 @@ function saveEditLog(id){
     entry.miles=newMi;
     entry.gain=newMi>0?'&#128694; +'+newMi.toFixed(1)+' mi':'';
   }
-  save(); closeModal(); renderAll();
+  if(!save()) return; closeModal(); renderAll();
 }
 
 // TABS & FILTERS
@@ -5161,7 +5190,7 @@ function savePurchase(){
   if(isNaN(cost)||cost<0){ alert('Enter the price you paid'); return; }
   if(!S.purchases) S.purchases=[];
   S.purchases.push({id:uid(),name:name,cost:cost,date:date||new Date().toISOString().slice(0,10),note:note});
-  save(); closeModal(); renderInvestment();
+  if(!save()) return; closeModal(); renderInvestment();
 }
 
 function renderAll(){
@@ -6066,7 +6095,7 @@ function alexaToggle(skill, url) {
   if (!btn) return;
   if (btn.classList.contains('active')) {
     // Already marked active — open skill page in case they want to manage it
-    window.open(url, '_blank');
+    openExternal(url);
   } else {
     // Mark as active
     localStorage.setItem(key, '1');
@@ -6231,7 +6260,6 @@ function carTab(id, btn) {
   var el = document.getElementById('tab-' + id);
   if (el) el.classList.add('active');
   if (btn) btn.classList.add('active');
-  if (id === 'car-settings') carUpdatePinStatus();
 }
 
 function fordLogService() {
@@ -6251,33 +6279,6 @@ function carLogFuel() {
 }
 
 var CAR_VIN = '4JGFB4KB0MA478988';
-var CAR_PIN_SERVICES = ['engine_start','doors_unlock','windows_open','sunroof_open','sunroof_tilt'];
-function getCarPin() { return localStorage.getItem('car_pin') || ''; }
-function setCarPin(p) { localStorage.setItem('car_pin', p); }
-function carNeedsPin(service) { return CAR_PIN_SERVICES.indexOf(service) >= 0; }
-function carPromptPin(cb) {
-  var existing = getCarPin();
-  if (existing) { cb(existing); return; }
-  grdShow('&#128273; Mercedes PIN Required', '<div style="font-size:12px;line-height:1.6;margin-bottom:12px">Enter your Mercedes me PIN to authorize this command. It will be saved on this device.</div>'
-    + '<input id="carPinInput" type="password" inputmode="numeric" maxlength="8" placeholder="Mercedes PIN" style="width:100%;box-sizing:border-box;background:rgba(0,0,0,.4);border:1px solid rgba(212,175,55,.3);border-radius:8px;padding:12px;color:#ede8df;font-size:18px;font-family:inherit;letter-spacing:6px;text-align:center;margin-bottom:10px">'
-    + '<div class="mbtns"><button class="mbtn primary" onclick="var p=document.getElementById(\'carPinInput\').value.trim();if(p){setCarPin(p);grdClose();window._carPinCb&&window._carPinCb(p);}">Save &amp; Continue</button><button class="mbtn secondary" onclick="grdClose()">Cancel</button></div>');
-  window._carPinCb = cb;
-}
-function carChangePinUI() {
-  grdShow('&#128273; Change Mercedes PIN', '<div style="font-size:12px;line-height:1.6;margin-bottom:12px">Enter your new Mercedes me PIN. This is the same PIN you set up in the Mercedes Me mobile app.</div>'
-    + '<input id="carPinInput" type="password" inputmode="numeric" maxlength="8" placeholder="New PIN" style="width:100%;box-sizing:border-box;background:rgba(0,0,0,.4);border:1px solid rgba(212,175,55,.3);border-radius:8px;padding:12px;color:#ede8df;font-size:18px;font-family:inherit;letter-spacing:6px;text-align:center;margin-bottom:10px">'
-    + '<div class="mbtns"><button class="mbtn primary" onclick="var p=document.getElementById(\'carPinInput\').value.trim();if(p){setCarPin(p);grdClose();carUpdatePinStatus();}">Save PIN</button>'
-    + '<button class="mbtn secondary" onclick="localStorage.removeItem(\'car_pin\');grdClose();carUpdatePinStatus();">Clear PIN</button>'
-    + '<button class="mbtn secondary" onclick="grdClose()">Cancel</button></div>');
-}
-function carUpdatePinStatus() {
-  var el = document.getElementById('carPinStatus');
-  if (!el) return;
-  var pin = getCarPin();
-  el.innerHTML = pin
-    ? '<span style="color:var(--ok)">&#10003; PIN saved on this device</span>'
-    : '<span style="color:var(--warn)">No PIN saved — remote start & unlock will prompt for it</span>';
-}
 function carMbSvc(service, extra) {
   var d = { vin: CAR_VIN };
   if (extra) Object.keys(extra).forEach(function(k){ d[k] = extra[k]; });
@@ -6788,7 +6789,7 @@ function openBeehive(path) {
   var base = localStorage.getItem('ha_base') || null;
   // Try stored base first, then hostname, then direct IP
   var urls = base ? [base] : ['http://homeassistant.local:8123', HA_IP];
-  window.open(urls[0] + path, '_blank');
+  openExternal(urls[0] + path);
 }
 
 function beehiveOnline(base, d) {
@@ -6910,7 +6911,10 @@ function saveHaToken() {
   var btn = document.getElementById('haTokenBtn');
   var status = document.getElementById('haTokenStatus');
   // Save immediately so it works even when traveling (no home WiFi)
-  localStorage.setItem('ha_token', token);
+  if (!safeSetItem('ha_token', token)) {
+    if (status) { status.innerHTML = '<span style="color:#ff6262">Save failed — storage full</span>'; }
+    return;
+  }
   acctRefreshStatus();
   if (btn) { btn.textContent = 'Verifying…'; btn.style.opacity = '0.7'; }
   if (status) status.innerHTML = '';
@@ -6948,9 +6952,12 @@ function saveHaTokenInline() {
   var inp = document.getElementById('haTokenInline');
   if (!inp || !inp.value.trim()) return;
   var token = inp.value.trim();
-  localStorage.setItem('ha_token', token);
-  acctRefreshStatus();
   var status = document.getElementById('haTokenInlineStatus');
+  if (!safeSetItem('ha_token', token)) {
+    if (status) status.innerHTML = '<span style="color:#ff6262">Save failed — storage full</span>';
+    return;
+  }
+  acctRefreshStatus();
   if (status) status.innerHTML = '<span style="color:#ffd24a">Verifying&hellip;</span>';
   haFetch('/api/', { signal: AbortSignal.timeout(25000) })
     .then(function(r) {
