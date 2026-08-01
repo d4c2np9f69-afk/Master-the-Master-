@@ -633,6 +633,11 @@ html.light .car-tabs{background:#fff}
 .util-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.30)}
 .util-banner{width:100%;overflow:hidden;background:#0b0b0f;line-height:0;position:relative}
 .util-banner img{width:100%;height:auto;display:block}
+/* Reserve the real image aspect ratio so the lazy-loaded photo doesn't cause layout
+   shift when it finishes loading (each meter photo has a different ratio). */
+.util-w .util-banner{aspect-ratio:1320/878}
+.util-g .util-banner{aspect-ratio:1135/868}
+.util-e .util-banner{aspect-ratio:1228/857}
 .util-banner-call{position:absolute;right:8px;top:8px;z-index:3;display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;letter-spacing:.5px;color:#fff;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.4);border-radius:20px;padding:5px 10px;line-height:1;text-decoration:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .util-banner-call:active{opacity:.8}
 .util-overlay-bottom{position:absolute;bottom:0;left:0;right:0;z-index:2;padding:14px 6px 6px}
@@ -659,7 +664,7 @@ html.light .car-tabs{background:#fff}
 .util-foot.est .dot{background:var(--info,#38bdf8)}
 
 /* ── WHITE HOUSE DISPATCH (contacts/emergency directory, HOME top) ───────── */
-.dispatch-card{position:relative;width:100%;margin:0 0 16px;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 4px 18px rgba(0,0,0,.35)}
+.dispatch-card{position:relative;width:100%;margin:0 0 16px;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 4px 18px rgba(0,0,0,.35);aspect-ratio:1448/1086}
 .dispatch-card img{width:100%;display:block}
 .dispatch-card .hotspot{position:absolute;z-index:5;display:block;border-radius:9px;-webkit-tap-highlight-color:transparent}
 .dispatch-card .hotspot:active,.dispatch-card .hotspot:focus{background:rgba(255,206,120,.30);outline:none}
