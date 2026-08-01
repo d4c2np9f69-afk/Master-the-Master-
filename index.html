@@ -16,7 +16,7 @@
 <title>Home Command Center</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Cinzel:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════════════════════════
    HOME COMMAND CENTER  ·  Single Design System
@@ -329,12 +329,10 @@ html,body{
 /* Irrigation: pin to top */
 .sec-hero-irr img{object-position:center top}
 .sec-hero-yard img{object-fit:cover;object-position:center center}
-.sec-hero-climate img{object-fit:cover;object-position:center center}
 /* Per-hero aspect = each image's true ratio so the baked-in gold titles never crop */
 .sec-hero-weather{aspect-ratio:1320/864;height:auto;max-height:460px}
 .sec-hero-irr{aspect-ratio:1320/864;height:auto;max-height:460px}
 .sec-hero-yard{aspect-ratio:1320/851;height:auto;max-height:460px}
-.sec-hero-climate{aspect-ratio:1320/931;height:auto;max-height:460px;background:linear-gradient(160deg,#0a0610 0%,#1a0a00 50%,#0a0610 100%)}
 /* ── HERO MASTER GRADE — REUSABLE MODULE ───────────────────────────────────
    One cinematic golden-hour grade for EVERY hero. applyHeroGrades() (JS) tags
    each hero container with .hcc-hero-vignette and each hero <img> with
@@ -1158,7 +1156,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 /* hcc-wrap is now applied via .hcc-section.active above */
 @media(min-width:768px){
   .hcc-section.active{padding:0 24px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-climate,.sec-hero-guardian,.sec-hero-car{max-height:560px}
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian,.sec-hero-car{max-height:560px}
   .house-hero{aspect-ratio:16/9}
   .card{padding:22px}
   .card-title{font-size:12px;letter-spacing:1px}
@@ -1170,7 +1168,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 }
 @media(min-width:1200px){
   .hcc-section.active{padding:0 40px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-climate,.sec-hero-guardian,.sec-hero-car{max-height:680px}
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian,.sec-hero-car{max-height:680px}
   .app-hdr{padding:14px 28px}
   .app-hdr-title{font-size:22px}
   .app-hdr-sub{font-size:10px;letter-spacing:4px}
@@ -1188,7 +1186,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 }
 @media(min-width:1920px){
   .hcc-section.active{max-width:1800px;padding:0 60px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-climate,.sec-hero-guardian,.sec-hero-car{max-height:800px}
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian,.sec-hero-car{max-height:800px}
   .app-hdr{padding:18px 40px}
   .app-hdr-title{font-size:26px}
   .app-hdr-sub{font-size:12px}
@@ -1215,7 +1213,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
   .app-hdr-badge{padding:10px 20px;font-size:20px;border-radius:10px}
   .snav-btn{min-width:200px;font-size:14px;padding:20px 20px 16px}
   .snav-icon{font-size:36px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-climate,.sec-hero-guardian,.sec-hero-car{max-height:1000px}
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian,.sec-hero-car{max-height:1000px}
   .card{padding:36px 40px;border-radius:22px;margin-bottom:28px}
   .card-title{font-size:16px;letter-spacing:1.5px}
   .sec-hero-title{font-size:46px}
@@ -1293,7 +1291,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 </div>
 <div class="hero-slot" id="hero-weather">
   <div class="sec-hero sec-hero-weather">
-    <img src="./images/hero-weather.jpg" alt="Weather">
+    <img src="./images/hero-weather.jpg" alt="Weather" loading="lazy">
     <div class="sec-hero-overlay">
       <div class="wx-hero-row">
         <div>
@@ -1312,7 +1310,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 </div>
 <div class="hero-slot" id="hero-irrigation">
   <div class="sec-hero sec-hero-irr">
-    <img src="./images/hero-irr.jpg" alt="Irrigation">
+    <img src="./images/hero-irr.jpg" alt="Irrigation" loading="lazy">
     <div class="sec-hero-overlay">
       <div class="sec-hero-status" id="irrHeroStatus"></div>
     </div>
@@ -1320,7 +1318,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 </div>
 <div class="hero-slot" id="hero-yard">
   <div class="sec-hero sec-hero-yard">
-    <img src="./images/hero-yard.jpg" alt="Toro TimeMaster 30&quot;">
+    <img src="./images/hero-yard.jpg" alt="Toro TimeMaster 30&quot;" loading="lazy">
     <div class="sec-hero-overlay">
       <div class="sec-hero-status" id="yardHeroStatus"></div>
     </div>
@@ -1328,7 +1326,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 </div>
 <div class="hero-slot" id="hero-guardian">
   <div class="sec-hero sec-hero-guardian">
-    <img src="./images/hero-guardian.jpg" alt="Home Guardian — Protect · Monitor · Automate" onerror="this.style.display='none'">
+    <img src="./images/hero-guardian.jpg" alt="Home Guardian — Protect · Monitor · Automate" loading="lazy" onerror="this.style.display='none'">
     <div class="sec-hero-overlay">
       <div class="sec-hero-status" id="guardianHeroStatus">Standing watch over 301</div>
     </div>
@@ -1336,7 +1334,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 </div>
 <div class="hero-slot" id="hero-car">
   <div class="sec-hero sec-hero-car">
-    <img id="carHeroImg" src="./images/hero-car.jpg" alt="Mercedes-Benz GLE 350 4MATIC" onerror="this.style.display='none'">
+    <img id="carHeroImg" src="./images/hero-car.jpg" alt="Mercedes-Benz GLE 350 4MATIC" loading="lazy" onerror="this.style.display='none'">
     <div class="sec-hero-overlay">
       <div class="sec-hero-status" id="carHeroStatus"></div>
     </div>
@@ -1375,7 +1373,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 
     <!-- ── WHITE HOUSE DISPATCH — tap any row to call ── -->
     <section class="dispatch-card" aria-label="White House Dispatch — emergency and utility contacts">
-      <img src="./images/white-house-dispatch.jpg" alt="White House Dispatch contact directory">
+      <img src="./images/white-house-dispatch.jpg" alt="White House Dispatch contact directory" loading="lazy">
       <a class="hotspot police" href="tel:6153844911" aria-label="Call White House Police (non-emergency)"></a>
       <a class="hotspot fire" href="tel:6156725338" aria-label="Call White House Fire Department"></a>
       <a class="hotspot water" href="tel:6156724110" aria-label="Call White House Utility District"></a>
@@ -1441,7 +1439,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <!-- WATER -->
       <div class="util-card util-w">
         <div class="util-banner">
-          <img src="./images/util-water.jpg" alt="White House Utilities water meter">
+          <img src="./images/util-water.jpg" alt="White House Utilities water meter" loading="lazy">
           <a class="util-banner-call" href="tel:6156724110" aria-label="Call White House Utility District customer service">&#128222; CALL</a>
           <div class="util-overlay-bottom">
             <div class="util-stats" style="grid-template-columns:repeat(3,1fr)">
@@ -1472,7 +1470,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <!-- GAS -->
       <div class="util-card util-g">
         <div class="util-banner">
-          <img src="./images/util-gas.jpg" alt="Spire Energy gas meter">
+          <img src="./images/util-gas.jpg" alt="Spire Energy gas meter" loading="lazy">
           <a class="util-banner-call" href="tel:8007527504" aria-label="Call Spire Energy customer service">&#128222; CALL</a>
           <div class="util-overlay-bottom">
             <div class="util-stats">
@@ -1498,7 +1496,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <!-- ELECTRIC -->
       <div class="util-card util-e">
         <div class="util-banner">
-          <img src="./images/util-electric.jpg" alt="Cumberland Electric (CEMC) meter">
+          <img src="./images/util-electric.jpg" alt="Cumberland Electric (CEMC) meter" loading="lazy">
           <a class="util-banner-call" href="tel:8009872362" aria-label="Call Cumberland Electric CEMC customer service">&#128222; CALL</a>
           <div class="util-overlay-bottom">
             <div class="util-stats" style="grid-template-columns:repeat(2,1fr)">
