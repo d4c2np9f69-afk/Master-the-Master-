@@ -206,7 +206,7 @@ html.light .app-hdr-sub{color:#8a8a8e;}
 html.light .app-hdr-badge{background:#fff;color:var(--a-home);border-color:var(--a-home);box-shadow:none;}
 html.light .theme-btn,html.light .cast-btn{background:#f0f0f3;border:1px solid #e3e3e8;color:#3a3a3c;}
 html.light .sec-nav{background:#fff;border-bottom:1px solid var(--border);}
-html.light .snav-btn{color:#9a9aa0;}
+html.light .snav-btn{color:#6b6b70;}
 html.light .snav-btn.active{color:#1c1c1e;}
 html.light .tabs{background:#fff;}
 
@@ -248,7 +248,7 @@ html,body{
   padding:5px 10px;
   font-size:11px;font-weight:700;letter-spacing:2.5px;
   font-family:var(--serif);
-  color:rgba(212,175,55,.9);
+  color:var(--gold);
   flex-shrink:0;
   box-shadow:0 0 16px rgba(212,175,55,.12);
 }
@@ -1409,10 +1409,10 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 
     <!-- Token prompt — shown when Beehive online but no token yet -->
     <div id="haTokenPrompt" style="display:none;background:rgba(212,175,55,.07);border:1px solid rgba(212,175,55,.25);border-radius:12px;padding:14px;margin-bottom:10px">
-      <div style="font-size:12px;font-weight:800;color:rgba(212,175,55,.9);margin-bottom:6px">&#128273; Connect to Beehive</div>
+      <div style="font-size:12px;font-weight:800;color:var(--gold);margin-bottom:6px">&#128273; Connect to Beehive</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Create a Long-Lived Token in Home Assistant to unlock cameras &amp; home status.</div>
       <div style="font-size:10px;color:var(--muted);margin-bottom:8px">In Beehive: tap your username (bottom left) &rarr; Security &rarr; Long-Lived Access Tokens &rarr; Create Token &rarr; copy it</div>
-      <input id="haTokenInput" type="password" placeholder="Paste token here&hellip;" style="width:100%;box-sizing:border-box;background:rgba(0,0,0,.4);border:1px solid rgba(212,175,55,.3);border-radius:8px;padding:9px 12px;color:#ede8df;font-size:12px;margin-bottom:8px;font-family:inherit">
+      <input id="haTokenInput" type="password" placeholder="Paste token here&hellip;" class="minput" style="width:100%;box-sizing:border-box;border:1px solid rgba(212,175,55,.3);border-radius:8px;padding:9px 12px;font-size:12px;margin-bottom:8px;font-family:inherit">
       <button id="haTokenBtn" onclick="saveHaToken()" style="width:100%;padding:10px;background:linear-gradient(135deg,#5a3e00,#3a2800);border:1px solid rgba(212,175,55,.4);border-radius:8px;color:rgba(212,175,55,.95);font-size:11px;font-weight:800;letter-spacing:.5px;cursor:pointer">&#128275; CONNECT TO BEEHIVE</button>
       <div id="haTokenStatus" style="font-size:11px;text-align:center;margin-top:8px;min-height:16px"></div>
     </div>
@@ -1584,9 +1584,9 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         <button onclick="checkBeehive(true)" class="icon-btn">&#128260;</button>
       </div>
       <div id="beehiveTokenInline" style="display:none;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.25);border-radius:10px;padding:12px;margin-bottom:10px">
-        <div style="font-size:11px;font-weight:800;color:rgba(212,175,55,.9);margin-bottom:6px">&#128273; Paste Your Token to Connect</div>
+        <div style="font-size:11px;font-weight:800;color:var(--gold);margin-bottom:6px">&#128273; Paste Your Token to Connect</div>
         <div style="font-size:10px;color:var(--muted);margin-bottom:8px;line-height:1.5">In Beehive: tap your name (bottom left) &rarr; Security &rarr; Long-Lived Access Tokens &rarr; Create Token &rarr; copy &rarr; paste below</div>
-        <input id="haTokenInline" type="password" placeholder="Paste token here&hellip;" style="width:100%;box-sizing:border-box;background:rgba(0,0,0,.4);border:1px solid rgba(212,175,55,.3);border-radius:8px;padding:9px 12px;color:#ede8df;font-size:13px;margin-bottom:8px;font-family:inherit">
+        <input id="haTokenInline" type="password" placeholder="Paste token here&hellip;" class="minput" style="width:100%;box-sizing:border-box;border:1px solid rgba(212,175,55,.3);border-radius:8px;padding:9px 12px;font-size:13px;margin-bottom:8px;font-family:inherit">
         <button onclick="saveHaTokenInline()" style="width:100%;padding:10px;background:linear-gradient(135deg,#5a3e00,#3a2800);border:1px solid rgba(212,175,55,.4);border-radius:8px;color:rgba(212,175,55,.95);font-size:12px;font-weight:800;letter-spacing:.5px;cursor:pointer">&#128275; CONNECT TO BEEHIVE</button>
         <div id="haTokenInlineStatus" style="font-size:11px;text-align:center;margin-top:8px;min-height:16px"></div>
       </div>
@@ -6764,7 +6764,7 @@ function checkBeehive(manual) {
       if (hd)    hd.style.background = '#e01c1c';
       if (hh)    hh.style.background = '#e01c1c';
       if (hd2)   hd2.style.background = '#e01c1c';
-      if (title) { title.textContent = 'Beehive Offline'; title.style.color = '#ff6262'; }
+      if (title) { title.textContent = 'Beehive Offline'; title.style.color = 'var(--bad)'; }
       if (ver)   ver.textContent = token ? 'Not reachable — check Beehive / Nabu Casa' : 'Paste your token below to connect';
       if (!token) {
         var p = document.getElementById('haTokenPrompt'); if (p) p.style.display = 'block';
@@ -6925,7 +6925,7 @@ function loadCameras() {
     if (!grid) return;
     if (cameras.length === 0) {
       grid.innerHTML = '<div style="background:rgba(212,175,55,.07);border:1px solid rgba(212,175,55,.2);border-radius:12px;padding:14px;margin-bottom:6px">'
-        + '<div style="font-size:12px;font-weight:700;color:rgba(212,175,55,.9);margin-bottom:6px">&#128247; Blink — Enter Verification Code</div>'
+        + '<div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px">&#128247; Blink — Enter Verification Code</div>'
         + '<div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.55">Blink sent a code to your email/phone. Enter it below to finish connecting to Beehive.</div>'
         + '<div style="font-size:10px;color:var(--muted);margin-bottom:8px">If you haven\'t added Blink yet: Beehive &rarr; Settings &rarr; Devices &rarr; Add Integration &rarr; Blink</div>'
         + '<input id="blinkPinInput" type="tel" inputmode="numeric" maxlength="8" placeholder="Enter PIN code&hellip;" style="width:100%;box-sizing:border-box;background:rgba(0,0,0,.4);border:1px solid rgba(212,175,55,.3);border-radius:8px;padding:9px 12px;color:#ede8df;font-size:14px;margin-bottom:8px;font-family:inherit;letter-spacing:4px;text-align:center">'
