@@ -328,6 +328,7 @@ Expected: all tests passing. If any fail, fix them before doing anything else.
 6. **Lucky Mike "Smart Stall"** — queued, plans in `docs/lucky-mike/` (read `INTEGRATION_NOTES.md` first). New "STABLE" section, `--a-stable` accent. **Do not start until Jeff says go.**
 7. **Desktop-wide-browser layout gap** — heroes leave black space on windows >~700px wide (`aspect-ratio`+`max-height:460px` with no width constraint). Low priority, app is used on phone.
 8. **Zigbee alarm hardware — Jeff purchasing 07-31.** Bare-bones parts list (coordinator, door sensors, siren) plus the full Guardian safety-layer wishlist (smoke, water leak, freeze, water-main shutoff) researched and handed to Jeff as a downloadable file this session — real current products verified via web search, not guessed. Once hardware arrives and is paired in HA, item 4 (Panic automation) becomes buildable — `docs/beehive/panic_alarm_automation.md` already has the automation YAML ready, just needs real entity ids swapped in.
+9. **`zone.work` is centered on Angela's office address, but she actually parks in a garage ~0.4mi away** (Jeff flagged 08-01) — as configured, `HCC — Angela Arrived at Work` likely won't fire since she never gets within the 100m radius. Fix needs either the garage's real name/address (geocode it the same way as the office) or exact coordinates from a dropped pin/Find My screenshot while she's actually parked there. Jeff said leave it for now, dial in later.
 
 ---
 
