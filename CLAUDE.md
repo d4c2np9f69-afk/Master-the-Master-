@@ -327,6 +327,7 @@ Expected: all tests passing. If any fail, fix them before doing anything else.
 
 ## Pending Items (Next Session Should Address These)
 
+0. **HA backup encryption key — needs a durable copy outside this one PC (Jeff's call on where).** All Beehive backups are encrypted (HA default). Retrieved the real key live via the backup config API (`backup/config/info`) and saved it to `C:\Users\jeffl\HCC-secrets\ha_backup_encryption_key.txt` — but that's the same single PC as everything else backup-related, so it's not yet truly independent. Without this key, the `.tar` archives in `HCC-Beehive-Backups\` (iCloud) are undecryptable, so it's the single most load-bearing secret in the whole disaster-recovery system. **Never put the raw key in this git repo (public).** Jeff should save a copy somewhere durable and independent of this PC — password manager, printed + physical safe, etc. — next session should confirm he's done this.
 1. **Ratgdo board** (~$35) — Jeff to buy + install on the opener (see Garage Door above); app side is already done and will auto-detect it.
 2. **iPad Air 2 wall-display** — Safari-15 polyfill deployed and working; HA token persistence + "Add to Home Screen" + Guided Access still need final confirmation.
 3. **F-250 OBD-II sensor box** — Veepeak OBDCheck BLE+ (~$30) + ESP32 + optional GPS for live diagnostics.
