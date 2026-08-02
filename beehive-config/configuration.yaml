@@ -1,0 +1,111 @@
+default_config:
+homeassistant:
+  packages: !include_dir_named packages
+automation: !include automations.yaml
+mobile_app:
+zone:
+  [
+    {
+      name: "Barn",
+      latitude: 36.716949,
+      longitude: -86.65295,
+      radius: 150,
+      icon: "mdi:barn",
+    },
+    {
+      name: "Work",
+      latitude: 36.1624877,
+      longitude: -86.7776215,
+      radius: 100,
+      icon: "mdi:parking",
+    },
+  ]
+rest_command:
+  {
+    pipup_notify:
+      {
+        url: "http://192.168.1.215:7979/notify",
+        method: POST,
+        headers: { Content-Type: application/json },
+        payload: '{"title": "{{ title }}", "message": "{{ message }}", "duration": {{ duration | default(15) }}, "media": {"image": {"uri": "{{ image_url }}", "width": 480}}}',
+      },
+  }
+image_processing:
+  - {
+      platform: codeproject_ai_object,
+      ip_address: 192.168.1.194,
+      port: 32168,
+      timeout: 60,
+      confidence: 60,
+      save_file_folder: /config/www/ai_snapshots/,
+      save_file_format: jpg,
+      show_boxes: true,
+      targets: [{ target: person }, { target: vehicle }, { target: animal }],
+      source: [{ entity_id: camera.301_backyard }],
+    }
+  - {
+      platform: codeproject_ai_object,
+      ip_address: 192.168.1.194,
+      port: 32168,
+      timeout: 60,
+      confidence: 60,
+      save_file_folder: /config/www/ai_snapshots/,
+      save_file_format: jpg,
+      show_boxes: true,
+      targets: [{ target: person }, { target: vehicle }, { target: animal }],
+      source: [{ entity_id: camera.301_driveway }],
+    }
+  - {
+      platform: codeproject_ai_object,
+      ip_address: 192.168.1.194,
+      port: 32168,
+      timeout: 60,
+      confidence: 60,
+      save_file_folder: /config/www/ai_snapshots/,
+      save_file_format: jpg,
+      show_boxes: true,
+      targets: [{ target: person }, { target: vehicle }, { target: animal }],
+      source: [{ entity_id: camera.301_front_doorbell }],
+    }
+  - {
+      platform: codeproject_ai_object,
+      ip_address: 192.168.1.194,
+      port: 32168,
+      timeout: 60,
+      confidence: 60,
+      save_file_folder: /config/www/ai_snapshots/,
+      save_file_format: jpg,
+      show_boxes: true,
+      targets: [{ target: person }, { target: vehicle }, { target: animal }],
+      source: [{ entity_id: camera.front_right }],
+    }
+  - {
+      platform: codeproject_ai_object,
+      ip_address: 192.168.1.194,
+      port: 32168,
+      timeout: 60,
+      confidence: 60,
+      save_file_folder: /config/www/ai_snapshots/,
+      save_file_format: jpg,
+      show_boxes: true,
+      targets: [{ target: person }, { target: vehicle }, { target: animal }],
+      source: [{ entity_id: camera.back_left }],
+    }
+  - {
+      platform: codeproject_ai_object,
+      ip_address: 192.168.1.194,
+      port: 32168,
+      timeout: 60,
+      confidence: 60,
+      save_file_folder: /config/www/ai_snapshots/,
+      save_file_format: jpg,
+      show_boxes: true,
+      targets: [{ target: person }, { target: vehicle }, { target: animal }],
+      source: [{ entity_id: camera.garage }],
+    }
+
+http:
+  cors_allowed_origins:
+    - https://loewenhome.com
+    - https://www.loewenhome.com
+    - https://toro1-5rz.pages.dev
