@@ -79,7 +79,6 @@ button{font-family:inherit;cursor:pointer}
   --c-health:#d4af37;
   --c-service:#c87941;
   --c-safety:#c0392b;
-  --c-fitness:#a855f7;
   --c-weather:#38bdf8;
   --glowRed:0 0 14px rgba(192,57,43,.5);
   --glowGold:0 0 14px rgba(212,175,55,.4);
@@ -126,7 +125,6 @@ html.light{
   --c-health:#7e6017;
   --c-service:#a85d28;
   --c-safety:#b03a2e;
-  --c-fitness:#7c3aed;
   --c-weather:#0277b6;
   --glowGold:0 0 14px rgba(154,123,30,.18);
 }
@@ -510,9 +508,7 @@ html.light .car-tabs{background:#fff}
 .cat-activity .card-title::before{background:var(--blue);box-shadow:0 0 10px var(--blue)}
 .cat-sensor .card-title::before{background:var(--blue);box-shadow:0 0 10px var(--blue)}
 .cat-status .card-title::before{background:var(--green);box-shadow:0 0 10px var(--green)}
-.cat-health .card-title::before{background:var(--gold);box-shadow:0 0 10px var(--gold)}
 .cat-service .card-title::before{background:var(--amber);box-shadow:0 0 10px var(--amber)}
-.cat-fitness .card-title::before{background:#a855f7;box-shadow:0 0 10px #a855f7}
 .cat-safety .card-title::before{background:var(--red);box-shadow:0 0 10px var(--red)}
 .cat-gps .card-title::before{background:#38bdf8;box-shadow:0 0 10px #38bdf8}
 .cat-wx .card-title::before{background:#38bdf8;box-shadow:0 0 10px #38bdf8}
@@ -2019,13 +2015,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <span class="lg"><span class="dot" style="background:var(--c-status);color:var(--c-status)"></span>Status</span>
     <span class="lg"><span class="dot" style="background:var(--c-health);color:var(--c-health)"></span>Health</span>
     <span class="lg"><span class="dot" style="background:var(--c-service);color:var(--c-service)"></span>Service</span>
-    <span class="lg"><span class="dot" style="background:var(--c-fitness);color:var(--c-fitness)"></span>Fitness</span>
     <span class="lg"><span class="dot" style="background:var(--c-weather);color:var(--c-weather)"></span>Weather</span>
-  </div>
-  <!-- PRE-MOW RESET REMINDER -->
-  <div id="preMowReminder" style="display:flex;align-items:center;gap:9px;background:linear-gradient(90deg,rgba(212,175,55,.12),rgba(212,175,55,.04));border:1px solid rgba(212,175,55,.3);border-radius:10px;padding:9px 12px;margin-bottom:10px">
-    <span style="font-size:17px;flex-shrink:0">&#128260;</span>
-    <span style="font-size:11.5px;color:var(--text);line-height:1.45"><b>Before you mow:</b> press <b>RESET</b> on the sensor box &mdash; it gives the motion sensor a clean start (vibration &amp; RPM), a faster GPS lock, and a fresh track for this mow.</span>
   </div>
   <!-- READY TO MOW — merged with the old separate "Mowing Conditions" card 08-03
        (they showed two overlapping verdicts on the same page); this is now the
@@ -2034,7 +2024,10 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <div class="card-title">&#127807; Ready to Mow?</div>
     <div id="readyBanner" class="wx-banner wx-load wx-banner-lg">&#8987; Checking&hellip;</div>
     <div id="readyReasons"></div>
-    <div class="wx-grid" style="margin-top:10px">
+    <div style="font-size:10px;font-weight:700;color:var(--dim);letter-spacing:1.2px;text-transform:uppercase;margin:12px 0 6px">System Health</div>
+    <div class="health-grid" id="healthGrid" style="grid-template-columns:repeat(4,1fr);margin-bottom:0"></div>
+    <div style="font-size:10px;font-weight:700;color:var(--dim);letter-spacing:1.2px;text-transform:uppercase;margin:14px 0 6px">Conditions</div>
+    <div class="wx-grid">
       <div class="wx-card"><div class="wx-lbl">Rain Risk</div><div class="wx-val" id="wxRisk">--</div></div>
       <div class="wx-card"><div class="wx-lbl">Soil Condition</div><div class="wx-val" id="wxSoil">--</div></div>
       <div class="wx-card"><div class="wx-lbl">Soil Temp</div><div class="wx-val" id="wxSoilTemp">--</div></div>
@@ -2049,7 +2042,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 
   <div class="card cat-sensor">
     <div class="card-title">&#128225; Engine Hour Sensor Data</div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">Pulls engine hours, battery, RPM, GPS distance, and mowing speed from the WiFi/GPS sensor. GPS distance feeds the Fitness miles walked tracker automatically. Hours only ever move forward.</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">Pulls engine hours, battery, RPM, GPS distance, and mowing speed from the WiFi/GPS sensor. Hours only ever move forward.</div>
     <div class="sensor-grid">
       <div class="sensor-row"><span>&#9889; Battery Voltage</span><span id="sensorBatt">&mdash;</span></div>
       <div id="sensorBatteryAlert" class="sensor-alert">Battery status waiting for sensor</div>
@@ -2101,14 +2094,6 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <div class="stat-box"><div class="stat-num" id="hrsToNext" style="color:#ffd24a">--</div><div class="stat-lbl">Hrs to Svc</div></div>
     </div>
   </div>
-  <div class="card cat-health">
-    <div class="card-title">&#10084; System Health</div>
-    <div style="width:80px;height:80px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 10px;border:3px solid var(--green);" id="healthCircle">
-      <div style="font-size:24px;font-weight:800;font-family:var(--mono)" id="healthPct">99%</div>
-      <div style="font-size:8px;letter-spacing:1px;color:var(--muted)">OVERALL</div>
-    </div>
-    <div class="health-grid" id="healthGrid"></div>
-  </div>
   <div class="card cat-service">
     <div class="card-title">&#128295; Service Status &bull; Driven by Hour Meter</div>
     <div id="alertsCard" style="display:none">
@@ -2116,28 +2101,6 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <div style="font-size:9px;letter-spacing:1.5px;color:var(--muted);font-weight:800;text-transform:uppercase;margin:10px 0 8px;padding-top:9px;border-top:1px solid var(--border)">&#9201; Upcoming Schedule</div>
     </div>
     <div id="countdownList"></div>
-  </div>
-  <div class="card cat-fitness">
-    <div class="card-title">&#128694; Fitness &bull; Miles Walked Mowing</div>
-    <div class="main-meter" style="border-color:#2a5a2a">
-      <div class="meter-left">
-        <div class="meter-lbl">&#128694; Total Distance</div>
-        <div class="meter-display" style="border-color:#1a3a1a"><div class="meter-num" id="fitMiles" style="color:#7ee787">0.0</div></div>
-        <div class="meter-unit">Miles Since Tracking Started</div>
-      </div>
-      <div class="meter-right">
-        <div class="meter-next-lbl">Calories Burned</div>
-        <div class="meter-next-val" id="fitCals" style="color:#7ee787">0</div>
-        <div class="meter-next-name">est. kcal</div>
-      </div>
-    </div>
-    <div class="stat-boxes" style="grid-template-columns:1fr 1fr 1fr 1fr">
-      <div class="stat-box"><div class="stat-num" id="fitMows" style="color:#7ee787">0</div><div class="stat-lbl">Mows Tracked</div></div>
-      <div class="stat-box"><div class="stat-num" id="fitAvg" style="color:#7ee787">4.0</div><div class="stat-lbl">Avg Mi/Mow</div></div>
-      <div class="stat-box"><div class="stat-num" id="fitSpeed" style="color:#7ee787">--</div><div class="stat-lbl">GPS MPH</div></div>
-      <div class="stat-box"><div class="stat-num" id="fitSteps" style="color:#7ee787">0</div><div class="stat-lbl">~Steps</div></div>
-    </div>
-    <div style="font-size:9px;color:#666;text-align:center;margin-top:2px">10,000 sq ft yard &middot; GPS sensor feeds miles + speed &middot; 30&Prime; swath &middot; gentle slope (+20% cal)</div>
   </div>
   <div class="card cat-gps">
     <div class="card-title">&#128506; Yard Map &bull; GPS Mowing Track <span id="mapCalibBadge" style="display:none;font-size:10px;font-weight:600;color:#d4af37;margin-left:6px">&#128205; Calibrated</span></div>
@@ -2441,10 +2404,6 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <span class="hive-chip-icon">&#128250;</span>
           <span class="hive-chip-lbl">WATCH</span>
           <span class="hive-dot" id="fireTvDot" style="background:#444;top:3px;right:3px"></span>
-        </div>
-        <div class="hive-chip hc-fitness" onclick="hccSection('yard',document.getElementById('snav-yard'));setTimeout(function(){var e=document.getElementById('fitMiles');if(e)e.scrollIntoView({behavior:'smooth',block:'center'})},300)" title="Fitness — miles walked mowing">
-          <span class="hive-chip-icon">&#128694;</span>
-          <span class="hive-chip-lbl" id="hiveFit">FITNESS</span>
         </div>
         <div class="hive-chip hc-beehive" onclick="openBeehive()" id="hiveBeehiveBtn" title="Open Beehive dashboard">
           <span class="hive-dot" id="hiveDot2" style="background:#444"></span>
@@ -3436,9 +3395,6 @@ function updateDashboard(){
   }
   el=document.getElementById('hdrCond');   if(el){ el.textContent=h.overall+'%'; el.style.color=hc(h.overall); }
   el=document.getElementById('dashCond');  if(el){ el.textContent=h.overall+'%'; el.style.color=hc(h.overall); }
-  el=document.getElementById('healthPct'); if(el){ el.textContent=h.overall+'%'; el.style.color=hc(h.overall); }
-  var hc_el=document.getElementById('healthCircle');
-  if(hc_el) hc_el.style.borderColor=hc(h.overall);
   var tasks = RULES.map(function(r){ return Object.assign({},r,svcStatus(r)); });
   tasks.sort(function(a,b){ return a.rem-b.rem; });
   var ns = tasks[0];
@@ -3472,22 +3428,12 @@ function updateDashboard(){
   var mows = S.log.filter(function(x){ return x.type==='mow'; }).length + 2;
   el=document.getElementById('totalMows'); if(el) el.textContent=mows;
 
-  // Fitness metrics - miles walked mowing
-  var miles = S.miles||0;
-  var SLOPE = 1.20;                                // gentle ~5% grade: +20% calories
-  var cals = Math.round(miles*95*SLOPE);           // ~95 kcal/mi pushing a mower, slope-adjusted
-  var steps = Math.round(miles*2100);              // ~2100 steps/mi
-  var trackedMows = S.log.filter(function(x){ return x.type==='mow' && x.miles>0; }).length;
-  var avg = trackedMows>0 ? (miles/trackedMows) : 4.0;
-  el=document.getElementById('fitMiles'); if(el) el.textContent=miles.toFixed(1);
-  el=document.getElementById('fitCals');  if(el) el.textContent=cals.toLocaleString();
-  el=document.getElementById('fitMows');  if(el) el.textContent=trackedMows;
-  el=document.getElementById('fitAvg');   if(el) el.textContent=avg.toFixed(1);
-  el=document.getElementById('fitSpeed'); if(el) el.textContent=(S.sensorSpeedMph&&S.sensorSpeedMph>0)?S.sensorSpeedMph.toFixed(1):'--';
-  el=document.getElementById('fitSteps'); if(el) el.textContent=steps.toLocaleString();
   var hg=document.getElementById('healthGrid');
   if(hg){
-    var sys=[['ENGINE',h.engine],['DECK',h.deck],['BLADES',h.blades],['DRIVE',h.drive],['ELECTRICAL',h.electrical],['FUEL',h.fuel]];
+    // Only categories actually derived from real service-interval data (svcStatus/RULES).
+    // Electrical/Fuel have no sensor behind them (calcHealth hardcodes them at 98) — showing
+    // them here as if they were live would be misleading, so they're left out.
+    var sys=[['ENGINE',h.engine],['DECK',h.deck],['BLADES',h.blades],['DRIVE',h.drive]];
     hg.innerHTML=sys.map(function(s){
       return '<div class="health-box"><div class="health-val" style="color:'+hc(s[1])+'">'+s[1]+'%</div><div class="health-lbl">'+s[0]+'</div><div class="health-bar"><div class="health-fill" style="width:'+s[1]+'%;background:'+hc(s[1])+'"></div></div></div>';
     }).join('');
