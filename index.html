@@ -1434,6 +1434,71 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       </div>
     </div>
 
+    <!-- LUX THERMOSTAT (moved here from GUARDIAN 08-03, right under cameras) -->
+    <div class="card" id="luxCard">
+      <div class="card-title">&#127777;&#65039; LUX Thermostat <span id="luxConn" class="irr-conn"></span></div>
+      <div id="luxBanner" class="wx-banner wx-load">&#128260; Loading thermostat&hellip;</div>
+
+      <!-- Main display — hidden until data loads -->
+      <div id="luxMain" style="display:none">
+        <div class="lux-temp-row">
+          <div class="lux-temp-block">
+            <div class="lux-temp-lbl">Room Temp</div>
+            <div id="luxCurrentTemp" class="lux-temp-big lux-temp-room">--&deg;</div>
+          </div>
+          <div class="lux-temp-sep"></div>
+          <div class="lux-temp-block">
+            <div class="lux-temp-lbl">Set Temp</div>
+            <div class="lux-adj-row">
+              <button class="lux-adj-btn" onclick="luxAdjust(-1)">&#9660;</button>
+              <div id="luxSetTemp" class="lux-temp-big lux-temp-set">--&deg;</div>
+              <button class="lux-adj-btn" onclick="luxAdjust(1)">&#9650;</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="lux-badges">
+          <span id="luxModeBadge" class="lux-badge lux-badge-off">MODE</span>
+          <span id="luxFanBadge" class="lux-badge lux-badge-fan">FAN</span>
+          <span id="luxSchedBadge" class="lux-badge lux-badge-sched">SCHEDULE</span>
+        </div>
+
+        <div class="lux-mode-grid">
+          <button class="lux-mode-btn" id="luxBtnCool" onclick="luxSetMode('cool')">&#10052;&#65039; COOL</button>
+          <button class="lux-mode-btn" id="luxBtnHeat" onclick="luxSetMode('heat')">&#128293; HEAT</button>
+          <button class="lux-mode-btn" id="luxBtnAuto" onclick="luxSetMode('auto')">&#128260; AUTO</button>
+          <button class="lux-mode-btn" id="luxBtnOff" onclick="luxSetMode('off')">&#9646;&#9646; OFF</button>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <button onclick="luxSetFan('auto')" id="luxFanAuto" style="flex:1;padding:7px 4px;border-radius:7px;background:rgba(212,175,55,.06);border:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:800;font-family:inherit;cursor:pointer">&#128168; Fan Auto</button>
+          <button onclick="luxSetFan('on')" id="luxFanOn" style="flex:1;padding:7px 4px;border-radius:7px;background:rgba(212,175,55,.06);border:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:800;font-family:inherit;cursor:pointer">&#128168; Fan On</button>
+          <button onclick="luxSetFan('circulate')" id="luxFanCirc" style="flex:1;padding:7px 4px;border-radius:7px;background:rgba(212,175,55,.06);border:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:800;font-family:inherit;cursor:pointer">&#128168; Circulate</button>
+        </div>
+
+        <div class="wx-grid" style="margin-bottom:8px">
+          <div class="wx-card"><div class="wx-lbl">Device</div><div class="wx-val" id="luxDevName" style="font-size:12px">--</div></div>
+          <div class="wx-card"><div class="wx-lbl">Last Sync</div><div class="wx-val" id="luxLastSync" style="font-size:12px">--</div></div>
+        </div>
+      </div>
+
+      <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadClimate()">&#128260; Refresh</button>
+      <div class="wx-note" style="margin-top:6px">Live from LUX Connected Home</div>
+    </div>
+
+    <!-- LUX ACCOUNT SETUP CARD -->
+    <div class="card" id="luxSetupCard">
+      <div class="card-title">&#9881; LUX Account</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px">Enter your LUX Connected Home login to enable thermostat control from this app.</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+        <input id="luxEmailIn" type="email" autocomplete="email" placeholder="LUX account email" style="width:100%;box-sizing:border-box;padding:10px 12px;background:rgba(0,0,0,.4);border:1px solid rgba(249,115,22,.3);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;outline:none;-webkit-appearance:none">
+        <input id="luxPassIn" type="password" autocomplete="current-password" placeholder="LUX account password" style="width:100%;box-sizing:border-box;padding:10px 12px;background:rgba(0,0,0,.4);border:1px solid rgba(249,115,22,.3);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;outline:none;-webkit-appearance:none">
+      </div>
+      <button onclick="saveLuxCreds()" style="width:100%;padding:11px;background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.4);border-radius:8px;color:#f97316;font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:.5px">&#127777;&#65039; Connect Thermostat</button>
+      <div id="luxCredsMsg" style="font-size:11px;margin-top:8px;text-align:center;min-height:18px;color:var(--muted)"></div>
+      <div style="font-size:10px;color:var(--muted);margin-top:10px;border-top:1px solid rgba(220,195,145,.1);padding-top:10px">Use the same email and password as the LUX Connected Home app on your phone.</div>
+    </div>
+
     <!-- ── UTILITIES (Water / Gas / Electric) — live once Beehive meter reader is online ── -->
     <div class="sec-hdr" style="margin-top:16px">
       <span class="sec-hdr-icon">&#128200;</span>
@@ -2275,12 +2340,10 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 
 </div><!-- /section-yard -->
 
-<!-- LUX thermostat lives in the HOME GUARDIAN section (below) — CLIMATE tab removed 07-04.
-     Cards moved verbatim; loadClimate()/luxSetMode()/etc unchanged. -->
-<template id="luxCardsMoved"></template>
+<!-- LUX thermostat now lives in HOME, right under cameras (moved 08-03, was
+     GUARDIAN 07-04 → 08-03). Cards moved verbatim; loadClimate()/luxSetMode()/etc unchanged. -->
 <!-- ══════════════════════════════════════════════════════════════════════════
      SECTION 5: HOME GUARDIAN  (whole-home safety + security + HVAC)
-     — CLIMATE tab removed 07-04; LUX thermostat folded in below.
      ══════════════════════════════════════════════════════════════════════════ -->
 <div id="section-guardian" class="hcc-section">
 
@@ -2429,71 +2492,6 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       </div>
       <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadVacuum()">&#128260; Refresh</button>
       <div class="wx-note">Live from Beehive</div>
-    </div>
-
-    <!-- LUX THERMOSTAT (folded in from the old CLIMATE tab) -->
-    <div class="card" id="luxCard">
-      <div class="card-title">&#127777;&#65039; LUX Thermostat <span id="luxConn" class="irr-conn"></span></div>
-      <div id="luxBanner" class="wx-banner wx-load">&#128260; Loading thermostat&hellip;</div>
-
-      <!-- Main display — hidden until data loads -->
-      <div id="luxMain" style="display:none">
-        <div class="lux-temp-row">
-          <div class="lux-temp-block">
-            <div class="lux-temp-lbl">Room Temp</div>
-            <div id="luxCurrentTemp" class="lux-temp-big lux-temp-room">--&deg;</div>
-          </div>
-          <div class="lux-temp-sep"></div>
-          <div class="lux-temp-block">
-            <div class="lux-temp-lbl">Set Temp</div>
-            <div class="lux-adj-row">
-              <button class="lux-adj-btn" onclick="luxAdjust(-1)">&#9660;</button>
-              <div id="luxSetTemp" class="lux-temp-big lux-temp-set">--&deg;</div>
-              <button class="lux-adj-btn" onclick="luxAdjust(1)">&#9650;</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="lux-badges">
-          <span id="luxModeBadge" class="lux-badge lux-badge-off">MODE</span>
-          <span id="luxFanBadge" class="lux-badge lux-badge-fan">FAN</span>
-          <span id="luxSchedBadge" class="lux-badge lux-badge-sched">SCHEDULE</span>
-        </div>
-
-        <div class="lux-mode-grid">
-          <button class="lux-mode-btn" id="luxBtnCool" onclick="luxSetMode('cool')">&#10052;&#65039; COOL</button>
-          <button class="lux-mode-btn" id="luxBtnHeat" onclick="luxSetMode('heat')">&#128293; HEAT</button>
-          <button class="lux-mode-btn" id="luxBtnAuto" onclick="luxSetMode('auto')">&#128260; AUTO</button>
-          <button class="lux-mode-btn" id="luxBtnOff" onclick="luxSetMode('off')">&#9646;&#9646; OFF</button>
-        </div>
-
-        <div style="display:flex;gap:8px;margin-bottom:10px">
-          <button onclick="luxSetFan('auto')" id="luxFanAuto" style="flex:1;padding:7px 4px;border-radius:7px;background:rgba(212,175,55,.06);border:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:800;font-family:inherit;cursor:pointer">&#128168; Fan Auto</button>
-          <button onclick="luxSetFan('on')" id="luxFanOn" style="flex:1;padding:7px 4px;border-radius:7px;background:rgba(212,175,55,.06);border:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:800;font-family:inherit;cursor:pointer">&#128168; Fan On</button>
-          <button onclick="luxSetFan('circulate')" id="luxFanCirc" style="flex:1;padding:7px 4px;border-radius:7px;background:rgba(212,175,55,.06);border:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:800;font-family:inherit;cursor:pointer">&#128168; Circulate</button>
-        </div>
-
-        <div class="wx-grid" style="margin-bottom:8px">
-          <div class="wx-card"><div class="wx-lbl">Device</div><div class="wx-val" id="luxDevName" style="font-size:12px">--</div></div>
-          <div class="wx-card"><div class="wx-lbl">Last Sync</div><div class="wx-val" id="luxLastSync" style="font-size:12px">--</div></div>
-        </div>
-      </div>
-
-      <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadClimate()">&#128260; Refresh</button>
-      <div class="wx-note" style="margin-top:6px">Live from LUX Connected Home</div>
-    </div>
-
-    <!-- LUX ACCOUNT SETUP CARD -->
-    <div class="card" id="luxSetupCard">
-      <div class="card-title">&#9881; LUX Account</div>
-      <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px">Enter your LUX Connected Home login to enable thermostat control from this app.</div>
-      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
-        <input id="luxEmailIn" type="email" autocomplete="email" placeholder="LUX account email" style="width:100%;box-sizing:border-box;padding:10px 12px;background:rgba(0,0,0,.4);border:1px solid rgba(249,115,22,.3);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;outline:none;-webkit-appearance:none">
-        <input id="luxPassIn" type="password" autocomplete="current-password" placeholder="LUX account password" style="width:100%;box-sizing:border-box;padding:10px 12px;background:rgba(0,0,0,.4);border:1px solid rgba(249,115,22,.3);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;outline:none;-webkit-appearance:none">
-      </div>
-      <button onclick="saveLuxCreds()" style="width:100%;padding:11px;background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.4);border-radius:8px;color:#f97316;font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:.5px">&#127777;&#65039; Connect Thermostat</button>
-      <div id="luxCredsMsg" style="font-size:11px;margin-top:8px;text-align:center;min-height:18px;color:var(--muted)"></div>
-      <div style="font-size:10px;color:var(--muted);margin-top:10px;border-top:1px solid rgba(220,195,145,.1);padding-top:10px">Use the same email and password as the LUX Connected Home app on your phone.</div>
     </div>
 
     <!-- Safety & Emergency (moved from HOME 07-14) -->
@@ -5922,9 +5920,9 @@ function hccSection(id, btn) {
   if (id === 'irrigation' && !window._irrLoaded) { window._irrLoaded = true; loadIrrigation(); }
   if (id === 'home') {
     if (!window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
-    loadUtilities(); loadCameras(); loadHomeStatus();
+    loadUtilities(); loadCameras(); loadHomeStatus(); loadClimate();
   }
-  if (id === 'guardian') { loadGuardian(); loadLights(); loadGarage(); loadVacuum(); loadClimate(); }
+  if (id === 'guardian') { loadGuardian(); loadLights(); loadGarage(); loadVacuum(); }
   if (id === 'car') { carSwitchVehicle(_activeVehicle); }
   if (id === 'yard') { mowerSync(false); }
   if (id === 'weather') {
