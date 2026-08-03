@@ -1,4 +1,4 @@
-const CACHE_NAME = "hcc-v12";
+const CACHE_NAME = "hcc-v13";
 const CRITICAL_ASSETS = [
   "./",
   "./index.html",
@@ -13,6 +13,7 @@ const OPTIONAL_ASSETS = [
   "./images/hero-guardian.jpg",
   "./images/hero-car.jpg",
   "./images/hero-cameras.jpg",
+  "./images/hero-lux.jpg",
   "./images/white-house-dispatch.jpg",
   "./images/splash-portrait.jpg",
   "./images/splash-landscape.jpg"

@@ -543,24 +543,40 @@ html.light .car-tabs{background:#fff}
 #section-yard .sec-hdr-label{color:rgba(220,100,80,.7)}
 
 /* ── CLIMATE / LUX THERMOSTAT ───────────────────────────────────────────── */
-.lux-temp-row{display:flex;align-items:center;justify-content:space-around;padding:20px 10px 14px}
-.lux-temp-block{text-align:center;flex:1}
-.lux-temp-lbl{font-size:9px;color:var(--muted);letter-spacing:1.2px;margin-bottom:6px;font-weight:700;text-transform:uppercase}
-.lux-temp-big{font-size:62px;font-weight:900;line-height:1;font-family:var(--serif)}
-.lux-temp-room{color:var(--text)}
-.lux-temp-set{color:#f97316}
-.lux-temp-sep{width:1px;background:var(--border);align-self:stretch;margin:4px 0}
-.lux-adj-row{display:flex;align-items:center;justify-content:center;gap:10px}
+/* Live temp/mode overlaid directly on the thermostat photo (images/hero-lux.jpg).
+   The panel's position/size/rotation is hand-calibrated to the device screen in
+   that specific photo — if the photo is ever swapped, these percentages need
+   re-calibrating to match the new image's screen position. */
+.lux-hero{position:relative;width:100%;border-radius:14px;overflow:hidden;margin-bottom:14px;aspect-ratio:560/670;background:#0a0a0a;box-shadow:0 4px 18px rgba(0,0,0,.3)}
+.lux-hero img{width:100%;height:100%;object-fit:cover;display:block}
+.lux-hero-panel{
+  position:absolute;left:47.95%;top:49.07%;
+  width:62.86%;height:72.39%;
+  transform:translate(-50%,-50%) rotate(-2.4deg);
+  background:#08080a;border-radius:16px;
+  padding:16px 18px;box-sizing:border-box;
+  color:#fff;box-shadow:0 0 24px rgba(0,0,0,.45);
+  display:flex;flex-direction:column;
+  z-index:2;
+}
+.lux-hero-brand{text-align:center;font-size:11px;font-weight:800;letter-spacing:3px;color:rgba(255,255,255,.75);margin-bottom:14px}
+.lux-hero-room{margin-bottom:16px}
+.lux-hero-room-big{font-size:46px;font-weight:800;line-height:1;font-family:var(--serif)}
+.lux-hero-room-lbl{font-size:10px;color:rgba(255,255,255,.55);margin-top:4px;letter-spacing:.5px}
+.lux-hero-badges{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;align-items:flex-start}
+.lux-hero-set{margin-top:auto}
+.lux-hero-set-lbl{font-size:10px;color:rgba(255,255,255,.55)}
+.lux-hero-set-big{font-size:26px;font-weight:800;margin-top:2px}
 .lux-adj-btn{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.3);border-radius:8px;color:#f97316;font-size:16px;padding:5px 14px;cursor:pointer;font-family:inherit;line-height:1;font-weight:900}
-.lux-badges{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
 .lux-badge{font-size:9px;font-weight:800;letter-spacing:.7px;padding:3px 8px;border-radius:5px;border:1px solid;white-space:nowrap}
 .lux-badge-cool{color:#38bdf8;border-color:rgba(56,189,248,.4);background:rgba(56,189,248,.1)}
 .lux-badge-heat{color:#f97316;border-color:rgba(249,115,22,.4);background:rgba(249,115,22,.1)}
 .lux-badge-off{color:var(--muted);border-color:var(--border);background:transparent}
 .lux-badge-auto{color:#22c55e;border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.1)}
 .lux-badge-fan{color:#d4af37;border-color:rgba(212,175,55,.3);background:rgba(212,175,55,.08)}
-.lux-badge-sched{color:var(--muted);border-color:var(--border);background:transparent}
-.lux-badge-sched-on{color:#22c55e;border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.1)}
+/* Badges sit on the always-dark hero photo panel regardless of app theme —
+   .lux-badge-off's theme-aware --muted/--border would go dark-on-dark in light mode. */
+.lux-hero-panel .lux-badge-off{color:rgba(255,255,255,.6);border-color:rgba(255,255,255,.25)}
 .lux-mode-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
 .lux-mode-btn{padding:8px 2px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:.2px}
 .lux-mode-btn.lmb-active-cool{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.4);color:#38bdf8}
@@ -1441,26 +1457,24 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 
       <!-- Main display — hidden until data loads -->
       <div id="luxMain" style="display:none">
-        <div class="lux-temp-row">
-          <div class="lux-temp-block">
-            <div class="lux-temp-lbl">Room Temp</div>
-            <div id="luxCurrentTemp" class="lux-temp-big lux-temp-room">--&deg;</div>
-          </div>
-          <div class="lux-temp-sep"></div>
-          <div class="lux-temp-block">
-            <div class="lux-temp-lbl">Set Temp</div>
-            <div class="lux-adj-row">
-              <button class="lux-adj-btn" onclick="luxAdjust(-1)">&#9660;</button>
-              <div id="luxSetTemp" class="lux-temp-big lux-temp-set">--&deg;</div>
-              <button class="lux-adj-btn" onclick="luxAdjust(1)">&#9650;</button>
+        <!-- Live temp/mode overlaid directly on the thermostat photo -->
+        <div class="lux-hero">
+          <img src="./images/hero-lux.jpg" alt="LUX Thermostat">
+          <div class="lux-hero-panel">
+            <div class="lux-hero-brand">LUX</div>
+            <div class="lux-hero-room">
+              <div id="luxCurrentTemp" class="lux-hero-room-big">--&deg;</div>
+              <div class="lux-hero-room-lbl">ROOM TEMPERATURE</div>
+            </div>
+            <div class="lux-hero-badges">
+              <span id="luxModeBadge" class="lux-badge lux-badge-off">MODE</span>
+              <span id="luxFanBadge" class="lux-badge lux-badge-fan">FAN</span>
+            </div>
+            <div class="lux-hero-set">
+              <div class="lux-hero-set-lbl">SET TEMP</div>
+              <div id="luxSetTemp" class="lux-hero-set-big">--&deg;</div>
             </div>
           </div>
-        </div>
-
-        <div class="lux-badges">
-          <span id="luxModeBadge" class="lux-badge lux-badge-off">MODE</span>
-          <span id="luxFanBadge" class="lux-badge lux-badge-fan">FAN</span>
-          <span id="luxSchedBadge" class="lux-badge lux-badge-sched">SCHEDULE</span>
         </div>
 
         <div class="lux-mode-grid">
@@ -1474,6 +1488,12 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <button onclick="luxSetFan('auto')" id="luxFanAuto" style="flex:1;padding:7px 4px;border-radius:7px;background:rgba(212,175,55,.06);border:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:800;font-family:inherit;cursor:pointer">&#128168; Fan Auto</button>
           <button onclick="luxSetFan('on')" id="luxFanOn" style="flex:1;padding:7px 4px;border-radius:7px;background:rgba(212,175,55,.06);border:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:800;font-family:inherit;cursor:pointer">&#128168; Fan On</button>
           <button onclick="luxSetFan('circulate')" id="luxFanCirc" style="flex:1;padding:7px 4px;border-radius:7px;background:rgba(212,175,55,.06);border:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:800;font-family:inherit;cursor:pointer">&#128168; Circulate</button>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:10px">
+          <button class="lux-adj-btn" onclick="luxAdjust(-1)">&#9660;</button>
+          <span style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.3px">ADJUST SET TEMP</span>
+          <button class="lux-adj-btn" onclick="luxAdjust(1)">&#9650;</button>
         </div>
 
         <div class="wx-grid" style="margin-bottom:8px">
@@ -4451,7 +4471,7 @@ function luxRenderFan(fan){
   });
   var activeMap={auto:'luxFanAuto',on:'luxFanOn',circulate:'luxFanCirc'};
   var ac=document.getElementById(activeMap[fan]);
-  if(ac){ac.style.borderColor='rgba(212,175,55,.45)';ac.style.color='#d4af37';}
+  if(ac){ac.style.borderColor='rgba(212,175,55,.45)';ac.style.color='var(--gold)';}
 }
 
 function luxApplyState(t){
@@ -4469,7 +4489,7 @@ function luxApplyState(t){
   document.getElementById('luxDevName').textContent=t.name||'LUX Thermostat';
   document.getElementById('luxLastSync').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
   var conn=document.getElementById('luxConn');
-  if(conn){conn.innerHTML=' &#9679; ONLINE';conn.style.color='#22c55e';}
+  if(conn){conn.innerHTML=' &#9679; ONLINE';conn.style.color='var(--ok)';}
   luxRenderMode(LUX_STATE.mode);
   luxRenderFan(LUX_STATE.fan);
   var b=document.getElementById('luxBanner');
