@@ -6908,6 +6908,12 @@ function saveHaTokenInline() {
 }
 
 var _camLastAutoRefresh = 0;
+// camera.<name>_clipframe entities are internal helper cameras (HA-side AI
+// popup pipeline) holding one extracted still, not real live cameras —
+// exclude them everywhere the app lists user-facing camera tiles.
+function isUserCamera(entityId) {
+  return entityId.indexOf('camera.') === 0 && !/_clipframe$/.test(entityId);
+}
 function loadCameras() {
   var token = getHaToken();
   var base = localStorage.getItem('ha_base') || HA_BASE;
@@ -6924,7 +6930,7 @@ function loadCameras() {
   })
   .then(function(states) {
     if (!Array.isArray(states)) throw new Error('bad_response');
-    var cameras = states.filter(function(s) { return s.entity_id.startsWith('camera.'); });
+    var cameras = states.filter(function(s) { return isUserCamera(s.entity_id); });
     if (!grid) return;
     if (cameras.length === 0) {
       grid.innerHTML = '<div style="background:rgba(212,175,55,.07);border:1px solid rgba(212,175,55,.2);border-radius:12px;padding:14px;margin-bottom:6px">'
@@ -7043,7 +7049,7 @@ function camToolStatus(msg, color) {
 }
 // Refresh All: tell every camera to grab a new photo, then reload the stills
 function blinkRefreshAll(btn) {
-  var cams = (window._camStates || []).filter(function(s){ return s.entity_id.indexOf('camera.') === 0; });
+  var cams = (window._camStates || []).filter(function(s){ return isUserCamera(s.entity_id); });
   if (!cams.length) return;
   if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
   camToolStatus('&#128248; Capturing fresh shots&hellip;', 'var(--info)');
@@ -7065,7 +7071,7 @@ function blinkReloadStills() {
     .then(function(states){
       if (!Array.isArray(states)) return;
       window._camStates = states;
-      states.filter(function(s){ return s.entity_id.indexOf('camera.') === 0; }).forEach(function(cam){
+      states.filter(function(s){ return isUserCamera(s.entity_id); }).forEach(function(cam){
         blinkSetStill(cam);
         var st = document.getElementById('cam-state-' + cam.entity_id.replace(/[^a-z0-9]/gi,'_'));
         if (st) st.textContent = cam.state || '';
