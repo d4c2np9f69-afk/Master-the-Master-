@@ -543,28 +543,58 @@ html.light .car-tabs{background:#fff}
 #section-yard .sec-hdr-label{color:rgba(220,100,80,.7)}
 
 /* ── CLIMATE / LUX THERMOSTAT ───────────────────────────────────────────── */
-/* Live temp/mode overlaid on the full thermostat photo (images/hero-lux.jpg),
-   using the exact same glass-chip-on-gradient pattern as the utility cards
-   (.util-banner/.util-overlay-bottom/.util-stats) for visual consistency. */
-.lux-hero-banner{border-radius:14px 14px 0 0;aspect-ratio:1320/931}
-.lux-hero-badges{display:flex;gap:6px;justify-content:center;margin-top:6px}
-.lux-adj-btn{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.3);border-radius:8px;color:#f97316;font-size:16px;padding:5px 14px;cursor:pointer;font-family:inherit;line-height:1;font-weight:900}
-.lux-badge{font-size:9px;font-weight:800;letter-spacing:.7px;padding:3px 8px;border-radius:5px;border:1px solid;white-space:nowrap}
-.lux-badge-cool{color:#38bdf8;border-color:rgba(56,189,248,.4);background:rgba(56,189,248,.1)}
-.lux-badge-heat{color:#f97316;border-color:rgba(249,115,22,.4);background:rgba(249,115,22,.1)}
-.lux-badge-off{color:var(--muted);border-color:var(--border);background:transparent}
-.lux-badge-auto{color:#22c55e;border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.1)}
-.lux-badge-fan{color:#d4af37;border-color:rgba(212,175,55,.3);background:rgba(212,175,55,.08)}
-/* Badges sit on the always-dark util-overlay-bottom gradient regardless of app
-   theme — .lux-badge-off's theme-aware --muted/--border would go dark-on-dark
-   in light mode there. */
-.util-overlay-bottom .lux-badge-off{color:rgba(255,255,255,.6);border-color:rgba(255,255,255,.25)}
-.lux-mode-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
-.lux-mode-btn{padding:8px 2px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:.2px}
-.lux-mode-btn.lmb-active-cool{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.4);color:#38bdf8}
-.lux-mode-btn.lmb-active-heat{background:rgba(249,115,22,.12);border-color:rgba(249,115,22,.4);color:#f97316}
-.lux-mode-btn.lmb-active-auto{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.4);color:#22c55e}
-.lux-mode-btn.lmb-active-off{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:var(--text)}
+/* Everything — readout AND controls — lives inside the thermostat photo
+   (images/hero-lux.jpg), in two hand-calibrated glass panels:
+   .lux-fp-panel sits over the fireplace/room area (all temp/mode/fan info +
+   every interactive control), .lux-wx-patch sits over the device's own
+   screen where the photo's fake weather readout used to be (now shows the
+   real outside temp/feels-like). Neither panel covers the "Climate Control"
+   text block or gets in the way of the other. If the photo is ever swapped,
+   both panels' percentages need re-calibrating to the new image. */
+.lux-photo-wrap{position:relative;width:100%;border-radius:14px;overflow:hidden;aspect-ratio:1320/931;background:#0a0a0a;box-shadow:0 4px 18px rgba(0,0,0,.3)}
+.lux-photo-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+
+.lux-fp-panel{
+  position:absolute;left:1.1%;top:1.6%;width:55.3%;height:48.3%;
+  background:rgba(10,8,6,.74);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+  border:1px solid rgba(255,255,255,.12);border-radius:10px;
+  padding:7px 8px;box-sizing:border-box;
+  display:flex;flex-direction:column;gap:4px;color:#fff;z-index:2;
+}
+.lux-fp-top{display:flex;justify-content:space-between;align-items:flex-start}
+.lux-fp-temp-big{font-size:24px;font-weight:800;line-height:1;font-family:var(--serif)}
+.lux-fp-temp-lbl{font-size:6.3px;color:rgba(255,255,255,.6);letter-spacing:.4px;text-transform:uppercase;margin-top:1px}
+.lux-fp-set-row{display:flex;align-items:center;gap:3px}
+.lux-adj-btn{background:rgba(249,115,22,.18);border:1px solid rgba(249,115,22,.4);border-radius:4px;color:#f97316;font-size:8px;padding:1px 4px;line-height:1.5;font-weight:900;cursor:pointer;font-family:inherit}
+.lux-fp-badges{display:flex;gap:4px}
+.lux-badge{font-size:6.4px;font-weight:800;letter-spacing:.3px;padding:2px 5px;border-radius:4px;border:1px solid;white-space:nowrap}
+.lux-badge-cool{color:#38bdf8;border-color:rgba(56,189,248,.5);background:rgba(56,189,248,.15)}
+.lux-badge-heat{color:#f97316;border-color:rgba(249,115,22,.5);background:rgba(249,115,22,.15)}
+.lux-badge-off{color:rgba(255,255,255,.65);border-color:rgba(255,255,255,.25)}
+.lux-badge-auto{color:#22c55e;border-color:rgba(34,197,94,.5);background:rgba(34,197,94,.15)}
+.lux-badge-fan{color:#d4af37;border-color:rgba(212,175,55,.5);background:rgba(212,175,55,.15)}
+.lux-mode-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px}
+.lux-mode-btn{padding:3px 1px;border-radius:5px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.75);font-size:6.6px;font-weight:800;font-family:inherit;cursor:pointer;line-height:1.3}
+.lux-mode-btn.lmb-active-cool{background:rgba(56,189,248,.2);border-color:rgba(56,189,248,.5);color:#38bdf8}
+.lux-mode-btn.lmb-active-heat{background:rgba(249,115,22,.2);border-color:rgba(249,115,22,.5);color:#f97316}
+.lux-mode-btn.lmb-active-auto{background:rgba(34,197,94,.2);border-color:rgba(34,197,94,.5);color:#22c55e}
+.lux-mode-btn.lmb-active-off{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.35);color:#fff}
+.lux-fan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px}
+.lux-fan-btn{padding:3px 1px;border-radius:5px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6);font-size:6px;font-weight:800;font-family:inherit;cursor:pointer}
+.lux-fan-btn.lux-fan-active{border-color:rgba(212,175,55,.6);color:#d4af37;background:rgba(212,175,55,.12)}
+.lux-fp-foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;font-size:6px;color:rgba(255,255,255,.5)}
+.lux-refresh-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:5px;color:rgba(255,255,255,.75);font-size:6.3px;font-weight:800;padding:2px 5px;cursor:pointer;font-family:inherit}
+
+/* Weather patch — sits on the device's own screen, replacing the photo's
+   baked-in fake weather readout with real outside temp / feels-like. */
+.lux-wx-patch{
+  position:absolute;left:61.7%;top:25.2%;width:26.1%;height:9.7%;
+  background:#0a0806;border-radius:5px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  color:#fff;z-index:2;
+}
+.lux-wx-val{font-size:9px;font-weight:800;line-height:1;font-family:var(--serif)}
+.lux-wx-lbl{font-size:5px;color:rgba(255,255,255,.55);letter-spacing:.3px;text-transform:uppercase;margin-top:1px}
 
 /* ── QUICK ACCESS (HOME section) ───────────────────────────────────────── */
 .quick-access-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
@@ -1439,51 +1469,56 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 
       <!-- Main display — hidden until data loads -->
       <div id="luxMain" style="display:none">
-        <!-- Live temp/mode overlaid on the full thermostat photo — same glass-chip-on-
-             gradient treatment as the utility cards, pulled flush to the card edges. -->
+        <!-- Everything lives inside the photo: fireplace panel = all readout +
+             every control, device-screen patch = real outside temp/feels-like
+             replacing the photo's fake weather numbers. -->
         <div style="margin:-18px -18px 14px -18px">
-          <div class="util-banner lux-hero-banner">
+          <div class="lux-photo-wrap">
             <img src="./images/hero-lux.jpg" alt="LUX Thermostat" loading="lazy">
-            <div class="util-overlay-bottom">
-              <div class="util-stats" style="grid-template-columns:repeat(2,1fr)">
-                <div class="util-stat"><div class="util-stat-label">Room Temp</div><div class="util-stat-val" id="luxCurrentTemp" style="font-size:22px">--&deg;</div></div>
-                <div class="util-stat"><div class="util-stat-label">Set Temp</div><div class="util-stat-val" id="luxSetTemp" style="font-size:22px">--&deg;</div></div>
+
+            <div class="lux-fp-panel">
+              <div class="lux-fp-top">
+                <div>
+                  <div id="luxCurrentTemp" class="lux-fp-temp-big">--&deg;</div>
+                  <div class="lux-fp-temp-lbl">Room Temp</div>
+                </div>
+                <div style="text-align:right">
+                  <div class="lux-fp-set-row">
+                    <button class="lux-adj-btn" onclick="luxAdjust(-1)">&#9660;</button>
+                    <span id="luxSetTemp" class="lux-fp-temp-big" style="font-size:19px">--&deg;</span>
+                    <button class="lux-adj-btn" onclick="luxAdjust(1)">&#9650;</button>
+                  </div>
+                  <div class="lux-fp-temp-lbl">Set Temp</div>
+                </div>
               </div>
-              <div class="lux-hero-badges">
+              <div class="lux-fp-badges">
                 <span id="luxModeBadge" class="lux-badge lux-badge-off">MODE</span>
                 <span id="luxFanBadge" class="lux-badge lux-badge-fan">FAN</span>
               </div>
+              <div class="lux-mode-grid">
+                <button class="lux-mode-btn" id="luxBtnCool" onclick="luxSetMode('cool')">&#10052;&#65039; COOL</button>
+                <button class="lux-mode-btn" id="luxBtnHeat" onclick="luxSetMode('heat')">&#128293; HEAT</button>
+                <button class="lux-mode-btn" id="luxBtnAuto" onclick="luxSetMode('auto')">&#128260; AUTO</button>
+                <button class="lux-mode-btn" id="luxBtnOff" onclick="luxSetMode('off')">&#9646;&#9646; OFF</button>
+              </div>
+              <div class="lux-fan-grid">
+                <button class="lux-fan-btn" id="luxFanAuto" onclick="luxSetFan('auto')">Fan Auto</button>
+                <button class="lux-fan-btn" id="luxFanOn" onclick="luxSetFan('on')">Fan On</button>
+                <button class="lux-fan-btn" id="luxFanCirc" onclick="luxSetFan('circulate')">Circulate</button>
+              </div>
+              <div class="lux-fp-foot">
+                <span><span id="luxDevName">--</span> &bull; <span id="luxLastSync">--</span></span>
+                <button class="lux-refresh-btn" onclick="loadClimate()">&#128260;</button>
+              </div>
+            </div>
+
+            <div class="lux-wx-patch">
+              <div><div id="luxOutTemp" class="lux-wx-val">--&deg;</div><div class="lux-wx-lbl">Outside</div></div>
+              <div><div id="luxFeelsLike" class="lux-wx-val">--&deg;</div><div class="lux-wx-lbl">Feels Like</div></div>
             </div>
           </div>
         </div>
-
-        <div class="lux-mode-grid">
-          <button class="lux-mode-btn" id="luxBtnCool" onclick="luxSetMode('cool')">&#10052;&#65039; COOL</button>
-          <button class="lux-mode-btn" id="luxBtnHeat" onclick="luxSetMode('heat')">&#128293; HEAT</button>
-          <button class="lux-mode-btn" id="luxBtnAuto" onclick="luxSetMode('auto')">&#128260; AUTO</button>
-          <button class="lux-mode-btn" id="luxBtnOff" onclick="luxSetMode('off')">&#9646;&#9646; OFF</button>
-        </div>
-
-        <div style="display:flex;gap:8px;margin-bottom:10px">
-          <button onclick="luxSetFan('auto')" id="luxFanAuto" style="flex:1;padding:7px 4px;border-radius:7px;background:rgba(212,175,55,.06);border:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:800;font-family:inherit;cursor:pointer">&#128168; Fan Auto</button>
-          <button onclick="luxSetFan('on')" id="luxFanOn" style="flex:1;padding:7px 4px;border-radius:7px;background:rgba(212,175,55,.06);border:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:800;font-family:inherit;cursor:pointer">&#128168; Fan On</button>
-          <button onclick="luxSetFan('circulate')" id="luxFanCirc" style="flex:1;padding:7px 4px;border-radius:7px;background:rgba(212,175,55,.06);border:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:800;font-family:inherit;cursor:pointer">&#128168; Circulate</button>
-        </div>
-
-        <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:10px">
-          <button class="lux-adj-btn" onclick="luxAdjust(-1)">&#9660;</button>
-          <span style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.3px">ADJUST SET TEMP</span>
-          <button class="lux-adj-btn" onclick="luxAdjust(1)">&#9650;</button>
-        </div>
-
-        <div class="wx-grid" style="margin-bottom:8px">
-          <div class="wx-card"><div class="wx-lbl">Device</div><div class="wx-val" id="luxDevName" style="font-size:12px">--</div></div>
-          <div class="wx-card"><div class="wx-lbl">Last Sync</div><div class="wx-val" id="luxLastSync" style="font-size:12px">--</div></div>
-        </div>
       </div>
-
-      <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadClimate()">&#128260; Refresh</button>
-      <div class="wx-note" style="margin-top:6px">Live from LUX Connected Home</div>
     </div>
 
     <!-- LUX ACCOUNT SETUP CARD -->
@@ -3757,6 +3792,9 @@ function loadStation(){
       // Feels like (heat index) — color it when it's a real heat concern
       var feels=(s.heatIndex!=null)?s.heatIndex:s.temp;
       if(feels!=null){ var fc=feels>=103?'#ff6262':feels>=90?'#ff8c42':''; setc('wxFeels', Math.round(feels)+'&#176;F', fc); }
+      // Same real KTNWHITE21 readings, mirrored onto the LUX card's device-screen patch
+      if(s.temp!=null) set('luxOutTemp', Math.round(s.temp)+'&#176;');
+      if(feels!=null) set('luxFeelsLike', Math.round(feels)+'&#176;');
       if(s.humidity!=null) set('wxHumidity', Math.round(s.humidity)+'%');
       // Heat stress
       var hi=(s.heatIndex!=null)?s.heatIndex:s.temp;
@@ -4445,13 +4483,15 @@ function luxRenderFan(fan){
   var fb=document.getElementById('luxFanBadge');
   var fanLabels={auto:'&#128168; FAN AUTO',on:'&#128168; FAN ON',circulate:'&#128168; FAN CIRCULATE'};
   if(fb){fb.innerHTML=fanLabels[fan]||('FAN '+fan.toUpperCase());fb.className='lux-badge lux-badge-fan';}
+  // Fan buttons sit on the always-dark lux-fp-panel regardless of app theme,
+  // so their state colors are fixed light-on-dark values, not theme tokens.
   ['luxFanAuto','luxFanOn','luxFanCirc'].forEach(function(id){
     var el=document.getElementById(id);
-    if(el) el.style.borderColor='var(--border)',el.style.color='var(--muted)';
+    if(el) el.style.borderColor='rgba(255,255,255,.12)',el.style.color='rgba(255,255,255,.6)';
   });
   var activeMap={auto:'luxFanAuto',on:'luxFanOn',circulate:'luxFanCirc'};
   var ac=document.getElementById(activeMap[fan]);
-  if(ac){ac.style.borderColor='rgba(212,175,55,.45)';ac.style.color='var(--gold)';}
+  if(ac){ac.style.borderColor='rgba(212,175,55,.6)';ac.style.color='#d4af37';}
 }
 
 function luxApplyState(t){
@@ -5920,7 +5960,7 @@ function hccSection(id, btn) {
   if (id === 'irrigation' && !window._irrLoaded) { window._irrLoaded = true; loadIrrigation(); }
   if (id === 'home') {
     if (!window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
-    loadUtilities(); loadCameras(); loadHomeStatus(); loadClimate();
+    loadUtilities(); loadCameras(); loadHomeStatus(); loadClimate(); loadStation();
   }
   if (id === 'guardian') { loadGuardian(); loadLights(); loadGarage(); loadVacuum(); }
   if (id === 'car') { carSwitchVehicle(_activeVehicle); }
