@@ -1,0 +1,263 @@
+- id: '1785018670353'
+  alias: HCC Watchdog - Integration Down Alert
+  description: Notifies Jeff's phone the moment a key HCC integration (Blink, Fire
+    TV, Mercedes) goes unavailable for 5+ minutes, instead of it failing silently
+    for hours.
+  triggers:
+  - trigger: state
+    entity_id:
+    - alarm_control_panel.blink_loewen301
+    - media_player.fire_tv_viewing_room
+    - binary_sensor.gle_350_engine_light_warning
+    to: unavailable
+    for:
+      minutes: 5
+  conditions: []
+  actions:
+  - action: notify.mobile_app_jeffs_iphone
+    data:
+      title: HCC Watchdog Alert
+      message: '{{ trigger.to_state.name }} has been unavailable for 5+ minutes. Check
+        Beehive.'
+  mode: single
+- id: '1785025314054'
+  alias: HCC - Auto Launch Sling on Fire TV Wake
+  description: When the Fire TV wakes from off/unavailable (i.e. the input was just
+    selected), automatically launches Sling TV.
+  triggers:
+  - trigger: state
+    entity_id: media_player.fire_tv_viewing_room
+    from:
+    - 'off'
+    - unavailable
+  conditions: []
+  actions:
+  - action: script.turn_on
+    target:
+      entity_id: script.hcc_open_sling
+  mode: single
+- id: '1785255436055'
+  alias: HCC — Recorder Down Watchdog
+  description: Alerts immediately if HA's recorder component logs an error (the exact
+    failure that silently broke utility bill tracking 07-02 to 07-28).
+  triggers:
+  - trigger: event
+    event_type: system_log_event
+  conditions:
+  - condition: template
+    value_template: '{{ trigger.event.data.level in [''ERROR'',''CRITICAL''] and ''recorder''
+      in (((trigger.event.data.message | join('' '')) if trigger.event.data.message
+      is not string else trigger.event.data.message) | lower) }}'
+  actions:
+  - action: persistent_notification.create
+    data:
+      title: HA Recorder Down
+      message: 'Recorder logged an error — utility bill tracking (water/gas/electric)
+        depends on recorder and will silently stop working. Check configuration.yaml
+        for default_config: and restart HA. Details: {{ (trigger.event.data.message
+        | join('' '')) if trigger.event.data.message is not string else trigger.event.data.message
+        }}'
+  - action: notify.mobile_app_jeffs_iphone
+    data:
+      title: HA Recorder Down
+      message: Recorder logged an error — utility tracking will silently break. Check
+        HA logs.
+  mode: single
+- id: hcc_blink_auto_heal
+  alias: HCC — Blink Auto-Heal
+  description: Blink's blinkpy library has a recurring, currently-unresolved upstream
+    LoginError token-refresh crash (tracked in home-assistant/core#176836) that leaves
+    camera/motion entities stuck at stale values instead of going 'unavailable' —
+    silent for 10-15+ minutes or longer until someone notices. This reloads just the
+    Blink integration within seconds of the crash instead of waiting for a manual
+    full HA restart.
+  triggers:
+  - trigger: event
+    event_type: system_log_event
+  conditions:
+  - condition: template
+    value_template: '{{ trigger.event.data.level in [''ERROR'',''CRITICAL''] and ''blink''
+      in (trigger.event.data.name | lower) }}'
+  actions:
+  - action: homeassistant.reload_config_entry
+    data:
+      entry_id: 01KY0MYHR8VN4646FQDSXA7VDC
+  - action: notify.mobile_app_jeffs_iphone
+    data:
+      title: HCC — Blink Auto-Healed
+      message: Blink hit its known LoginError crash and was reloaded automatically.
+        Cameras should recover within seconds.
+  mode: single
+- id: hcc_ai_camera_popup_fire_tv
+  alias: HCC — AI Camera Popup on Fire TV
+  description: On real CodeProject.AI object detection, pushes the actual annotated
+    frame that triggered the detection (not a fresh/later snapshot) as a small picture-in-picture
+    popup via PiPup, instead of taking over the whole TV. Replaces the old full-screen-switch
+    approach per Jeff's request.
+  triggers:
+  - trigger: event
+    event_type: codeproject_ai.object_detected
+  conditions: []
+  actions:
+  - action: rest_command.pipup_notify
+    data:
+      title: '{{ trigger.event.data.name | default(''Motion'') | title }} Detected'
+      message: '{{ trigger.event.data.entity_id }} — {{ trigger.event.data.confidence
+        | default('''') }}% confidence'
+      duration: 15
+      image_url: '{{ trigger.event.data.saved_file | replace(''/config/www'', ''http://192.168.1.66:8123/local'')
+        }}'
+  mode: single
+- id: hcc_blink_periodic_health_reload
+  alias: HCC — Blink Periodic Health Reload
+  description: Backstop for the known recurring blinkpy crash (see HCC — Blink Auto-Heal).
+    The error-triggered auto-heal only fires on the FIRST occurrence of a given error
+    message per HA session — repeats of the same message don't re-fire system_log_event,
+    so a crash-loop can slip past it. This runs unconditionally every 15 minutes regardless
+    of any detected error, guaranteeing Blink self-heals within a bounded worst-case
+    time no matter what actually failed. Cheap and safe — reload_config_entry was
+    live-tested with zero disruption.
+  triggers:
+  - trigger: time_pattern
+    minutes: /15
+  conditions: []
+  actions:
+  - action: homeassistant.reload_config_entry
+    data:
+      entry_id: 01KY0MYHR8VN4646FQDSXA7VDC
+  mode: single
+- id: hcc_angela_arrived_at_barn
+  alias: HCC — Angela Arrived at Barn
+  description: Separate from Angela Almost Home (which is for her coming back to the
+    house) — this is specifically for barn arrivals, using the Mercedes GLE's GPS
+    since her phone doesn't reliably report location. Zone real coordinates captured
+    live 08-01 as she actually arrived.
+  triggers:
+  - trigger: zone
+    entity_id: device_tracker.gle_350_device_tracker
+    zone: zone.barn
+    event: enter
+  conditions: []
+  actions:
+  - action: notify.mobile_app_jeffs_iphone
+    data:
+      title: HCC — Angela
+      message: Angela made it safe to the barn
+  mode: single
+- id: hcc_angela_arrived_at_work
+  alias: HCC — Angela Arrived at Work
+  description: 'Separate from the barn-arrival automation — Angela doesn''t always
+    drive to the barn, sometimes it''s to her Nashville office instead. Uses the Mercedes
+    GLE''s GPS since her phone doesn''t reliably report location. Work address: 150
+    4th Avenue North Suite 1700, Nashville, TN 37219.'
+  triggers:
+  - trigger: zone
+    entity_id: device_tracker.gle_350_device_tracker
+    zone: zone.work
+    event: enter
+  conditions: []
+  actions:
+  - action: notify.mobile_app_jeffs_iphone
+    data:
+      title: HCC — Angela
+      message: Angela made it to work
+  mode: single
+- id: hcc_idle_flow_leak_alert
+  alias: HCC — Possible Water Leak (Idle Flow)
+  description: 'Fast-reacting leak check: alerts if water is flowing while the house
+    should be idle (everyone away, or 1-5am) and no known irrigation zone is running.
+    Complements the Water-Monitor integration''s slower session-based detectors --
+    built 08-01 after confirming the water meter/pit radio are healthy, not faulty.'
+  triggers:
+  - trigger: numeric_state
+    entity_id: sensor.water_flow
+    above: 0.05
+    for:
+      minutes: 30
+  conditions:
+  - condition: or
+    conditions:
+    - condition: and
+      conditions:
+      - condition: state
+        entity_id: person.jeff_loewen
+        state: not_home
+      - condition: state
+        entity_id: person.angela_loewen
+        state: not_home
+    - condition: time
+      after: 01:00:00
+      before: 05:00:00
+  - condition: state
+    entity_id: switch.z2_front_left
+    state: 'off'
+  - condition: state
+    entity_id: switch.z3_back_left
+    state: 'off'
+  - condition: state
+    entity_id: switch.z4_back_right
+    state: 'off'
+  - condition: state
+    entity_id: switch.z5_right_side_drive
+    state: 'off'
+  - condition: state
+    entity_id: switch.garden
+    state: 'off'
+  actions:
+  - action: notify.mobile_app_jeffs_iphone
+    data:
+      title: HCC — Possible Water Leak
+      message: 'Water has been flowing for 30+ min while the house should be idle
+        (everyone away or 1-5am) and no irrigation zone is running. Current flow:
+        {{ states(''sensor.water_flow'') }} gal/min.'
+  mode: single
+- id: hcc_morning_digest
+  alias: HCC — Morning Digest
+  description: 'Daily 7am summary of weather, vacuum, car, and utility status -- automates
+    the manual health-check Jeff used to ask for by hand. Dropped the active-notification
+    count 08-02: confirmed via live test that states.persistent_notification has been
+    unreadable from templates since HA 2023.6 (notifications were removed from the
+    state machine) -- it was silently always reporting zero, which is worse than not
+    reporting it.'
+  triggers:
+  - trigger: time
+    at: 07:00:00
+  conditions: []
+  actions:
+  - variables:
+      vacuum_state: '{{ states(''vacuum.sharky'') }}'
+      car_lock: '{{ states(''lock.gle_350_lock'') }}'
+      car_fuel: '{{ states(''sensor.gle_350_fuel_level'') }}'
+      car_odo: '{{ states(''sensor.gle_350_odometer'') }}'
+      weather_cond: '{{ states(''weather.forecast_home'') }}'
+      weather_temp: '{{ state_attr(''weather.forecast_home'', ''temperature'') }}'
+      water_state: '{{ states(''sensor.water_gallons'') }}'
+      gas_state: '{{ states(''sensor.gas_ccf'') }}'
+      blink_heals_recent: '{{ ''yes'' if (state_attr(''automation.hcc_blink_auto_heal'',''last_triggered'')
+        is not none and (as_timestamp(now()) - as_timestamp(state_attr(''automation.hcc_blink_auto_heal'',''last_triggered'')))
+        < 86400) else ''no'' }}'
+      digest_message: '{{ weather_cond | replace(''-'', '' '') | title }}, {{ weather_temp
+        }}°F today.
+
+        Vacuum: {{ ''offline ⚠️'' if vacuum_state in [''unavailable'',''unknown'']
+        else vacuum_state }}.
+
+        Car: {{ car_fuel }}% fuel, {{ ''unlocked ⚠️'' if car_lock == ''unlocked''
+        else ''locked'' }}, {{ car_odo | round(0) }} mi.
+
+        Water/Gas reporting: {{ ''OK'' if water_state not in [''unavailable'',''unknown'',none]
+        and gas_state not in [''unavailable'',''unknown'',none] else ''check needed
+        ⚠️'' }}.
+
+        {% if blink_heals_recent == ''yes'' %}Blink self-healed a crash in the last
+        24h (handled automatically, no action needed).{% endif %}'
+  - action: notify.mobile_app_jeffs_iphone
+    data:
+      title: ☀️ HCC Morning Digest
+      message: '{{ digest_message }}'
+  - action: persistent_notification.create
+    data:
+      title: ☀️ HCC Morning Digest
+      message: '{{ digest_message }}'
+      notification_id: hcc_morning_digest
+  mode: single
