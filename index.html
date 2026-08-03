@@ -2027,11 +2027,14 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <span style="font-size:17px;flex-shrink:0">&#128260;</span>
     <span style="font-size:11.5px;color:var(--text);line-height:1.45"><b>Before you mow:</b> press <b>RESET</b> on the sensor box &mdash; it gives the motion sensor a clean start (vibration &amp; RPM), a faster GPS lock, and a fresh track for this mow.</span>
   </div>
-  <!-- MOWING CONDITIONS (mower-specific — moved here from Weather) -->
-  <div class="card cat-weather">
-    <div class="card-title">&#127807; Mowing Conditions</div>
-    <div class="wx-banner wx-load" id="wxBanner">&#128260; Loading conditions&hellip;</div>
-    <div class="wx-grid">
+  <!-- READY TO MOW — merged with the old separate "Mowing Conditions" card 08-03
+       (they showed two overlapping verdicts on the same page); this is now the
+       one place for the overall go/no-go call, why, and the underlying stats. -->
+  <div class="card cat-weather" id="readyCard" style="border-width:2px">
+    <div class="card-title">&#127807; Ready to Mow?</div>
+    <div id="readyBanner" class="wx-banner wx-load wx-banner-lg">&#8987; Checking&hellip;</div>
+    <div id="readyReasons"></div>
+    <div class="wx-grid" style="margin-top:10px">
       <div class="wx-card"><div class="wx-lbl">Rain Risk</div><div class="wx-val" id="wxRisk">--</div></div>
       <div class="wx-card"><div class="wx-lbl">Soil Condition</div><div class="wx-val" id="wxSoil">--</div></div>
       <div class="wx-card"><div class="wx-lbl">Soil Temp</div><div class="wx-val" id="wxSoilTemp">--</div></div>
@@ -2041,14 +2044,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <div class="wx-card"><div class="wx-lbl">Heat Stress</div><div class="wx-val" id="wxHeatStress">--</div></div>
       <div class="wx-card"><div class="wx-lbl">Lightning</div><div class="wx-val" id="wxLightning">--</div></div>
     </div>
-    <button class="btn-full btn-gray" onclick="loadWeather()">&#128260; Refresh Conditions</button>
-  </div>
-
-  <!-- READY TO MOW (moved here from Weather) -->
-  <div class="card cat-weather" id="readyCard" style="border-width:2px">
-    <div class="card-title">&#127807; Ready to Mow?</div>
-    <div id="readyBanner" class="wx-banner wx-load wx-banner-lg">&#8987; Checking&hellip;</div>
-    <div id="readyReasons"></div>
+    <button class="btn-full btn-gray" style="margin-top:10px" onclick="loadWeather()">&#128260; Refresh Conditions</button>
   </div>
 
   <div class="card cat-sensor">
