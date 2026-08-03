@@ -6095,8 +6095,10 @@ function fireTvRender(tv) {
   if (!isOn) {
     h += '<div style="text-align:center;margin:20px 0 8px"><button onclick="fireTvCmd(\'power\')" class="btn-full btn-green" style="max-width:200px;margin:0 auto">&#9654; TURN ON</button></div>';
   } else {
-    h += '<div style="display:flex;justify-content:center;gap:10px;margin:18px 0 8px">';
+    h += '<div style="display:flex;justify-content:center;gap:10px;margin:18px 0 8px;flex-wrap:wrap">';
+    h += '<button onclick="fireTvCmd(\'rewind\')" class="btn-full btn-gray" style="flex:0 0 auto;width:auto;padding:10px 18px;font-size:13px">&#9194; Rewind</button>';
     h += '<button onclick="fireTvCmd(\'play_pause\')" class="btn-full btn-gray" style="flex:0 0 auto;width:auto;padding:10px 24px;font-size:13px">&#9199; Play / Pause</button>';
+    h += '<button onclick="fireTvCmd(\'ff\')" class="btn-full btn-gray" style="flex:0 0 auto;width:auto;padding:10px 18px;font-size:13px">&#9193; Fast Fwd</button>';
     h += '</div>';
   }
 
@@ -6121,8 +6123,9 @@ function fireTvCmd(cmd) {
       .then(function() { setTimeout(fireTvOpen, 1500); });
     return;
   }
-  if (cmd === 'play_pause') {
-    haFetch('/api/services/media_player/media_play_pause', {
+  if (cmd === 'play_pause' || cmd === 'ff' || cmd === 'rewind') {
+    var svcMap = { play_pause: 'media_play_pause', ff: 'media_next_track', rewind: 'media_previous_track' };
+    haFetch('/api/services/media_player/' + svcMap[cmd], {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ entity_id: FIRE_TV_ENTITY }),
