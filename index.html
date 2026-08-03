@@ -6914,6 +6914,19 @@ var _camLastAutoRefresh = 0;
 function isUserCamera(entityId) {
   return entityId.indexOf('camera.') === 0 && !/_clipframe$/.test(entityId);
 }
+// Fixed display order for the camera grid (driveway first, front doorbell right
+// under it per Jeff's request) — any camera not listed here falls after these,
+// keeping its original relative order (stable sort).
+var CAM_ORDER = ['301_driveway','301_front_doorbell','front_right','back_left','301_backyard','garage'];
+function sortCameras(cameras) {
+  return cameras.slice().sort(function(a, b) {
+    var ai = CAM_ORDER.indexOf(a.entity_id.replace('camera.', ''));
+    var bi = CAM_ORDER.indexOf(b.entity_id.replace('camera.', ''));
+    if (ai === -1) ai = CAM_ORDER.length;
+    if (bi === -1) bi = CAM_ORDER.length;
+    return ai - bi;
+  });
+}
 function loadCameras() {
   var token = getHaToken();
   var base = localStorage.getItem('ha_base') || HA_BASE;
@@ -6930,7 +6943,7 @@ function loadCameras() {
   })
   .then(function(states) {
     if (!Array.isArray(states)) throw new Error('bad_response');
-    var cameras = states.filter(function(s) { return isUserCamera(s.entity_id); });
+    var cameras = sortCameras(states.filter(function(s) { return isUserCamera(s.entity_id); }));
     if (!grid) return;
     if (cameras.length === 0) {
       grid.innerHTML = '<div style="background:rgba(212,175,55,.07);border:1px solid rgba(212,175,55,.2);border-radius:12px;padding:14px;margin-bottom:6px">'
