@@ -6559,11 +6559,16 @@ function carMaxHeat() {
   doHeat();
 }
 
+var ACCT_CARD_HTML = null;
 function hiveShowAccounts(){
-  var src=document.getElementById('connAcctCard');
-  if(!src) return;
+  if(ACCT_CARD_HTML===null){
+    var src=document.getElementById('connAcctCard');
+    if(!src) return;
+    ACCT_CARD_HTML = src.innerHTML;
+    src.remove();
+  }
   var h='<div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">Your logins are saved on this device. Tap any service to set up or update.</div>'
-    + src.innerHTML;
+    + ACCT_CARD_HTML;
   grdShow('&#128273; Connected Accounts', h);
   acctRefreshStatus();
 }
