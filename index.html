@@ -5237,6 +5237,12 @@ renderAll();
 })();
 loadWeather();
 loadIrrigation();
+// LUX lives on HOME (moved 08-03), which is already the active section by default on
+// boot — so hccSection('home')'s own loadClimate()/loadStation() calls never fire on a
+// normal app open (only on manual nav away-and-back). Load it directly here too, same
+// as loadWeather()/loadIrrigation() above, so it's populated the moment the app opens.
+loadClimate();
+loadStation();
 loadAlerts();
 acctRefreshStatus();
 alexaInitBadges();
@@ -6773,6 +6779,7 @@ setTimeout(function() {
 // momentarily-quiet meter) recovers on its own — no manual refresh. Guarded to token.
 setInterval(function(){
   mowerSync(false);
+  loadClimate(); loadStation();
   if (getHaToken()) { checkBeehive(false); loadCameras(); loadUtilities(); loadGuardian(); loadLights(); loadGarage(); loadVacuum(); loadCar(); }
 }, 60000);
 setInterval(loadWeather, 5*60*1000);
