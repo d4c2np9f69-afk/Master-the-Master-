@@ -4398,7 +4398,7 @@ function loadClimate(){
     .catch(function(err){
       var msg=err&&err.message||'unknown';
       if(b){b.className='wx-banner wx-no'; b.innerHTML='&#127777;&#65039; LUX: '+msg;}
-      if(msg.indexOf('login_failed')>=0||msg.indexOf('401')>=0){
+      if(msg.indexOf('login_failed')>=0){
         localStorage.removeItem('lux_email'); localStorage.removeItem('lux_pass');
         var sc=document.getElementById('luxSetupCard'); if(sc) sc.style.display='';
       }

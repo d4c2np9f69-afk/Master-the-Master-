@@ -14,6 +14,52 @@ const API_BASE = 'https://www.myluxstat.io/api';
 const MODE_MAP = { 0: 'off', 1: 'heat', 2: 'cool', 3: 'auto' };
 const MODE_TO_INT = { off: 0, heat: 1, cool: 2, auto: 3 };
 
+// KV binding: same dual-name fallback as functions/api/hours.js
+function getKV(env) {
+  return env.HCC_KV || env.MOWER_KV || null;
+}
+
+const TOKEN_KV_KEY = 'lux_tokens';
+
+async function getCachedAccessToken(env) {
+  const kv = getKV(env);
+  if (!kv) return null;
+  try {
+    const raw = await kv.get(TOKEN_KV_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data.access_token || !data.expires_at) return null;
+    if (Date.now() >= data.expires_at - 5 * 60 * 1000) return null; // expired or expiring within 5 min
+    return data.access_token;
+  } catch (_) { return null; }
+}
+
+async function cacheAccessToken(env, tokens) {
+  const kv = getKV(env);
+  if (!kv) return;
+  const expires_at = Date.now() + (tokens.expires_in ? tokens.expires_in * 1000 : 55 * 60 * 1000);
+  try {
+    await kv.put(TOKEN_KV_KEY, JSON.stringify({ access_token: tokens.access_token, expires_at }));
+  } catch (_) {}
+}
+
+// Runs fn(accessToken) using a cached token when we have one (avoids a full
+// B2C login on every request — the old behavior of re-logging-in every time
+// the app opened is what was flooding B2C with interactive logins and
+// causing the intermittent failures that made LUX look like it required
+// signing in over and over). Falls back to a real login on cache miss, and
+// retries once with a fresh login if the cached token turns out to be stale.
+async function withAuth(env, email, password, fn) {
+  const cached = await getCachedAccessToken(env);
+  if (cached) {
+    try { return await fn(cached); }
+    catch (e) { if (!/\b401\b/.test(e.message)) throw e; }
+  }
+  const tokens = await luxAuth(email, password);
+  await cacheAccessToken(env, tokens);
+  return await fn(tokens.access_token);
+}
+
 async function generatePKCE() {
   const buf = new Uint8Array(32);
   crypto.getRandomValues(buf);
@@ -202,20 +248,25 @@ export async function onRequestGet({ request, env }) {
   if (!email || !password) return Response.json({ ok: false, error: 'credentials_not_provided' }, { status: 400 });
 
   try {
-    const tokens = await luxAuth(email, password);
-    const userData = await getLocationUser(tokens.access_token);
-    const locRaw = userData.location;
-    const loc = (Array.isArray(locRaw) ? locRaw[0] : locRaw) || (userData.locations?.[0]) || {};
-    const devices = loc.devices || [];
-    const device = devices[0];
-    if (!device) {
-      const diag = `no_device_found — keys:${Object.keys(userData).join(',')} loc_keys:${Object.keys(loc).join(',') || 'none'} devices:${devices.length}`;
-      return Response.json({ ok: false, error: diag, raw: userData }, { status: 404 });
-    }
-    const state = await getDeviceState(tokens.access_token, device.id);
-    return Response.json({ ok: true, thermostat: parseThermostat(state, device.id, device.name) });
+    const thermostat = await withAuth(env, email, password, async (accessToken) => {
+      const userData = await getLocationUser(accessToken);
+      const locRaw = userData.location;
+      const loc = (Array.isArray(locRaw) ? locRaw[0] : locRaw) || (userData.locations?.[0]) || {};
+      const devices = loc.devices || [];
+      const device = devices[0];
+      if (!device) {
+        const diag = `no_device_found — keys:${Object.keys(userData).join(',')} loc_keys:${Object.keys(loc).join(',') || 'none'} devices:${devices.length}`;
+        const err = new Error(diag);
+        err.status = 404;
+        err.raw = userData;
+        throw err;
+      }
+      const state = await getDeviceState(accessToken, device.id);
+      return parseThermostat(state, device.id, device.name);
+    });
+    return Response.json({ ok: true, thermostat });
   } catch (e) {
-    return Response.json({ ok: false, error: e.message }, { status: 503 });
+    return Response.json({ ok: false, error: e.message, raw: e.raw }, { status: e.status || 503 });
   }
 }
 
@@ -231,37 +282,42 @@ export async function onRequestPost({ request, env }) {
   if (!action) return Response.json({ ok: false, error: 'missing_action' }, { status: 400 });
 
   try {
-    const tokens = await luxAuth(email, password);
-    const userData = await getLocationUser(tokens.access_token);
-    const locRaw = userData.location;
-    const loc = (Array.isArray(locRaw) ? locRaw[0] : locRaw) || (userData.locations?.[0]) || {};
-    const device = (loc.devices || [])[0];
-    if (!device) {
-      const diag = `no_device_found — keys:${Object.keys(userData).join(',')} loc_keys:${Object.keys(loc).join(',') || 'none'}`;
-      return Response.json({ ok: false, error: diag, raw: userData }, { status: 404 });
-    }
+    const thermostat = await withAuth(env, email, password, async (accessToken) => {
+      const userData = await getLocationUser(accessToken);
+      const locRaw = userData.location;
+      const loc = (Array.isArray(locRaw) ? locRaw[0] : locRaw) || (userData.locations?.[0]) || {};
+      const device = (loc.devices || [])[0];
+      if (!device) {
+        const diag = `no_device_found — keys:${Object.keys(userData).join(',')} loc_keys:${Object.keys(loc).join(',') || 'none'}`;
+        const err = new Error(diag);
+        err.status = 404;
+        err.raw = userData;
+        throw err;
+      }
 
-    // GET full raw state, modify the target field, PUT the whole object back
-    // (matches Python luxgeo package behavior: d = get_state(); d[field]=val; put(d))
-    const currentState = await getDeviceState(tokens.access_token, device.id);
+      // GET full raw state, modify the target field, PUT the whole object back
+      // (matches Python luxgeo package behavior: d = get_state(); d[field]=val; put(d))
+      const currentState = await getDeviceState(accessToken, device.id);
 
-    if (action === 'set_sp') {
-      if (heat_sp != null) currentState.holdheat = parseInt(heat_sp, 10);
-      if (cool_sp != null) currentState.holdcool = parseInt(cool_sp, 10);
-    } else if (action === 'set_mode') {
-      const modeInt = MODE_TO_INT[value];
-      if (modeInt === undefined) return Response.json({ ok: false, error: 'unknown_mode: ' + value }, { status: 400 });
-      currentState.systemmode = modeInt;
-    } else if (action === 'set_fan') {
-      currentState.fanmode = value === 'on' ? 1 : 0;
-    } else {
-      return Response.json({ ok: false, error: 'unknown_action: ' + action }, { status: 400 });
-    }
+      if (action === 'set_sp') {
+        if (heat_sp != null) currentState.holdheat = parseInt(heat_sp, 10);
+        if (cool_sp != null) currentState.holdcool = parseInt(cool_sp, 10);
+      } else if (action === 'set_mode') {
+        const modeInt = MODE_TO_INT[value];
+        if (modeInt === undefined) { const err = new Error('unknown_mode: ' + value); err.status = 400; throw err; }
+        currentState.systemmode = modeInt;
+      } else if (action === 'set_fan') {
+        currentState.fanmode = value === 'on' ? 1 : 0;
+      } else {
+        const err = new Error('unknown_action: ' + action); err.status = 400; throw err;
+      }
 
-    await setDeviceState(tokens.access_token, device.id, currentState);
-    const newState = await getDeviceState(tokens.access_token, device.id);
-    return Response.json({ ok: true, thermostat: parseThermostat(newState, device.id, device.name) });
+      await setDeviceState(accessToken, device.id, currentState);
+      const newState = await getDeviceState(accessToken, device.id);
+      return parseThermostat(newState, device.id, device.name);
+    });
+    return Response.json({ ok: true, thermostat });
   } catch (e) {
-    return Response.json({ ok: false, error: e.message }, { status: 503 });
+    return Response.json({ ok: false, error: e.message, raw: e.raw }, { status: e.status || 503 });
   }
 }
