@@ -312,7 +312,7 @@ Expected: all tests passing. If any fail, fix them before doing anything else.
 
 ## Beehive / Home Assistant Integration
 
-**Hardware:** Beelink J45 (Gemini) mini-PC, Intel Pentium J4205, x86, ~8GB/128GB, running HA OS off its **internal SSD** (migrated off a flaky external USB drive 2026-07-02 — external is retired, don't reintroduce it; both USB ports are free for RTL-SDR + a future Zigbee/Thread stick).
+**Hardware:** Beelink J45 (Gemini) mini-PC, Intel Pentium J4205, x86, ~8GB/128GB, running HA OS off its **internal SSD** (migrated off a flaky external USB drive 2026-07-02 — external is retired, don't reintroduce it). **4x USB 3.0 ports total** (confirmed by Jeff 08-05, corrects the earlier "2 free ports" assumption below) — one is yellow (likely always-on/charging, doesn't affect device choice). Current/planned allocation: RTL-SDR (water+gas meters, live) = 1 port; Zigbee coordinator (SONOFF ZBDongle-E, planned) on its own USB extension cable — keep it off a hub/away from other high-speed USB to avoid 2.4GHz interference = 1 port; HDMI capture card (planned, for streaming a TV feed into the app) = 1 port; **1 port spare.** Jeff has a separate USB-C multiport hub ("cakitte," 3x USB3.0 + Ethernet) available but it's not needed for this plan — plenty of direct ports on the J45.
 
 **Architecture — three ways anything connects (only radio sticks physically plug into the J45):**
 - **USB stick in the J45:** RTL-SDR (water+gas meters, live). Future: one Zigbee/Thread coordinator stick → whole mesh of cheap sensors/plugs for a security layer with no wiring.
