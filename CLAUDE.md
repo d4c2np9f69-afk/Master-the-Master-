@@ -78,6 +78,8 @@ When ANYTHING is broken or misbehaving, in this order — **before asking Jeff t
 
 **Known fragile pattern (don't repeat):** any new `fetch(base + '/api/...')` straight from the browser to HA. Use **`haFetch()`** (routes through `/api/ha`). Never hoist a shared `AbortSignal.timeout` across retries. Keep timeouts generous for the Nabu Casa relay.
 
+**8. NEVER name a specific product/model to Jeff from memory (PROTECTED — Jeff's standing rule 08-05, added after the garage door incident).** On 08-05 I recommended a ratgdo board, then "SONOFF Basic," then had to be corrected to SONOFF SV — three guessed answers on one part, in a row, before Jeff found the actually-correct SONOFF MINI-D himself. He does not have time to be the fact-checker on my hardware recommendations. **The rule going forward: never state a specific product name/model number as a recommendation unless it was verified via a real search THIS session.** If I haven't checked, say "let me check" — never let a plausible-sounding model number stand in for one that's actually confirmed.
+
 ---
 
 ## Mandatory Pre-Session Checklist
