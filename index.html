@@ -474,6 +474,57 @@ html,body{
    overlay sits at the TOP (same treatment as the weather hero). Own aspect
    ratio = the image's true 1200x900 so the baked-in title never crops. */
 .sec-hero-guardian{aspect-ratio:1200/900;height:auto;max-height:480px;background:#0a1224}
+/* ── The 8 live house checks, inlaid on the Guardian photo ────────────────
+   NOTE: grdSet() does `el.className = 'hs-val ' + cls`, which wipes any class
+   set on the value span itself. So everything here is styled through the
+   PARENT (.grd-hero-cell .hs-val), which survives that overwrite. Don't move
+   these onto a class on the span — it will silently stop applying the moment
+   real data lands. */
+.grd-hero-readout{
+  margin-top:auto;display:grid;grid-template-columns:repeat(4,1fr);
+  gap:clamp(4px,1vw,9px) 0;
+  padding:clamp(6px,1.6vw,12px) clamp(4px,1.2vw,10px);
+  border-radius:clamp(12px,3.4vw,24px);
+  background:rgba(16,14,12,.16);
+  backdrop-filter:blur(9px) saturate(150%) brightness(.98);-webkit-backdrop-filter:blur(9px) saturate(150%) brightness(.98);
+  box-shadow:0 20px 60px rgba(0,0,0,.4),inset 0 1px rgba(255,255,255,.12);
+}
+.grd-hero-cell{min-width:0;display:flex;flex-direction:column;align-items:center;text-align:center;gap:1px}
+.grd-hero-ico{font-size:clamp(11px,2.4vw,19px);line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,.8))}
+.grd-hero-lbl{
+  font-size:clamp(6.2px,1.35vw,10px);font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+  color:rgba(247,229,196,.7);text-shadow:0 1px 6px rgba(0,0,0,.75);line-height:1.15;
+}
+/* fixed light-on-dark status colours — this sits on a permanently dark photo,
+   so the theme-relative tokens the card version uses would go dark-on-dark in light mode */
+.grd-hero-cell .hs-val{
+  font-size:clamp(8px,1.75vw,14px);font-weight:700;line-height:1.15;margin:0;
+  text-shadow:0 1px 6px rgba(0,0,0,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
+}
+.grd-hero-cell .hs-dim{color:rgba(247,241,231,.6)}
+.grd-hero-cell .hs-ok{color:#86efac}
+.grd-hero-cell .hs-warn{color:#ffd88a}
+.grd-hero-cell .hs-red,.grd-hero-cell .hs-bad{color:#ffa8a8}
+.grd-hero-cell .hs-neutral{color:rgba(247,241,231,.85)}
+/* ── Live mower readout inlaid on the Yard photo ──────────────────────────── */
+.yard-hero-readout{
+  margin-top:auto;display:grid;grid-template-columns:repeat(3,1fr);
+  padding:clamp(6px,1.6vw,12px) clamp(4px,1.2vw,10px);
+  border-radius:clamp(12px,3.4vw,24px);
+  background:rgba(16,14,12,.16);
+  backdrop-filter:blur(9px) saturate(150%) brightness(.98);-webkit-backdrop-filter:blur(9px) saturate(150%) brightness(.98);
+  box-shadow:0 20px 60px rgba(0,0,0,.4),inset 0 1px rgba(255,255,255,.12);
+}
+.yard-hero-cell{min-width:0;text-align:center}
+.yard-hero-lbl{
+  font-size:clamp(6.4px,1.4vw,11px);font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  color:rgba(247,229,196,.72);text-shadow:0 1px 6px rgba(0,0,0,.75);line-height:1.2;
+}
+.yard-hero-val{
+  font-size:clamp(10.5px,2.1vw,17px);font-weight:600;margin-top:2px;line-height:1.15;
+  color:#f7f1e7;text-shadow:0 2px 10px rgba(0,0,0,.8);font-variant-numeric:tabular-nums;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
 .sec-hero-guardian img{object-fit:cover;object-position:center center}
 .sec-hero-guardian .sec-hero-overlay{
   background:linear-gradient(to bottom,rgba(0,0,0,.6) 0%,rgba(0,0,0,.15) 42%,transparent 65%);
@@ -1724,6 +1775,16 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <img src="./images/hero-yard.jpg" alt="Toro TimeMaster 30&quot;" loading="lazy">
     <div class="sec-hero-overlay">
       <div class="sec-hero-status" id="yardHeroStatus"></div>
+      <!-- Live mower readout inlaid on the photo of the actual mower (08-06).
+           These MIRROR the meter card rather than moving it — unlike the other
+           sections, the hour meter is the centrepiece of the Yard dashboard and
+           belongs in both places. Mirroring means new ids here, written
+           alongside the originals; see setHoursEverywhere(). -->
+      <div class="yard-hero-readout" id="yardHeroReadout">
+        <div class="yard-hero-cell"><div class="yard-hero-lbl">Engine Hours</div><div class="yard-hero-val" id="yardHeroHours">--</div></div>
+        <div class="yard-hero-cell"><div class="yard-hero-lbl">Next Service</div><div class="yard-hero-val" id="yardHeroSvc">--</div></div>
+        <div class="yard-hero-cell"><div class="yard-hero-lbl">Ready to Mow</div><div class="yard-hero-val" id="yardHeroReady">--</div></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1732,6 +1793,18 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <img src="./images/hero-guardian.jpg" alt="Home Guardian — Protect · Monitor · Automate" loading="lazy" onerror="this.style.display='none'">
     <div class="sec-hero-overlay">
       <div class="sec-hero-status" id="guardianHeroStatus">Standing watch over 301</div>
+      <!-- The 8 live house checks, inlaid on the photo of the actual house
+           (Jeff, 08-06). MOVED from the Home Guardian card, not copied. -->
+      <div class="grd-hero-readout" id="grdHeroReadout">
+        <div class="grd-hero-cell"><span class="grd-hero-ico">&#128101;</span><span class="grd-hero-lbl">People</span><span class="hs-val hs-dim grd-hero-val" id="grd-people">&mdash;</span></div>
+        <div class="grd-hero-cell"><span class="grd-hero-ico">&#128167;</span><span class="grd-hero-lbl">Water</span><span class="hs-val hs-dim grd-hero-val" id="grd-water">&mdash;</span></div>
+        <div class="grd-hero-cell"><span class="grd-hero-ico">&#9889;</span><span class="grd-hero-lbl">Electric</span><span class="hs-val hs-dim grd-hero-val" id="grd-electric">&mdash;</span></div>
+        <div class="grd-hero-cell"><span class="grd-hero-ico">&#128293;</span><span class="grd-hero-lbl">Gas</span><span class="hs-val hs-dim grd-hero-val" id="grd-gas">&mdash;</span></div>
+        <div class="grd-hero-cell"><span class="grd-hero-ico">&#127777;&#65039;</span><span class="grd-hero-lbl">HVAC</span><span class="hs-val hs-dim grd-hero-val" id="grd-hvac">&mdash;</span></div>
+        <div class="grd-hero-cell"><span class="grd-hero-ico">&#128663;</span><span class="grd-hero-lbl">Garage</span><span class="hs-val hs-dim grd-hero-val" id="grd-garage">&mdash;</span></div>
+        <div class="grd-hero-cell"><span class="grd-hero-ico">&#128682;</span><span class="grd-hero-lbl">Doors</span><span class="hs-val hs-dim grd-hero-val" id="grd-doors">&mdash;</span></div>
+        <div class="grd-hero-cell"><span class="grd-hero-ico">&#128225;</span><span class="grd-hero-lbl">Devices</span><span class="hs-val hs-dim grd-hero-val" id="grd-devices">&mdash;</span></div>
+      </div>
     </div>
   </div>
 </div>
@@ -2737,16 +2810,10 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <div class="card-title">&#128737;&#65039; Home Guardian <span id="guardianConn" class="irr-conn"></span></div>
       <div id="guardianBanner" class="wx-banner wx-banner-lg wx-load">&#128737;&#65039; Checking the house&hellip;</div>
 
-      <div class="grd-checks" id="guardianChecks">
-        <div class="hs-row"><span class="hs-icon">&#128101;</span><span class="hs-label">People</span><span class="hs-val hs-dim" id="grd-people">&mdash;</span></div>
-        <div class="hs-row"><span class="hs-icon">&#128167;</span><span class="hs-label">Water</span><span class="hs-val hs-dim" id="grd-water">&mdash;</span></div>
-        <div class="hs-row"><span class="hs-icon">&#9889;</span><span class="hs-label">Electric</span><span class="hs-val hs-dim" id="grd-electric">&mdash;</span></div>
-        <div class="hs-row"><span class="hs-icon">&#128293;</span><span class="hs-label">Gas</span><span class="hs-val hs-dim" id="grd-gas">&mdash;</span></div>
-        <div class="hs-row"><span class="hs-icon">&#127777;&#65039;</span><span class="hs-label">HVAC</span><span class="hs-val hs-dim" id="grd-hvac">&mdash;</span></div>
-        <div class="hs-row"><span class="hs-icon">&#128663;</span><span class="hs-label">Garage</span><span class="hs-val hs-dim" id="grd-garage">&mdash;</span></div>
-        <div class="hs-row"><span class="hs-icon">&#128682;</span><span class="hs-label">Doors</span><span class="hs-val hs-dim" id="grd-doors">&mdash;</span></div>
-        <div class="hs-row"><span class="hs-icon">&#128225;</span><span class="hs-label">Devices</span><span class="hs-val hs-dim" id="grd-devices">&mdash;</span></div>
-      </div>
+      <!-- The 8 live house checks moved onto the Guardian photo at the top of
+           this section (08-06). Deliberately not duplicated here — the grd-*
+           ids must stay unique or loadGuardian() writes to a hidden copy. -->
+      <div class="grd-checks" id="guardianChecks"></div>
 
       <div class="grd-actions">
         <button class="btn-full btn-gray" onclick="guardianNightCheck()">&#127765; NIGHT CHECK</button>
@@ -3786,6 +3853,10 @@ function updateDashboard(){
   var ns = tasks[0];
   el=document.getElementById('nextSvcVal');  if(el) el.textContent=ns.rem.toFixed(1)+' hrs';
   el=document.getElementById('nextSvcName'); if(el) el.textContent=ns.name;
+  // mirror onto the readout inlaid on the mower photo
+  el=document.getElementById('yardHeroHours'); if(el) el.textContent=hrsStr+' hrs';
+  el=document.getElementById('yardHeroSvc');   if(el){ el.textContent=ns.rem.toFixed(1)+' hrs';
+    el.style.color = ns.st==='OK' ? '#86efac' : (ns.st==='SOON' ? '#ffd88a' : '#ffa8a8'); }
   el=document.getElementById('hrsToNext');   if(el){ el.textContent=ns.rem.toFixed(1); el.style.color=ns.st==='OK'?'var(--warn)':'var(--bad)'; }
 
   // Service Countdown panel - shows elapsed progress so every hour visibly moves a bar
@@ -4959,6 +5030,31 @@ function loadIrrigationFromHA(token,base,onFail){
         b2.className='wx-banner wx-go';b2.innerHTML='&#128167; WATERING — '+an;
       } else {b2.className='wx-banner wx-caution';b2.innerHTML='&#10003; All zones idle &bull; via Beehive';}
     }
+
+    // ── B-Hyve Intelligence card ──────────────────────────────────────────
+    // BUG FIX 08-06 (Jeff: "those readings are not rendering"). Every irrIntel*
+    // field was only ever written by loadIrrigationDirect(), the B-Hyve-cloud
+    // fallback. Jeff's zones live in HA, so THIS function runs instead and that
+    // card sat on "--" permanently. Not a regression -- it never worked on the
+    // HA path at all.
+    // Only fields HA genuinely knows are filled. Next Run and Smart Zones are
+    // NOT exposed by B-Hyve's HA switch entities, so they say so rather than
+    // showing an invented number.
+    var iicHA=document.getElementById('irrIntelCard');
+    if(iicHA) iicHA.style.display='';
+    function isetHA(id,v,color){ var e=document.getElementById(id); if(e){ e.innerHTML=v; e.style.color=color||''; } }
+    isetHA('irrIntelRainDelay', rd>0?rd+' HRS':'NONE', rd>0?'#ffd24a':'#22c55e');
+    isetHA('irrIntelMode','AUTO','#22c55e');
+    var anyAvail=zones.some(function(z){return z.state!=='unavailable'&&z.state!=='unknown';});
+    isetHA('irrIntelConn', anyAvail?'&#128994; Online':'&#128993; Check B-Hyve App', anyAvail?'#22c55e':'#ffd24a');
+    // most recent zone state change is the best "last watered" HA can give us
+    var lastTs=null;
+    zones.forEach(function(z){ if(z.last_changed){ var t=new Date(z.last_changed); if(!lastTs||t>lastTs) lastTs=t; } });
+    if(lastTs){ try{ isetHA('irrIntelLast', lastTs.toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})); }
+                catch(e){ isetHA('irrIntelLast','&mdash;','var(--muted)'); } }
+    else { isetHA('irrIntelLast','&mdash;','var(--muted)'); }
+    isetHA('irrIntelSmartZones', zones.length+' zones', '#4aa3ff');
+    isetHA('irrIntelNext','Not exposed via Beehive','var(--muted)');
     var html='';
     zones.forEach(function(z){
       var isA=z.state==='on';
@@ -5143,6 +5239,14 @@ function renderReadiness(){
   if(hasBad){ banner.className='wx-banner wx-no'; banner.innerHTML='&#128683; NOT READY'; if(card) card.style.borderColor='var(--red)'; }
   else if(hasWarn){ banner.className='wx-banner wx-caution'; banner.innerHTML='&#9888; MOW WITH CAUTION'; if(card) card.style.borderColor='#ffd24a'; }
   else { banner.className='wx-banner wx-go'; banner.innerHTML='&#10003; GOOD TO MOW'; if(card) card.style.borderColor='#22c55e'; }
+  // mirror the verdict onto the readout inlaid on the mower photo. Fixed
+  // light-on-dark colours: it sits on a permanently dark photo in both themes.
+  var yhr=document.getElementById('yardHeroReady');
+  if(yhr){
+    if(hasBad){ yhr.textContent='Not Ready'; yhr.style.color='#ffa8a8'; }
+    else if(hasWarn){ yhr.textContent='Caution'; yhr.style.color='#ffd88a'; }
+    else { yhr.textContent='Good to Mow'; yhr.style.color='#86efac'; }
+  }
 
   reasons.innerHTML=rs.map(function(r){
     var col=statusColor(r[2]);
