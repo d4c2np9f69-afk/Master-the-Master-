@@ -21,42 +21,79 @@ function getKV(env) {
 
 const TOKEN_KV_KEY = 'lux_tokens';
 
-async function getCachedAccessToken(env) {
+async function getCachedTokens(env) {
   const kv = getKV(env);
   if (!kv) return null;
   try {
     const raw = await kv.get(TOKEN_KV_KEY);
     if (!raw) return null;
-    const data = JSON.parse(raw);
-    if (!data.access_token || !data.expires_at) return null;
-    if (Date.now() >= data.expires_at - 5 * 60 * 1000) return null; // expired or expiring within 5 min
-    return data.access_token;
+    return JSON.parse(raw);
   } catch (_) { return null; }
 }
 
-async function cacheAccessToken(env, tokens) {
+function accessTokenStillValid(data) {
+  return !!(data && data.access_token && data.expires_at && Date.now() < data.expires_at - 5 * 60 * 1000);
+}
+
+// Stores both the access token (short-lived, ~1hr) AND the refresh token (long-lived —
+// the SCOPE explicitly requests offline_access to get one). previousRefreshToken lets a
+// refresh-exchange response that doesn't include a new refresh_token (some OAuth servers
+// don't rotate it) keep using the one we already had instead of losing it.
+async function cacheTokens(env, tokens, previousRefreshToken) {
   const kv = getKV(env);
   if (!kv) return;
   const expires_at = Date.now() + (tokens.expires_in ? tokens.expires_in * 1000 : 55 * 60 * 1000);
+  const refresh_token = tokens.refresh_token || previousRefreshToken || null;
   try {
-    await kv.put(TOKEN_KV_KEY, JSON.stringify({ access_token: tokens.access_token, expires_at }));
+    await kv.put(TOKEN_KV_KEY, JSON.stringify({ access_token: tokens.access_token, expires_at, refresh_token }));
   } catch (_) {}
 }
 
-// Runs fn(accessToken) using a cached token when we have one (avoids a full
-// B2C login on every request — the old behavior of re-logging-in every time
-// the app opened is what was flooding B2C with interactive logins and
-// causing the intermittent failures that made LUX look like it required
-// signing in over and over). Falls back to a real login on cache miss, and
-// retries once with a fresh login if the cached token turns out to be stale.
+// Fast, single-request token refresh — same B2C token endpoint as step 4 of luxAuth(),
+// just with grant_type=refresh_token instead of authorization_code, so it skips the
+// whole authorize/SelfAsserted/confirmed cookie-carrying dance entirely.
+async function refreshTokens(refreshToken) {
+  const r = await fetch(`${B2C_BASE}/te/${B2C_TENANT}/${B2C_POLICY}/oauth2/v2.0/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: CLIENT_ID,
+      scope: SCOPE,
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+    }).toString(),
+  });
+  const body = await r.text().catch(() => '{}');
+  if (!r.ok) throw new Error(`refresh_failed: ${r.status} — ${body.slice(0, 120)}`);
+  const tokens = JSON.parse(body);
+  if (!tokens.access_token) throw new Error(`refresh_no_access_token — keys: ${Object.keys(tokens).join(',')}`);
+  return tokens;
+}
+
+// Runs fn(accessToken), preferring (in order): a still-valid cached access token, then a
+// refresh-token exchange (fast + reliable, one request), and only falling back to the
+// full interactive B2C login (slow, multi-step, the fragile path most likely to trip a
+// transient failure) when neither of those is available or both fail. This is what makes
+// LUX "stay logged in" the way a normal refresh-token integration does — previously the
+// refresh_token from the offline_access scope was requested but never stored/used, so
+// ANY access-token cache miss (expiry, or just Cloudflare KV's eventual-consistency lag
+// across edge locations) fell straight back to a full login every time (08-06, Jeff:
+// "does it need a token? All the other things stay logged in").
 async function withAuth(env, email, password, fn) {
-  const cached = await getCachedAccessToken(env);
-  if (cached) {
-    try { return await fn(cached); }
+  const cached = await getCachedTokens(env);
+  if (accessTokenStillValid(cached)) {
+    try { return await fn(cached.access_token); }
     catch (e) { if (!/\b401\b/.test(e.message)) throw e; }
   }
+  if (cached && cached.refresh_token) {
+    try {
+      const tokens = await refreshTokens(cached.refresh_token);
+      await cacheTokens(env, tokens, cached.refresh_token);
+      return await fn(tokens.access_token);
+    } catch (_) { /* refresh token itself expired/invalid — fall through to full login */ }
+  }
   const tokens = await luxAuth(email, password);
-  await cacheAccessToken(env, tokens);
+  await cacheTokens(env, tokens, null);
   return await fn(tokens.access_token);
 }
 
