@@ -6404,6 +6404,11 @@ function carSwitchVehicle(which) {
   document.querySelectorAll('#section-car .car-content').forEach(function(c){ c.classList.remove('active'); });
   document.querySelectorAll('#section-car .car-tab').forEach(function(t){ t.classList.remove('active'); });
   var heroImg = document.getElementById('carHeroImg');
+  // The LOCK/UNLOCK/FLASH controls inlaid on the cockpit photo are Mercedes-only.
+  // The 2001 F-250 pre-dates FordPass Connect and has no remote features at all,
+  // so showing them over the truck photo would be offering buttons that can't work.
+  var heroCtl = document.getElementById('carHeroControls');
+  if (heroCtl) heroCtl.style.display = which === 'merc' ? '' : 'none';
   if (which === 'merc') {
     if (heroImg) { heroImg.src = './images/hero-car.jpg'; heroImg.alt = 'Mercedes-Benz GLE 350 4MATIC'; heroImg.style.display = ''; }
     var firstMerc = document.querySelector('#car-merc-tabs .car-tab');
