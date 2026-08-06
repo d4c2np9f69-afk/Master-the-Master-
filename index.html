@@ -396,6 +396,15 @@ html,body{
   text-shadow:0 1px 8px rgba(0,0,0,.9);
 }
 .sec-hero-guardian .sec-hero-status{color:rgba(240,225,190,.85)}
+/* All heroes MUST stay full-bleed width -- without an explicit width, `height:auto` +
+   `aspect-ratio` + `max-height` fight each other: once the aspect-ratio-driven height would
+   exceed max-height, the browser shrinks WIDTH instead (so both constraints hold), leaving a
+   blank gap next to the hero on any window wider than ~700px (Pending Item 7, reproduced +
+   fixed 08-06 at phone/iPad/desktop/TV widths). Pinning width:100% forces the browser to keep
+   the image full-width and crop more of it instead -- normal hero behavior, no blank space.
+   Never remove this on an individual hero; it's exactly the "no per-hero override" the Hero
+   Gold Standard above already establishes for grading -- same rule applies to sizing. */
+.house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian,.sec-hero-car{width:100%}
 /* Car hero — Mercedes GLE interior mockup with baked-in title/tabs at bottom */
 .sec-hero-car{aspect-ratio:1320/677;height:auto;max-height:400px;background:#0a0a12}
 .sec-hero-car img{object-fit:cover;object-position:center top}

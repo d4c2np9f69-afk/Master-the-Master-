@@ -9,6 +9,36 @@ this ever needs re-litigating.
 
 ---
 
+## Exactly what the issue was, plain version
+
+This project has **two separate GitHub repositories** — `Master-the-Master-` and
+`Toro-Timemaster-` — not one. Cloudflare Pages (the service that publishes the app to
+`toro1-5rz.pages.dev`, which is what shows up on Jeff's phone) is wired to watch exactly **one**
+of those two repos, on one specific branch, and auto-deploys whenever that branch gets a new push.
+Everything else — any other repo, any other branch — can get pushed to all day and **nothing
+happens**, silently, no error anywhere.
+
+The problem: both repos' own internal notes (`CLAUDE.md`, meant to be each project's persistent
+memory) independently claimed *"this repo is the one Cloudflare deploys."* That claim was true of
+one of them and stale/wrong in the other — but nothing in either repo's files could tell you
+*which* was which, because that's a setting that only exists inside Cloudflare's own dashboard,
+not in git. So an AI session picking either repo at random had a real, un-flagged chance of doing
+a full night's tested work that would never actually reach the live app — not because the work was
+wrong, but because it landed in the wrong house entirely.
+
+**How the two repos came to exist in the first place:** they started as one identical copy (same
+exact starting commit in both, byte for byte). From there, real work happened in both for a while
+in parallel, with someone periodically hand-copying finished changes from Master-the-Master- into
+Toro-Timemaster- (visible in the git history as commits literally titled *"Sync from
+Master-the-Master-: ..."*). That manual copying stopped on **July 24**. Master-the-Master- kept
+getting real work for **12 more days** after that (through tonight); Toro-Timemaster- has been
+frozen since **July 26**, silently falling behind with nobody flagging it.
+
+**Confirmed live repo:** `Master-the-Master-`, branch `claude/time-master-project-liq1jw`.
+`Toro-Timemaster-` is now a dead mirror and should not be developed on going forward.
+
+---
+
 ## The problem in one sentence
 
 There are **two GitHub repos** with diverging history (`Master-the-Master-` and
