@@ -7,15 +7,29 @@
 // Usage: node scripts/smoke-test.js
 
 const path = require('path');
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+
+// Resolve Playwright from wherever it actually lives. The cloud session has it
+// at a fixed global path; the coworker's PC has it installed in the repo. Try
+// the sandbox path first (so nothing changes there), then a normal require.
+// Same for the browser binary: the sandbox pins an executablePath, everywhere
+// else Playwright already knows where its own download lives, so leave it unset.
+const SANDBOX_PW = '/opt/node22/lib/node_modules/playwright';
+const SANDBOX_CHROME = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+let chromium;
+let usingSandbox = false;
+try {
+  ({ chromium } = require(SANDBOX_PW));
+  usingSandbox = require('fs').existsSync(SANDBOX_CHROME);
+} catch (e) {
+  ({ chromium } = require('playwright'));
+}
 
 const FILE_URL = 'file://' + path.join(__dirname, '..', 'index.html');
 
 async function main() {
-  const browser = await chromium.launch({
-    executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
+  const launchOpts = { args: ['--no-sandbox', '--disable-setuid-sandbox'] };
+  if (usingSandbox) launchOpts.executablePath = SANDBOX_CHROME;
+  const browser = await chromium.launch(launchOpts);
   const page = await browser.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));

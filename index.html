@@ -609,7 +609,7 @@ html.light .car-tabs{background:#fff}
   display:flex;flex-direction:column;gap:clamp(4px,1.1vw,8px);color:var(--glass-text);z-index:2;
 }
 /* Guide item 2 — soft edge glow: a 1px gradient ring instead of a solid border. */
-.lux-fp-panel::before,.util-overlay-bottom .util-stats::before{
+.lux-fp-panel::before{
   content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
   background:var(--glass-ring);
   -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;
@@ -761,79 +761,66 @@ html.light .car-tabs{background:#fff}
 .util-banner-call:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(0,0,0,.35)}
 .util-banner-call:active{opacity:.8;transform:none}
 
-/* ── The live-readout panel ───────────────────────────────────────────────
-   This used to be a loose cluster of individually-boxed chips laid out with
-   flex-wrap along the bottom of the photo, so each chip sized to its own text,
-   the rows came out ragged and unaligned, and the photo's own printed icon
-   strip showed through the gaps between them.
+/* ── The live-readout field ───────────────────────────────────────────────
+   Jeff, 08-06: "take out all the boxes and nest your numbers in a translucent
+   blur where those fake icons are and leave the logos."
 
-   It is now the SAME SHAPE AS THE LUX CARD (Jeff, 08-06: "make the rest of the
-   utilities look like the lux... two columns and shrink it down so the meter
-   itself shows like you did with the thermostat"): one frosted-glass panel
-   down the LEFT side of the photo, over the utility's baked-in branding
-   block, with the actual meter left fully visible on the right. Inside it is
-   a plain evenly-divided grid — no per-cell boxes, so there are no gaps for
-   the photo to bleed through and every column lines up at every width.
+   So: NO chips, NO cell boxes, NO dividers, and no separate logo asset. Every
+   one of these photos already carries the real utility logo up top (the WHUD
+   globe, the spire wordmark, the CEMC oval). The readout is a single softly
+   blurred field of the photo itself, starting just BELOW that logo — which
+   lands it exactly on top of the photo's baked-in marketing copy and fake
+   icon strip ("SMART MEASUREMENT", SAFE SUPPLY / USAGE INSIGHTS, etc.), so
+   the one thing it covers is the one thing that was never real. The numbers
+   sit straight in the blur.
 
-   47% width is the constraint that matters: on all three photos the meter's
-   left edge starts around 48-53% across, so anything wider starts eating the
-   meter. Don't widen it without re-checking all three photos. */
-.util-overlay-bottom{position:absolute;left:3%;right:auto;top:auto;bottom:3%;width:47%;z-index:2;padding:0;display:flex}
-/* Gas (3 stats) and Electric (6) would otherwise be short enough that the
-   panel's top edge lands mid-word on the photo's baked-in headline ("SPIRE
-   ENERGY", "CUMBERLAND ELECTRIC"). Running those two full height covers the
-   headline outright instead of slicing it. Water has 8 stats, so its natural
-   height already clears its own artwork — full height there would squeeze the
-   rows to ~27px, which is too cramped to read. */
-.util-g .util-overlay-bottom,.util-e .util-overlay-bottom{top:3%}
-.util-overlay-bottom .util-stats{
-  position:relative;z-index:1;flex:1;display:grid;gap:0;margin:0;padding:0;overflow:hidden;
-  grid-template-columns:repeat(2,1fr);
-  /* equal-height rows regardless of whether a cell has a unit line under its
-     value — without this, rows with a unit ("19,334.7 / gal") come out taller
-     than rows without one ("$38.20") and the grid looks irregular */
-  grid-auto-rows:1fr;
-  /* Deliberately lighter than --glass-bg/--glass-blur (Jeff, 08-06: "make the
-     boxes translucent like the lux"). The LUX panel reads translucent because
-     the lit fireplace behind it is bright; these sit over dark ground, so they
-     need less tint and a higher backdrop brightness to read the same way.
-     Checked for text contrast against the brightest backdrop of the three
-     (the gas photo's sunset) before landing on these values. */
-  background:rgba(20,18,16,.26);
-  backdrop-filter:blur(20px) saturate(170%) brightness(.92);-webkit-backdrop-filter:blur(20px) saturate(170%) brightness(.92);
-  border:1px solid var(--glass-border);border-radius:clamp(12px,3.4vw,24px);
-  box-shadow:var(--glass-shadow);
+   Two hand-calibrated constraints, both measured against the actual photos —
+   don't change either without re-checking all three:
+     - width 46% (left 4%): each meter's left edge starts around 48-53% across,
+       so anything wider starts eating the meter.
+     - per-card `top`: set just under that photo's own logo. LOWER percentage
+       = field starts higher = covers more. Water 28.5% clears the globe badge
+       (ends 27.6%) while covering "WHITE HOUSE UTILITIES"; gas 29.5% clears
+       the spire mark (ends 28.6%); electric 33% clears the CEMC oval
+       (ends 31.3%) while covering "CUMBERLAND ELECTRIC". */
+.util-overlay-bottom{
+  position:absolute;left:4%;right:auto;bottom:4%;width:46%;z-index:2;
+  display:flex;flex-direction:column;padding:0;background:none;border:0;box-shadow:none;
 }
+.util-w .util-overlay-bottom{top:28.5%}
+.util-g .util-overlay-bottom{top:29.5%}
+.util-e .util-overlay-bottom{top:33%}
+.util-overlay-bottom .util-stats{
+  position:relative;z-index:1;flex:1;display:grid;
+  grid-template-columns:repeat(2,1fr);gap:0 clamp(3px,.9vw,8px);
+  /* equal-height rows regardless of whether a cell has a unit line under its
+     value — without this, rows with a unit ("19,340.5 / gal") come out taller
+     than rows without one ("$38.26") and the readout looks irregular */
+  grid-auto-rows:1fr;
+  padding:clamp(6px,1.6vw,12px);margin:0;overflow:hidden;
+  /* the blur IS the panel — no border, no hard edge, just a soft field of the
+     photo. Light tint (.18) so it reads translucent the way the LUX panel does;
+     checked for text contrast against the brightest backdrop of the three (the
+     gas photo's sunset) before landing on these values. */
+  background:rgba(20,18,16,.18);
+  backdrop-filter:blur(26px) saturate(160%) brightness(.92);-webkit-backdrop-filter:blur(26px) saturate(160%) brightness(.92);
+  border:0;border-radius:clamp(14px,3.8vw,26px);
+  box-shadow:0 20px 60px rgba(0,0,0,.45),0 0 60px rgba(255,170,70,.08);
+}
+/* Gas has only 3 stats — 2 columns would leave an orphan, so it runs as one. */
+.util-overlay-bottom .util-stats-1col{grid-template-columns:1fr}
 .util-overlay-bottom .util-stat{
-  min-width:0;text-align:center;background:none;border:0;border-radius:0;
+  min-width:0;text-align:center;background:none;border:0;border-radius:0;padding:0;
   backdrop-filter:none;-webkit-backdrop-filter:none;
   display:flex;flex-direction:column;justify-content:center;
-  padding:clamp(4px,1.1vw,8px) clamp(3px,1vw,8px);
-  border-left:1px solid var(--glass-hair);border-top:1px solid var(--glass-hair);
 }
-/* hairline dividers only BETWEEN cells — never on the panel's own outer edge */
-.util-overlay-bottom .util-stats-2col .util-stat:nth-child(2n+1){border-left:0}
-.util-overlay-bottom .util-stats-2col .util-stat:nth-child(-n+2){border-top:0}
-/* Gas has 3 stats — 2 columns would leave an orphan, so it runs as one column */
-.util-overlay-bottom .util-stats-1col{grid-template-columns:1fr}
-.util-overlay-bottom .util-stats-1col .util-stat{border-left:0}
-.util-overlay-bottom .util-stats-1col .util-stat:first-child{border-top:0}
 /* Guide item 12 — warm off-white with a soft glow, weight 600, not heavy bold. */
 .util-overlay-bottom .util-stat-label{color:rgba(247,229,196,.78);font-size:clamp(7.4px,1.6vw,12px);font-weight:700;letter-spacing:.6px;text-transform:uppercase;text-shadow:none;line-height:1.25;white-space:normal;overflow-wrap:break-word}
-.util-overlay-bottom .util-stat-val{color:var(--glass-text);font-size:clamp(13.5px,2.45vw,20px);font-weight:600;text-shadow:var(--glass-glow);margin-top:3px;line-height:1.15;font-variant-numeric:tabular-nums;white-space:normal;overflow-wrap:break-word}
-/* the unit drops to its own line so a long real reading ("19,334.7 gal") can
-   never widen a cell past its column — the failure the last attempt at this
+.util-overlay-bottom .util-stat-val{color:var(--glass-text);font-size:clamp(13.5px,2.45vw,20px);font-weight:600;text-shadow:var(--glass-glow);margin-top:1px;line-height:1.15;font-variant-numeric:tabular-nums;white-space:normal;overflow-wrap:break-word}
+/* the unit drops to its own line so a long real reading ("19,340.5 gal") can
+   never widen a cell past its column — the failure the first attempt at this
    design only ever saw with short placeholder values. */
-.util-overlay-bottom .util-stat-unit{display:block;margin:1px 0 0 0;color:rgba(247,229,196,.55);font-size:clamp(7px,1.5vw,11px);font-weight:700;letter-spacing:.4px}
-/* Water's 4 rows are the tallest panel of the three, and on a 320px-wide screen
-   they came out 7.7px taller than the photo itself — the panel's top edge broke
-   out of the banner and got clipped. Trimming ~4px of vertical rhythm per row
-   below 360px buys 16px back, which clears it with room to spare. Everything at
-   360px and up is untouched. */
-@media (max-width:360px){
-  .util-overlay-bottom .util-stat{padding-top:3px;padding-bottom:3px}
-  .util-overlay-bottom .util-stat-val{margin-top:1px}
-}
+.util-overlay-bottom .util-stat-unit{display:block;margin:0;color:rgba(247,229,196,.55);font-size:clamp(7px,1.5vw,11px);font-weight:700;letter-spacing:.4px}
 .util-body{padding:11px 14px 13px}
 .util-head{display:flex;align-items:center;gap:9px;margin-bottom:10px}
 .util-head-name{font-size:13px;font-weight:800;color:var(--text);letter-spacing:.3px}
