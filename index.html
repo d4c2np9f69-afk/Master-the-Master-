@@ -744,58 +744,96 @@ html.light .car-tabs{background:#fff}
    for attention. Deliberately NOT the guide's blur(2px) -- see the matching
    note on .lux-photo-wrap img. */
 .util-banner img{width:100%;height:auto;display:block;filter:saturate(118%) brightness(.82)}
-/* Guide item 8 — warm key light matched to these photos' own sunset tone. */
-.util-banner::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:var(--glass-ambient)}
+/* Guide item 8 — warm key light matched to these photos' own sunset tone.
+   The floor shadow is much lighter here than the shared --glass-ambient (.18 vs
+   .45): the readout panel sits over the bottom-left of these photos, which is
+   exactly where that gradient was darkest, and it was making a .26-alpha glass
+   panel read as a solid black box. LUX keeps the full .45 because its panel sits
+   up top where the gradient is still transparent. */
+.util-banner::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(circle at 70% 20%,rgba(255,210,140,.18),transparent 55%),linear-gradient(to bottom,transparent,rgba(0,0,0,.18))}
 /* Reserve the real image aspect ratio so the lazy-loaded photo doesn't cause layout
    shift when it finishes loading (each meter photo has a different ratio). */
 .util-w .util-banner{aspect-ratio:1320/878}
 .util-g .util-banner{aspect-ratio:1135/868}
 .util-e .util-banner{aspect-ratio:1228/857}
 /* Guide item 6 — floating glass button. */
-.util-banner-call{position:absolute;right:clamp(8px,2.2vw,16px);top:clamp(8px,2.2vw,16px);z-index:3;display:inline-flex;align-items:center;gap:5px;font-size:clamp(10px,1.8vw,15px);font-weight:700;letter-spacing:.5px;color:var(--glass-text);background:rgba(255,255,255,.10);backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:clamp(5px,1.1vw,9px) clamp(9px,1.8vw,15px);line-height:1;text-decoration:none;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.25);transition:.25s;-webkit-tap-highlight-color:transparent}
+.util-banner-call{position:absolute;right:clamp(8px,2.2vw,16px);top:clamp(8px,2.2vw,16px);z-index:3;display:inline-flex;align-items:center;gap:5px;font-size:clamp(11px,2vw,17px);font-weight:700;letter-spacing:.5px;color:var(--glass-text);background:rgba(255,255,255,.10);backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:clamp(5px,1.1vw,9px) clamp(9px,1.8vw,15px);line-height:1;text-decoration:none;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.25);transition:.25s;-webkit-tap-highlight-color:transparent}
 .util-banner-call:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(0,0,0,.35)}
 .util-banner-call:active{opacity:.8;transform:none}
 
-/* ── The live-readout slab ────────────────────────────────────────────────
+/* ── The live-readout panel ───────────────────────────────────────────────
    This used to be a loose cluster of individually-boxed chips laid out with
-   flex-wrap, so each chip sized to its own text and the rows came out ragged
-   and unaligned, with the photo's own printed icon strip showing through the
-   gaps between them. It's now ONE frosted-glass slab (guide items 1/2/3/9)
-   with a plain, evenly-divided grid inside it — no per-cell boxes at all, so
-   there are no gaps for the photo to bleed through and every column lines up
-   at every width. The slab is inset from the photo edges so it reads as a
-   piece of glass laid on the picture, not a black bar taped across it. */
-.util-overlay-bottom{position:absolute;bottom:0;left:0;right:0;z-index:2;padding:0 clamp(6px,1.7vw,12px) clamp(6px,1.7vw,12px)}
-/* Guide item 3 — a transparent gradient rising out of the image instead of an
-   opaque black band, so the slab has something to sit on without a hard edge. */
-.util-overlay-bottom::before{content:"";position:absolute;left:0;right:0;bottom:0;height:270%;z-index:0;pointer-events:none;background:linear-gradient(to top,rgba(4,4,10,.86) 0%,rgba(4,4,10,.66) 28%,rgba(4,4,10,.30) 62%,rgba(4,4,10,0) 100%)}
+   flex-wrap along the bottom of the photo, so each chip sized to its own text,
+   the rows came out ragged and unaligned, and the photo's own printed icon
+   strip showed through the gaps between them.
+
+   It is now the SAME SHAPE AS THE LUX CARD (Jeff, 08-06: "make the rest of the
+   utilities look like the lux... two columns and shrink it down so the meter
+   itself shows like you did with the thermostat"): one frosted-glass panel
+   down the LEFT side of the photo, over the utility's baked-in branding
+   block, with the actual meter left fully visible on the right. Inside it is
+   a plain evenly-divided grid — no per-cell boxes, so there are no gaps for
+   the photo to bleed through and every column lines up at every width.
+
+   47% width is the constraint that matters: on all three photos the meter's
+   left edge starts around 48-53% across, so anything wider starts eating the
+   meter. Don't widen it without re-checking all three photos. */
+.util-overlay-bottom{position:absolute;left:3%;right:auto;top:auto;bottom:3%;width:47%;z-index:2;padding:0;display:flex}
+/* Gas (3 stats) and Electric (6) would otherwise be short enough that the
+   panel's top edge lands mid-word on the photo's baked-in headline ("SPIRE
+   ENERGY", "CUMBERLAND ELECTRIC"). Running those two full height covers the
+   headline outright instead of slicing it. Water has 8 stats, so its natural
+   height already clears its own artwork — full height there would squeeze the
+   rows to ~27px, which is too cramped to read. */
+.util-g .util-overlay-bottom,.util-e .util-overlay-bottom{top:3%}
 .util-overlay-bottom .util-stats{
-  position:relative;z-index:1;display:grid;gap:0;margin:0;padding:0;overflow:hidden;
-  grid-template-columns:repeat(3,1fr);
-  background:var(--glass-bg);
-  backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
-  border:1px solid var(--glass-border);border-radius:clamp(14px,3.8vw,26px);
+  position:relative;z-index:1;flex:1;display:grid;gap:0;margin:0;padding:0;overflow:hidden;
+  grid-template-columns:repeat(2,1fr);
+  /* equal-height rows regardless of whether a cell has a unit line under its
+     value — without this, rows with a unit ("19,334.7 / gal") come out taller
+     than rows without one ("$38.20") and the grid looks irregular */
+  grid-auto-rows:1fr;
+  /* Deliberately lighter than --glass-bg/--glass-blur (Jeff, 08-06: "make the
+     boxes translucent like the lux"). The LUX panel reads translucent because
+     the lit fireplace behind it is bright; these sit over dark ground, so they
+     need less tint and a higher backdrop brightness to read the same way.
+     Checked for text contrast against the brightest backdrop of the three
+     (the gas photo's sunset) before landing on these values. */
+  background:rgba(20,18,16,.26);
+  backdrop-filter:blur(20px) saturate(170%) brightness(.92);-webkit-backdrop-filter:blur(20px) saturate(170%) brightness(.92);
+  border:1px solid var(--glass-border);border-radius:clamp(12px,3.4vw,24px);
   box-shadow:var(--glass-shadow);
 }
 .util-overlay-bottom .util-stat{
   min-width:0;text-align:center;background:none;border:0;border-radius:0;
   backdrop-filter:none;-webkit-backdrop-filter:none;
-  padding:clamp(6px,1.6vw,11px) clamp(3px,1vw,9px);
+  display:flex;flex-direction:column;justify-content:center;
+  padding:clamp(4px,1.1vw,8px) clamp(3px,1vw,8px);
   border-left:1px solid var(--glass-hair);border-top:1px solid var(--glass-hair);
 }
-/* hairline dividers only BETWEEN cells — never on the slab's own outer edge */
-.util-overlay-bottom .util-stats-grid3 .util-stat:nth-child(3n+1){border-left:0}
-.util-overlay-bottom .util-stats-grid3 .util-stat:nth-child(-n+3){border-top:0}
-.util-overlay-bottom .util-stats-grid4{grid-template-columns:repeat(4,1fr)}
-.util-overlay-bottom .util-stats-grid4 .util-stat:nth-child(4n+1){border-left:0}
-.util-overlay-bottom .util-stats-grid4 .util-stat:nth-child(-n+4){border-top:0}
+/* hairline dividers only BETWEEN cells — never on the panel's own outer edge */
+.util-overlay-bottom .util-stats-2col .util-stat:nth-child(2n+1){border-left:0}
+.util-overlay-bottom .util-stats-2col .util-stat:nth-child(-n+2){border-top:0}
+/* Gas has 3 stats — 2 columns would leave an orphan, so it runs as one column */
+.util-overlay-bottom .util-stats-1col{grid-template-columns:1fr}
+.util-overlay-bottom .util-stats-1col .util-stat{border-left:0}
+.util-overlay-bottom .util-stats-1col .util-stat:first-child{border-top:0}
 /* Guide item 12 — warm off-white with a soft glow, weight 600, not heavy bold. */
-.util-overlay-bottom .util-stat-label{color:rgba(247,229,196,.60);font-size:clamp(6.6px,1.4vw,11px);font-weight:700;letter-spacing:.6px;text-transform:uppercase;text-shadow:none;line-height:1.25;white-space:normal;overflow-wrap:break-word}
-.util-overlay-bottom .util-stat-val{color:var(--glass-text);font-size:clamp(11.5px,2.1vw,17px);font-weight:600;text-shadow:var(--glass-glow);margin-top:3px;line-height:1.15;font-variant-numeric:tabular-nums;white-space:normal;overflow-wrap:break-word}
+.util-overlay-bottom .util-stat-label{color:rgba(247,229,196,.78);font-size:clamp(7.4px,1.6vw,12px);font-weight:700;letter-spacing:.6px;text-transform:uppercase;text-shadow:none;line-height:1.25;white-space:normal;overflow-wrap:break-word}
+.util-overlay-bottom .util-stat-val{color:var(--glass-text);font-size:clamp(13.5px,2.45vw,20px);font-weight:600;text-shadow:var(--glass-glow);margin-top:3px;line-height:1.15;font-variant-numeric:tabular-nums;white-space:normal;overflow-wrap:break-word}
 /* the unit drops to its own line so a long real reading ("19,334.7 gal") can
    never widen a cell past its column — the failure the last attempt at this
    design only ever saw with short placeholder values. */
-.util-overlay-bottom .util-stat-unit{display:block;margin:1px 0 0;color:rgba(247,229,196,.55);font-size:clamp(6.2px,1.3vw,10px);font-weight:700;letter-spacing:.4px}
+.util-overlay-bottom .util-stat-unit{display:block;margin:1px 0 0 0;color:rgba(247,229,196,.55);font-size:clamp(7px,1.5vw,11px);font-weight:700;letter-spacing:.4px}
+/* Water's 4 rows are the tallest panel of the three, and on a 320px-wide screen
+   they came out 7.7px taller than the photo itself — the panel's top edge broke
+   out of the banner and got clipped. Trimming ~4px of vertical rhythm per row
+   below 360px buys 16px back, which clears it with room to spare. Everything at
+   360px and up is untouched. */
+@media (max-width:360px){
+  .util-overlay-bottom .util-stat{padding-top:3px;padding-bottom:3px}
+  .util-overlay-bottom .util-stat-val{margin-top:1px}
+}
 .util-body{padding:11px 14px 13px}
 .util-head{display:flex;align-items:center;gap:9px;margin-bottom:10px}
 .util-head-name{font-size:13px;font-weight:800;color:var(--text);letter-spacing:.3px}
@@ -1669,7 +1707,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <img src="./images/util-water.jpg" alt="White House Utilities water meter" loading="lazy">
           <a class="util-banner-call" href="tel:6156724110" aria-label="Call White House Utility District customer service">&#128222; CALL</a>
           <div class="util-overlay-bottom">
-            <div class="util-stats util-stats-grid4">
+            <div class="util-stats util-stats-2col">
               <div class="util-stat"><div class="util-stat-label">Reading</div><div class="util-stat-val" id="util-water-today">&mdash;<span class="util-stat-unit">gal</span></div></div>
               <div class="util-stat"><div class="util-stat-label">This Cycle</div><div class="util-stat-val" id="util-water-month">&mdash;<span class="util-stat-unit">gal</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Flow</div><div class="util-stat-val" id="util-water-flow">&mdash;<span class="util-stat-unit">gpm</span></div></div>
@@ -1701,7 +1739,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <img src="./images/util-gas.jpg" alt="Spire Energy gas meter" loading="lazy">
           <a class="util-banner-call" href="tel:8007527504" aria-label="Call Spire Energy customer service">&#128222; CALL</a>
           <div class="util-overlay-bottom">
-            <div class="util-stats util-stats-grid3">
+            <div class="util-stats util-stats-1col">
               <div class="util-stat"><div class="util-stat-label">Reading</div><div class="util-stat-val" id="util-gas-today">&mdash;<span class="util-stat-unit">ccf</span></div></div>
               <div class="util-stat"><div class="util-stat-label">This Month</div><div class="util-stat-val" id="util-gas-month">&mdash;<span class="util-stat-unit">ccf</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Est. Cost</div><div class="util-stat-val" id="util-gas-cost">&mdash;</div></div>
@@ -1727,7 +1765,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <img src="./images/util-electric.jpg" alt="Cumberland Electric (CEMC) meter" loading="lazy">
           <a class="util-banner-call" href="tel:8009872362" aria-label="Call Cumberland Electric CEMC customer service">&#128222; CALL</a>
           <div class="util-overlay-bottom">
-            <div class="util-stats util-stats-grid3">
+            <div class="util-stats util-stats-2col">
               <div class="util-stat"><div class="util-stat-label">Now</div><div class="util-stat-val" id="util-elec-now">&mdash;<span class="util-stat-unit">kW</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Today</div><div class="util-stat-val" id="util-elec-today">&mdash;<span class="util-stat-unit">kWh</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Yesterday</div><div class="util-stat-val" id="util-elec-yesterday">&mdash;<span class="util-stat-unit">kWh</span></div></div>
