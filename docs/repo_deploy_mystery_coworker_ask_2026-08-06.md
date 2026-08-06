@@ -1,8 +1,11 @@
-# Two-repo / Cloudflare Pages mystery — needs the coworker's local dashboard access (2026-08-06)
+# Two-repo / Cloudflare Pages mystery — RESOLVED 2026-08-06
 
-**For Jeff to paste directly to the coworker session, or the coworker to read after `git pull`.**
-This is a real structural problem, not a one-off bug — it explains a chunk of "why doesn't
-anything stay working." Read this fully before touching anything.
+**RESOLVED same day — no coworker action needed.** Jeff opened the live app after the push
+described below and saw the new Electric card cells (Yesterday/Peak Hour/Last 7 Days), confirming
+**`Master-the-Master-` is the repo Cloudflare Pages actually deploys**, on branch
+`claude/time-master-project-liq1jw`. `Toro-Timemaster-` is a stale, diverged mirror — see
+"What This Project Is" in `CLAUDE.md` for the permanent note. Kept below for the record / in case
+this ever needs re-litigating.
 
 ---
 
