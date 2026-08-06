@@ -98,3 +98,46 @@ before building anything new) before considering scraping — lower priority tha
 July 1, 2026. Same cross-check pattern as the other utilities: next time a real CEMC bill photo
 comes in, re-derive `ELEC_BASE`/`ELEC_PER_KWH` from it rather than trusting the constants are still
 current — the rate sheet is also directly fetchable now if a bill isn't handy.
+
+---
+
+## App-side implementation status (2026-08-06, cloud session)
+
+**Item 1 (real Today/Yesterday/Peak Hour + Last 7 Days panel): built.** New
+`functions/api/ha-stats.js` opens a one-shot outbound WebSocket to the same allow-listed Nabu Casa
+host `ha.js` already uses, authenticates with the browser's own token (nothing stored
+server-side — same pattern as `ha.js`), sends one `history/statistics_during_period` command
+(`types: ['change','sum','state']`, preferring `change` and falling back to `sum`/`state`), and
+returns the JSON result over normal HTTP — REST-only `haFetch()` genuinely cannot reach this
+command, there is no REST equivalent in HA. Client-side `loadElectricStats()`/`haStatsFetch()`
+(index.html) fetch a trailing 25h hourly window + trailing 8-day daily window, compute real
+TODAY/YESTERDAY/PEAK HOUR, and render the "Last 7 Days" sub-panel (`util-elec-history`, same
+visual pattern as Water's Billing History table). The old 24-bucket estimate stays as the fast
+fallback (shown with the `≈`/EST chip) until the real fetch resolves, then gets silently
+overwritten — matches the existing `putWaterCycle()`/`irrGalFromHistory()` real-vs-estimate
+pattern. **NOW is left permanently blank (—)** per this doc's explicit instruction — the old
+hour-of-day "Now" estimate was removed outright, not just deprioritized.
+
+**Verification done:** full `lint-app.js`/`smoke-test.js` regression clean; a dedicated
+Playwright test mocked `/api/ha-stats`'s hourly+daily responses and confirmed Today/Yesterday/Peak
+Hour/Last 7 Days compute and render correctly end-to-end, Now stays blank, and the chip flips to
+LIVE; a direct unit test of `ha-stats.js` confirmed its request validation (400/401) and that an
+unreachable WS fails cleanly with a 502 rather than hanging (so the client's `.catch()` falls back
+to the estimate instead of breaking). **Verification NOT possible from this sandbox:** the real
+WS round-trip against Jeff's actual HA/SmartHub — no network path exists here, same limitation as
+every other real-HA fix in this project's history. Concretely, the one unconfirmed assumption is
+which field (`change`, `sum`, or `state`) this specific integration/HA version actually populates
+in the `history/statistics_during_period` response — the code tries `change` first as the most
+direct "per-period delta" field, falling back to `sum` then `state`, but this needs a live check.
+**Ask for the coworker:** fire that WS command for
+`sensor.electric_smarthub_energy_monthly_usage_4501007001` from HA's own WS API/dev tools and
+confirm the field name. If Today/Yesterday/Peak Hour don't populate after this deploys (chip stays
+EST, cells stay blank/≈), that's the first thing to check.
+
+**Item 3 (Bill Due / Last Payment / vs Last Year): not attempted.** The doc's own instruction is
+to check the entity's `attributes` first — that needs live HA entity inspection, which this
+sandbox cannot do. Left for the coworker or a future session with real HA access.
+
+**Item 2 (poll interval) and item 4 (rate sheet):** no app-code changes needed — both already
+handled live by the coworker (poll interval reconfigured directly in HA; rate sheet is a
+reference source for the next bill cross-check, not something the app reads automatically).

@@ -1602,9 +1602,11 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <img src="./images/util-electric.jpg" alt="Cumberland Electric (CEMC) meter" loading="lazy">
           <a class="util-banner-call" href="tel:8009872362" aria-label="Call Cumberland Electric CEMC customer service">&#128222; CALL</a>
           <div class="util-overlay-bottom">
-            <div class="util-stats" style="grid-template-columns:repeat(2,1fr)">
+            <div class="util-stats" style="grid-template-columns:repeat(3,1fr)">
               <div class="util-stat"><div class="util-stat-label">Now</div><div class="util-stat-val" id="util-elec-now">&mdash;<span class="util-stat-unit">kW</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Today</div><div class="util-stat-val" id="util-elec-today">&mdash;<span class="util-stat-unit">kWh</span></div></div>
+              <div class="util-stat"><div class="util-stat-label">Yesterday</div><div class="util-stat-val" id="util-elec-yesterday">&mdash;<span class="util-stat-unit">kWh</span></div></div>
+              <div class="util-stat"><div class="util-stat-label">Peak Hour</div><div class="util-stat-val" id="util-elec-peak">&mdash;</div></div>
               <div class="util-stat"><div class="util-stat-label">This Month</div><div class="util-stat-val" id="util-elec-month">&mdash;<span class="util-stat-unit">kWh</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Est. Cost</div><div class="util-stat-val" id="util-elec-cost">&mdash;</div></div>
             </div>
@@ -1619,6 +1621,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
             </div>
             <span class="util-chip" id="util-elec-chip">WAITING</span>
           </div>
+          <div id="util-elec-history" style="display:none;margin:0 0 8px"></div>
           <div class="util-foot" id="util-elec-foot"><span class="dot"></span> Waiting for Beehive energy monitor</div>
         </div>
       </div>
@@ -6809,6 +6812,23 @@ function haFetch(path, opts) {
   return fetch('/api/ha?path=' + encodeURIComponent(path), init);
 }
 
+// Same-origin proxy for HA's long-term Statistics API (history/statistics_during_period) —
+// a WebSocket-only HA command, no REST equivalent, so /api/ha's plain HTTP relay can't reach
+// it. /api/ha-stats opens a one-shot WS to Beehive server-side and returns the result as JSON.
+// Same auth pattern as haFetch(): browser sends its own token, nothing is stored server-side.
+function haStatsFetch(statisticId, startIso, endIso, period) {
+  var base = localStorage.getItem('ha_base') || HA_BASE;
+  var token = getHaToken();
+  var headers = {};
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  if (base) headers['X-HA-Base'] = base;
+  var qs = '?statistic_id=' + encodeURIComponent(statisticId)
+    + '&start_time=' + encodeURIComponent(startIso)
+    + '&end_time=' + encodeURIComponent(endIso)
+    + '&period=' + encodeURIComponent(period);
+  return fetch('/api/ha-stats' + qs, { headers: headers, signal: AbortSignal.timeout(20000) });
+}
+
 function saveHaToken() {
   var inp = document.getElementById('haTokenInput');
   if (!inp || !inp.value.trim()) return;
@@ -8133,6 +8153,112 @@ function loadUtilities() {
       try { localStorage.setItem(key, JSON.stringify(st)); } catch (e) {}
       return delta;
     }
+    // Real Today/Yesterday/Peak Hour from HA's long-term Statistics API (via /api/ha-stats,
+    // see functions/api/ha-stats.js) — replaces the electricDayDelta() estimate above with
+    // ground truth once it resolves, same "estimate now, refine when real data lands" pattern
+    // as putWaterCycle()/irrGalFromHistory(). Built per
+    // docs/utilities/electric_smarthub_data_upgrade_2026-08-06.md — the SmartHub integration
+    // already imports real hourly/daily statistics for this entity, separate from its monthly
+    // running-total state. Could not be tested against Jeff's real HA/SmartHub data from this
+    // sandbox (no network path) — silently falls back to the existing estimate on any failure.
+    function loadElectricStats(entId){
+      if (!entId) return;
+      var now = new Date();
+      var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+      // 25h back guarantees a full trailing-24h peak-hour window even right after local
+      // midnight; 8 days back guarantees 7 full prior days for the Last 7 Days panel.
+      var hourWindowStart = new Date(now.getTime() - 25 * 3600000);
+      var dayWindowStart = new Date(todayStart.getTime() - 8 * 86400000);
+      var nowIso = now.toISOString();
+
+      Promise.all([
+        haStatsFetch(entId, hourWindowStart.toISOString(), nowIso, 'hour').then(function(r){ return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)); }),
+        haStatsFetch(entId, dayWindowStart.toISOString(), nowIso, 'day').then(function(r){ return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)); })
+      ]).then(function(results){
+        var hourly = (results[0] && results[0].statistics) || [];
+        var daily = (results[1] && results[1].statistics) || [];
+        if (!hourly.length && !daily.length) return; // nothing usable yet -- leave the estimate showing
+
+        function periodKwh(item){
+          // Prefer the explicit per-period 'change' HA's WS command returns when asked for it;
+          // fall back to 'sum'/'state' if 'change' isn't populated for this entity/HA version.
+          if (item.change != null) return Math.max(0, item.change);
+          if (item.sum != null) return Math.max(0, item.sum);
+          if (item.state != null) return Math.max(0, item.state);
+          return 0;
+        }
+        function dayKeyOf(d){ return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate(); }
+
+        var todayKey = dayKeyOf(todayStart);
+        var yesterdayKey = dayKeyOf(new Date(todayStart.getTime() - 86400000));
+
+        var todaySum = 0, peakVal = -1, peakStart = null, sawTodayHour = false;
+        hourly.forEach(function(item){
+          var t = new Date(item.start);
+          var kwh = periodKwh(item);
+          if (dayKeyOf(t) === todayKey) { todaySum += kwh; sawTodayHour = true; }
+          if (kwh > peakVal) { peakVal = kwh; peakStart = t; }
+        });
+
+        if (sawTodayHour) {
+          put('util-elec-today', todaySum.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+        }
+        if (peakStart && peakVal >= 0) {
+          var h1 = peakStart.getHours(), h2 = (h1 + 1) % 24;
+          var fmtHr = function(h){ var ap = h < 12 ? 'AM' : 'PM'; var hh = h % 12; if (hh === 0) hh = 12; return hh + ap; };
+          var peakEl = document.getElementById('util-elec-peak');
+          if (peakEl) peakEl.innerHTML = fmtHr(h1) + '-' + fmtHr(h2)
+            + '<br><span style="font-size:9px;font-weight:700;color:var(--muted)">' + peakVal.toFixed(1) + ' kWh</span>';
+        }
+
+        var yesterdayVal = null;
+        daily.forEach(function(item){
+          if (dayKeyOf(new Date(item.start)) === yesterdayKey) yesterdayVal = periodKwh(item);
+        });
+        if (yesterdayVal != null) {
+          put('util-elec-yesterday', yesterdayVal.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+        }
+
+        if (sawTodayHour || yesterdayVal != null) {
+          var chip = document.getElementById('util-elec-chip');
+          if (chip) { chip.textContent = 'LIVE'; chip.classList.remove('est'); chip.classList.add('live'); }
+          var foot = document.getElementById('util-elec-foot');
+          if (foot) { foot.classList.remove('est'); foot.classList.add('live'); foot.innerHTML = '<span class="dot"></span> Today/Yesterday/Peak Hour live from SmartHub hourly statistics'; }
+        }
+
+        renderElectricHistory(daily, todayKey, dayKeyOf);
+      })
+      .catch(function(){
+        // Real statistics unreachable this cycle (Beehive offline, HA restarting, token
+        // expired) -- leave the fast client-side estimate already on screen, untouched.
+      });
+    }
+    function renderElectricHistory(daily, todayKey, dayKeyOf){
+      var el = document.getElementById('util-elec-history');
+      if (!el || !daily || !daily.length) return;
+      var days = daily.filter(function(item){
+        return dayKeyOf(new Date(item.start)) !== todayKey; // today's day-period is still partial
+      }).slice(-7);
+      if (!days.length) return;
+      var maxKwh = 0;
+      var rows = days.map(function(item){
+        var t = new Date(item.start);
+        var kwh = (item.change != null) ? Math.max(0, item.change) : (item.sum != null ? Math.max(0, item.sum) : Math.max(0, item.state || 0));
+        if (kwh > maxKwh) maxKwh = kwh;
+        return { label: t.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }), kwh: kwh };
+      });
+      var barsHtml = rows.map(function(r){
+        var pct = maxKwh > 0 ? Math.max(4, Math.round((r.kwh / maxKwh) * 100)) : 4;
+        return '<tr style="border-bottom:1px solid var(--border)">'
+          + '<td style="padding:4px 6px;font-size:11px">' + r.label + '</td>'
+          + '<td style="padding:4px 6px"><div style="background:rgba(150,150,150,.15);border-radius:4px;overflow:hidden;height:8px"><div style="width:' + pct + '%;height:100%;background:var(--gold)"></div></div></td>'
+          + '<td style="padding:4px 6px;font-size:11px;text-align:right;white-space:nowrap">' + r.kwh.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' kWh</td>'
+          + '</tr>';
+      }).join('');
+      el.style.display = '';
+      el.innerHTML = '<div style="font-size:9px;letter-spacing:1.5px;color:var(--muted);font-weight:800;text-transform:uppercase;margin:0 0 6px;padding-top:8px;border-top:1px solid var(--border)">Last 7 Days</div>'
+        + '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><tbody>' + barsHtml + '</tbody></table></div>';
+    }
     // Fast synchronous estimate from the fixed weekly schedule -- used immediately so the
     // sewer-overcharge note isn't blank while irrGalFromHistory()'s HA history fetch is
     // still in flight. Misses rain delays/skipped days/manual overrides, so it's always
@@ -8416,20 +8542,24 @@ function loadUtilities() {
         lastSample = { ts: nowTs, val: eMonth };
       }
 
+      // "Now" is deliberately left blank (—) unless a real instantaneous sensor exists (eNow
+      // above) — SmartHub's finest real grain is hourly, not instantaneous, and modeling a fake
+      // "Now" from the hour-of-day profile was explicitly dropped per Jeff/coworker's 2026-08-06
+      // review (docs/utilities/electric_smarthub_data_upgrade_2026-08-06.md): genuine "Now" can
+      // only come from a future CT-clamp build, so it stays honestly blank until then.
       var profile = loadElecProfile();
-      var hod = new Date().getHours();
-      var estNow = (profile.counts && profile.counts[hod] > 0) ? profile.buckets[hod] : null;
-      var haveModel = estNow != null;
-      if (!eNow && estNow != null) put('util-elec-now', '≈' + estNow.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
       if (num('sensor.electric_today') == null) {
+        // Fast synchronous fallback so Today isn't blank while loadElectricStats()'s real
+        // hourly-statistics fetch (below) is still in flight — same "estimate now, refine
+        // when real data lands" pattern as putWaterCycle()/irrGalFromHistory().
         var todayReal = electricDayDelta(eMonth);              // measured since local midnight, as of the last real SmartHub sample
         var gapEst = estimateElecSpan(profile, lastSample.ts, nowTs); // modeled fill from that sample to right now
         put('util-elec-today', '≈' + (todayReal + gapEst).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+        if (!eNow) estimated('elec', 'Month/Cost live from SmartHub · Today modeled (≈) — refining with real hourly data…');
+      } else if (!eNow) {
+        live('elec');
       }
-      if (!eNow) {
-        if (haveModel) estimated('elec', 'Month/Cost live from SmartHub · Now/Today modeled (≈) — accuracy improves over time');
-        else live('elec'); // real monthly data flowing, just not enough history yet to model Now/Today
-      }
+      loadElectricStats(eMonthEnt);
     }
   })
   .catch(function(){
