@@ -791,11 +791,54 @@ html.light .car-tabs{background:#fff}
    `top` values are GONE: there is nothing left to dodge, and the readout just
    sits centred on the clean left side of all three, one rule for all.
    The only constraint left is width — each meter's left edge starts around 45%
-   across, so don't widen much past 41% without re-checking all three. */
+   across, so don't widen much past 41% without re-checking all three.
+
+   08-06 (later still): the card's whole text block — name, provider, LIVE chip
+   and the "Live from Beehive" status line — moved OUT of .util-body and ONTO
+   the photo too (Jeff: "you can make all that shit that was underneath the
+   pictures before all fit on the picture now"). Only the billing-history /
+   Last-7-Days tables stay below, because they're real tables. The left column
+   is now one stack: header on top, blurred readout in the middle, status line
+   inside the bottom of the glass. .util-body keeps horizontal padding only, so
+   it collapses to zero height while its table is hidden. */
 .util-overlay-bottom{
-  position:absolute;left:5%;right:auto;top:50%;bottom:auto;transform:translateY(-50%);
+  position:absolute;left:5%;right:auto;top:6%;bottom:6%;transform:none;
   width:41%;z-index:2;
-  display:flex;flex-direction:column;padding:0;background:none;border:0;box-shadow:none;
+  display:flex;flex-direction:column;justify-content:center;gap:clamp(5px,1.4vw,10px);
+  padding:0;background:none;border:0;box-shadow:none;
+}
+/* header sits above the glass; fixed light-on-dark values because it is on a
+   permanently dark photo in both themes */
+.util-overlay-bottom .util-head{
+  display:flex;flex-wrap:wrap;align-items:center;gap:3px clamp(5px,1.4vw,9px);margin:0;flex:0 0 auto;
+  text-shadow:0 1px 6px rgba(0,0,0,.75);
+}
+/* Give the name a real flex-basis so that on a narrow phone the LIVE chip drops
+   to its own line instead of squeezing the name into an ellipsis — "Natural Gas"
+   was clipping to 35px of a 64px word at 320px wide before this. */
+.util-overlay-bottom .util-head > div{flex:1 1 72px;min-width:0}
+.util-overlay-bottom .util-chip{flex:0 0 auto}
+.util-head-icon{font-size:clamp(14px,3.3vw,24px);line-height:1;flex-shrink:0}
+.util-overlay-bottom .util-head-name{color:var(--glass-text);font-size:clamp(11px,2.5vw,20px);font-weight:700;letter-spacing:.3px;line-height:1.15;white-space:normal;overflow-wrap:break-word}
+/* The provider/meter-model line ("White House Utilities • flowIQ 2100") is hidden
+   on the photo on purpose: at 41% column width it wraps to three ragged lines and
+   pushes the LIVE chip out of the column. It's also redundant here — each photo
+   now shows that utility's real logo on the meter itself. The text is still in the
+   DOM (nothing else reads it, but keeping it costs nothing and it stays available
+   if we ever widen the column). */
+.util-overlay-bottom .util-head-prov{display:none}
+.util-overlay-bottom .util-chip{
+  margin:0;flex-shrink:0;font-size:clamp(6.5px,1.4vw,11px);padding:clamp(2px,.6vw,5px) clamp(5px,1.3vw,10px);
+  background:rgba(255,255,255,.12);color:rgba(247,241,231,.85);border:1px solid rgba(255,255,255,.2);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.util-overlay-bottom .util-chip.live{background:rgba(34,197,94,.2);color:#86efac;border-color:rgba(34,197,94,.4)}
+.util-overlay-bottom .util-chip.est{background:rgba(56,189,248,.2);color:#7dd3fc;border-color:rgba(56,189,248,.4)}
+/* status line lives inside the bottom of the glass field */
+.util-overlay-bottom .util-foot{
+  margin:clamp(4px,1.1vw,8px) 0 0;font-size:clamp(6.6px,1.45vw,11px);
+  color:rgba(247,229,196,.72);text-shadow:0 1px 6px rgba(0,0,0,.7);
+  justify-content:center;text-align:center;line-height:1.2;
 }
 .util-overlay-bottom .util-stats{
   position:relative;z-index:1;flex:1;display:grid;
@@ -833,7 +876,7 @@ html.light .car-tabs{background:#fff}
    never widen a cell past its column — the failure the first attempt at this
    design only ever saw with short placeholder values. */
 .util-overlay-bottom .util-stat-unit{display:block;margin:0;color:rgba(247,229,196,.55);font-size:clamp(7px,1.5vw,11px);font-weight:700;letter-spacing:.4px;text-shadow:0 1px 6px rgba(0,0,0,.7)}
-.util-body{padding:11px 14px 13px}
+.util-body{padding:0 14px}  /* horizontal only, so the card collapses flat while its table is hidden */
 .util-head{display:flex;align-items:center;gap:9px;margin-bottom:10px}
 .util-head-name{font-size:13px;font-weight:800;color:var(--text);letter-spacing:.3px}
 .util-head-prov{font-size:10px;color:var(--muted);margin-top:1px}
@@ -1706,6 +1749,14 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <img src="./images/util-water.jpg" alt="White House Utilities water meter" loading="lazy">
           <a class="util-banner-call" href="tel:6156724110" aria-label="Call White House Utility District customer service">&#128222; CALL</a>
           <div class="util-overlay-bottom">
+            <div class="util-head">
+              <span class="util-head-icon">&#128167;</span>
+              <div style="flex:1;min-width:0">
+                <div class="util-head-name">Water</div>
+                <div class="util-head-prov">White House Utilities &bull; flowIQ 2100</div>
+              </div>
+              <span class="util-chip" id="util-water-chip">WAITING</span>
+            </div>
             <div class="util-stats util-stats-2col">
               <div class="util-stat"><div class="util-stat-label">Reading</div><div class="util-stat-val" id="util-water-today">&mdash;<span class="util-stat-unit">gal</span></div></div>
               <div class="util-stat"><div class="util-stat-label">This Cycle</div><div class="util-stat-val" id="util-water-month">&mdash;<span class="util-stat-unit">gal</span></div></div>
@@ -1716,19 +1767,11 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
               <div class="util-stat"><div class="util-stat-label">Stormwater</div><div class="util-stat-val" id="util-stormwater-cost">&mdash;</div></div>
               <div class="util-stat"><div class="util-stat-label">Combined</div><div class="util-stat-val" id="util-combined-cost" style="font-weight:800">&mdash;</div></div>
             </div>
+            <div class="util-foot" id="util-water-foot"><span class="dot"></span> Waiting for Beehive meter reader</div>
           </div>
         </div>
         <div class="util-body">
-          <div class="util-head">
-            <span style="font-size:18px">&#128167;</span>
-            <div style="flex:1;min-width:0">
-              <div class="util-head-name">Water</div>
-              <div class="util-head-prov">White House Utilities &bull; flowIQ 2100</div>
-            </div>
-            <span class="util-chip" id="util-water-chip">WAITING</span>
-          </div>
-          <div id="util-water-history" style="display:none;margin:0 0 8px"></div>
-          <div class="util-foot" id="util-water-foot"><span class="dot"></span> Waiting for Beehive meter reader</div>
+          <div id="util-water-history" style="display:none"></div>
         </div>
       </div>
 
@@ -1738,23 +1781,21 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <img src="./images/util-gas.jpg" alt="Spire Energy gas meter" loading="lazy">
           <a class="util-banner-call" href="tel:8007527504" aria-label="Call Spire Energy customer service">&#128222; CALL</a>
           <div class="util-overlay-bottom">
+            <div class="util-head">
+              <span class="util-head-icon">&#128293;</span>
+              <div style="flex:1;min-width:0">
+                <div class="util-head-name">Natural Gas</div>
+                <div class="util-head-prov">Spire Energy &bull; Itron 100G ERT</div>
+              </div>
+              <span class="util-chip" id="util-gas-chip">WAITING</span>
+            </div>
             <div class="util-stats util-stats-1col">
               <div class="util-stat"><div class="util-stat-label">Reading</div><div class="util-stat-val" id="util-gas-today">&mdash;<span class="util-stat-unit">ccf</span></div></div>
               <div class="util-stat"><div class="util-stat-label">This Month</div><div class="util-stat-val" id="util-gas-month">&mdash;<span class="util-stat-unit">ccf</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Est. Cost</div><div class="util-stat-val" id="util-gas-cost">&mdash;</div></div>
             </div>
+            <div class="util-foot" id="util-gas-foot"><span class="dot"></span> Waiting for Beehive meter reader</div>
           </div>
-        </div>
-        <div class="util-body">
-          <div class="util-head">
-            <span style="font-size:18px">&#128293;</span>
-            <div style="flex:1;min-width:0">
-              <div class="util-head-name">Natural Gas</div>
-              <div class="util-head-prov">Spire Energy &bull; Itron 100G ERT</div>
-            </div>
-            <span class="util-chip" id="util-gas-chip">WAITING</span>
-          </div>
-          <div class="util-foot" id="util-gas-foot"><span class="dot"></span> Waiting for Beehive meter reader</div>
         </div>
       </div>
 
@@ -1764,6 +1805,14 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <img src="./images/util-electric.jpg" alt="Cumberland Electric (CEMC) meter" loading="lazy">
           <a class="util-banner-call" href="tel:8009872362" aria-label="Call Cumberland Electric CEMC customer service">&#128222; CALL</a>
           <div class="util-overlay-bottom">
+            <div class="util-head">
+              <span class="util-head-icon">&#9889;</span>
+              <div style="flex:1;min-width:0">
+                <div class="util-head-name">Electric</div>
+                <div class="util-head-prov">Cumberland Electric &bull; DIY CT monitor</div>
+              </div>
+              <span class="util-chip" id="util-elec-chip">WAITING</span>
+            </div>
             <div class="util-stats util-stats-2col">
               <div class="util-stat"><div class="util-stat-label">Now</div><div class="util-stat-val" id="util-elec-now">&mdash;<span class="util-stat-unit">kW</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Today</div><div class="util-stat-val" id="util-elec-today">&mdash;<span class="util-stat-unit">kWh</span></div></div>
@@ -1772,19 +1821,11 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
               <div class="util-stat"><div class="util-stat-label">This Month</div><div class="util-stat-val" id="util-elec-month">&mdash;<span class="util-stat-unit">kWh</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Est. Cost</div><div class="util-stat-val" id="util-elec-cost">&mdash;</div></div>
             </div>
+            <div class="util-foot" id="util-elec-foot"><span class="dot"></span> Waiting for Beehive energy monitor</div>
           </div>
         </div>
         <div class="util-body">
-          <div class="util-head">
-            <span style="font-size:18px">&#9889;</span>
-            <div style="flex:1;min-width:0">
-              <div class="util-head-name">Electric</div>
-              <div class="util-head-prov">Cumberland Electric &bull; DIY CT monitor</div>
-            </div>
-            <span class="util-chip" id="util-elec-chip">WAITING</span>
-          </div>
-          <div id="util-elec-history" style="display:none;margin:0 0 8px"></div>
-          <div class="util-foot" id="util-elec-foot"><span class="dot"></span> Waiting for Beehive energy monitor</div>
+          <div id="util-elec-history" style="display:none"></div>
         </div>
       </div>
 
