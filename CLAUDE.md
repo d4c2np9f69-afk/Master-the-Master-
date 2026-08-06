@@ -397,7 +397,7 @@ Expected: all tests passing. If any fail, fix them before doing anything else.
 **Status:** Water + Gas LIVE via RTL-SDR + rtlamr2mqtt on the J45. Electric "This Month" LIVE via the SmartHub (CEMC) cloud integration — a real ATM90E32 CT-clamp build is still the future path for true instant Now/Today.
 
 ### 💧 WATER — WHUD · Kamstrup flowIQ 2100
-- Meter S/N `25394131`, billing cycle ~21st. Rates: Base $10.32 + $0.00908/gal (validated). Sewer (City of White House, mirrors the WHUD meter, no separate meter): Base $22.74 + $0.00982/gal (validated).
+- Meter S/N `25394131`, billing cycle ~21st. Rates: Base $10.32 + $0.00908/gal (validated). Sewer (City of White House, mirrors the WHUD meter, no separate meter): **Base $23.42 + $0.01011/gal** (rate increase confirmed 08-05 from the 5/7–6/6/26 bill — was $22.74 + $0.00982/gal, both figures up ~3%, exact match to the bill's $92.56 base+consumption). **Known gap, not yet fixed:** the bill also carries Sanitation Services ($24.00 flat) + Stormwater Fee ($8.99 flat) — real monthly charges on the City of WH bill that "Est. Sewer" does NOT include (usage-based sewer cost only). Asked Jeff whether to fold the ~$33/mo flat fees into the estimate — awaiting his call.
 - Read path (confirmed by WHUD supervisor): external MIU `100WD`, ERT ID `79453337`, unencrypted Itron ERT-SCM, protocol `scm+` (rtlamr2mqtt config), 915–930 MHz, ~1 SCM/min, no AES key.
 - Timestamps are European (Kamstrup is Danish) — convert to Central in code. Raw ÷10 = gallons.
 - App shows **This Cycle** (`whudCycleKey()`, resets ~21st) + Est. Water/Sewer/Combined + billing history + sewer-overcharge tracking (irrigation water is charged sewer fees it never actually generates).

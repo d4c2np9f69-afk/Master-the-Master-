@@ -4173,7 +4173,7 @@ function wxFcEmoji(cond){ return wxFcIcon(null, cond); }
 var IRR_FLOW={1:17.2,2:14.3,5:5.7};        // zone GPM (MP3500 x6/x5, MP3000 x3) — 82 psi supply, no shortfall
 var IRR_RUNMIN={1:20,2:18,5:8};            // representative run times (min)
 var IRR_DAYS_WK=3;                         // assumed watering days/week
-var RATE_WATER=0.00908, RATE_SEWER=0.00982; // $/gal — WHUD water + City of WH sewer (validated from 3/8-4/7/26 bill)
+var RATE_WATER=0.00908, RATE_SEWER=0.01011; // $/gal — WHUD water (3/8-4/7/26 bill) + City of WH sewer (rate increase confirmed 5/7-6/6/26 bill, was 0.00982)
 var IRR_INCLUDE_SEWER=true;                // set false if on an irrigation meter / seasonal sewer averaging
 function fmtD(n){ return '$'+(n>=100?Math.round(n).toString():n.toFixed(2)); }
 function renderUsage(){
@@ -4191,7 +4191,7 @@ function renderUsage(){
     +'<div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0 2px;font-weight:800"><span>Per cycle</span><span><span style="color:#4aa3ff">'+cycle+' gal</span> &bull; <span style="color:#4ade80">'+fmtD(cycle*perGal)+'</span></span></div>'
     +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span style="color:var(--muted)">Weekly (~'+IRR_DAYS_WK+' days)</span><span style="font-weight:700">~'+weekly+' gal &bull; <span style="color:#4ade80">'+fmtD(weekly*perGal)+'</span></span></div>'
     +'<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span style="color:var(--muted)">Monthly</span><span style="font-weight:700;color:#4ade80">~'+fmtD(monthly*perGal)+'</span></div>'
-    +'<div style="font-size:9px;color:#888;margin-top:6px;line-height:1.55">WHUD 2026: water $0.00908 + sewer $0.00982/gal. 💡 <b>Irrigation water never enters the sewer</b> — ask WHUD about <b>seasonal sewer averaging</b> (or an irrigation meter) to drop the sewer half: water-only would be ~'+fmtD(waterOnlyMo)+'/mo. Flow est. from Hunter MP charts at 180°; your 82 psi confirms no pressure shortfall.</div>';
+    +'<div style="font-size:9px;color:#888;margin-top:6px;line-height:1.55">WHUD 2026: water $0.00908 + sewer $0.01011/gal. 💡 <b>Irrigation water never enters the sewer</b> — ask WHUD about <b>seasonal sewer averaging</b> (or an irrigation meter) to drop the sewer half: water-only would be ~'+fmtD(waterOnlyMo)+'/mo. Flow est. from Hunter MP charts at 180°; your 82 psi confirms no pressure shortfall.</div>';
 }
 
 // --- B-hyve CONTROL (PIN-gated) — start/stop zones + rain delay ---
@@ -7926,7 +7926,7 @@ function loadVacuum(){
 //     sensor.electric_now / electric_today (DIY CT-clamp monitor, later)
 function loadUtilities() {
   var WATER_BASE = 10.32, WATER_PER_GAL = 0.00908;
-  var SEWER_BASE = 22.74, SEWER_PER_GAL = 0.00982;
+  var SEWER_BASE = 23.42, SEWER_PER_GAL = 0.01011; // City of WH rate increase confirmed 5/7-6/6/26 bill (was 22.74 / 0.00982)
   var WH_KEY = 'water_billing_history';
   function whudCycleKey(){
     var d = new Date(), y = d.getFullYear(), m = d.getMonth();
