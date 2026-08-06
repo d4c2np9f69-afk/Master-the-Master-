@@ -346,7 +346,34 @@ html,body{
 .sec-hero-irr img{object-position:center top}
 .sec-hero-yard img{object-fit:cover;object-position:center center}
 /* Per-hero aspect = each image's true ratio so the baked-in gold titles never crop */
-.sec-hero-weather{aspect-ratio:1320/864;height:auto;max-height:460px}
+/* Re-cropped taller 08-06 (1.53 -> 1.32) to make room for the full live
+   conditions readout inlaid on the photo — 295px tall at a 390px viewport
+   instead of 255px. Jeff: "if you want to make the pictures bigger so more
+   will fit on them that's great." */
+.sec-hero-weather{aspect-ratio:1320/1000;height:auto;max-height:560px}
+/* ── Live conditions inlaid on the WEATHER photo ──────────────────────────
+   Same glass language as the utility readouts: one soft blurred field of the
+   photo, no per-cell boxes, fixed light-on-dark colours (the overlay sits on
+   a permanently dark-graded photo in both themes). */
+.wx-hero-readout{
+  margin-top:auto;display:grid;grid-template-columns:repeat(4,1fr);
+  gap:clamp(3px,.9vw,8px) 0;
+  padding:clamp(6px,1.6vw,12px) clamp(4px,1.2vw,10px);
+  border-radius:clamp(12px,3.4vw,24px);
+  background:rgba(16,14,12,.16);
+  backdrop-filter:blur(9px) saturate(150%) brightness(.98);-webkit-backdrop-filter:blur(9px) saturate(150%) brightness(.98);
+  box-shadow:0 20px 60px rgba(0,0,0,.35),inset 0 1px rgba(255,255,255,.12);
+}
+.wx-hero-cell{min-width:0;text-align:center}
+.wx-hero-lbl{
+  font-size:clamp(6.6px,1.45vw,11px);font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  color:rgba(247,229,196,.72);text-shadow:0 1px 6px rgba(0,0,0,.7);line-height:1.2;
+}
+.wx-hero-val{
+  font-size:clamp(11.5px,2.2vw,18px);font-weight:600;margin-top:2px;line-height:1.15;
+  color:#f7f1e7;text-shadow:0 2px 10px rgba(0,0,0,.75);font-variant-numeric:tabular-nums;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
 .sec-hero-irr{aspect-ratio:1320/864;height:auto;max-height:460px}
 .sec-hero-yard{aspect-ratio:1320/851;height:auto;max-height:460px}
 /* ── HERO MASTER GRADE — REUSABLE MODULE ───────────────────────────────────
@@ -1575,6 +1602,20 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <div style="font-size:9px;font-weight:700;color:rgba(212,175,55,.65);letter-spacing:.5px;margin-top:2px;font-family:var(--serif)">WU Recognized</div>
         </div>
       </div>
+      <!-- Full live conditions readout, inlaid on the photo (Jeff, 08-06:
+           "Weather yes add the feels like wind chill all that can go in").
+           These are MOVED from the Weather Conditions card, not copied — the
+           ids must stay unique for loadStation()/loadWeather() to find them. -->
+      <div class="wx-hero-readout" id="wxHeroReadout">
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Temp</div><div class="wx-hero-val" id="wxTemp">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Feels Like</div><div class="wx-hero-val" id="wxFeels">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Dew Point</div><div class="wx-hero-val" id="wxDew">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Humidity</div><div class="wx-hero-val" id="wxHumidity">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Wind</div><div class="wx-hero-val" id="wxWindDir">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">UV Index</div><div class="wx-hero-val" id="wxUV">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Pressure</div><div class="wx-hero-val" id="wxPressure">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Rain Rate</div><div class="wx-hero-val" id="wxRainRate">--</div></div>
+      </div>
     </div>
   </div>
 </div>
@@ -2003,16 +2044,8 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <!-- WEATHER CONDITIONS AT 301 (mowing/soil metrics moved to YARD) -->
     <div class="card cat-weather" id="wxConditionsCard">
       <div class="card-title">&#127780; Weather Conditions at 301</div>
-      <div class="wx-grid">
-        <div class="wx-card"><div class="wx-lbl">Temperature</div><div class="wx-val" id="wxTemp">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Feels Like</div><div class="wx-val" id="wxFeels">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Dew Point</div><div class="wx-val" id="wxDew">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Humidity</div><div class="wx-val" id="wxHumidity">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Wind Dir</div><div class="wx-val" id="wxWindDir">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">UV Index</div><div class="wx-val" id="wxUV">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Pressure</div><div class="wx-val" id="wxPressure">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Rain Rate</div><div class="wx-val" id="wxRainRate">--</div></div>
-      </div>
+      <!-- The 8 live condition cells moved onto the hero photo (08-06). Kept
+           here as a comment so it's obvious where they went, not duplicated. -->
       <div id="wxStationNote" class="wx-note"></div>
       <button class="btn-full btn-gray" onclick="loadWeather()">&#128260; Refresh Weather</button>
     </div>
