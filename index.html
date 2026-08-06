@@ -404,8 +404,10 @@ html,body{
 }
 .irr-hero-btns{display:grid;grid-template-columns:1fr 1fr;gap:clamp(4px,1.1vw,8px)}
 .irr-hero-btn{
+  /* same 44px tap-target floor as the car controls — these had the same defect */
+  min-height:44px;display:flex;align-items:center;justify-content:center;
   padding:clamp(5px,1.4vw,10px) clamp(2px,.6vw,5px);border-radius:clamp(8px,2vw,15px);
-  font-size:clamp(7.5px,1.7vw,13px);font-weight:700;font-family:inherit;cursor:pointer;line-height:1.2;
+  font-size:clamp(8.5px,1.8vw,14px);font-weight:700;font-family:inherit;cursor:pointer;line-height:1.2;
   background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.14);
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   box-shadow:0 8px 20px rgba(0,0,0,.3);transition:.25s;
@@ -598,8 +600,14 @@ html,body{
 }
 .car-hero-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(5px,1.3vw,10px)}
 .car-hero-btn{
+  /* min-height 44px is Apple's tap-target guideline and NOT optional here.
+     These came out 24px tall on a 390px phone, which is reachable in code but
+     genuinely hard to hit with a thumb -- Jeff could land FLASH but kept
+     missing LOCK/UNLOCK, which looked like a broken command rather than a
+     missed tap. Don't let the clamp shrink these below 44 again. */
+  min-height:44px;display:flex;align-items:center;justify-content:center;
   padding:clamp(6px,1.5vw,11px) clamp(2px,.6vw,5px);border-radius:clamp(8px,2vw,15px);
-  font-size:clamp(8.5px,1.9vw,14px);font-weight:700;font-family:inherit;cursor:pointer;line-height:1.2;
+  font-size:clamp(9.5px,2vw,15px);font-weight:700;font-family:inherit;cursor:pointer;line-height:1.2;
   background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.14);
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   box-shadow:0 8px 20px rgba(0,0,0,.3);transition:.25s;
