@@ -1581,7 +1581,6 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
             </div>
             <span class="util-chip" id="util-water-chip">WAITING</span>
           </div>
-          <div id="util-irr-sewer-note" style="display:none;margin:0 0 8px;padding:8px 10px;border-radius:var(--radius);background:rgba(255,98,98,.08);border:1px solid rgba(255,98,98,.2);font-size:11px;line-height:1.5;color:var(--text)"></div>
           <div id="util-water-history" style="display:none;margin:0 0 8px"></div>
           <div class="util-foot" id="util-water-foot"><span class="dot"></span> Waiting for Beehive meter reader</div>
         </div>
@@ -8299,20 +8298,14 @@ function loadUtilities() {
         + '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><tbody>' + barsHtml + '</tbody></table></div>';
     }
     // Fast synchronous estimate from the fixed weekly schedule -- used immediately so the
-    // sewer-overcharge note isn't blank while irrGalFromHistory()'s HA history fetch is
-    // still in flight. Misses rain delays/skipped days/manual overrides, so it's always
-    // superseded by the real number the moment that resolves (see putWaterCycle below).
+    // billing-history entry (irrGal/waste fields) isn't blank while irrGalFromHistory()'s HA
+    // history fetch is still in flight. Misses rain delays/skipped days/manual overrides, so
+    // it's always superseded by the real number the moment that resolves (see putWaterCycle
+    // below).
     function irrMonthlyGal(){
       var total = 0;
       Object.keys(IRR_FLOW).forEach(function(s){ total += IRR_FLOW[s] * (IRR_RUNMIN[s] || 0); });
       return total * IRR_DAYS_WK * 4.33;
-    }
-    function irrSewerNoteHtml(irrGal, real){
-      var fmt = function(v){ return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
-      var sewerWaste = irrGal * SEWER_PER_GAL;
-      var src = real ? '(from real B-Hyve run time this cycle)' : '(rough estimate from your weekly schedule)';
-      return '<b style="color:var(--bad)">Sewer overcharge</b> ' + src + ': ~' + Math.round(irrGal).toLocaleString()
-        + ' gal/mo is irrigation — never enters the sewer. That\'s <b>' + fmt(sewerWaste) + '/mo</b> in sewer charges on water that goes on the lawn. Ask City of WH about <b>seasonal sewer averaging</b> or an <b>irrigation meter</b> to eliminate this.';
     }
     // Real per-zone runtime this billing cycle, pulled from HA recorder history for every
     // B-Hyve zone switch we have a configured GPM constant (IRR_FLOW) for -- replaces the
@@ -8345,8 +8338,6 @@ function loadUtilities() {
       })).then(function(gallonsPerZone){
         var totalGal = gallonsPerZone.reduce(function(a, b){ return a + b; }, 0);
         if (totalGal <= 0) return; // no real watering events found yet this cycle -- leave the schedule estimate showing
-        var note = document.getElementById('util-irr-sewer-note');
-        if (note) { note.style.display = ''; note.innerHTML = irrSewerNoteHtml(totalGal, true); }
         // The tracked history's waste/irrGal fields were only ever set from the rough schedule
         // estimate in putWaterCycle() and never refreshed once the real B-Hyve number came in --
         // meaning "Total sewer overcharge tracked" was silently stuck on the less accurate guess
@@ -8378,10 +8369,6 @@ function loadUtilities() {
       put('util-garbage-cost', fmt(GARBAGE_FLAT));
       put('util-stormwater-cost', fmt(STORMWATER_FLAT));
       put('util-combined-cost', fmt(waterEst + sewerEst + GARBAGE_FLAT + STORMWATER_FLAT));
-      if (irrGal > 0) {
-        var note = document.getElementById('util-irr-sewer-note');
-        if (note) { note.style.display = ''; note.innerHTML = irrSewerNoteHtml(irrGal, false); }
-      }
       irrGalFromHistory();
       var ck = whudCycleKey();
       if (cyc > 0) {
