@@ -454,7 +454,14 @@ html,body{
 /* Re-cropped taller 08-06 (1.95 -> 1.50) so the cockpit renders noticeably
    bigger on a phone — 260px tall at a 390px viewport instead of 200px — and
    leaves room for the controls inlaid on it. */
-.sec-hero-car{aspect-ratio:1320/880;height:auto;max-height:520px;background:#0a0a12}
+/* NO max-height on this one, deliberately. The readouts below are positioned
+   as percentages of the container, which only equals image coordinates while
+   the container's aspect matches the image's. Any max-height clamp makes
+   object-fit:cover crop the photo and the readouts drift off the screens.
+   Letting it run full aspect keeps them pinned at every width — and Jeff
+   wants the pictures bigger anyway. The media-query max-heights further down
+   are overridden for this hero for the same reason. */
+.sec-hero-car{aspect-ratio:1320/880;height:auto;max-height:none;background:#0a0a12}
 /* ── Controls inlaid on the CAR cockpit photo ─────────────────────────────
    Same glass language as the utility readouts and the LUX panel: one soft
    blurred field of the photo, no hard border, fixed light-on-dark colours
@@ -468,6 +475,30 @@ html,body{
   backdrop-filter:blur(9px) saturate(150%) brightness(.98);-webkit-backdrop-filter:blur(9px) saturate(150%) brightness(.98);
   border-radius:clamp(12px,3.4vw,24px);
   box-shadow:0 20px 60px rgba(0,0,0,.4),inset 0 1px rgba(255,255,255,.12);
+}
+/* ── Live readouts sitting ON the car's own screens in the photo ──────────
+   Percentages measured against hero-car.jpg at 1320x880:
+     instrument cluster  x 314-526, y 282-369
+     centre display      x 557-772, y 285-366
+   No background of their own — they sit directly on the lit screens, so the
+   glow of the photo's display does the work. Fixed light colours (this is a
+   permanently dark photo in both themes). */
+.car-screen{
+  position:absolute;z-index:3;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;pointer-events:none;
+  color:#dbeafe;text-align:center;line-height:1;overflow:hidden;
+}
+.car-screen-cluster{left:23.8%;top:32.0%;width:16.1%;height:9.9%}
+.car-screen-centre {left:42.2%;top:32.4%;width:16.3%;height:9.2%}
+.car-screen-val{
+  font-size:clamp(7px,1.75vw,15px);font-weight:700;letter-spacing:.2px;
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+  text-shadow:0 0 8px rgba(120,190,255,.75),0 1px 3px rgba(0,0,0,.9);
+}
+.car-screen-lbl{
+  font-size:clamp(4.6px,1.1vw,9px);font-weight:600;letter-spacing:.4px;text-transform:uppercase;
+  color:rgba(190,215,245,.8);margin-top:2px;white-space:nowrap;
+  text-shadow:0 1px 3px rgba(0,0,0,.9);
 }
 .car-hero-lockrow{display:flex;justify-content:center}
 .car-hero-lockstate{
@@ -1453,7 +1484,8 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 /* hcc-wrap is now applied via .hcc-section.active above */
 @media(min-width:768px){
   .hcc-section.active{padding:0 24px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian,.sec-hero-car{max-height:560px}
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian{max-height:560px}
+  .sec-hero-car{max-height:none}
   .house-hero{aspect-ratio:16/9}
   .card{padding:22px}
   .card-title{font-size:12px;letter-spacing:1px}
@@ -1465,7 +1497,8 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 }
 @media(min-width:1200px){
   .hcc-section.active{padding:0 40px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian,.sec-hero-car{max-height:680px}
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian{max-height:680px}
+  .sec-hero-car{max-height:none}
   .app-hdr{padding:14px 28px}
   .app-hdr-title{font-size:22px}
   .app-hdr-sub{font-size:10px;letter-spacing:4px}
@@ -1483,7 +1516,8 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 }
 @media(min-width:1920px){
   .hcc-section.active{max-width:1800px;padding:0 60px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian,.sec-hero-car{max-height:800px}
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian{max-height:800px}
+  .sec-hero-car{max-height:none}
   .app-hdr{padding:18px 40px}
   .app-hdr-title{font-size:26px}
   .app-hdr-sub{font-size:12px}
@@ -1510,7 +1544,8 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
   .app-hdr-badge{padding:10px 20px;font-size:20px;border-radius:10px}
   .snav-btn{min-width:200px;font-size:14px;padding:20px 20px 16px}
   .snav-icon{font-size:36px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian,.sec-hero-car{max-height:1000px}
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian{max-height:1000px}
+  .sec-hero-car{max-height:none}
   .card{padding:36px 40px;border-radius:22px;margin-bottom:28px}
   .card-title{font-size:16px;letter-spacing:1.5px}
   .sec-hero-title{font-size:46px}
@@ -1653,6 +1688,22 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
          carSwitchVehicle() hides this for the F-250, which has no remote
          features at all. The buttons are the ONLY copy; they were removed
          from the Vehicle Status card so there's one place, not two. -->
+    <!-- Live data rendered ON the car's own two screens in the photograph
+         (Jeff, 08-06: "put the controls in the screens"). Hand-calibrated to
+         hero-car.jpg at 1320x880 and expressed as percentages so they stay
+         aligned at any render width — same technique as the LUX thermostat's
+         .lux-wx-patch. If the photo is ever re-cropped, BOTH boxes need
+         re-measuring. Each screen is only ~16% of the frame, so these carry
+         short readouts only; the tappable controls stay in the glass panel
+         below, where they're big enough to actually hit. -->
+    <div class="car-screen car-screen-cluster" id="carScreenCluster">
+      <div class="car-screen-val" id="carScrOdo">--</div>
+      <div class="car-screen-lbl">Miles</div>
+    </div>
+    <div class="car-screen car-screen-centre" id="carScreenCentre">
+      <div class="car-screen-val" id="carScrRange">--</div>
+      <div class="car-screen-lbl">Range &bull; <span id="carScrFuel">--</span></div>
+    </div>
     <div class="car-hero-controls" id="carHeroControls">
       <div class="car-hero-lockrow">
         <span class="car-hero-lockstate" id="carHeroLockState">&#128274; &mdash;</span>
@@ -6662,13 +6713,14 @@ function loadCar() {
     function set(id, txt) { var el = document.getElementById(id); if (el) el.textContent = txt; }
 
     var odo = val('odometer');
-    if (odo) set('carOdo', parseFloat(odo.state).toLocaleString());
+    if (odo) { set('carOdo', parseFloat(odo.state).toLocaleString());
+               set('carScrOdo', parseFloat(odo.state).toLocaleString()); }
 
     var fuel = val('fuel_level') || val('tank_level');
-    if (fuel) set('carFuel', fuel.state + '%');
+    if (fuel) { set('carFuel', fuel.state + '%'); set('carScrFuel', fuel.state + '%'); }
 
     var range = val('range') || val('fuel_range');
-    if (range) { set('carRange', parseFloat(range.state).toFixed(0) + ' mi'); set('carTripRange', parseFloat(range.state).toFixed(0) + ' mi'); }
+    if (range) { var rmi = parseFloat(range.state).toFixed(0); set('carRange', rmi + ' mi'); set('carTripRange', rmi + ' mi'); set('carScrRange', rmi + ' mi'); }
 
     var lockEnts = states.filter(function(s){
       if (s.entity_id.indexOf('lock.') !== 0) return false;
