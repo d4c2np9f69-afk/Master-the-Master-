@@ -141,3 +141,55 @@ sandbox cannot do. Left for the coworker or a future session with real HA access
 **Item 2 (poll interval) and item 4 (rate sheet):** no app-code changes needed — both already
 handled live by the coworker (poll interval reconfigured directly in HA; rate sheet is a
 reference source for the next bill cross-check, not something the app reads automatically).
+
+---
+
+## Coworker follow-up, live HA verification (2026-08-06, later)
+
+**Ran the exact WS command from `functions/api/ha-stats.js` directly against the live HA instance
+(via the browser's own authenticated `hass.connection`, not guessed) — found two real bugs. The
+built feature (Today/Yesterday/Peak Hour/Last 7 Days) is currently non-functional and silently
+falling back to the old estimate every time, even though the UI cells render.**
+
+**Bug 1 — wrong WS command name.** `history/statistics_during_period` returns
+`{"code":"unknown_command","message":"Unknown command."}` on this HA version (Core 2026.8.0). The
+real, working command is **`recorder/statistics_during_period`** — same params (`start_time`,
+`end_time`, `statistic_ids`, `period`), confirmed working and returning real data when called
+directly. This is presumably an HA-version naming change (some `history/*` statistics commands
+moved to `recorder/*` in recent Core versions) — `ha-stats.js` needs the command name changed.
+
+**Bug 2 — wrong field, even once the command name is fixed.** Queried a real 48-hour window for
+the SmartHub entity's hourly statistics: `state` moved 98→209 and `sum` moved 761→872 (both real,
+consistent +111 deltas — the underlying data genuinely changes). **But every single hourly
+bucket's `change` field reads exactly `0`, even ones spanning that real growth.** `ha-stats.js`
+currently tries `change` first per its own doc note — that field is not usable for this
+sensor/integration, it will always return 0 regardless of real usage. **Fix: compute each period's
+real usage as `sum` (or `state`) at the end of the period minus `sum`/`state` at the start** —
+i.e., a cumulative-delta calculation across period boundaries, not a per-bucket field read. This is
+the same "diff two cumulative readings" pattern already used everywhere else in this app
+(`irrGalFromHistory()`, the water meter billing-cycle math) — nothing exotic, just needs applying
+here too.
+
+**Raw verification data** (for whoever fixes this, so it's not re-derived from scratch):
+```
+recorder/statistics_during_period, period: hour, entity: sensor.electric_smarthub_energy_monthly_usage_4501007001_electric_smarthub_energy_monthly_usage_4501007001
+Sample buckets over a 48h window:
+  start=1785830400000  state=98   sum=761   change=0
+  ...(46 more hourly buckets, all change=0)...
+  start=1785981600000  state=209  sum=872   change=0
+Net real movement across the window: state +111, sum +111 — both real, "change" just never populates for this sensor.
+```
+
+**Item 3 (Bill Due / Last Payment / vs Last Year) — checked, confirmed not available without new
+scraping work.** Read the live entity's full `attributes` directly:
+`{"state_class":"total_increasing","account_id":"4501007001","location_id":"16290","last_reading_time":"...","meter_name":"145590962",...}`
+— no billing/payment/comparison data at all, just account/meter identifiers. Getting Bill
+Due/Last Payment/Vs Last Year into the app would require actually scraping SmartHub's account
+overview page (new work, not a quick add) — not just reading something already present.
+
+**Recommendation on item 3: low priority, probably skip.** This data is billing-convenience info,
+not something the sewer-overcharge case needs (the case rests on real kWh/gallons usage matching
+meter readings, which items 1+2 already cover once the two bugs above are fixed). Building a
+SmartHub-account scraper is real new surface area (another set of credentials/session handling,
+another thing that can break silently) for a "nice to have" display feature. Recommend skipping
+unless Jeff specifically wants it — items 1+2's bug fixes are the actual priority.
