@@ -37,6 +37,39 @@ Daily / Interval): real per-day kWh going back over a year, and real **hourly** 
 30-day window (labeled "Interval" in their UI, `timeFrame=HOURLY` in the URL). Matches what the
 integration is already importing.
 
+### Concrete field spec — what to build
+
+Current stat row on the Electric card: `NOW | TODAY | THIS MONTH | EST. COST`. Proposed:
+
+- **TODAY** — replace the ≈modeled estimate with the real sum of today's hourly statistics
+  (local midnight → now). Drop the `≈`/EST chip once it's real data. Same cell, same label, just
+  swap the data source.
+- **YESTERDAY** *(new cell)* — sum of yesterday's real daily statistic (or sum of its 24 hourly
+  stats). Straightforward now that real daily data exists.
+- **PEAK HOUR** *(new cell)* — the single highest-usage hour in the last 24h, e.g. `"3-4 PM ·
+  2.1 kWh"`. Directly useful for the appliance-identification idea discussed tonight (AC/dryer/oven
+  cycles show up as clear hourly spikes).
+- **THIS MONTH** — unchanged, already real and already correct.
+- **EST. COST** — unchanged, already correct (computed from THIS MONTH × rate).
+- **NOW** — leave as `—` (disabled), and please don't fake/estimate it once hourly data lands.
+  SmartHub's finest real grain is hourly, not instantaneous — genuine "Now" can only come from the
+  future CT-clamp hardware build. Keep it honestly blank until that exists rather than papering
+  over it with another estimate.
+
+**New sub-panel below the stat row: "Last 7 Days"** — small table or sparkline of daily kWh for the
+past 7 days, source = the real daily statistics. Same visual pattern as the Water card's Billing
+History table (`.util-stat`/existing Section Kit classes — no new CSS module needed). Gives a
+quick usage-trend glance and sets up the appliance-identification testing Jeff wants to do next
+(spot a day that stands out, then go correlate with what ran that day).
+
+**Lower priority — account/billing fields** *(item 3 below, needs the "check attributes first"
+step)*: if buildable, add as either new stat cells or a small "Billing" sub-panel:
+- **BILL DUE** — `"$X.XX due Aug 21, 2026"` style
+- **LAST PAYMENT** — `"$557.07 paid Jul 31, 2026"` style
+- **VS LAST YEAR** — SmartHub's own live % figure, no baked-in explanatory caption (the duct-leak
+  explanation is specific to today's number, not evergreen — future spikes need their own
+  investigation, don't assume every future variance is explained the same way).
+
 ## 2. Poll interval fixed tonight — was still on HA's 6-hour default
 
 Reconfigured live via Settings → Devices & Services → SmartHub Energy Integration → Reconfigure →
