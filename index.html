@@ -8182,6 +8182,23 @@ function loadUtilities() {
         if (totalGal <= 0) return; // no real watering events found yet this cycle -- leave the schedule estimate showing
         var note = document.getElementById('util-irr-sewer-note');
         if (note) { note.style.display = ''; note.innerHTML = irrSewerNoteHtml(totalGal, true); }
+        // The tracked history's waste/irrGal fields were only ever set from the rough schedule
+        // estimate in putWaterCycle() and never refreshed once the real B-Hyve number came in --
+        // meaning "Total sewer overcharge tracked" was silently stuck on the less accurate guess
+        // forever. Overwrite the current cycle's entry with the real number so the running total
+        // Jeff is tracking for the WHUD/City of WH case is always the best data available (08-05).
+        var ck = whudCycleKey();
+        var hist = getWaterHistory();
+        for (var i = 0; i < hist.length; i++) {
+          if (hist[i].cycle === ck) {
+            hist[i].irrGal = Math.round(totalGal);
+            hist[i].waste = totalGal * SEWER_PER_GAL;
+            hist[i].ts = Date.now();
+            saveWaterHistory(hist);
+            renderWaterHistory();
+            break;
+          }
+        }
       });
     }
     function putWaterCycle(cyc){
