@@ -667,9 +667,17 @@ html.light .car-tabs{background:#fff}
 .util-overlay-bottom{position:absolute;bottom:0;left:0;right:0;z-index:2;padding:14px 6px 6px}
 .util-overlay-bottom .util-stats{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;background:linear-gradient(to top,rgba(4,4,10,.9) 0%,rgba(4,4,10,.7) 75%,rgba(4,4,10,0) 100%);padding:10px 3px 3px;margin:-10px -3px -3px}
 .util-overlay-bottom .util-stat{flex:0 0 auto;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);padding:clamp(4px,.9vw,7px) clamp(9px,1.8vw,14px);border-radius:8px}
-.util-overlay-bottom .util-stat-label{color:rgba(255,255,255,.8);text-shadow:0 1px 4px rgba(0,0,0,.9);font-size:clamp(7.5px,1.5vw,12px)}
+.util-overlay-bottom .util-stat-label{color:rgba(255,255,255,.8);text-shadow:0 1px 4px rgba(0,0,0,.9);font-size:clamp(7.5px,1.5vw,12px);white-space:nowrap}
 .util-overlay-bottom .util-stat-val{color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.95);font-size:clamp(12px,2.2vw,18px);margin-top:1px}
 .util-overlay-bottom .util-stat-unit{color:rgba(255,255,255,.75)}
+/* 6+ cell cards (Electric: Now/Today/Yesterday/Peak Hour/This Month/Est. Cost) — the default
+   flex-wrap above sizes each chip to its own content, so an uneven cell count wraps raggedly
+   (e.g. 4 chips on row 1, 2 on row 2) once there are more than 4. A real 3-col grid keeps every
+   row even and every cell width-consistent regardless of viewport. */
+.util-overlay-bottom .util-stats.util-stats-grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.util-overlay-bottom .util-stats.util-stats-grid3 .util-stat{min-width:0;text-align:center}
+.util-overlay-bottom .util-stats.util-stats-grid3 .util-stat-label,
+.util-overlay-bottom .util-stats.util-stats-grid3 .util-stat-val{white-space:normal;overflow-wrap:break-word}
 .util-body{padding:11px 14px 13px}
 .util-head{display:flex;align-items:center;gap:9px;margin-bottom:10px}
 .util-head-name{font-size:13px;font-weight:800;color:var(--text);letter-spacing:.3px}
@@ -1602,7 +1610,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <img src="./images/util-electric.jpg" alt="Cumberland Electric (CEMC) meter" loading="lazy">
           <a class="util-banner-call" href="tel:8009872362" aria-label="Call Cumberland Electric CEMC customer service">&#128222; CALL</a>
           <div class="util-overlay-bottom">
-            <div class="util-stats" style="grid-template-columns:repeat(3,1fr)">
+            <div class="util-stats util-stats-grid3">
               <div class="util-stat"><div class="util-stat-label">Now</div><div class="util-stat-val" id="util-elec-now">&mdash;<span class="util-stat-unit">kW</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Today</div><div class="util-stat-val" id="util-elec-today">&mdash;<span class="util-stat-unit">kWh</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Yesterday</div><div class="util-stat-val" id="util-elec-yesterday">&mdash;<span class="util-stat-unit">kWh</span></div></div>
@@ -8204,11 +8212,17 @@ function loadUtilities() {
           put('util-elec-today', todaySum.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
         }
         if (peakStart && peakVal >= 0) {
+          // Single line, e.g. "3-4 PM · 2.1 kWh" -- one shared AM/PM suffix (off the end hour)
+          // reads cleanly in a narrow grid cell; a two-tier custom-colored span here previously
+          // used var(--muted), a theme-relative token that's dark-on-dark against this card's
+          // permanently-dark photo overlay (same class of bug as the LUX contrast fixes) --
+          // sticking to the shared .util-stat-val/.util-stat-unit styling avoids that entirely.
           var h1 = peakStart.getHours(), h2 = (h1 + 1) % 24;
-          var fmtHr = function(h){ var ap = h < 12 ? 'AM' : 'PM'; var hh = h % 12; if (hh === 0) hh = 12; return hh + ap; };
+          var to12 = function(h){ var hh = h % 12; return hh === 0 ? 12 : hh; };
+          var ap = h2 < 12 ? 'AM' : 'PM';
           var peakEl = document.getElementById('util-elec-peak');
-          if (peakEl) peakEl.innerHTML = fmtHr(h1) + '-' + fmtHr(h2)
-            + '<br><span style="font-size:9px;font-weight:700;color:var(--muted)">' + peakVal.toFixed(1) + ' kWh</span>';
+          if (peakEl) peakEl.innerHTML = to12(h1) + '-' + to12(h2) + ' ' + ap
+            + '<br><span class="util-stat-unit">' + peakVal.toFixed(1) + ' kWh</span>';
         }
 
         var yesterdayVal = null;
