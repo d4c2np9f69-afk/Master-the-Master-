@@ -571,6 +571,19 @@ html.light .car-tabs{background:#fff}
   background:radial-gradient(circle at 70% 20%,rgba(255,210,140,.16),transparent 55%),
              linear-gradient(to bottom,transparent,rgba(0,0,0,.35));
 }
+/* Gas + Electric photos have their own baked-in icon/label row (Safe
+   Supply/Usage/System/Energy, Accurate/Usage/Reliable/Smart) sitting
+   right where the stat-chip row lands. The shared darken above is tuned
+   for Water/LUX, which don't have that baked-in content there — it left
+   Gas/Electric's decorative row visible and colliding with the chips
+   (found 08-06 from Jeff's report of "data covering the title in the
+   picture"). Override just these two banners with a stronger, later-
+   starting bottom darken so that row is fully hidden under the chips
+   instead of bleeding through. */
+.util-g .util-banner::after,.util-e .util-banner::after{
+  background:radial-gradient(circle at 70% 20%,rgba(255,210,140,.16),transparent 55%),
+             linear-gradient(to bottom,transparent 25%,rgba(0,0,0,.6) 65%,rgba(0,0,0,.88) 100%);
+}
 
 /* Shared gradient-ring border ("Soft Edge Glow") for every button/chip-
    tier glass element, not just the big cards — same ::before mask-
