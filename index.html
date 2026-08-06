@@ -4191,8 +4191,12 @@ function wxFcIcon(code, phrase){
 // Keep old name as alias for any other callers
 function wxFcEmoji(cond){ return wxFcIcon(null, cond); }
 
-// Water-usage + cost estimate (Hunter MP flow @180°; White House Utility District 2026 rates)
-var IRR_FLOW={1:17.2,2:14.3,5:5.7};        // zone GPM (MP3500 x6/x5, MP3000 x3) — 82 psi supply, no shortfall
+// Water-usage + cost estimate (Hunter MP Rotator flow, real per-zone head/arc config; White House Utility District 2026 rates)
+var IRR_FLOW={1:8.78,2:10.09,5:4.4};       // zone GPM — REAL measured 2026-08-06 (isolated single-zone
+                                            // tests, HA switch timing + water meter delta). Replaces the
+                                            // old spec-sheet guess (17.2/14.3/5.7), which used the wrong
+                                            // head counts/nozzle model — see
+                                            // docs/utilities/irrigation_gpm_calibration_2026-08-06.md
 var IRR_RUNMIN={1:20,2:18,5:8};            // representative run times (min)
 var IRR_DAYS_WK=3;                         // assumed watering days/week
 var RATE_WATER=0.00908, RATE_SEWER=0.01011; // $/gal — WHUD water (3/8-4/7/26 bill) + City of WH sewer (rate increase confirmed 5/7-6/6/26 bill, was 0.00982)
