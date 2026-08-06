@@ -4339,7 +4339,7 @@ function saveLuxCreds(){
   localStorage.setItem('lux_pass',pass);
   if(msg){msg.style.color='#22c55e';msg.textContent='Saved! Connecting…';}
   acctRefreshStatus();
-  loadClimate();
+  loadClimate(true);
 }
 
 function acctToggle(id){
@@ -4383,7 +4383,7 @@ function acctSaveLux(){
   if(!safeSetItem('lux_email',email)||!safeSetItem('lux_pass',pass)){ if(msg){msg.style.color='#ff6262';msg.textContent='Save failed — storage full.';} return; }
   acctRefreshStatus();
   if(msg){msg.style.color='#22c55e';msg.textContent='Saved! Connecting…';}
-  setTimeout(function(){var f=document.getElementById('acct-lux');if(f)f.classList.remove('open');loadClimate();},1200);
+  setTimeout(function(){var f=document.getElementById('acct-lux');if(f)f.classList.remove('open');loadClimate(true);},1200);
 }
 function acctSaveBhyve(){
   var email=(document.getElementById('acct-bhyve-email')?document.getElementById('acct-bhyve-email').value:'').trim();
@@ -4404,7 +4404,7 @@ function acctClear(svc){
   acctRefreshStatus();
 }
 
-function loadClimate(){
+function loadClimate(isManualLogin){
   var creds=getLuxCreds();
   var b=document.getElementById('luxBanner');
   var ei=document.getElementById('luxEmailIn'); if(ei&&creds.email) ei.value=creds.email;
@@ -4423,7 +4423,18 @@ function loadClimate(){
     .catch(function(err){
       var msg=err&&err.message||'unknown';
       if(b){b.className='wx-banner wx-no'; b.innerHTML='&#127777;&#65039; LUX: '+msg;}
-      if(msg.indexOf('login_failed')>=0){
+      // Only wipe saved credentials + pop the login form back up when the user JUST
+      // typed them in (isManualLogin, from saveLuxCreds()/acctSaveLux()) -- a
+      // background/automatic refresh (app open, section switch, 60s self-heal) hitting
+      // "login_failed" is just as likely to be a transient Azure B2C session hiccup
+      // (climate.js's SelfAsserted-step error classification is a loose 400/401
+      // substring match, not a confirmed "your password is wrong") as an actually-wrong
+      // password. Wiping on every automatic hit was forcing Jeff to re-type working
+      // credentials on ordinary app opens (08-06). Automatic refreshes now just show
+      // the error and retry next cycle with the same saved creds -- self-heals like
+      // every other HOME card already does; only an explicit re-submit of the login
+      // form can clear a saved login now.
+      if(isManualLogin && msg.indexOf('login_failed')>=0){
         localStorage.removeItem('lux_email'); localStorage.removeItem('lux_pass');
         var sc=document.getElementById('luxSetupCard'); if(sc) sc.style.display='';
       }
