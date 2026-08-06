@@ -1391,8 +1391,14 @@ html.light .car-tabs{background:#fff}
 .cv-row b{color:var(--text);font-weight:700}
 .cv-note{font-size:10px;color:var(--muted);line-height:1.5;opacity:.85}
 /* Camera section banner + big tiles (mockup-style) */
-.cam-hero{position:relative;width:100%;aspect-ratio:1300/980;border-radius:14px;overflow:hidden;margin-bottom:10px;background:#0a0a0a}
-.cam-hero img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
+/* hero-cameras.jpg was a 1300x2042 PORTRAIT mock-up of the app's own UI — a
+   fake "ALL SYSTEMS READY" panel plus six empty dummy camera tiles that sat
+   right above the real camera grid. This CSS existed only to crop the top off
+   and hide them. Regenerated 08-06 as a clean 1300x970 landscape banner (the
+   blink logo and the 2nd Amendment sticker kept, per Jeff), so there is
+   nothing left to hide and object-position no longer needs to fight it. */
+.cam-hero{position:relative;width:100%;aspect-ratio:1300/970;border-radius:14px;overflow:hidden;margin-bottom:10px;background:#0a0a0a}
+.cam-hero img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
 .cam-hero-ov{display:none}
 .cam-hero-title{display:none}
 .cam-hero-badge{display:none}
@@ -7500,7 +7506,8 @@ function loadCameras() {
         + (armed ? '&#128275; DISARM' : '&#128274; ARM') + '</button>';
     }
     var camCount = cameras.length;
-    // Banner (house photo, cropped so the baked "Home Command Center" text stays hidden)
+    // Banner — clean house-at-dusk photo (regenerated 08-06; the fake tile grid
+    // that used to need cropping out is gone from the image itself)
     var html = '<div class="cam-hero">'
       + '<img src="./images/hero-cameras.jpg" alt="Home Guardian Smart Security System">'
       + '</div>';
