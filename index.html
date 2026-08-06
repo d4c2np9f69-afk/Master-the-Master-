@@ -1543,12 +1543,14 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <img src="./images/util-water.jpg" alt="White House Utilities water meter" loading="lazy">
           <a class="util-banner-call" href="tel:6156724110" aria-label="Call White House Utility District customer service">&#128222; CALL</a>
           <div class="util-overlay-bottom">
-            <div class="util-stats" style="grid-template-columns:repeat(3,1fr)">
+            <div class="util-stats" style="grid-template-columns:repeat(4,1fr)">
               <div class="util-stat"><div class="util-stat-label">Reading</div><div class="util-stat-val" id="util-water-today">&mdash;<span class="util-stat-unit">gal</span></div></div>
               <div class="util-stat"><div class="util-stat-label">This Cycle</div><div class="util-stat-val" id="util-water-month">&mdash;<span class="util-stat-unit">gal</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Flow</div><div class="util-stat-val" id="util-water-flow">&mdash;<span class="util-stat-unit">gpm</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Est. Water</div><div class="util-stat-val" id="util-water-cost">&mdash;</div></div>
               <div class="util-stat"><div class="util-stat-label">Est. Sewer</div><div class="util-stat-val" id="util-sewer-cost">&mdash;</div></div>
+              <div class="util-stat"><div class="util-stat-label">Garbage</div><div class="util-stat-val" id="util-garbage-cost">&mdash;</div></div>
+              <div class="util-stat"><div class="util-stat-label">Stormwater</div><div class="util-stat-val" id="util-stormwater-cost">&mdash;</div></div>
               <div class="util-stat"><div class="util-stat-label">Combined</div><div class="util-stat-val" id="util-combined-cost" style="font-weight:800">&mdash;</div></div>
             </div>
           </div>
@@ -7927,6 +7929,11 @@ function loadVacuum(){
 function loadUtilities() {
   var WATER_BASE = 10.32, WATER_PER_GAL = 0.00908;
   var SEWER_BASE = 23.42, SEWER_PER_GAL = 0.01011; // City of WH rate increase confirmed 5/7-6/6/26 bill (was 22.74 / 0.00982)
+  // Flat monthly City of WH fees -- deliberately NOT part of SEWER_BASE/SEWER_PER_GAL or sewerWaste below.
+  // Jeff is building an irrigation-sewer-overcharge case with WHUD/City of WH; that argument only holds up if
+  // "Est. Sewer" and the waste math stay pure usage-based numbers. Garbage/stormwater don't vary with water
+  // use at all, so they're tracked as their own line items and only folded into the Combined total.
+  var GARBAGE_FLAT = 24.00, STORMWATER_FLAT = 8.99; // confirmed 5/7-6/6/26 bill
   var WH_KEY = 'water_billing_history';
   function whudCycleKey(){
     var d = new Date(), y = d.getFullYear(), m = d.getMonth();
@@ -8186,7 +8193,9 @@ function loadUtilities() {
       var fmt = function(v){ return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
       put('util-water-cost', fmt(waterEst));
       put('util-sewer-cost', fmt(sewerEst));
-      put('util-combined-cost', fmt(waterEst + sewerEst));
+      put('util-garbage-cost', fmt(GARBAGE_FLAT));
+      put('util-stormwater-cost', fmt(STORMWATER_FLAT));
+      put('util-combined-cost', fmt(waterEst + sewerEst + GARBAGE_FLAT + STORMWATER_FLAT));
       if (irrGal > 0) {
         var note = document.getElementById('util-irr-sewer-note');
         if (note) { note.style.display = ''; note.innerHTML = irrSewerNoteHtml(irrGal, false); }
