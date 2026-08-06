@@ -3051,7 +3051,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         <div class="car-stat">
           <div class="car-stat-icon">&#128267;</div>
           <div class="car-stat-val" id="carBatt">--</div>
-          <div class="car-stat-lbl">Battery (V)</div>
+          <div class="car-stat-lbl">Starter Battery</div>
         </div>
         <div class="car-stat">
           <div class="car-stat-icon">&#128274;</div>
@@ -6885,7 +6885,13 @@ function loadCar() {
     var fuel = val('fuel_level') || val('tank_level');
     if (fuel) { set('carFuel', fuel.state + '%'); set('carScrFuel', fuel.state + '%'); }
 
-    var range = val('range') || val('fuel_range');
+    // BUG FIX 08-06 (Jeff's screenshot showed "Range Remaining: 0 mi" while HA
+    // had 524). val() keyword-matches and returns the FIRST hit, and this car
+    // exposes TWO entities containing "range":
+    //     sensor.gle_350_eco_score_bonus_range   0.0   <- was winning
+    //     sensor.gle_350_range_liquid            524   <- the real one
+    // Ask for the specific entity first and only fall back to the loose match.
+    var range = val('range_liquid') || val('fuel_range') || val('range_electric') || val('range');
     if (range) { var rmi = parseFloat(range.state).toFixed(0); set('carRange', rmi + ' mi'); set('carTripRange', rmi + ' mi'); set('carScrRange', rmi + ' mi'); }
 
     var lockEnts = states.filter(function(s){
@@ -6913,8 +6919,15 @@ function loadCar() {
     var oil = val('oil_level') || val('oil');
     if (oil) set('carOil', oil.state + '%');
 
+    // The tile is labelled "BATTERY (V)" but sensor.gle_350_starter_battery_state
+    // is NOT volts — it's mbapi2020's condition code. Jeff's screenshot showed a
+    // bare "1" under "(V)", which reads like a dead 1-volt battery. Map it to
+    // words instead of printing a raw code under a wrong unit.
     var batt = val('starter_battery') || val('battery_state');
-    if (batt) set('carBatt', batt.state);
+    if (batt) {
+      var BATT_STATE = { '0':'Good', '1':'Partly charged', '2':'Low', '3':'Critical', '4':'Critical' };
+      set('carBatt', BATT_STATE[String(batt.state).trim()] || batt.state);
+    }
 
     var tireFL = val('tire_pressure_front_left') || val('tirepressure_frontleft');
     var tireFR = val('tire_pressure_front_right') || val('tirepressure_frontright');
