@@ -374,7 +374,47 @@ html,body{
   color:#f7f1e7;text-shadow:0 2px 10px rgba(0,0,0,.75);font-variant-numeric:tabular-nums;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.sec-hero-irr{aspect-ratio:1320/864;height:auto;max-height:460px}
+/* max-height:none for the same reason as the car hero — the inlaid panel is
+   positioned as a percentage of the container, so any clamp would make
+   object-fit:cover crop the photo and slide the panel off the clean lawn. */
+.sec-hero-irr{aspect-ratio:1320/864;height:auto;max-height:none}
+/* ── Live irrigation controls inlaid on the lawn photo ────────────────────
+   Right-hand side, over the open lawn the regenerated photo leaves clear.
+   Same glass language as the utility readouts and the car cockpit panel. */
+.irr-hero-panel{
+  position:absolute;right:4%;top:50%;transform:translateY(-50%);left:auto;
+  width:42%;z-index:3;
+  display:flex;flex-direction:column;gap:clamp(5px,1.3vw,10px);
+  padding:clamp(7px,1.8vw,13px) clamp(7px,1.8vw,13px);box-sizing:border-box;
+  background:rgba(16,14,12,.16);
+  backdrop-filter:blur(9px) saturate(150%) brightness(.98);-webkit-backdrop-filter:blur(9px) saturate(150%) brightness(.98);
+  border-radius:clamp(12px,3.4vw,24px);
+  box-shadow:0 20px 60px rgba(0,0,0,.4),inset 0 1px rgba(255,255,255,.12);
+}
+.irr-hero-stats{display:grid;grid-template-columns:1fr 1fr;gap:0 clamp(3px,.9vw,8px)}
+.irr-hero-stat{min-width:0;text-align:center}
+.irr-hero-lbl{
+  font-size:clamp(6.6px,1.45vw,11px);font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  color:rgba(247,229,196,.75);text-shadow:0 1px 6px rgba(0,0,0,.75);line-height:1.2;
+}
+.irr-hero-val{
+  font-size:clamp(11px,2.1vw,17px);font-weight:600;margin-top:2px;line-height:1.15;
+  color:#f7f1e7;text-shadow:0 2px 10px rgba(0,0,0,.8);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.irr-hero-btns{display:grid;grid-template-columns:1fr 1fr;gap:clamp(4px,1.1vw,8px)}
+.irr-hero-btn{
+  padding:clamp(5px,1.4vw,10px) clamp(2px,.6vw,5px);border-radius:clamp(8px,2vw,15px);
+  font-size:clamp(7.5px,1.7vw,13px);font-weight:700;font-family:inherit;cursor:pointer;line-height:1.2;
+  background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.14);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  box-shadow:0 8px 20px rgba(0,0,0,.3);transition:.25s;
+  color:rgba(247,241,231,.9);text-shadow:0 1px 5px rgba(0,0,0,.75);
+}
+.irr-hero-btn:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(0,0,0,.4)}
+.irr-hero-btn:active{opacity:.8;transform:none}
+.ihb-stop{background:rgba(255,98,98,.22);border-color:rgba(255,98,98,.42);color:#ffa8a8}
+.ihb-clear{background:rgba(34,197,94,.2);border-color:rgba(34,197,94,.4);color:#86efac}
 .sec-hero-yard{aspect-ratio:1320/851;height:auto;max-height:460px}
 /* ── HERO MASTER GRADE — REUSABLE MODULE ───────────────────────────────────
    One cinematic golden-hour grade for EVERY hero. applyHeroGrades() (JS) tags
@@ -1660,6 +1700,23 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <div class="sec-hero-overlay">
       <div class="sec-hero-status" id="irrHeroStatus"></div>
     </div>
+    <!-- Live controls inlaid on the lawn (Jeff, 08-06). MOVED from the B-Hyve
+         Intelligence card, not copied — the ids have to stay unique or
+         loadIrrigation() writes to the wrong node. Sits on the open right-hand
+         side of the regenerated photo; the zone list stays in the card below
+         because its length varies. -->
+    <div class="irr-hero-panel" id="irrHeroPanel">
+      <div class="irr-hero-stats">
+        <div class="irr-hero-stat"><div class="irr-hero-lbl">Mode</div><div class="irr-hero-val" id="irrMode">--</div></div>
+        <div class="irr-hero-stat"><div class="irr-hero-lbl">Rain Delay</div><div class="irr-hero-val" id="irrRainDelay">--</div></div>
+      </div>
+      <div class="irr-hero-btns">
+        <button class="irr-hero-btn ihb-stop" onclick="irrStopAll()">&#9632; STOP ALL</button>
+        <button class="irr-hero-btn ihb-clear" onclick="irrRain(0)">&#9728;&#65039; CLEAR</button>
+        <button class="irr-hero-btn ihb-delay" onclick="irrRain(24)">&#127783;&#65039; 24h</button>
+        <button class="irr-hero-btn ihb-delay" onclick="irrRain(48)">&#127783;&#65039; 48h</button>
+      </div>
+    </div>
   </div>
 </div>
 <div class="hero-slot" id="hero-yard">
@@ -2224,19 +2281,10 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         &#128688; <span id="irrDevName">Water Hog</span><span class="irr-conn" id="irrConn"></span>
       </div>
       <div id="irrBanner" class="wx-banner wx-load">&#128260; Loading irrigation&hellip;</div>
-      <div class="wx-grid">
-        <div class="wx-card"><div class="wx-lbl">Mode</div><div class="wx-val" id="irrMode">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Rain Delay</div><div class="wx-val" id="irrRainDelay">--</div></div>
-      </div>
+      <!-- Mode / Rain Delay and the STOP ALL / CLEAR / 24h / 48h buttons now
+           live inlaid on the lawn photo at the top of this section (08-06).
+           Deliberately not duplicated here. -->
       <div id="irrZones"></div>
-      <div class="irr-btn-row">
-        <button class="irr-btn irr-btn-stop" onclick="irrStopAll()">&#9632; STOP ALL</button>
-        <button class="irr-btn irr-btn-clear" onclick="irrRain(0)">&#9728;&#65039; CLEAR DELAY</button>
-      </div>
-      <div class="irr-btn-row">
-        <button class="irr-btn irr-btn-delay" onclick="irrRain(24)">&#127783;&#65039; Delay 24h</button>
-        <button class="irr-btn irr-btn-delay" onclick="irrRain(48)">&#127783;&#65039; Delay 48h</button>
-      </div>
       <div class="irr-next-run" id="irrNextRun"></div>
       <div id="irrUsage"></div>
       <button class="btn-full btn-gray" style="margin-top:10px" onclick="loadIrrigation()">&#128260; Refresh Irrigation</button>
