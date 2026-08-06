@@ -1,12 +1,18 @@
 // /api/ha-stats — server-side proxy for Home Assistant's long-term Statistics API.
 //
-// WHY: history/statistics_during_period (the call that returns real hourly/daily consumption,
+// WHY: recorder/statistics_during_period (the call that returns real hourly/daily consumption,
 // as opposed to raw state-change history) has no REST equivalent in HA — it's a WebSocket-only
 // command. /api/ha (see ha.js) is a plain HTTP reverse proxy and can't reach it. This function
 // opens a short-lived outbound WebSocket to the same allow-listed Nabu Casa host, authenticates
 // with the token the browser sends (never stored here — same pattern as ha.js), sends exactly
-// one history/statistics_during_period command, and returns the JSON result over a normal HTTP
+// one recorder/statistics_during_period command, and returns the JSON result over a normal HTTP
 // response so the browser never has to speak WebSocket itself.
+//
+// Command name confirmed live 08-06 by the coworker against Jeff's real HA (Core 2026.8.0):
+// the older `history/statistics_during_period` name returns `unknown_command` on this version
+// -- it moved to `recorder/statistics_during_period` (same params). Fixing this after shipping
+// with the wrong name on day one; see docs/utilities/electric_smarthub_data_upgrade_2026-08-06.md
+// "Coworker follow-up, live HA verification" for the full trace.
 
 const ALLOWED_HOSTS = ['kmtpozwheqwww9t5uxhhvzzso1tvagro.ui.nabu.casa'];
 const DEFAULT_BASE = 'https://kmtpozwheqwww9t5uxhhvzzso1tvagro.ui.nabu.casa';
@@ -88,12 +94,12 @@ function fetchStatistics(wsUrl, authHeader, statisticId, startTime, endTime, per
           } else if (msg.type === 'auth_ok') {
             ws.send(JSON.stringify({
               id: msgId,
-              type: 'history/statistics_during_period',
+              type: 'recorder/statistics_during_period',
               start_time: startTime,
               end_time: endTime,
               statistic_ids: [statisticId],
               period: period,
-              types: ['change', 'sum', 'state']
+              types: ['sum', 'state']
             }));
           } else if (msg.type === 'result' && msg.id === msgId) {
             if (msg.success) finish(resolve, (msg.result && msg.result[statisticId]) || []);

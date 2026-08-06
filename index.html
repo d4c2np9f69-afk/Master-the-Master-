@@ -8174,36 +8174,48 @@ function loadUtilities() {
     // see functions/api/ha-stats.js) — replaces the electricDayDelta() estimate above with
     // ground truth once it resolves, same "estimate now, refine when real data lands" pattern
     // as putWaterCycle()/irrGalFromHistory(). Built per
-    // docs/utilities/electric_smarthub_data_upgrade_2026-08-06.md — the SmartHub integration
-    // already imports real hourly/daily statistics for this entity, separate from its monthly
-    // running-total state. Could not be tested against Jeff's real HA/SmartHub data from this
-    // sandbox (no network path) — silently falls back to the existing estimate on any failure.
+    // docs/utilities/electric_smarthub_data_upgrade_2026-08-06.md.
+    //
+    // Per-period usage = diff of the CUMULATIVE 'sum'/'state' reading between consecutive
+    // periods, not a per-bucket field read. The coworker fired this exact command against
+    // Jeff's real HA (Core 2026.8.0) and found 'change' always reads 0 for this sensor even
+    // across real usage growth ('sum' moved 761->872 over 48h while every 'change' was 0) --
+    // same "diff two cumulative readings" pattern already used everywhere else in this app
+    // (irrGalFromHistory(), the water meter billing-cycle math). toDiffedSeries() below does
+    // this once for both the hourly and daily arrays. Real command name also fixed same day:
+    // history/statistics_during_period doesn't exist on this HA version, it's
+    // recorder/statistics_during_period -- see functions/api/ha-stats.js.
     function loadElectricStats(entId){
       if (!entId) return;
       var now = new Date();
       var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
       // 25h back guarantees a full trailing-24h peak-hour window even right after local
-      // midnight; 8 days back guarantees 7 full prior days for the Last 7 Days panel.
+      // midnight, PLUS one extra hour of baseline for the first real diff; 8 days back
+      // guarantees 7 full prior days for the Last 7 Days panel plus one extra baseline day.
       var hourWindowStart = new Date(now.getTime() - 25 * 3600000);
       var dayWindowStart = new Date(todayStart.getTime() - 8 * 86400000);
       var nowIso = now.toISOString();
+
+      function toDiffedSeries(raw){
+        var items = raw.slice().sort(function(a, b){ return new Date(a.start) - new Date(b.start); });
+        function cumOf(item){ return item.sum != null ? item.sum : (item.state != null ? item.state : null); }
+        var out = [];
+        for (var i = 1; i < items.length; i++){
+          var prev = cumOf(items[i - 1]), cur = cumOf(items[i]);
+          if (prev == null || cur == null) continue; // can't diff without both cumulative readings
+          out.push({ start: items[i].start, kwh: Math.max(0, cur - prev) }); // clamp a meter reset to 0, never negative
+        }
+        return out;
+      }
 
       Promise.all([
         haStatsFetch(entId, hourWindowStart.toISOString(), nowIso, 'hour').then(function(r){ return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)); }),
         haStatsFetch(entId, dayWindowStart.toISOString(), nowIso, 'day').then(function(r){ return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)); })
       ]).then(function(results){
-        var hourly = (results[0] && results[0].statistics) || [];
-        var daily = (results[1] && results[1].statistics) || [];
+        var hourly = toDiffedSeries((results[0] && results[0].statistics) || []);
+        var daily = toDiffedSeries((results[1] && results[1].statistics) || []);
         if (!hourly.length && !daily.length) return; // nothing usable yet -- leave the estimate showing
 
-        function periodKwh(item){
-          // Prefer the explicit per-period 'change' HA's WS command returns when asked for it;
-          // fall back to 'sum'/'state' if 'change' isn't populated for this entity/HA version.
-          if (item.change != null) return Math.max(0, item.change);
-          if (item.sum != null) return Math.max(0, item.sum);
-          if (item.state != null) return Math.max(0, item.state);
-          return 0;
-        }
         function dayKeyOf(d){ return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate(); }
 
         var todayKey = dayKeyOf(todayStart);
@@ -8212,7 +8224,7 @@ function loadUtilities() {
         var todaySum = 0, peakVal = -1, peakStart = null, sawTodayHour = false;
         hourly.forEach(function(item){
           var t = new Date(item.start);
-          var kwh = periodKwh(item);
+          var kwh = item.kwh;
           if (dayKeyOf(t) === todayKey) { todaySum += kwh; sawTodayHour = true; }
           if (kwh > peakVal) { peakVal = kwh; peakStart = t; }
         });
@@ -8236,7 +8248,7 @@ function loadUtilities() {
 
         var yesterdayVal = null;
         daily.forEach(function(item){
-          if (dayKeyOf(new Date(item.start)) === yesterdayKey) yesterdayVal = periodKwh(item);
+          if (dayKeyOf(new Date(item.start)) === yesterdayKey) yesterdayVal = item.kwh;
         });
         if (yesterdayVal != null) {
           put('util-elec-yesterday', yesterdayVal.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
@@ -8266,7 +8278,7 @@ function loadUtilities() {
       var maxKwh = 0;
       var rows = days.map(function(item){
         var t = new Date(item.start);
-        var kwh = (item.change != null) ? Math.max(0, item.change) : (item.sum != null ? Math.max(0, item.sum) : Math.max(0, item.state || 0));
+        var kwh = item.kwh;
         if (kwh > maxKwh) maxKwh = kwh;
         return { label: t.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }), kwh: kwh };
       });

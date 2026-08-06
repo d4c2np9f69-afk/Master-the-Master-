@@ -141,3 +141,24 @@ sandbox cannot do. Left for the coworker or a future session with real HA access
 **Item 2 (poll interval) and item 4 (rate sheet):** no app-code changes needed — both already
 handled live by the coworker (poll interval reconfigured directly in HA; rate sheet is a
 reference source for the next bill cross-check, not something the app reads automatically).
+
+---
+
+## App-side fix for both real bugs above (2026-08-06, cloud session)
+
+Both bugs found by the coworker's live WS trace above are fixed:
+
+1. **`functions/api/ha-stats.js`** now sends `recorder/statistics_during_period` instead of
+   `history/statistics_during_period`.
+2. **`index.html`'s `loadElectricStats()`** no longer reads a per-bucket `change` field at all
+   (dropped `change` from the `types` request too — confirmed dead weight for this sensor). It now
+   runs the raw hourly/daily arrays through `toDiffedSeries()`, which diffs each period's
+   cumulative `sum` (falling back to `state`) against the previous period's, clamped to 0 to guard
+   a meter reset — the same "diff two cumulative readings" pattern already used by
+   `irrGalFromHistory()`/the water billing math elsewhere in this file.
+
+Re-verified via a mocked Playwright test built from the coworker's exact real data shape (`sum`
+761→872 over 48h, `change` always 0, one clear 3-4pm peak) — Today/Yesterday/Peak Hour/Last 7 Days
+all compute correctly. `lint-app.js`/`smoke-test.js` clean. This sandbox still cannot fire the real
+WS command itself — the fix is verified against the coworker's real data shape, not against a live
+round-trip, so a final live confirmation after this deploys is still the right sanity check.
