@@ -67,6 +67,24 @@ button{font-family:inherit;cursor:pointer}
   --info:#38bdf8;
   /* shared corner radius so every card/button/control matches */
   --radius:10px;
+  /* ── LUXURY GLASS OVERLAY TOKENS ─────────────────────────────────────────
+     Shared by every panel that sits ON TOP OF A PHOTO (LUX thermostat panel,
+     the Water/Gas/Electric meter stat slabs). These are deliberately FIXED
+     light-on-dark values, NOT theme-relative — the photos underneath are
+     permanently dark in both themes, so a var(--text)/var(--muted) here would
+     go dark-on-dark in light mode (Pending Item 17's bug class).
+     Values come straight from the Luxury Dashboard UI guide. */
+  --glass-bg:rgba(22,22,22,.20);
+  --glass-border:rgba(255,255,255,.08);
+  --glass-ring:linear-gradient(160deg,rgba(255,255,255,.18),rgba(255,255,255,.02));
+  --glass-blur:blur(24px) saturate(180%) brightness(.75);
+  --glass-shadow:0 20px 60px rgba(0,0,0,.45),0 0 60px rgba(255,170,70,.08),inset 0 1px rgba(255,255,255,.08);
+  --glass-text:#f7f1e7;
+  --glass-warm:#f7e5c4;
+  --glass-glow:0 0 15px rgba(255,212,135,.25);
+  --glass-hair:rgba(255,255,255,.07);
+  /* one warm key light + gentle floor shadow, matched to the photos' own tone */
+  --glass-ambient:radial-gradient(circle at 70% 20%,rgba(255,210,140,.18),transparent 55%),linear-gradient(to bottom,transparent,rgba(0,0,0,.45));
   /* legacy aliases */
   --ink:#ede8df;
   /* Style A — ONE clean system font everywhere (no more serif/sans mix).
@@ -556,50 +574,99 @@ html.light .car-tabs{background:#fff}
    real outside temp/feels-like). Neither panel covers the "Climate Control"
    text block or gets in the way of the other. If the photo is ever swapped,
    both panels' percentages need re-calibrating to the new image. */
-.lux-photo-wrap{position:relative;width:100%;border-radius:14px;overflow:hidden;aspect-ratio:1320/931;background:#0a0a0a;box-shadow:0 4px 18px rgba(0,0,0,.3)}
-.lux-photo-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.lux-photo-wrap{position:relative;width:100%;border-radius:14px;overflow:hidden;aspect-ratio:1320/931;background:#0a0a0a;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+/* Guide item 5 — darken + warm the host photo so the live panel is the focus,
+   not the photo's own baked-in ad copy. The guide's literal blur(2px) was tried
+   and pulled back on Jeff's call (08-06: "not so much blur in the picture") --
+   at a ~350px card width a 2px blur on a 1320px-wide source reads as a broken
+   render, not a design choice. The focus separation is carried by the brightness
+   drop plus the panel's own backdrop blur instead, which is where it belongs. */
+.lux-photo-wrap img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(118%) brightness(.82)}
+/* Guide item 8 — warm key light from the upper right + a gentle floor shadow,
+   so the glass reads as lit by the same room the photo shows. */
+.lux-photo-wrap::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:var(--glass-ambient)}
 
 .lux-fp-panel{
-  position:absolute;left:1.1%;top:1.6%;width:55.3%;height:48.3%;
-  background:rgba(10,8,6,.74);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
-  border:1px solid rgba(255,255,255,.12);border-radius:10px;
-  padding:7px 8px;box-sizing:border-box;
-  display:flex;flex-direction:column;gap:4px;color:#fff;z-index:2;
+  position:absolute;left:3%;top:3%;bottom:3%;width:56%;
+  /* Height is DERIVED (top+bottom inset), never a fixed number. It used to be a
+     hard 48.3% of the photo, which the mode/fan buttons outgrew at real phone
+     widths — the device name + refresh button spilled out of the panel and sat
+     loose on the photo ("the overlays don't even fit in the pictures").
+     Running it top-to-bottom does three things at once: overflow becomes
+     structurally impossible, it covers ALL of the photo's baked-in ad copy
+     (CLIMATE CONTROL / COMFORT. EFFICIENCY. CONTROL. / the icon strip /
+     SMART CLIMATE.) in one move rather than slicing through the middle of it,
+     and with space-between the controls fill the glass evenly instead of
+     pooling at the top with dead space underneath (Jeff's call, 08-06).
+     min-height:max-content is the safety valve: if content ever did exceed the
+     photo it grows the panel instead of clipping. */
+  height:auto;min-height:max-content;justify-content:space-between;
+  background:var(--glass-bg);
+  backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+  border:1px solid var(--glass-border);border-radius:clamp(12px,3.4vw,24px);
+  box-shadow:var(--glass-shadow);
+  padding:clamp(7px,1.9vw,14px) clamp(8px,2.1vw,15px);box-sizing:border-box;
+  display:flex;flex-direction:column;gap:clamp(4px,1.1vw,8px);color:var(--glass-text);z-index:2;
+}
+/* Guide item 2 — soft edge glow: a 1px gradient ring instead of a solid border. */
+.lux-fp-panel::before,.util-overlay-bottom .util-stats::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+  background:var(--glass-ring);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;
+  pointer-events:none;z-index:1;
 }
 .lux-fp-top{display:flex;justify-content:space-between;align-items:flex-start}
-.lux-fp-temp-big{font-size:24px;font-weight:800;line-height:1;font-family:var(--serif)}
-.lux-fp-temp-lbl{font-size:6.3px;color:rgba(255,255,255,.6);letter-spacing:.4px;text-transform:uppercase;margin-top:1px}
-.lux-fp-set-row{display:flex;align-items:center;gap:3px}
-.lux-adj-btn{background:rgba(249,115,22,.18);border:1px solid rgba(249,115,22,.4);border-radius:4px;color:#f97316;font-size:clamp(8px,1.9vw,13px);padding:clamp(2px,.5vw,4px) clamp(4px,1.2vw,8px);line-height:1.5;font-weight:900;cursor:pointer;font-family:inherit}
-.lux-fp-badges{display:flex;gap:4px}
-.lux-badge{font-size:6.4px;font-weight:800;letter-spacing:.3px;padding:2px 5px;border-radius:4px;border:1px solid;white-space:nowrap}
-.lux-badge-cool{color:#38bdf8;border-color:rgba(56,189,248,.5);background:rgba(56,189,248,.15)}
-.lux-badge-heat{color:#f97316;border-color:rgba(249,115,22,.5);background:rgba(249,115,22,.15)}
-.lux-badge-off{color:rgba(255,255,255,.65);border-color:rgba(255,255,255,.25)}
-.lux-badge-auto{color:#22c55e;border-color:rgba(34,197,94,.5);background:rgba(34,197,94,.15)}
-.lux-badge-fan{color:#d4af37;border-color:rgba(212,175,55,.5);background:rgba(212,175,55,.15)}
-.lux-mode-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(3px,.8vw,6px)}
-.lux-mode-btn{padding:clamp(4px,1vw,8px) clamp(1px,.4vw,3px);border-radius:5px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.75);font-size:clamp(6.6px,1.7vw,12px);font-weight:800;font-family:inherit;cursor:pointer;line-height:1.3}
-.lux-mode-btn.lmb-active-cool{background:rgba(56,189,248,.2);border-color:rgba(56,189,248,.5);color:#38bdf8}
-.lux-mode-btn.lmb-active-heat{background:rgba(249,115,22,.2);border-color:rgba(249,115,22,.5);color:#f97316}
-.lux-mode-btn.lmb-active-auto{background:rgba(34,197,94,.2);border-color:rgba(34,197,94,.5);color:#22c55e}
-.lux-mode-btn.lmb-active-off{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.35);color:#fff}
-.lux-fan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(3px,.8vw,6px)}
-.lux-fan-btn{padding:clamp(4px,1vw,7px) clamp(1px,.4vw,3px);border-radius:5px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6);font-size:clamp(6px,1.55vw,11px);font-weight:800;font-family:inherit;cursor:pointer}
-.lux-fan-btn.lux-fan-active{border-color:rgba(212,175,55,.6);color:#d4af37;background:rgba(212,175,55,.12)}
-.lux-fp-foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;font-size:6px;color:rgba(255,255,255,.5)}
-.lux-refresh-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:5px;color:rgba(255,255,255,.75);font-size:clamp(6.3px,1.6vw,11px);font-weight:800;padding:clamp(3px,.8vw,6px) clamp(5px,1.3vw,10px);cursor:pointer;font-family:inherit}
+.lux-fp-temp-big{font-size:clamp(24px,6.2vw,44px);font-weight:600;line-height:1;letter-spacing:-.5px;font-family:var(--serif);color:var(--glass-text);text-shadow:var(--glass-glow)}
+.lux-fp-temp-set{font-size:clamp(19px,4.9vw,35px)}
+.lux-fp-temp-lbl{font-size:clamp(6.3px,1.6vw,11px);color:rgba(247,229,196,.58);letter-spacing:.6px;text-transform:uppercase;margin-top:2px}
+.lux-fp-set-row{display:flex;align-items:center;gap:clamp(3px,.8vw,6px)}
+.lux-adj-btn{background:rgba(249,115,22,.16);border:1px solid rgba(249,115,22,.28);border-radius:clamp(6px,1.6vw,12px);color:#ffb37a;font-size:clamp(8px,1.9vw,13px);padding:clamp(2px,.5vw,4px) clamp(4px,1.2vw,8px);line-height:1.5;font-weight:700;cursor:pointer;font-family:inherit;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 8px 20px rgba(0,0,0,.25);transition:.25s}
+.lux-fp-badges{display:flex;gap:clamp(4px,1vw,8px)}
+.lux-badge{font-size:clamp(6.4px,1.6vw,11px);font-weight:700;letter-spacing:.5px;padding:clamp(2px,.6vw,5px) clamp(5px,1.4vw,10px);border-radius:999px;border:1px solid;white-space:nowrap;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.lux-badge-cool{color:#7dd3fc;border-color:rgba(56,189,248,.35);background:rgba(56,189,248,.14)}
+.lux-badge-heat{color:#ffb37a;border-color:rgba(249,115,22,.35);background:rgba(249,115,22,.14)}
+.lux-badge-off{color:rgba(247,241,231,.7);border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.06)}
+.lux-badge-auto{color:#86efac;border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.14)}
+.lux-badge-fan{color:var(--glass-warm);border-color:rgba(255,210,140,.28);background:rgba(255,185,60,.14)}
+.lux-mode-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(3px,.9vw,7px)}
+/* Guide item 6 — floating glass buttons: translucent, blurred, one soft shadow,
+   a small lift on hover. */
+.lux-mode-btn,.lux-fan-btn,.lux-refresh-btn{
+  border-radius:clamp(7px,1.9vw,14px);
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  box-shadow:0 8px 20px rgba(0,0,0,.25);transition:.25s;
+  font-family:inherit;cursor:pointer;
+}
+.lux-mode-btn:hover,.lux-fan-btn:hover,.lux-refresh-btn:hover,.lux-adj-btn:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(0,0,0,.35)}
+.lux-mode-btn{padding:clamp(4px,1.1vw,9px) clamp(1px,.4vw,3px);color:rgba(247,241,231,.8);font-size:clamp(6.6px,1.7vw,12px);font-weight:700;line-height:1.3}
+.lux-mode-btn.lmb-active-cool{background:rgba(56,189,248,.18);border-color:rgba(56,189,248,.35);color:#7dd3fc}
+.lux-mode-btn.lmb-active-heat{background:rgba(249,115,22,.18);border-color:rgba(249,115,22,.35);color:#ffb37a}
+.lux-mode-btn.lmb-active-auto{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.35);color:#86efac}
+.lux-mode-btn.lmb-active-off{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.3);color:#fff}
+.lux-fan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(3px,.9vw,7px)}
+.lux-fan-btn{padding:clamp(4px,1.1vw,8px) clamp(1px,.4vw,3px);color:rgba(247,241,231,.65);font-size:clamp(6px,1.55vw,11px);font-weight:700}
+.lux-fan-btn.lux-fan-active{border-color:rgba(255,210,140,.4);color:var(--glass-warm);background:rgba(255,185,60,.14)}
+.lux-fp-foot{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:clamp(6px,1.5vw,10px);color:rgba(247,229,196,.5);letter-spacing:.3px}
+.lux-refresh-btn{color:rgba(247,241,231,.8);font-size:clamp(6.3px,1.6vw,11px);font-weight:700;padding:clamp(3px,.9vw,7px) clamp(5px,1.4vw,11px)}
 
 /* Weather patch — sits on the device's own screen, replacing the photo's
-   baked-in fake weather readout with real outside temp / feels-like. */
+   baked-in fake weather readout with real outside temp / feels-like.
+   Kept deliberately more opaque than the other glass (.82 not .20): its whole
+   job is to HIDE the fake numbers printed on the photo underneath it, and a
+   .20 wash would let them ghost through. */
 .lux-wx-patch{
   position:absolute;left:61.7%;top:25.2%;width:26.1%;height:9.7%;
-  background:#0a0806;border-radius:5px;
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  color:#fff;z-index:2;
+  background:rgba(10,8,6,.82);
+  backdrop-filter:blur(10px) saturate(140%);-webkit-backdrop-filter:blur(10px) saturate(140%);
+  border:1px solid rgba(255,255,255,.06);border-radius:clamp(5px,1.4vw,10px);
+  box-shadow:inset 0 1px rgba(255,255,255,.06);
+  display:flex;align-items:center;justify-content:center;gap:clamp(8px,2vw,16px);
+  color:var(--glass-text);z-index:2;
 }
-.lux-wx-val{font-size:9px;font-weight:800;line-height:1;font-family:var(--serif)}
-.lux-wx-lbl{font-size:5px;color:rgba(255,255,255,.55);letter-spacing:.3px;text-transform:uppercase;margin-top:1px}
+.lux-wx-val{font-size:clamp(9px,2.3vw,16px);font-weight:600;line-height:1;font-family:var(--serif);text-shadow:var(--glass-glow)}
+.lux-wx-lbl{font-size:clamp(5px,1.25vw,9px);color:rgba(247,229,196,.55);letter-spacing:.4px;text-transform:uppercase;margin-top:1px}
 
 /* ── QUICK ACCESS (HOME section) ───────────────────────────────────────── */
 .quick-access-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
@@ -663,30 +730,67 @@ html.light .car-tabs{background:#fff}
 
 /* ── UTILITIES (Water / Gas / Electric meter cards, HOME) ───────────────── */
 .util-list{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
-.util-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.30)}
+.util-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.45)}
 .util-banner{width:100%;overflow:hidden;background:#0b0b0f;line-height:0;position:relative}
-.util-banner img{width:100%;height:auto;display:block}
+/* Guide item 5 — each meter photo carries its own baked-in marketing panel
+   ("SMART MEASUREMENT", the SAFE SUPPLY / USAGE INSIGHTS icon strip, etc.)
+   printed right where the live numbers have to go. Darkening the photo pushes
+   that back into ambient texture so the glass slab is the only thing competing
+   for attention. Deliberately NOT the guide's blur(2px) -- see the matching
+   note on .lux-photo-wrap img. */
+.util-banner img{width:100%;height:auto;display:block;filter:saturate(118%) brightness(.82)}
+/* Guide item 8 — warm key light matched to these photos' own sunset tone. */
+.util-banner::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:var(--glass-ambient)}
 /* Reserve the real image aspect ratio so the lazy-loaded photo doesn't cause layout
    shift when it finishes loading (each meter photo has a different ratio). */
 .util-w .util-banner{aspect-ratio:1320/878}
 .util-g .util-banner{aspect-ratio:1135/868}
 .util-e .util-banner{aspect-ratio:1228/857}
-.util-banner-call{position:absolute;right:8px;top:8px;z-index:3;display:inline-flex;align-items:center;gap:4px;font-size:clamp(10px,1.8vw,15px);font-weight:800;letter-spacing:.5px;color:#fff;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.4);border-radius:20px;padding:clamp(4px,1vw,7px) clamp(8px,1.6vw,13px);line-height:1;text-decoration:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.util-banner-call:active{opacity:.8}
-.util-overlay-bottom{position:absolute;bottom:0;left:0;right:0;z-index:2;padding:14px 6px 6px}
-.util-overlay-bottom .util-stats{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;background:linear-gradient(to top,rgba(4,4,10,.9) 0%,rgba(4,4,10,.7) 75%,rgba(4,4,10,0) 100%);padding:10px 3px 3px;margin:-10px -3px -3px}
-.util-overlay-bottom .util-stat{flex:0 0 auto;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);padding:clamp(4px,.9vw,7px) clamp(9px,1.8vw,14px);border-radius:8px}
-.util-overlay-bottom .util-stat-label{color:rgba(255,255,255,.8);text-shadow:0 1px 4px rgba(0,0,0,.9);font-size:clamp(7.5px,1.5vw,12px);white-space:nowrap}
-.util-overlay-bottom .util-stat-val{color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.95);font-size:clamp(12px,2.2vw,18px);margin-top:1px}
-.util-overlay-bottom .util-stat-unit{color:rgba(255,255,255,.75)}
-/* 6+ cell cards (Electric: Now/Today/Yesterday/Peak Hour/This Month/Est. Cost) — the default
-   flex-wrap above sizes each chip to its own content, so an uneven cell count wraps raggedly
-   (e.g. 4 chips on row 1, 2 on row 2) once there are more than 4. A real 3-col grid keeps every
-   row even and every cell width-consistent regardless of viewport. */
-.util-overlay-bottom .util-stats.util-stats-grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
-.util-overlay-bottom .util-stats.util-stats-grid3 .util-stat{min-width:0;text-align:center}
-.util-overlay-bottom .util-stats.util-stats-grid3 .util-stat-label,
-.util-overlay-bottom .util-stats.util-stats-grid3 .util-stat-val{white-space:normal;overflow-wrap:break-word}
+/* Guide item 6 — floating glass button. */
+.util-banner-call{position:absolute;right:clamp(8px,2.2vw,16px);top:clamp(8px,2.2vw,16px);z-index:3;display:inline-flex;align-items:center;gap:5px;font-size:clamp(10px,1.8vw,15px);font-weight:700;letter-spacing:.5px;color:var(--glass-text);background:rgba(255,255,255,.10);backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:clamp(5px,1.1vw,9px) clamp(9px,1.8vw,15px);line-height:1;text-decoration:none;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.25);transition:.25s;-webkit-tap-highlight-color:transparent}
+.util-banner-call:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(0,0,0,.35)}
+.util-banner-call:active{opacity:.8;transform:none}
+
+/* ── The live-readout slab ────────────────────────────────────────────────
+   This used to be a loose cluster of individually-boxed chips laid out with
+   flex-wrap, so each chip sized to its own text and the rows came out ragged
+   and unaligned, with the photo's own printed icon strip showing through the
+   gaps between them. It's now ONE frosted-glass slab (guide items 1/2/3/9)
+   with a plain, evenly-divided grid inside it — no per-cell boxes at all, so
+   there are no gaps for the photo to bleed through and every column lines up
+   at every width. The slab is inset from the photo edges so it reads as a
+   piece of glass laid on the picture, not a black bar taped across it. */
+.util-overlay-bottom{position:absolute;bottom:0;left:0;right:0;z-index:2;padding:0 clamp(6px,1.7vw,12px) clamp(6px,1.7vw,12px)}
+/* Guide item 3 — a transparent gradient rising out of the image instead of an
+   opaque black band, so the slab has something to sit on without a hard edge. */
+.util-overlay-bottom::before{content:"";position:absolute;left:0;right:0;bottom:0;height:270%;z-index:0;pointer-events:none;background:linear-gradient(to top,rgba(4,4,10,.86) 0%,rgba(4,4,10,.66) 28%,rgba(4,4,10,.30) 62%,rgba(4,4,10,0) 100%)}
+.util-overlay-bottom .util-stats{
+  position:relative;z-index:1;display:grid;gap:0;margin:0;padding:0;overflow:hidden;
+  grid-template-columns:repeat(3,1fr);
+  background:var(--glass-bg);
+  backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+  border:1px solid var(--glass-border);border-radius:clamp(14px,3.8vw,26px);
+  box-shadow:var(--glass-shadow);
+}
+.util-overlay-bottom .util-stat{
+  min-width:0;text-align:center;background:none;border:0;border-radius:0;
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+  padding:clamp(6px,1.6vw,11px) clamp(3px,1vw,9px);
+  border-left:1px solid var(--glass-hair);border-top:1px solid var(--glass-hair);
+}
+/* hairline dividers only BETWEEN cells — never on the slab's own outer edge */
+.util-overlay-bottom .util-stats-grid3 .util-stat:nth-child(3n+1){border-left:0}
+.util-overlay-bottom .util-stats-grid3 .util-stat:nth-child(-n+3){border-top:0}
+.util-overlay-bottom .util-stats-grid4{grid-template-columns:repeat(4,1fr)}
+.util-overlay-bottom .util-stats-grid4 .util-stat:nth-child(4n+1){border-left:0}
+.util-overlay-bottom .util-stats-grid4 .util-stat:nth-child(-n+4){border-top:0}
+/* Guide item 12 — warm off-white with a soft glow, weight 600, not heavy bold. */
+.util-overlay-bottom .util-stat-label{color:rgba(247,229,196,.60);font-size:clamp(6.6px,1.4vw,11px);font-weight:700;letter-spacing:.6px;text-transform:uppercase;text-shadow:none;line-height:1.25;white-space:normal;overflow-wrap:break-word}
+.util-overlay-bottom .util-stat-val{color:var(--glass-text);font-size:clamp(11.5px,2.1vw,17px);font-weight:600;text-shadow:var(--glass-glow);margin-top:3px;line-height:1.15;font-variant-numeric:tabular-nums;white-space:normal;overflow-wrap:break-word}
+/* the unit drops to its own line so a long real reading ("19,334.7 gal") can
+   never widen a cell past its column — the failure the last attempt at this
+   design only ever saw with short placeholder values. */
+.util-overlay-bottom .util-stat-unit{display:block;margin:1px 0 0;color:rgba(247,229,196,.55);font-size:clamp(6.2px,1.3vw,10px);font-weight:700;letter-spacing:.4px}
 .util-body{padding:11px 14px 13px}
 .util-head{display:flex;align-items:center;gap:9px;margin-bottom:10px}
 .util-head-name{font-size:13px;font-weight:800;color:var(--text);letter-spacing:.3px}
@@ -1498,7 +1602,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
                 <div style="text-align:right">
                   <div class="lux-fp-set-row">
                     <button class="lux-adj-btn" onclick="luxAdjust(-1)">&#9660;</button>
-                    <span id="luxSetTemp" class="lux-fp-temp-big" style="font-size:19px">--&deg;</span>
+                    <span id="luxSetTemp" class="lux-fp-temp-big lux-fp-temp-set">--&deg;</span>
                     <button class="lux-adj-btn" onclick="luxAdjust(1)">&#9650;</button>
                   </div>
                   <div class="lux-fp-temp-lbl">Set Temp</div>
@@ -1560,7 +1664,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <img src="./images/util-water.jpg" alt="White House Utilities water meter" loading="lazy">
           <a class="util-banner-call" href="tel:6156724110" aria-label="Call White House Utility District customer service">&#128222; CALL</a>
           <div class="util-overlay-bottom">
-            <div class="util-stats" style="grid-template-columns:repeat(4,1fr)">
+            <div class="util-stats util-stats-grid4">
               <div class="util-stat"><div class="util-stat-label">Reading</div><div class="util-stat-val" id="util-water-today">&mdash;<span class="util-stat-unit">gal</span></div></div>
               <div class="util-stat"><div class="util-stat-label">This Cycle</div><div class="util-stat-val" id="util-water-month">&mdash;<span class="util-stat-unit">gal</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Flow</div><div class="util-stat-val" id="util-water-flow">&mdash;<span class="util-stat-unit">gpm</span></div></div>
@@ -1592,7 +1696,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <img src="./images/util-gas.jpg" alt="Spire Energy gas meter" loading="lazy">
           <a class="util-banner-call" href="tel:8007527504" aria-label="Call Spire Energy customer service">&#128222; CALL</a>
           <div class="util-overlay-bottom">
-            <div class="util-stats">
+            <div class="util-stats util-stats-grid3">
               <div class="util-stat"><div class="util-stat-label">Reading</div><div class="util-stat-val" id="util-gas-today">&mdash;<span class="util-stat-unit">ccf</span></div></div>
               <div class="util-stat"><div class="util-stat-label">This Month</div><div class="util-stat-val" id="util-gas-month">&mdash;<span class="util-stat-unit">ccf</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Est. Cost</div><div class="util-stat-val" id="util-gas-cost">&mdash;</div></div>
@@ -8256,8 +8360,10 @@ function loadUtilities() {
           var to12 = function(h){ var hh = h % 12; return hh === 0 ? 12 : hh; };
           var ap = h2 < 12 ? 'AM' : 'PM';
           var peakEl = document.getElementById('util-elec-peak');
+          // .util-stat-unit is display:block inside the photo overlay, so it
+          // already starts its own line -- no <br> (that would add a blank one).
           if (peakEl) peakEl.innerHTML = to12(h1) + '-' + to12(h2) + ' ' + ap
-            + '<br><span class="util-stat-unit">' + peakVal.toFixed(1) + ' kWh</span>';
+            + '<span class="util-stat-unit">' + peakVal.toFixed(1) + ' kWh</span>';
         }
 
         var yesterdayVal = null;
