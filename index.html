@@ -617,13 +617,18 @@ html.light .car-tabs{background:#fff}
   pointer-events:none;z-index:1;
 }
 .lux-fp-top{display:flex;justify-content:space-between;align-items:flex-start}
-.lux-fp-temp-big{font-size:clamp(24px,6.2vw,44px);font-weight:600;line-height:1;letter-spacing:-.5px;font-family:var(--serif);color:var(--glass-text);text-shadow:var(--glass-glow)}
-.lux-fp-temp-set{font-size:clamp(19px,4.9vw,35px)}
-.lux-fp-temp-lbl{font-size:clamp(6.3px,1.6vw,11px);color:rgba(247,229,196,.58);letter-spacing:.6px;text-transform:uppercase;margin-top:2px}
+/* Type/control scale sized up ~20% from the first pass on Jeff's call (08-06,
+   "maybe a little bigger") after looking at it at real phone width. The panel
+   is a fixed top:3%/bottom:3% box, so every one of these was re-checked for
+   overflow and clipping at 320/375/390/430/768/1024/1440px before landing --
+   zero clipped elements, zero panel overflow, at all seven. */
+.lux-fp-temp-big{font-size:clamp(29px,7.4vw,52px);font-weight:600;line-height:1;letter-spacing:-.5px;font-family:var(--serif);color:var(--glass-text);text-shadow:var(--glass-glow)}
+.lux-fp-temp-set{font-size:clamp(23px,5.9vw,42px)}
+.lux-fp-temp-lbl{font-size:clamp(7.6px,1.95vw,13px);color:rgba(247,229,196,.58);letter-spacing:.6px;text-transform:uppercase;margin-top:2px}
 .lux-fp-set-row{display:flex;align-items:center;gap:clamp(3px,.8vw,6px)}
-.lux-adj-btn{background:rgba(249,115,22,.16);border:1px solid rgba(249,115,22,.28);border-radius:clamp(6px,1.6vw,12px);color:#ffb37a;font-size:clamp(8px,1.9vw,13px);padding:clamp(2px,.5vw,4px) clamp(4px,1.2vw,8px);line-height:1.5;font-weight:700;cursor:pointer;font-family:inherit;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 8px 20px rgba(0,0,0,.25);transition:.25s}
+.lux-adj-btn{background:rgba(249,115,22,.16);border:1px solid rgba(249,115,22,.28);border-radius:clamp(6px,1.6vw,12px);color:#ffb37a;font-size:clamp(9.6px,2.3vw,16px);padding:clamp(3px,.6vw,5px) clamp(5px,1.4vw,10px);line-height:1.5;font-weight:700;cursor:pointer;font-family:inherit;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 8px 20px rgba(0,0,0,.25);transition:.25s}
 .lux-fp-badges{display:flex;gap:clamp(4px,1vw,8px)}
-.lux-badge{font-size:clamp(6.4px,1.6vw,11px);font-weight:700;letter-spacing:.5px;padding:clamp(2px,.6vw,5px) clamp(5px,1.4vw,10px);border-radius:999px;border:1px solid;white-space:nowrap;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.lux-badge{font-size:clamp(7.7px,1.95vw,13px);font-weight:700;letter-spacing:.5px;padding:clamp(3px,.75vw,6px) clamp(6px,1.7vw,12px);border-radius:999px;border:1px solid;white-space:nowrap;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .lux-badge-cool{color:#7dd3fc;border-color:rgba(56,189,248,.35);background:rgba(56,189,248,.14)}
 .lux-badge-heat{color:#ffb37a;border-color:rgba(249,115,22,.35);background:rgba(249,115,22,.14)}
 .lux-badge-off{color:rgba(247,241,231,.7);border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.06)}
@@ -640,16 +645,16 @@ html.light .car-tabs{background:#fff}
   font-family:inherit;cursor:pointer;
 }
 .lux-mode-btn:hover,.lux-fan-btn:hover,.lux-refresh-btn:hover,.lux-adj-btn:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(0,0,0,.35)}
-.lux-mode-btn{padding:clamp(4px,1.1vw,9px) clamp(1px,.4vw,3px);color:rgba(247,241,231,.8);font-size:clamp(6.6px,1.7vw,12px);font-weight:700;line-height:1.3}
+.lux-mode-btn{padding:clamp(5px,1.35vw,11px) clamp(1px,.4vw,3px);color:rgba(247,241,231,.8);font-size:clamp(8px,2.05vw,14px);font-weight:700;line-height:1.3}
 .lux-mode-btn.lmb-active-cool{background:rgba(56,189,248,.18);border-color:rgba(56,189,248,.35);color:#7dd3fc}
 .lux-mode-btn.lmb-active-heat{background:rgba(249,115,22,.18);border-color:rgba(249,115,22,.35);color:#ffb37a}
 .lux-mode-btn.lmb-active-auto{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.35);color:#86efac}
 .lux-mode-btn.lmb-active-off{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.3);color:#fff}
 .lux-fan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(3px,.9vw,7px)}
-.lux-fan-btn{padding:clamp(4px,1.1vw,8px) clamp(1px,.4vw,3px);color:rgba(247,241,231,.65);font-size:clamp(6px,1.55vw,11px);font-weight:700}
+.lux-fan-btn{padding:clamp(5px,1.35vw,10px) clamp(1px,.4vw,3px);color:rgba(247,241,231,.65);font-size:clamp(7.3px,1.85vw,13px);font-weight:700}
 .lux-fan-btn.lux-fan-active{border-color:rgba(255,210,140,.4);color:var(--glass-warm);background:rgba(255,185,60,.14)}
-.lux-fp-foot{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:clamp(6px,1.5vw,10px);color:rgba(247,229,196,.5);letter-spacing:.3px}
-.lux-refresh-btn{color:rgba(247,241,231,.8);font-size:clamp(6.3px,1.6vw,11px);font-weight:700;padding:clamp(3px,.9vw,7px) clamp(5px,1.4vw,11px)}
+.lux-fp-foot{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:clamp(7.2px,1.8vw,12px);color:rgba(247,229,196,.5);letter-spacing:.3px}
+.lux-refresh-btn{color:rgba(247,241,231,.8);font-size:clamp(7.6px,1.9vw,13px);font-weight:700;padding:clamp(4px,1.05vw,8px) clamp(6px,1.65vw,13px)}
 
 /* Weather patch — sits on the device's own screen, replacing the photo's
    baked-in fake weather readout with real outside temp / feels-like.
