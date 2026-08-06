@@ -179,6 +179,20 @@ Custom ESP32 running Arduino `.ino` firmware (NOT the ESPHome YAML in `beehive/e
 
 ---
 
+## 📷 WHICH PHOTOS ARE REAL — READ BEFORE EDITING ANY IMAGE (PROTECTED)
+
+Learned the hard way 08-06: I regenerated the irrigation and yard heroes and **deleted Jeff out of his own app**, assuming the person was a stock model. He isn't. Before removing anything from a photo, know what it is:
+
+- **`hero-irr.jpg` and `hero-yard.jpg` contain JEFF HIMSELF** (dark LawnCareLife t-shirt, watch, thumbs-up). **He likes these. Never remove, replace or alter him.** Only ever strip the printed marketing overlays around him.
+- **`images/zones/` — the irrigation zone photos are REAL PHOTOGRAPHS OF JEFF'S ACTUAL YARD**, just enhanced. He likes them. **Do not regenerate or replace these.**
+- **`hero-cameras.jpg` — keep the Blink logo and the 2nd Amendment sticker** (Jeff's explicit call 08-06). What must go is the fake "HOME GUARDIAN / SMART SECURITY SYSTEM" title, the fake "ALL SYSTEMS READY · PROTECTED · 6 CAMERAS" panel, and the six dummy camera tiles — those duplicate the app's own real camera grid, which is exactly the "fake stuff next to my real icons" Jeff objects to. **Not yet done.**
+- **The stock couple in the old `hero-car.jpg` were NOT Jeff and Angela** — removed 08-06, cabin now empty, which is also a better surface for data.
+- **Jeff's standing objection (08-06):** *"I hate those logos that are on the picture. I don't mind the text but it looks awful with them right next to the real icons."* The baked-in **fake icon/feature strips** are the thing to kill in any photo. Plain title text is tolerable; fake iconography next to the app's real icons is not.
+
+**Rule: if a photo contains a person or a real place, confirm with Jeff who/what it is before altering it.** Originals are always recoverable from git history, and full-res copies live in `C:\Users\jeffl\iCloudDrive\HCC-Photos\`.
+
+---
+
 ## 🎬 Hero Image Gold Standard (mandatory for every section, current & future)
 
 Every hero — including any NEW section — MUST use the shared hero-grade module. Never grade a hero individually.
