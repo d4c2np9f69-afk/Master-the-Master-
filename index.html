@@ -550,6 +550,17 @@ html,body{
    Never remove this on an individual hero; it's exactly the "no per-hero override" the Hero
    Gold Standard above already establishes for grading -- same rule applies to sizing. */
 .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian,.sec-hero-car{width:100%}
+/* Continuous max-height instead of frozen breakpoint tiers (Jeff, 08-08: "the size is
+   still off on iPad landscape, the picture resizing"). The old 768/1200/1920/2560 jumps
+   held the hero at a dead-flat 560px from ~739px width all the way to 1200px -- which
+   covers nearly every real iPad's landscape width (iPad 9th gen 1080, mini 1133, Air/
+   10th gen 1180, 11" Pro 1194) -- so the photo simply never grew across the whole iPad
+   range, then jumped abruptly at 1200px. One clamp() replaces all four fixed tiers below
+   and grows smoothly at every width; ceiling still 1000px, matching the old 2560px cap. */
+.house-hero,.sec-hero,.sec-hero-weather,.sec-hero-yard,.sec-hero-guardian{max-height:clamp(560px, 24.5vw + 371px, 1000px)}
+/* Same "percentage-positioned overlay" reasoning as the car hero right below --
+   uncapped so the irr-hero-panel's %-based position never drifts off the photo. */
+.sec-hero-irr{max-height:none}
 /* Car hero — Mercedes GLE interior mockup with baked-in title/tabs at bottom */
 /* Re-cropped taller 08-06 (1.95 -> 1.50) so the cockpit renders noticeably
    bigger on a phone — 260px tall at a 390px viewport instead of 200px — and
@@ -1599,7 +1610,6 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 /* hcc-wrap is now applied via .hcc-section.active above */
 @media(min-width:768px){
   .hcc-section.active{padding:0 24px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian{max-height:560px}
   .sec-hero-car{max-height:none}
   .house-hero{aspect-ratio:16/9}
   .card{padding:22px}
@@ -1620,7 +1630,6 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 }
 @media(min-width:1200px){
   .hcc-section.active{padding:0 40px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian{max-height:680px}
   .sec-hero-car{max-height:none}
   .app-hdr{padding:14px 28px}
   .app-hdr-title{font-size:22px}
@@ -1644,7 +1653,6 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 }
 @media(min-width:1920px){
   .hcc-section.active{max-width:1800px;padding:0 60px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian{max-height:800px}
   .sec-hero-car{max-height:none}
   .app-hdr{padding:18px 40px}
   .app-hdr-title{font-size:26px}
@@ -1677,7 +1685,6 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
   .app-hdr-badge{padding:10px 20px;font-size:20px;border-radius:10px}
   .snav-btn{min-width:200px;font-size:14px;padding:20px 20px 16px}
   .snav-icon{font-size:36px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian{max-height:1000px}
   .sec-hero-car{max-height:none}
   .card{padding:36px 40px;border-radius:22px;margin-bottom:28px}
   .card-title{font-size:16px;letter-spacing:1.5px}
