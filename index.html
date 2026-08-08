@@ -6715,6 +6715,15 @@ function carSwitchVehicle(which) {
   // so showing them over the truck photo would be offering buttons that can't work.
   var heroCtl = document.getElementById('carHeroControls');
   if (heroCtl) heroCtl.style.display = which === 'merc' ? '' : 'none';
+  // Same fix for the odometer/range readouts hand-positioned onto the Mercedes'
+  // OWN dashboard screens (percentage-coordinates only valid on that photo) --
+  // these were never hidden on switch, so the GLE's last-loaded miles/range sat
+  // stale and misplaced over the F-250's exterior photo (Jeff, 08-08: "the
+  // dashboard miles somehow carry over to the truck picture").
+  var scrCluster = document.getElementById('carScreenCluster');
+  var scrCentre = document.getElementById('carScreenCentre');
+  if (scrCluster) scrCluster.style.display = which === 'merc' ? '' : 'none';
+  if (scrCentre) scrCentre.style.display = which === 'merc' ? '' : 'none';
   if (which === 'merc') {
     if (heroImg) { heroImg.src = './images/hero-car.jpg'; heroImg.alt = 'Mercedes-Benz GLE 350 4MATIC'; heroImg.style.display = ''; }
     var firstMerc = document.querySelector('#car-merc-tabs .car-tab');
