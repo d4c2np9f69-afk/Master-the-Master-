@@ -7661,18 +7661,30 @@ function camToolStatus(msg, color) {
   var s = document.getElementById('camToolStatus');
   if (s) { s.innerHTML = msg || ''; s.style.color = color || 'var(--muted)'; }
 }
-// Refresh All: tell every camera to grab a new photo, then reload the stills
+// Refresh All: tell every camera to grab a new photo, then reload the stills.
+// Tracks per-camera trigger failures (e.g. one camera offline) instead of silently
+// swallowing them -- a blanket "Updated" when one camera didn't actually respond
+// would be a false-confidence bug, not a working refresh (Jeff, 08-08).
 function blinkRefreshAll(btn) {
   var cams = (window._camStates || []).filter(function(s){ return isUserCamera(s.entity_id); });
   if (!cams.length) return;
   if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
   camToolStatus('&#128248; Capturing fresh shots&hellip;', 'var(--info)');
-  Promise.all(cams.map(function(c){ return blinkTrigger(c.entity_id).catch(function(){}); }))
+  var failed = [];
+  Promise.all(cams.map(function(c){
+    return blinkTrigger(c.entity_id).catch(function(){
+      failed.push((c.attributes && c.attributes.friendly_name) || c.entity_id.replace('camera.',''));
+    });
+  }))
     .then(function(){
       // Blink needs a few seconds to capture + upload the new thumbnail
       setTimeout(function(){
         blinkReloadStills().then(function(){
-          camToolStatus('&#9989; Updated ' + new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}), 'var(--ok)');
+          if (failed.length){
+            camToolStatus('&#9888;&#65039; Updated ' + (cams.length - failed.length) + '/' + cams.length + ' &bull; ' + failed.join(', ') + ' didn&rsquo;t respond', '#ffd24a');
+          } else {
+            camToolStatus('&#9989; Updated ' + new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}), 'var(--ok)');
+          }
           if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
         });
       }, 7000);
