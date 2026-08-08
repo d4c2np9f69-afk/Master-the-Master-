@@ -74,6 +74,18 @@ The app's existing `loadGarage()`/`garageToggle()` code was written expecting a 
 
 ---
 
+## Door position sensor — now in scope (added 08-06)
+
+Jeff has both parts of the MyQ (hub + sensor) and plans to sell it rather than keep opening a separate app just to check open/closed status — reasonable, since the whole point of this project is one app for everything. That means the sensor Pending Item (previously "future, not needed now") is **now active**: without it, the HCC app has no way to show real door-open/closed state once MyQ is gone.
+
+**Recommendation: a Zigbee door/window contact sensor**, not a wired reed switch — fits Jeff's existing Zigbee-coordinator plan (Pending Item 8) instead of adding a separate wiring run, battery-powered so no extra wiring at the door at all.
+
+- **SONOFF SNZB-04P** — same brand ecosystem as the coordinator dongle already in play, confirmed Zigbee2MQTT/ZHA compatible.
+- **Aqara Door/Window Sensor** — the other well-regarded option, small, long battery life, widely used.
+- Mount one half on the door's bottom panel, the other on the floor/frame at the fully-closed position — standard magnetic contact sensor, not a tilt sensor. (Tilt sensors are an alternative some prefer for garage doors specifically since they avoid magnet alignment on a moving track, but they have their own quirks — a stuck/dusty tilt ball can misreport. Contact sensors are the simpler, cheaper default; only reach for a tilt sensor if the contact sensor proves finicky on the actual door.)
+- Needs the Zigbee coordinator paired into HA first (separate from this Sonoff/Matter relay work) — see Pending Item 8/the Zigbee dongle discussion elsewhere in CLAUDE.md.
+- Once paired, this becomes its own `binary_sensor.*` entity in HA, completely independent of the Sonoff relay — the app side will read real open/closed state from it once Jeff has the entity ID.
+
 ## Sources
 
 - [How to Add a Garage Door Opener to Home Assistant Using a Dry Contact Relay — SONOFF](https://sonoff.tech/en-us/blogs/news/how-to-add-a-garage-door-opener-to-home-assistant-using-a-dry-contact-relay)
@@ -84,3 +96,4 @@ The app's existing `loadGarage()`/`garageToggle()` code was written expecting a 
 - [Sonoff MINI-D inching mode — Home Assistant Community](https://community.home-assistant.io/t/sonoff-mini-d-inching-mode/903505)
 - [SONOFF MINI-D — Help Center (terminals/wiring)](https://help.sonoff.tech/docs/mini-d)
 - [How to Install Chamberlain MyQ Smart Garage Hub — Trunetto](https://www.trunetto.com/troubleshooting/garage-doors/chamberlain/how-to-install-chamberlain-myq-smart-garage-hub) (confirms MyQ shares the same wall-console terminals as the physical button)
+- [Garage Sensor: Contact or Tilt? — SmartThings Community](https://community.smartthings.com/t/garage-sensor-contact-or-tilt/36468) (contact vs. tilt sensor tradeoffs for garage doors)
