@@ -1,10 +1,13 @@
 name: Deploy HCC to Cloudflare Pages
 
+# DISABLED 2026-08-06. This workflow has never worked — the CLOUDFLARE_API_TOKEN
+# secret does not exist, so every push failed and emailed Jeff (124 failure
+# notices in one week). Deploys do NOT go through Actions: Cloudflare Pages'
+# native Git integration watches claude/time-master-project-liq1jw and deploys
+# on push, independently of this file. See CLAUDE.md "Deployment Pipeline".
+# Trigger reduced to manual-only so it can never fire automatically again.
 on:
-  push:
-    branches:
-      - claude/time-master-project-liq1jw
-      - main
+  workflow_dispatch:
 
 jobs:
   deploy:

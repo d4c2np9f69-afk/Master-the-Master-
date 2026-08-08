@@ -67,6 +67,24 @@ button{font-family:inherit;cursor:pointer}
   --info:#38bdf8;
   /* shared corner radius so every card/button/control matches */
   --radius:10px;
+  /* ── LUXURY GLASS OVERLAY TOKENS ─────────────────────────────────────────
+     Shared by every panel that sits ON TOP OF A PHOTO (LUX thermostat panel,
+     the Water/Gas/Electric meter stat slabs). These are deliberately FIXED
+     light-on-dark values, NOT theme-relative — the photos underneath are
+     permanently dark in both themes, so a var(--text)/var(--muted) here would
+     go dark-on-dark in light mode (Pending Item 17's bug class).
+     Values come straight from the Luxury Dashboard UI guide. */
+  --glass-bg:rgba(22,22,22,.20);
+  --glass-border:rgba(255,255,255,.08);
+  --glass-ring:linear-gradient(160deg,rgba(255,255,255,.18),rgba(255,255,255,.02));
+  --glass-blur:blur(24px) saturate(180%) brightness(.75);
+  --glass-shadow:0 20px 60px rgba(0,0,0,.45),0 0 60px rgba(255,170,70,.08),inset 0 1px rgba(255,255,255,.08);
+  --glass-text:#f7f1e7;
+  --glass-warm:#f7e5c4;
+  --glass-glow:0 0 15px rgba(255,212,135,.25);
+  --glass-hair:rgba(255,255,255,.07);
+  /* one warm key light + gentle floor shadow, matched to the photos' own tone */
+  --glass-ambient:radial-gradient(circle at 70% 20%,rgba(255,210,140,.18),transparent 55%),linear-gradient(to bottom,transparent,rgba(0,0,0,.45));
   /* legacy aliases */
   --ink:#ede8df;
   /* Style A — ONE clean system font everywhere (no more serif/sans mix).
@@ -328,8 +346,77 @@ html,body{
 .sec-hero-irr img{object-position:center top}
 .sec-hero-yard img{object-fit:cover;object-position:center center}
 /* Per-hero aspect = each image's true ratio so the baked-in gold titles never crop */
-.sec-hero-weather{aspect-ratio:1320/864;height:auto;max-height:460px}
-.sec-hero-irr{aspect-ratio:1320/864;height:auto;max-height:460px}
+/* Re-cropped taller 08-06 (1.53 -> 1.32) to make room for the full live
+   conditions readout inlaid on the photo — 295px tall at a 390px viewport
+   instead of 255px. Jeff: "if you want to make the pictures bigger so more
+   will fit on them that's great." */
+.sec-hero-weather{aspect-ratio:1320/1000;height:auto;max-height:560px}
+/* ── Live conditions inlaid on the WEATHER photo ──────────────────────────
+   Same glass language as the utility readouts: one soft blurred field of the
+   photo, no per-cell boxes, fixed light-on-dark colours (the overlay sits on
+   a permanently dark-graded photo in both themes). */
+.wx-hero-readout{
+  margin-top:auto;display:grid;grid-template-columns:repeat(4,1fr);
+  gap:clamp(3px,.9vw,8px) 0;
+  padding:clamp(6px,1.6vw,12px) clamp(4px,1.2vw,10px);
+  border-radius:clamp(12px,3.4vw,24px);
+  background:rgba(16,14,12,.16);
+  backdrop-filter:blur(9px) saturate(150%) brightness(.98);-webkit-backdrop-filter:blur(9px) saturate(150%) brightness(.98);
+  box-shadow:0 20px 60px rgba(0,0,0,.35),inset 0 1px rgba(255,255,255,.12);
+}
+.wx-hero-cell{min-width:0;text-align:center}
+.wx-hero-lbl{
+  font-size:clamp(6.6px,1.45vw,11px);font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  color:rgba(247,229,196,.72);text-shadow:0 1px 6px rgba(0,0,0,.7);line-height:1.2;
+}
+.wx-hero-val{
+  font-size:clamp(11.5px,2.2vw,18px);font-weight:600;margin-top:2px;line-height:1.15;
+  color:#f7f1e7;text-shadow:0 2px 10px rgba(0,0,0,.75);font-variant-numeric:tabular-nums;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+/* max-height:none for the same reason as the car hero — the inlaid panel is
+   positioned as a percentage of the container, so any clamp would make
+   object-fit:cover crop the photo and slide the panel off the clean lawn. */
+.sec-hero-irr{aspect-ratio:1320/864;height:auto;max-height:none}
+/* ── Live irrigation controls inlaid on the lawn photo ────────────────────
+   Right-hand side, over the open lawn the regenerated photo leaves clear.
+   Same glass language as the utility readouts and the car cockpit panel. */
+.irr-hero-panel{
+  position:absolute;right:4%;top:50%;transform:translateY(-50%);left:auto;
+  width:42%;z-index:3;
+  display:flex;flex-direction:column;gap:clamp(5px,1.3vw,10px);
+  padding:clamp(7px,1.8vw,13px) clamp(7px,1.8vw,13px);box-sizing:border-box;
+  background:rgba(16,14,12,.16);
+  backdrop-filter:blur(9px) saturate(150%) brightness(.98);-webkit-backdrop-filter:blur(9px) saturate(150%) brightness(.98);
+  border-radius:clamp(12px,3.4vw,24px);
+  box-shadow:0 20px 60px rgba(0,0,0,.4),inset 0 1px rgba(255,255,255,.12);
+}
+.irr-hero-stats{display:grid;grid-template-columns:1fr 1fr;gap:0 clamp(3px,.9vw,8px)}
+.irr-hero-stat{min-width:0;text-align:center}
+.irr-hero-lbl{
+  font-size:clamp(6.6px,1.45vw,11px);font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  color:rgba(247,229,196,.75);text-shadow:0 1px 6px rgba(0,0,0,.75);line-height:1.2;
+}
+.irr-hero-val{
+  font-size:clamp(11px,2.1vw,17px);font-weight:600;margin-top:2px;line-height:1.15;
+  color:#f7f1e7;text-shadow:0 2px 10px rgba(0,0,0,.8);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.irr-hero-btns{display:grid;grid-template-columns:1fr 1fr;gap:clamp(4px,1.1vw,8px)}
+.irr-hero-btn{
+  /* same 44px tap-target floor as the car controls — these had the same defect */
+  min-height:44px;display:flex;align-items:center;justify-content:center;
+  padding:clamp(5px,1.4vw,10px) clamp(2px,.6vw,5px);border-radius:clamp(8px,2vw,15px);
+  font-size:clamp(8.5px,1.8vw,14px);font-weight:700;font-family:inherit;cursor:pointer;line-height:1.2;
+  background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.14);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  box-shadow:0 8px 20px rgba(0,0,0,.3);transition:.25s;
+  color:rgba(247,241,231,.9);text-shadow:0 1px 5px rgba(0,0,0,.75);
+}
+.irr-hero-btn:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(0,0,0,.4)}
+.irr-hero-btn:active{opacity:.8;transform:none}
+.ihb-stop{background:rgba(255,98,98,.22);border-color:rgba(255,98,98,.42);color:#ffa8a8}
+.ihb-clear{background:rgba(34,197,94,.2);border-color:rgba(34,197,94,.4);color:#86efac}
 .sec-hero-yard{aspect-ratio:1320/851;height:auto;max-height:460px}
 /* ── HERO MASTER GRADE — REUSABLE MODULE ───────────────────────────────────
    One cinematic golden-hour grade for EVERY hero. applyHeroGrades() (JS) tags
@@ -389,6 +476,57 @@ html,body{
    overlay sits at the TOP (same treatment as the weather hero). Own aspect
    ratio = the image's true 1200x900 so the baked-in title never crops. */
 .sec-hero-guardian{aspect-ratio:1200/900;height:auto;max-height:480px;background:#0a1224}
+/* ── The 8 live house checks, inlaid on the Guardian photo ────────────────
+   NOTE: grdSet() does `el.className = 'hs-val ' + cls`, which wipes any class
+   set on the value span itself. So everything here is styled through the
+   PARENT (.grd-hero-cell .hs-val), which survives that overwrite. Don't move
+   these onto a class on the span — it will silently stop applying the moment
+   real data lands. */
+.grd-hero-readout{
+  margin-top:auto;display:grid;grid-template-columns:repeat(4,1fr);
+  gap:clamp(4px,1vw,9px) 0;
+  padding:clamp(6px,1.6vw,12px) clamp(4px,1.2vw,10px);
+  border-radius:clamp(12px,3.4vw,24px);
+  background:rgba(16,14,12,.16);
+  backdrop-filter:blur(9px) saturate(150%) brightness(.98);-webkit-backdrop-filter:blur(9px) saturate(150%) brightness(.98);
+  box-shadow:0 20px 60px rgba(0,0,0,.4),inset 0 1px rgba(255,255,255,.12);
+}
+.grd-hero-cell{min-width:0;display:flex;flex-direction:column;align-items:center;text-align:center;gap:1px}
+.grd-hero-ico{font-size:clamp(11px,2.4vw,19px);line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,.8))}
+.grd-hero-lbl{
+  font-size:clamp(6.2px,1.35vw,10px);font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+  color:rgba(247,229,196,.7);text-shadow:0 1px 6px rgba(0,0,0,.75);line-height:1.15;
+}
+/* fixed light-on-dark status colours — this sits on a permanently dark photo,
+   so the theme-relative tokens the card version uses would go dark-on-dark in light mode */
+.grd-hero-cell .hs-val{
+  font-size:clamp(8px,1.75vw,14px);font-weight:700;line-height:1.15;margin:0;
+  text-shadow:0 1px 6px rgba(0,0,0,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
+}
+.grd-hero-cell .hs-dim{color:rgba(247,241,231,.6)}
+.grd-hero-cell .hs-ok{color:#86efac}
+.grd-hero-cell .hs-warn{color:#ffd88a}
+.grd-hero-cell .hs-red,.grd-hero-cell .hs-bad{color:#ffa8a8}
+.grd-hero-cell .hs-neutral{color:rgba(247,241,231,.85)}
+/* ── Live mower readout inlaid on the Yard photo ──────────────────────────── */
+.yard-hero-readout{
+  margin-top:auto;display:grid;grid-template-columns:repeat(3,1fr);
+  padding:clamp(6px,1.6vw,12px) clamp(4px,1.2vw,10px);
+  border-radius:clamp(12px,3.4vw,24px);
+  background:rgba(16,14,12,.16);
+  backdrop-filter:blur(9px) saturate(150%) brightness(.98);-webkit-backdrop-filter:blur(9px) saturate(150%) brightness(.98);
+  box-shadow:0 20px 60px rgba(0,0,0,.4),inset 0 1px rgba(255,255,255,.12);
+}
+.yard-hero-cell{min-width:0;text-align:center}
+.yard-hero-lbl{
+  font-size:clamp(6.4px,1.4vw,11px);font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  color:rgba(247,229,196,.72);text-shadow:0 1px 6px rgba(0,0,0,.75);line-height:1.2;
+}
+.yard-hero-val{
+  font-size:clamp(10.5px,2.1vw,17px);font-weight:600;margin-top:2px;line-height:1.15;
+  color:#f7f1e7;text-shadow:0 2px 10px rgba(0,0,0,.8);font-variant-numeric:tabular-nums;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
 .sec-hero-guardian img{object-fit:cover;object-position:center center}
 .sec-hero-guardian .sec-hero-overlay{
   background:linear-gradient(to bottom,rgba(0,0,0,.6) 0%,rgba(0,0,0,.15) 42%,transparent 65%);
@@ -406,7 +544,79 @@ html,body{
    Gold Standard above already establishes for grading -- same rule applies to sizing. */
 .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian,.sec-hero-car{width:100%}
 /* Car hero — Mercedes GLE interior mockup with baked-in title/tabs at bottom */
-.sec-hero-car{aspect-ratio:1320/677;height:auto;max-height:400px;background:#0a0a12}
+/* Re-cropped taller 08-06 (1.95 -> 1.50) so the cockpit renders noticeably
+   bigger on a phone — 260px tall at a 390px viewport instead of 200px — and
+   leaves room for the controls inlaid on it. */
+/* NO max-height on this one, deliberately. The readouts below are positioned
+   as percentages of the container, which only equals image coordinates while
+   the container's aspect matches the image's. Any max-height clamp makes
+   object-fit:cover crop the photo and the readouts drift off the screens.
+   Letting it run full aspect keeps them pinned at every width — and Jeff
+   wants the pictures bigger anyway. The media-query max-heights further down
+   are overridden for this hero for the same reason. */
+.sec-hero-car{aspect-ratio:1320/880;height:auto;max-height:none;background:#0a0a12}
+/* ── Controls inlaid on the CAR cockpit photo ─────────────────────────────
+   Same glass language as the utility readouts and the LUX panel: one soft
+   blurred field of the photo, no hard border, fixed light-on-dark colours
+   because the cockpit is dark in both themes. Sits across the lower third,
+   over the empty seats, so it reads like a console rather than a pasted bar. */
+.car-hero-controls{
+  position:absolute;left:6%;right:6%;bottom:6%;z-index:3;
+  display:flex;flex-direction:column;gap:clamp(4px,1.1vw,8px);
+  padding:clamp(7px,1.8vw,13px) clamp(8px,2vw,15px);box-sizing:border-box;
+  background:rgba(16,14,12,.16);
+  backdrop-filter:blur(9px) saturate(150%) brightness(.98);-webkit-backdrop-filter:blur(9px) saturate(150%) brightness(.98);
+  border-radius:clamp(12px,3.4vw,24px);
+  box-shadow:0 20px 60px rgba(0,0,0,.4),inset 0 1px rgba(255,255,255,.12);
+}
+/* ── Live readouts sitting ON the car's own screens in the photo ──────────
+   Percentages measured against hero-car.jpg at 1320x880:
+     instrument cluster  x 314-526, y 282-369
+     centre display      x 557-772, y 285-366
+   No background of their own — they sit directly on the lit screens, so the
+   glow of the photo's display does the work. Fixed light colours (this is a
+   permanently dark photo in both themes). */
+.car-screen{
+  position:absolute;z-index:3;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;pointer-events:none;
+  color:#dbeafe;text-align:center;line-height:1;overflow:hidden;
+}
+.car-screen-cluster{left:23.8%;top:32.0%;width:16.1%;height:9.9%}
+.car-screen-centre {left:42.2%;top:32.4%;width:16.3%;height:9.2%}
+.car-screen-val{
+  font-size:clamp(7px,1.75vw,15px);font-weight:700;letter-spacing:.2px;
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+  text-shadow:0 0 8px rgba(120,190,255,.75),0 1px 3px rgba(0,0,0,.9);
+}
+.car-screen-lbl{
+  font-size:clamp(4.6px,1.1vw,9px);font-weight:600;letter-spacing:.4px;text-transform:uppercase;
+  color:rgba(190,215,245,.8);margin-top:2px;white-space:nowrap;
+  text-shadow:0 1px 3px rgba(0,0,0,.9);
+}
+.car-hero-lockrow{display:flex;justify-content:center}
+.car-hero-lockstate{
+  font-size:clamp(8px,1.7vw,13px);font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+  color:rgba(247,229,196,.8);text-shadow:0 1px 6px rgba(0,0,0,.8);
+}
+.car-hero-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(5px,1.3vw,10px)}
+.car-hero-btn{
+  /* min-height 44px is Apple's tap-target guideline and NOT optional here.
+     These came out 24px tall on a 390px phone, which is reachable in code but
+     genuinely hard to hit with a thumb -- Jeff could land FLASH but kept
+     missing LOCK/UNLOCK, which looked like a broken command rather than a
+     missed tap. Don't let the clamp shrink these below 44 again. */
+  min-height:44px;display:flex;align-items:center;justify-content:center;
+  padding:clamp(6px,1.5vw,11px) clamp(2px,.6vw,5px);border-radius:clamp(8px,2vw,15px);
+  font-size:clamp(9.5px,2vw,15px);font-weight:700;font-family:inherit;cursor:pointer;line-height:1.2;
+  background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.14);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  box-shadow:0 8px 20px rgba(0,0,0,.3);transition:.25s;
+  color:rgba(247,241,231,.9);text-shadow:0 1px 5px rgba(0,0,0,.7);
+}
+.car-hero-btn:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(0,0,0,.4)}
+.car-hero-btn:active{opacity:.8;transform:none}
+.chb-lock{background:rgba(34,197,94,.2);border-color:rgba(34,197,94,.4);color:#86efac}
+.chb-unlock{background:rgba(255,98,98,.2);border-color:rgba(255,98,98,.4);color:#ffa8a8}
 .sec-hero-car img{object-fit:cover;object-position:center top}
 .sec-hero-car .sec-hero-overlay{
   background:linear-gradient(to bottom,rgba(0,0,0,.5) 0%,rgba(0,0,0,.1) 40%,transparent 65%);
@@ -556,50 +766,104 @@ html.light .car-tabs{background:#fff}
    real outside temp/feels-like). Neither panel covers the "Climate Control"
    text block or gets in the way of the other. If the photo is ever swapped,
    both panels' percentages need re-calibrating to the new image. */
-.lux-photo-wrap{position:relative;width:100%;border-radius:14px;overflow:hidden;aspect-ratio:1320/931;background:#0a0a0a;box-shadow:0 4px 18px rgba(0,0,0,.3)}
-.lux-photo-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.lux-photo-wrap{position:relative;width:100%;border-radius:14px;overflow:hidden;aspect-ratio:1320/931;background:#0a0a0a;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+/* Guide item 5 — darken + warm the host photo so the live panel is the focus,
+   not the photo's own baked-in ad copy. The guide's literal blur(2px) was tried
+   and pulled back on Jeff's call (08-06: "not so much blur in the picture") --
+   at a ~350px card width a 2px blur on a 1320px-wide source reads as a broken
+   render, not a design choice. The focus separation is carried by the brightness
+   drop plus the panel's own backdrop blur instead, which is where it belongs. */
+.lux-photo-wrap img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(118%) brightness(.82)}
+/* Guide item 8 — warm key light from the upper right + a gentle floor shadow,
+   so the glass reads as lit by the same room the photo shows. */
+.lux-photo-wrap::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:var(--glass-ambient)}
 
 .lux-fp-panel{
-  position:absolute;left:1.1%;top:1.6%;width:55.3%;height:48.3%;
-  background:rgba(10,8,6,.74);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
-  border:1px solid rgba(255,255,255,.12);border-radius:10px;
-  padding:7px 8px;box-sizing:border-box;
-  display:flex;flex-direction:column;gap:4px;color:#fff;z-index:2;
+  position:absolute;left:3%;top:3%;bottom:3%;width:56%;
+  /* Height is DERIVED (top+bottom inset), never a fixed number. It used to be a
+     hard 48.3% of the photo, which the mode/fan buttons outgrew at real phone
+     widths — the device name + refresh button spilled out of the panel and sat
+     loose on the photo ("the overlays don't even fit in the pictures").
+     Running it top-to-bottom does three things at once: overflow becomes
+     structurally impossible, it covers ALL of the photo's baked-in ad copy
+     (CLIMATE CONTROL / COMFORT. EFFICIENCY. CONTROL. / the icon strip /
+     SMART CLIMATE.) in one move rather than slicing through the middle of it,
+     and with space-between the controls fill the glass evenly instead of
+     pooling at the top with dead space underneath (Jeff's call, 08-06).
+     min-height:max-content is the safety valve: if content ever did exceed the
+     photo it grows the panel instead of clipping. */
+  height:auto;min-height:max-content;justify-content:space-between;
+  background:var(--glass-bg);
+  backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+  border:1px solid var(--glass-border);border-radius:clamp(12px,3.4vw,24px);
+  box-shadow:var(--glass-shadow);
+  padding:clamp(7px,1.9vw,14px) clamp(8px,2.1vw,15px);box-sizing:border-box;
+  display:flex;flex-direction:column;gap:clamp(4px,1.1vw,8px);color:var(--glass-text);z-index:2;
+}
+/* Guide item 2 — soft edge glow: a 1px gradient ring instead of a solid border. */
+.lux-fp-panel::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+  background:var(--glass-ring);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;
+  pointer-events:none;z-index:1;
 }
 .lux-fp-top{display:flex;justify-content:space-between;align-items:flex-start}
-.lux-fp-temp-big{font-size:24px;font-weight:800;line-height:1;font-family:var(--serif)}
-.lux-fp-temp-lbl{font-size:6.3px;color:rgba(255,255,255,.6);letter-spacing:.4px;text-transform:uppercase;margin-top:1px}
-.lux-fp-set-row{display:flex;align-items:center;gap:3px}
-.lux-adj-btn{background:rgba(249,115,22,.18);border:1px solid rgba(249,115,22,.4);border-radius:4px;color:#f97316;font-size:clamp(8px,1.9vw,13px);padding:clamp(2px,.5vw,4px) clamp(4px,1.2vw,8px);line-height:1.5;font-weight:900;cursor:pointer;font-family:inherit}
-.lux-fp-badges{display:flex;gap:4px}
-.lux-badge{font-size:6.4px;font-weight:800;letter-spacing:.3px;padding:2px 5px;border-radius:4px;border:1px solid;white-space:nowrap}
-.lux-badge-cool{color:#38bdf8;border-color:rgba(56,189,248,.5);background:rgba(56,189,248,.15)}
-.lux-badge-heat{color:#f97316;border-color:rgba(249,115,22,.5);background:rgba(249,115,22,.15)}
-.lux-badge-off{color:rgba(255,255,255,.65);border-color:rgba(255,255,255,.25)}
-.lux-badge-auto{color:#22c55e;border-color:rgba(34,197,94,.5);background:rgba(34,197,94,.15)}
-.lux-badge-fan{color:#d4af37;border-color:rgba(212,175,55,.5);background:rgba(212,175,55,.15)}
-.lux-mode-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(3px,.8vw,6px)}
-.lux-mode-btn{padding:clamp(4px,1vw,8px) clamp(1px,.4vw,3px);border-radius:5px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.75);font-size:clamp(6.6px,1.7vw,12px);font-weight:800;font-family:inherit;cursor:pointer;line-height:1.3}
-.lux-mode-btn.lmb-active-cool{background:rgba(56,189,248,.2);border-color:rgba(56,189,248,.5);color:#38bdf8}
-.lux-mode-btn.lmb-active-heat{background:rgba(249,115,22,.2);border-color:rgba(249,115,22,.5);color:#f97316}
-.lux-mode-btn.lmb-active-auto{background:rgba(34,197,94,.2);border-color:rgba(34,197,94,.5);color:#22c55e}
-.lux-mode-btn.lmb-active-off{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.35);color:#fff}
-.lux-fan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(3px,.8vw,6px)}
-.lux-fan-btn{padding:clamp(4px,1vw,7px) clamp(1px,.4vw,3px);border-radius:5px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6);font-size:clamp(6px,1.55vw,11px);font-weight:800;font-family:inherit;cursor:pointer}
-.lux-fan-btn.lux-fan-active{border-color:rgba(212,175,55,.6);color:#d4af37;background:rgba(212,175,55,.12)}
-.lux-fp-foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;font-size:6px;color:rgba(255,255,255,.5)}
-.lux-refresh-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:5px;color:rgba(255,255,255,.75);font-size:clamp(6.3px,1.6vw,11px);font-weight:800;padding:clamp(3px,.8vw,6px) clamp(5px,1.3vw,10px);cursor:pointer;font-family:inherit}
+/* Type/control scale sized up ~20% from the first pass on Jeff's call (08-06,
+   "maybe a little bigger") after looking at it at real phone width. The panel
+   is a fixed top:3%/bottom:3% box, so every one of these was re-checked for
+   overflow and clipping at 320/375/390/430/768/1024/1440px before landing --
+   zero clipped elements, zero panel overflow, at all seven. */
+.lux-fp-temp-big{font-size:clamp(29px,7.4vw,52px);font-weight:600;line-height:1;letter-spacing:-.5px;font-family:var(--serif);color:var(--glass-text);text-shadow:var(--glass-glow)}
+.lux-fp-temp-set{font-size:clamp(23px,5.9vw,42px)}
+.lux-fp-temp-lbl{font-size:clamp(7.6px,1.95vw,13px);color:rgba(247,229,196,.58);letter-spacing:.6px;text-transform:uppercase;margin-top:2px}
+.lux-fp-set-row{display:flex;align-items:center;gap:clamp(3px,.8vw,6px)}
+.lux-adj-btn{background:rgba(249,115,22,.16);border:1px solid rgba(249,115,22,.28);border-radius:clamp(6px,1.6vw,12px);color:#ffb37a;font-size:clamp(9.6px,2.3vw,16px);padding:clamp(3px,.6vw,5px) clamp(5px,1.4vw,10px);line-height:1.5;font-weight:700;cursor:pointer;font-family:inherit;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 8px 20px rgba(0,0,0,.25);transition:.25s}
+.lux-fp-badges{display:flex;gap:clamp(4px,1vw,8px)}
+.lux-badge{font-size:clamp(7.7px,1.95vw,13px);font-weight:700;letter-spacing:.5px;padding:clamp(3px,.75vw,6px) clamp(6px,1.7vw,12px);border-radius:999px;border:1px solid;white-space:nowrap;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.lux-badge-cool{color:#7dd3fc;border-color:rgba(56,189,248,.35);background:rgba(56,189,248,.14)}
+.lux-badge-heat{color:#ffb37a;border-color:rgba(249,115,22,.35);background:rgba(249,115,22,.14)}
+.lux-badge-off{color:rgba(247,241,231,.7);border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.06)}
+.lux-badge-auto{color:#86efac;border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.14)}
+.lux-badge-fan{color:var(--glass-warm);border-color:rgba(255,210,140,.28);background:rgba(255,185,60,.14)}
+.lux-mode-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(3px,.9vw,7px)}
+/* Guide item 6 — floating glass buttons: translucent, blurred, one soft shadow,
+   a small lift on hover. */
+.lux-mode-btn,.lux-fan-btn,.lux-refresh-btn{
+  border-radius:clamp(7px,1.9vw,14px);
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  box-shadow:0 8px 20px rgba(0,0,0,.25);transition:.25s;
+  font-family:inherit;cursor:pointer;
+}
+.lux-mode-btn:hover,.lux-fan-btn:hover,.lux-refresh-btn:hover,.lux-adj-btn:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(0,0,0,.35)}
+.lux-mode-btn{padding:clamp(5px,1.35vw,11px) clamp(1px,.4vw,3px);color:rgba(247,241,231,.8);font-size:clamp(8px,2.05vw,14px);font-weight:700;line-height:1.3}
+.lux-mode-btn.lmb-active-cool{background:rgba(56,189,248,.18);border-color:rgba(56,189,248,.35);color:#7dd3fc}
+.lux-mode-btn.lmb-active-heat{background:rgba(249,115,22,.18);border-color:rgba(249,115,22,.35);color:#ffb37a}
+.lux-mode-btn.lmb-active-auto{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.35);color:#86efac}
+.lux-mode-btn.lmb-active-off{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.3);color:#fff}
+.lux-fan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(3px,.9vw,7px)}
+.lux-fan-btn{padding:clamp(5px,1.35vw,10px) clamp(1px,.4vw,3px);color:rgba(247,241,231,.65);font-size:clamp(7.3px,1.85vw,13px);font-weight:700}
+.lux-fan-btn.lux-fan-active{border-color:rgba(255,210,140,.4);color:var(--glass-warm);background:rgba(255,185,60,.14)}
+.lux-fp-foot{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:clamp(7.2px,1.8vw,12px);color:rgba(247,229,196,.5);letter-spacing:.3px}
+.lux-refresh-btn{color:rgba(247,241,231,.8);font-size:clamp(7.6px,1.9vw,13px);font-weight:700;padding:clamp(4px,1.05vw,8px) clamp(6px,1.65vw,13px)}
 
 /* Weather patch — sits on the device's own screen, replacing the photo's
-   baked-in fake weather readout with real outside temp / feels-like. */
+   baked-in fake weather readout with real outside temp / feels-like.
+   Kept deliberately more opaque than the other glass (.82 not .20): its whole
+   job is to HIDE the fake numbers printed on the photo underneath it, and a
+   .20 wash would let them ghost through. */
 .lux-wx-patch{
   position:absolute;left:61.7%;top:25.2%;width:26.1%;height:9.7%;
-  background:#0a0806;border-radius:5px;
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  color:#fff;z-index:2;
+  background:rgba(10,8,6,.82);
+  backdrop-filter:blur(10px) saturate(140%);-webkit-backdrop-filter:blur(10px) saturate(140%);
+  border:1px solid rgba(255,255,255,.06);border-radius:clamp(5px,1.4vw,10px);
+  box-shadow:inset 0 1px rgba(255,255,255,.06);
+  display:flex;align-items:center;justify-content:center;gap:clamp(8px,2vw,16px);
+  color:var(--glass-text);z-index:2;
 }
-.lux-wx-val{font-size:9px;font-weight:800;line-height:1;font-family:var(--serif)}
-.lux-wx-lbl{font-size:5px;color:rgba(255,255,255,.55);letter-spacing:.3px;text-transform:uppercase;margin-top:1px}
+.lux-wx-val{font-size:clamp(9px,2.3vw,16px);font-weight:600;line-height:1;font-family:var(--serif);text-shadow:var(--glass-glow)}
+.lux-wx-lbl{font-size:clamp(5px,1.25vw,9px);color:rgba(247,229,196,.55);letter-spacing:.4px;text-transform:uppercase;margin-top:1px}
 
 /* ── QUICK ACCESS (HOME section) ───────────────────────────────────────── */
 .quick-access-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
@@ -663,31 +927,148 @@ html.light .car-tabs{background:#fff}
 
 /* ── UTILITIES (Water / Gas / Electric meter cards, HOME) ───────────────── */
 .util-list{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
-.util-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.30)}
+.util-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.45)}
 .util-banner{width:100%;overflow:hidden;background:#0b0b0f;line-height:0;position:relative}
-.util-banner img{width:100%;height:auto;display:block}
-/* Reserve the real image aspect ratio so the lazy-loaded photo doesn't cause layout
-   shift when it finishes loading (each meter photo has a different ratio). */
-.util-w .util-banner{aspect-ratio:1320/878}
-.util-g .util-banner{aspect-ratio:1135/868}
-.util-e .util-banner{aspect-ratio:1228/857}
-.util-banner-call{position:absolute;right:8px;top:8px;z-index:3;display:inline-flex;align-items:center;gap:4px;font-size:clamp(10px,1.8vw,15px);font-weight:800;letter-spacing:.5px;color:#fff;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.4);border-radius:20px;padding:clamp(4px,1vw,7px) clamp(8px,1.6vw,13px);line-height:1;text-decoration:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.util-banner-call:active{opacity:.8}
-.util-overlay-bottom{position:absolute;bottom:0;left:0;right:0;z-index:2;padding:14px 6px 6px}
-.util-overlay-bottom .util-stats{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;background:linear-gradient(to top,rgba(4,4,10,.9) 0%,rgba(4,4,10,.7) 75%,rgba(4,4,10,0) 100%);padding:10px 3px 3px;margin:-10px -3px -3px}
-.util-overlay-bottom .util-stat{flex:0 0 auto;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);padding:clamp(4px,.9vw,7px) clamp(9px,1.8vw,14px);border-radius:8px}
-.util-overlay-bottom .util-stat-label{color:rgba(255,255,255,.8);text-shadow:0 1px 4px rgba(0,0,0,.9);font-size:clamp(7.5px,1.5vw,12px);white-space:nowrap}
-.util-overlay-bottom .util-stat-val{color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.95);font-size:clamp(12px,2.2vw,18px);margin-top:1px}
-.util-overlay-bottom .util-stat-unit{color:rgba(255,255,255,.75)}
-/* 6+ cell cards (Electric: Now/Today/Yesterday/Peak Hour/This Month/Est. Cost) — the default
-   flex-wrap above sizes each chip to its own content, so an uneven cell count wraps raggedly
-   (e.g. 4 chips on row 1, 2 on row 2) once there are more than 4. A real 3-col grid keeps every
-   row even and every cell width-consistent regardless of viewport. */
-.util-overlay-bottom .util-stats.util-stats-grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
-.util-overlay-bottom .util-stats.util-stats-grid3 .util-stat{min-width:0;text-align:center}
-.util-overlay-bottom .util-stats.util-stats-grid3 .util-stat-label,
-.util-overlay-bottom .util-stats.util-stats-grid3 .util-stat-val{white-space:normal;overflow-wrap:break-word}
-.util-body{padding:11px 14px 13px}
+/* Guide item 5 — each meter photo carries its own baked-in marketing panel
+   ("SMART MEASUREMENT", the SAFE SUPPLY / USAGE INSIGHTS icon strip, etc.)
+   printed right where the live numbers have to go. Darkening the photo pushes
+   that back into ambient texture so the glass slab is the only thing competing
+   for attention. Deliberately NOT the guide's blur(2px) -- see the matching
+   note on .lux-photo-wrap img. */
+.util-banner img{width:100%;height:auto;display:block;filter:saturate(118%) brightness(.82)}
+/* Guide item 8 — warm key light matched to these photos' own sunset tone.
+   The floor shadow is much lighter here than the shared --glass-ambient (.18 vs
+   .45): the readout panel sits over the bottom-left of these photos, which is
+   exactly where that gradient was darkest, and it was making a .26-alpha glass
+   panel read as a solid black box. LUX keeps the full .45 because its panel sits
+   up top where the gradient is still transparent. */
+.util-banner::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(circle at 70% 20%,rgba(255,210,140,.18),transparent 55%),linear-gradient(to bottom,transparent,rgba(0,0,0,.18))}
+/* Reserve the image aspect ratio so the lazy-loaded photo doesn't cause layout
+   shift when it finishes loading. All three photos are now regenerated at one
+   identical size (08-06), so this is a single shared rule rather than three. */
+.util-banner{aspect-ratio:1320/886}
+/* Guide item 6 — floating glass button. */
+.util-banner-call{position:absolute;right:clamp(8px,2.2vw,16px);top:clamp(8px,2.2vw,16px);z-index:3;display:inline-flex;align-items:center;gap:5px;font-size:clamp(11px,2vw,17px);font-weight:700;letter-spacing:.5px;color:var(--glass-text);background:rgba(255,255,255,.10);backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:clamp(5px,1.1vw,9px) clamp(9px,1.8vw,15px);line-height:1;text-decoration:none;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.25);transition:.25s;-webkit-tap-highlight-color:transparent}
+.util-banner-call:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(0,0,0,.35)}
+.util-banner-call:active{opacity:.8;transform:none}
+
+/* ── The live-readout field ───────────────────────────────────────────────
+   Jeff, 08-06: "take out all the boxes and nest your numbers in a translucent
+   blur where those fake icons are and leave the logos."
+
+   So: NO chips, NO cell boxes, NO dividers, and no separate logo asset. Every
+   one of these photos already carries the real utility logo up top (the WHUD
+   globe, the spire wordmark, the CEMC oval). The readout is a single softly
+   blurred field of the photo itself, starting just BELOW that logo — which
+   lands it exactly on top of the photo's baked-in marketing copy and fake
+   icon strip ("SMART MEASUREMENT", SAFE SUPPLY / USAGE INSIGHTS, etc.), so
+   the one thing it covers is the one thing that was never real. The numbers
+   sit straight in the blur.
+
+   Two hand-calibrated constraints, both measured against the actual photos —
+   don't change either without re-checking all three:
+     - width 46% (left 4%): each meter's left edge starts around 48-53% across,
+       so anything wider starts eating the meter.
+     - per-card `top`: set just under that photo's own logo. LOWER percentage
+       = field starts higher = covers more. Water 28.5% clears the globe badge
+       (ends 27.6%) while covering "WHITE HOUSE UTILITIES"; gas 29.5% clears
+       the spire mark (ends 28.6%); electric 33% clears the CEMC oval
+       (ends 31.3%) while covering "CUMBERLAND ELECTRIC".
+
+   ^^ ALL OF THAT IS NOW HISTORY (08-06, later the same day). The three photos
+   were REGENERATED via the Gemini image-edit API with every bit of the fake
+   marketing copy removed — no headlines, no icon strips, no ad panel. See the
+   Change Log. All three now put the real meter on the right and leave the left
+   side clean, at one identical 1320x886 size. So the per-card hand-calibrated
+   `top` values are GONE: there is nothing left to dodge, and the readout just
+   sits centred on the clean left side of all three, one rule for all.
+   The only constraint left is width — each meter's left edge starts around 45%
+   across, so don't widen much past 41% without re-checking all three.
+
+   08-06 (later still): the card's whole text block — name, provider, LIVE chip
+   and the "Live from Beehive" status line — moved OUT of .util-body and ONTO
+   the photo too (Jeff: "you can make all that shit that was underneath the
+   pictures before all fit on the picture now"). Only the billing-history /
+   Last-7-Days tables stay below, because they're real tables. The left column
+   is now one stack: header on top, blurred readout in the middle, status line
+   inside the bottom of the glass. .util-body keeps horizontal padding only, so
+   it collapses to zero height while its table is hidden. */
+.util-overlay-bottom{
+  position:absolute;left:5%;right:auto;top:6%;bottom:6%;transform:none;
+  width:41%;z-index:2;
+  display:flex;flex-direction:column;justify-content:center;gap:clamp(5px,1.4vw,10px);
+  padding:0;background:none;border:0;box-shadow:none;
+}
+/* header sits above the glass; fixed light-on-dark values because it is on a
+   permanently dark photo in both themes */
+.util-overlay-bottom .util-head{
+  display:flex;flex-wrap:wrap;align-items:center;gap:3px clamp(5px,1.4vw,9px);margin:0;flex:0 0 auto;
+  text-shadow:0 1px 6px rgba(0,0,0,.75);
+}
+/* Give the name a real flex-basis so that on a narrow phone the LIVE chip drops
+   to its own line instead of squeezing the name into an ellipsis — "Natural Gas"
+   was clipping to 35px of a 64px word at 320px wide before this. */
+.util-overlay-bottom .util-head > div{flex:1 1 72px;min-width:0}
+.util-overlay-bottom .util-chip{flex:0 0 auto}
+.util-head-icon{font-size:clamp(14px,3.3vw,24px);line-height:1;flex-shrink:0}
+.util-overlay-bottom .util-head-name{color:var(--glass-text);font-size:clamp(11px,2.5vw,20px);font-weight:700;letter-spacing:.3px;line-height:1.15;white-space:normal;overflow-wrap:break-word}
+/* The provider/meter-model line ("White House Utilities • flowIQ 2100") is hidden
+   on the photo on purpose: at 41% column width it wraps to three ragged lines and
+   pushes the LIVE chip out of the column. It's also redundant here — each photo
+   now shows that utility's real logo on the meter itself. The text is still in the
+   DOM (nothing else reads it, but keeping it costs nothing and it stays available
+   if we ever widen the column). */
+.util-overlay-bottom .util-head-prov{display:none}
+.util-overlay-bottom .util-chip{
+  margin:0;flex-shrink:0;font-size:clamp(6.5px,1.4vw,11px);padding:clamp(2px,.6vw,5px) clamp(5px,1.3vw,10px);
+  background:rgba(255,255,255,.12);color:rgba(247,241,231,.85);border:1px solid rgba(255,255,255,.2);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.util-overlay-bottom .util-chip.live{background:rgba(34,197,94,.2);color:#86efac;border-color:rgba(34,197,94,.4)}
+.util-overlay-bottom .util-chip.est{background:rgba(56,189,248,.2);color:#7dd3fc;border-color:rgba(56,189,248,.4)}
+/* status line lives inside the bottom of the glass field */
+.util-overlay-bottom .util-foot{
+  margin:clamp(4px,1.1vw,8px) 0 0;font-size:clamp(6.6px,1.45vw,11px);
+  color:rgba(247,229,196,.72);text-shadow:0 1px 6px rgba(0,0,0,.7);
+  justify-content:center;text-align:center;line-height:1.2;
+}
+.util-overlay-bottom .util-stats{
+  position:relative;z-index:1;flex:1;display:grid;
+  grid-template-columns:repeat(2,1fr);gap:0 clamp(3px,.9vw,8px);
+  /* equal-height rows regardless of whether a cell has a unit line under its
+     value — without this, rows with a unit ("19,340.5 / gal") come out taller
+     than rows without one ("$38.26") and the readout looks irregular */
+  grid-auto-rows:1fr;
+  padding:clamp(6px,1.6vw,12px);margin:0;overflow:hidden;
+  /* the blur IS the panel — no border, no hard edge, just a soft field of the
+     photo showing through (Jeff, 08-06: "make the box translucent so the
+     background shows through as a blur").
+     NOTE the blur radius is deliberately SMALL (9px, not the 26px this started
+     at). A big radius over the smooth lawn behind these panels averages out to
+     flat dark colour — it reads as a solid box, which is the opposite of the
+     ask. 9px keeps enough texture that the sunset, tree line and planting are
+     genuinely visible through the glass. Legibility is carried by the text
+     shadows below rather than by tinting the panel darker. */
+  background:rgba(16,14,12,.14);
+  backdrop-filter:blur(9px) saturate(150%) brightness(.98);-webkit-backdrop-filter:blur(9px) saturate(150%) brightness(.98);
+  border:0;border-radius:clamp(14px,3.8vw,26px);
+  box-shadow:0 20px 60px rgba(0,0,0,.35),inset 0 1px rgba(255,255,255,.12);
+}
+/* Gas has only 3 stats — 2 columns would leave an orphan, so it runs as one. */
+.util-overlay-bottom .util-stats-1col{grid-template-columns:1fr}
+.util-overlay-bottom .util-stat{
+  min-width:0;text-align:center;background:none;border:0;border-radius:0;padding:0;
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+  display:flex;flex-direction:column;justify-content:center;
+}
+/* Guide item 12 — warm off-white with a soft glow, weight 600, not heavy bold. */
+.util-overlay-bottom .util-stat-label{color:rgba(247,229,196,.78);font-size:clamp(7.4px,1.6vw,12px);font-weight:700;letter-spacing:.6px;text-transform:uppercase;text-shadow:0 1px 6px rgba(0,0,0,.7);line-height:1.25;white-space:normal;overflow-wrap:break-word}
+.util-overlay-bottom .util-stat-val{color:var(--glass-text);font-size:clamp(13.5px,2.45vw,20px);font-weight:600;text-shadow:0 2px 10px rgba(0,0,0,.75),0 0 15px rgba(255,212,135,.2);margin-top:1px;line-height:1.15;font-variant-numeric:tabular-nums;white-space:normal;overflow-wrap:break-word}
+/* the unit drops to its own line so a long real reading ("19,340.5 gal") can
+   never widen a cell past its column — the failure the first attempt at this
+   design only ever saw with short placeholder values. */
+.util-overlay-bottom .util-stat-unit{display:block;margin:0;color:rgba(247,229,196,.55);font-size:clamp(7px,1.5vw,11px);font-weight:700;letter-spacing:.4px;text-shadow:0 1px 6px rgba(0,0,0,.7)}
+.util-body{padding:0 14px}  /* horizontal only, so the card collapses flat while its table is hidden */
 .util-head{display:flex;align-items:center;gap:9px;margin-bottom:10px}
 .util-head-name{font-size:13px;font-weight:800;color:var(--text);letter-spacing:.3px}
 .util-head-prov{font-size:10px;color:var(--muted);margin-top:1px}
@@ -1018,8 +1399,14 @@ html.light .car-tabs{background:#fff}
 .cv-row b{color:var(--text);font-weight:700}
 .cv-note{font-size:10px;color:var(--muted);line-height:1.5;opacity:.85}
 /* Camera section banner + big tiles (mockup-style) */
-.cam-hero{position:relative;width:100%;aspect-ratio:1300/980;border-radius:14px;overflow:hidden;margin-bottom:10px;background:#0a0a0a}
-.cam-hero img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
+/* hero-cameras.jpg was a 1300x2042 PORTRAIT mock-up of the app's own UI — a
+   fake "ALL SYSTEMS READY" panel plus six empty dummy camera tiles that sat
+   right above the real camera grid. This CSS existed only to crop the top off
+   and hide them. Regenerated 08-06 as a clean 1300x970 landscape banner (the
+   blink logo and the 2nd Amendment sticker kept, per Jeff), so there is
+   nothing left to hide and object-position no longer needs to fight it. */
+.cam-hero{position:relative;width:100%;aspect-ratio:1300/970;border-radius:14px;overflow:hidden;margin-bottom:10px;background:#0a0a0a}
+.cam-hero img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
 .cam-hero-ov{display:none}
 .cam-hero-title{display:none}
 .cam-hero-badge{display:none}
@@ -1202,7 +1589,8 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 /* hcc-wrap is now applied via .hcc-section.active above */
 @media(min-width:768px){
   .hcc-section.active{padding:0 24px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian,.sec-hero-car{max-height:560px}
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian{max-height:560px}
+  .sec-hero-car{max-height:none}
   .house-hero{aspect-ratio:16/9}
   .card{padding:22px}
   .card-title{font-size:12px;letter-spacing:1px}
@@ -1214,7 +1602,8 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 }
 @media(min-width:1200px){
   .hcc-section.active{padding:0 40px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian,.sec-hero-car{max-height:680px}
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian{max-height:680px}
+  .sec-hero-car{max-height:none}
   .app-hdr{padding:14px 28px}
   .app-hdr-title{font-size:22px}
   .app-hdr-sub{font-size:10px;letter-spacing:4px}
@@ -1232,7 +1621,8 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 }
 @media(min-width:1920px){
   .hcc-section.active{max-width:1800px;padding:0 60px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian,.sec-hero-car{max-height:800px}
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian{max-height:800px}
+  .sec-hero-car{max-height:none}
   .app-hdr{padding:18px 40px}
   .app-hdr-title{font-size:26px}
   .app-hdr-sub{font-size:12px}
@@ -1259,7 +1649,8 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
   .app-hdr-badge{padding:10px 20px;font-size:20px;border-radius:10px}
   .snav-btn{min-width:200px;font-size:14px;padding:20px 20px 16px}
   .snav-icon{font-size:36px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian,.sec-hero-car{max-height:1000px}
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian{max-height:1000px}
+  .sec-hero-car{max-height:none}
   .card{padding:36px 40px;border-radius:22px;margin-bottom:28px}
   .card-title{font-size:16px;letter-spacing:1.5px}
   .sec-hero-title{font-size:46px}
@@ -1351,6 +1742,20 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <div style="font-size:9px;font-weight:700;color:rgba(212,175,55,.65);letter-spacing:.5px;margin-top:2px;font-family:var(--serif)">WU Recognized</div>
         </div>
       </div>
+      <!-- Full live conditions readout, inlaid on the photo (Jeff, 08-06:
+           "Weather yes add the feels like wind chill all that can go in").
+           These are MOVED from the Weather Conditions card, not copied — the
+           ids must stay unique for loadStation()/loadWeather() to find them. -->
+      <div class="wx-hero-readout" id="wxHeroReadout">
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Temp</div><div class="wx-hero-val" id="wxTemp">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Feels Like</div><div class="wx-hero-val" id="wxFeels">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Dew Point</div><div class="wx-hero-val" id="wxDew">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Humidity</div><div class="wx-hero-val" id="wxHumidity">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Wind</div><div class="wx-hero-val" id="wxWindDir">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">UV Index</div><div class="wx-hero-val" id="wxUV">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Pressure</div><div class="wx-hero-val" id="wxPressure">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Rain Rate</div><div class="wx-hero-val" id="wxRainRate">--</div></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1360,6 +1765,23 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <div class="sec-hero-overlay">
       <div class="sec-hero-status" id="irrHeroStatus"></div>
     </div>
+    <!-- Live controls inlaid on the lawn (Jeff, 08-06). MOVED from the B-Hyve
+         Intelligence card, not copied — the ids have to stay unique or
+         loadIrrigation() writes to the wrong node. Sits on the open right-hand
+         side of the regenerated photo; the zone list stays in the card below
+         because its length varies. -->
+    <div class="irr-hero-panel" id="irrHeroPanel">
+      <div class="irr-hero-stats">
+        <div class="irr-hero-stat"><div class="irr-hero-lbl">Mode</div><div class="irr-hero-val" id="irrMode">--</div></div>
+        <div class="irr-hero-stat"><div class="irr-hero-lbl">Rain Delay</div><div class="irr-hero-val" id="irrRainDelay">--</div></div>
+      </div>
+      <div class="irr-hero-btns">
+        <button class="irr-hero-btn ihb-stop" onclick="irrStopAll()">&#9632; STOP ALL</button>
+        <button class="irr-hero-btn ihb-clear" onclick="irrRain(0)">&#9728;&#65039; CLEAR</button>
+        <button class="irr-hero-btn ihb-delay" onclick="irrRain(24)">&#127783;&#65039; 24h</button>
+        <button class="irr-hero-btn ihb-delay" onclick="irrRain(48)">&#127783;&#65039; 48h</button>
+      </div>
+    </div>
   </div>
 </div>
 <div class="hero-slot" id="hero-yard">
@@ -1367,6 +1789,16 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <img src="./images/hero-yard.jpg" alt="Toro TimeMaster 30&quot;" loading="lazy">
     <div class="sec-hero-overlay">
       <div class="sec-hero-status" id="yardHeroStatus"></div>
+      <!-- Live mower readout inlaid on the photo of the actual mower (08-06).
+           These MIRROR the meter card rather than moving it — unlike the other
+           sections, the hour meter is the centrepiece of the Yard dashboard and
+           belongs in both places. Mirroring means new ids here, written
+           alongside the originals; see setHoursEverywhere(). -->
+      <div class="yard-hero-readout" id="yardHeroReadout">
+        <div class="yard-hero-cell"><div class="yard-hero-lbl">Engine Hours</div><div class="yard-hero-val" id="yardHeroHours">--</div></div>
+        <div class="yard-hero-cell"><div class="yard-hero-lbl">Next Service</div><div class="yard-hero-val" id="yardHeroSvc">--</div></div>
+        <div class="yard-hero-cell"><div class="yard-hero-lbl">Ready to Mow</div><div class="yard-hero-val" id="yardHeroReady">--</div></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1375,6 +1807,18 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <img src="./images/hero-guardian.jpg" alt="Home Guardian — Protect · Monitor · Automate" loading="lazy" onerror="this.style.display='none'">
     <div class="sec-hero-overlay">
       <div class="sec-hero-status" id="guardianHeroStatus">Standing watch over 301</div>
+      <!-- The 8 live house checks, inlaid on the photo of the actual house
+           (Jeff, 08-06). MOVED from the Home Guardian card, not copied. -->
+      <div class="grd-hero-readout" id="grdHeroReadout">
+        <div class="grd-hero-cell"><span class="grd-hero-ico">&#128101;</span><span class="grd-hero-lbl">People</span><span class="hs-val hs-dim grd-hero-val" id="grd-people">&mdash;</span></div>
+        <div class="grd-hero-cell"><span class="grd-hero-ico">&#128167;</span><span class="grd-hero-lbl">Water</span><span class="hs-val hs-dim grd-hero-val" id="grd-water">&mdash;</span></div>
+        <div class="grd-hero-cell"><span class="grd-hero-ico">&#9889;</span><span class="grd-hero-lbl">Electric</span><span class="hs-val hs-dim grd-hero-val" id="grd-electric">&mdash;</span></div>
+        <div class="grd-hero-cell"><span class="grd-hero-ico">&#128293;</span><span class="grd-hero-lbl">Gas</span><span class="hs-val hs-dim grd-hero-val" id="grd-gas">&mdash;</span></div>
+        <div class="grd-hero-cell"><span class="grd-hero-ico">&#127777;&#65039;</span><span class="grd-hero-lbl">HVAC</span><span class="hs-val hs-dim grd-hero-val" id="grd-hvac">&mdash;</span></div>
+        <div class="grd-hero-cell"><span class="grd-hero-ico">&#128663;</span><span class="grd-hero-lbl">Garage</span><span class="hs-val hs-dim grd-hero-val" id="grd-garage">&mdash;</span></div>
+        <div class="grd-hero-cell"><span class="grd-hero-ico">&#128682;</span><span class="grd-hero-lbl">Doors</span><span class="hs-val hs-dim grd-hero-val" id="grd-doors">&mdash;</span></div>
+        <div class="grd-hero-cell"><span class="grd-hero-ico">&#128225;</span><span class="grd-hero-lbl">Devices</span><span class="hs-val hs-dim grd-hero-val" id="grd-devices">&mdash;</span></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1383,6 +1827,36 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <img id="carHeroImg" src="./images/hero-car.jpg" alt="Mercedes-Benz GLE 350 4MATIC" loading="lazy" onerror="this.style.display='none'">
     <div class="sec-hero-overlay">
       <div class="sec-hero-status" id="carHeroStatus"></div>
+    </div>
+    <!-- Controls inlaid on the cockpit photo (Jeff, 08-06). Mercedes only —
+         carSwitchVehicle() hides this for the F-250, which has no remote
+         features at all. The buttons are the ONLY copy; they were removed
+         from the Vehicle Status card so there's one place, not two. -->
+    <!-- Live data rendered ON the car's own two screens in the photograph
+         (Jeff, 08-06: "put the controls in the screens"). Hand-calibrated to
+         hero-car.jpg at 1320x880 and expressed as percentages so they stay
+         aligned at any render width — same technique as the LUX thermostat's
+         .lux-wx-patch. If the photo is ever re-cropped, BOTH boxes need
+         re-measuring. Each screen is only ~16% of the frame, so these carry
+         short readouts only; the tappable controls stay in the glass panel
+         below, where they're big enough to actually hit. -->
+    <div class="car-screen car-screen-cluster" id="carScreenCluster">
+      <div class="car-screen-val" id="carScrOdo">--</div>
+      <div class="car-screen-lbl">Miles</div>
+    </div>
+    <div class="car-screen car-screen-centre" id="carScreenCentre">
+      <div class="car-screen-val" id="carScrRange">--</div>
+      <div class="car-screen-lbl">Range &bull; <span id="carScrFuel">--</span></div>
+    </div>
+    <div class="car-hero-controls" id="carHeroControls">
+      <div class="car-hero-lockrow">
+        <span class="car-hero-lockstate" id="carHeroLockState">&#128274; &mdash;</span>
+      </div>
+      <div class="car-hero-btns">
+        <button class="car-hero-btn chb-lock" onclick="carLockCmd('lock')">&#128274; LOCK</button>
+        <button class="car-hero-btn chb-unlock" onclick="carLockCmd('unlock')">&#128275; UNLOCK</button>
+        <button class="car-hero-btn chb-flash" onclick="carFlashLights()">&#128261; FLASH</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1498,7 +1972,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
                 <div style="text-align:right">
                   <div class="lux-fp-set-row">
                     <button class="lux-adj-btn" onclick="luxAdjust(-1)">&#9660;</button>
-                    <span id="luxSetTemp" class="lux-fp-temp-big" style="font-size:19px">--&deg;</span>
+                    <span id="luxSetTemp" class="lux-fp-temp-big lux-fp-temp-set">--&deg;</span>
                     <button class="lux-adj-btn" onclick="luxAdjust(1)">&#9650;</button>
                   </div>
                   <div class="lux-fp-temp-lbl">Set Temp</div>
@@ -1560,7 +2034,15 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <img src="./images/util-water.jpg" alt="White House Utilities water meter" loading="lazy">
           <a class="util-banner-call" href="tel:6156724110" aria-label="Call White House Utility District customer service">&#128222; CALL</a>
           <div class="util-overlay-bottom">
-            <div class="util-stats" style="grid-template-columns:repeat(4,1fr)">
+            <div class="util-head">
+              <span class="util-head-icon">&#128167;</span>
+              <div style="flex:1;min-width:0">
+                <div class="util-head-name">Water</div>
+                <div class="util-head-prov">White House Utilities &bull; flowIQ 2100</div>
+              </div>
+              <span class="util-chip" id="util-water-chip">WAITING</span>
+            </div>
+            <div class="util-stats util-stats-2col">
               <div class="util-stat"><div class="util-stat-label">Reading</div><div class="util-stat-val" id="util-water-today">&mdash;<span class="util-stat-unit">gal</span></div></div>
               <div class="util-stat"><div class="util-stat-label">This Cycle</div><div class="util-stat-val" id="util-water-month">&mdash;<span class="util-stat-unit">gal</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Flow</div><div class="util-stat-val" id="util-water-flow">&mdash;<span class="util-stat-unit">gpm</span></div></div>
@@ -1570,19 +2052,11 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
               <div class="util-stat"><div class="util-stat-label">Stormwater</div><div class="util-stat-val" id="util-stormwater-cost">&mdash;</div></div>
               <div class="util-stat"><div class="util-stat-label">Combined</div><div class="util-stat-val" id="util-combined-cost" style="font-weight:800">&mdash;</div></div>
             </div>
+            <div class="util-foot" id="util-water-foot"><span class="dot"></span> Waiting for Beehive meter reader</div>
           </div>
         </div>
         <div class="util-body">
-          <div class="util-head">
-            <span style="font-size:18px">&#128167;</span>
-            <div style="flex:1;min-width:0">
-              <div class="util-head-name">Water</div>
-              <div class="util-head-prov">White House Utilities &bull; flowIQ 2100</div>
-            </div>
-            <span class="util-chip" id="util-water-chip">WAITING</span>
-          </div>
-          <div id="util-water-history" style="display:none;margin:0 0 8px"></div>
-          <div class="util-foot" id="util-water-foot"><span class="dot"></span> Waiting for Beehive meter reader</div>
+          <div id="util-water-history" style="display:none"></div>
         </div>
       </div>
 
@@ -1592,23 +2066,21 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <img src="./images/util-gas.jpg" alt="Spire Energy gas meter" loading="lazy">
           <a class="util-banner-call" href="tel:8007527504" aria-label="Call Spire Energy customer service">&#128222; CALL</a>
           <div class="util-overlay-bottom">
-            <div class="util-stats">
+            <div class="util-head">
+              <span class="util-head-icon">&#128293;</span>
+              <div style="flex:1;min-width:0">
+                <div class="util-head-name">Natural Gas</div>
+                <div class="util-head-prov">Spire Energy &bull; Itron 100G ERT</div>
+              </div>
+              <span class="util-chip" id="util-gas-chip">WAITING</span>
+            </div>
+            <div class="util-stats util-stats-1col">
               <div class="util-stat"><div class="util-stat-label">Reading</div><div class="util-stat-val" id="util-gas-today">&mdash;<span class="util-stat-unit">ccf</span></div></div>
               <div class="util-stat"><div class="util-stat-label">This Month</div><div class="util-stat-val" id="util-gas-month">&mdash;<span class="util-stat-unit">ccf</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Est. Cost</div><div class="util-stat-val" id="util-gas-cost">&mdash;</div></div>
             </div>
+            <div class="util-foot" id="util-gas-foot"><span class="dot"></span> Waiting for Beehive meter reader</div>
           </div>
-        </div>
-        <div class="util-body">
-          <div class="util-head">
-            <span style="font-size:18px">&#128293;</span>
-            <div style="flex:1;min-width:0">
-              <div class="util-head-name">Natural Gas</div>
-              <div class="util-head-prov">Spire Energy &bull; Itron 100G ERT</div>
-            </div>
-            <span class="util-chip" id="util-gas-chip">WAITING</span>
-          </div>
-          <div class="util-foot" id="util-gas-foot"><span class="dot"></span> Waiting for Beehive meter reader</div>
         </div>
       </div>
 
@@ -1618,7 +2090,15 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <img src="./images/util-electric.jpg" alt="Cumberland Electric (CEMC) meter" loading="lazy">
           <a class="util-banner-call" href="tel:8009872362" aria-label="Call Cumberland Electric CEMC customer service">&#128222; CALL</a>
           <div class="util-overlay-bottom">
-            <div class="util-stats util-stats-grid3">
+            <div class="util-head">
+              <span class="util-head-icon">&#9889;</span>
+              <div style="flex:1;min-width:0">
+                <div class="util-head-name">Electric</div>
+                <div class="util-head-prov">Cumberland Electric &bull; DIY CT monitor</div>
+              </div>
+              <span class="util-chip" id="util-elec-chip">WAITING</span>
+            </div>
+            <div class="util-stats util-stats-2col">
               <div class="util-stat"><div class="util-stat-label">Now</div><div class="util-stat-val" id="util-elec-now">&mdash;<span class="util-stat-unit">kW</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Today</div><div class="util-stat-val" id="util-elec-today">&mdash;<span class="util-stat-unit">kWh</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Yesterday</div><div class="util-stat-val" id="util-elec-yesterday">&mdash;<span class="util-stat-unit">kWh</span></div></div>
@@ -1626,19 +2106,11 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
               <div class="util-stat"><div class="util-stat-label">This Month</div><div class="util-stat-val" id="util-elec-month">&mdash;<span class="util-stat-unit">kWh</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Est. Cost</div><div class="util-stat-val" id="util-elec-cost">&mdash;</div></div>
             </div>
+            <div class="util-foot" id="util-elec-foot"><span class="dot"></span> Waiting for Beehive energy monitor</div>
           </div>
         </div>
         <div class="util-body">
-          <div class="util-head">
-            <span style="font-size:18px">&#9889;</span>
-            <div style="flex:1;min-width:0">
-              <div class="util-head-name">Electric</div>
-              <div class="util-head-prov">Cumberland Electric &bull; DIY CT monitor</div>
-            </div>
-            <span class="util-chip" id="util-elec-chip">WAITING</span>
-          </div>
-          <div id="util-elec-history" style="display:none;margin:0 0 8px"></div>
-          <div class="util-foot" id="util-elec-foot"><span class="dot"></span> Waiting for Beehive energy monitor</div>
+          <div id="util-elec-history" style="display:none"></div>
         </div>
       </div>
 
@@ -1767,16 +2239,8 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <!-- WEATHER CONDITIONS AT 301 (mowing/soil metrics moved to YARD) -->
     <div class="card cat-weather" id="wxConditionsCard">
       <div class="card-title">&#127780; Weather Conditions at 301</div>
-      <div class="wx-grid">
-        <div class="wx-card"><div class="wx-lbl">Temperature</div><div class="wx-val" id="wxTemp">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Feels Like</div><div class="wx-val" id="wxFeels">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Dew Point</div><div class="wx-val" id="wxDew">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Humidity</div><div class="wx-val" id="wxHumidity">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Wind Dir</div><div class="wx-val" id="wxWindDir">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">UV Index</div><div class="wx-val" id="wxUV">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Pressure</div><div class="wx-val" id="wxPressure">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Rain Rate</div><div class="wx-val" id="wxRainRate">--</div></div>
-      </div>
+      <!-- The 8 live condition cells moved onto the hero photo (08-06). Kept
+           here as a comment so it's obvious where they went, not duplicated. -->
       <div id="wxStationNote" class="wx-note"></div>
       <button class="btn-full btn-gray" onclick="loadWeather()">&#128260; Refresh Weather</button>
     </div>
@@ -1904,19 +2368,10 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         &#128688; <span id="irrDevName">Water Hog</span><span class="irr-conn" id="irrConn"></span>
       </div>
       <div id="irrBanner" class="wx-banner wx-load">&#128260; Loading irrigation&hellip;</div>
-      <div class="wx-grid">
-        <div class="wx-card"><div class="wx-lbl">Mode</div><div class="wx-val" id="irrMode">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Rain Delay</div><div class="wx-val" id="irrRainDelay">--</div></div>
-      </div>
+      <!-- Mode / Rain Delay and the STOP ALL / CLEAR / 24h / 48h buttons now
+           live inlaid on the lawn photo at the top of this section (08-06).
+           Deliberately not duplicated here. -->
       <div id="irrZones"></div>
-      <div class="irr-btn-row">
-        <button class="irr-btn irr-btn-stop" onclick="irrStopAll()">&#9632; STOP ALL</button>
-        <button class="irr-btn irr-btn-clear" onclick="irrRain(0)">&#9728;&#65039; CLEAR DELAY</button>
-      </div>
-      <div class="irr-btn-row">
-        <button class="irr-btn irr-btn-delay" onclick="irrRain(24)">&#127783;&#65039; Delay 24h</button>
-        <button class="irr-btn irr-btn-delay" onclick="irrRain(48)">&#127783;&#65039; Delay 48h</button>
-      </div>
       <div class="irr-next-run" id="irrNextRun"></div>
       <div id="irrUsage"></div>
       <button class="btn-full btn-gray" style="margin-top:10px" onclick="loadIrrigation()">&#128260; Refresh Irrigation</button>
@@ -2369,16 +2824,10 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <div class="card-title">&#128737;&#65039; Home Guardian <span id="guardianConn" class="irr-conn"></span></div>
       <div id="guardianBanner" class="wx-banner wx-banner-lg wx-load">&#128737;&#65039; Checking the house&hellip;</div>
 
-      <div class="grd-checks" id="guardianChecks">
-        <div class="hs-row"><span class="hs-icon">&#128101;</span><span class="hs-label">People</span><span class="hs-val hs-dim" id="grd-people">&mdash;</span></div>
-        <div class="hs-row"><span class="hs-icon">&#128167;</span><span class="hs-label">Water</span><span class="hs-val hs-dim" id="grd-water">&mdash;</span></div>
-        <div class="hs-row"><span class="hs-icon">&#9889;</span><span class="hs-label">Electric</span><span class="hs-val hs-dim" id="grd-electric">&mdash;</span></div>
-        <div class="hs-row"><span class="hs-icon">&#128293;</span><span class="hs-label">Gas</span><span class="hs-val hs-dim" id="grd-gas">&mdash;</span></div>
-        <div class="hs-row"><span class="hs-icon">&#127777;&#65039;</span><span class="hs-label">HVAC</span><span class="hs-val hs-dim" id="grd-hvac">&mdash;</span></div>
-        <div class="hs-row"><span class="hs-icon">&#128663;</span><span class="hs-label">Garage</span><span class="hs-val hs-dim" id="grd-garage">&mdash;</span></div>
-        <div class="hs-row"><span class="hs-icon">&#128682;</span><span class="hs-label">Doors</span><span class="hs-val hs-dim" id="grd-doors">&mdash;</span></div>
-        <div class="hs-row"><span class="hs-icon">&#128225;</span><span class="hs-label">Devices</span><span class="hs-val hs-dim" id="grd-devices">&mdash;</span></div>
-      </div>
+      <!-- The 8 live house checks moved onto the Guardian photo at the top of
+           this section (08-06). Deliberately not duplicated here — the grd-*
+           ids must stay unique or loadGuardian() writes to a hidden copy. -->
+      <div class="grd-checks" id="guardianChecks"></div>
 
       <div class="grd-actions">
         <button class="btn-full btn-gray" onclick="guardianNightCheck()">&#127765; NIGHT CHECK</button>
@@ -2602,7 +3051,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         <div class="car-stat">
           <div class="car-stat-icon">&#128267;</div>
           <div class="car-stat-val" id="carBatt">--</div>
-          <div class="car-stat-lbl">Battery (V)</div>
+          <div class="car-stat-lbl">Starter Battery</div>
         </div>
         <div class="car-stat">
           <div class="car-stat-icon">&#128274;</div>
@@ -2627,11 +3076,8 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         <li><span class="sk">Windows</span><span class="sv" id="carWindows">All Closed</span></li>
         <li><span class="sk">Lights</span><span class="sv" id="carLights">Off</span></li>
       </ul>
-      <div style="display:flex;gap:8px;margin-top:14px">
-        <button class="btn-full btn-green" style="flex:1" onclick="carLockCmd('lock')">&#128274; LOCK</button>
-        <button class="btn-full btn-red" style="flex:1" onclick="carLockCmd('unlock')">&#128275; UNLOCK</button>
-      </div>
-      <button class="btn-full btn-gray" style="margin-top:8px" onclick="carFlashLights()">&#128261; FLASH LIGHTS</button>
+      <!-- LOCK / UNLOCK / FLASH now live inlaid on the cockpit hero photo at the
+           top of this section (08-06). Deliberately not duplicated here. -->
       <div class="wx-note" style="margin-top:12px">Connect Mercedes me to see live data</div>
     </div>
 
@@ -3421,6 +3867,10 @@ function updateDashboard(){
   var ns = tasks[0];
   el=document.getElementById('nextSvcVal');  if(el) el.textContent=ns.rem.toFixed(1)+' hrs';
   el=document.getElementById('nextSvcName'); if(el) el.textContent=ns.name;
+  // mirror onto the readout inlaid on the mower photo
+  el=document.getElementById('yardHeroHours'); if(el) el.textContent=hrsStr+' hrs';
+  el=document.getElementById('yardHeroSvc');   if(el){ el.textContent=ns.rem.toFixed(1)+' hrs';
+    el.style.color = ns.st==='OK' ? '#86efac' : (ns.st==='SOON' ? '#ffd88a' : '#ffa8a8'); }
   el=document.getElementById('hrsToNext');   if(el){ el.textContent=ns.rem.toFixed(1); el.style.color=ns.st==='OK'?'var(--warn)':'var(--bad)'; }
 
   // Service Countdown panel - shows elapsed progress so every hour visibly moves a bar
@@ -4594,6 +5044,31 @@ function loadIrrigationFromHA(token,base,onFail){
         b2.className='wx-banner wx-go';b2.innerHTML='&#128167; WATERING — '+an;
       } else {b2.className='wx-banner wx-caution';b2.innerHTML='&#10003; All zones idle &bull; via Beehive';}
     }
+
+    // ── B-Hyve Intelligence card ──────────────────────────────────────────
+    // BUG FIX 08-06 (Jeff: "those readings are not rendering"). Every irrIntel*
+    // field was only ever written by loadIrrigationDirect(), the B-Hyve-cloud
+    // fallback. Jeff's zones live in HA, so THIS function runs instead and that
+    // card sat on "--" permanently. Not a regression -- it never worked on the
+    // HA path at all.
+    // Only fields HA genuinely knows are filled. Next Run and Smart Zones are
+    // NOT exposed by B-Hyve's HA switch entities, so they say so rather than
+    // showing an invented number.
+    var iicHA=document.getElementById('irrIntelCard');
+    if(iicHA) iicHA.style.display='';
+    function isetHA(id,v,color){ var e=document.getElementById(id); if(e){ e.innerHTML=v; e.style.color=color||''; } }
+    isetHA('irrIntelRainDelay', rd>0?rd+' HRS':'NONE', rd>0?'#ffd24a':'#22c55e');
+    isetHA('irrIntelMode','AUTO','#22c55e');
+    var anyAvail=zones.some(function(z){return z.state!=='unavailable'&&z.state!=='unknown';});
+    isetHA('irrIntelConn', anyAvail?'&#128994; Online':'&#128993; Check B-Hyve App', anyAvail?'#22c55e':'#ffd24a');
+    // most recent zone state change is the best "last watered" HA can give us
+    var lastTs=null;
+    zones.forEach(function(z){ if(z.last_changed){ var t=new Date(z.last_changed); if(!lastTs||t>lastTs) lastTs=t; } });
+    if(lastTs){ try{ isetHA('irrIntelLast', lastTs.toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})); }
+                catch(e){ isetHA('irrIntelLast','&mdash;','var(--muted)'); } }
+    else { isetHA('irrIntelLast','&mdash;','var(--muted)'); }
+    isetHA('irrIntelSmartZones', zones.length+' zones', '#4aa3ff');
+    isetHA('irrIntelNext','Not exposed via Beehive','var(--muted)');
     var html='';
     zones.forEach(function(z){
       var isA=z.state==='on';
@@ -4778,6 +5253,14 @@ function renderReadiness(){
   if(hasBad){ banner.className='wx-banner wx-no'; banner.innerHTML='&#128683; NOT READY'; if(card) card.style.borderColor='var(--red)'; }
   else if(hasWarn){ banner.className='wx-banner wx-caution'; banner.innerHTML='&#9888; MOW WITH CAUTION'; if(card) card.style.borderColor='#ffd24a'; }
   else { banner.className='wx-banner wx-go'; banner.innerHTML='&#10003; GOOD TO MOW'; if(card) card.style.borderColor='#22c55e'; }
+  // mirror the verdict onto the readout inlaid on the mower photo. Fixed
+  // light-on-dark colours: it sits on a permanently dark photo in both themes.
+  var yhr=document.getElementById('yardHeroReady');
+  if(yhr){
+    if(hasBad){ yhr.textContent='Not Ready'; yhr.style.color='#ffa8a8'; }
+    else if(hasWarn){ yhr.textContent='Caution'; yhr.style.color='#ffd88a'; }
+    else { yhr.textContent='Good to Mow'; yhr.style.color='#86efac'; }
+  }
 
   reasons.innerHTML=rs.map(function(r){
     var col=statusColor(r[2]);
@@ -6171,6 +6654,11 @@ function carSwitchVehicle(which) {
   document.querySelectorAll('#section-car .car-content').forEach(function(c){ c.classList.remove('active'); });
   document.querySelectorAll('#section-car .car-tab').forEach(function(t){ t.classList.remove('active'); });
   var heroImg = document.getElementById('carHeroImg');
+  // The LOCK/UNLOCK/FLASH controls inlaid on the cockpit photo are Mercedes-only.
+  // The 2001 F-250 pre-dates FordPass Connect and has no remote features at all,
+  // so showing them over the truck photo would be offering buttons that can't work.
+  var heroCtl = document.getElementById('carHeroControls');
+  if (heroCtl) heroCtl.style.display = which === 'merc' ? '' : 'none';
   if (which === 'merc') {
     if (heroImg) { heroImg.src = './images/hero-car.jpg'; heroImg.alt = 'Mercedes-Benz GLE 350 4MATIC'; heroImg.style.display = ''; }
     var firstMerc = document.querySelector('#car-merc-tabs .car-tab');
@@ -6391,13 +6879,20 @@ function loadCar() {
     function set(id, txt) { var el = document.getElementById(id); if (el) el.textContent = txt; }
 
     var odo = val('odometer');
-    if (odo) set('carOdo', parseFloat(odo.state).toLocaleString());
+    if (odo) { set('carOdo', parseFloat(odo.state).toLocaleString());
+               set('carScrOdo', parseFloat(odo.state).toLocaleString()); }
 
     var fuel = val('fuel_level') || val('tank_level');
-    if (fuel) set('carFuel', fuel.state + '%');
+    if (fuel) { set('carFuel', fuel.state + '%'); set('carScrFuel', fuel.state + '%'); }
 
-    var range = val('range') || val('fuel_range');
-    if (range) { set('carRange', parseFloat(range.state).toFixed(0) + ' mi'); set('carTripRange', parseFloat(range.state).toFixed(0) + ' mi'); }
+    // BUG FIX 08-06 (Jeff's screenshot showed "Range Remaining: 0 mi" while HA
+    // had 524). val() keyword-matches and returns the FIRST hit, and this car
+    // exposes TWO entities containing "range":
+    //     sensor.gle_350_eco_score_bonus_range   0.0   <- was winning
+    //     sensor.gle_350_range_liquid            524   <- the real one
+    // Ask for the specific entity first and only fall back to the loose match.
+    var range = val('range_liquid') || val('fuel_range') || val('range_electric') || val('range');
+    if (range) { var rmi = parseFloat(range.state).toFixed(0); set('carRange', rmi + ' mi'); set('carTripRange', rmi + ' mi'); set('carScrRange', rmi + ' mi'); }
 
     var lockEnts = states.filter(function(s){
       if (s.entity_id.indexOf('lock.') !== 0) return false;
@@ -6410,13 +6905,29 @@ function loadCar() {
       set('carLock', locked ? 'Locked' : 'Unlocked');
       var lockEl = document.getElementById('carLock');
       if (lockEl) lockEl.style.color = locked ? 'var(--ok)' : 'var(--bad)';
+      // mirror onto the controls inlaid on the cockpit hero photo. Fixed
+      // light-on-dark colours here, NOT var(--ok)/var(--bad) -- this sits on a
+      // permanently dark photo, so a theme-relative token would go dark-on-dark
+      // in light mode (Pending Item 17's bug class).
+      var heroLock = document.getElementById('carHeroLockState');
+      if (heroLock) {
+        heroLock.innerHTML = (locked ? '🔒 Locked' : '🔓 Unlocked');
+        heroLock.style.color = locked ? '#86efac' : '#ffa8a8';
+      }
     }
 
     var oil = val('oil_level') || val('oil');
     if (oil) set('carOil', oil.state + '%');
 
+    // The tile is labelled "BATTERY (V)" but sensor.gle_350_starter_battery_state
+    // is NOT volts — it's mbapi2020's condition code. Jeff's screenshot showed a
+    // bare "1" under "(V)", which reads like a dead 1-volt battery. Map it to
+    // words instead of printing a raw code under a wrong unit.
     var batt = val('starter_battery') || val('battery_state');
-    if (batt) set('carBatt', batt.state);
+    if (batt) {
+      var BATT_STATE = { '0':'Good', '1':'Partly charged', '2':'Low', '3':'Critical', '4':'Critical' };
+      set('carBatt', BATT_STATE[String(batt.state).trim()] || batt.state);
+    }
 
     var tireFL = val('tire_pressure_front_left') || val('tirepressure_frontleft');
     var tireFR = val('tire_pressure_front_right') || val('tirepressure_frontright');
@@ -7016,7 +7527,8 @@ function loadCameras() {
         + (armed ? '&#128275; DISARM' : '&#128274; ARM') + '</button>';
     }
     var camCount = cameras.length;
-    // Banner (house photo, cropped so the baked "Home Command Center" text stays hidden)
+    // Banner — clean house-at-dusk photo (regenerated 08-06; the fake tile grid
+    // that used to need cropping out is gone from the image itself)
     var html = '<div class="cam-hero">'
       + '<img src="./images/hero-cameras.jpg" alt="Home Guardian Smart Security System">'
       + '</div>';
@@ -8256,8 +8768,10 @@ function loadUtilities() {
           var to12 = function(h){ var hh = h % 12; return hh === 0 ? 12 : hh; };
           var ap = h2 < 12 ? 'AM' : 'PM';
           var peakEl = document.getElementById('util-elec-peak');
+          // .util-stat-unit is display:block inside the photo overlay, so it
+          // already starts its own line -- no <br> (that would add a blank one).
           if (peakEl) peakEl.innerHTML = to12(h1) + '-' + to12(h2) + ' ' + ap
-            + '<br><span class="util-stat-unit">' + peakVal.toFixed(1) + ' kWh</span>';
+            + '<span class="util-stat-unit">' + peakVal.toFixed(1) + ' kWh</span>';
         }
 
         var yesterdayVal = null;
