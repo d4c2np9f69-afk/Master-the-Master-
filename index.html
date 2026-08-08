@@ -2429,13 +2429,14 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <!-- B-HYVE INTELLIGENCE + LAWN WATER NEED — combined into one card (Jeff, 08-08:
          "remove all that from these two sections and combine them" -- Rain Delay/Smart
          Zones dropped since they're now on the hero panel above; everything else that
-         was unique to each card (watering verdict banner, schedule/controller detail,
-         rain/drought detail) merged into one. Element ids unchanged so the independent
-         loadDrought()-style function and loadIrrigation*() keep writing to the same
-         places regardless of which card visually contains them. -->
+         was unique to each card (schedule/controller detail, rain/drought detail)
+         merged into one. The watering-need verdict banner (wxWaterVerdict) was dropped
+         entirely per Jeff's follow-up ("we don't need it") -- see renderWaterNeed().
+         Element ids unchanged so the independent loadDrought()-style function and
+         loadIrrigation*() keep writing to the same places regardless of which card
+         visually contains them. -->
     <div class="card cat-wx" id="irrIntelCard">
       <div class="card-title">&#129504; B-Hyve Intelligence</div>
-      <div id="wxWaterVerdict" class="wx-banner wx-load" style="margin-bottom:10px">&#8987; Loading rain &amp; drought&hellip;</div>
       <ul class="spec-list">
         <li><span class="sk">Next Run</span><span class="sv" id="irrIntelNext">--</span></li>
         <li><span class="sk">Last Watered</span><span class="sv" id="irrIntelLast">--</span></li>
@@ -4372,24 +4373,6 @@ function renderWaterNeed(){
       dc.innerHTML=DROUGHT.label; dc.style.color=dcol;
     } else { dc.innerHTML='&mdash;'; }
   }
-  // Verdict: rain in the last day suppresses need; drought raises it
-  var v=document.getElementById('wxWaterVerdict'); if(!v) return;
-  var inDrought=DROUGHT.loaded && DROUGHT.category!=='None';
-  var wetEnough=(rainToday!=null && rainToday>=0.25);
-  var someRain=(rainToday!=null && rainToday>=0.05);
-  if(wetEnough){
-    v.className='wx-banner wx-go';
-    v.innerHTML='&#10003; NO WATERING NEEDED &mdash; '+rainToday.toFixed(2)+'" of rain today';
-  } else if(inDrought && !someRain){
-    v.className='wx-banner wx-no';
-    v.innerHTML='&#128167; WATER THE LAWN &mdash; '+DROUGHT.label+', little/no rain';
-  } else if(inDrought || (!someRain)){
-    v.className='wx-banner wx-caution';
-    v.innerHTML='&#9888; CONSIDER WATERING &mdash; '+(inDrought?DROUGHT.label:'dry, no rain today');
-  } else {
-    v.className='wx-banner wx-go';
-    v.innerHTML='&#10003; LAWN OK &mdash; recent rain, no drought';
-  }
 }
 
 // Live state for Ready-to-Mow safety checks (NWS alerts + irrigation)
@@ -5097,7 +5080,7 @@ function loadIrrigationFromHA(token,base,onFail){
       if(activeZone){
         var an=(activeZone.attributes&&activeZone.attributes.friendly_name)||activeZone.entity_id.replace('switch.','').replace(/_/g,' ');
         b2.className='wx-banner wx-go';b2.innerHTML='&#128167; WATERING — '+an;
-      } else {b2.className='wx-banner wx-caution';b2.innerHTML='&#10003; All zones idle &bull; via Beehive';}
+      } else {b2.className='wx-banner wx-go';b2.innerHTML='&#10003; All zones idle &bull; via Beehive';}
     }
 
     // ── B-Hyve Intelligence card ──────────────────────────────────────────
@@ -5193,7 +5176,7 @@ function loadIrrigationDirect(){
       var active=dev.active_station, banner=document.getElementById('irrBanner');
       if(banner){
         if(active){ banner.className='wx-banner wx-go'; banner.innerHTML='💧 WATERING — Zone '+active; }
-        else { banner.className='wx-banner wx-caution'; banner.innerHTML='✓ All zones idle'; }
+        else { banner.className='wx-banner wx-go'; banner.innerHTML='✓ All zones idle'; }
       }
       var html='';
       (d.zones||[]).forEach(function(z){
