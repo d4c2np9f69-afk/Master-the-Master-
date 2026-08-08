@@ -2426,34 +2426,30 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <div class="wx-note" style="margin-top:6px">Live from Orbit B-Hyve &bull; Water Hog</div>
     </div>
 
-    <!-- B-HYVE INTELLIGENCE — weather-smart scheduling info -->
+    <!-- B-HYVE INTELLIGENCE + LAWN WATER NEED — combined into one card (Jeff, 08-08:
+         "remove all that from these two sections and combine them" -- Rain Delay/Smart
+         Zones dropped since they're now on the hero panel above; everything else that
+         was unique to each card (watering verdict banner, schedule/controller detail,
+         rain/drought detail) merged into one. Element ids unchanged so the independent
+         loadDrought()-style function and loadIrrigation*() keep writing to the same
+         places regardless of which card visually contains them. -->
     <div class="card cat-wx" id="irrIntelCard">
       <div class="card-title">&#129504; B-Hyve Intelligence</div>
-      <div class="wx-grid" style="margin-bottom:10px">
-        <div class="wx-card"><div class="wx-lbl">Rain Delay</div><div class="wx-val" id="irrIntelRainDelay">--</div></div>
-        <div class="wx-card"><div class="wx-lbl">Smart Zones</div><div class="wx-val" id="irrIntelSmartZones">--</div></div>
-      </div>
+      <div id="wxWaterVerdict" class="wx-banner wx-load" style="margin-bottom:10px">&#8987; Loading rain &amp; drought&hellip;</div>
       <ul class="spec-list">
         <li><span class="sk">Next Run</span><span class="sv" id="irrIntelNext">--</span></li>
         <li><span class="sk">Last Watered</span><span class="sv" id="irrIntelLast">--</span></li>
         <li><span class="sk">Controller</span><span class="sv" id="irrIntelConn">--</span></li>
         <li><span class="sk">Run Mode</span><span class="sv" id="irrIntelMode">--</span></li>
-      </ul>
-      <div class="wx-note">B-Hyve automatically skips watering when rain is forecasted by your KTNWHITE21 weather station &bull; Smart zones adjust runtime based on soil moisture &amp; ET</div>
-    </div>
-
-    <!-- ZONES PREVIEW — shown until B-Hyve connects and populates irrZones -->
-    <!-- LAWN WATER NEED (moved from Weather — watering guidance) -->
-    <div class="card cat-wx" id="wxWaterCard">
-      <div class="card-title">&#128167; Lawn Water Need</div>
-      <div id="wxWaterVerdict" class="wx-banner wx-load">&#8987; Loading rain &amp; drought&hellip;</div>
-      <ul class="spec-list" style="margin-top:6px">
         <li><span class="sk">Rain Today (station)</span><span class="sv" id="wxRainToday">&mdash;</span></li>
         <li><span class="sk">Current Rain Rate</span><span class="sv" id="wxRain7">&mdash;</span></li>
         <li><span class="sk">Drought Status (37188)</span><span class="sv" id="wxDroughtCat">&mdash;</span></li>
       </ul>
+      <div class="wx-note">B-Hyve automatically skips watering when rain is forecasted by your KTNWHITE21 weather station &bull; Smart zones adjust runtime based on soil moisture &amp; ET</div>
       <div class="wx-note" id="wxDroughtNote" style="margin-top:6px">U.S. Drought Monitor &bull; Robertson County &bull; KTNWHITE21 rainfall</div>
     </div>
+
+    <!-- ZONES PREVIEW — shown until B-Hyve connects and populates irrZones -->
 
     <div class="card cat-status" id="irrZonesCard">
       <div class="card-title">&#127807; Your Zones &bull; Water Hog</div>
@@ -5110,13 +5106,12 @@ function loadIrrigationFromHA(token,base,onFail){
     // fallback. Jeff's zones live in HA, so THIS function runs instead and that
     // card sat on "--" permanently. Not a regression -- it never worked on the
     // HA path at all.
-    // Only fields HA genuinely knows are filled. Next Run and Smart Zones are
-    // NOT exposed by B-Hyve's HA switch entities, so they say so rather than
-    // showing an invented number.
+    // Only fields HA genuinely knows are filled. Next Run is NOT exposed by
+    // B-Hyve's HA switch entities, so it says so rather than showing an
+    // invented number.
     var iicHA=document.getElementById('irrIntelCard');
     if(iicHA) iicHA.style.display='';
     function isetHA(id,v,color){ var e=document.getElementById(id); if(e){ e.innerHTML=v; e.style.color=color||''; } }
-    isetHA('irrIntelRainDelay', rd>0?rd+' HRS':'NONE', rd>0?'#ffd24a':'#22c55e');
     isetHA('irrIntelMode','AUTO','#22c55e');
     var anyAvail=zones.some(function(z){return z.state!=='unavailable'&&z.state!=='unknown';});
     isetHA('irrIntelConn', anyAvail?'&#128994; Online':'&#128993; Check B-Hyve App', anyAvail?'#22c55e':'#ffd24a');
@@ -5126,7 +5121,6 @@ function loadIrrigationFromHA(token,base,onFail){
     if(lastTs){ try{ isetHA('irrIntelLast', lastTs.toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})); }
                 catch(e){ isetHA('irrIntelLast','&mdash;','var(--muted)'); } }
     else { isetHA('irrIntelLast','&mdash;','var(--muted)'); }
-    isetHA('irrIntelSmartZones', zones.length+' zones', '#4aa3ff');
     isetHA('irrHeroSmartZones', zones.length+' zones', '');
     isetHA('irrIntelNext','Not exposed via Beehive','var(--muted)');
     var html='';
@@ -5226,11 +5220,7 @@ function loadIrrigationDirect(){
       var iic=document.getElementById('irrIntelCard');
       if(iic){ iic.style.display=''; }
       function iset(id,v,color){ var e=document.getElementById(id); if(e){ e.innerHTML=v; if(color) e.style.color=color; else e.style.color=''; } }
-      var rd2=Number(dev.rain_delay)||0;
-      if(rd2>0){ iset('irrIntelRainDelay',rd2+' HRS','#ffd24a'); }
-      else { iset('irrIntelRainDelay','NONE','#22c55e'); }
       var smartCount=(d.zones||[]).filter(function(z){return z.smart;}).length;
-      iset('irrIntelSmartZones', smartCount+'/'+(d.zones||[]).length, smartCount>0?'#4aa3ff':null);
       iset('irrHeroSmartZones', smartCount+'/'+(d.zones||[]).length, null);
       if(dev.next_start_time){ try{ iset('irrIntelNext', new Date(dev.next_start_time).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})); }catch(e){ iset('irrIntelNext','Scheduled'); } }
       else { iset('irrIntelNext','No schedule set'); }
