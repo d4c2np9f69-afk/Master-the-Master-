@@ -2946,7 +2946,11 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <div class="wx-note">Live from Beehive</div>
     </div>
 
-    <!-- GARAGE DOOR — myQ via Beehive; shows when a cover.*garage* entity exists -->
+    <!-- GARAGE DOOR — myQ via Beehive; shows when a cover/switch.*garage* entity exists.
+         Two independent entity shapes, per the SONOFF MINI DRY plan (docs/beehive/garage_door_sonoff_mini_dry_setup_2026-08-06.md):
+         a plain `switch.*` momentary relay (Matter, no position) and -- once the Zigbee
+         contact sensor is added later -- a separate `binary_sensor.*` for real open/closed
+         state. cover.* (ratgdo, if ever adopted instead) still renders the original way. -->
     <div class="card" id="garageCard" style="display:none">
       <div class="card-title">&#128663; Garage Door <span id="garageConn" class="irr-conn"></span></div>
       <div id="garageBanner" class="wx-banner wx-load">&#128260; Loading&hellip;</div>
@@ -2958,18 +2962,21 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
             <div id="garageChanged" style="font-size:11px;color:var(--muted)"></div>
           </div>
         </div>
-        <div style="display:flex;gap:8px;margin-bottom:8px">
+        <div id="garageCoverBtns" style="display:flex;gap:8px;margin-bottom:8px">
           <button class="btn-full btn-green" id="garageOpenBtn" onclick="garageToggle('open')">&#9650; OPEN</button>
           <button class="btn-full btn-gray" id="garageCloseBtn" onclick="garageToggle('close')">&#9660; CLOSE</button>
+        </div>
+        <div id="garageSwitchBtns" style="display:none;margin-bottom:8px">
+          <button class="btn-full btn-green" id="garageTriggerBtn" onclick="garageToggle('trigger')">&#128663; TRIGGER DOOR</button>
         </div>
         <ul class="spec-list" id="garageSpecs">
           <li><span class="sk">Name</span><span class="sv">Garage Door</span></li>
           <li><span class="sk">Position</span><span class="sv">--</span></li>
-          <li><span class="sk">Connection</span><span class="sv">Local (ratgdo / ESPHome)</span></li>
+          <li><span class="sk">Connection</span><span class="sv">--</span></li>
         </ul>
       </div>
       <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadGarage()">&#128260; Refresh</button>
-      <div class="wx-note">Live from Beehive &bull; ratgdo / ESPHome</div>
+      <div class="wx-note" id="garageNote">Live from Beehive</div>
     </div>
 
     <!-- ROBOT VACUUM — its own card; only shows when a vacuum.* entity exists -->
@@ -3009,8 +3016,8 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <div class="hcc-module-row hcc-module-future" id="garageModulePlanned" style="display:none">
         <span class="hcc-module-icon">&#128663;</span>
         <div class="hcc-module-info">
-          <div class="hcc-module-name">Garage Door (ratgdo &rarr; Beehive)</div>
-          <div class="hcc-module-desc">Install the ratgdo board on your garage opener, then adopt it in Beehive via ESPHome. Open/close control + status will appear here automatically.</div>
+          <div class="hcc-module-name">Garage Door (SONOFF MINI DRY &rarr; Beehive)</div>
+          <div class="hcc-module-desc">Wire + pair the SONOFF MINI DRY relay (Matter) and adopt it in Beehive. A trigger button appears here automatically &mdash; add a Zigbee door sensor later for real open/closed status.</div>
         </div>
         <span class="hcc-badge-future">SETUP</span>
       </div>
@@ -8142,21 +8149,22 @@ function loadGuardian(){
       else grdSet('grd-hvac', (c.state || '—'), 'hs-neutral');
     } else grdSet('grd-hvac', '—', 'hs-dim');
 
-    // GARAGE — a cover/binary_sensor named "garage"
-    var garage = states.filter(function(s){
-      var id = s.entity_id.toLowerCase();
-      return (s.entity_id.indexOf('cover.') === 0 && id.indexOf('garage') >= 0)
-          || (s.entity_id.indexOf('binary_sensor.') === 0 && id.indexOf('garage') >= 0);
-    });
-    var gCover = garage.filter(function(s){ return s.entity_id.indexOf('cover.') === 0; })[0];
-    if (gCover) window._garageEntity = gCover.entity_id;
-    if (garage.length){
-      var open = garage.some(function(g){ return g.state === 'open' || g.state === 'on'; });
-      grdSet('grd-garage', open ? 'OPEN' : 'CLOSED', open ? 'hs-warn' : 'hs-ok');
-      if (open) warnReasons.push('Garage open');
+    // GARAGE — cover (ratgdo, if ever adopted), switch (SONOFF MINI DRY trigger relay,
+    // the actual 08-06 hardware plan), or binary_sensor (future Zigbee door contact,
+    // real position) named "garage". A switch's own on/off is a momentary relay pulse,
+    // NOT door position -- never treat it as open/closed. See garagePick()/loadGarage().
+    var gPick = garagePick(states);
+    if (gPick.cover || gPick.sw || gPick.sensor){
+      var knownOpen = gPick.cover ? (gPick.cover.state === 'open')
+        : (gPick.sensor ? garageSensorIsOpen(gPick.sensor) : null);
+      if (knownOpen === null){ grdSet('grd-garage', 'Installed', 'hs-neutral'); }
+      else {
+        grdSet('grd-garage', knownOpen ? 'OPEN' : 'CLOSED', knownOpen ? 'hs-warn' : 'hs-ok');
+        if (knownOpen) warnReasons.push('Garage open');
+      }
       var gCard = document.getElementById('garageCard'); if (gCard) gCard.style.display = '';
       var gPlan = document.getElementById('garageModulePlanned'); if (gPlan) gPlan.style.display = 'none';
-      if (gCover) loadGarage(gCover);
+      loadGarage(states);
     } else {
       grdSet('grd-garage', 'Sensor pending', 'hs-dim');
       var gCard2 = document.getElementById('garageCard'); if (gCard2) gCard2.style.display = 'none';
@@ -8393,61 +8401,124 @@ function loadLights(){
 }
 
 // ── GARAGE DOOR (Home Guardian) ───────────────────────────────────────────
-// Controls a HA cover.*garage* entity (ratgdo / myQ). Card auto-shows when entity exists.
-function loadGarage(coverState){
+// Two independent HA entity shapes, per docs/beehive/garage_door_sonoff_mini_dry_setup_2026-08-06.md:
+//   cover.*garage*   — ratgdo, if that's ever adopted instead. Real open/closed + position.
+//   switch.*garage*  — the actual 08-06 hardware plan (SONOFF MINI DRY via Matter). A
+//                       momentary relay pulse, NOT a position signal -- on/off here means
+//                       "was just triggered", never "door is open". Single trigger button.
+//   binary_sensor.*garage* — future Zigbee door contact (Pending Item, not bought yet).
+//                       Real position, independent of the switch. Shown alongside the
+//                       trigger button once it exists.
+function garagePick(states){
+  var cover = states.filter(function(s){ return s.entity_id.indexOf('cover.') === 0 && s.entity_id.toLowerCase().indexOf('garage') >= 0; })[0];
+  var sw = states.filter(function(s){ return s.entity_id.indexOf('switch.') === 0 && s.entity_id.toLowerCase().indexOf('garage') >= 0; })[0];
+  var sensor = states.filter(function(s){ return s.entity_id.indexOf('binary_sensor.') === 0 && s.entity_id.toLowerCase().indexOf('garage') >= 0; })[0];
+  return { cover: cover, sw: sw, sensor: sensor };
+}
+// Contact sensors sometimes name the entity/friendly_name for the CLOSED state (same
+// inversion gotcha as the Mercedes window sensors -- see mbapi2020 notes) -- e.g.
+// "binary_sensor.garage_door_closed" reads on=closed, while a plain "...garage_contact"
+// reads on=open. Detect via the "closed" substring the same way the car fix already does.
+function garageSensorIsOpen(sensor){
+  var isOn = String(sensor.state || '').toLowerCase() === 'on';
+  var inverted = /closed/i.test(sensor.entity_id) || /closed/i.test((sensor.attributes && sensor.attributes.friendly_name) || '');
+  return inverted ? !isOn : isOn;
+}
+// Controls the garage entity/entities. Card auto-shows when any of the three exist.
+function loadGarage(preFetchedStates){
   var card = document.getElementById('garageCard');
   var banner = document.getElementById('garageBanner');
   var controls = document.getElementById('garageControls');
   var conn = document.getElementById('garageConn');
   if (!getHaToken()){ if (card) card.style.display = 'none'; return; }
-  function render(s){
-    if (!s){ if (banner) { banner.className = 'wx-banner wx-no'; banner.innerHTML = '&#128663; No garage entity found in Beehive'; } return; }
-    window._garageEntity = s.entity_id;
+  function render(states){
+    var picked = garagePick(states), cover = picked.cover, sw = picked.sw, sensor = picked.sensor;
+    if (!cover && !sw && !sensor){ if (banner) { banner.className = 'wx-banner wx-no'; banner.innerHTML = '&#128663; No garage entity found in Beehive'; } return; }
     if (banner) banner.style.display = 'none';
     if (controls) controls.style.display = '';
     if (conn){ conn.textContent = '● LIVE'; conn.style.color = '#22c55e'; }
-    var st = String(s.state || '').toLowerCase();
-    var a = s.attributes || {};
     var icon = document.getElementById('garageIcon');
     var label = document.getElementById('garageState');
     var changed = document.getElementById('garageChanged');
+    var coverBtns = document.getElementById('garageCoverBtns');
+    var switchBtns = document.getElementById('garageSwitchBtns');
     var openBtn = document.getElementById('garageOpenBtn');
     var closeBtn = document.getElementById('garageCloseBtn');
-    if (st === 'open' || st === 'opening'){
-      if (icon) icon.innerHTML = '&#128310;';
-      if (label) { label.textContent = st === 'opening' ? 'OPENING…' : 'OPEN'; label.style.color = 'var(--warn)'; }
-      if (openBtn) openBtn.disabled = true;
-      if (closeBtn) closeBtn.disabled = false;
-    } else if (st === 'closed' || st === 'closing'){
-      if (icon) icon.innerHTML = '&#128663;';
-      if (label) { label.textContent = st === 'closing' ? 'CLOSING…' : 'CLOSED'; label.style.color = 'var(--ok)'; }
-      if (openBtn) openBtn.disabled = false;
-      if (closeBtn) closeBtn.disabled = true;
-    } else {
-      if (icon) icon.innerHTML = '&#128663;';
-      if (label) { label.textContent = st.toUpperCase() || '--'; label.style.color = 'var(--muted)'; }
-      if (openBtn) openBtn.disabled = false;
-      if (closeBtn) closeBtn.disabled = false;
-    }
-    if (changed && s.last_changed){
-      try { var d = new Date(s.last_changed); changed.textContent = 'Since ' + d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}); } catch(e){}
-    }
     var specs = document.getElementById('garageSpecs');
-    if (specs){
-      var name = a.friendly_name || s.entity_id;
-      var pos = (typeof a.current_position === 'number') ? a.current_position + '%' : '--';
-      specs.innerHTML = '<li><span class="sk">Name</span><span class="sv">' + name + '</span></li>'
-        + '<li><span class="sk">Position</span><span class="sv">' + pos + '</span></li>'
-        + '<li><span class="sk">Connection</span><span class="sv">Local (ratgdo / ESPHome)</span></li>';
+    var note = document.getElementById('garageNote');
+
+    if (cover){
+      window._garageEntity = cover.entity_id;
+      window._garagePositionEntity = null;
+      if (coverBtns) coverBtns.style.display = '';
+      if (switchBtns) switchBtns.style.display = 'none';
+      var st = String(cover.state || '').toLowerCase();
+      var a = cover.attributes || {};
+      if (st === 'open' || st === 'opening'){
+        if (icon) icon.innerHTML = '&#128310;';
+        if (label) { label.textContent = st === 'opening' ? 'OPENING…' : 'OPEN'; label.style.color = 'var(--warn)'; }
+        if (openBtn) openBtn.disabled = true;
+        if (closeBtn) closeBtn.disabled = false;
+      } else if (st === 'closed' || st === 'closing'){
+        if (icon) icon.innerHTML = '&#128663;';
+        if (label) { label.textContent = st === 'closing' ? 'CLOSING…' : 'CLOSED'; label.style.color = 'var(--ok)'; }
+        if (openBtn) openBtn.disabled = false;
+        if (closeBtn) closeBtn.disabled = true;
+      } else {
+        if (icon) icon.innerHTML = '&#128663;';
+        if (label) { label.textContent = st.toUpperCase() || '--'; label.style.color = 'var(--muted)'; }
+        if (openBtn) openBtn.disabled = false;
+        if (closeBtn) closeBtn.disabled = false;
+      }
+      if (changed){
+        if (cover.last_changed){ try { var d = new Date(cover.last_changed); changed.textContent = 'Since ' + d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}); } catch(e){ changed.textContent = ''; } }
+        else changed.textContent = '';
+      }
+      if (specs){
+        var name = a.friendly_name || cover.entity_id;
+        var pos = (typeof a.current_position === 'number') ? a.current_position + '%' : '--';
+        specs.innerHTML = '<li><span class="sk">Name</span><span class="sv">' + name + '</span></li>'
+          + '<li><span class="sk">Position</span><span class="sv">' + pos + '</span></li>'
+          + '<li><span class="sk">Connection</span><span class="sv">Local (ratgdo / ESPHome)</span></li>';
+      }
+      if (note) note.innerHTML = 'Live from Beehive &bull; ratgdo / ESPHome';
+      return;
     }
+
+    // No cover -- render the switch-relay path (sw and/or sensor must exist to get here).
+    window._garageEntity = sw ? sw.entity_id : null;
+    window._garagePositionEntity = sensor ? sensor.entity_id : null;
+    if (coverBtns) coverBtns.style.display = 'none';
+    if (switchBtns) switchBtns.style.display = sw ? '' : 'none';
+
+    var posOpen = sensor ? garageSensorIsOpen(sensor) : null;
+    if (icon) icon.innerHTML = '&#128663;';
+    if (posOpen === true) { if (label) { label.textContent = 'OPEN'; label.style.color = 'var(--warn)'; } }
+    else if (posOpen === false) { if (label) { label.textContent = 'CLOSED'; label.style.color = 'var(--ok)'; } }
+    else { if (label) { label.textContent = sw ? 'Ready' : '--'; label.style.color = 'var(--muted)'; } }
+
+    if (changed){
+      var src = sensor || sw;
+      if (src && src.last_changed){ try { var d2 = new Date(src.last_changed); changed.textContent = (sensor ? 'Since ' : 'Last triggered ') + d2.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}); } catch(e){ changed.textContent = ''; } }
+      else changed.textContent = '';
+    }
+    if (specs){
+      var swName = sw ? ((sw.attributes && sw.attributes.friendly_name) || sw.entity_id) : ((sensor.attributes && sensor.attributes.friendly_name) || sensor.entity_id);
+      var posTxt = posOpen === true ? 'Open' : posOpen === false ? 'Closed' : (sw ? 'Unknown &mdash; add a door sensor' : '--');
+      specs.innerHTML = '<li><span class="sk">Name</span><span class="sv">' + swName + '</span></li>'
+        + '<li><span class="sk">Position</span><span class="sv">' + posTxt + '</span></li>'
+        + '<li><span class="sk">Connection</span><span class="sv">Local (Matter)</span></li>';
+    }
+    if (note) note.innerHTML = sw
+      ? (sensor ? 'Live from Beehive &bull; SONOFF relay + door sensor' : 'Live from Beehive &bull; SONOFF relay (trigger only &mdash; no door sensor yet)')
+      : 'Live from Beehive &bull; door sensor only (no trigger relay found)';
   }
-  if (coverState){ render(coverState); return; }
+  if (preFetchedStates){ render(preFetchedStates); return; }
   haFetch('/api/states', { signal: AbortSignal.timeout(25000) })
   .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
   .then(function(states){
     if (!Array.isArray(states)) throw new Error('bad');
-    var cover = states.filter(function(s){ return s.entity_id.indexOf('cover.') === 0 && s.entity_id.toLowerCase().indexOf('garage') >= 0; })[0];
-    render(cover);
+    render(states);
   })
   .catch(function(){
     if (banner){ banner.className = 'wx-banner wx-no'; banner.innerHTML = '&#128663; Beehive unreachable'; }
@@ -8456,6 +8527,14 @@ function loadGarage(coverState){
 }
 function garageToggle(action){
   var eid = window._garageEntity; if (!eid) return;
+  // A switch is a momentary relay (Inching Mode) -- one action, always turn_on, no
+  // separate open/close (we don't know current position without a door sensor).
+  if (eid.indexOf('switch.') === 0){
+    haFetch('/api/services/switch/turn_on', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ entity_id: eid }) })
+    .then(function(){ setTimeout(loadGarage, 2000); })
+    .catch(function(){ alert('Garage command failed — check Beehive connection.'); });
+    return;
+  }
   var svc = action === 'open' ? 'open_cover' : 'close_cover';
   haFetch('/api/services/cover/' + svc, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ entity_id: eid }) })
   .then(function(){ setTimeout(loadGarage, 2000); })
