@@ -1708,6 +1708,27 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
   .modal-box{max-width:900px}
   .btn-full{font-size:16px;padding:18px}
 }
+
+/* ── TABLET KIOSK ORIENTATION SELF-CORRECTION (Jeff, 08-08) ──────────────
+   The wall-mounted iPad is physically screwed in landscape, but iOS
+   (Guided Access / rotation lock) can freeze Safari's own layout viewport
+   at its portrait dimensions -- the browser genuinely believes it's
+   768x1024, so every normal responsive rule renders the phone/portrait
+   layout (vertical nav, etc.) sideways on the landscape screen. Toggling
+   iOS rotation lock fixes today's instance, but nothing stops a future
+   Guided Access restart from re-freezing it the same way.
+   This rotates the WHOLE PAGE 90deg back to landscape whenever the
+   browser reports portrait on a screen wide enough to be a tablet, not a
+   phone -- min-width:700px excludes every real handheld phone (max
+   ~430px even in portrait) so normal phone-portrait use is untouched.
+   Pure CSS, self-healing, no iOS setting required to keep working. */
+@media screen and (orientation:portrait) and (min-width:700px){
+  html{
+    width:100vh;height:100vw;
+    transform-origin:0 0;
+    transform:rotate(90deg) translateY(-100%);
+  }
+}
 </style>
 </head>
 <body>
