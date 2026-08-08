@@ -12,14 +12,27 @@ Everything below is sourced from SONOFF's own docs/help center and independent r
 
 ---
 
+## Install location: the opener, not the wall switch (resolved 08-06)
+
+Jeff has outlet access at both the wall-switch location and the opener itself, and asked which is the right install point. **Recommendation: the opener.**
+
+- The low-voltage "wall console" terminals live at the opener's control board — installing there is the direct, short wire run. Installing at the wall switch would mean extending that run unnecessarily.
+- The wall-switch box is likely sized for just a momentary pushbutton — the Sonoff module may not physically fit in there alongside existing wiring (same box-depth concern already flagged for the Kasa lighting switches). Worth a quick look before ruling it out, but the opener location avoids the question entirely.
+- Outlet availability is equal at both spots, so it isn't the deciding factor here.
+
+## Coexistence with the existing MyQ hub + wall button (resolved 08-06)
+
+**Confirmed via research: this works fine, no conflict.** MyQ hubs connect to the exact same "wall console" terminals as the physical wall button (standard design, not a workaround) — the same red/white wires Jeff already bridge-tested on 08-05. Wiring the Sonoff's relay output onto those same two wires adds a **third** independent trigger onto one shared low-voltage sense circuit, not a competing signal path. Since it's a simple momentary-contact circuit (not a power circuit), any one of the three — wall button, MyQ, or the Sonoff relay — briefly shorting those two wires triggers the door, completely independent of the other two. This is the same pattern keypads and extra remotes already use on these systems.
+
+## Powering the module: a simple cord, not a splice into the opener (resolved 08-06)
+
+The N/L terminals are bare screw terminals — this is a hardwire module, not a plug-in device. Since there's outlet access at the opener, the straightforward approach is a basic 2-conductor AC cord with a molded plug on one end (a "lamp cord" / "appliance power cord," cheap at any hardware store — or repurpose a spare extension cord by cutting off the female end). Strip the other end, land the two conductors on **N** and **L**, plug the cord into the wall outlet. No need to splice into the opener's own internal wiring — that would mean opening its housing for no benefit now that outlet access is confirmed.
+
+---
+
 ## Step 1 (Jeff/coworker, on-site): Decide how to power the module
 
-The device needs **either** AC (100-240V via N/L) **or** DC (12-48V via DC+/DC-) — not both, and this can't be decided remotely. Check what's actually available at the opener:
-
-- **Easiest if available:** the opener motor head is itself mains-powered (plugs into a ceiling outlet) — if there's a spare hot/neutral in that junction box, or the outlet has a free slot, power the Sonoff via **N/L** off the same circuit. No voltage guessing needed.
-- **Alternative:** if the opener has a labeled low-voltage accessory terminal (common on some openers for sensors/accessories), **measure it with a multimeter first** — only use it if it reads DC and falls in the 12-48V range. Don't assume; some openers' low-voltage terminals are AC, not DC, and using AC on the DC+/DC- input would be wrong.
-
-This is a physical/on-site call — not something I can determine from here.
+The device needs **either** AC (100-240V via N/L) **or** DC (12-48V via DC+/DC-) — not both. **Resolved above: use AC via N/L, powered from the outlet at the opener location, via a simple cord** — no voltage guessing needed since DC isn't in play here.
 
 ## Step 2 (Jeff/coworker): Wire the relay output in parallel with the existing wall button
 
@@ -70,3 +83,4 @@ The app's existing `loadGarage()`/`garageToggle()` code was written expecting a 
 - [Sonoff Matter Dry-Contact Switch MINI-D Review — SmartHomeScene](https://smarthomescene.com/reviews/sonoff-matter-dry-contact-switch-mini-d-review/)
 - [Sonoff MINI-D inching mode — Home Assistant Community](https://community.home-assistant.io/t/sonoff-mini-d-inching-mode/903505)
 - [SONOFF MINI-D — Help Center (terminals/wiring)](https://help.sonoff.tech/docs/mini-d)
+- [How to Install Chamberlain MyQ Smart Garage Hub — Trunetto](https://www.trunetto.com/troubleshooting/garage-doors/chamberlain/how-to-install-chamberlain-myq-smart-garage-hub) (confirms MyQ shares the same wall-console terminals as the physical button)
