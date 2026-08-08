@@ -383,11 +383,17 @@ html,body{
    object-fit:cover crop the photo and slide the panel off the clean lawn. */
 .sec-hero-irr{aspect-ratio:1320/864;height:auto;max-height:none}
 /* ── Live irrigation controls inlaid on the lawn photo ────────────────────
-   Right-hand side, over the open lawn the regenerated photo leaves clear.
+   Bottom-anchored, spanning the clear grass/flowerbed strip along the
+   bottom of the photo (Jeff, 08-08: "the blurred section... is covering me
+   in the picture" -- he's crouched in the right-center/upper area of this
+   photo, so the panel used to float right on top of him. The only part of
+   the frame that's clear of both him and the irrigation box is this bottom
+   strip). Kept short (stats row + one 4-across button row, not the old
+   3-row stack) so it stays safely below his boot at the edge of frame.
    Same glass language as the utility readouts and the car cockpit panel. */
 .irr-hero-panel{
-  position:absolute;right:4%;top:50%;transform:translateY(-50%);left:auto;
-  width:42%;z-index:3;
+  position:absolute;left:4%;right:4%;bottom:2%;top:auto;transform:none;
+  width:auto;z-index:3;
   display:flex;flex-direction:column;gap:clamp(5px,1.3vw,13px);
   padding:clamp(7px,1.8vw,17px) clamp(7px,1.8vw,17px);box-sizing:border-box;
   background:rgba(16,14,12,.16);
@@ -407,7 +413,9 @@ html,body{
   color:#f7f1e7;text-shadow:0 2px 10px rgba(0,0,0,.8);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.irr-hero-btns{display:grid;grid-template-columns:1fr 1fr;gap:clamp(4px,1.1vw,11px)}
+/* 4-across (not 2x2) -- keeps the panel to just 2 rows total so it stays
+   clear of Jeff's boot at the bottom edge of the frame. */
+.irr-hero-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(4px,1.1vw,11px)}
 .irr-hero-btn{
   /* same 44px tap-target floor as the car controls — these had the same defect */
   min-height:44px;display:flex;align-items:center;justify-content:center;
