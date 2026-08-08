@@ -1609,6 +1609,14 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
   .snav-icon{font-size:22px}
   .spec-list .sk{font-size:13px}
   .spec-list .sv{font-size:13px}
+  /* Zone cards (Irrigation) were a fixed 95px thumbnail at every width -- the
+     one piece of UI that never scaled up at all. Jeff, 08-08: "make it
+     perfect on all platforms." */
+  .zone-photo,.zone-photo-empty{width:130px;min-width:130px;height:130px}
+  .zone-name{font-size:15px}
+  .zone-badge{font-size:9px;padding:3px 6px}
+  .zone-sub{font-size:10px}
+  .zone-run-btn{font-size:12px;padding:8px 6px}
 }
 @media(min-width:1200px){
   .hcc-section.active{padding:0 40px}
@@ -1628,6 +1636,11 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
   .sec-hero-status{font-size:14px}
   .modal-box{max-width:600px;padding:28px 24px 42px}
   .splash-status .splash-stat .ss-label,.splash-status .splash-stat .ss-val{font-size:14px}
+  .zone-photo,.zone-photo-empty{width:160px;min-width:160px;height:160px}
+  .zone-name{font-size:16px}
+  .zone-badge{font-size:10px;padding:3px 7px}
+  .zone-sub{font-size:11px}
+  .zone-run-btn{font-size:13px;padding:9px 6px}
 }
 @media(min-width:1920px){
   .hcc-section.active{max-width:1800px;padding:0 60px}
@@ -1650,6 +1663,11 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
   .btn-full{font-size:14px;padding:16px}
   .splash-status .splash-stat .ss-label,.splash-status .splash-stat .ss-val{font-size:16px}
   .splash-status .splash-stat .ss-icon{font-size:20px}
+  .zone-photo,.zone-photo-empty{width:200px;min-width:200px;height:200px}
+  .zone-name{font-size:19px}
+  .zone-badge{font-size:11px;padding:4px 8px}
+  .zone-sub{font-size:12px}
+  .zone-run-btn{font-size:15px;padding:11px 8px}
 }
 @media(min-width:2560px){
   .hcc-section.active{max-width:2200px;padding:0 80px}
@@ -5083,7 +5101,12 @@ function loadIrrigationFromHA(token,base,onFail){
     zones.forEach(function(z){
       var isA=z.state==='on';
       var name=(z.attributes&&z.attributes.friendly_name)||z.entity_id.replace('switch.','').replace(/_/g,' ');
-      var stNum=parseInt((z.entity_id.match(/(\d+)/)||[])[1])||0;
+      // Garden (station 6) doesn't reliably carry a literal "6" in its HA entity_id the way
+      // the numbered sprinkler zones do (e.g. "switch.garden_zone" has no digit at all, or an
+      // unrelated one), so the digit-parse below silently missed it and the photo fell back to
+      // the empty placeholder -- "the garden zone picture is missing" (Jeff, 08-08). Name-match
+      // first, digit-parse as the fallback for the numbered zones.
+      var stNum=/garden/i.test(name)||/garden/i.test(z.entity_id)?6:(parseInt((z.entity_id.match(/(\d+)/)||[])[1])||0);
       var photo=stNum>=1&&stNum<=6
         ?'<img class="zone-photo" src="./images/zones/zone-'+stNum+'.jpg" loading="lazy">'
         :'<div class="zone-photo-empty">&#128688;</div>';
