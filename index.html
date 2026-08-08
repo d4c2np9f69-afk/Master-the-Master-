@@ -395,7 +395,11 @@ html,body{
   position:absolute;left:4%;right:4%;bottom:1.5%;top:auto;transform:none;
   width:auto;z-index:3;
   display:flex;flex-direction:column;gap:clamp(5px,1.3vw,13px);
-  padding:clamp(7px,1.8vw,17px) clamp(7px,1.8vw,17px);box-sizing:border-box;
+  /* padding matches wx/grd/yard-hero-readout exactly (Jeff, 08-08: "bring
+     them more in line with the others' size") -- was a uniform 7/1.8vw/17
+     on all sides where the siblings use a smaller asymmetric horizontal
+     value, which read a touch bulkier than the rest of the heroes. */
+  padding:clamp(6px,1.6vw,16px) clamp(4px,1.2vw,13px);box-sizing:border-box;
   background:rgba(16,14,12,.16);
   backdrop-filter:blur(9px) saturate(150%) brightness(.98);-webkit-backdrop-filter:blur(9px) saturate(150%) brightness(.98);
   border-radius:clamp(12px,3.4vw,32px);
@@ -409,7 +413,9 @@ html,body{
   color:rgba(247,229,196,.75);text-shadow:0 1px 6px rgba(0,0,0,.75);line-height:1.2;
 }
 .irr-hero-val{
-  font-size:clamp(11px,2.1vw,28px);font-weight:600;margin-top:2px;line-height:1.15;
+  /* matches wx-hero-val exactly -- was clamp(11px,2.1vw,28px), a shade
+     smaller than the other hero readouts at the same widths. */
+  font-size:clamp(11.5px,2.2vw,30px);font-weight:600;margin-top:2px;line-height:1.15;
   color:#f7f1e7;text-shadow:0 2px 10px rgba(0,0,0,.8);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
