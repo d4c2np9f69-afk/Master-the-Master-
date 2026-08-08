@@ -383,16 +383,17 @@ html,body{
    object-fit:cover crop the photo and slide the panel off the clean lawn. */
 .sec-hero-irr{aspect-ratio:1320/864;height:auto;max-height:none}
 /* ── Live irrigation controls inlaid on the lawn photo ────────────────────
-   Bottom-right corner (Jeff, 08-08: "good spot would be bottom right"), and
-   kept SHORT (2 rows: stats row + one 4-across button row, not a 2x2 button
-   grid) -- measured Jeff's actual bounding box in the source photo (roughly
-   x 610-990, y 15-650 of 1320x864) and at narrow/phone widths a taller
-   stacked panel pushes its top edge up past y~650 even confined to the
-   right side, re-colliding with his boot/knee. Staying to 2 short rows
-   keeps the top edge below him at every width, not just wide ones. */
+   Full width across the bottom (Jeff, 08-08: "should go all the way across
+   the bottom like the other[s] do" -- matching the wx/grd/yard hero
+   readouts). Sits below Jeff's actual bounding box in the source photo
+   (roughly x 610-990, y 15-650 of 1320x864) with real margin to spare at
+   every tested width. Kept the 4-across button row (not 2x2) from the
+   bottom-right version -- still the shortest layout, so there's no reason
+   to give that margin back now that the panel isn't squeezed into a
+   narrower column anymore. */
 .irr-hero-panel{
-  position:absolute;right:4%;left:auto;bottom:1.5%;top:auto;transform:none;
-  width:64%;z-index:3;
+  position:absolute;left:4%;right:4%;bottom:1.5%;top:auto;transform:none;
+  width:auto;z-index:3;
   display:flex;flex-direction:column;gap:clamp(5px,1.3vw,13px);
   padding:clamp(7px,1.8vw,17px) clamp(7px,1.8vw,17px);box-sizing:border-box;
   background:rgba(16,14,12,.16);
