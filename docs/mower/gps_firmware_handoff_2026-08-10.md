@@ -78,23 +78,35 @@ name and it'll be wired into the log/history display.
 
 ---
 
-## TASK 3 — Real aerial photo of Jeff's actual property (MEDIUM)
+## TASK 3 — ~~Real aerial photo~~ **SOLVED IN CODE — verify on-site only**
 
-**Why the map needs manual alignment today:** `images/yard-aerial.jpg` is **not
-Jeff's property**. It has `32.899480 N, 97.033920 W` baked into the image as text
-— that's Fort Worth, TX. Jeff's real coords are ~`36.4766, -86.6601` (White
-House, TN). The GPS simulation code even hardcodes those Texas coords.
+**Superseded 2026-08-10.** Rather than sourcing a static plot map, the app now
+pulls **live georeferenced satellite tiles** from **USGS The National Map**
+(`basemap.nationalmap.gov/.../USGSImageryOnly`) centred on the real GPS
+coordinates. That service is US federal, public domain, **no API key and no
+account** (Esri World Imagery would have required a developer signup).
 
-Because the photo isn't georeferenced to the real yard, the app cannot
-auto-align — hence the rotate/zoom/pan pad.
+Because tiles are Web Mercator, GPS→pixel is exact arithmetic — the mow track
+lands on the real grass automatically, with **nothing to align, ever**. The
+manual align pad now hides itself whenever satellite mode is live, and there's a
+`🛰 Satellite: ON/OFF` toggle to fall back to the bundled photo.
 
-**What would fix it permanently:**
-1. Grab a real satellite/aerial image of 301 (Jeff's address) — Google Earth Pro
-   can export with known bounds, or any GIS/county parcel viewer.
-2. Record the **exact lat/lon of the image's NW and SE corners**.
-3. Hand the cloud session the image + those two corner coordinates. It can then
-   georeference the map properly and the alignment pad becomes unnecessary —
-   the track would land on the real grass automatically, first time, forever.
+Verified in test: a point exactly 10 m east projects to exactly 10/mpp pixels
+right (0.24 m/pixel at z19), and if a zoom level has no imagery the code steps
+down automatically (proved z19→18→17) instead of giving up.
+
+**The one thing that still needs a human, on-site:**
+> Open YARD → Yard Map on a device with internet and confirm the satellite image
+> actually shows **Jeff's real yard** and that the green coverage lands on the
+> real grass. This sandbox has **no network egress** (`tnmap.tn.gov` and the live
+> app both return blocked/403), so the real tile fetch could only be tested
+> against a synthetic tile — the maths is proven, the actual imagery for White
+> House TN is not.
+
+If USGS imagery turns out too coarse there, the fallback is unchanged: get a real
+aerial + its **NW and SE corner lat/lon** and hand it back for georeferencing.
+(Note: don't commit Jeff's street address to this repo — it's public. Coordinates
+already present in sensor data are enough.)
 
 ---
 

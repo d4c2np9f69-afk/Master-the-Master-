@@ -2630,7 +2630,8 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     </div>
     <div id="yardMapMsg" style="font-size:10px;color:#666;text-align:center;margin-top:6px">No GPS track yet &mdash; it&rsquo;ll appear after your first mow with the sensor installed.</div>
     <div id="yardCoverStats" style="font-size:10px;color:var(--muted);text-align:center;margin-top:4px"></div>
-    <div style="margin-top:10px;background:rgba(15,25,15,.55);border:1px solid var(--border);border-radius:8px;padding:9px">
+    <div id="mapAttrib" style="display:none;font-size:9px;color:var(--dim);text-align:center;margin-top:3px">Imagery: USGS The National Map (public domain)</div>
+    <div id="mapAlignPad" style="margin-top:10px;background:rgba(15,25,15,.55);border:1px solid var(--border);border-radius:8px;padding:9px">
       <div style="font-size:10px;color:var(--muted);letter-spacing:1px;font-weight:700;margin-bottom:7px;text-align:center">ALIGN MAP TO PHOTO</div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
         <button class="mapadj-btn" onclick="mapAdjust('rot',-5)" title="Rotate left">&#8634;</button>
@@ -2648,9 +2649,10 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn-full btn-gray" style="flex:1;font-size:11px;margin:0" id="satToggleBtn" onclick="toggleSatellite()">&#128752; Satellite: ON</button>
       <button class="btn-full btn-gray" style="flex:1;font-size:11px;margin:0" id="trackPauseBtn" onclick="toggleTracking()">&#9208; Pause GPS tracking</button>
-      <button class="btn-full btn-gray" style="flex:1;font-size:11px;margin:0" onclick="clearYardCoverage()">&#128465; Clear local cache</button>
     </div>
+    <button class="btn-full btn-gray" style="margin-top:8px;font-size:11px" onclick="clearYardCoverage()">&#128465; Clear local cache</button>
   </div>
   <div class="card cat-activity">
     <div class="card-title">&#128336; Recent Activity</div>
@@ -6172,6 +6174,27 @@ setInterval(loadAlerts, 5*60*1000);
   })();
   function _saveMapView(){ try{ localStorage.setItem('yard_map_view',JSON.stringify(_mapView)); }catch(e){} }
 
+  // Satellite basemap on by default — it's the only mode that's actually correct.
+  // The toggle exists so Jeff can fall back to the bundled photo if the imagery is
+  // ever too coarse for his area or he's offline.
+  function _satelliteEnabled(){
+    try{ return localStorage.getItem('yard_map_satellite')!=='0'; }catch(e){ return true; }
+  }
+  function toggleSatellite(){
+    try{ localStorage.setItem('yard_map_satellite', _satelliteEnabled()?'0':'1'); }catch(e){}
+    drawYardMap(window._lastTrack||[]);
+  }
+  // Reflect which basemap actually rendered, and hide the manual align pad when
+  // satellite is live — with real georeferencing there is nothing left to align.
+  function _reflectMapMode(isSat){
+    var pad=document.getElementById('mapAlignPad');
+    if(pad) pad.style.display=isSat?'none':'';
+    var b=document.getElementById('satToggleBtn');
+    if(b) b.textContent=_satelliteEnabled()?'🛰 Satellite: ON':'🖼 Satellite: OFF';
+    var attr=document.getElementById('mapAttrib');
+    if(attr) attr.style.display=isSat?'':'none';
+  }
+
   function mapAdjust(key,delta){
     if(key==='zoom') _mapView.zoom=Math.max(0.15,Math.min(8,_mapView.zoom*delta));
     else if(key==='rot') _mapView.rot=(_mapView.rot+delta)%360;
@@ -6195,6 +6218,105 @@ setInterval(loadAlerts, 5*60*1000);
   function _gpsToMetres(lat,lon,refLat,refLon){
     var cosL=Math.cos(refLat*Math.PI/180)||1;
     return { x:(lon-refLon)*111320*cosL, y:-(lat-refLat)*111320 };  // +y = south
+  }
+
+  // ---- REAL SATELLITE BASEMAP (auto-georeferenced) ----------------------------
+  // The bundled yard-aerial.jpg is NOT Jeff's property — it has 32.899480N /
+  // 97.033920W (Fort Worth, TX) printed on the image; his yard is ~36.4766N /
+  // -86.6601W in White House, TN. Because that photo has no true relationship to
+  // real coordinates, the track could only ever be hand-aligned to it — which is
+  // the entire reason the manual align pad existed.
+  //
+  // Real map tiles fix that permanently: they're Web Mercator, so GPS -> pixel is
+  // exact arithmetic and the track lands on the real grass automatically, first
+  // time, with nothing to align. Source is USGS The National Map imagery — a US
+  // federal government service, public domain, no API key and no account needed
+  // (Esri's World Imagery would have required Jeff to sign up for a dev account).
+  var TILE_URL='https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}';
+  var TILE_SIZE=256, TILE_ZMAX=19, TILE_ZMIN=2;
+  var _tileCache={}, _tilePending={}, _deadZooms={};
+
+  function _lonToWorldX(lon,z){ return (lon+180)/360*Math.pow(2,z)*TILE_SIZE; }
+  function _latToWorldY(lat,z){
+    var r=Math.max(-85.05,Math.min(85.05,lat))*Math.PI/180;
+    return (1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*Math.pow(2,z)*TILE_SIZE;
+  }
+  function _metresPerPixel(lat,z){
+    return 156543.03392*Math.cos(lat*Math.PI/180)/Math.pow(2,z);
+  }
+
+  function _getTile(z,x,y,onLoad){
+    var key=z+'/'+x+'/'+y;
+    if(_tileCache[key]) return _tileCache[key];
+    if(_tilePending[key]) return null;
+    _tilePending[key]=1;
+    var img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=function(){ _tileCache[key]=img; delete _tilePending[key]; if(onLoad) onLoad(); };
+    img.onerror=function(){ delete _tilePending[key]; _tileCache[key]='ERR'; if(onLoad) onLoad(); };
+    img.src=TILE_URL.replace('{z}',z).replace('{x}',x).replace('{y}',y);
+    return null;
+  }
+
+  // Exact Web Mercator fit: choose the zoom that frames the data, then GPS->pixel
+  // is pure arithmetic against the same projection the tiles are drawn in, so
+  // alignment is correct by construction rather than by hand.
+  function _buildTileFit(points, rect){
+    if(!points||points.length===0) return null;
+    var minLa=90,maxLa=-90,minLo=180,maxLo=-180,i,n=0;
+    for(i=0;i<points.length;i++){
+      var la=points[i][0], lo=points[i][1];
+      if(typeof la!=='number'||typeof lo!=='number') continue;
+      if(la<minLa)minLa=la; if(la>maxLa)maxLa=la;
+      if(lo<minLo)minLo=lo; if(lo>maxLo)maxLo=lo;
+      n++;
+    }
+    if(n===0) return null;
+    var cLat=(minLa+maxLa)/2, cLon=(minLo+maxLo)/2;
+    // Never zoom past a sane yard scale if the data is a single point / tiny span.
+    var spanX=Math.max(30,(maxLo-minLo)*111320*Math.cos(cLat*Math.PI/180));
+    var spanY=Math.max(30,(maxLa-minLa)*111320);
+    var need=Math.max(spanX/(rect.w*0.86), spanY/(rect.h*0.86));   // metres per pixel
+    var z=Math.floor(Math.log2(156543.03392*Math.cos(cLat*Math.PI/180)/need));
+    z=Math.max(TILE_ZMIN,Math.min(TILE_ZMAX,z));
+    // USGS imagery resolution varies by area — not everywhere has tiles at z19.
+    // If a zoom came back with nothing but 404s, step down until we find one that
+    // does have coverage, rather than silently dropping back to the fake photo.
+    while(z>TILE_ZMIN && _deadZooms[z]) z--;
+    var originX=_lonToWorldX(cLon,z)-rect.w/2, originY=_latToWorldY(cLat,z)-rect.h/2;
+    return {
+      z:z, originX:originX, originY:originY, centre:[cLat,cLon],
+      mpp:_metresPerPixel(cLat,z),
+      project:function(lat,lon){
+        return { x:rect.x+_lonToWorldX(lon,z)-originX, y:rect.y+_latToWorldY(lat,z)-originY };
+      }
+    };
+  }
+
+  // Paint the tiles covering the visible rect. Returns false if none are ready yet
+  // (offline / imagery gap) so the caller can fall back to the bundled photo.
+  function _drawTiles(ctx,fit,rect,redraw){
+    var x0=Math.floor(fit.originX/TILE_SIZE), x1=Math.floor((fit.originX+rect.w)/TILE_SIZE);
+    var y0=Math.floor(fit.originY/TILE_SIZE), y1=Math.floor((fit.originY+rect.h)/TILE_SIZE);
+    var maxIdx=Math.pow(2,fit.z)-1, drew=0, pending=0, failed=0, asked=0;
+    for(var ty=y0;ty<=y1;ty++){
+      for(var tx=x0;tx<=x1;tx++){
+        if(tx<0||ty<0||tx>maxIdx||ty>maxIdx) continue;
+        asked++;
+        var img=_getTile(fit.z,tx,ty,redraw);
+        if(img==='ERR'){ failed++; continue; }
+        if(!img){ pending++; continue; }
+        ctx.drawImage(img, rect.x+tx*TILE_SIZE-fit.originX, rect.y+ty*TILE_SIZE-fit.originY, TILE_SIZE, TILE_SIZE);
+        drew++;
+      }
+    }
+    // Every tile at this zoom 404'd and none are still in flight → this zoom has no
+    // imagery here. Mark it dead and redraw one level out; _buildTileFit skips it.
+    if(asked>0 && failed===asked && pending===0 && fit.z>TILE_ZMIN && !_deadZooms[fit.z]){
+      _deadZooms[fit.z]=1;
+      if(redraw) setTimeout(redraw,0);
+    }
+    return {drew:drew, pending:pending, failed:failed, asked:asked};
   }
 
   // Build a stable GPS->pixel transform by fitting the FULL extent of the supplied
@@ -6370,42 +6492,60 @@ setInterval(loadAlerts, 5*60*1000);
     c.width=w; c.height=h;
     ctx.clearRect(0,0,w,h);
 
-    // Aerial base, letterboxed. Coverage/track are fitted to the PHOTO rect rather
-    // than the raw canvas so they always land on the yard, never in the letterbox.
-    var photo={x:0,y:0,w:w,h:h};
-    if(window._platMapImg){
-      var img=window._platMapImg;
-      var iw=img.naturalWidth, ih=img.naturalHeight;
-      var sc=Math.min(w/iw,h/ih);
-      var dw=iw*sc, dh=ih*sc, dx=(w-dw)/2, dy=(h-dh)/2;
-      ctx.drawImage(img,dx,dy,dw,dh);
-      ctx.fillStyle='rgba(0,0,0,0.18)';
-      ctx.fillRect(0,0,w,h);
-      photo={x:dx,y:dy,w:dw,h:dh};
-    } else {
-      ctx.fillStyle='#0c1a0c';
-      ctx.fillRect(0,0,w,h);
-    }
-
     var coverage=(typeof S!=='undefined'&&Array.isArray(S.yardCoverage))?S.yardCoverage:[];
     var hasTrack=Array.isArray(track)&&track.length>=2;
-
     // Fit off the cumulative coverage once it exists: as mows accumulate it converges
-    // on the real extent of the yard, so the alignment stops drifting between mows.
-    // Falls back to this mow's own track on day one.
+    // on the real extent of the yard. Falls back to this mow's own track on day one.
     var fitPts=coverage.length>0?coverage:(hasTrack?track:null);
+
+    var full={x:0,y:0,w:w,h:h};
+    var project=null, usedSatellite=false, tileState=null;
+
+    // Preferred path: real georeferenced satellite tiles centred on the actual GPS.
+    // No alignment needed — GPS to pixel is exact Web Mercator arithmetic.
+    if(fitPts && fitPts.length>0 && _satelliteEnabled()){
+      var tf=_buildTileFit(fitPts,full);
+      if(tf){
+        tileState=_drawTiles(ctx,tf,full,function(){ drawYardMap(window._lastTrack||[]); });
+        if(tileState.drew>0){
+          ctx.fillStyle='rgba(0,0,0,0.10)'; ctx.fillRect(0,0,w,h);
+          project=tf.project; usedSatellite=true;
+          window._lastTileFit=tf;
+        }
+      }
+    }
+
+    // Fallback: the bundled decorative photo, letterboxed, with the manual align pad.
+    var photo=full;
+    if(!usedSatellite){
+      if(window._platMapImg){
+        var img=window._platMapImg;
+        var iw=img.naturalWidth, ih=img.naturalHeight;
+        var sc=Math.min(w/iw,h/ih);
+        var dw=iw*sc, dh=ih*sc, dx=(w-dw)/2, dy=(h-dh)/2;
+        ctx.drawImage(img,dx,dy,dw,dh);
+        ctx.fillStyle='rgba(0,0,0,0.18)';
+        ctx.fillRect(0,0,w,h);
+        photo={x:dx,y:dy,w:dw,h:dh};
+      } else {
+        ctx.fillStyle='#0c1a0c';
+        ctx.fillRect(0,0,w,h);
+      }
+    }
+
     if(!fitPts||fitPts.length===0){
       if(msg) msg.textContent='No GPS track yet — it will draw on your first mow with the sensor running.';
       if(stats) stats.textContent='';
-      _refreshCoverBadge();
+      _refreshCoverBadge(); _reflectMapMode(false);
       return;
     }
-    var project=_buildMapFit(fitPts,photo);
+    if(!project) project=_buildMapFit(fitPts,photo);
     if(!project){
       if(msg) msg.textContent='Not enough GPS spread yet to draw the map.';
-      _refreshCoverBadge();
+      _refreshCoverBadge(); _reflectMapMode(false);
       return;
     }
+    _reflectMapMode(usedSatellite);
 
     // 1) Cumulative coverage — every mow ever recorded, in mown-grass green
     if(coverage.length>0){
@@ -6444,9 +6584,11 @@ setInterval(loadAlerts, 5*60*1000);
     }
 
     if(msg){
-      msg.textContent = hasTrack
-        ? (track.length+' GPS points this mow · red = latest mow · green = all-time coverage')
-        : (coverage.length+' coverage points mapped · green = ground covered so far');
+      var base = usedSatellite ? ' · 🛰 real satellite, auto-aligned'
+        : (tileState && tileState.pending>0 ? ' · loading satellite…' : ' · decorative photo (not your property)');
+      msg.textContent = (hasTrack
+        ? (track.length+' GPS points this mow · red = latest · green = all-time coverage')
+        : (coverage.length+' coverage points mapped')) + base;
     }
     if(stats){
       // Mow count comes from the server's completed-mow history (the authoritative
@@ -6474,6 +6616,9 @@ setInterval(loadAlerts, 5*60*1000);
   window.syncYardCoverage=syncYardCoverage;
   window.toggleTracking=toggleTracking;
   window._reflectPauseState=_reflectPauseState;
+  window.toggleSatellite=toggleSatellite;
+  window._buildTileFit=_buildTileFit;
+  window._satelliteEnabled=_satelliteEnabled;
   _refreshCoverBadge();
   window.addEventListener('resize',function(){ if(window._lastTrack) drawYardMap(window._lastTrack); });
 
