@@ -60,14 +60,16 @@ function gpsPointsFrom(body) {
 }
 
 function mergeCoverage(existing, pts) {
-  const seen = new Set(existing);
-  let added = 0;
-  const push = (la, lo) => {
-    const k = Math.round(la * GRID) + ',' + Math.round(lo * GRID);
-    if (seen.has(k)) return;
-    seen.add(k);
-    added++;
-  };
+  // Normalise: legacy format was a plain array of cell keys (presence only).
+  const counts = Array.isArray(existing)
+    ? existing.reduce((m, k) => { m[k] = 1; return m; }, {})
+    : Object.assign({}, existing || {});
+
+  // Cells touched by THIS reading. Deduplicated within the reading first, so a
+  // slow pass (or dense interpolation) over one cell counts as ONE visit, not
+  // fifty — otherwise dwell time would masquerade as confidence.
+  const touched = new Set();
+  const push = (la, lo) => { touched.add(Math.round(la * GRID) + ',' + Math.round(lo * GRID)); };
   for (let i = 0; i < pts.length; i++) {
     const [la, lo] = pts[i];
     push(la, lo);
@@ -86,9 +88,23 @@ function mergeCoverage(existing, pts) {
       }
     }
   }
-  let out = Array.from(seen);
-  if (out.length > COVERAGE_MAX) out = out.slice(-COVERAGE_MAX);
-  return { cells: out, added };
+
+  let added = 0;
+  for (const k of touched) {
+    if (counts[k] === undefined) added++;
+    counts[k] = (counts[k] || 0) + 1;
+  }
+
+  // Over the cap, drop the LEAST-visited cells rather than the oldest. Those are
+  // precisely the one-off GPS strays; the repeatedly-mown yard is what survives.
+  let keys = Object.keys(counts);
+  if (keys.length > COVERAGE_MAX) {
+    keys.sort((a, b) => counts[b] - counts[a]);
+    const trimmed = {};
+    for (let i = 0; i < COVERAGE_MAX; i++) trimmed[keys[i]] = counts[keys[i]];
+    return { cells: trimmed, added };
+  }
+  return { cells: counts, added };
 }
 
 // Record the ENTIRE raw payload — deliberately NOT a hand-picked whitelist.
@@ -148,16 +164,20 @@ export async function onRequestGet({ env, request }) {
     if (kv) {
       try {
         const covRaw = await kv.get(COVERAGE_KEY);
-        const cells = covRaw ? JSON.parse(covRaw) : [];
+        const parsed = covRaw ? JSON.parse(covRaw) : {};
+        // {"latE5,lonE5": visitCount}. Legacy array form is upgraded to count 1.
+        const cells = Array.isArray(parsed)
+          ? parsed.reduce((m, k) => { m[k] = 1; return m; }, {})
+          : parsed;
         const pausedRaw = await kv.get(COVERAGE_PAUSED_KEY);
         return Response.json({
-          coverage: cells,           // ["3647660,-8666010", ...] grid-cell keys
-          coverage_n: cells.length,
+          coverage: cells,
+          coverage_n: Object.keys(cells).length,
           paused: pausedRaw === '1',
         });
       } catch (_) {}
     }
-    return Response.json({ coverage: [], coverage_n: 0, paused: false });
+    return Response.json({ coverage: {}, coverage_n: 0, paused: false });
   }
 
   if (kv) {
@@ -166,7 +186,8 @@ export async function onRequestGet({ env, request }) {
       const histRaw = await kv.get(MOW_HISTORY_KEY);
       const history = histRaw ? JSON.parse(histRaw) : [];
       const covRaw = await kv.get(COVERAGE_KEY);
-      const coverage_n = covRaw ? JSON.parse(covRaw).length : 0;
+      const covParsed = covRaw ? JSON.parse(covRaw) : {};
+      const coverage_n = Array.isArray(covParsed) ? covParsed.length : Object.keys(covParsed).length;
       const pausedRaw = await kv.get(COVERAGE_PAUSED_KEY);
       const paused = pausedRaw === '1';
       if (raw) return Response.json({ ...JSON.parse(raw), history, coverage_n, tracking_paused: paused });
@@ -216,9 +237,11 @@ export async function onRequestPost({ request, env }) {
         const pts = gpsPointsFrom(body);
         if (pts.length > 0) {
           const covRaw = await kv.get(COVERAGE_KEY);
-          const existing = covRaw ? JSON.parse(covRaw) : [];
+          const existing = covRaw ? JSON.parse(covRaw) : {};
           const merged = mergeCoverage(existing, pts);
-          if (merged.added > 0) await kv.put(COVERAGE_KEY, JSON.stringify(merged.cells));
+          // Always write: even with no NEW cells, revisits raise confidence counts,
+          // which is the whole mechanism by which the map sharpens over time.
+          await kv.put(COVERAGE_KEY, JSON.stringify(merged.cells));
         }
       }
     } catch (_) {}

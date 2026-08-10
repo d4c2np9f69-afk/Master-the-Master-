@@ -6468,6 +6468,7 @@ setInterval(loadAlerts, 5*60*1000);
   // decimal places) so repeat passes over the same ground collapse to one cell,
   // which naturally bounds the total size to the actual area of the yard.
   var COVERAGE_MAX=20000;
+  var COVERAGE_CONFIDENT=3;   // visits before a cell is treated as confirmed grass
   function _covKey(la,lo){ return la.toFixed(5)+','+lo.toFixed(5); }
 
   function mergeYardCoverage(track){
@@ -6540,13 +6541,16 @@ setInterval(loadAlerts, 5*60*1000);
     fetch('/api/hours?coverage=1',{cache:'no-store'})
       .then(function(r){ return r.json(); })
       .then(function(d){
-        if(!Array.isArray(d.coverage)) return;
-        // Server stores compact "latE5,lonE5" grid-cell keys; decode to lat/lon.
-        var pts=[];
-        for(var i=0;i<d.coverage.length;i++){
-          var parts=String(d.coverage[i]).split(',');
+        if(!d||!d.coverage) return;
+        // Server sends {"latE5,lonE5": visitCount}. Decode to [lat, lon, visits].
+        // (Legacy array form = presence only, treated as a single visit.)
+        var pts=[], keys, i, cnt;
+        if(Array.isArray(d.coverage)){ keys=d.coverage.map(String); cnt=null; }
+        else { keys=Object.keys(d.coverage); cnt=d.coverage; }
+        for(i=0;i<keys.length;i++){
+          var parts=keys[i].split(',');
           var la=parseInt(parts[0],10), lo=parseInt(parts[1],10);
-          if(isFinite(la)&&isFinite(lo)) pts.push([la/1e5, lo/1e5]);
+          if(isFinite(la)&&isFinite(lo)) pts.push([la/1e5, lo/1e5, cnt?(cnt[keys[i]]||1):1]);
         }
         _covServerN=d.coverage_n;
         if(typeof S!=='undefined'){ S.yardCoverage=pts; if(typeof save==='function') save(); }
@@ -6664,18 +6668,28 @@ setInterval(loadAlerts, 5*60*1000);
     }
     _reflectMapMode(usedSatellite);
 
-    // 1) Cumulative coverage — every mow ever recorded, in mown-grass green
+    // 1) Cumulative coverage, shaded by CONFIDENCE (how many separate readings hit
+    //    that cell). This is what actually makes the map improve with every mow:
+    //    GPS error is random, so real grass gets hit again and again and darkens to
+    //    solid, while a one-off drift stray stays faint and never firms up. A plain
+    //    union would instead just accumulate every stray forever and bloat outward.
     if(coverage.length>0){
-      ctx.fillStyle='rgba(80,200,90,0.5)';
       var dotR=Math.max(1.6,Math.min(5,photo.w/220));
+      var confirmed=0;
       for(var i=0;i<coverage.length;i++){
         var cp=coverage[i];
         if(!cp||typeof cp[0]!=='number') continue;
         var p=project(cp[0],cp[1]);
         if(!isFinite(p.x)||!isFinite(p.y)) continue;
         if(p.x<-40||p.x>w+40||p.y<-40||p.y>h+40) continue;
+        var visits=(typeof cp[2]==='number'&&cp[2]>0)?cp[2]:1;
+        if(visits>=COVERAGE_CONFIDENT) confirmed++;
+        // 1 visit ≈ faint, 3+ ≈ solid.
+        var alpha=0.18+0.62*Math.min(1,(visits-1)/(COVERAGE_CONFIDENT-1));
+        ctx.fillStyle='rgba(80,200,90,'+alpha.toFixed(3)+')';
         ctx.beginPath(); ctx.arc(p.x,p.y,dotR,0,Math.PI*2); ctx.fill();
       }
+      window._coverConfirmed=confirmed;
     }
 
     // 2) Latest mow on top, in Toro red, with the current position in blue
@@ -6742,9 +6756,11 @@ setInterval(loadAlerts, 5*60*1000);
       // Each coverage cell is ~1 m of grid (5 decimal places at this latitude), so
       // cell count is a rough ground-covered figure, not a surveyed measurement.
       var areaM2=coverage.length;
+      var conf=(typeof window._coverConfirmed==='number')?window._coverConfirmed:0;
       stats.textContent = coverage.length>0
-        ? (coverage.length.toLocaleString()+' cells mapped from '+mows+' mow'+(mows===1?'':'s')
-           +' · roughly '+(areaM2>=4047?(areaM2/4046.86).toFixed(2)+' acres':Math.round(areaM2)+' m²')+' of ground covered')
+        ? (coverage.length.toLocaleString()+' cells from '+mows+' mow'+(mows===1?'':'s')
+           +' · '+conf.toLocaleString()+' confirmed ('+COVERAGE_CONFIDENT+'+ passes)'
+           +' · roughly '+(areaM2>=4047?(areaM2/4046.86).toFixed(2)+' acres':Math.round(areaM2)+' m²'))
         : '';
     }
     _refreshCoverBadge();
