@@ -3681,9 +3681,36 @@ if(!Array.isArray(S.sensorTrack)) S.sensorTrack=[];
 // Cumulative yard coverage — every mow's GPS breadcrumbs merged into one permanent,
 // ~1m-grid-deduplicated map of ground actually covered, so the yard map fills in and
 // gets more complete over time instead of each mow wiping out the last one.
-if(!Array.isArray(S.yardCoverage)) S.yardCoverage=[];
-if(typeof S.yardCoverageMows!=='number') S.yardCoverageMows=0;
-if(typeof S.coverageLastTrackStart!=='string') S.coverageLastTrackStart='';
+// Coverage is NOT stored here. It lives on the server (authoritative, shared by
+// every device) and is held in memory client-side. Keeping it in this blob was a
+// real bug: the map can run to tens of thousands of cells, and stuffing that into
+// the same localStorage entry as the hour meter, service log and maintenance
+// history pushed the whole thing past the storage quota — so saves silently
+// failed and the state reset to defaults, taking Jeff's real hours with it.
+// Strip it from any already-bloated saved state to reclaim that space.
+if(S && (S['yardCoverage']!==undefined||S['yardCoverageMows']!==undefined||S['coverageLastTrackStart']!==undefined)){
+  try{ delete S['yardCoverage']; delete S['yardCoverageMows']; delete S['coverageLastTrackStart'];
+       localStorage.setItem('toro21200',JSON.stringify(S)); }catch(e){}
+}
+// If the main state was lost or reset, recover the hour meter from the small
+// mirror key rather than silently falling back to the 5.9 factory default.
+try {
+  var _core = JSON.parse(localStorage.getItem('toro21200_core') || 'null');
+  if (_core && typeof _core.hours === 'number' && _core.hours > (S.hours || 0)) {
+    S.hours = _core.hours;
+    if (typeof _core.hoursBaseline === 'number') S.hoursBaseline = _core.hoursBaseline;
+    if (typeof _core.lastSensorHours === 'number') S.lastSensorHours = _core.lastSensorHours;
+  }
+} catch (e) {}
+// Write the mirror immediately on load, not only on the next save — otherwise a
+// device that never happens to save is unprotected the whole time.
+try {
+  localStorage.setItem('toro21200_core', JSON.stringify({
+    hours: S.hours, hoursBaseline: S.hoursBaseline, lastSensorHours: S.lastSensorHours,
+    savedAt: new Date().toISOString()
+  }));
+} catch (e) {}
+
 // Master hour calibration: hoursBaseline is added to the sensor's cumulative runtime.
 // It's re-synced whenever Jeff sets the true hours (from the mower's physical meter),
 // so the total stays correct even if the sensor ever misses a mow. lastSensorHours =
@@ -3701,11 +3728,23 @@ function openExternal(url){
 // backfill ids on any pre-existing log entries
 if(S.log) S.log.forEach(function(x){ if(!x.id) x.id=uid(); });
 function save(){
-  try { localStorage.setItem('toro21200', JSON.stringify(S)); return true; }
+  var ok=true;
+  try { localStorage.setItem('toro21200', JSON.stringify(S)); }
   catch(e){
+    ok=false;
     if(typeof toast==='function'){ toast('\u26A0 Storage full \u2014 export a backup &amp; delete some photos'); }
-    return false;
   }
+  // Mirror the few numbers that must never be lost into their own tiny key.
+  // The main blob is big (log, services, photos) and a quota failure there used
+  // to take the hour meter down with it, silently resetting to the 5.9 default.
+  // This key is a few dozen bytes, so it survives when the big one can't.
+  try {
+    localStorage.setItem('toro21200_core', JSON.stringify({
+      hours: S.hours, hoursBaseline: S.hoursBaseline, lastSensorHours: S.lastSensorHours,
+      savedAt: new Date().toISOString()
+    }));
+  } catch(e){}
+  return ok;
 }
 function safeSetItem(key,val){
   try { localStorage.setItem(key,val); return true; }
@@ -6166,6 +6205,8 @@ setInterval(loadAlerts, 5*60*1000);
   // factor. The track then sprayed across the road and house at 10-100x true size.
   // That is exactly the failure Jeff hit. Replaced by an auto-fit that derives scale
   // from the FULL extent of the data (can never blow up), plus manual rotate/zoom/pan.
+  // In-memory only — deliberately never written into the persisted `S` blob.
+  var _coverageCells=[], _coverageMows=0, _coverageLastStart='';
   var _mapView={rot:0, zoom:1, panX:0, panY:0};
   (function(){
     try{
@@ -6473,11 +6514,10 @@ setInterval(loadAlerts, 5*60*1000);
 
   function mergeYardCoverage(track){
     if(!Array.isArray(track)||track.length<2) return 0;
-    if(typeof S==='undefined') return 0;
-    if(!Array.isArray(S.yardCoverage)) S.yardCoverage=[];
+    if(!Array.isArray(_coverageCells)) _coverageCells=[];
     var seen={}, i;
-    for(i=0;i<S.yardCoverage.length;i++){
-      var e=S.yardCoverage[i];
+    for(i=0;i<_coverageCells.length;i++){
+      var e=_coverageCells[i];
       if(Array.isArray(e)&&typeof e[0]==='number') seen[_covKey(e[0],e[1])]=1;
     }
     var added=0;
@@ -6485,7 +6525,7 @@ setInterval(loadAlerts, 5*60*1000);
       var k=_covKey(la,lo);
       if(seen[k]) return;
       seen[k]=1;
-      S.yardCoverage.push([+la.toFixed(5),+lo.toFixed(5)]);
+      _coverageCells.push([+la.toFixed(5),+lo.toFixed(5)]);
       added++;
     }
     for(i=0;i<track.length;i++){
@@ -6510,13 +6550,13 @@ setInterval(loadAlerts, 5*60*1000);
         }
       }
     }
-    if(S.yardCoverage.length>COVERAGE_MAX) S.yardCoverage=S.yardCoverage.slice(-COVERAGE_MAX);
+    if(_coverageCells.length>COVERAGE_MAX) _coverageCells=_coverageCells.slice(-COVERAGE_MAX);
     // Count DISTINCT mows, not merges. mowerSync re-merges the same growing track
     // every 60s while a mow is underway, so counting merges would inflate the total.
     // A new mow is detected by its track starting at a different point than the last.
     var sig=(typeof track[0][0]==='number')?_covKey(track[0][0],track[0][1]):null;
-    var newMow=(sig && S.coverageLastTrackStart!==sig);
-    if(newMow){ S.coverageLastTrackStart=sig; S.yardCoverageMows=(S.yardCoverageMows||0)+1; }
+    var newMow=(sig && _coverageLastStart!==sig);
+    if(newMow){ _coverageLastStart=sig; _coverageMows=(_coverageMows||0)+1; }
     if(added>0 || newMow){ if(typeof save==='function') save(); }
     return added;
   }
@@ -6524,7 +6564,7 @@ setInterval(loadAlerts, 5*60*1000);
   function clearYardCoverage(){
     if(typeof S==='undefined') return;
     if(!confirm('Clear this device\'s copy of the coverage map?\n\nThe permanent map on the server is NOT deleted — it will re-download on the next sync. This just clears the local cache.')) return;
-    S.yardCoverage=[]; S.yardCoverageMows=0; S.coverageLastTrackStart='';
+    _coverageCells=[]; _coverageMows=0; _coverageLastStart='';
     _covServerN=-1;                       // force a fresh pull on next sync
     if(typeof save==='function') save();
     drawYardMap(window._lastTrack||[]);
@@ -6553,7 +6593,7 @@ setInterval(loadAlerts, 5*60*1000);
           if(isFinite(la)&&isFinite(lo)) pts.push([la/1e5, lo/1e5, cnt?(cnt[keys[i]]||1):1]);
         }
         _covServerN=d.coverage_n;
-        if(typeof S!=='undefined'){ S.yardCoverage=pts; if(typeof save==='function') save(); }
+        _coverageCells=pts;   // in-memory only — never persisted, so no save() here
         if(typeof d.paused==='boolean') _reflectPauseState(d.paused, d.paused_since);
         drawYardMap(window._lastTrack||[]);
       })
@@ -6609,7 +6649,7 @@ setInterval(loadAlerts, 5*60*1000);
   // latest mow track (Toro red) on top, then the current position (blue).
   function _refreshCoverBadge(){
     var badge=document.getElementById('mapCoverBadge');
-    var n=(typeof S!=='undefined'&&Array.isArray(S.yardCoverage))?S.yardCoverage.length:0;
+    var n=Array.isArray(_coverageCells)?_coverageCells.length:0;
     if(badge) badge.style.display=n>0?'':'none';
   }
 
@@ -6623,7 +6663,7 @@ setInterval(loadAlerts, 5*60*1000);
     c.width=w; c.height=h;
     ctx.clearRect(0,0,w,h);
 
-    var coverage=(typeof S!=='undefined'&&Array.isArray(S.yardCoverage))?S.yardCoverage:[];
+    var coverage=Array.isArray(_coverageCells)?_coverageCells:[];
     var hasTrack=Array.isArray(track)&&track.length>=2;
     // Frame off the UNION of the all-time coverage and the current track. Using
     // coverage alone was a real bug: server-side coverage only started accumulating
@@ -6769,7 +6809,7 @@ setInterval(loadAlerts, 5*60*1000);
       // record) and falls back to the local counter only if that hasn't loaded yet.
       var mows=(typeof window._serverMowCount==='number' && window._serverMowCount>0)
         ? window._serverMowCount
-        : ((typeof S!=='undefined'&&S.yardCoverageMows)?S.yardCoverageMows:0);
+        : ((typeof S!=='undefined'&&_coverageMows)?_coverageMows:0);
       // Each coverage cell is ~1 m of grid (5 decimal places at this latitude), so
       // cell count is a rough ground-covered figure, not a surveyed measurement.
       var areaM2=coverage.length;
@@ -6789,6 +6829,7 @@ setInterval(loadAlerts, 5*60*1000);
   window.mergeYardCoverage=mergeYardCoverage;
   window._buildMapFit=_buildMapFit;   // exposed for geometry tests / debugging
   window._mapViewState=function(){ return _mapView; };
+  window._coverageState=function(){ return {cells:_coverageCells, mows:_coverageMows}; };
   window.syncYardCoverage=syncYardCoverage;
   window.toggleTracking=toggleTracking;
   window._reflectPauseState=_reflectPauseState;
@@ -6813,8 +6854,8 @@ setInterval(loadAlerts, 5*60*1000);
     // tapped Simulate. Falls back to the real White House, TN coordinates.
     var cLat=36.47660, cLon=-86.66010;
     try{
-      var src=(typeof S!=='undefined'&&Array.isArray(S.yardCoverage)&&S.yardCoverage.length>0)
-        ? S.yardCoverage : (Array.isArray(window._lastTrack)?window._lastTrack:null);
+      var src=(typeof S!=='undefined'&&Array.isArray(_coverageCells)&&_coverageCells.length>0)
+        ? _coverageCells : (Array.isArray(window._lastTrack)?window._lastTrack:null);
       if(src&&src.length>0){
         var sLa=0,sLo=0,n=0;
         for(var i=0;i<src.length;i++){
