@@ -1171,6 +1171,11 @@ html.light .car-tabs{background:#fff}
 .btn-red{background:linear-gradient(135deg,#c01010,#780000);color:#fff;box-shadow:0 2px 12px rgba(180,0,0,.28)}
 .btn-green{background:linear-gradient(135deg,#166534,#14532d);color:#fff}
 .btn-gray{background:rgba(255,255,255,.07);color:var(--muted);border:1px solid var(--border)}
+/* Yard-map alignment pad — compact tap targets, still >=36px tall for real fingers */
+.mapadj-btn{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text);
+  border-radius:7px;padding:9px 4px;font-size:13px;font-weight:600;min-height:38px;cursor:pointer;
+  font-family:var(--font);line-height:1}
+.mapadj-btn:active{background:rgba(212,175,55,.18);border-color:var(--gold)}
 .hcc-arm-btn{flex:1;padding:10px;border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:800;letter-spacing:.8px;font-family:inherit}
 .hdr-btns{display:flex;gap:8px;margin-top:8px}
 .hdr-btn{flex:1;min-width:0;padding:10px 8px;border-radius:10px;font-size:11px;font-weight:800;letter-spacing:.5px;border:none;text-align:center;font-family:inherit}
@@ -2617,26 +2622,31 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <div id="countdownList"></div>
   </div>
   <div class="card cat-gps">
-    <div class="card-title">&#128506; Yard Map &bull; GPS Mowing Track <span id="mapCalibBadge" style="display:none;font-size:10px;font-weight:600;color:#d4af37;margin-left:6px">&#128205; Calibrated</span></div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5">Real aerial photo of your property. Your mow path draws in Toro red automatically. To line it up with the photo, tap <strong style="color:#d4af37">Pin Track to Photo</strong> &mdash; then just tap where you <em>started</em> and where you <em>ended</em>. No coordinates to type.</div>
+    <div class="card-title">&#128506; Yard Map &bull; Cumulative Coverage <span id="mapCoverBadge" style="display:none;font-size:10px;font-weight:600;color:#7ee787;margin-left:6px">&#127807; Building</span></div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5">Every mow adds to a permanent map of your yard &mdash; <strong style="color:#7ee787">green</strong> is ground you've covered over time, <strong style="color:#ff6262">red</strong> is your latest mow. The more you mow, the more complete it gets. Use the controls below to line it up with the photo once; it stays put after that.</div>
     <div style="position:relative">
-      <canvas id="yardMap" style="width:100%;height:320px;display:block;border-radius:8px;cursor:default" onclick="onMapClick(event)" ontouchstart="onMapClick(event)"></canvas>
-      <div id="calibDot" style="display:none;position:absolute;width:16px;height:16px;border-radius:50%;background:#ffd700;border:2px solid #fff;transform:translate(-50%,-50%);pointer-events:none;box-shadow:0 0 10px rgba(255,215,0,.9)"></div>
+      <canvas id="yardMap" style="width:100%;height:320px;display:block;border-radius:8px"></canvas>
     </div>
     <div id="yardMapMsg" style="font-size:10px;color:#666;text-align:center;margin-top:6px">No GPS track yet &mdash; it&rsquo;ll appear after your first mow with the sensor installed.</div>
-    <div id="mapCalibPanel" style="display:none;background:rgba(15,25,15,.96);border:1px solid #3a5a3a;border-radius:8px;padding:13px;margin-top:10px">
-      <div style="color:#d4af37;font-weight:700;font-size:13px;margin-bottom:6px">&#128205; Pin Track to Photo</div>
-      <div id="calibStatus" style="color:#9ab9ab;font-size:12px;margin-bottom:10px;line-height:1.6">On the photo above, tap where you <b>started</b> mowing.</div>
-      <div style="display:flex;gap:8px">
-        <button onclick="startMapCalib()" style="flex:1;background:#1a1a08;border:1px solid #d4af37;color:#d4af37;padding:9px;border-radius:7px;font-size:13px;font-weight:600">&#8635; Start over</button>
-        <button onclick="cancelMapCalib()" style="background:#2a1212;border:1px solid #6a3030;color:#ff6262;padding:9px 13px;border-radius:7px;font-size:13px">Cancel</button>
+    <div id="yardCoverStats" style="font-size:10px;color:var(--muted);text-align:center;margin-top:4px"></div>
+    <div style="margin-top:10px;background:rgba(15,25,15,.55);border:1px solid var(--border);border-radius:8px;padding:9px">
+      <div style="font-size:10px;color:var(--muted);letter-spacing:1px;font-weight:700;margin-bottom:7px;text-align:center">ALIGN MAP TO PHOTO</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+        <button class="mapadj-btn" onclick="mapAdjust('rot',-5)" title="Rotate left">&#8634;</button>
+        <button class="mapadj-btn" onclick="mapAdjust('rot',5)" title="Rotate right">&#8635;</button>
+        <button class="mapadj-btn" onclick="mapAdjust('zoom',1.1)" title="Bigger">&#10133;</button>
+        <button class="mapadj-btn" onclick="mapAdjust('zoom',0.9091)" title="Smaller">&#10134;</button>
+        <button class="mapadj-btn" onclick="mapAdjust('panX',-0.03)" title="Move left">&#11013;&#65039;</button>
+        <button class="mapadj-btn" onclick="mapAdjust('panX',0.03)" title="Move right">&#10145;&#65039;</button>
+        <button class="mapadj-btn" onclick="mapAdjust('panY',-0.03)" title="Move up">&#11014;&#65039;</button>
+        <button class="mapadj-btn" onclick="mapAdjust('panY',0.03)" title="Move down">&#11015;&#65039;</button>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:6px">
+        <button class="mapadj-btn" style="flex:1" onclick="mapAdjustReset()">&#8635; Reset alignment</button>
+        <button class="mapadj-btn" style="flex:1" onclick="runGpsSim()" id="simBtn">&#9654; Simulate</button>
       </div>
     </div>
-    <div id="calibBtnRow" style="margin-top:10px;display:flex;gap:8px">
-      <button onclick="startMapCalib()" style="flex:1;background:#1a1a08;border:1px solid #d4af37;color:#d4af37;padding:9px;border-radius:7px;font-size:12px;font-weight:600">&#128205; Pin Track to Photo</button>
-      <button onclick="runGpsSim()" id="simBtn" style="flex:1;background:#2a1212;border:1px solid #ff6262;color:#ff6262;padding:9px;border-radius:7px;font-size:12px;font-weight:600">&#9654; Simulate</button>
-      <button onclick="clearMapCalib()" id="clearCalibBtn" style="display:none;background:#1a1212;border:1px solid #5a2a2a;color:#ff6262;padding:9px 14px;border-radius:7px;font-size:12px">&#10005;</button>
-    </div>
+    <button class="btn-full btn-gray" style="margin-top:8px;font-size:11px" onclick="clearYardCoverage()">&#128465; Clear coverage map &amp; start over</button>
   </div>
   <div class="card cat-activity">
     <div class="card-title">&#128336; Recent Activity</div>
@@ -3659,6 +3669,12 @@ if(typeof S.sensorMiles!=='number') S.sensorMiles=0;
 if(typeof S.sensorSpeedMph!=='number') S.sensorSpeedMph=0;
 if(!S.purchases) S.purchases=[];
 if(!Array.isArray(S.sensorTrack)) S.sensorTrack=[];
+// Cumulative yard coverage — every mow's GPS breadcrumbs merged into one permanent,
+// ~1m-grid-deduplicated map of ground actually covered, so the yard map fills in and
+// gets more complete over time instead of each mow wiping out the last one.
+if(!Array.isArray(S.yardCoverage)) S.yardCoverage=[];
+if(typeof S.yardCoverageMows!=='number') S.yardCoverageMows=0;
+if(typeof S.coverageLastTrackStart!=='string') S.coverageLastTrackStart='';
 // Master hour calibration: hoursBaseline is added to the sensor's cumulative runtime.
 // It's re-synced whenever Jeff sets the true hours (from the mower's physical meter),
 // so the total stays correct even if the sensor ever misses a mow. lastSensorHours =
@@ -6070,6 +6086,10 @@ setInterval(loadAlerts, 5*60*1000);
         // heartbeat post (no track) doesn't wipe the map.
         var freshTrack = Array.isArray(d.track) && d.track.length >= 2 ? d.track : null;
         if(freshTrack && typeof S!=='undefined'){ S.sensorTrack = freshTrack; if(typeof save==='function') save(); }
+        // Merge every real track into the permanent cumulative coverage map BEFORE
+        // drawing, so the yard fills in over time instead of each mow replacing the
+        // last. Dedup by ~1m grid cell means re-merging the same track is a no-op.
+        if(freshTrack && typeof mergeYardCoverage==='function') mergeYardCoverage(freshTrack);
         var trackToShow = freshTrack || (typeof S!=='undefined' && S.sensorTrack.length>=2 ? S.sensorTrack : []);
         if(typeof drawYardMap==='function') drawYardMap(trackToShow);
         if(Array.isArray(d.history) && typeof renderMowSensorHistory==='function') renderMowSensorHistory(d.history);
@@ -6090,16 +6110,36 @@ setInterval(loadAlerts, 5*60*1000);
   })();
 
   // \u2500\u2500 MAP CALIBRATION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-  var _mapCalib=null, _calibMode=false, _calibPending=[], _pendingDot=null, _pinStep=0;
+  // The OLD 2-tap "Pin Track to Photo" calibration is gone — it was structurally
+  // broken, not just fiddly. It derived rotation+scale from ONLY the track's first
+  // and last GPS points, so when a mow ended near where it started (the normal case
+  // — you finish back at the garage) the GPS delta between those two points was
+  // near-zero, and dividing the tapped pixel delta by it produced an enormous scale
+  // factor. The track then sprayed across the road and house at 10-100x true size.
+  // That is exactly the failure Jeff hit. Replaced by an auto-fit that derives scale
+  // from the FULL extent of the data (can never blow up), plus manual rotate/zoom/pan.
+  var _mapView={rot:0, zoom:1, panX:0, panY:0};
   (function(){
-    try{ var s=localStorage.getItem('yard_map_calib'); if(s) _mapCalib=JSON.parse(s); }catch(e){}
+    try{
+      var s=localStorage.getItem('yard_map_view');
+      if(s){ var v=JSON.parse(s); if(v && typeof v.rot==='number') _mapView=v; }
+    }catch(e){}
+    // Purge the old broken calibration so a previously-saved bad pin can't persist.
+    try{ localStorage.removeItem('yard_map_calib'); }catch(e){}
   })();
+  function _saveMapView(){ try{ localStorage.setItem('yard_map_view',JSON.stringify(_mapView)); }catch(e){} }
 
-  function _refreshCalibUI(){
-    var badge=document.getElementById('mapCalibBadge');
-    var clearBtn=document.getElementById('clearCalibBtn');
-    if(badge) badge.style.display=(_mapCalib&&_mapCalib.length>=2)?'':'none';
-    if(clearBtn) clearBtn.style.display=(_mapCalib&&_mapCalib.length>=2)?'':'none';
+  function mapAdjust(key,delta){
+    if(key==='zoom') _mapView.zoom=Math.max(0.15,Math.min(8,_mapView.zoom*delta));
+    else if(key==='rot') _mapView.rot=(_mapView.rot+delta)%360;
+    else _mapView[key]=Math.max(-1.5,Math.min(1.5,(_mapView[key]||0)+delta));
+    _saveMapView();
+    drawYardMap(window._lastTrack||[]);
+  }
+  function mapAdjustReset(){
+    _mapView={rot:0, zoom:1, panX:0, panY:0};
+    _saveMapView();
+    drawYardMap(window._lastTrack||[]);
   }
 
   // 2-point SIMILARITY transform (translation + uniform scale + ROTATION) built from
@@ -6107,153 +6147,190 @@ setInterval(loadAlerts, 5*60*1000);
   // isn't perfectly north-up — the old version mapped lon→x and lat→y independently
   // (north-up only). GPS is projected to a local flat plane first (lon×cos(lat), −lat)
   // so small-yard distances are ~linear.
-  function gpsToXY(lat,lon,w,h){
-    if(!_mapCalib||_mapCalib.length<2) return null;
-    var p1=_mapCalib[0],p2=_mapCalib[1];
-    var cosL=Math.cos((p1.lat||0)*Math.PI/180)||1;
-    function loc(la,lo){ return {x:lo*cosL, y:-la}; }
-    var L1=loc(p1.lat,p1.lon), L2=loc(p2.lat,p2.lon);
-    var dx=L2.x-L1.x, dy=L2.y-L1.y;
-    var denom=dx*dx+dy*dy;
-    if(denom<1e-16) return null;                    // start≈end → can't scale
-    var dfx=p2.fx-p1.fx, dfy=p2.fy-p1.fy;
-    var a=(dx*dfx+dy*dfy)/denom;                     // (dfx+i·dfy)/(dx+i·dy) = a+i·b
-    var b=(dx*dfy-dy*dfx)/denom;
-    var L=loc(lat,lon), ux=L.x-L1.x, uy=L.y-L1.y;
-    var nx=p1.fx + a*ux - b*uy;
-    var ny=p1.fy + b*ux + a*uy;
-    return {x:nx*w, y:ny*h};
+  // GPS -> flat local metres relative to a reference point. Small-yard distances are
+  // effectively linear at this scale, so no real projection maths is needed.
+  function _gpsToMetres(lat,lon,refLat,refLon){
+    var cosL=Math.cos(refLat*Math.PI/180)||1;
+    return { x:(lon-refLon)*111320*cosL, y:-(lat-refLat)*111320 };  // +y = south
   }
 
-  // \u2500\u2500 PIN TRACK TO PHOTO \u2014 two taps, zero coordinate typing \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-  // The app already knows the GPS of the track's first & last points, so the user
-  // just taps where the path STARTED and ENDED on the aerial. Those two pixel\u2194GPS
-  // pairs feed gpsToXY's similarity transform. No lat/lon entry = no "invalid
-  // coordinates" ever again.
-  function _calibSay(txt, color){
-    var el=document.getElementById('calibStatus'); if(!el) return;
-    el.style.color=color||'#9ab9ab'; el.innerHTML=txt;
-  }
-  function startMapCalib(){
-    var track=window._lastTrack;
-    _calibMode=true; _calibPending=[]; _pinStep=0; _pendingDot=null;
-    var panel=document.getElementById('mapCalibPanel');
-    var btnRow=document.getElementById('calibBtnRow');
-    if(panel) panel.style.display='';
-    if(btnRow) btnRow.style.display='none';
-    if(!track||track.length<2){
-      _calibMode=false;
-      if(panel) panel.style.display='';
-      _calibSay('No GPS track yet. Mow with the sensor running (or tap &#9654; Simulate) to lay down a path first &mdash; then pin it to the photo.', '#ffb454');
-      return;
+  // Build a stable GPS->pixel transform by fitting the FULL extent of the supplied
+  // points into the photo rect. Scale comes from the data's own span, so it is
+  // mathematically impossible for it to explode the way the old 2-point pin did.
+  // Rotation/zoom/pan are the user's manual alignment on top of that fit.
+  function _buildMapFit(points, photoRect){
+    if(!points || points.length===0) return null;
+    var refLat=points[0][0], refLon=points[0][1];
+    var th=_mapView.rot*Math.PI/180, cs=Math.cos(th), sn=Math.sin(th);
+    var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+    for(var i=0;i<points.length;i++){
+      var la=points[i][0], lo=points[i][1];
+      if(typeof la!=='number'||typeof lo!=='number') continue;
+      var m=_gpsToMetres(la,lo,refLat,refLon);
+      var rx=m.x*cs-m.y*sn, ry=m.x*sn+m.y*cs;
+      if(rx<minX)minX=rx; if(rx>maxX)maxX=rx;
+      if(ry<minY)minY=ry; if(ry>maxY)maxY=ry;
     }
-    var c=document.getElementById('yardMap'); if(c) c.style.cursor='crosshair';
-    _calibSay('On the photo, tap where you <b>STARTED</b> mowing (the start of the red path).');
-    drawYardMap(track);
+    if(!isFinite(minX)||!isFinite(minY)) return null;
+    var spanX=(maxX-minX)||1, spanY=(maxY-minY)||1;
+    var pad=Math.min(photoRect.w,photoRect.h)*0.07;
+    var scale=Math.min((photoRect.w-2*pad)/spanX,(photoRect.h-2*pad)/spanY)*_mapView.zoom;
+    if(!isFinite(scale)||scale<=0) return null;
+    var cx=(minX+maxX)/2, cy=(minY+maxY)/2;
+    var ox=photoRect.x+photoRect.w/2+(_mapView.panX||0)*photoRect.w;
+    var oy=photoRect.y+photoRect.h/2+(_mapView.panY||0)*photoRect.h;
+    return function(lat,lon){
+      var mm=_gpsToMetres(lat,lon,refLat,refLon);
+      var qx=mm.x*cs-mm.y*sn, qy=mm.x*sn+mm.y*cs;
+      return { x:ox+(qx-cx)*scale, y:oy+(qy-cy)*scale };
+    };
   }
 
-  function cancelMapCalib(){
-    _calibMode=false; _pendingDot=null; _calibPending=[]; _pinStep=0;
-    var panel=document.getElementById('mapCalibPanel');
-    var btnRow=document.getElementById('calibBtnRow');
-    var dot=document.getElementById('calibDot');
-    if(panel) panel.style.display='none';
-    if(btnRow) btnRow.style.display='flex';
-    if(dot) dot.style.display='none';
-    var c=document.getElementById('yardMap'); if(c) c.style.cursor='default';
-    drawYardMap(window._lastTrack||[]);
-  }
+  // ---- CUMULATIVE YARD COVERAGE ----------------------------------------------
+  // Each mow's breadcrumb trail is merged into a permanent, deduplicated coverage
+  // set instead of replacing the previous one, so the yard map genuinely fills in
+  // and gets more complete with every mow. Points are snapped to a ~1 m grid (5
+  // decimal places) so repeat passes over the same ground collapse to one cell,
+  // which naturally bounds the total size to the actual area of the yard.
+  var COVERAGE_MAX=20000;
+  function _covKey(la,lo){ return la.toFixed(5)+','+lo.toFixed(5); }
 
-  function onMapClick(e){
-    if(!_calibMode) return;
-    if(e&&e.preventDefault) e.preventDefault();
-    var c=document.getElementById('yardMap'); if(!c) return;
-    var track=window._lastTrack; if(!track||track.length<2){ cancelMapCalib(); return; }
-    var rect=c.getBoundingClientRect();
-    var src=(e.touches&&e.touches[0])?e.touches[0]:e;
-    var fx=(src.clientX-rect.left)/rect.width, fy=(src.clientY-rect.top)/rect.height;
-    if(fx<0||fx>1||fy<0||fy>1) return;
-    var ep = _pinStep===0 ? track[0] : track[track.length-1];
-    var lat=(ep&&ep.lat!=null)?ep.lat:ep[0];
-    var lon=(ep&&ep.lon!=null)?ep.lon:ep[1];
-    _calibPending.push({fx:fx, fy:fy, lat:lat, lon:lon});
-    _pinStep++;
-    if(_pinStep<2){
-      _calibSay('Start pinned &#10003; &mdash; now tap where you <b>ENDED</b> (the blue dot at the end of the path).');
-      drawYardMap(track);
-    } else {
-      _mapCalib=_calibPending.slice();
-      try{ localStorage.setItem('yard_map_calib',JSON.stringify(_mapCalib)); }catch(err){}
-      _calibMode=false;
-      var panel=document.getElementById('mapCalibPanel'); if(panel) panel.style.display='none';
-      var btnRow=document.getElementById('calibBtnRow'); if(btnRow) btnRow.style.display='flex';
-      c.style.cursor='default';
-      _refreshCalibUI();
-      drawYardMap(track);
-      var msg=document.getElementById('yardMapMsg');
-      if(msg) msg.innerHTML='&#10003; Track pinned to the photo. Tap &#10005; to redo it.';
+  function mergeYardCoverage(track){
+    if(!Array.isArray(track)||track.length<2) return 0;
+    if(typeof S==='undefined') return 0;
+    if(!Array.isArray(S.yardCoverage)) S.yardCoverage=[];
+    var seen={}, i;
+    for(i=0;i<S.yardCoverage.length;i++){
+      var e=S.yardCoverage[i];
+      if(Array.isArray(e)&&typeof e[0]==='number') seen[_covKey(e[0],e[1])]=1;
     }
+    var added=0;
+    function addPt(la,lo){
+      var k=_covKey(la,lo);
+      if(seen[k]) return;
+      seen[k]=1;
+      S.yardCoverage.push([+la.toFixed(5),+lo.toFixed(5)]);
+      added++;
+    }
+    for(i=0;i<track.length;i++){
+      var la=track[i][0], lo=track[i][1];
+      if(typeof la!=='number'||typeof lo!=='number') continue;
+      addPt(la,lo);
+      // Fill in along each segment so coverage reflects the ground actually mown,
+      // not just the sparse 90-second breadcrumbs. A segment longer than ~40 m is
+      // treated as a GPS jump/dropout and NOT filled, so a glitch can't paint a
+      // fake stripe across the yard.
+      if(i>0){
+        var pla=track[i-1][0], plo=track[i-1][1];
+        if(typeof pla!=='number'||typeof plo!=='number') continue;
+        var m=_gpsToMetres(la,lo,pla,plo);
+        var dist=Math.sqrt(m.x*m.x+m.y*m.y);
+        if(dist>1 && dist<=40){
+          var steps=Math.min(60,Math.ceil(dist));
+          for(var s=1;s<steps;s++){
+            var t=s/steps;
+            addPt(pla+(la-pla)*t, plo+(lo-plo)*t);
+          }
+        }
+      }
+    }
+    if(S.yardCoverage.length>COVERAGE_MAX) S.yardCoverage=S.yardCoverage.slice(-COVERAGE_MAX);
+    // Count DISTINCT mows, not merges. mowerSync re-merges the same growing track
+    // every 60s while a mow is underway, so counting merges would inflate the total.
+    // A new mow is detected by its track starting at a different point than the last.
+    var sig=(typeof track[0][0]==='number')?_covKey(track[0][0],track[0][1]):null;
+    var newMow=(sig && S.coverageLastTrackStart!==sig);
+    if(newMow){ S.coverageLastTrackStart=sig; S.yardCoverageMows=(S.yardCoverageMows||0)+1; }
+    if(added>0 || newMow){ if(typeof save==='function') save(); }
+    return added;
   }
 
-  function clearMapCalib(){
-    _mapCalib=null;
-    localStorage.removeItem('yard_map_calib');
-    _refreshCalibUI();
+  function clearYardCoverage(){
+    if(typeof S==='undefined') return;
+    if(!confirm('Clear the whole cumulative coverage map and start building it again from your next mow?')) return;
+    S.yardCoverage=[]; S.yardCoverageMows=0; S.coverageSeenTracks=[];
+    if(typeof save==='function') save();
     drawYardMap(window._lastTrack||[]);
+    if(typeof toast==='function') toast('✓ Coverage map cleared');
   }
 
-  // \u2500\u2500 DRAW GPS TRACK \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+  // ---- YARD MAP RENDER -------------------------------------------------------
+  // Cumulative coverage (green, built up over every mow) painted first, then the
+  // latest mow track (Toro red) on top, then the current position (blue).
+  function _refreshCoverBadge(){
+    var badge=document.getElementById('mapCoverBadge');
+    var n=(typeof S!=='undefined'&&Array.isArray(S.yardCoverage))?S.yardCoverage.length:0;
+    if(badge) badge.style.display=n>0?'':'none';
+  }
+
   function drawYardMap(track){
     var c=document.getElementById('yardMap'); if(!c) return;
     var msg=document.getElementById('yardMapMsg');
+    var stats=document.getElementById('yardCoverStats');
     var ctx=c.getContext('2d');
     window._lastTrack=track;
     var w=c.clientWidth||300, h=c.clientHeight||320;
     c.width=w; c.height=h;
     ctx.clearRect(0,0,w,h);
 
-    // Draw aerial base image \u2014 fixed, not rotated or stretched
+    // Aerial base, letterboxed. Coverage/track are fitted to the PHOTO rect rather
+    // than the raw canvas so they always land on the yard, never in the letterbox.
+    var photo={x:0,y:0,w:w,h:h};
     if(window._platMapImg){
       var img=window._platMapImg;
       var iw=img.naturalWidth, ih=img.naturalHeight;
-      var sc=Math.min(w/iw, h/ih);
+      var sc=Math.min(w/iw,h/ih);
       var dw=iw*sc, dh=ih*sc, dx=(w-dw)/2, dy=(h-dh)/2;
       ctx.drawImage(img,dx,dy,dw,dh);
       ctx.fillStyle='rgba(0,0,0,0.18)';
       ctx.fillRect(0,0,w,h);
+      photo={x:dx,y:dy,w:dw,h:dh};
     } else {
       ctx.fillStyle='#0c1a0c';
       ctx.fillRect(0,0,w,h);
     }
 
-    // Calibration mode: show tapped points on canvas
-    if(_calibMode){
-      for(var ci=0;ci<_calibPending.length;ci++){
-        var cp=_calibPending[ci];
-        var cpx=cp.fx*w, cpy=cp.fy*h;
-        ctx.shadowColor='#ffd700'; ctx.shadowBlur=10;
-        ctx.fillStyle='#ffd700';
-        ctx.beginPath(); ctx.arc(cpx,cpy,8,0,Math.PI*2); ctx.fill();
-        ctx.shadowBlur=0;
-        ctx.fillStyle='#000'; ctx.font='bold 11px sans-serif';
-        ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillText(ci===0?'S':'E',cpx,cpy);
+    var coverage=(typeof S!=='undefined'&&Array.isArray(S.yardCoverage))?S.yardCoverage:[];
+    var hasTrack=Array.isArray(track)&&track.length>=2;
+
+    // Fit off the cumulative coverage once it exists: as mows accumulate it converges
+    // on the real extent of the yard, so the alignment stops drifting between mows.
+    // Falls back to this mow's own track on day one.
+    var fitPts=coverage.length>0?coverage:(hasTrack?track:null);
+    if(!fitPts||fitPts.length===0){
+      if(msg) msg.textContent='No GPS track yet — it will draw on your first mow with the sensor running.';
+      if(stats) stats.textContent='';
+      _refreshCoverBadge();
+      return;
+    }
+    var project=_buildMapFit(fitPts,photo);
+    if(!project){
+      if(msg) msg.textContent='Not enough GPS spread yet to draw the map.';
+      _refreshCoverBadge();
+      return;
+    }
+
+    // 1) Cumulative coverage — every mow ever recorded, in mown-grass green
+    if(coverage.length>0){
+      ctx.fillStyle='rgba(80,200,90,0.5)';
+      var dotR=Math.max(1.6,Math.min(5,photo.w/220));
+      for(var i=0;i<coverage.length;i++){
+        var cp=coverage[i];
+        if(!cp||typeof cp[0]!=='number') continue;
+        var p=project(cp[0],cp[1]);
+        if(!isFinite(p.x)||!isFinite(p.y)) continue;
+        if(p.x<-40||p.x>w+40||p.y<-40||p.y>h+40) continue;
+        ctx.beginPath(); ctx.arc(p.x,p.y,dotR,0,Math.PI*2); ctx.fill();
       }
-      if(msg) msg.textContent=_calibPending.length===0?'Tap where you STARTED mowing':'Now tap where you ENDED';
-      return;
     }
 
-    if(!track||track.length<2){
-      if(msg) msg.textContent='No GPS track yet \u2014 it\u2019ll draw on your first mow with the sensor running.';
-      return;
-    }
-
-    // Calibrated mode: GPS \u2192 pixel via stored calibration
-    if(_mapCalib&&_mapCalib.length>=2){
+    // 2) Latest mow on top, in Toro red, with the current position in blue
+    if(hasTrack){
       var pts=[];
       for(var j=0;j<track.length;j++){
-        var pt=gpsToXY(track[j][0],track[j][1],w,h);
-        if(pt) pts.push(pt);
+        if(!track[j]||typeof track[j][0]!=='number') continue;
+        var q=project(track[j][0],track[j][1]);
+        if(isFinite(q.x)&&isFinite(q.y)) pts.push(q);
       }
       if(pts.length>=2){
         ctx.shadowColor='#cc0000'; ctx.shadowBlur=5;
@@ -6266,46 +6343,34 @@ setInterval(loadAlerts, 5*60*1000);
         ctx.fillStyle='#4da3ff'; ctx.shadowColor='#4da3ff'; ctx.shadowBlur=8;
         ctx.beginPath(); ctx.arc(last.x,last.y,6,0,Math.PI*2); ctx.fill();
         ctx.shadowBlur=0;
-        if(msg) msg.textContent=track.length+' GPS points \u00b7 red = mow path \u00b7 blue = current position';
-        return;
       }
     }
 
-    // Fallback auto-fit mode (no calibration set)
-    var minLa=track[0][0],maxLa=track[0][0],minLo=track[0][1],maxLo=track[0][1];
-    for(var i=1;i<track.length;i++){
-      var la=track[i][0],lo=track[i][1];
-      if(la<minLa)minLa=la; if(la>maxLa)maxLa=la;
-      if(lo<minLo)minLo=lo; if(lo>maxLo)maxLo=lo;
+    if(msg){
+      msg.textContent = hasTrack
+        ? (track.length+' GPS points this mow · red = latest mow · green = all-time coverage')
+        : (coverage.length+' coverage points mapped · green = ground covered so far');
     }
-    var midLa=(minLa+maxLa)/2, lonScale=Math.cos(midLa*Math.PI/180)||1;
-    var apts=track.map(function(p){ return [(p[1]-minLo)*lonScale,(maxLa-p[0])]; });
-    var ax=apts[0][0],bx=apts[0][0],ay=apts[0][1],by=apts[0][1];
-    for(var jj=1;jj<apts.length;jj++){
-      if(apts[jj][0]<ax)ax=apts[jj][0]; if(apts[jj][0]>bx)bx=apts[jj][0];
-      if(apts[jj][1]<ay)ay=apts[jj][1]; if(apts[jj][1]>by)by=apts[jj][1];
+    if(stats){
+      var mows=(typeof S!=='undefined'&&S.yardCoverageMows)?S.yardCoverageMows:0;
+      // Each coverage cell is ~1 m of grid (5 decimal places at this latitude), so
+      // cell count is a rough ground-covered figure, not a surveyed measurement.
+      var areaM2=coverage.length;
+      stats.textContent = coverage.length>0
+        ? (coverage.length.toLocaleString()+' cells mapped from '+mows+' mow'+(mows===1?'':'s')
+           +' · roughly '+(areaM2>=4047?(areaM2/4046.86).toFixed(2)+' acres':Math.round(areaM2)+' m²')+' of ground covered')
+        : '';
     }
-    var spanX=(bx-ax)||1e-9,spanY=(by-ay)||1e-9,pad=22;
-    var asc=Math.min((w-2*pad)/spanX,(h-2*pad)/spanY);
-    var aox=(w-spanX*asc)/2, aoy=(h-spanY*asc)/2;
-    function sx(q){ return aox+(q[0]-ax)*asc; }
-    function sy(q){ return aoy+(q[1]-ay)*asc; }
-    ctx.shadowColor='#cc0000'; ctx.shadowBlur=4;
-    ctx.lineWidth=2.5; ctx.strokeStyle='#cc0000'; ctx.lineJoin='round'; ctx.lineCap='round';
-    ctx.beginPath();
-    for(var kk=0;kk<apts.length;kk++){ var X=sx(apts[kk]),Y=sy(apts[kk]); if(kk===0)ctx.moveTo(X,Y); else ctx.lineTo(X,Y); }
-    ctx.stroke(); ctx.shadowBlur=0;
-    ctx.fillStyle='#4da3ff'; ctx.shadowColor='#4da3ff'; ctx.shadowBlur=6;
-    ctx.beginPath(); ctx.arc(sx(apts[apts.length-1]),sy(apts[apts.length-1]),6,0,Math.PI*2); ctx.fill();
-    ctx.shadowBlur=0;
-    if(msg) msg.textContent=track.length+' GPS points \u00b7 tap Calibrate Map to anchor track to the aerial photo';
+    _refreshCoverBadge();
   }
   window.drawYardMap=drawYardMap;
-  window.onMapClick=onMapClick;
-  window.startMapCalib=startMapCalib;
-  window.cancelMapCalib=cancelMapCalib;
-  window.clearMapCalib=clearMapCalib;
-  _refreshCalibUI();
+  window.mapAdjust=mapAdjust;
+  window.mapAdjustReset=mapAdjustReset;
+  window.clearYardCoverage=clearYardCoverage;
+  window.mergeYardCoverage=mergeYardCoverage;
+  window._buildMapFit=_buildMapFit;   // exposed for geometry tests / debugging
+  window._mapViewState=function(){ return _mapView; };
+  _refreshCoverBadge();
   window.addEventListener('resize',function(){ if(window._lastTrack) drawYardMap(window._lastTrack); });
 
   // ── GPS SIMULATION ───────────────────────────────────────────────────────
@@ -6505,16 +6570,9 @@ setInterval(loadAlerts, 5*60*1000);
 
   function _getCanvasPts(gpsPts,w,h){
     if(!gpsPts||!gpsPts.length) return [];
-    // If calibrated, use GPS→pixel transform
-    if(_mapCalib&&_mapCalib.length>=2){
-      var out=[];
-      for(var i=0;i<gpsPts.length;i++){
-        var pt=gpsToXY(gpsPts[i].lat||gpsPts[i][0],gpsPts[i].lon||gpsPts[i][1],w,h);
-        if(pt) out.push(pt);
-      }
-      if(out.length>=2) return out;
-    }
-    // Auto-fit fallback
+    // Self-contained auto-fit. (This used to branch through the old 2-point pin
+    // calibration, which was removed — it derived scale from just the track's first
+    // and last GPS points and blew up whenever a mow ended near where it started.)
     var lats=gpsPts.map(function(p){return p.lat||p[0];}),lons=gpsPts.map(function(p){return p.lon||p[1];});
     var minLa=Math.min.apply(null,lats),maxLa=Math.max.apply(null,lats);
     var minLo=Math.min.apply(null,lons),maxLo=Math.max.apply(null,lons);

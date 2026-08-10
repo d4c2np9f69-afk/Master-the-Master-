@@ -47,11 +47,13 @@ function logEntryFrom(body) {
 
 export async function onRequestGet({ env, request }) {
   const kv = getKV(env);
-  const url = new URL(request.url);
 
   // ?log=1 — the full raw reading-by-reading history, fetched on demand only
   // (not part of the normal sync payload, so routine syncs stay small/fast).
-  if (url.searchParams.get('log') === '1') {
+  // Parsed defensively so a malformed/absent request can never 500 the endpoint.
+  let wantsLog = false;
+  try { wantsLog = new URL(request.url).searchParams.get('log') === '1'; } catch (_) {}
+  if (wantsLog) {
     if (kv) {
       try {
         const logRaw = await kv.get(SENSOR_LOG_KEY);
@@ -125,6 +127,12 @@ export async function onRequestPost({ request, env }) {
         rpm_peak: (typeof prev.rpm_peak === 'number') ? prev.rpm_peak : null,
         rpm_avg: (typeof prev.rpm_avg === 'number') ? prev.rpm_avg : null,
         dist_session_m: (typeof prev.dist_session_m === 'number') ? prev.dist_session_m : null,
+        battery: (typeof prev.battery === 'number') ? prev.battery : null,
+        esp_temp_f: (typeof prev.esp_temp_f === 'number') ? prev.esp_temp_f : null,
+        shock_events: (typeof prev.shock_events === 'number') ? prev.shock_events : null,
+        // That mow's own GPS breadcrumb trail, so any individual past mow's path can
+        // be pulled back up later rather than only ever having the most recent one.
+        track: Array.isArray(prev.track) ? prev.track : null,
       });
       await kv.put(MOW_HISTORY_KEY, JSON.stringify(hist.slice(-MOW_HISTORY_MAX)));
     } catch (_) {}
