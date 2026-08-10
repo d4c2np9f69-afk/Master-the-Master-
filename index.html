@@ -2694,6 +2694,18 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     </div>
   </div>
   <div class="card cat-history">
+    <div class="card-title">&#128300; Full Sensor Log &bull; Every Reading</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:9px">Every single reading the sensor box has ever sent &mdash; battery, RPM, GPS, pitch/roll, vibration, shocks, WiFi, temp &mdash; not just mow summaries. Loaded on demand since it can be a lot of data.</div>
+    <button class="btn-full btn-gray" onclick="loadFullSensorLog()" id="sensorLogLoadBtn">&#128300; Load Full Sensor Log</button>
+    <div id="sensorLogStatus" style="font-size:10px;color:var(--muted);margin-top:6px"></div>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:9px" id="sensorLogTableWrap">
+    <table class="hist-table" id="sensorLogTable" style="display:none">
+      <thead><tr><th>Date</th><th>Src</th><th>Hrs</th><th>Batt</th><th>RPM Pk/Avg</th><th>Dist Tot/Sess</th><th>Speed</th><th>Lat,Lon</th><th>Pitch/Roll</th><th>Vibe</th><th>Shocks</th><th>WiFi</th><th>Temp</th></tr></thead>
+      <tbody id="sensorLogBody"></tbody>
+    </table>
+    </div>
+  </div>
+  <div class="card cat-history">
     <div class="card-title">&#128197; Session Log</div>
     <div class="filter-row">
       <button class="fbtn active" onclick="filterLog('ALL',this)">ALL</button>
@@ -4159,6 +4171,60 @@ function renderMowSensorHistory(history){
       +'</tr>';
   });
   tb.innerHTML=rows.join('');
+}
+
+// FULL SENSOR LOG — every single reading (live + heartbeat) the box has ever
+// sent, fetched on demand (?log=1) rather than on every routine sync, since
+// it can grow to thousands of entries. Kept separate from Mow Sensor History
+// (the per-mow summary above) — this is the raw, complete record.
+function loadFullSensorLog(){
+  var btn=document.getElementById('sensorLogLoadBtn');
+  var status=document.getElementById('sensorLogStatus');
+  var table=document.getElementById('sensorLogTable');
+  var tb=document.getElementById('sensorLogBody');
+  if(btn) btn.disabled=true;
+  if(status) status.textContent='Loading…';
+  fetch('/api/hours?log=1', {cache:'no-store'})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var log=Array.isArray(d.log)?d.log:[];
+      if(status) status.textContent=log.length+' readings on record'+(log.length>=5000?' (showing most recent 5,000)':'');
+      if(log.length===0){
+        if(tb) tb.innerHTML='<tr><td colspan="13" style="text-align:center;color:var(--muted)">No readings recorded yet</td></tr>';
+      } else if(tb){
+        tb.innerHTML=log.slice().reverse().map(function(e){
+          var dt=e.date ? new Date(e.date).toLocaleString() : '—';
+          var latlon=(typeof e.lat==='number' && typeof e.lon==='number') ? e.lat.toFixed(4)+','+e.lon.toFixed(4) : '—';
+          var pr=(typeof e.pitch==='number' || typeof e.roll==='number')
+            ? (e.pitch!=null?e.pitch.toFixed(1):'—')+'/'+(e.roll!=null?e.roll.toFixed(1):'—') : '—';
+          var rpm=(typeof e.rpm_peak==='number' || typeof e.rpm_avg==='number')
+            ? (e.rpm_peak!=null?e.rpm_peak:'—')+'/'+(e.rpm_avg!=null?e.rpm_avg:'—') : '—';
+          var distMi=(typeof e.dist_total_m==='number' ? (e.dist_total_m/1609.344).toFixed(1) : '—')
+            +'/'+(typeof e.dist_session_m==='number' ? (e.dist_session_m/1609.344).toFixed(1) : '—');
+          return '<tr>'
+            +'<td class="td-date">'+dt+'</td>'
+            +'<td>'+(e.source||'—')+'</td>'
+            +'<td>'+(typeof e.hours==='number'?e.hours.toFixed(1):'—')+'</td>'
+            +'<td>'+(typeof e.battery==='number'?e.battery.toFixed(2)+'V':'—')+'</td>'
+            +'<td>'+rpm+'</td>'
+            +'<td>'+distMi+'</td>'
+            +'<td>'+(typeof e.speed_mph==='number'?e.speed_mph.toFixed(1):'—')+'</td>'
+            +'<td>'+latlon+'</td>'
+            +'<td>'+pr+'</td>'
+            +'<td>'+(typeof e.vibration==='number'?e.vibration.toFixed(2)+'g':'—')+'</td>'
+            +'<td>'+(typeof e.shock_events==='number'?e.shock_events:'—')+'</td>'
+            +'<td>'+(typeof e.wifi_rssi==='number'?e.wifi_rssi+'dBm':'—')+'</td>'
+            +'<td>'+(typeof e.esp_temp_f==='number'?e.esp_temp_f+'°F':'—')+'</td>'
+            +'</tr>';
+        }).join('');
+      }
+      if(table) table.style.display='';
+      if(btn) btn.disabled=false;
+    })
+    .catch(function(){
+      if(status) status.textContent='Could not load the sensor log — try again';
+      if(btn) btn.disabled=false;
+    });
 }
 
 // CART

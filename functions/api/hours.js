@@ -11,8 +11,56 @@ function getKV(env) {
 const MOW_HISTORY_KEY = 'hours_history';
 const MOW_HISTORY_MAX = 50;
 
-export async function onRequestGet({ env }) {
+// Full raw reading log — every single POST the sensor box ever sends (live or
+// heartbeat), not just mow-end summaries. Capped at 5000 readings: at the
+// box's 90s live-posting interval that's ~250 engine-on hours of history,
+// years of real mowing at Jeff's usage rate, while staying well under
+// Cloudflare KV's 25MB per-value limit (~2-3MB at this cap).
+const SENSOR_LOG_KEY = 'sensor_log';
+const SENSOR_LOG_MAX = 5000;
+
+function logEntryFrom(body) {
+  return {
+    date: new Date().toISOString(),
+    source: body.source || (body.engine_running === false ? 'heartbeat' : 'live'),
+    engine_running: (typeof body.engine_running === 'boolean') ? body.engine_running : null,
+    hours: (typeof body.hours === 'number') ? body.hours : null,
+    battery: (typeof body.battery === 'number') ? body.battery : null,
+    rpm_peak: (typeof body.rpm_peak === 'number') ? body.rpm_peak : null,
+    rpm_avg: (typeof body.rpm_avg === 'number') ? body.rpm_avg : null,
+    dist_total_m: (typeof body.dist_total_m === 'number') ? body.dist_total_m : null,
+    dist_session_m: (typeof body.dist_session_m === 'number') ? body.dist_session_m : null,
+    speed_mph: (typeof body.speed_mph === 'number') ? body.speed_mph : null,
+    lat: (typeof body.lat === 'number') ? body.lat : null,
+    lon: (typeof body.lon === 'number') ? body.lon : null,
+    has_fix: (typeof body.has_fix === 'boolean') ? body.has_fix : null,
+    pitch: (typeof body.pitch === 'number') ? body.pitch : null,
+    roll: (typeof body.roll === 'number') ? body.roll : null,
+    vibration: (typeof body.vibration === 'number') ? body.vibration : null,
+    shock_events: (typeof body.shock_events === 'number') ? body.shock_events : null,
+    wifi_rssi: (typeof body.wifi_rssi === 'number') ? body.wifi_rssi : null,
+    esp_temp_f: (typeof body.esp_temp_f === 'number') ? body.esp_temp_f : null,
+    mpu_ok: (typeof body.mpu_ok === 'number') ? body.mpu_ok : null,
+    gps_rx: (typeof body.gps_rx === 'number') ? body.gps_rx : null,
+  };
+}
+
+export async function onRequestGet({ env, request }) {
   const kv = getKV(env);
+  const url = new URL(request.url);
+
+  // ?log=1 — the full raw reading-by-reading history, fetched on demand only
+  // (not part of the normal sync payload, so routine syncs stay small/fast).
+  if (url.searchParams.get('log') === '1') {
+    if (kv) {
+      try {
+        const logRaw = await kv.get(SENSOR_LOG_KEY);
+        return Response.json({ log: logRaw ? JSON.parse(logRaw) : [] });
+      } catch (_) {}
+    }
+    return Response.json({ log: [] });
+  }
+
   if (kv) {
     try {
       const raw = await kv.get('hours_data');
@@ -79,6 +127,18 @@ export async function onRequestPost({ request, env }) {
         dist_session_m: (typeof prev.dist_session_m === 'number') ? prev.dist_session_m : null,
       });
       await kv.put(MOW_HISTORY_KEY, JSON.stringify(hist.slice(-MOW_HISTORY_MAX)));
+    } catch (_) {}
+  }
+
+  // Log EVERY reading — live or heartbeat — to the full raw history, not just
+  // mow-end summaries. This is the complete record: every field the box
+  // reports, at every point in time it reports it.
+  if (kv) {
+    try {
+      const logRaw = await kv.get(SENSOR_LOG_KEY);
+      const log = logRaw ? JSON.parse(logRaw) : [];
+      log.push(logEntryFrom(body));
+      await kv.put(SENSOR_LOG_KEY, JSON.stringify(log.slice(-SENSOR_LOG_MAX)));
     } catch (_) {}
   }
 
