@@ -30,9 +30,23 @@ export async function onRequestPost({ request, env }) {
     return Response.json({ ok: false, error: 'invalid_json' }, { status: 400 });
   }
 
-  const data = { ...body, lastSync: new Date().toISOString() };
-
   const kv = getKV(env);
+
+  // Heartbeats (engine off) only carry battery/wifi/temp — they don't know the
+  // mow's hours, RPM, distance, or GPS track. Merging onto the last full reading
+  // (instead of overwriting it) means parking the mower to charge doesn't erase
+  // what it just recorded; the heartbeat only refreshes the fields it actually has.
+  const isHeartbeat = body.source === 'heartbeat' || body.engine_running === false;
+  let merged = body;
+  if (isHeartbeat && kv) {
+    try {
+      const prevRaw = await kv.get('hours_data');
+      if (prevRaw) merged = { ...JSON.parse(prevRaw), ...body };
+    } catch (_) {}
+  }
+
+  const data = { ...merged, lastSync: new Date().toISOString() };
+
   if (kv) {
     await kv.put('hours_data', JSON.stringify(data));
   }
