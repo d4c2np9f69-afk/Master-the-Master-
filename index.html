@@ -2684,6 +2684,16 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     </div>
   </div>
   <div class="card cat-history">
+    <div class="card-title">&#128202; Mow Sensor History &bull; Auto-Recorded</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:9px">Every completed mow, saved automatically the moment the engine stops &mdash; compare RPM/distance mow-to-mow to spot if anything's changing.</div>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+    <table class="hist-table">
+      <thead><tr><th>Date</th><th>Hrs This Mow</th><th>Hour Meter</th><th>Peak RPM</th><th>Avg RPM</th><th>Distance</th></tr></thead>
+      <tbody id="mowSensorHistBody"><tr><td colspan="6" style="text-align:center;color:var(--muted)">No mows recorded yet</td></tr></tbody>
+    </table>
+    </div>
+  </div>
+  <div class="card cat-history">
     <div class="card-title">&#128197; Session Log</div>
     <div class="filter-row">
       <button class="fbtn active" onclick="filterLog('ALL',this)">ALL</button>
@@ -4121,6 +4131,34 @@ function renderHistory(){
     var dot=r.logged?'<span style="color:#5b9bd5">&#9679; </span>':'';
     return '<tr><td class="td-date">'+r.date+'</td><td class="td-svc">'+dot+r.title+'</td><td class="td-part">'+r.part+'</td><td class="td-cost">'+r.cost+'</td><td class="td-note">'+r.note+'</td></tr>';
   }).join('');
+}
+
+// MOW SENSOR HISTORY — auto-recorded server-side the moment each mow ends
+// (functions/api/hours.js). "Hrs This Mow" is a delta between consecutive
+// entries' cumulative hour-meter reading, computed here since the server only
+// stores the running total, not a per-mow delta.
+function renderMowSensorHistory(history){
+  var tb=document.getElementById('mowSensorHistBody'); if(!tb) return;
+  if(!Array.isArray(history) || history.length===0){
+    tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted)">No mows recorded yet</td></tr>';
+    return;
+  }
+  var rows=history.slice().reverse().map(function(entry, i){
+    var prevEntry=history[history.length-1-i-1]; // chronologically previous entry
+    var hrsThisMow=(prevEntry && typeof prevEntry.hours_end==='number' && typeof entry.hours_end==='number')
+      ? Math.max(0, Math.round((entry.hours_end-prevEntry.hours_end)*100)/100) : null;
+    var dt=entry.date ? new Date(entry.date).toLocaleDateString() : '—';
+    var distMi=(typeof entry.dist_session_m==='number' && entry.dist_session_m>0) ? (entry.dist_session_m/1609.344).toFixed(2)+' mi' : '—';
+    return '<tr>'
+      +'<td class="td-date">'+dt+'</td>'
+      +'<td>'+(hrsThisMow!=null ? hrsThisMow.toFixed(1)+' hrs' : '—')+'</td>'
+      +'<td>'+(typeof entry.hours_end==='number' ? entry.hours_end.toFixed(1) : '—')+'</td>'
+      +'<td>'+(typeof entry.rpm_peak==='number' ? entry.rpm_peak : '—')+'</td>'
+      +'<td>'+(typeof entry.rpm_avg==='number' ? entry.rpm_avg : '—')+'</td>'
+      +'<td>'+distMi+'</td>'
+      +'</tr>';
+  });
+  tb.innerHTML=rows.join('');
 }
 
 // CART
@@ -5968,6 +6006,7 @@ setInterval(loadAlerts, 5*60*1000);
         if(freshTrack && typeof S!=='undefined'){ S.sensorTrack = freshTrack; if(typeof save==='function') save(); }
         var trackToShow = freshTrack || (typeof S!=='undefined' && S.sensorTrack.length>=2 ? S.sensorTrack : []);
         if(typeof drawYardMap==='function') drawYardMap(trackToShow);
+        if(Array.isArray(d.history) && typeof renderMowSensorHistory==='function') renderMowSensorHistory(d.history);
         if(manual && typeof toast==='function') toast(changed ? '\u2713 Hours updated from sensor' : '\u2713 Sensor read \u2014 no change');
       })
       .catch(function(){
