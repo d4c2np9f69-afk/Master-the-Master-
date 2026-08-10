@@ -2623,7 +2623,8 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
   </div>
   <div class="card cat-gps">
     <div class="card-title">&#128506; Yard Map &bull; Cumulative Coverage <span id="mapCoverBadge" style="display:none;font-size:10px;font-weight:600;color:#7ee787;margin-left:6px">&#127807; Building</span></div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5">Every mow adds to a permanent map of your yard &mdash; <strong style="color:#7ee787">green</strong> is ground you've covered over time, <strong style="color:#ff6262">red</strong> is your latest mow. The more you mow, the more complete it gets. Use the controls below to line it up with the photo once; it stays put after that.</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5">Records <strong>automatically</strong> from the sensor box's first GPS fix to its last &mdash; nothing to start or stop, and the app doesn't need to be open. Every mow adds to a permanent map: <strong style="color:#7ee787">green</strong> is ground covered over time, <strong style="color:#ff6262">red</strong> is your latest mow. Line it up with the photo once using the pad below; it stays put after that.</div>
+    <div id="trackPauseNote" style="display:none;font-size:11px;color:#ffb454;margin-bottom:8px;font-weight:600">&#9208; GPS tracking is paused &mdash; nothing is being added to the map.</div>
     <div style="position:relative">
       <canvas id="yardMap" style="width:100%;height:320px;display:block;border-radius:8px"></canvas>
     </div>
@@ -2646,7 +2647,10 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         <button class="mapadj-btn" style="flex:1" onclick="runGpsSim()" id="simBtn">&#9654; Simulate</button>
       </div>
     </div>
-    <button class="btn-full btn-gray" style="margin-top:8px;font-size:11px" onclick="clearYardCoverage()">&#128465; Clear coverage map &amp; start over</button>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn-full btn-gray" style="flex:1;font-size:11px;margin:0" id="trackPauseBtn" onclick="toggleTracking()">&#9208; Pause GPS tracking</button>
+      <button class="btn-full btn-gray" style="flex:1;font-size:11px;margin:0" onclick="clearYardCoverage()">&#128465; Clear local cache</button>
+    </div>
   </div>
   <div class="card cat-activity">
     <div class="card-title">&#128336; Recent Activity</div>
@@ -6086,13 +6090,18 @@ setInterval(loadAlerts, 5*60*1000);
         // heartbeat post (no track) doesn't wipe the map.
         var freshTrack = Array.isArray(d.track) && d.track.length >= 2 ? d.track : null;
         if(freshTrack && typeof S!=='undefined'){ S.sensorTrack = freshTrack; if(typeof save==='function') save(); }
-        // Merge every real track into the permanent cumulative coverage map BEFORE
-        // drawing, so the yard fills in over time instead of each mow replacing the
-        // last. Dedup by ~1m grid cell means re-merging the same track is a no-op.
-        if(freshTrack && typeof mergeYardCoverage==='function') mergeYardCoverage(freshTrack);
+        // Coverage is accumulated SERVER-SIDE (see functions/api/hours.js) so it
+        // records with no app open and no buttons. Here we only pull it down when
+        // the server's cell count has actually changed, so a routine 60s sync
+        // doesn't re-download the whole map every time.
+        if(typeof d.coverage_n==='number' && typeof syncYardCoverage==='function') syncYardCoverage(d.coverage_n);
+        if(typeof d.tracking_paused==='boolean' && typeof _reflectPauseState==='function') _reflectPauseState(d.tracking_paused);
         var trackToShow = freshTrack || (typeof S!=='undefined' && S.sensorTrack.length>=2 ? S.sensorTrack : []);
         if(typeof drawYardMap==='function') drawYardMap(trackToShow);
-        if(Array.isArray(d.history) && typeof renderMowSensorHistory==='function') renderMowSensorHistory(d.history);
+        if(Array.isArray(d.history)){
+          window._serverMowCount=d.history.length;
+          if(typeof renderMowSensorHistory==='function') renderMowSensorHistory(d.history);
+        }
         if(manual && typeof toast==='function') toast(changed ? '\u2713 Hours updated from sensor' : '\u2713 Sensor read \u2014 no change');
       })
       .catch(function(){
@@ -6247,11 +6256,65 @@ setInterval(loadAlerts, 5*60*1000);
 
   function clearYardCoverage(){
     if(typeof S==='undefined') return;
-    if(!confirm('Clear the whole cumulative coverage map and start building it again from your next mow?')) return;
-    S.yardCoverage=[]; S.yardCoverageMows=0; S.coverageSeenTracks=[];
+    if(!confirm('Clear this device\'s copy of the coverage map?\n\nThe permanent map on the server is NOT deleted — it will re-download on the next sync. This just clears the local cache.')) return;
+    S.yardCoverage=[]; S.yardCoverageMows=0; S.coverageLastTrackStart='';
+    _covServerN=-1;                       // force a fresh pull on next sync
     if(typeof save==='function') save();
     drawYardMap(window._lastTrack||[]);
-    if(typeof toast==='function') toast('✓ Coverage map cleared');
+    if(typeof toast==='function') toast('✓ Local coverage cache cleared');
+  }
+
+  // ---- SERVER COVERAGE SYNC ---------------------------------------------------
+  // The server is the single source of truth for the yard map, so every device
+  // (phone, wall iPad) shows the identical thing and nothing depends on one
+  // browser's localStorage surviving. Only re-download when the count changes.
+  var _covServerN=-1;
+  function syncYardCoverage(serverN){
+    if(serverN===_covServerN) return;
+    fetch('/api/hours?coverage=1',{cache:'no-store'})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(!Array.isArray(d.coverage)) return;
+        // Server stores compact "latE5,lonE5" grid-cell keys; decode to lat/lon.
+        var pts=[];
+        for(var i=0;i<d.coverage.length;i++){
+          var parts=String(d.coverage[i]).split(',');
+          var la=parseInt(parts[0],10), lo=parseInt(parts[1],10);
+          if(isFinite(la)&&isFinite(lo)) pts.push([la/1e5, lo/1e5]);
+        }
+        _covServerN=d.coverage_n;
+        if(typeof S!=='undefined'){ S.yardCoverage=pts; if(typeof save==='function') save(); }
+        if(typeof d.paused==='boolean') _reflectPauseState(d.paused);
+        drawYardMap(window._lastTrack||[]);
+      })
+      .catch(function(){});
+  }
+
+  function _reflectPauseState(paused){
+    window._trackingPaused=!!paused;
+    var b=document.getElementById('trackPauseBtn');
+    if(b){
+      b.textContent = paused ? '▶ Resume GPS tracking' : '⏸ Pause GPS tracking';
+      b.style.color = paused ? '#ffb454' : '';
+    }
+    var n=document.getElementById('trackPauseNote');
+    if(n) n.style.display = paused ? '' : 'none';
+  }
+
+  function toggleTracking(){
+    var next=!window._trackingPaused;
+    var b=document.getElementById('trackPauseBtn'); if(b) b.disabled=true;
+    fetch('/api/hours',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({__cmd:'pause_tracking', value:next})
+    })
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        _reflectPauseState(!!d.paused);
+        if(typeof toast==='function') toast(d.paused?'⏸ GPS tracking paused':'▶ GPS tracking resumed');
+      })
+      .catch(function(){ if(typeof toast==='function') toast('⚠ Could not reach the server'); })
+      .then(function(){ if(b) b.disabled=false; });
   }
 
   // ---- YARD MAP RENDER -------------------------------------------------------
@@ -6352,7 +6415,11 @@ setInterval(loadAlerts, 5*60*1000);
         : (coverage.length+' coverage points mapped · green = ground covered so far');
     }
     if(stats){
-      var mows=(typeof S!=='undefined'&&S.yardCoverageMows)?S.yardCoverageMows:0;
+      // Mow count comes from the server's completed-mow history (the authoritative
+      // record) and falls back to the local counter only if that hasn't loaded yet.
+      var mows=(typeof window._serverMowCount==='number' && window._serverMowCount>0)
+        ? window._serverMowCount
+        : ((typeof S!=='undefined'&&S.yardCoverageMows)?S.yardCoverageMows:0);
       // Each coverage cell is ~1 m of grid (5 decimal places at this latitude), so
       // cell count is a rough ground-covered figure, not a surveyed measurement.
       var areaM2=coverage.length;
@@ -6370,6 +6437,9 @@ setInterval(loadAlerts, 5*60*1000);
   window.mergeYardCoverage=mergeYardCoverage;
   window._buildMapFit=_buildMapFit;   // exposed for geometry tests / debugging
   window._mapViewState=function(){ return _mapView; };
+  window.syncYardCoverage=syncYardCoverage;
+  window.toggleTracking=toggleTracking;
+  window._reflectPauseState=_reflectPauseState;
   _refreshCoverBadge();
   window.addEventListener('resize',function(){ if(window._lastTrack) drawYardMap(window._lastTrack); });
 

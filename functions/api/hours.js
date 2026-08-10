@@ -19,6 +19,78 @@ const MOW_HISTORY_MAX = 50;
 const SENSOR_LOG_KEY = 'sensor_log';
 const SENSOR_LOG_MAX = 5000;
 
+// ---- CUMULATIVE YARD COVERAGE (accumulated SERVER-SIDE, automatically) --------
+// This deliberately lives on the server, not in the phone's localStorage, because
+// the whole point is that it works with NO buttons and NO app open: you can't watch
+// a phone while pushing a mower. The box posts, the server merges — so a mow is
+// recorded even if the app is never opened, and every device (phone, wall iPad)
+// sees the identical map instead of each building its own private one.
+//
+// Points are snapped to a ~1 m grid (1e-5 deg) and deduplicated, so repeat passes
+// over the same ground collapse to one cell and the total size is naturally bounded
+// by the actual area of the yard rather than by how much you mow.
+const COVERAGE_KEY = 'yard_coverage';
+const COVERAGE_PAUSED_KEY = 'coverage_paused';
+const COVERAGE_MAX = 60000;         // ~60,000 m2 ≈ 15 acres — far beyond one yard
+const COVERAGE_SEG_MAX_M = 40;      // longer than this = GPS dropout, don't fill in
+const GRID = 1e5;                   // 1e-5 deg ≈ 1.1 m lat / 0.9 m lon at 36.5N
+
+function metresBetween(la1, lo1, la2, lo2) {
+  const cosL = Math.cos(la1 * Math.PI / 180) || 1;
+  const dx = (lo2 - lo1) * 111320 * cosL;
+  const dy = (la2 - la1) * 111320;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+// Pull every usable GPS point out of a reading: the breadcrumb track if the box
+// sent one, plus its own current lat/lon. Using both means coverage still builds
+// even on firmware/readings that report only a position and no track array.
+function gpsPointsFrom(body) {
+  const pts = [];
+  if (Array.isArray(body.track)) {
+    for (const p of body.track) {
+      if (Array.isArray(p) && typeof p[0] === 'number' && typeof p[1] === 'number') pts.push([p[0], p[1]]);
+      else if (p && typeof p.lat === 'number' && typeof p.lon === 'number') pts.push([p.lat, p.lon]);
+    }
+  }
+  if (typeof body.lat === 'number' && typeof body.lon === 'number' && body.has_fix !== false) {
+    pts.push([body.lat, body.lon]);
+  }
+  return pts;
+}
+
+function mergeCoverage(existing, pts) {
+  const seen = new Set(existing);
+  let added = 0;
+  const push = (la, lo) => {
+    const k = Math.round(la * GRID) + ',' + Math.round(lo * GRID);
+    if (seen.has(k)) return;
+    seen.add(k);
+    added++;
+  };
+  for (let i = 0; i < pts.length; i++) {
+    const [la, lo] = pts[i];
+    push(la, lo);
+    // Fill in along each leg so coverage reflects ground actually mown rather than
+    // sparse 90-second breadcrumbs — but never across a long jump, which is a GPS
+    // dropout, not real travel, and would paint a fake stripe across the yard.
+    if (i > 0) {
+      const [pla, plo] = pts[i - 1];
+      const d = metresBetween(pla, plo, la, lo);
+      if (d > 1 && d <= COVERAGE_SEG_MAX_M) {
+        const steps = Math.min(60, Math.ceil(d));
+        for (let s = 1; s < steps; s++) {
+          const t = s / steps;
+          push(pla + (la - pla) * t, plo + (lo - plo) * t);
+        }
+      }
+    }
+  }
+  let out = Array.from(seen);
+  if (out.length > COVERAGE_MAX) out = out.slice(-COVERAGE_MAX);
+  return { cells: out, added };
+}
+
 function logEntryFrom(body) {
   return {
     date: new Date().toISOString(),
@@ -51,9 +123,11 @@ export async function onRequestGet({ env, request }) {
   // ?log=1 — the full raw reading-by-reading history, fetched on demand only
   // (not part of the normal sync payload, so routine syncs stay small/fast).
   // Parsed defensively so a malformed/absent request can never 500 the endpoint.
-  let wantsLog = false;
-  try { wantsLog = new URL(request.url).searchParams.get('log') === '1'; } catch (_) {}
-  if (wantsLog) {
+  let q = null;
+  try { q = new URL(request.url).searchParams; } catch (_) {}
+  const param = (k) => (q ? q.get(k) : null);
+
+  if (param('log') === '1') {
     if (kv) {
       try {
         const logRaw = await kv.get(SENSOR_LOG_KEY);
@@ -63,17 +137,40 @@ export async function onRequestGet({ env, request }) {
     return Response.json({ log: [] });
   }
 
+  // ?coverage=1 — the cumulative yard map. Sent on demand rather than on every
+  // 60s sync (it's the biggest payload here); the normal response carries only a
+  // `coverage_n` count so the app knows when to re-fetch.
+  if (param('coverage') === '1') {
+    if (kv) {
+      try {
+        const covRaw = await kv.get(COVERAGE_KEY);
+        const cells = covRaw ? JSON.parse(covRaw) : [];
+        const pausedRaw = await kv.get(COVERAGE_PAUSED_KEY);
+        return Response.json({
+          coverage: cells,           // ["3647660,-8666010", ...] grid-cell keys
+          coverage_n: cells.length,
+          paused: pausedRaw === '1',
+        });
+      } catch (_) {}
+    }
+    return Response.json({ coverage: [], coverage_n: 0, paused: false });
+  }
+
   if (kv) {
     try {
       const raw = await kv.get('hours_data');
       const histRaw = await kv.get(MOW_HISTORY_KEY);
       const history = histRaw ? JSON.parse(histRaw) : [];
-      if (raw) return Response.json({ ...JSON.parse(raw), history });
+      const covRaw = await kv.get(COVERAGE_KEY);
+      const coverage_n = covRaw ? JSON.parse(covRaw).length : 0;
+      const pausedRaw = await kv.get(COVERAGE_PAUSED_KEY);
+      const paused = pausedRaw === '1';
+      if (raw) return Response.json({ ...JSON.parse(raw), history, coverage_n, tracking_paused: paused });
       return Response.json({
         hours: 0, lastSync: null, battery: null,
         rpm_peak: null, rpm_avg: null,
         dist_total_m: null, dist_session_m: null, speed_mph: null,
-        source: 'stub', history
+        source: 'stub', history, coverage_n, tracking_paused: paused
       });
     } catch (_) {}
   }
@@ -81,7 +178,7 @@ export async function onRequestGet({ env, request }) {
     hours: 0, lastSync: null, battery: null,
     rpm_peak: null, rpm_avg: null,
     dist_total_m: null, dist_session_m: null, speed_mph: null,
-    source: 'stub', history: []
+    source: 'stub', history: [], coverage_n: 0, tracking_paused: false
   });
 }
 
@@ -92,7 +189,36 @@ export async function onRequestPost({ request, env }) {
   }
 
   const kv = getKV(env);
+
+  // Control commands from the app (never sent by the sensor box — the `__cmd`
+  // field can't collide with real telemetry). Pause is deliberately reversible
+  // and non-destructive; there is intentionally NO server-side "wipe coverage"
+  // command, because this endpoint is unauthenticated and a destructive one
+  // would be trivially abusable. Clearing stays a local, confirmed action.
+  if (body.__cmd === 'pause_tracking') {
+    if (kv) await kv.put(COVERAGE_PAUSED_KEY, body.value ? '1' : '0');
+    return Response.json({ ok: true, paused: !!body.value });
+  }
+
   const isHeartbeat = body.source === 'heartbeat' || body.engine_running === false;
+
+  // Accumulate the yard map automatically, on every reading that carries GPS.
+  // No button, no app open, no start/stop — it records from the box's first fix
+  // to its last, which is the whole point.
+  if (kv) {
+    try {
+      const pausedRaw = await kv.get(COVERAGE_PAUSED_KEY);
+      if (pausedRaw !== '1') {
+        const pts = gpsPointsFrom(body);
+        if (pts.length > 0) {
+          const covRaw = await kv.get(COVERAGE_KEY);
+          const existing = covRaw ? JSON.parse(covRaw) : [];
+          const merged = mergeCoverage(existing, pts);
+          if (merged.added > 0) await kv.put(COVERAGE_KEY, JSON.stringify(merged.cells));
+        }
+      }
+    } catch (_) {}
+  }
 
   let prev = null;
   if (kv) {
