@@ -6134,7 +6134,7 @@ setInterval(loadAlerts, 5*60*1000);
         // the server's cell count has actually changed, so a routine 60s sync
         // doesn't re-download the whole map every time.
         if(typeof d.coverage_n==='number' && typeof syncYardCoverage==='function') syncYardCoverage(d.coverage_n);
-        if(typeof d.tracking_paused==='boolean' && typeof _reflectPauseState==='function') _reflectPauseState(d.tracking_paused);
+        if(typeof d.tracking_paused==='boolean' && typeof _reflectPauseState==='function') _reflectPauseState(d.tracking_paused, d.paused_since);
         var trackToShow = freshTrack || (typeof S!=='undefined' && S.sensorTrack.length>=2 ? S.sensorTrack : []);
         if(typeof drawYardMap==='function') drawYardMap(trackToShow);
         if(Array.isArray(d.history)){
@@ -6554,21 +6554,38 @@ setInterval(loadAlerts, 5*60*1000);
         }
         _covServerN=d.coverage_n;
         if(typeof S!=='undefined'){ S.yardCoverage=pts; if(typeof save==='function') save(); }
-        if(typeof d.paused==='boolean') _reflectPauseState(d.paused);
+        if(typeof d.paused==='boolean') _reflectPauseState(d.paused, d.paused_since);
         drawYardMap(window._lastTrack||[]);
       })
       .catch(function(){});
   }
 
-  function _reflectPauseState(paused){
+  function _reflectPauseState(paused, since){
     window._trackingPaused=!!paused;
+    if(since!==undefined) window._pausedSince=since;
     var b=document.getElementById('trackPauseBtn');
     if(b){
       b.textContent = paused ? '▶ Resume GPS tracking' : '⏸ Pause GPS tracking';
       b.style.color = paused ? '#ffb454' : '';
     }
     var n=document.getElementById('trackPauseNote');
-    if(n) n.style.display = paused ? '' : 'none';
+    if(!n) return;
+    n.style.display = paused ? '' : 'none';
+    if(!paused) return;
+    // Escalate the warning the longer it's been off. Pausing to mow something
+    // that isn't the yard is the intended use — silently leaving it off for weeks
+    // and losing the mapping is the failure this guards against.
+    var msg='&#9208; GPS tracking is paused &mdash; nothing is being added to the map.';
+    var st=window._pausedSince?Date.parse(window._pausedSince):NaN;
+    if(isFinite(st)){
+      var days=Math.floor((Date.now()-st)/86400000);
+      if(days>=1){
+        msg='&#9888;&#65039; GPS tracking has been paused for '+days+' day'+(days===1?'':'s')
+          +' (since '+new Date(st).toLocaleDateString()+') &mdash; no mowing has been mapped in that time. Tap Resume if that wasn\'t intended.';
+        n.style.color='#ff9a3c';
+      } else { n.style.color='#ffb454'; }
+    }
+    n.innerHTML=msg;
   }
 
   function toggleTracking(){
@@ -6580,7 +6597,7 @@ setInterval(loadAlerts, 5*60*1000);
     })
       .then(function(r){ return r.json(); })
       .then(function(d){
-        _reflectPauseState(!!d.paused);
+        _reflectPauseState(!!d.paused, d.paused?new Date().toISOString():null);
         if(typeof toast==='function') toast(d.paused?'⏸ GPS tracking paused':'▶ GPS tracking resumed');
       })
       .catch(function(){ if(typeof toast==='function') toast('⚠ Could not reach the server'); })

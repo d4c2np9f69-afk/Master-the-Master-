@@ -31,6 +31,7 @@ const SENSOR_LOG_MAX = 5000;
 // by the actual area of the yard rather than by how much you mow.
 const COVERAGE_KEY = 'yard_coverage';
 const COVERAGE_PAUSED_KEY = 'coverage_paused';
+const COVERAGE_PAUSED_AT_KEY = 'coverage_paused_at';
 const COVERAGE_MAX = 60000;         // ~60,000 m2 ≈ 15 acres — far beyond one yard
 const COVERAGE_SEG_MAX_M = 40;      // longer than this = GPS dropout, don't fill in
 const GRID = 1e5;                   // 1e-5 deg ≈ 1.1 m lat / 0.9 m lon at 36.5N
@@ -42,17 +43,59 @@ function metresBetween(la1, lo1, la2, lo2) {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
+// Clean a GPS path before it becomes permanent coverage.
+//
+// Two passes, both deliberately gentle. The track is only ~95 points for a whole
+// mow, so points are far apart and aggressive smoothing would round off real
+// corners where the mower actually turned. This is tuned to remove receiver
+// error, not to redraw the path:
+//   1. Spike rejection — a point sitting far off the line between its two
+//      neighbours, while those neighbours are close to each other, is a receiver
+//      glitch rather than real travel. Pulled back onto the line.
+//   2. A 1-2-1 weighted average — takes the jitter off without moving any point
+//      more than a fraction of the local spacing, so turns survive.
+// Applied BEFORE the coverage merge, so drift produces fewer bogus cells in the
+// first place rather than being papered over at render time.
+const SPIKE_M = 8;
+
+function smoothGpsPath(pts) {
+  if (!Array.isArray(pts) || pts.length < 3) return pts || [];
+  const cleaned = [pts[0]];
+  for (let i = 1; i < pts.length - 1; i++) {
+    const a = pts[i - 1], b = pts[i], c = pts[i + 1];
+    const midLa = (a[0] + c[0]) / 2, midLo = (a[1] + c[1]) / 2;
+    const dev = metresBetween(midLa, midLo, b[0], b[1]);
+    const span = metresBetween(a[0], a[1], c[0], c[1]);
+    cleaned.push((dev > SPIKE_M && dev > span) ? [midLa, midLo] : b);
+  }
+  cleaned.push(pts[pts.length - 1]);
+
+  const out = [cleaned[0]];
+  for (let i = 1; i < cleaned.length - 1; i++) {
+    out.push([
+      (cleaned[i - 1][0] + 2 * cleaned[i][0] + cleaned[i + 1][0]) / 4,
+      (cleaned[i - 1][1] + 2 * cleaned[i][1] + cleaned[i + 1][1]) / 4
+    ]);
+  }
+  out.push(cleaned[cleaned.length - 1]);
+  return out;
+}
+
 // Pull every usable GPS point out of a reading: the breadcrumb track if the box
 // sent one, plus its own current lat/lon. Using both means coverage still builds
 // even on firmware/readings that report only a position and no track array.
 function gpsPointsFrom(body) {
-  const pts = [];
+  const track = [];
   if (Array.isArray(body.track)) {
     for (const p of body.track) {
-      if (Array.isArray(p) && typeof p[0] === 'number' && typeof p[1] === 'number') pts.push([p[0], p[1]]);
-      else if (p && typeof p.lat === 'number' && typeof p.lon === 'number') pts.push([p.lat, p.lon]);
+      if (Array.isArray(p) && typeof p[0] === 'number' && typeof p[1] === 'number') track.push([p[0], p[1]]);
+      else if (p && typeof p.lat === 'number' && typeof p.lon === 'number') track.push([p.lat, p.lon]);
     }
   }
+  // Smooth the breadcrumb path (it's a real trajectory, so smoothing is valid).
+  // The single current lat/lon is appended AFTER — it has no neighbours to smooth
+  // against, and blending it into the path would drag the trail toward it.
+  const pts = smoothGpsPath(track);
   if (typeof body.lat === 'number' && typeof body.lon === 'number' && body.has_fix !== false) {
     pts.push([body.lat, body.lon]);
   }
@@ -170,10 +213,12 @@ export async function onRequestGet({ env, request }) {
           ? parsed.reduce((m, k) => { m[k] = 1; return m; }, {})
           : parsed;
         const pausedRaw = await kv.get(COVERAGE_PAUSED_KEY);
+        const pausedAt = await kv.get(COVERAGE_PAUSED_AT_KEY);
         return Response.json({
           coverage: cells,
           coverage_n: Object.keys(cells).length,
           paused: pausedRaw === '1',
+          paused_since: pausedAt || null,
         });
       } catch (_) {}
     }
@@ -190,12 +235,14 @@ export async function onRequestGet({ env, request }) {
       const coverage_n = Array.isArray(covParsed) ? covParsed.length : Object.keys(covParsed).length;
       const pausedRaw = await kv.get(COVERAGE_PAUSED_KEY);
       const paused = pausedRaw === '1';
-      if (raw) return Response.json({ ...JSON.parse(raw), history, coverage_n, tracking_paused: paused });
+      const pausedAt = paused ? (await kv.get(COVERAGE_PAUSED_AT_KEY)) : null;
+      if (raw) return Response.json({ ...JSON.parse(raw), history, coverage_n, tracking_paused: paused, paused_since: pausedAt || null });
       return Response.json({
         hours: 0, lastSync: null, battery: null,
         rpm_peak: null, rpm_avg: null,
         dist_total_m: null, dist_session_m: null, speed_mph: null,
-        source: 'stub', history, coverage_n, tracking_paused: paused
+        source: 'stub', history, coverage_n,
+        tracking_paused: paused, paused_since: pausedAt || null
       });
     } catch (_) {}
   }
@@ -203,7 +250,7 @@ export async function onRequestGet({ env, request }) {
     hours: 0, lastSync: null, battery: null,
     rpm_peak: null, rpm_avg: null,
     dist_total_m: null, dist_session_m: null, speed_mph: null,
-    source: 'stub', history: [], coverage_n: 0, tracking_paused: false
+    source: 'stub', history: [], coverage_n: 0, tracking_paused: false, paused_since: null
   });
 }
 
@@ -221,7 +268,14 @@ export async function onRequestPost({ request, env }) {
   // command, because this endpoint is unauthenticated and a destructive one
   // would be trivially abusable. Clearing stays a local, confirmed action.
   if (body.__cmd === 'pause_tracking') {
-    if (kv) await kv.put(COVERAGE_PAUSED_KEY, body.value ? '1' : '0');
+    if (kv) {
+      await kv.put(COVERAGE_PAUSED_KEY, body.value ? '1' : '0');
+      // Stamp WHEN it was paused. Jeff's stated use is switching tracking off to
+      // mow something that isn't his yard (a neighbour's) — the obvious failure is
+      // forgetting to switch it back on and silently losing weeks of mapping, so
+      // the UI escalates its warning based on this.
+      await kv.put(COVERAGE_PAUSED_AT_KEY, body.value ? new Date().toISOString() : '');
+    }
     return Response.json({ ok: true, paused: !!body.value });
   }
 
