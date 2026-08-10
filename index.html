@@ -2714,7 +2714,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <div id="sensorLogStatus" style="font-size:10px;color:var(--muted);margin-top:6px"></div>
     <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:9px" id="sensorLogTableWrap">
     <table class="hist-table" id="sensorLogTable" style="display:none">
-      <thead><tr><th>Date</th><th>Src</th><th>Hrs</th><th>Batt</th><th>RPM Pk/Avg</th><th>Dist Tot/Sess</th><th>Speed</th><th>Lat,Lon</th><th>Pitch/Roll</th><th>Vibe</th><th>Shocks</th><th>WiFi</th><th>Temp</th></tr></thead>
+      <thead><tr><th>Date</th><th>Src</th><th>Hrs</th><th>Batt</th><th>RPM Pk/Avg</th><th>Dist Tot/Sess</th><th>Speed</th><th>Lat,Lon</th><th>Pitch/Roll</th><th>Vibe</th><th>Shocks</th><th>WiFi</th><th>Temp</th><th>Other / raw</th></tr></thead>
       <tbody id="sensorLogBody"></tbody>
     </table>
     </div>
@@ -4210,31 +4210,65 @@ function loadFullSensorLog(){
       var log=Array.isArray(d.log)?d.log:[];
       if(status) status.textContent=log.length+' readings on record'+(log.length>=5000?' (showing most recent 5,000)':'');
       if(log.length===0){
-        if(tb) tb.innerHTML='<tr><td colspan="13" style="text-align:center;color:var(--muted)">No readings recorded yet</td></tr>';
+        if(tb) tb.innerHTML='<tr><td colspan="14" style="text-align:center;color:var(--muted)">No readings recorded yet</td></tr>';
       } else if(tb){
+        // The firmware uses alternate key names for the same reading, so every
+        // column looks through all known aliases rather than one fixed key.
+        var ALIAS={
+          battery:['battery','battery_v','voltage','voltage_v','batt','battery_parked'],
+          speed:['speed_mph','gps_speed_mph','mph'],
+          pitch:['pitch','pitch_deg'], roll:['roll','roll_deg'],
+          vibration:['vibration','vibration_g','vibe','vibration_level'],
+          shocks:['shock_events','shocks','impact_count'],
+          wifi:['wifi_rssi','rssi'], temp:['esp_temp_f','esp_temp','temp_f'],
+          rpm_peak:['rpm_peak'], rpm_avg:['rpm_avg'],
+          dist_total:['dist_total_m'], dist_session:['dist_session_m'],
+          hours:['hours'], lat:['lat'], lon:['lon']
+        };
+        function pick(e,keys){
+          for(var i=0;i<keys.length;i++){
+            var v=e[keys[i]];
+            if(typeof v==='number'&&isFinite(v)) return v;
+          }
+          return null;
+        }
+        // Anything not already shown in a column gets listed in "Other", so a field
+        // the firmware adds later can never be silently invisible in this table.
+        var SHOWN={date:1,source:1,engine_running:1,track_points:1};
+        Object.keys(ALIAS).forEach(function(g){ ALIAS[g].forEach(function(k){ SHOWN[k]=1; }); });
+        var fmt=function(v,dp,suf){ return v==null?'—':(dp!=null?v.toFixed(dp):v)+(suf||''); };
         tb.innerHTML=log.slice().reverse().map(function(e){
           var dt=e.date ? new Date(e.date).toLocaleString() : '—';
-          var latlon=(typeof e.lat==='number' && typeof e.lon==='number') ? e.lat.toFixed(4)+','+e.lon.toFixed(4) : '—';
-          var pr=(typeof e.pitch==='number' || typeof e.roll==='number')
-            ? (e.pitch!=null?e.pitch.toFixed(1):'—')+'/'+(e.roll!=null?e.roll.toFixed(1):'—') : '—';
-          var rpm=(typeof e.rpm_peak==='number' || typeof e.rpm_avg==='number')
-            ? (e.rpm_peak!=null?e.rpm_peak:'—')+'/'+(e.rpm_avg!=null?e.rpm_avg:'—') : '—';
-          var distMi=(typeof e.dist_total_m==='number' ? (e.dist_total_m/1609.344).toFixed(1) : '—')
-            +'/'+(typeof e.dist_session_m==='number' ? (e.dist_session_m/1609.344).toFixed(1) : '—');
+          var la=pick(e,ALIAS.lat), lo=pick(e,ALIAS.lon);
+          var latlon=(la!=null&&lo!=null)?la.toFixed(4)+','+lo.toFixed(4):'—';
+          var pi=pick(e,ALIAS.pitch), ro=pick(e,ALIAS.roll);
+          var pr=(pi!=null||ro!=null)?fmt(pi,1)+'/'+fmt(ro,1):'—';
+          var rp=pick(e,ALIAS.rpm_peak), ra=pick(e,ALIAS.rpm_avg);
+          var rpm=(rp!=null||ra!=null)?fmt(rp)+'/'+fmt(ra):'—';
+          var dt_=pick(e,ALIAS.dist_total), ds=pick(e,ALIAS.dist_session);
+          var distMi=(dt_!=null?(dt_/1609.344).toFixed(1):'—')+'/'+(ds!=null?(ds/1609.344).toFixed(1):'—');
+          var other=[];
+          for(var k in e){
+            if(!Object.prototype.hasOwnProperty.call(e,k)) continue;
+            if(SHOWN[k]) continue;
+            other.push(k+'='+e[k]);
+          }
+          if(typeof e.track_points==='number'&&e.track_points>0) other.unshift('track='+e.track_points+'pts');
           return '<tr>'
             +'<td class="td-date">'+dt+'</td>'
             +'<td>'+(e.source||'—')+'</td>'
-            +'<td>'+(typeof e.hours==='number'?e.hours.toFixed(1):'—')+'</td>'
-            +'<td>'+(typeof e.battery==='number'?e.battery.toFixed(2)+'V':'—')+'</td>'
+            +'<td>'+fmt(pick(e,ALIAS.hours),1)+'</td>'
+            +'<td>'+fmt(pick(e,ALIAS.battery),2,'V')+'</td>'
             +'<td>'+rpm+'</td>'
             +'<td>'+distMi+'</td>'
-            +'<td>'+(typeof e.speed_mph==='number'?e.speed_mph.toFixed(1):'—')+'</td>'
+            +'<td>'+fmt(pick(e,ALIAS.speed),1)+'</td>'
             +'<td>'+latlon+'</td>'
             +'<td>'+pr+'</td>'
-            +'<td>'+(typeof e.vibration==='number'?e.vibration.toFixed(2)+'g':'—')+'</td>'
-            +'<td>'+(typeof e.shock_events==='number'?e.shock_events:'—')+'</td>'
-            +'<td>'+(typeof e.wifi_rssi==='number'?e.wifi_rssi+'dBm':'—')+'</td>'
-            +'<td>'+(typeof e.esp_temp_f==='number'?e.esp_temp_f+'°F':'—')+'</td>'
+            +'<td>'+fmt(pick(e,ALIAS.vibration),2,'g')+'</td>'
+            +'<td>'+fmt(pick(e,ALIAS.shocks))+'</td>'
+            +'<td>'+fmt(pick(e,ALIAS.wifi),0,'dBm')+'</td>'
+            +'<td>'+fmt(pick(e,ALIAS.temp),0,'&deg;F')+'</td>'
+            +'<td style="font-size:9px;color:var(--muted)">'+(other.length?other.join(' · '):'—')+'</td>'
             +'</tr>';
         }).join('');
       }

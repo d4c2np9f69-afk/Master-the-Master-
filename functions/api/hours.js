@@ -91,30 +91,34 @@ function mergeCoverage(existing, pts) {
   return { cells: out, added };
 }
 
+// Record the ENTIRE raw payload — deliberately NOT a hand-picked whitelist.
+//
+// A whitelist silently drops data, and this firmware genuinely uses alternate key
+// names for the same reading: the app itself already reads battery as any of
+// battery/battery_v/voltage/voltage_v/batt/battery_parked, vibration as
+// vibration/vibration_g/vibe/vibration_level, shocks as
+// shock_events/shocks/impact_count, wifi as wifi_rssi/rssi, temp as
+// esp_temp_f/esp_temp/temp_f, speed as speed_mph/gps_speed_mph/mph, and so on.
+// A fixed whitelist would have logged null for every one of those variants and
+// quietly lost the reading. Storing the raw body means every field the box sends
+// is captured — including any field added to the firmware later that this code
+// has never heard of.
+//
+// `track` is the one exclusion: it's an array of ~95+ GPS points, and repeating it
+// in all 5,000 log rows would blow past Cloudflare KV's 25 MB per-value limit. It
+// is NOT lost — the live track is kept in `hours_data`, each completed mow's track
+// is kept in `hours_history`, and every point is merged into `yard_coverage`. The
+// log records how many points came with each reading so nothing is unaccounted for.
 function logEntryFrom(body) {
-  return {
-    date: new Date().toISOString(),
-    source: body.source || (body.engine_running === false ? 'heartbeat' : 'live'),
-    engine_running: (typeof body.engine_running === 'boolean') ? body.engine_running : null,
-    hours: (typeof body.hours === 'number') ? body.hours : null,
-    battery: (typeof body.battery === 'number') ? body.battery : null,
-    rpm_peak: (typeof body.rpm_peak === 'number') ? body.rpm_peak : null,
-    rpm_avg: (typeof body.rpm_avg === 'number') ? body.rpm_avg : null,
-    dist_total_m: (typeof body.dist_total_m === 'number') ? body.dist_total_m : null,
-    dist_session_m: (typeof body.dist_session_m === 'number') ? body.dist_session_m : null,
-    speed_mph: (typeof body.speed_mph === 'number') ? body.speed_mph : null,
-    lat: (typeof body.lat === 'number') ? body.lat : null,
-    lon: (typeof body.lon === 'number') ? body.lon : null,
-    has_fix: (typeof body.has_fix === 'boolean') ? body.has_fix : null,
-    pitch: (typeof body.pitch === 'number') ? body.pitch : null,
-    roll: (typeof body.roll === 'number') ? body.roll : null,
-    vibration: (typeof body.vibration === 'number') ? body.vibration : null,
-    shock_events: (typeof body.shock_events === 'number') ? body.shock_events : null,
-    wifi_rssi: (typeof body.wifi_rssi === 'number') ? body.wifi_rssi : null,
-    esp_temp_f: (typeof body.esp_temp_f === 'number') ? body.esp_temp_f : null,
-    mpu_ok: (typeof body.mpu_ok === 'number') ? body.mpu_ok : null,
-    gps_rx: (typeof body.gps_rx === 'number') ? body.gps_rx : null,
-  };
+  const entry = { date: new Date().toISOString() };
+  for (const k in body) {
+    if (!Object.prototype.hasOwnProperty.call(body, k)) continue;
+    if (k === 'track' || k === '__cmd') continue;
+    entry[k] = body[k];
+  }
+  entry.track_points = Array.isArray(body.track) ? body.track.length : null;
+  if (!entry.source) entry.source = (body.engine_running === false) ? 'heartbeat' : 'live';
+  return entry;
 }
 
 export async function onRequestGet({ env, request }) {
