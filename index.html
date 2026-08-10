@@ -2623,7 +2623,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
   </div>
   <div class="card cat-gps">
     <div class="card-title">&#128506; Yard Map &bull; Cumulative Coverage <span id="mapCoverBadge" style="display:none;font-size:10px;font-weight:600;color:#7ee787;margin-left:6px">&#127807; Building</span></div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5">Records <strong>automatically</strong> from the sensor box's first GPS fix to its last &mdash; nothing to start or stop, and the app doesn't need to be open. Every mow adds to a permanent map: <strong style="color:#7ee787">green</strong> is ground covered over time, <strong style="color:#ff6262">red</strong> is your latest mow. Line it up with the photo once using the pad below; it stays put after that.</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5">Records <strong>automatically</strong> from the sensor box's first GPS fix to its last &mdash; nothing to start or stop, and the app doesn't need to be open. Every mow adds to a permanent map: <strong style="color:#7ee787">green</strong> is ground covered over time, <strong style="color:#ff6262">red</strong> is your latest mow. With satellite on it's real imagery of your property, oriented <strong>true north</strong> and aligned automatically &mdash; nothing to line up.</div>
     <div id="trackPauseNote" style="display:none;font-size:11px;color:#ffb454;margin-bottom:8px;font-weight:600">&#9208; GPS tracking is paused &mdash; nothing is being added to the map.</div>
     <div style="position:relative">
       <canvas id="yardMap" style="width:100%;height:320px;display:block;border-radius:8px"></canvas>
@@ -6258,10 +6258,43 @@ setInterval(loadAlerts, 5*60*1000);
     return null;
   }
 
+  // Throw out GPS outliers before fitting. Real receivers occasionally emit a
+  // garbage fix (0,0 or a point from somewhere else entirely), and ONE of those
+  // would blow the bounding box up so far that the map zooms out to the whole
+  // country and the yard renders as a single dot. Median-based so it can't be
+  // skewed by the very outliers it's meant to reject.
+  function _rejectOutliers(points){
+    if(!points||points.length<8) return points||[];
+    var las=[],los=[],i;
+    for(i=0;i<points.length;i++){
+      if(points[i]&&typeof points[i][0]==='number'&&typeof points[i][1]==='number'){
+        las.push(points[i][0]); los.push(points[i][1]);
+      }
+    }
+    if(las.length<8) return points;
+    las.sort(function(a,b){return a-b;}); los.sort(function(a,b){return a-b;});
+    var mLa=las[Math.floor(las.length/2)], mLo=los[Math.floor(los.length/2)];
+    var out=[];
+    for(i=0;i<points.length;i++){
+      var la=points[i]&&points[i][0], lo=points[i]&&points[i][1];
+      if(typeof la!=='number'||typeof lo!=='number') continue;
+      // ~0.01 deg ≈ 1.1 km: far larger than any yard, but tolerant of a big lot.
+      if(Math.abs(la-mLa)>0.01||Math.abs(lo-mLo)>0.01) continue;
+      out.push(points[i]);
+    }
+    return out.length>=2?out:points;
+  }
+
   // Exact Web Mercator fit: choose the zoom that frames the data, then GPS->pixel
   // is pure arithmetic against the same projection the tiles are drawn in, so
   // alignment is correct by construction rather than by hand.
+  //
+  // NOTE ON ORIENTATION: no rotation is applied here, deliberately. Web Mercator
+  // tiles are north-up by definition and lat maps to y / lon maps to x, so the
+  // render is TRUE NORTH automatically. The manual rotate control only exists for
+  // the decorative-photo fallback, where there's no real orientation to honour.
   function _buildTileFit(points, rect){
+    points=_rejectOutliers(points);
     if(!points||points.length===0) return null;
     var minLa=90,maxLa=-90,minLo=180,maxLo=-180,i,n=0;
     for(i=0;i<points.length;i++){
@@ -6324,6 +6357,7 @@ setInterval(loadAlerts, 5*60*1000);
   // mathematically impossible for it to explode the way the old 2-point pin did.
   // Rotation/zoom/pan are the user's manual alignment on top of that fit.
   function _buildMapFit(points, photoRect){
+    points=_rejectOutliers(points);
     if(!points || points.length===0) return null;
     var refLat=points[0][0], refLon=points[0][1];
     var th=_mapView.rot*Math.PI/180, cs=Math.cos(th), sn=Math.sin(th);
@@ -6583,6 +6617,32 @@ setInterval(loadAlerts, 5*60*1000);
       }
     }
 
+    // North arrow + scale bar — only in satellite mode, where they're meaningful.
+    // (On the decorative photo there is no true orientation or scale to state.)
+    if(usedSatellite && window._lastTileFit){
+      var mpp=window._lastTileFit.mpp;
+      ctx.save();
+      // North arrow, top-right. Tiles are north-up, so this is always straight up.
+      var nx=w-18, ny=16;
+      ctx.strokeStyle='rgba(255,255,255,.92)'; ctx.fillStyle='rgba(255,255,255,.92)';
+      ctx.lineWidth=2; ctx.shadowColor='rgba(0,0,0,.9)'; ctx.shadowBlur=4;
+      ctx.beginPath(); ctx.moveTo(nx,ny+18); ctx.lineTo(nx,ny+2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(nx,ny-3); ctx.lineTo(nx-4.5,ny+5); ctx.lineTo(nx+4.5,ny+5); ctx.closePath(); ctx.fill();
+      ctx.font='bold 10px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='top';
+      ctx.fillText('N',nx,ny+20);
+      // Scale bar, bottom-left — pick a round metre length that fits ~70px.
+      var targets=[5,10,20,25,50,100,200], px=70, best=targets[0];
+      for(var ti=0;ti<targets.length;ti++){ if(targets[ti]/mpp<=px*1.4) best=targets[ti]; }
+      var barPx=best/mpp;
+      var bx=12, by=h-16;
+      ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(bx+barPx,by); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(bx,by-4); ctx.lineTo(bx,by+4); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(bx+barPx,by-4); ctx.lineTo(bx+barPx,by+4); ctx.stroke();
+      ctx.textAlign='left'; ctx.textBaseline='bottom';
+      ctx.fillText(best+' m  ('+Math.round(best*3.28084)+' ft)',bx,by-6);
+      ctx.restore();
+    }
+
     if(msg){
       var base = usedSatellite ? ' · 🛰 real satellite, auto-aligned'
         : (tileState && tileState.pending>0 ? ' · loading satellite…' : ' · decorative photo (not your property)');
@@ -6628,9 +6688,23 @@ setInterval(loadAlerts, 5*60*1000);
   var _simTimer=null, _simStep=0, _simFullTrack=[], _simHistory=[];
 
   function _buildSimTrack(){
-    // Property coords: center 32.899480N, -97.033920W
-    // Approximate yard: 90ft wide × 65ft deep, back yard
-    var cLat=32.899200, cLon=-97.033850;
+    // Centre the demo track on the REAL property, using the live coverage/track
+    // centroid when there is one. The old hardcoded 32.8992N / -97.0338W was Fort
+    // Worth, TX — inherited from the decorative photo's fake coordinates — which
+    // would drag a satellite map ~700 miles off Jeff's yard the moment anyone
+    // tapped Simulate. Falls back to the real White House, TN coordinates.
+    var cLat=36.47660, cLon=-86.66010;
+    try{
+      var src=(typeof S!=='undefined'&&Array.isArray(S.yardCoverage)&&S.yardCoverage.length>0)
+        ? S.yardCoverage : (Array.isArray(window._lastTrack)?window._lastTrack:null);
+      if(src&&src.length>0){
+        var sLa=0,sLo=0,n=0;
+        for(var i=0;i<src.length;i++){
+          if(typeof src[i][0]==='number'&&typeof src[i][1]==='number'){ sLa+=src[i][0]; sLo+=src[i][1]; n++; }
+        }
+        if(n>0){ cLat=sLa/n; cLon=sLo/n; }
+      }
+    }catch(e){}
     var latFt=0.00000275, lonFt=0.00000330;
     var swath=2.5, passes=26, len=80;
     var startLat=cLat+(passes*swath/2)*latFt;
