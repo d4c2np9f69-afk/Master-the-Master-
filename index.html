@@ -1616,8 +1616,24 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 /* hcc-wrap is now applied via .hcc-section.active above */
 @media(min-width:768px){
   .hcc-section.active{padding:0 24px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian{max-height:560px}
-  .sec-hero-car{max-height:none}
+  /* Deterministic hero sizing at tablet+ widths. `aspect-ratio` + `height:auto` +
+     `max-height` is an ambiguous combination — the browser has to satisfy both the
+     ratio and the height cap, and engines differ on whether they honour the ratio by
+     shrinking WIDTH. Chromium keeps full width; Safari does not always, which is why
+     the heroes render short of the right edge on the iPad but look correct in test.
+     Setting an explicit height and switching aspect-ratio off removes the conflict
+     entirely, so every engine computes the same box. The resulting box is identical
+     to what the cap already produced, so the %-positioned overlays don't move. */
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-yard,.sec-hero-guardian{
+    aspect-ratio:auto;height:560px;max-height:none;width:100%;min-width:100%
+  }
+  /* irr + car stay aspect-driven and uncapped on purpose: their readouts are placed
+     by percentage of the container, so a fixed height would shift them off the photo.
+     They also carry the .sec-hero class, so the explicit height above would capture
+     them — restore aspect-driven sizing here. */
+  .sec-hero-irr,.sec-hero-car{height:auto;max-height:none;width:100%;min-width:100%}
+  .sec-hero-irr{aspect-ratio:1320/864}
+  .sec-hero-car{aspect-ratio:1320/880}
   .house-hero{aspect-ratio:16/9}
   .card{padding:22px}
   .card-title{font-size:12px;letter-spacing:1px}
@@ -1637,8 +1653,24 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 }
 @media(min-width:1200px){
   .hcc-section.active{padding:0 40px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian{max-height:680px}
-  .sec-hero-car{max-height:none}
+  /* Deterministic hero sizing at tablet+ widths. `aspect-ratio` + `height:auto` +
+     `max-height` is an ambiguous combination — the browser has to satisfy both the
+     ratio and the height cap, and engines differ on whether they honour the ratio by
+     shrinking WIDTH. Chromium keeps full width; Safari does not always, which is why
+     the heroes render short of the right edge on the iPad but look correct in test.
+     Setting an explicit height and switching aspect-ratio off removes the conflict
+     entirely, so every engine computes the same box. The resulting box is identical
+     to what the cap already produced, so the %-positioned overlays don't move. */
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-yard,.sec-hero-guardian{
+    aspect-ratio:auto;height:680px;max-height:none;width:100%;min-width:100%
+  }
+  /* irr + car stay aspect-driven and uncapped on purpose: their readouts are placed
+     by percentage of the container, so a fixed height would shift them off the photo.
+     They also carry the .sec-hero class, so the explicit height above would capture
+     them — restore aspect-driven sizing here. */
+  .sec-hero-irr,.sec-hero-car{height:auto;max-height:none;width:100%;min-width:100%}
+  .sec-hero-irr{aspect-ratio:1320/864}
+  .sec-hero-car{aspect-ratio:1320/880}
   .app-hdr{padding:14px 28px}
   .app-hdr-title{font-size:22px}
   .app-hdr-sub{font-size:10px;letter-spacing:4px}
@@ -1661,8 +1693,24 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 }
 @media(min-width:1920px){
   .hcc-section.active{max-width:1800px;padding:0 60px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian{max-height:800px}
-  .sec-hero-car{max-height:none}
+  /* Deterministic hero sizing at tablet+ widths. `aspect-ratio` + `height:auto` +
+     `max-height` is an ambiguous combination — the browser has to satisfy both the
+     ratio and the height cap, and engines differ on whether they honour the ratio by
+     shrinking WIDTH. Chromium keeps full width; Safari does not always, which is why
+     the heroes render short of the right edge on the iPad but look correct in test.
+     Setting an explicit height and switching aspect-ratio off removes the conflict
+     entirely, so every engine computes the same box. The resulting box is identical
+     to what the cap already produced, so the %-positioned overlays don't move. */
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-yard,.sec-hero-guardian{
+    aspect-ratio:auto;height:800px;max-height:none;width:100%;min-width:100%
+  }
+  /* irr + car stay aspect-driven and uncapped on purpose: their readouts are placed
+     by percentage of the container, so a fixed height would shift them off the photo.
+     They also carry the .sec-hero class, so the explicit height above would capture
+     them — restore aspect-driven sizing here. */
+  .sec-hero-irr,.sec-hero-car{height:auto;max-height:none;width:100%;min-width:100%}
+  .sec-hero-irr{aspect-ratio:1320/864}
+  .sec-hero-car{aspect-ratio:1320/880}
   .app-hdr{padding:18px 40px}
   .app-hdr-title{font-size:26px}
   .app-hdr-sub{font-size:12px}
@@ -1694,8 +1742,24 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
   .app-hdr-badge{padding:10px 20px;font-size:20px;border-radius:10px}
   .snav-btn{min-width:200px;font-size:14px;padding:20px 20px 16px}
   .snav-icon{font-size:36px}
-  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-irr,.sec-hero-yard,.sec-hero-guardian{max-height:1000px}
-  .sec-hero-car{max-height:none}
+  /* Deterministic hero sizing at tablet+ widths. `aspect-ratio` + `height:auto` +
+     `max-height` is an ambiguous combination — the browser has to satisfy both the
+     ratio and the height cap, and engines differ on whether they honour the ratio by
+     shrinking WIDTH. Chromium keeps full width; Safari does not always, which is why
+     the heroes render short of the right edge on the iPad but look correct in test.
+     Setting an explicit height and switching aspect-ratio off removes the conflict
+     entirely, so every engine computes the same box. The resulting box is identical
+     to what the cap already produced, so the %-positioned overlays don't move. */
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-yard,.sec-hero-guardian{
+    aspect-ratio:auto;height:1000px;max-height:none;width:100%;min-width:100%
+  }
+  /* irr + car stay aspect-driven and uncapped on purpose: their readouts are placed
+     by percentage of the container, so a fixed height would shift them off the photo.
+     They also carry the .sec-hero class, so the explicit height above would capture
+     them — restore aspect-driven sizing here. */
+  .sec-hero-irr,.sec-hero-car{height:auto;max-height:none;width:100%;min-width:100%}
+  .sec-hero-irr{aspect-ratio:1320/864}
+  .sec-hero-car{aspect-ratio:1320/880}
   .card{padding:36px 40px;border-radius:22px;margin-bottom:28px}
   .card-title{font-size:16px;letter-spacing:1.5px}
   .sec-hero-title{font-size:46px}
@@ -3746,6 +3810,43 @@ function save(){
   } catch(e){}
   return ok;
 }
+// ---- SERVICE PHOTOS: stored in their OWN localStorage keys, never inside the
+// main `toro21200` blob. A shrunk photo is still ~80-200KB of base64, and S.log
+// is unbounded, so a handful of them would push the core blob past the storage
+// quota — exactly the failure that wiped the hour meter. Keeping them separate
+// means a photo that won't fit costs you the photo, not your hours and history.
+var PHOTO_PREFIX='toro21200_photo_';
+function photoOf(entry){
+  if(!entry) return null;
+  if(entry.photoId){ try { return localStorage.getItem(PHOTO_PREFIX+entry.photoId); } catch(e){ return null; } }
+  return entry.photo || null;                      // legacy inline photo
+}
+function setPhotoFor(entry, dataUrl){
+  if(!entry||!dataUrl) return false;
+  var pid=entry.id||uid();
+  try { localStorage.setItem(PHOTO_PREFIX+pid, dataUrl); }
+  catch(e){
+    if(typeof toast==='function') toast('\u26A0 Photo too large to save \u2014 the log entry was kept');
+    return false;
+  }
+  entry.photoId=pid; delete entry.photo;
+  return true;
+}
+function dropPhotoFor(entry){
+  if(!entry) return;
+  if(entry.photoId){ try { localStorage.removeItem(PHOTO_PREFIX+entry.photoId); } catch(e){} }
+  delete entry.photoId; delete entry.photo;
+}
+// One-time migration: lift any legacy inline photos out of the core blob.
+(function(){
+  try{
+    if(!S||!Array.isArray(S.log)) return;
+    var moved=0;
+    S.log.forEach(function(e){ if(e && e.photo){ if(setPhotoFor(e, e.photo)) moved++; } });
+    if(moved>0) localStorage.setItem('toro21200', JSON.stringify(S));
+  }catch(e){}
+})();
+
 function safeSetItem(key,val){
   try { localStorage.setItem(key,val); return true; }
   catch(e){
@@ -4061,7 +4162,7 @@ function updateDashboard(){
     } else {
       ra.innerHTML=S.log.slice(0,5).map(function(x){
         var c=x.type==='mow'?'#22c55e':x.type==='restoration'?'#ffd24a':'#5b9bd5';
-        return '<div class="log-entry" style="border-left-color:'+c+'"><div class="log-date">'+x.date+' &bull; '+x.hrs.toFixed(1)+' hrs</div><div class="log-title">'+x.title+'</div>'+(x.note?'<div class="log-note">'+x.note+'</div>':'')+(x.gain?'<div class="log-gain">'+x.gain+'</div>':'')+'</div>';
+        return '<div class="log-entry" style="border-left-color:'+c+'"><div class="log-date">'+x.date+' &bull; '+(typeof x.hrs==='number'?x.hrs.toFixed(1):'\u2014')+' hrs</div><div class="log-title">'+x.title+'</div>'+(x.note?'<div class="log-note">'+x.note+'</div>':'')+(x.gain?'<div class="log-gain">'+x.gain+'</div>':'')+'</div>';
       }).join('');
     }
   }
@@ -4169,11 +4270,11 @@ function renderLog(filter){
   le.innerHTML=entries.map(function(x){
     var c=x.type==='mow'?'#22c55e':'#5b9bd5';
     return '<div class="log-entry" style="border-left-color:'+c+'">'
-      +'<div class="log-date">'+x.date+' &bull; '+x.hrs.toFixed(1)+' hrs on meter</div>'
+      +'<div class="log-date">'+x.date+' &bull; '+(typeof x.hrs==='number'?x.hrs.toFixed(1):'\u2014')+' hrs on meter</div>'
       +'<div class="log-title">'+x.title+'</div>'
       +(x.note?'<div class="log-note">'+x.note+'</div>':'')
       +(x.gain?'<div class="log-gain">'+x.gain+'</div>':'')
-      +(x.photo?'<img src="'+x.photo+'" onclick="viewPhoto(\''+x.id+'\')" style="margin-top:7px;max-width:120px;max-height:90px;border-radius:8px;border:1px solid var(--border);cursor:pointer;display:block">':'')
+      +((function(){var _p=photoOf(x);return _p?'<img src="'+_p+'" onclick="viewPhoto(\''+x.id+'\')" style="margin-top:7px;max-width:120px;max-height:90px;border-radius:8px;border:1px solid var(--border);cursor:pointer;display:block">':'';})())
       +'<div style="display:flex;gap:6px;margin-top:7px">'
       +'<button onclick="showModal(\'editlog\',\''+x.id+'\')" style="padding:6px 12px;border-radius:7px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:#ddd;font-size:10px;font-weight:700;cursor:pointer">&#9999; Edit</button>'
       +'<button onclick="deleteLog(\''+x.id+'\')" style="padding:6px 12px;border-radius:7px;background:rgba(204,0,0,.12);border:1px solid rgba(204,0,0,.3);color:#ff6262;font-size:10px;font-weight:700;cursor:pointer">&#128465; Delete</button>'
@@ -5022,8 +5123,8 @@ function saveLuxCreds(){
   var email=(e.value||'').trim(), pass=(p.value||'').trim();
   var msg=document.getElementById('luxCredsMsg');
   if(!email||!pass){ if(msg){msg.style.color='#ff6262';msg.textContent='Enter both email and password.';} return; }
-  localStorage.setItem('lux_email',email);
-  localStorage.setItem('lux_pass',pass);
+  safeSetItem('lux_email',email);
+  safeSetItem('lux_pass',pass);
   if(msg){msg.style.color='#22c55e';msg.textContent='Saved! Connecting…';}
   acctRefreshStatus();
   loadClimate(true);
@@ -5673,7 +5774,7 @@ function saveSvc(){
   }
   if(n>S.hours) S.hours=n;
   var entry={id:uid(),date:new Date().toISOString().slice(0,10),hrs:n,type:'service',title:title,note:note,gain:gain};
-  if(pendingPhoto){ entry.photo=pendingPhoto; pendingPhoto=null; }
+  if(pendingPhoto){ setPhotoFor(entry, pendingPhoto); pendingPhoto=null; }
   S.log.unshift(entry);
   if(!save()) return; closeModal(); renderAll();
   // Confirmation so it's obvious the log registered
@@ -5717,12 +5818,13 @@ function previewPhoto(input, prevId){
 }
 function viewPhoto(id){
   var entry=(S.log||[]).find(function(x){ return x.id===id; });
-  if(!entry||!entry.photo) return;
+  var _pv=photoOf(entry);
+  if(!entry||!_pv) return;
   var mc=document.getElementById('modalContent');
   if(!mc) return;
   mc.innerHTML='<div class="modal-title">&#128247; '+entry.title+'</div>'
-    +'<img src="'+entry.photo+'" style="width:100%;border-radius:12px;border:1px solid var(--border)">'
-    +'<div style="font-size:11px;color:var(--muted);margin-top:8px">'+entry.date+' &middot; '+entry.hrs.toFixed(1)+' hrs</div>'
+    +'<img src="'+_pv+'" style="width:100%;border-radius:12px;border:1px solid var(--border)">'
+    +'<div style="font-size:11px;color:var(--muted);margin-top:8px">'+entry.date+' &middot; '+(typeof entry.hrs==='number'?entry.hrs.toFixed(1):'\u2014')+' hrs</div>'
     +'<div class="mbtns"><button class="mbtn secondary" onclick="closeModal()">Close</button></div>';
   document.getElementById('modal').className='modal-ov show';
 }
@@ -5748,6 +5850,7 @@ function deleteLog(id){
   if(!confirm('Delete "'+entry.title+'"? This cannot be undone.')) return;
   // if it was a mow with miles, subtract from total
   if(entry.type==='mow' && entry.miles>0){ S.miles=Math.max(0,(S.miles||0)-entry.miles); }
+  dropPhotoFor(entry);   // otherwise the photo's key is orphaned and leaks storage forever
   S.log=S.log.filter(function(x){ return x.id!==id; });
   save(); renderAll();
 }
@@ -5920,7 +6023,7 @@ function splashLogin(){
     .then(function(r){return r.json().then(function(d){return{status:r.status,data:d};});})
     .then(function(res){
       if(res.data.ok&&res.data.ha_token){
-        localStorage.setItem('ha_token',res.data.ha_token);
+        safeSetItem('ha_token',res.data.ha_token);
         localStorage.setItem('hcc_theme','dark');
         document.documentElement.classList.remove('light');
         syncThemeBtn();
@@ -7325,7 +7428,7 @@ var _activeVehicle = localStorage.getItem('hcc_vehicle') || 'merc';
 
 function carSwitchVehicle(which) {
   _activeVehicle = which;
-  localStorage.setItem('hcc_vehicle', which);
+  safeSetItem('hcc_vehicle', which);
   document.getElementById('pick-merc').classList.toggle('active', which === 'merc');
   document.getElementById('pick-ford').classList.toggle('active', which === 'ford');
   var mercTabs = document.getElementById('car-merc-tabs');
@@ -7933,7 +8036,7 @@ function openBeehive(path) {
 }
 
 function beehiveOnline(base, d) {
-  localStorage.setItem('ha_base', base);
+  safeSetItem('ha_base', base);
   HA_BASE = base;
   var dot    = document.getElementById('beehiveDot');
   var title  = document.getElementById('beehiveTitle');
