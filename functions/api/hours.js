@@ -544,6 +544,23 @@ export async function onRequestPost({ request, env }) {
         Array.isArray(prev.track) && prev.track.length > 0) {
       merged.track = prev.track;
     }
+
+    // ...but the merge must NOT resurrect a dead sensor's last reading.
+    // Firmware 1.4.0 deliberately omits tilt when the MPU doesn't answer, on the
+    // principle that absent is honest and stale looks fine while being a lie. The
+    // merge then helpfully put the old values back, which defeats the whole point:
+    // caught live on the bench, where a box with no MPU attached was still serving
+    // pitch and roll of -35.3 (the classic both-axes-identical I2C garbage value).
+    // If the box says the sensor is down, the sensor's fields go with it.
+    if (body.mpu_ok !== undefined && !body.mpu_ok) {
+      for (const k of ['pitch', 'roll', 'tilt_deg', 'upright', 'tilt_ref', 'ax', 'ay', 'az']) {
+        delete merged[k];
+      }
+    }
+    // Deliberately NOT done for lat/lon on has_fix:false — a last-known position is
+    // genuinely useful while parked, the app labels its staleness via has_fix, and
+    // coverage reads the raw body rather than this merged object, so it can never
+    // leak into the yard map.
   }
 
   // The moment a heartbeat follows a real live reading is exactly "the mow just

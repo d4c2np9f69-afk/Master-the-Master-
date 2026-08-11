@@ -112,6 +112,39 @@ console.log('\n-- hour meter + mow history (must not regress) --');
     JSON.stringify(j2.history[0]));
 }
 
+console.log('\n-- a dead sensor must not keep serving its last reading --');
+{
+  const kv = mockKV();
+  // Healthy reading first, so there is something for the merge to resurrect.
+  await post(kv, parked({ mpu_ok: 1, pitch: -12.4, roll: 28.5, tilt_deg: 0.3 }));
+  let j = await (await get(kv)).json();
+  check('healthy tilt is served normally', j.pitch === -12.4, `got ${j.pitch}`);
+
+  // Now the MPU goes silent. Firmware 1.4.0 omits tilt entirely in this case —
+  // verified against the real box on the bench, which sent no pitch/roll at all.
+  const dead = parked({ mpu_ok: 0 });
+  delete dead.pitch; delete dead.roll;
+  await post(kv, dead);
+  j = await (await get(kv)).json();
+  check('stale pitch is dropped, not inherited from the last good reading',
+    j.pitch === undefined, `got ${j.pitch}`);
+  check('stale roll is dropped too', j.roll === undefined, `got ${j.roll}`);
+  check('mpu_ok still reports the failure', j.mpu_ok === 0, `got ${j.mpu_ok}`);
+  check('unrelated fields still merge normally', j.hours === 5.525, `got ${j.hours}`);
+}
+{
+  const kv = mockKV();
+  // A no-fix reading SHOULD keep the last known position — deliberately different
+  // from tilt, and worth pinning so nobody "fixes" it later.
+  await post(kv, parked({ has_fix: true, lat: 36.4766, lon: -86.6601 }));
+  const nofix = parked({ has_fix: false });
+  delete nofix.lat; delete nofix.lon;
+  await post(kv, nofix);
+  const j = await (await get(kv)).json();
+  check('last known position survives a no-fix reading', j.lat === 36.4766, `got ${j.lat}`);
+  check('has_fix honestly reports no fix', j.has_fix === false, `got ${j.has_fix}`);
+}
+
 console.log('\n-- control channel: auth --');
 const TOKEN = 'test-maintenance-token-0123456789';
 {
