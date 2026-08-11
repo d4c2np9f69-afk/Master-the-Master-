@@ -84,7 +84,7 @@ function smoothGpsPath(pts) {
 // Pull every usable GPS point out of a reading: the breadcrumb track if the box
 // sent one, plus its own current lat/lon. Using both means coverage still builds
 // even on firmware/readings that report only a position and no track array.
-function gpsPointsFrom(body) {
+function gpsPointsFrom(body, allowBarePoint) {
   const track = [];
   if (Array.isArray(body.track)) {
     for (const p of body.track) {
@@ -96,7 +96,22 @@ function gpsPointsFrom(body) {
   // The single current lat/lon is appended AFTER — it has no neighbours to smooth
   // against, and blending it into the path would drag the trail toward it.
   const pts = smoothGpsPath(track);
-  if (typeof body.lat === 'number' && typeof body.lon === 'number' && body.has_fix !== false) {
+
+  // The bare current lat/lon is only real COVERAGE if the mower was actually moving.
+  // The box reports every 5 minutes while parked, so accepting a standalone point
+  // from an engine-off reading records the parking spot's GPS drift ~288x/day as if
+  // it were mown grass. Measured 2026-08-11: the entire coverage map was a
+  // 16.7m x 12.5m blob at the garage, and the visit-count shading made that drift the
+  // most "confirmed" ground on the map. The track[] array is always merged; only this
+  // standalone point is gated.
+  //
+  // `has_fix` must be checked for TRUTHINESS, not `!== false`: older firmware sent the
+  // number 0 for "no fix", and 0 !== false is true, so no-fix 0,0 coordinates were
+  // merged as a real cell. That actually happened — a literal "0,0" cell (Null Island,
+  // ~8000 km away) had to be cleaned out of KV.
+  if (allowBarePoint && body.has_fix &&
+      typeof body.lat === 'number' && typeof body.lon === 'number' &&
+      (body.lat !== 0 || body.lon !== 0)) {
     pts.push([body.lat, body.lon]);
   }
   return pts;
@@ -172,7 +187,9 @@ function logEntryFrom(body) {
   const entry = { date: new Date().toISOString() };
   for (const k in body) {
     if (!Object.prototype.hasOwnProperty.call(body, k)) continue;
-    if (k === 'track' || k === '__cmd') continue;
+    // `secret` is the box's shared credential — never persist it into the log, which
+    // is served (unauthenticated) via ?log=1.
+    if (k === 'track' || k === '__cmd' || k === 'secret') continue;
     entry[k] = body[k];
   }
   entry.track_points = Array.isArray(body.track) ? body.track.length : null;
@@ -236,7 +253,12 @@ export async function onRequestGet({ env, request }) {
       const pausedRaw = await kv.get(COVERAGE_PAUSED_KEY);
       const paused = pausedRaw === '1';
       const pausedAt = paused ? (await kv.get(COVERAGE_PAUSED_AT_KEY)) : null;
-      if (raw) return Response.json({ ...JSON.parse(raw), history, coverage_n, tracking_paused: paused, paused_since: pausedAt || null });
+      if (raw) {
+        // This endpoint is public and unauthenticated. Echoing the whole stored body
+        // was publishing the box's `secret` to anyone who asked for it.
+        const { secret, ...stored } = JSON.parse(raw);
+        return Response.json({ ...stored, history, coverage_n, tracking_paused: paused, paused_since: pausedAt || null });
+      }
       return Response.json({
         hours: 0, lastSync: null, battery: null,
         rpm_peak: null, rpm_avg: null,
@@ -288,7 +310,10 @@ export async function onRequestPost({ request, env }) {
     try {
       const pausedRaw = await kv.get(COVERAGE_PAUSED_KEY);
       if (pausedRaw !== '1') {
-        const pts = gpsPointsFrom(body);
+        // Engine running (or a real mow-end payload) => a standalone lat/lon is real
+        // travel. Parked heartbeat => track[] only, no bare point. See gpsPointsFrom.
+        const movingNow = body.engine_running === true || body.mow_ended === true;
+        const pts = gpsPointsFrom(body, movingNow);
         if (pts.length > 0) {
           const covRaw = await kv.get(COVERAGE_KEY);
           const existing = covRaw ? JSON.parse(covRaw) : {};
@@ -316,6 +341,15 @@ export async function onRequestPost({ request, env }) {
   let merged = body;
   if (isHeartbeat && prev) {
     merged = { ...prev, ...body };
+    // An empty track must not wipe the stored one. The box clears its track buffer
+    // once it has been delivered, so every later parked post carries `track: []` —
+    // which would blank the last mow's path out of `hours_data` about five minutes
+    // after the mow ended. The phone hides this (it caches the track locally), but a
+    // fresh device like the wall iPad would show no track at all.
+    if ((!Array.isArray(body.track) || body.track.length === 0) &&
+        Array.isArray(prev.track) && prev.track.length > 0) {
+      merged.track = prev.track;
+    }
   }
 
   // The moment a heartbeat follows a real live reading is exactly "the mow just
@@ -323,23 +357,44 @@ export async function onRequestPost({ request, env }) {
   // so mow-to-mow comparisons survive instead of only ever showing the latest
   // state. dist_session_m/rpm_peak/rpm_avg are already scoped to "this mow" by
   // the sensor box itself, so they're recorded as-is, not recomputed here.
-  const wasLive = prev && prev.source !== 'heartbeat' && prev.engine_running !== false && typeof prev.hours === 'number';
-  if (isHeartbeat && wasLive && kv) {
+  // FIXED 2026-08-11 — this had NEVER recorded a single mow.
+  //
+  // The old trigger fired when "a heartbeat follows a live reading", reading the mow's
+  // totals out of `prev`. That assumed the box posts during a mow. It does not — it
+  // posts ONLY while parked, so that transition can never occur, and `hours_history`
+  // sat empty for months while 6.3 km of real mowing went unrecorded. It was also
+  // gated on `typeof prev.hours === 'number'`, which was never true either, because
+  // the box sent `hours_seconds` and nothing ever converted it.
+  //
+  // The firmware now marks the one upload that carries a finished mow's totals. Read
+  // from `body`, NOT `prev`: on a mow_end post it is the BODY that holds this mow's
+  // rpm_peak / dist_session_m / track.
+  const isMowEnd = body.mow_ended === true || body.source === 'mow_end';
+  if (isMowEnd && kv) {
     try {
       const histRaw = await kv.get(MOW_HISTORY_KEY);
       const hist = histRaw ? JSON.parse(histRaw) : [];
+      const num = (v) => (typeof v === 'number' && isFinite(v)) ? v : null;
+      // Prefer the body's own value, falling back to the merged/previous reading for
+      // anything a given payload happens not to carry.
+      const pick = (k) => num(body[k] !== undefined ? body[k] : (prev ? prev[k] : undefined));
+      const hoursEnd = num(body.hours) !== null ? num(body.hours)
+                     : (num(body.hours_seconds) !== null ? +(body.hours_seconds / 3600).toFixed(4) : null);
+      const track = Array.isArray(body.track) && body.track.length
+        ? body.track
+        : (prev && Array.isArray(prev.track) && prev.track.length ? prev.track : null);
       hist.push({
         date: new Date().toISOString(),
-        hours_end: prev.hours,
-        rpm_peak: (typeof prev.rpm_peak === 'number') ? prev.rpm_peak : null,
-        rpm_avg: (typeof prev.rpm_avg === 'number') ? prev.rpm_avg : null,
-        dist_session_m: (typeof prev.dist_session_m === 'number') ? prev.dist_session_m : null,
-        battery: (typeof prev.battery === 'number') ? prev.battery : null,
-        esp_temp_f: (typeof prev.esp_temp_f === 'number') ? prev.esp_temp_f : null,
-        shock_events: (typeof prev.shock_events === 'number') ? prev.shock_events : null,
+        hours_end: hoursEnd,
+        rpm_peak: pick('rpm_peak'),
+        rpm_avg: pick('rpm_avg'),
+        dist_session_m: pick('dist_session_m'),
+        battery: pick('battery'),
+        esp_temp_f: pick('esp_temp_f'),
+        shock_events: pick('shock_events'),
         // That mow's own GPS breadcrumb trail, so any individual past mow's path can
         // be pulled back up later rather than only ever having the most recent one.
-        track: Array.isArray(prev.track) ? prev.track : null,
+        track: track,
       });
       await kv.put(MOW_HISTORY_KEY, JSON.stringify(hist.slice(-MOW_HISTORY_MAX)));
     } catch (_) {}
