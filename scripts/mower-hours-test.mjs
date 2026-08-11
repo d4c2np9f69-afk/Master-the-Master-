@@ -145,6 +145,26 @@ console.log('\n-- a dead sensor must not keep serving its last reading --');
   check('has_fix honestly reports no fix', j.has_fix === false, `got ${j.has_fix}`);
 }
 
+console.log('\n-- per-cycle fields must not be inherited by the merge --');
+{
+  const kv = mockKV();
+  // A cycle that carried an ack and vibration stats.
+  await post(kv, parked({ cmd_ack: 1, last_cmd: 1, last_cmd_ok: true,
+                          vib_max: 0.31, vib_avg: 0.12, vib_n: 40 }));
+  let j = await (await get(kv)).json();
+  check('ack and vib stats are served on the cycle that sent them',
+    j.cmd_ack === 1 && j.vib_max === 0.31, JSON.stringify({a: j.cmd_ack, v: j.vib_max}));
+
+  // Next cycle: command retired, stats reset — the box sends none of them.
+  await post(kv, parked());
+  j = await (await get(kv)).json();
+  check('retired ack is not still asserted', j.cmd_ack === undefined, `got ${j.cmd_ack}`);
+  check('stale vib stats are dropped', j.vib_max === undefined, `got ${j.vib_max}`);
+  check('but hours still carry forward', j.hours === 5.525, `got ${j.hours}`);
+  check('and the track still carries forward', Array.isArray(j.track) && j.track.length === 1,
+    JSON.stringify(j.track));
+}
+
 console.log('\n-- control channel: auth --');
 const TOKEN = 'test-maintenance-token-0123456789';
 {

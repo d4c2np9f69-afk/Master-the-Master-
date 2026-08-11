@@ -557,6 +557,19 @@ export async function onRequestPost({ request, env }) {
         delete merged[k];
       }
     }
+
+    // Same class, generalised. The merge exists to carry FORWARD what a heartbeat
+    // can't measure — hours, RPM, distance, the track. But some fields describe
+    // only the cycle that produced them, and the box sends them conditionally:
+    // an ack that has been retired, the outcome of the last command, vibration
+    // statistics that reset on every successful upload. Inheriting those means
+    // the endpoint keeps asserting something that stopped being true — spotted
+    // live as a `cmd_ack: 1` still being served long after command 1 was retired.
+    // If the box didn't send it this cycle, it isn't current, so it goes.
+    for (const k of ['cmd_ack', 'last_cmd', 'last_cmd_ok', 'ota_fails',
+                     'vib_max', 'vib_avg', 'vib_n']) {
+      if (body[k] === undefined) delete merged[k];
+    }
     // Deliberately NOT done for lat/lon on has_fix:false — a last-known position is
     // genuinely useful while parked, the app labels its staleness via has_fix, and
     // coverage reads the raw body rather than this merged object, so it can never
