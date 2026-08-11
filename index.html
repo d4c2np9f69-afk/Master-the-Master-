@@ -344,7 +344,15 @@ html,body{
 .sec-hero img{width:100%;height:100%;object-fit:cover;object-position:center top}
 /* Irrigation: pin to top */
 .sec-hero-irr img{object-position:center top}
-.sec-hero-yard img{object-fit:cover;object-position:center center}
+/* Anchored to the TOP, not centred: Jeff is in this photo and his hair starts at
+   image row ~22 of 851 — there is almost no headroom above him. Once the hero got
+   an explicit height (the Safari sizing fix), cover started cropping vertically at
+   any width past ~1.55x the box height, which first happens in iPad landscape, and
+   a centred crop takes that off the top of his head. Anchoring to the top keeps his
+   full 22px of clearance at EVERY width instead of only the ones tuned for; what it
+   trims instead is the bottom edge of the mower deck, which the readout panel
+   already covers. Never centre this one again. */
+.sec-hero-yard img{object-fit:cover;object-position:center top}
 /* Per-hero aspect = each image's true ratio so the baked-in gold titles never crop */
 /* Re-cropped taller 08-06 (1.53 -> 1.32) to make room for the full live
    conditions readout inlaid on the photo — 295px tall at a 390px viewport
