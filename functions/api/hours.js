@@ -566,8 +566,13 @@ export async function onRequestPost({ request, env }) {
     // the endpoint keeps asserting something that stopped being true — spotted
     // live as a `cmd_ack: 1` still being served long after command 1 was retired.
     // If the box didn't send it this cycle, it isn't current, so it goes.
+    // `age_s` and `mow_ended` belong here for the same reason and are the two
+    // that matter most. The box sends age_s only on a replayed buffered reading
+    // and mow_ended only on the single upload that closes a mow — so inheriting
+    // them means the endpoint permanently claims the latest reading is an hour
+    // stale, or that a mow just ended, neither of which is true.
     for (const k of ['cmd_ack', 'last_cmd', 'last_cmd_ok', 'ota_fails',
-                     'vib_max', 'vib_avg', 'vib_n']) {
+                     'vib_max', 'vib_avg', 'vib_n', 'age_s', 'mow_ended']) {
       if (body[k] === undefined) delete merged[k];
     }
     // Deliberately NOT done for lat/lon on has_fix:false — a last-known position is
