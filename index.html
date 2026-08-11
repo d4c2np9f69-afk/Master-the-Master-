@@ -123,8 +123,16 @@ html.light{
   /* brand + status, darkened for contrast on white */
   --gold:#7e6017;
   --amber:#a85d28;
-  --ok:#15803d;
-  --warn:#b7791f;
+  /* darkened 08-11 from #15803d, which passed on white cards (5.02:1) but measured
+     only 4.37:1 on the page background — where "Beehive Online" actually sits.
+     #137534 measures 5.80 / 5.42 / 5.06 across card / surface / page background.
+     Dark mode's --ok is untouched. */
+  --ok:#137534;
+  /* darkened 08-11 from #b7791f, which measured 3.64:1 on a white card — under the
+     4.5:1 WCAG floor for normal text, so any warn-coloured text was borderline
+     unreadable in light mode. #96600f measures 5.28:1 on card / 4.94:1 on surface /
+     4.60:1 on the page background. Dark mode's --warn is untouched. */
+  --warn:#96600f;
   --bad:#c21b1b;
   --info:#0277b6;
   --green:#15803d;
@@ -912,8 +920,32 @@ html.light .car-tabs{background:#fff}
 .acct-badge-ok{background:rgba(34,197,94,.15);color:#22c55e;border:1px solid rgba(34,197,94,.3)}
 .acct-badge-no{background:rgba(180,180,180,.1);color:#999;border:1px solid rgba(180,180,180,.2)}
 .acct-form{display:none;background:rgba(0,0,0,.25);border-radius:10px;padding:12px;margin-bottom:6px}
+/* In light mode .modal-box is white, so the dark 25%-black wash above composited to
+   a mid-grey (~rgb(191,191,191)) and the save/error messages inside dropped to
+   ~2.7:1 — the "Wrong password" / "Save failed" text you most need to read.
+   Light mode gets a warm tint of the same shape instead. (08-11) */
+html.light .acct-form{background:rgba(60,45,15,.05)}
 .acct-form.open{display:block}
 .acct-input{width:100%;box-sizing:border-box;padding:9px 12px;background:rgba(0,0,0,.4);border:1px solid rgba(212,175,55,.3);border-radius:8px;color:var(--text);font-size:13px;margin-bottom:8px;font-family:inherit}
+/* These six credential fields hardcode a dark background (five of them in an inline
+   style attribute) while their text colour follows the theme. In light mode that
+   painted a dark grey box inside a white modal, and the placeholder fell to 1.6:1 —
+   you could not tell which field you were typing into. !important is genuinely
+   required here: an inline style beats any selector, however specific. (08-11) */
+html.light .acct-input,
+html.light #luxEmailIn, html.light #luxPassIn,
+html.light #bhyveEmailIn, html.light #bhyvePassIn,
+html.light #blinkPinInput{background:#fff !important;border-color:rgba(70,55,25,.28) !important}
+/* The ✕ "forget this credential" buttons sit on an 8%-red wash. On the dark modal
+   that reads fine, but in light mode the wash is near-white pink and the old inline
+   #ff6262 measured 2.34:1. The colour moved out of the inline style so a theme rule
+   can reach it at all. (08-11) */
+.acct-clear{color:#ff6262}
+html.light .acct-clear{color:var(--bad)}
+html.light .acct-input::placeholder,
+html.light #luxEmailIn::placeholder, html.light #luxPassIn::placeholder,
+html.light #bhyveEmailIn::placeholder, html.light #bhyvePassIn::placeholder,
+html.light #blinkPinInput::placeholder{color:var(--muted)}
 /* Beehive utility buttons */
 .btn-beehive{width:100%;padding:10px;border:1px solid rgba(74,158,255,.3);border-radius:10px;background:rgba(74,158,255,.07);color:#4a9eff;font-size:11px;font-weight:800;font-family:inherit;margin-bottom:10px;cursor:pointer;letter-spacing:.5px}
 .icon-btn{background:none;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:var(--muted);padding:5px 10px;font-size:10px;font-weight:800;font-family:inherit;cursor:pointer}
@@ -1180,6 +1212,18 @@ html.light .car-tabs{background:#fff}
 .btn-green{background:linear-gradient(135deg,#166534,#14532d);color:#fff}
 .btn-gray{background:rgba(255,255,255,.07);color:var(--muted);border:1px solid var(--border)}
 /* Yard-map alignment pad — compact tap targets, still >=36px tall for real fingers */
+/* The map align pad is a dark glass panel over the satellite map. In light mode it
+   sat on a white card, so its 55%-dark wash composited to mid-grey and nothing on it
+   read well (the Stop/Simulate button measured 1.2:1). It now carries its own solid
+   dark background in BOTH themes, per the standing rule that a panel which must stay
+   dark supplies its own ground — and these live in CSS, not the element's inline
+   style attribute, because an inline style silently wins over any theme override
+   no matter how specific (the same trap hit on 08-01). (08-11) */
+#mapAlignPad{background:rgba(15,25,15,.55);border:1px solid var(--border)}
+#mapPadLabel{color:var(--muted)}
+html.light #mapAlignPad{background:rgba(18,26,18,.92);border-color:rgba(255,255,255,.16)}
+html.light #mapPadLabel{color:rgba(247,241,231,.78)}
+html.light .mapadj-btn{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.22);color:#f2ede3}
 .mapadj-btn{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text);
   border-radius:7px;padding:9px 4px;font-size:13px;font-weight:600;min-height:38px;cursor:pointer;
   font-family:var(--font);line-height:1}
@@ -2245,8 +2289,8 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <div class="acct-form" id="acct-ha">
         <input id="acct-ha-token" type="password" placeholder="Paste HA Long-Lived Token&hellip;" autocomplete="off" class="acct-input">
         <div style="display:flex;gap:8px;margin-top:0">
-          <button onclick="acctSaveHa()" style="flex:1;padding:9px;background:linear-gradient(135deg,#1a3a5f,#0d2040);border:1px solid rgba(74,158,255,.4);border-radius:8px;color:#4a9eff;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:.5px">&#128275; SAVE TOKEN</button>
-          <button onclick="acctClear('ha')" title="Remove saved token" style="padding:9px 14px;background:rgba(255,0,0,.08);border:1px solid rgba(255,0,0,.2);border-radius:8px;color:#ff6262;font-size:13px;font-weight:800;cursor:pointer">&#10005;</button>
+          <button onclick="acctSaveHa()" style="flex:1;padding:9px;background:linear-gradient(135deg,#1a3a5f,#0d2040);border:1px solid rgba(74,158,255,.4);border-radius:8px;color:#7dbaff;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:.5px">&#128275; SAVE TOKEN</button>
+          <button onclick="acctClear('ha')" title="Remove saved token" class="acct-clear" style="padding:9px 14px;background:rgba(255,0,0,.08);border:1px solid rgba(255,0,0,.2);border-radius:8px;font-size:13px;font-weight:800;cursor:pointer">&#10005;</button>
         </div>
         <div id="acct-ha-msg" style="font-size:11px;text-align:center;margin-top:7px;min-height:14px"></div>
       </div>
@@ -2260,7 +2304,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         <input id="acct-lux-pass" type="password" placeholder="LUX password" autocomplete="current-password" class="acct-input">
         <div style="display:flex;gap:8px;margin-top:0">
           <button onclick="acctSaveLux()" style="flex:1;padding:9px;background:linear-gradient(135deg,#3a2800,#5a3e00);border:1px solid rgba(212,175,55,.4);border-radius:8px;color:rgba(212,175,55,.95);font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:.5px">&#128275; SAVE</button>
-          <button onclick="acctClear('lux')" title="Remove saved credentials" style="padding:9px 14px;background:rgba(255,0,0,.08);border:1px solid rgba(255,0,0,.2);border-radius:8px;color:#ff6262;font-size:13px;font-weight:800;cursor:pointer">&#10005;</button>
+          <button onclick="acctClear('lux')" title="Remove saved credentials" class="acct-clear" style="padding:9px 14px;background:rgba(255,0,0,.08);border:1px solid rgba(255,0,0,.2);border-radius:8px;font-size:13px;font-weight:800;cursor:pointer">&#10005;</button>
         </div>
         <div id="acct-lux-msg" style="font-size:11px;text-align:center;margin-top:7px;min-height:14px"></div>
       </div>
@@ -2273,8 +2317,8 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         <input id="acct-bhyve-email" type="email" placeholder="B-Hyve email" autocomplete="email" class="acct-input">
         <input id="acct-bhyve-pass" type="password" placeholder="B-Hyve password" autocomplete="current-password" class="acct-input">
         <div style="display:flex;gap:8px;margin-top:0">
-          <button onclick="acctSaveBhyve()" style="flex:1;padding:9px;background:linear-gradient(135deg,#003a1a,#005a28);border:1px solid rgba(34,197,94,.4);border-radius:8px;color:#22c55e;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:.5px">&#128275; SAVE</button>
-          <button onclick="acctClear('bhyve')" title="Remove saved credentials" style="padding:9px 14px;background:rgba(255,0,0,.08);border:1px solid rgba(255,0,0,.2);border-radius:8px;color:#ff6262;font-size:13px;font-weight:800;cursor:pointer">&#10005;</button>
+          <button onclick="acctSaveBhyve()" style="flex:1;padding:9px;background:linear-gradient(135deg,#003a1a,#005a28);border:1px solid rgba(34,197,94,.4);border-radius:8px;color:#4ade80;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:.5px">&#128275; SAVE</button>
+          <button onclick="acctClear('bhyve')" title="Remove saved credentials" class="acct-clear" style="padding:9px 14px;background:rgba(255,0,0,.08);border:1px solid rgba(255,0,0,.2);border-radius:8px;font-size:13px;font-weight:800;cursor:pointer">&#10005;</button>
         </div>
         <div id="acct-bhyve-msg" style="font-size:11px;text-align:center;margin-top:7px;min-height:14px"></div>
       </div>
@@ -2703,8 +2747,8 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
     <div id="yardMapMsg" style="font-size:10px;color:#666;text-align:center;margin-top:6px">No GPS track yet &mdash; it&rsquo;ll appear after your first mow with the sensor installed.</div>
     <div id="yardCoverStats" style="font-size:10px;color:var(--muted);text-align:center;margin-top:4px"></div>
     <div id="mapAttrib" style="display:none;font-size:9px;color:var(--dim);text-align:center;margin-top:3px">Imagery: USGS The National Map (public domain)</div>
-    <div id="mapAlignPad" style="margin-top:10px;background:rgba(15,25,15,.55);border:1px solid var(--border);border-radius:8px;padding:9px">
-      <div id="mapPadLabel" style="font-size:10px;color:var(--muted);letter-spacing:1px;font-weight:700;margin-bottom:7px;text-align:center">FRAME THE MAP (always true north)</div>
+    <div id="mapAlignPad" style="margin-top:10px;border-radius:8px;padding:9px">
+      <div id="mapPadLabel" style="font-size:10px;letter-spacing:1px;font-weight:700;margin-bottom:7px;text-align:center">FRAME THE MAP (always true north)</div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
         <span id="mapRotBtns" style="display:contents">
         <button class="mapadj-btn" onclick="mapAdjust('rot',-5)" title="Rotate left">&#8634;</button>
@@ -3876,7 +3920,7 @@ function exportData(){
         var file = new File([json], fname, {type:'application/json'});
         if(navigator.canShare({files:[file]})){
           navigator.share({files:[file], title:'Toro Backup', text:'Toro TimeMaster 21200 backup'})
-            .then(function(){ if(m){ m.style.color='#22c55e'; m.textContent='\u2713 Backup shared \u2014 choose Save to Files'; } })
+            .then(function(){ if(m){ m.style.color='var(--ok)'; m.textContent='\u2713 Backup shared \u2014 choose Save to Files'; } })
             .catch(function(err){
               // user cancelled or share failed -> fall back to download
               if(err && err.name==='AbortError'){ if(m){ m.style.color='#aaa'; m.textContent='Share cancelled'; } return; }
@@ -3889,7 +3933,7 @@ function exportData(){
     // Fallback: standard browser download
     downloadBackup(json, fname, m);
   } catch(e){
-    if(m){ m.style.color='#ff6262'; m.textContent='Export failed: '+e.message; }
+    if(m){ m.style.color='var(--bad)'; m.textContent='Export failed: '+e.message; }
   }
 }
 
@@ -3901,7 +3945,7 @@ function downloadBackup(json, fname, m){
   document.body.appendChild(a);
   a.click();
   setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 100);
-  if(m){ m.style.color='#22c55e'; m.textContent='\u2713 Backup saved to your downloads'; }
+  if(m){ m.style.color='var(--ok)'; m.textContent='\u2713 Backup saved to your downloads'; }
 }
 
 function importData(input){
@@ -3924,13 +3968,13 @@ function importData(input){
 if(typeof S.sensorMiles!=='number') S.sensorMiles=0;
 if(typeof S.sensorSpeedMph!=='number') S.sensorSpeedMph=0;
       save(); renderAll();
-      if(msg){ msg.style.color='#22c55e'; msg.textContent='\u2713 Backup restored ('+(S.log?S.log.length:0)+' log entries)'; }
+      if(msg){ msg.style.color='var(--ok)'; msg.textContent='\u2713 Backup restored ('+(S.log?S.log.length:0)+' log entries)'; }
     } catch(e){
-      if(msg){ msg.style.color='#ff6262'; msg.textContent='Import failed: '+e.message; }
+      if(msg){ msg.style.color='var(--bad)'; msg.textContent='Import failed: '+e.message; }
     }
     input.value='';
   };
-  reader.onerror = function(){ if(msg){ msg.style.color='#ff6262'; msg.textContent='Could not read file'; } input.value=''; };
+  reader.onerror = function(){ if(msg){ msg.style.color='var(--bad)'; msg.textContent='Could not read file'; } input.value=''; };
   reader.readAsText(file);
 }
 
@@ -5022,9 +5066,9 @@ function saveBhyveCreds(){
   if(!e||!p) return;
   var email=(e.value||'').trim(), pass=(p.value||'').trim();
   var msg=document.getElementById('bhyveCredsMsg');
-  if(!email||!pass){ if(msg){msg.style.color='#ff6262';msg.textContent='Enter both email and password.';} return; }
-  if(!safeSetItem('bhyve_email',email)||!safeSetItem('bhyve_pass',pass)){ if(msg){msg.style.color='#ff6262';msg.textContent='Save failed — storage full.';} return; }
-  if(msg){msg.style.color='#22c55e';msg.textContent='Saved! Connecting…';}
+  if(!email||!pass){ if(msg){msg.style.color='var(--bad)';msg.textContent='Enter both email and password.';} return; }
+  if(!safeSetItem('bhyve_email',email)||!safeSetItem('bhyve_pass',pass)){ if(msg){msg.style.color='var(--bad)';msg.textContent='Save failed — storage full.';} return; }
+  if(msg){msg.style.color='var(--ok)';msg.textContent='Saved! Connecting…';}
   acctRefreshStatus();
   loadIrrigation();
 }
@@ -5130,10 +5174,10 @@ function saveLuxCreds(){
   if(!e||!p) return;
   var email=(e.value||'').trim(), pass=(p.value||'').trim();
   var msg=document.getElementById('luxCredsMsg');
-  if(!email||!pass){ if(msg){msg.style.color='#ff6262';msg.textContent='Enter both email and password.';} return; }
+  if(!email||!pass){ if(msg){msg.style.color='var(--bad)';msg.textContent='Enter both email and password.';} return; }
   safeSetItem('lux_email',email);
   safeSetItem('lux_pass',pass);
-  if(msg){msg.style.color='#22c55e';msg.textContent='Saved! Connecting…';}
+  if(msg){msg.style.color='var(--ok)';msg.textContent='Saved! Connecting…';}
   acctRefreshStatus();
   loadClimate(true);
 }
@@ -5165,30 +5209,30 @@ function acctRefreshStatus(){
 }
 function acctSaveHa(){
   var inp=document.getElementById('acct-ha-token'),msg=document.getElementById('acct-ha-msg');
-  if(!inp||!inp.value.trim()){if(msg){msg.style.color='#ff6262';msg.textContent='Paste a token first.';}return;}
-  if(!safeSetItem('ha_token',inp.value.trim())){ if(msg){msg.style.color='#ff6262';msg.textContent='Save failed — storage full.';} return; }
+  if(!inp||!inp.value.trim()){if(msg){msg.style.color='var(--bad)';msg.textContent='Paste a token first.';}return;}
+  if(!safeSetItem('ha_token',inp.value.trim())){ if(msg){msg.style.color='var(--bad)';msg.textContent='Save failed — storage full.';} return; }
   acctRefreshStatus();
-  if(msg){msg.style.color='#22c55e';msg.textContent='Saved! Will connect on home WiFi.';}
+  if(msg){msg.style.color='var(--ok)';msg.textContent='Saved! Will connect on home WiFi.';}
   setTimeout(function(){var f=document.getElementById('acct-ha');if(f)f.classList.remove('open');checkBeehive(false);loadCameras();loadHomeStatus();loadUtilities();},1500);
 }
 function acctSaveLux(){
   var email=(document.getElementById('acct-lux-email')?document.getElementById('acct-lux-email').value:'').trim();
   var pass=(document.getElementById('acct-lux-pass')?document.getElementById('acct-lux-pass').value:'').trim();
   var msg=document.getElementById('acct-lux-msg');
-  if(!email||!pass){if(msg){msg.style.color='#ff6262';msg.textContent='Enter both email and password.';}return;}
-  if(!safeSetItem('lux_email',email)||!safeSetItem('lux_pass',pass)){ if(msg){msg.style.color='#ff6262';msg.textContent='Save failed — storage full.';} return; }
+  if(!email||!pass){if(msg){msg.style.color='var(--bad)';msg.textContent='Enter both email and password.';}return;}
+  if(!safeSetItem('lux_email',email)||!safeSetItem('lux_pass',pass)){ if(msg){msg.style.color='var(--bad)';msg.textContent='Save failed — storage full.';} return; }
   acctRefreshStatus();
-  if(msg){msg.style.color='#22c55e';msg.textContent='Saved! Connecting…';}
+  if(msg){msg.style.color='var(--ok)';msg.textContent='Saved! Connecting…';}
   setTimeout(function(){var f=document.getElementById('acct-lux');if(f)f.classList.remove('open');loadClimate(true);},1200);
 }
 function acctSaveBhyve(){
   var email=(document.getElementById('acct-bhyve-email')?document.getElementById('acct-bhyve-email').value:'').trim();
   var pass=(document.getElementById('acct-bhyve-pass')?document.getElementById('acct-bhyve-pass').value:'').trim();
   var msg=document.getElementById('acct-bhyve-msg');
-  if(!email||!pass){if(msg){msg.style.color='#ff6262';msg.textContent='Enter both email and password.';}return;}
-  if(!safeSetItem('bhyve_email',email)||!safeSetItem('bhyve_pass',pass)){ if(msg){msg.style.color='#ff6262';msg.textContent='Save failed — storage full.';} return; }
+  if(!email||!pass){if(msg){msg.style.color='var(--bad)';msg.textContent='Enter both email and password.';}return;}
+  if(!safeSetItem('bhyve_email',email)||!safeSetItem('bhyve_pass',pass)){ if(msg){msg.style.color='var(--bad)';msg.textContent='Save failed — storage full.';} return; }
   acctRefreshStatus();
-  if(msg){msg.style.color='#22c55e';msg.textContent='Saved!';}
+  if(msg){msg.style.color='var(--ok)';msg.textContent='Saved!';}
   setTimeout(function(){var f=document.getElementById('acct-bhyve');if(f)f.classList.remove('open');loadIrrigation();},1200);
 }
 function acctClear(svc){
@@ -5378,7 +5422,7 @@ function loadIrrigationFromHA(token,base,onFail){
     var devName=document.getElementById('irrDevName');
     if(devName) devName.textContent='Water Hog';
     var conn=document.getElementById('irrConn');
-    if(conn){conn.innerHTML=' &#11044; BEEHIVE';conn.style.color='#d4af37';}
+    if(conn){conn.innerHTML=' &#11044; BEEHIVE';conn.style.color='var(--gold)';}
     var modeEl=document.getElementById('irrMode'); if(modeEl) modeEl.textContent='AUTO';
     var rd=rainSensor?Number(rainSensor.state)||0:0;
     var rdEl=document.getElementById('irrRainDelay');
@@ -8056,7 +8100,7 @@ function beehiveOnline(base, d) {
   if (hd) hd.style.background = '#22c55e';
   if (hh) hh.style.background = '#22c55e';
   if (hd2) hd2.style.background = '#22c55e';
-  if (title) { title.textContent = '\u{1FAB4} Beehive Online'; title.style.color = '#22c55e'; }
+  if (title) { title.textContent = '\u{1FAB4} Beehive Online'; title.style.color = 'var(--ok)'; }
   if (ver)   ver.textContent = 'Home Assistant' + (d&&d.version?' '+d.version:'') + ' — ' + base.replace('http://','');
   if (steps) steps.style.display = 'none';
   if (toggle) toggle.style.display = 'none';
@@ -9107,7 +9151,7 @@ function loadLights(){
     if (conn) conn.textContent = '';
     return;
   }
-  if (conn){ conn.textContent = '●'; conn.style.color = '#ffd24a'; }
+  if (conn){ conn.textContent = '●'; conn.style.color = 'var(--warn)'; }
   haFetch('/api/states', { signal: AbortSignal.timeout(25000) })
   .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
   .then(function(states){
@@ -9143,7 +9187,7 @@ function loadLights(){
           + 'switch.*: ' + (sw.length ? sw.join(', ') : '<i>none</i>') + '<br>'
           + 'light.*: ' + (li.length ? li.join(', ') : '<i>none</i>') + '</div>';
       }
-      if (conn){ conn.textContent = '● LIVE'; conn.style.color = '#22c55e'; }
+      if (conn){ conn.textContent = '● LIVE'; conn.style.color = 'var(--ok)'; }
       return;
     }
     if (hint) hint.style.display = 'none';
@@ -9161,11 +9205,11 @@ function loadLights(){
     });
     var list = document.getElementById('lightsList'); if (list) list.innerHTML = html;
     if (master) master.style.display = 'block';
-    if (conn){ conn.textContent = '● LIVE'; conn.style.color = '#22c55e'; }
+    if (conn){ conn.textContent = '● LIVE'; conn.style.color = 'var(--ok)'; }
   })
   .catch(function(){
     set('wx-load', '&#128161; Beehive unreachable — check your token on HOME');
-    if (conn){ conn.textContent = '● OFFLINE'; conn.style.color = '#ff6262'; }
+    if (conn){ conn.textContent = '● OFFLINE'; conn.style.color = 'var(--bad)'; }
   });
 }
 
@@ -9205,7 +9249,7 @@ function loadGarage(preFetchedStates){
     if (!cover && !sw && !sensor){ if (banner) { banner.className = 'wx-banner wx-no'; banner.innerHTML = '&#128663; No garage entity found in Beehive'; } return; }
     if (banner) banner.style.display = 'none';
     if (controls) controls.style.display = '';
-    if (conn){ conn.textContent = '● LIVE'; conn.style.color = '#22c55e'; }
+    if (conn){ conn.textContent = '● LIVE'; conn.style.color = 'var(--ok)'; }
     var icon = document.getElementById('garageIcon');
     var label = document.getElementById('garageState');
     var changed = document.getElementById('garageChanged');
@@ -9291,7 +9335,7 @@ function loadGarage(preFetchedStates){
   })
   .catch(function(){
     if (banner){ banner.className = 'wx-banner wx-no'; banner.innerHTML = '&#128663; Beehive unreachable'; }
-    if (conn){ conn.textContent = '● OFFLINE'; conn.style.color = '#ff6262'; }
+    if (conn){ conn.textContent = '● OFFLINE'; conn.style.color = 'var(--bad)'; }
   });
 }
 function garageToggle(action){
@@ -9350,11 +9394,11 @@ function loadVacuum(){
     else if (st === 'idle'){ cls = 'wx-load'; txt = 'Idle'; }
     else if (st === 'error'){ cls = 'wx-no'; txt = '&#9888;&#65039; Error' + (a.error ? ' — ' + a.error : ''); }
     if (banner){ banner.className = 'wx-banner ' + cls; banner.innerHTML = txt + batt; }
-    if (conn){ conn.textContent = '● LIVE'; conn.style.color = '#22c55e'; }
+    if (conn){ conn.textContent = '● LIVE'; conn.style.color = 'var(--ok)'; }
   })
   .catch(function(){
     if (banner){ banner.className = 'wx-banner wx-load'; banner.innerHTML = '&#129302; Beehive unreachable — check your token on HOME'; }
-    if (conn){ conn.textContent = '● OFFLINE'; conn.style.color = '#ff6262'; }
+    if (conn){ conn.textContent = '● OFFLINE'; conn.style.color = 'var(--bad)'; }
   });
 }
 
@@ -10010,10 +10054,10 @@ function blinkSendPin() {
   var pin = (document.getElementById('blinkPinInput') || {}).value || '';
   var status = document.getElementById('blinkPinStatus');
   pin = pin.trim();
-  if (!pin) { if(status) { status.style.color='#ff6262'; status.textContent='Enter the PIN code first'; } return; }
+  if (!pin) { if(status) { status.style.color='var(--bad)'; status.textContent='Enter the PIN code first'; } return; }
   var token = getHaToken();
   var base = localStorage.getItem('ha_base') || HA_BASE;
-  if (!token || !base) { if(status) { status.style.color='#ff6262'; status.textContent='Beehive not connected'; } return; }
+  if (!token || !base) { if(status) { status.style.color='var(--bad)'; status.textContent='Beehive not connected'; } return; }
   if (status) { status.style.color='var(--muted)'; status.textContent='Sending to Beehive…'; }
   haFetch('/api/services/blink/send_pin', {
     method: 'POST',
@@ -10023,7 +10067,7 @@ function blinkSendPin() {
   })
   .then(function(r) {
     if (r.ok || r.status === 200) {
-      if (status) { status.style.color='#22c55e'; status.textContent='✓ Code sent! Loading cameras…'; }
+      if (status) { status.style.color='var(--ok)'; status.textContent='✓ Code sent! Loading cameras…'; }
       setTimeout(function() { loadCameras(); loadHomeStatus(); loadUtilities(); }, 2000);
     } else {
       return r.text().then(function(t) { throw new Error(r.status + ' ' + t.slice(0,80)); });
@@ -10031,7 +10075,7 @@ function blinkSendPin() {
   })
   .catch(function(err) {
     if (status) {
-      status.style.color='#ff6262';
+      status.style.color='var(--bad)';
       var msg = err && err.message || '';
       if (msg.indexOf('404') >= 0) {
         status.textContent = 'Blink not set up in Beehive yet — add it first via Settings → Integrations → Blink';
