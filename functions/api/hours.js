@@ -70,6 +70,14 @@ const CFG_LIMITS = {
   sample_interval_s: [10, 120],
   track_min_step_m:  [1, 20],
   gps_step_max_m:    [5, 200],
+  // How often engine seconds are written to flash while running. This is the
+  // exposure window for the EN reset button on the box: anything already flushed
+  // survives a reset, anything since does not. Floor of 30 s keeps NVS wear sane.
+  flush_every_s:     [30, 900],
+  // 1 = never count engine hours, whatever the vibration says. The upright gate
+  // handles servicing automatically; this is the manual override for the case it
+  // can't see — working on the mower while it sits flat on its wheels.
+  service_mode:      [0, 1],
 };
 const CMDS_ALLOWED = ['zero_tilt', 'clear_track', 'flush_buffer', 'reboot', 'ota'];
 
