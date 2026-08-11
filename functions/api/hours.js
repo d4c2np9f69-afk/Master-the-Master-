@@ -36,6 +36,114 @@ const COVERAGE_MAX = 60000;         // ~60,000 m2 ≈ 15 acres — far beyond on
 const COVERAGE_SEG_MAX_M = 40;      // longer than this = GPS dropout, don't fill in
 const GRID = 1e5;                   // 1e-5 deg ≈ 1.1 m lat / 0.9 m lon at 36.5N
 
+// ---- REMOTE CONTROL / CONFIG CHANNEL ------------------------------------------
+// The box already reads the POST response body — postJson() in the firmware pulls
+// it into `resp` and prints it, it just never parsed it. Returning config and
+// commands there turns every upload into a two-way exchange, which is what makes
+// this thing maintainable without pulling it off the mower and holding BOOT
+// through a reflash every time a number needs changing.
+//
+// Shape: { cfg_rev, cfg:{...}, cmds:[{id,do,args}], next_id }
+//   cfg  is DESIRED state. The box applies it whenever cfg_rev differs from its
+//        own, saves it to NVS, and echoes cfg_rev back — so "did it take?" is
+//        answerable from the endpoint instead of assumed.
+//   cmds is a one-shot queue. Exactly ONE is handed out per response (oldest
+//        first) to keep the firmware trivial, and it stays queued until the box
+//        echoes cmd_ack. Retry is therefore automatic, and re-running a command
+//        the box already applied is harmless.
+//
+// The box sleeps between uploads and cannot be woken, so a command lands on its
+// next post — up to IDLE_INTERVAL_S (5 min) while parked. That is a property of
+// the hardware, not a bug to chase.
+const CTRL_KEY = 'mower_ctrl';
+const CTRL_MAX_CMDS = 8;
+
+// Every tunable is clamped server-side. A config channel reaching hardware must
+// not be able to brick it: setting vib_threshold to 50 would mean the engine is
+// never detected as running again and the hour meter silently stops forever —
+// the exact class of failure that already cost months here.
+const CFG_LIMITS = {
+  vib_threshold:     [0.005, 1.0],   // floor sits just above the measured parked
+                                     // noise floor (0.003-0.005 g), so no setting
+                                     // can make idle vibration read as "running"
+  idle_interval_s:   [60, 3600],
+  sample_interval_s: [10, 120],
+  track_min_step_m:  [1, 20],
+  gps_step_max_m:    [5, 200],
+};
+const CMDS_ALLOWED = ['zero_tilt', 'clear_track', 'flush_buffer', 'reboot', 'ota'];
+
+function emptyCtrl() { return { cfg_rev: 0, cfg: {}, cmds: [], next_id: 1 }; }
+
+async function loadCtrl(kv) {
+  if (!kv) return emptyCtrl();
+  try {
+    const raw = await kv.get(CTRL_KEY);
+    if (!raw) return emptyCtrl();
+    const c = JSON.parse(raw);
+    return {
+      cfg_rev: typeof c.cfg_rev === 'number' ? c.cfg_rev : 0,
+      cfg: (c.cfg && typeof c.cfg === 'object') ? c.cfg : {},
+      cmds: Array.isArray(c.cmds) ? c.cmds : [],
+      next_id: typeof c.next_id === 'number' ? c.next_id : 1,
+    };
+  } catch (_) { return emptyCtrl(); }
+}
+
+async function sha256Hex(s) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Issuing a command or changing config needs authorisation. The sensor's own
+// uploads stay unauthenticated (the box has nowhere safe to hold a secret), but
+// nothing that CHANGES the box is open to whoever finds the URL.
+//
+// Two accepted paths, deliberately:
+//   password — the family login, the same SHA-256 hash auth.js stores under
+//              `auth_hash`. This is the path the app UI uses, so Jeff can re-zero
+//              the tilt himself from his phone without a second credential.
+//   token    — a maintenance token in KV under `mower_ctrl_token`. Exists so a
+//              maintenance session can drive the box from a terminal WITHOUT
+//              anyone having to hand over or type the family password. Kept in
+//              C:\Users\jeffl\HCC-secrets\ on the PC, never in this repo (public).
+// Either alone is sufficient. Rotating one never locks out the other, which
+// matters the day one of them is compromised or forgotten.
+async function ctrlAuthorised(kv, body) {
+  if (!kv) return false;
+  const { password, token } = body || {};
+  if (typeof token === 'string' && token) {
+    const want = await kv.get('mower_ctrl_token');
+    // Length check first so a missing/blank KV value can never authorise.
+    if (want && want.length >= 16 && token === want) return true;
+  }
+  if (typeof password === 'string' && password) {
+    const stored = await kv.get('auth_hash');
+    if (stored && (await sha256Hex(password)) === stored) return true;
+  }
+  return false;
+}
+
+// Clamp a requested config patch to the limits above. Returns the accepted values
+// and a list of anything rejected, so a typo is reported rather than silently
+// ignored — a config channel that quietly drops half your change is worse than
+// no config channel.
+function sanitiseCfg(patch) {
+  const accepted = {}, rejected = [];
+  for (const [k, v] of Object.entries(patch || {})) {
+    const lim = CFG_LIMITS[k];
+    if (!lim) { rejected.push({ key: k, why: 'unknown_key' }); continue; }
+    const n = Number(v);
+    if (!isFinite(n)) { rejected.push({ key: k, why: 'not_a_number' }); continue; }
+    if (n < lim[0] || n > lim[1]) {
+      rejected.push({ key: k, why: `out_of_range_${lim[0]}_${lim[1]}` });
+      continue;
+    }
+    accepted[k] = n;
+  }
+  return { accepted, rejected };
+}
+
 function metresBetween(la1, lo1, la2, lo2) {
   const cosL = Math.cos(la1 * Math.PI / 180) || 1;
   const dx = (lo2 - lo1) * 111320 * cosL;
@@ -84,9 +192,9 @@ function smoothGpsPath(pts) {
 // Pull every usable GPS point out of a reading: the breadcrumb track if the box
 // sent one, plus its own current lat/lon. Using both means coverage still builds
 // even on firmware/readings that report only a position and no track array.
-function gpsPointsFrom(body, allowBarePoint) {
+function gpsPointsFrom(body, allowBarePoint, allowTrack) {
   const track = [];
-  if (Array.isArray(body.track)) {
+  if (allowTrack && Array.isArray(body.track)) {
     for (const p of body.track) {
       if (Array.isArray(p) && typeof p[0] === 'number' && typeof p[1] === 'number') track.push([p[0], p[1]]);
       else if (p && typeof p.lat === 'number' && typeof p.lon === 'number') track.push([p.lat, p.lon]);
@@ -102,8 +210,8 @@ function gpsPointsFrom(body, allowBarePoint) {
   // from an engine-off reading records the parking spot's GPS drift ~288x/day as if
   // it were mown grass. Measured 2026-08-11: the entire coverage map was a
   // 16.7m x 12.5m blob at the garage, and the visit-count shading made that drift the
-  // most "confirmed" ground on the map. The track[] array is always merged; only this
-  // standalone point is gated.
+  // most "confirmed" ground on the map. The track[] array is gated too, by the
+  // caller — see there for why a parked reading's breadcrumbs are drift, not yard.
   //
   // `has_fix` must be checked for TRUTHINESS, not `!== false`: older firmware sent the
   // number 0 for "no fix", and 0 !== false is true, so no-fix 0,0 coordinates were
@@ -301,6 +409,67 @@ export async function onRequestPost({ request, env }) {
     return Response.json({ ok: true, paused: !!body.value });
   }
 
+  // ---- Control-channel endpoints (authorised; never sent by the sensor box) ----
+  // These change what the hardware does, so unlike pause_tracking above they are
+  // all gated. See ctrlAuthorised for why there are two accepted credentials.
+  if (body.__cmd === 'ctrl_status' || body.__cmd === 'set_cfg' ||
+      body.__cmd === 'queue_cmd'   || body.__cmd === 'cancel_cmd') {
+    if (!kv) return Response.json({ ok: false, error: 'no_kv' }, { status: 503 });
+    if (!(await ctrlAuthorised(kv, body))) {
+      return Response.json({ ok: false, error: 'unauthorised' }, { status: 401 });
+    }
+    const ctrl = await loadCtrl(kv);
+
+    if (body.__cmd === 'set_cfg') {
+      const { accepted, rejected } = sanitiseCfg(body.cfg);
+      if (Object.keys(accepted).length) {
+        ctrl.cfg = { ...ctrl.cfg, ...accepted };
+        // Only bump the revision when something actually changed, so a no-op call
+        // doesn't make the box rewrite NVS for nothing.
+        ctrl.cfg_rev = (ctrl.cfg_rev || 0) + 1;
+        await kv.put(CTRL_KEY, JSON.stringify(ctrl));
+      }
+      return Response.json({ ok: true, cfg_rev: ctrl.cfg_rev, cfg: ctrl.cfg, accepted, rejected });
+    }
+
+    if (body.__cmd === 'queue_cmd') {
+      const doWhat = String(body.do || '');
+      if (!CMDS_ALLOWED.includes(doWhat)) {
+        return Response.json({ ok: false, error: 'unknown_command', allowed: CMDS_ALLOWED }, { status: 400 });
+      }
+      if (ctrl.cmds.length >= CTRL_MAX_CMDS) {
+        return Response.json({ ok: false, error: 'queue_full', queued: ctrl.cmds }, { status: 409 });
+      }
+      // Collapse duplicates: re-queueing zero_tilt while one is already pending
+      // should not mean the box zeroes twice.
+      const dup = ctrl.cmds.find((c) => c.do === doWhat);
+      if (dup) return Response.json({ ok: true, already_queued: dup, queued: ctrl.cmds });
+
+      const cmd = { id: ctrl.next_id, do: doWhat, issued: new Date().toISOString() };
+      if (doWhat === 'ota') {
+        // An OTA has to be pinned to an exact artefact. No URL, no command —
+        // never let the box fetch "whatever is at the default path".
+        if (typeof body.url !== 'string' || !/^https:\/\//.test(body.url)) {
+          return Response.json({ ok: false, error: 'ota_needs_https_url' }, { status: 400 });
+        }
+        cmd.args = { url: body.url, sha256: typeof body.sha256 === 'string' ? body.sha256 : null };
+      }
+      ctrl.next_id += 1;
+      ctrl.cmds.push(cmd);
+      await kv.put(CTRL_KEY, JSON.stringify(ctrl));
+      return Response.json({ ok: true, queued: cmd, pending: ctrl.cmds.length });
+    }
+
+    if (body.__cmd === 'cancel_cmd') {
+      const before = ctrl.cmds.length;
+      ctrl.cmds = ctrl.cmds.filter((c) => c.id !== body.id && (!body.do || c.do !== body.do));
+      await kv.put(CTRL_KEY, JSON.stringify(ctrl));
+      return Response.json({ ok: true, removed: before - ctrl.cmds.length, queued: ctrl.cmds });
+    }
+
+    return Response.json({ ok: true, ctrl });
+  }
+
   const isHeartbeat = body.source === 'heartbeat' || body.engine_running === false;
 
   // Accumulate the yard map automatically, on every reading that carries GPS.
@@ -311,9 +480,26 @@ export async function onRequestPost({ request, env }) {
       const pausedRaw = await kv.get(COVERAGE_PAUSED_KEY);
       if (pausedRaw !== '1') {
         // Engine running (or a real mow-end payload) => a standalone lat/lon is real
-        // travel. Parked heartbeat => track[] only, no bare point. See gpsPointsFrom.
+        // travel. Parked heartbeat => neither the bare point NOR the track.
+        //
+        // FIXED 2026-08-11 (second pass): gating only the bare point left the leak
+        // wide open. The firmware clears trkHavePrev on every successful upload, so
+        // the movement gate is reset and the very next GPS fix ALWAYS passes it —
+        // meaning every parked heartbeat ships exactly one track point sitting on the
+        // parking spot, and this merged it unconditionally. Measured live: the garage
+        // cell climbing a visit every 5 minutes while real grass sat at 1-2 visits.
+        // Because coverage shades by visit count, the parking spot was on its way to
+        // becoming the most "confirmed" ground on the whole map.
+        //
+        // The >1 exception is load-bearing, not a hedge: a parked box emits exactly
+        // ONE point per upload. A real mow's track is dozens. So if a heartbeat turns
+        // up carrying many points, that's a mow-end upload that failed on WiFi and is
+        // only now being flushed — genuine yard, and dropping it would silently lose
+        // a whole mow's map every time the garage WiFi hiccups at the wrong moment.
         const movingNow = body.engine_running === true || body.mow_ended === true;
-        const pts = gpsPointsFrom(body, movingNow);
+        const trackN = Array.isArray(body.track) ? body.track.length : 0;
+        const allowTrack = movingNow || trackN > 1;
+        const pts = gpsPointsFrom(body, movingNow, allowTrack);
         if (pts.length > 0) {
           const covRaw = await kv.get(COVERAGE_KEY);
           const existing = covRaw ? JSON.parse(covRaw) : {};
@@ -429,5 +615,37 @@ export async function onRequestPost({ request, env }) {
     } catch (_) {}
   }
 
-  return Response.json({ ok: true });
+  // ---- Downlink: hand the box its config and at most one pending command -------
+  // This is the reply to the box's own upload, so it costs no extra radio time and
+  // no extra battery — the connection is already open.
+  let down = { ok: true };
+  if (kv) {
+    try {
+      const ctrl = await loadCtrl(kv);
+      let dirty = false;
+
+      // Process the ack FIRST, so a command the box just confirmed is never handed
+      // back to it on this same response.
+      if (typeof body.cmd_ack === 'number') {
+        const before = ctrl.cmds.length;
+        ctrl.cmds = ctrl.cmds.filter((c) => c.id !== body.cmd_ack);
+        if (ctrl.cmds.length !== before) dirty = true;
+      }
+      if (dirty) await kv.put(CTRL_KEY, JSON.stringify(ctrl));
+
+      down.cfg_rev = ctrl.cfg_rev || 0;
+      // Only ship the config body when the box is actually behind. Steady state is
+      // a two-field reply the firmware can parse without a JSON library.
+      if ((body.cfg_rev || 0) !== (ctrl.cfg_rev || 0) && Object.keys(ctrl.cfg).length) {
+        down.cfg = ctrl.cfg;
+      }
+      // Oldest first, exactly one. It stays queued until acked, so a box that dies
+      // mid-command simply gets it again on its next successful upload.
+      if (ctrl.cmds.length) {
+        const c = ctrl.cmds[0];
+        down.cmd = c.args ? { id: c.id, do: c.do, args: c.args } : { id: c.id, do: c.do };
+      }
+    } catch (_) { /* a control-channel fault must never fail the telemetry POST */ }
+  }
+  return Response.json(down);
 }
