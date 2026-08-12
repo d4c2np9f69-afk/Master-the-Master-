@@ -11,6 +11,7 @@
 // It talks to the real exported handlers through a mock KV. No network, no box.
 
 import { onRequestPost, onRequestGet } from '../functions/api/hours.js';
+const TOKEN = 'test-maintenance-token-0123456789';
 
 function mockKV(seed = {}) {
   const m = new Map(Object.entries(seed));
@@ -81,9 +82,38 @@ console.log('\n-- coverage gate (parked drift must not become mowed yard) --');
 }
 {
   const kv = mockKV();
-  await post(kv, parked({ engine_running: true, source: 'live', lat: 36.4780, lon: -86.6610, track: [] }));
-  check('engine running merges the bare lat/lon', (await nCells(kv)) === 1,
+  // Jeff idled it in the garage for 3 minutes to calibrate the vibration
+  // threshold, and that alone painted 6 cells over the parking spot. A running
+  // engine is not a moving mower — warm-ups and maintenance runs must not map.
+  await post(kv, parked({ engine_running: true, source: 'live',
+                          lat: 36.4780, lon: -86.6610, track: [] }));
+  check('a running engine standing still adds nothing', (await nCells(kv)) === 0,
     `got ${await nCells(kv)} cells`);
+
+  await post(kv, parked({ engine_running: true, source: 'live',
+                          lat: 36.4780, lon: -86.6610,
+                          track: [[36.4780, -86.6610]] }));
+  check('one lone track point is still not travel', (await nCells(kv)) === 0,
+    `got ${await nCells(kv)} cells`);
+}
+{
+  const kv = mockKV();
+  const many = [];
+  for (let i = 0; i < 10; i++) many.push([36.4780 + i * 0.00005, -86.6610]);
+  await post(kv, parked({ engine_running: true, source: 'live', track: many }));
+  check('genuine travel still maps', (await nCells(kv)) > 5, `got ${await nCells(kv)} cells`);
+}
+{
+  const kv = mockKV({ mower_ctrl_token: TOKEN });
+  const many = [];
+  for (let i = 0; i < 10; i++) many.push([36.4780 + i * 0.00005, -86.6610]);
+  await post(kv, parked({ engine_running: true, track: many }));
+  const before = await nCells(kv);
+  let r = await post(kv, { __cmd: 'queue_cmd', do: 'clear_coverage' });
+  check('clearing coverage needs a credential', r.status === 401, `status ${r.status}`);
+  const j = await (await post(kv, { __cmd: 'queue_cmd', do: 'clear_coverage', token: TOKEN })).json();
+  check('authorised clear wipes the map', (await nCells(kv)) === 0 && j.cells_removed === before,
+    JSON.stringify(j));
 }
 {
   const kv = mockKV();
@@ -166,7 +196,7 @@ console.log('\n-- per-cycle fields must not be inherited by the merge --');
 }
 
 console.log('\n-- control channel: auth --');
-const TOKEN = 'test-maintenance-token-0123456789';
+
 {
   const kv = mockKV();
   let r = await post(kv, { __cmd: 'queue_cmd', do: 'zero_tilt' });

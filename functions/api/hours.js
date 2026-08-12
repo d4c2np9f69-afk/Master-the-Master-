@@ -81,6 +81,13 @@ const CFG_LIMITS = {
 };
 const CMDS_ALLOWED = ['zero_tilt', 'clear_track', 'flush_buffer', 'reboot', 'ota'];
 
+// Server-side commands — handled here, never sent to the box.
+// `clear_coverage` deliberately did not exist while this endpoint was
+// unauthenticated, because a destructive remote command would have been
+// trivially abusable. It is safe now that changes require a credential, and it
+// beats a trip to the Cloudflare dashboard every time the map needs resetting.
+const SERVER_CMDS_ALLOWED = ['clear_coverage'];
+
 function emptyCtrl() { return { cfg_rev: 0, cfg: {}, cmds: [], next_id: 1 }; }
 
 async function loadCtrl(kv) {
@@ -440,6 +447,16 @@ export async function onRequestPost({ request, env }) {
       return Response.json({ ok: true, cfg_rev: ctrl.cfg_rev, cfg: ctrl.cfg, accepted, rejected });
     }
 
+    if (body.__cmd === 'queue_cmd' && SERVER_CMDS_ALLOWED.includes(String(body.do || ''))) {
+      // Acts on KV immediately rather than being queued for the box.
+      if (body.do === 'clear_coverage') {
+        const covRaw = await kv.get(COVERAGE_KEY);
+        const had = covRaw ? Object.keys(JSON.parse(covRaw)).length : 0;
+        await kv.put(COVERAGE_KEY, JSON.stringify({}));
+        return Response.json({ ok: true, did: 'clear_coverage', cells_removed: had });
+      }
+    }
+
     if (body.__cmd === 'queue_cmd') {
       const doWhat = String(body.do || '');
       if (!CMDS_ALLOWED.includes(doWhat)) {
@@ -504,10 +521,24 @@ export async function onRequestPost({ request, env }) {
         // up carrying many points, that's a mow-end upload that failed on WiFi and is
         // only now being flushed — genuine yard, and dropping it would silently lose
         // a whole mow's map every time the garage WiFi hiccups at the wrong moment.
-        const movingNow = body.engine_running === true || body.mow_ended === true;
+        // THIRD PASS, 2026-08-12. Gating on engine_running was still wrong: it
+        // treats "the engine is on" as "the mower is moving". Jeff idled it in the
+        // garage for three minutes to calibrate the vibration threshold and that
+        // alone painted 6 cells over the parking spot — the same corruption as
+        // before, reached by a different route. Warm-ups, maintenance runs and
+        // start-up checks would all keep doing it.
+        //
+        // The honest signal for travel is the breadcrumb track itself. Firmware
+        // only records a point after 3 m of real movement, so:
+        //   stationary (parked OR idling) -> 0 or 1 point
+        //   actually mowing               -> dozens
+        // Requiring 2+ points therefore means coverage can only ever grow from
+        // ground the mower genuinely covered, with no dependence on engine state
+        // at all. The bare lat/lon is no longer merged under any circumstance —
+        // a single position is a snapshot, never evidence of travel.
         const trackN = Array.isArray(body.track) ? body.track.length : 0;
-        const allowTrack = movingNow || trackN > 1;
-        const pts = gpsPointsFrom(body, movingNow, allowTrack);
+        const reallyMoved = trackN >= 2;
+        const pts = gpsPointsFrom(body, false, reallyMoved);
         if (pts.length > 0) {
           const covRaw = await kv.get(COVERAGE_KEY);
           const existing = covRaw ? JSON.parse(covRaw) : {};
