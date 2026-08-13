@@ -24,13 +24,13 @@ plus project knowledge. **(?) = needs Jeff to confirm.**
 | IP | Name | What it is |
 |---|---|---|
 | .215 | 20BEB83A8C5D | **Fire TV** (PiPup target) — FIXED tonight |
-| .209 | TY_WR | Tuya device — Sharky vacuum or a Smart Life socket (?) |
+| .209 | TY_WR | Tuya — hot-water-pump socket or Sharky (last two unclaimed Tuya devices) (?) |
 | .198 | CMWC1ZZABR | likely the **B-Hyve controller** (?) |
 | .166 | dp-730602E4 | possibly the **AirTV 2** (?) |
 | .164 / — | WS-SD00PJBA / WS-Uejlwa4yAnSI | (?) unknown "WS-" pair — LUX thermostat? |
 | — | esp32-21206C, esp32-6BFCA4 | one is the **mower box** (mostly "off" = sleeping, correct); what's the other? (?) |
 | .170/.224/.195/.210 | ESP_DFC785, ESP_DFE142, ESP_0BDE3B, espressif | **four more ESP8266/ESP32s, online** — Jeff's other builds? (?) |
-| .171 | Nest Protect | **smoke/CO alarm — HA has a Nest integration; Guardian candidate, zero new hardware** |
+| .171 | "Nest Protect" | ❌ NOT a smoke alarm — see clean census: Angela's bed-lamp Tuya socket with a fake hostname |
 | .222 | NETGEAR NTV300 | old NeoTV streamer — still online; still used? (?) |
 | .197 | MyQ-E31 | ⚠️ **MyQ hub still online — being sold on eBay. Unplug + factory-reset before listing** |
 
@@ -44,7 +44,7 @@ plus project knowledge. **(?) = needs Jeff to confirm.**
 ## Entertainment / family
 Vizio TV ×2 + VIZIOCastAudio4523 (.68 = the soundbar) + VC-E-L-2T3HD74 (.251, Vizio E-series) ·
 32onnRokuTV (.241) · PS5 · XBOX · HP printer (.208) · Angelas-iPhone (.172) · Jeff's iPhone (.223) ·
-Braxtons-MacBook-Air ·  DellMasterBed (= Lenovo B570) · OfficeMain (?) · Apple Watches (several
+Braxtons-MacBook-Air ·  DellMasterBed (= Angela's Dell, office) · OfficeMain (?) · Apple Watches (several
 rotating private MACs) · assorted iPhones/UUID names = iOS private WiFi addresses (normal)
 
 ## Oddballs to identify
@@ -112,8 +112,8 @@ cams) will re-register as they wake — that's correct behavior.
 - **.171 impostor behavior:** constant flap (up/down every 1–2 min) but never dies — battery-saver or weak-radio fingerprint, NOT a solid mains socket pattern. Unplug game (4 Smart Life sockets + Sharky dock) still the decider.
 - Kodi: no dedicated HTPC — installed across multiple computers.
 
-## .171 endgame (2026-08-13)
-Port 6668 open on .171 and .209 = both CONFIRMED Tuya-local devices. Tuya registry
-holds 5 hardware devices; MAC-embedded IDs prove .224=Jeff's bed lamp, .170=garage fan.
-Remaining lineup for the ".171 Nest Protect" impostor: **hot-water-pump socket,
-Angela's bed-lamp socket, or Sharky** (flap pattern favors Sharky). One unplug round settles it.
+## .171 endgame — SOLVED 2026-08-13 14:50
+Unplug test: Angela's bed-lamp socket pulled → .171 down, held 60s+ (debounced monitor).
+**.171 = Angela's bed-lamp Tuya socket.** All fake-hostname mysteries traced to store-bought
+Tuya sockets. Remaining: .209 TY_WR and sleepy .195 ESP_0BDE3B = hot-water-pump socket
+and Sharky, in some order (low stakes — next natural clue settles it).
