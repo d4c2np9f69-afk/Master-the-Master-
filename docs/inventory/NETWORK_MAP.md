@@ -18,7 +18,7 @@ plus project knowledge. **(?) = needs Jeff to confirm.**
 | .66 | — | **Beehive** (HA, Beelink J45) — FIXED |
 | .196 | RE200 | ✅ CONVERTED 08-13: **wired Access Point** (Cat6 backhaul). Broadcasts Loewen301 (2.4, ch 6) + Loewen301-5G (WPA2, house password). Admin: http://192.168.1.196, password in HCC-secrets. The volatile wireless-repeater hop is GONE |
 | .194 | 301Server | (?) house-number name — the beast? CodeProject.AI host? |
-| .121 | GaragePC | HP TouchSmart (wired NIC; second random-MAC entry is its WiFi) |
+| .121 | GaragePC | HP TouchSmart — ⚠️ OFFLINE since extender retirement: its WiFi was joined to the extender's own `Loewen301_Ext` SSID (now gone). Fix on next garage visit: join `Loewen301` (same password). Both garage Tuya sockets + mower box reach the gateway fine without the extender |
 
 ## HCC project devices
 | IP | Name | What it is |
@@ -87,12 +87,12 @@ cams) will re-register as they wake — that's correct behavior.
 | .198 | CMWC1ZZABR | likely B-Hyve controller (?) |
 | .166 | dp-730602E4 | possibly AirTV 2 (?) |
 | .171 | "Nest Protect" | ✅ **UNMASKED 08-13: Angela's bed-lamp Tuya socket** — proven by unplug test (down, held 60s+, at 14:50). Cheap Tuya firmware self-reporting a fake hostname. There is NO Nest hardware in this house |
-| .209 | TY_WR | Tuya device (socket or vacuum) (?) |
+| .209 | TY_WR | ✅ **Hot-water recirculating pump socket** (garage) — last Tuya standing after Sharky=.231. Switched OFF but plugged in, so radio stays up. Flap = weak garage signal |
 | .204 | Linux | Amazon MAC — likely Blink Sync Module |
-| .231 | Linux | (?) unknown, WiFi |
+| .231 | Linux | ✅ **SHARKY** (robot vacuum) — proven 08-13 15:03: died the moment Jeff switched it off. Linux-based, hostname says only "Linux" |
 | .214 | Blink-Device | one of the 6 Blink cameras |
 | .200/.202/.205 | wlan0 ×3 | likely Echo Dots (one now in the GARAGE per Jeff) (?) |
-| .170 / .224 | ESP_DFC785 / ESP_DFE142 | ✅ **Garage-fan socket / Jeff's bed-lamp socket** — Tuya IDs embed their MACs; the "mystery ESP8266s" were store-bought Tuya sockets all along. .195 ESP_0BDE3B = likely a third Tuya socket (asleep) |
+| .170 / .224 | ESP_DFC785 / ESP_DFE142 | ✅ **Garage-fan socket / Jeff's bed-lamp socket** — Tuya IDs embed their MACs; the "mystery ESP8266s" were store-bought Tuya sockets all along. .195 ESP_0BDE3B = the remaining Tuya socket (mini smart socket / smart socket 2), sleepy |
 | .82 | none-6 | (?) unknown |
 | .161 | none-5 | (?) unknown |
 | .172 | (UUID name) | Angela's iPhone (private-address mode) |
@@ -112,8 +112,10 @@ cams) will re-register as they wake — that's correct behavior.
 - **.171 impostor behavior:** constant flap (up/down every 1–2 min) but never dies — battery-saver or weak-radio fingerprint, NOT a solid mains socket pattern. Unplug game (4 Smart Life sockets + Sharky dock) still the decider.
 - Kodi: no dedicated HTPC — installed across multiple computers.
 
-## .171 endgame — SOLVED 2026-08-13 14:50
-Unplug test: Angela's bed-lamp socket pulled → .171 down, held 60s+ (debounced monitor).
-**.171 = Angela's bed-lamp Tuya socket.** All fake-hostname mysteries traced to store-bought
-Tuya sockets. Remaining: .209 TY_WR and sleepy .195 ESP_0BDE3B = hot-water-pump socket
-and Sharky, in some order (low stakes — next natural clue settles it).
+## Tuya endgame — FULLY SOLVED 2026-08-13
+- **.171 = Angela's bed-lamp socket** (unplug test, 14:50)
+- **.231 = Sharky** (off-switch test, 15:03 — the "Linux" unknown all along)
+- **.209 = hot-water pump socket** (last Tuya standing; off-but-plugged-in)
+- **.195 = remaining Tuya socket**, sleepy
+- .224 = Jeff's bed lamp, .170 = garage fan (MAC-embedded IDs)
+Every fake-hostname mystery on the network is now identified.
