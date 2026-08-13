@@ -39,7 +39,7 @@ plus project knowledge. **(?) = needs Jeff to confirm.**
 |---|---|---|
 | .214–.220, .204 | Blink-Device ×7, "Linux" | 6 Blink cams + sync module (.204 is Amazon-MAC "Linux" = likely Sync Module 2) |
 | Mini-1 / Mini-2 | — | likely **Blink Mini** indoor cams (Mini-2 has an Espressif MAC) (?) |
-| .207/.104 + off entries | Zmodo-IPC, BraxtonBedroom3/4, BraxtonsBedroom, Main-Bedroom-2 | **legacy Zmodo camera system, partially ONLINE** — still wanted, or retire? (?) |
+| — | Zmodo fleet | ✅ ALL DARK 08-13: .104 was a stale lease (already dead); the live .207 was found ON THE BACK DECK plugged in with the covered TV — unplugged by Jeff, factory-reset pending, eBay pile. Braxton-room units long gone. Privacy issue closed |
 
 ## Entertainment / family
 Vizio TV ×2 + VIZIOCastAudio4523 (.68 = the soundbar) + VC-E-L-2T3HD74 (.251, Vizio E-series) ·
