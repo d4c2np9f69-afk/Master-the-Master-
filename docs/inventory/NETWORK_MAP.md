@@ -92,7 +92,7 @@ cams) will re-register as they wake — that's correct behavior.
 | .231 | Linux | (?) unknown, WiFi |
 | .214 | Blink-Device | one of the 6 Blink cameras |
 | .200/.202/.205 | wlan0 ×3 | likely Echo Dots (one now in the GARAGE per Jeff) (?) |
-| .170/.224/.195 | ESP_DFC785 / ESP_DFE142 / ESP_0BDE3B | (?) three ESP8266s — ask Jeff what he built |
+| .170 / .224 | ESP_DFC785 / ESP_DFE142 | ✅ **Garage-fan socket / Jeff's bed-lamp socket** — Tuya IDs embed their MACs; the "mystery ESP8266s" were store-bought Tuya sockets all along. .195 ESP_0BDE3B = likely a third Tuya socket (asleep) |
 | .82 | none-6 | (?) unknown |
 | .161 | none-5 | (?) unknown |
 | .172 | (UUID name) | Angela's iPhone (private-address mode) |
@@ -111,3 +111,9 @@ cams) will re-register as they wake — that's correct behavior.
 - **Sharky is ALIVE in HA** (docked, 100%, full telemetry) — the July "offline, needs power-cycle" note is stale. Sharky is a live suspect for .171 or .209.
 - **.171 impostor behavior:** constant flap (up/down every 1–2 min) but never dies — battery-saver or weak-radio fingerprint, NOT a solid mains socket pattern. Unplug game (4 Smart Life sockets + Sharky dock) still the decider.
 - Kodi: no dedicated HTPC — installed across multiple computers.
+
+## .171 endgame (2026-08-13)
+Port 6668 open on .171 and .209 = both CONFIRMED Tuya-local devices. Tuya registry
+holds 5 hardware devices; MAC-embedded IDs prove .224=Jeff's bed lamp, .170=garage fan.
+Remaining lineup for the ".171 Nest Protect" impostor: **hot-water-pump socket,
+Angela's bed-lamp socket, or Sharky** (flap pattern favors Sharky). One unplug round settles it.
