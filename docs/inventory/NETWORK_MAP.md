@@ -44,7 +44,7 @@ plus project knowledge. **(?) = needs Jeff to confirm.**
 ## Entertainment / family
 Vizio TV ×2 + VIZIOCastAudio4523 (.68 = the soundbar) + VC-E-L-2T3HD74 (.251, Vizio E-series) ·
 32onnRokuTV (.241) · PS5 · XBOX · HP printer (.208) · Angelas-iPhone (.172) · Jeff's iPhone (.223) ·
-Braxtons-MacBook-Air ·  DellMasterBed (= Angela's Dell, office) · OfficeMain (?) · Apple Watches (several
+Braxtons-MacBook-Air ·  DellMasterBed (= B570 w/ inherited name) · OfficeMain (?) · Apple Watches (several
 rotating private MACs) · assorted iPhones/UUID names = iOS private WiFi addresses (normal)
 
 ## Oddballs to identify
@@ -100,7 +100,7 @@ cams) will re-register as they wake — that's correct behavior.
 | .227 | unknownf66584925fe7 | (?) iOS-style private address |
 
 | .176 | JeffsLapTop | ✅ **Acer Aspire E5-576** — i3-8130U (8th gen, AVX-capable — could host AI workloads unlike B570/GaragePC), 16 GB, 466 GB. On WiFi — move to Loewen301-5G |
-| .173 | DellMasterBed | ✅ **DELL laptop — Angela's 2nd work computer, in the office** (per Angela 08-13). Hostname = a Dell once in the master bedroom. NOT the B570 — that stays shelf-spare, not on the network |
+| .173 | DellMasterBed | ✅ **Lenovo B570 spare laptop** — Windows name inherited from Jeff's old retired master-bedroom Dell (hostnames are SELF-reported; recorded 08-05, confirmed 08-13 when Jeff remembered the old Dell). Angela's client Dell is a separate corporate machine, not this entry |
 | .232 | esp32-6BFCA4 | ✅ **THE MOWER BOX** — confirmed 08-13 by 5-min heartbeat timing after the purge. The dormant esp32-21206C is a DIFFERENT board (?) |
 
 **Every (?) row is a question only Jeff can answer** — fill them in as identified.
