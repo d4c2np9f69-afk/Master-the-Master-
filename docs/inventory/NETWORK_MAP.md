@@ -99,4 +99,8 @@ cams) will re-register as they wake — that's correct behavior.
 | .223 | iPhone | Jeff's iPhone |
 | .227 | unknownf66584925fe7 | (?) iOS-style private address |
 
+| .176 | JeffsLapTop | Jeff's laptop (WiFi — suggest joining Loewen301-5G) |
+| .173 | DellMasterBed (Eth LAN-1, 1G) | Lenovo B570, WIRED at the entertainment cluster |
+| .232 | esp32-6BFCA4 | ✅ **THE MOWER BOX** — confirmed 08-13 by 5-min heartbeat timing after the purge. The dormant esp32-21206C is a DIFFERENT board (?) |
+
 **Every (?) row is a question only Jeff can answer** — fill them in as identified.
