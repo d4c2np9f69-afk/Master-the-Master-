@@ -91,7 +91,7 @@ cams) will re-register as they wake — that's correct behavior.
 | .204 | Linux | Amazon MAC — likely Blink Sync Module |
 | .231 | Linux | ✅ **SHARKY** (robot vacuum) — proven 08-13 15:03: died the moment Jeff switched it off. Linux-based, hostname says only "Linux" |
 | .214 | Blink-Device | one of the 6 Blink cameras |
-| .200/.202/.205 | wlan0 ×3 | likely Echo Dots (one now in the GARAGE per Jeff) (?) |
+| .199/.200/.202/.205 | wlan0 / (new) | ✅ **The 4 Sylvania SMART+ WiFi lamp plugs, living room** — Tuya port 6668 confirmed on all four 08-13 evening. NOT Echo Dots, NOT Bluetooth: earlier "pull test showed nothing" was a monitor watching the wrong IPs. CAN join HA via Smart Life re-pair if ever wanted |
 | .170 / .224 | ESP_DFC785 / ESP_DFE142 | ✅ **Garage-fan socket / Jeff's bed-lamp socket** — Tuya IDs embed their MACs; the "mystery ESP8266s" were store-bought Tuya sockets all along. .195 ESP_0BDE3B = the remaining Tuya socket (mini smart socket / smart socket 2), sleepy |
 | .82 | none-6 | (?) unknown |
 | .161 | none-5 | (?) unknown |
@@ -113,9 +113,10 @@ cams) will re-register as they wake — that's correct behavior.
 - Kodi: no dedicated HTPC — installed across multiple computers.
 
 ## Tuya endgame — FULLY SOLVED 2026-08-13
-- **.171 = Angela's bed-lamp socket** (unplug test, 14:50)
+- **.171 = Angela's bed-lamp socket** (unplug test, 14:50; replugged, back online)
 - **.231 = Sharky** (off-switch test, 15:03 — the "Linux" unknown all along)
 - **.209 = hot-water pump socket** (last Tuya standing; off-but-plugged-in)
 - **.195 = remaining Tuya socket**, sleepy
 - .224 = Jeff's bed lamp, .170 = garage fan (MAC-embedded IDs)
+- **.199/.200/.202/.205 = the 4 Sylvania WiFi lamp plugs** (Tuya port-scan, post-reset)
 Every fake-hostname mystery on the network is now identified.
