@@ -57,8 +57,18 @@ async function bhyveLogin(email, password) {
 
 export async function onRequestGet({ env, request }) {
   const url = new URL(request.url);
-  const email = env.BHYVE_EMAIL || url.searchParams.get('e') || '';
-  const password = env.BHYVE_PASSWORD || url.searchParams.get('p') || '';
+  // The caller's credentials win over the deployment defaults, not the other way
+  // round. These env vars are set once at deploy time and quietly go stale; the
+  // query params come from what Jeff actually typed into the app and are the same
+  // login the B-Hyve phone app is using right now.
+  //
+  // The old order had env FIRST, so a stale deployment variable silently overrode
+  // the correct credentials the app was sending on every request — which is exactly
+  // how this endpoint ended up reporting "not authorized" for an account whose
+  // password had never changed and whose phone app was working fine.
+  const email = url.searchParams.get('e') || env.BHYVE_EMAIL || '';
+  const password = url.searchParams.get('p') || env.BHYVE_PASSWORD || '';
+  const credSource = url.searchParams.get('e') ? 'request' : 'env';
 
   if (!email || !password) {
     return Response.json({ ok: false, error: 'credentials_not_provided' }, { status: 400 });
@@ -185,6 +195,17 @@ export async function onRequestGet({ env, request }) {
     return Response.json(resp);
 
   } catch (e) {
-    return Response.json({ ok: false, error: e.message }, { status: 503 });
+    // Say WHICH credentials were used. A stale deployment variable silently
+    // overriding the app's own login is what made this failure look like a
+    // password problem for an account whose password was fine — the error should
+    // never leave that ambiguous again.
+    return Response.json({
+      ok: false,
+      error: e.message,
+      cred_source: credSource,
+      hint: credSource === 'env'
+        ? 'Used BHYVE_EMAIL/BHYVE_PASSWORD from the Cloudflare deployment, not app-supplied credentials.'
+        : 'Used credentials supplied by the app request.',
+    }, { status: 503 });
   }
 }
