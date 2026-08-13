@@ -74,6 +74,14 @@ multimeter · wire strippers/cutters · headlamp · screwdrivers · Energetic re
 | SONOFF MINI-D (Matter, dry contact) | 1 | ON HAND | — | wire + eWeLink Inching + Matter-commission (Pending Item 1) |
 | MyQ hub + sensor | 1 set | RESALE | — | eBay when Jeff gets to it |
 
+## Network
+
+| Item | Qty | Status | Cost | Notes |
+|---|---|---|---|---|
+| MoCA adapter set | 1 pr | ON HAND — SHELF | — | Garage WiFi measured ADEQUATE 08-13 (mower box, last 50 uploads: mean −71.5 dBm, worst −76, zero buffered uploads ever; GaragePC + Tuya plug also clean). **Trigger to deploy:** if the Matter garage relay feels laggy once installed → MoCA backhaul + AP in garage. Needs coax at garage — unverified. |
+
+**ISP note:** Jeff mentioned an AT&T box 08-13; older records said Xfinity. Confirm which gateway is current before any network work.
+
 ## Other on-hand (from CLAUDE.md spare inventory, unchanged)
 
 KESU 500GB USB drive (AirTV DVR) · Lenovo B570 (kiosk candidate) · Delam XLR mic
