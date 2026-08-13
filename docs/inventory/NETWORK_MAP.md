@@ -100,7 +100,7 @@ cams) will re-register as they wake — that's correct behavior.
 | .227 | unknownf66584925fe7 | (?) iOS-style private address |
 
 | .176 | JeffsLapTop | ✅ **Acer Aspire E5-576** — i3-8130U (8th gen, AVX-capable — could host AI workloads unlike B570/GaragePC), 16 GB, 466 GB. On WiFi — move to Loewen301-5G |
-| .173 | DellMasterBed | ✅ **Lenovo B570** (hand-me-down hostname, per 08-05 note — original record was RIGHT), wired |
+| .173 | DellMasterBed | ✅ **DELL laptop — Angela's 2nd work computer, in the office** (per Angela 08-13). Hostname = a Dell once in the master bedroom. NOT the B570 — that stays shelf-spare, not on the network |
 | .232 | esp32-6BFCA4 | ✅ **THE MOWER BOX** — confirmed 08-13 by 5-min heartbeat timing after the purge. The dormant esp32-21206C is a DIFFERENT board (?) |
 
 **Every (?) row is a question only Jeff can answer** — fill them in as identified.
