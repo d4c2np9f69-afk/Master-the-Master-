@@ -62,3 +62,41 @@ rotating private MACs) · assorted iPhones/UUID names = iOS private WiFi address
 - **Generic "Wireless-N Repeater"** (no-name, 2.4-only, MAC 00:E0:20:84:30:FB, broadcasts `Loewen301_Ext`, default 192.168.10.1 admin/admin): **RETIRE.** Cheap wireless-only repeat, pure airtime pollution next to the new wired AP. Unplug once RE200 coverage is confirmed; it has a LAN port but is not worth AP conversion.
 - **D-Link DAP-1520** (dual-band, MAC 1C:5F:2B:B9:08:62): the `Loewen301-EXT`/`-EXT5G` broadcaster. **RETIRE — no Ethernet port, conversion impossible** (Jeff spotted the disqualifier himself). eBay-able.
 - RE200 admin password set = WiFi password (recorded in HCC-secrets/att_bgw320_gateway.txt file).
+
+---
+
+# CLEAN CENSUS — after "Clear and Rescan," 2026-08-13 late (the label layer)
+
+Gateway cannot rename devices; THIS table is the authoritative label for every live device.
+80+ stale entries purged; only live devices below. Sleepers (watches, mower ESP32, off Blink
+cams) will re-register as they wake — that's correct behavior.
+
+| IP | Gateway shows | ACTUAL DEVICE |
+|---|---|---|
+| .66 | homeassistant (Eth LAN-3, 1G) | **Beehive** — HA on Beelink J45, FIXED |
+| .196 | RE200 (Eth LAN-1, 1G) | **Wired AP** — Loewen301 ch6 + Loewen301-5G |
+| .215 | 20BEB83A8C5D | **Fire TV** (PiPup target), FIXED |
+| .194 | 301Server (Eth LAN-4, 1G) | (?) — ask Jeff: the beast? |
+| .222 | NETGEAR NTV300 (Eth LAN-1) | old NeoTV streamer — WIRED; still used? |
+| .68 | VIZIOCastAudio4523 (Eth LAN-1) | Vizio soundbar |
+| .164 | WS-SD00PJBA (Eth LAN-1) | (?) wired unknown — on the LAN-1 switch cluster |
+| .251 | VC-E-L-2T3HD74 | Vizio E-series TV |
+| .241 | 32onnRokuTV | onn 32" Roku TV |
+| .208 | HP444BD6 | HP printer |
+| .197 | MyQ-E31 | ⚠️ MyQ hub — UNPLUG + reset for eBay |
+| .198 | CMWC1ZZABR | likely B-Hyve controller (?) |
+| .166 | dp-730602E4 | possibly AirTV 2 (?) |
+| .171 | "Nest Protect" | ⚠️ IMPOSTOR — mains-powered Tuya-family device. NOT the C20A (proven by battery-pull 08-13). Suspects: a Smart Life socket or Sharky dock. Identify by unplugging suspects one at a time |
+| .209 | TY_WR | Tuya device (socket or vacuum) (?) |
+| .204 | Linux | Amazon MAC — likely Blink Sync Module |
+| .231 | Linux | (?) unknown, WiFi |
+| .214 | Blink-Device | one of the 6 Blink cameras |
+| .200/.202/.205 | wlan0 ×3 | likely Echo Dots (one now in the GARAGE per Jeff) (?) |
+| .170/.224/.195 | ESP_DFC785 / ESP_DFE142 / ESP_0BDE3B | (?) three ESP8266s — ask Jeff what he built |
+| .82 | none-6 | (?) unknown |
+| .161 | none-5 | (?) unknown |
+| .172 | (UUID name) | Angela's iPhone (private-address mode) |
+| .223 | iPhone | Jeff's iPhone |
+| .227 | unknownf66584925fe7 | (?) iOS-style private address |
+
+**Every (?) row is a question only Jeff can answer** — fill them in as identified.
