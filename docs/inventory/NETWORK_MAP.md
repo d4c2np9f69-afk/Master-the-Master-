@@ -76,10 +76,10 @@ cams) will re-register as they wake — that's correct behavior.
 | .66 | homeassistant (Eth LAN-3, 1G) | **Beehive** — HA on Beelink J45, FIXED |
 | .196 | RE200 (Eth LAN-1, 1G) | **Wired AP** — Loewen301 ch6 + Loewen301-5G |
 | .215 | 20BEB83A8C5D | **Fire TV** (PiPup target), FIXED |
-| .194 | 301Server (Eth LAN-4, 1G) | (?) — ask Jeff: the beast? |
+| .194 | 301Server (Eth LAN-4, 1G) | ✅ **THE BEAST** — confirmed 08-13 (its own Ethernet reports .194). CodeProject.AI host, Claude coworker machine |
 | .222 | NETGEAR NTV300 (Eth LAN-1) | old NeoTV streamer — WIRED; still used? |
 | .68 | VIZIOCastAudio4523 (Eth LAN-1) | Vizio soundbar |
-| .164 | WS-SD00PJBA (Eth LAN-1) | (?) wired unknown — on the LAN-1 switch cluster |
+| .164 | WS-SD00PJBA (Eth LAN-1) | (?) wired, on the LAN-1 ENTERTAINMENT cluster (shares switch with soundbar/NTV300) — ask Jeff |
 | .251 | VC-E-L-2T3HD74 | Vizio E-series TV |
 | .241 | 32onnRokuTV | onn 32" Roku TV |
 | .208 | HP444BD6 | HP printer |
