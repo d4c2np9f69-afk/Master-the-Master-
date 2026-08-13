@@ -35,13 +35,16 @@ swap to a ZBDongle-E, decided 2026-08-13).
 
 | Item | Qty | Status | Cost | Notes |
 |---|---|---|---|---|
-| Kasa HS220 dimmer, single-pole (WiFi) | 2 seen — **confirm count** | ON HAND | — | Photographed as two SINGLE boxes, not the P3 3-pack the plan assumed. Keep + redeploy to WiFi-OK rooms (see plan) |
-| Kasa HS200 (WiFi) | confirm | ON HAND? | — | not in photos — confirm it exists |
-| Inovelli Blue 2-1 (Zigbee) | 0 | **TO BUY — Jeff confirmed** | ~$60 ea | 1 first as living-room test, then standardize main rooms |
-| Leviton Decora E5603-SW 3-way, lever-edge (dumb) | 1 | ON HAND | — | real 3-way — candidate for garage 2-location if it stays dumb |
-| GE UltraPro grounding paddle, single-pole (dumb) | 1 | ON HAND | — | spare — e.g. fresh switch for a bedroom repurposed-receptacle position |
-| Lepro 14 W LED recessed downlights w/ j-boxes | several — **confirm count** | ON HAND | — | 120 V, 0.124 A, damp-rated. Future rooms/garage. 14 W each — count them into any dimmer load calc |
-| ❓ Beige square device, FCC/CE marks, button on face | 1 | UNIDENTIFIED | — | need model # from inside/back |
+| Kasa HS220 dimmer, single-pole (WiFi, 150 W LED) | **2 (confirmed)** | ON HAND | — | **ASSIGNED: living room** (12 ft from dongle — mesh contribution redundant there, WiFi is fine). #2 = bedroom or spare, pending Inovelli test |
+| Inovelli Blue 2-1 (Zigbee) | 0 | **TO BUY — likely 2, not 3** | ~$60 ea | **#1 = KITCHEN** — farthest point from dongle, the mesh's critical router AND the dimming test unit. #2 = bedroom if mesh needs it there |
+| Leviton Decora E5603-SW 3-way (dumb) | 1 | ON HAND | — | **ASSIGNED: garage 2-location, stays dumb** — closes Pending Item 19 at $0 |
+| GE UltraPro paddle, single-pole (dumb) | 1 | ON HAND | — | bedroom repurposed-receptacle position |
+| MOES single-gang dimmer module (the beige box) | 1 | ON HAND | — | **ASSIGNED: single LED over kitchen sink (~12 W** vs 100 W/gang limit — finally a load it fits). ⚠️ needs a MOMENTARY push-button at the wall, not a standard toggle (toggles cause continuous-ramp misbehavior, researched 08-06). Confirm protocol from label: WM- prefix = WiFi/Tuya, ZM- = Zigbee |
+| Lepro 14 W LED downlights w/ j-boxes | several | ON HAND — **SPARES ONLY** | — | replacements for existing fixtures, NOT expansion (Jeff 08-13) |
+
+**Mesh geometry (Jeff 08-13):** kitchen is the FARTHEST point needing mesh; living
+room is ~12 ft from the dongle. Router priority is therefore kitchen first — not
+living room as originally assumed.
 
 ## Wiring consumables & tools (from bin photos — no purchases needed for install work)
 
