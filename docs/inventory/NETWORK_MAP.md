@@ -79,7 +79,7 @@ cams) will re-register as they wake — that's correct behavior.
 | .194 | 301Server (Eth LAN-4, 1G) | ✅ **THE BEAST** — confirmed 08-13 (its own Ethernet reports .194). CodeProject.AI host, Claude coworker machine |
 | .222 | NETGEAR NTV300 (Eth LAN-1) | old NeoTV streamer — WIRED; still used? |
 | .68 | VIZIOCastAudio4523 (Eth LAN-1) | Vizio soundbar |
-| .164 | WS-SD00PJBA (Eth LAN-1) | (?) wired, on the LAN-1 ENTERTAINMENT cluster (shares switch with soundbar/NTV300) — ask Jeff |
+| .164 | WS-SD00PJBA (Eth LAN-1) | ✅ **Angela's work computer** (Lenovo/LCFC-built, corporate hostname) — wired at her office jack |
 | .251 | VC-E-L-2T3HD74 | Vizio E-series TV |
 | .241 | 32onnRokuTV | onn 32" Roku TV |
 | .208 | HP444BD6 | HP printer |
@@ -104,3 +104,10 @@ cams) will re-register as they wake — that's correct behavior.
 | .232 | esp32-6BFCA4 | ✅ **THE MOWER BOX** — confirmed 08-13 by 5-min heartbeat timing after the purge. The dormant esp32-21206C is a DIFFERENT board (?) |
 
 **Every (?) row is a question only Jeff can answer** — fill them in as identified.
+
+## Identifications 2026-08-13 afternoon
+- **.164 WS-SD00PJBA = Angela's WORK COMPUTER** (Lenovo-built, corporate hostname), wired via house Cat6.
+- **LAN-1 is the central Cat6 fan-out switch**, not a TV-stand cluster — its devices are in different rooms. TV stand physically holds only: J45/Beehive, soundbar, TV, the beast. (Second unmanaged switch's location: TBD, invisible by design.)
+- **Sharky is ALIVE in HA** (docked, 100%, full telemetry) — the July "offline, needs power-cycle" note is stale. Sharky is a live suspect for .171 or .209.
+- **.171 impostor behavior:** constant flap (up/down every 1–2 min) but never dies — battery-saver or weak-radio fingerprint, NOT a solid mains socket pattern. Unplug game (4 Smart Life sockets + Sharky dock) still the decider.
+- Kodi: no dedicated HTPC — installed across multiple computers.
