@@ -10,19 +10,49 @@ const LOGIN_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
 };
 
+// Orbit identifies the calling client with an `orbit-app-id` header. This file
+// never sent one and started getting HTTP 401 on login, while the HA integration
+// — which DOES send it, and cycles through these same three values — authenticated
+// fine against the identical account from a different IP on the same day. That
+// asymmetry is the whole diagnosis: the credentials were never the problem.
+//
+// Kept as a list, in the same order the HA side uses, because Orbit has retired
+// individual app ids before. If all three are rejected the error reports what each
+// one actually returned rather than a bare "login failed".
+const APP_IDS = [
+  'Orbit Support Dashboard',
+  'com.orbitbhyve.ios',
+  'com.orbit.orbitbhyve',
+];
+
 async function bhyveLogin(email, password) {
-  const r = await fetch(`${API_BASE}/session`, {
-    method: 'POST',
-    headers: LOGIN_HEADERS,
-    body: JSON.stringify({ session: { email, password } }),
-  });
-  const body = await r.text().catch(() => '');
-  if (!r.ok) throw new Error(`login_failed — HTTP ${r.status} — ${body.slice(0, 120)}`);
-  const data = JSON.parse(body);
-  const token = data.orbit_session_token || data.token || data.session_token || data.access_token;
-  const userId = data.user_id || data.id || data.userId;
-  if (!token || !userId) throw new Error(`login_failed — no token in response — keys: ${Object.keys(data).join(',')}`);
-  return { token, userId };
+  const attempts = [];
+  for (const appId of APP_IDS) {
+    let r, body = '';
+    try {
+      r = await fetch(`${API_BASE}/session`, {
+        method: 'POST',
+        headers: { ...LOGIN_HEADERS, 'orbit-app-id': appId },
+        body: JSON.stringify({ session: { email, password } }),
+        signal: AbortSignal.timeout(15000),
+      });
+      body = await r.text().catch(() => '');
+    } catch (e) {
+      attempts.push(`${appId}: ${e.name || 'network error'}`);
+      continue;
+    }
+    if (!r.ok) { attempts.push(`${appId}: HTTP ${r.status} — ${body.slice(0, 60)}`); continue; }
+
+    let data;
+    try { data = JSON.parse(body); }
+    catch (_) { attempts.push(`${appId}: 200 but not JSON`); continue; }
+
+    const token = data.orbit_session_token || data.token || data.session_token || data.access_token;
+    const userId = data.user_id || data.id || data.userId;
+    if (token && userId) return { token, userId, appId };
+    attempts.push(`${appId}: 200 but no token — keys: ${Object.keys(data).join(',')}`);
+  }
+  throw new Error(`login_failed — ${attempts.join(' | ')}`);
 }
 
 export async function onRequestGet({ env, request }) {
@@ -35,13 +65,16 @@ export async function onRequestGet({ env, request }) {
   }
 
   try {
-    const { token, userId } = await bhyveLogin(email, password);
+    const { token, userId, appId } = await bhyveLogin(email, password);
 
     const devHeaders = {
       'Accept': 'application/json, text/plain, */*',
       'Host': 'api.orbitbhyve.com',
       'Referer': 'https://api.orbitbhyve.com/',
       'Orbit-Session-Token': token,
+      // Carry the SAME app id that the login was accepted under. Sending it only
+      // on /session would just push the 401 one call further down.
+      'orbit-app-id': appId,
       'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     };
 
