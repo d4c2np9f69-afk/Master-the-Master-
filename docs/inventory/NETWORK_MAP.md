@@ -16,7 +16,7 @@ plus project knowledge. **(?) = needs Jeff to confirm.**
 |---|---|---|
 | .254 | gateway | AT&T BGW320-500 |
 | .66 | — | **Beehive** (HA, Beelink J45) — FIXED |
-| .253 | RE200 | ⚠️ **TP-Link RE200 WiFi extender — ONLINE. Jeff never mentioned it. Where is it, and is it still wanted?** A wireless extender can interact oddly with the new split-SSID setup |
+| .196 | RE200 | ✅ CONVERTED 08-13: **wired Access Point** (Cat6 backhaul). Broadcasts Loewen301 (2.4, ch 6) + Loewen301-5G (WPA2, house password). Admin: http://192.168.1.196, password in HCC-secrets. The volatile wireless-repeater hop is GONE |
 | .194 | 301Server | (?) house-number name — the beast? CodeProject.AI host? |
 | .121 | GaragePC | HP TouchSmart (wired NIC; second random-MAC entry is its WiFi) |
 
@@ -56,3 +56,9 @@ rotating private MACs) · assorted iPhones/UUID names = iOS private WiFi address
 ## Standing notes
 - Names are device-reported; this file is the rename layer. Update it when devices are added/retired.
 - The 2.4 channel is PINNED (1). If WiFi congestion ever appears, re-evaluate here **and** check the Zigbee channel before moving it.
+
+## Update 2026-08-13 late — extender fleet
+- **RE200 → wired AP, done** (see Infrastructure row). Login lesson: its 2018 login page fails SILENTLY when the request rides a flapping wireless link — every "wrong password" was really a dropped link. Wired access worked first try.
+- **Generic "Wireless-N Repeater"** (no-name, 2.4-only, MAC 00:E0:20:84:30:FB, broadcasts `Loewen301_Ext`, default 192.168.10.1 admin/admin): **RETIRE.** Cheap wireless-only repeat, pure airtime pollution next to the new wired AP. Unplug once RE200 coverage is confirmed; it has a LAN port but is not worth AP conversion.
+- Remaining `Loewen301-EXT`/`-EXT5G` broadcaster: third extender, not yet physically identified — same verdict likely. Find and retire.
+- RE200 admin password set = WiFi password (recorded in HCC-secrets/att_bgw320_gateway.txt file).
