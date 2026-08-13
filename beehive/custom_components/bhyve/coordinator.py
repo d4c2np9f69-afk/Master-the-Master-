@@ -101,7 +101,12 @@ class BhyveCoordinator(DataUpdateCoordinator):
                 async with session.get(
                     f"{self._base}/devices?user_id={self._user_id}",
                     headers=dev_headers,
-                    timeout=aiohttp.ClientTimeout(total=10),
+                    # 10s was tight for a third-party cloud API on a residential
+                    # connection. A single slow response dropped every zone entity
+                    # out of Home Assistant until the next successful poll, which
+                    # reads as "the integration is broken" rather than "one request
+                    # was slow". 30s costs nothing on the happy path.
+                    timeout=aiohttp.ClientTimeout(total=30),
                 ) as r:
                     if r.status == 401:
                         # Token expired — re-login next cycle
@@ -114,7 +119,16 @@ class BhyveCoordinator(DataUpdateCoordinator):
                 raise
             except Exception as e:
                 self._token = None
-                raise UpdateFailed(f"B-Hyve fetch error: {e}")
+                # ALWAYS include the exception TYPE, never just str(e).
+                # asyncio.TimeoutError stringifies to an empty string, so the old
+                # f"B-Hyve fetch error: {e}" produced literally "B-Hyve fetch error: "
+                # with nothing after it. That dead-end message cost hours on
+                # 2026-08-13 and sent the investigation down three wrong paths
+                # (changed password, missing app-id header, datacenter IP block)
+                # before the empty string itself turned out to be the clue.
+                raise UpdateFailed(
+                    f"B-Hyve fetch error: {type(e).__name__}: {e or '(no detail)'}"
+                ) from e
 
             timer = next(
                 (
