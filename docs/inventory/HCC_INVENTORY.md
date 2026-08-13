@@ -35,9 +35,19 @@ swap to a ZBDongle-E, decided 2026-08-13).
 
 | Item | Qty | Status | Cost | Notes |
 |---|---|---|---|---|
-| Kasa HS220P3 dimmer 3-pack (WiFi) | 1 pk | ON HAND | — | **Return if window open** — superseded by Zigbee decision. Else RESALE/redeploy. |
-| Kasa HS200 (WiFi) | 1 | ON HAND | — | same |
-| Zigbee dimmer — living room test unit | 0 | **DECISION PENDING** | ~$60 | see wattage finding in `docs/zigbee/` |
+| Kasa HS220 dimmer, single-pole (WiFi) | 2 seen — **confirm count** | ON HAND | — | Photographed as two SINGLE boxes, not the P3 3-pack the plan assumed. Keep + redeploy to WiFi-OK rooms (see plan) |
+| Kasa HS200 (WiFi) | confirm | ON HAND? | — | not in photos — confirm it exists |
+| Inovelli Blue 2-1 (Zigbee) | 0 | **TO BUY — Jeff confirmed** | ~$60 ea | 1 first as living-room test, then standardize main rooms |
+| Leviton Decora E5603-SW 3-way, lever-edge (dumb) | 1 | ON HAND | — | real 3-way — candidate for garage 2-location if it stays dumb |
+| GE UltraPro grounding paddle, single-pole (dumb) | 1 | ON HAND | — | spare — e.g. fresh switch for a bedroom repurposed-receptacle position |
+| Lepro 14 W LED recessed downlights w/ j-boxes | several — **confirm count** | ON HAND | — | 120 V, 0.124 A, damp-rated. Future rooms/garage. 14 W each — count them into any dimmer load calc |
+| ❓ Beige square device, FCC/CE marks, button on face | 1 | UNIDENTIFIED | — | need model # from inside/back |
+
+## Wiring consumables & tools (from bin photos — no purchases needed for install work)
+
+12/2 NM cable (yellow, good length) · Wago-style lever connectors (45-pc kit + loose) ·
+old-work boxes, single-gang boxes, misc plates · NM staples · structured-wiring plates ·
+multimeter · wire strippers/cutters · headlamp · screwdrivers · Energetic recessed fixture
 
 ## Irrigation
 
