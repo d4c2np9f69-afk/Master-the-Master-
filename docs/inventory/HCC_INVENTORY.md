@@ -81,7 +81,13 @@ multimeter · wire strippers/cutters · headlamp · screwdrivers · Energetic re
 |---|---|---|---|---|
 | MoCA adapter set | 1 pr | ON HAND — SHELF | — | Garage WiFi measured ADEQUATE 08-13 (mower box, last 50 uploads: mean −71.5 dBm, worst −76, zero buffered uploads ever; GaragePC + Tuya plug also clean). **Trigger to deploy:** if the Matter garage relay feels laggy once installed → MoCA backhaul + AP in garage. Needs coax at garage — unverified. |
 
-**ISP note:** Jeff mentioned an AT&T box 08-13; older records said Xfinity. Confirm which gateway is current before any network work.
+**ISP (confirmed by photo 08-13):** AT&T Fiber, gateway **BGW320-500** (integrated ONT,
+WiFi 6). Admin UI at `http://192.168.1.254` — login uses the Device Access Code printed
+on the unit's label. LAN is 192.168.1.x (matches Beehive at .66). Household WiFi SSID
+in use is `Loewen301`, NOT the factory SSID on the label. The old Xfinity notes refer
+to Jeff's *email/mail*, not current internet service.
+If true mesh WiFi is ever wanted: AT&T's All-Fi/Smart WiFi extenders pair with this
+gateway, or the MoCA + AP route above — decision deferred since garage WiFi measured fine.
 
 ## Other on-hand (from CLAUDE.md spare inventory, unchanged)
 
