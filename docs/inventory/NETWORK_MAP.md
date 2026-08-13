@@ -60,5 +60,5 @@ rotating private MACs) · assorted iPhones/UUID names = iOS private WiFi address
 ## Update 2026-08-13 late — extender fleet
 - **RE200 → wired AP, done** (see Infrastructure row). Login lesson: its 2018 login page fails SILENTLY when the request rides a flapping wireless link — every "wrong password" was really a dropped link. Wired access worked first try.
 - **Generic "Wireless-N Repeater"** (no-name, 2.4-only, MAC 00:E0:20:84:30:FB, broadcasts `Loewen301_Ext`, default 192.168.10.1 admin/admin): **RETIRE.** Cheap wireless-only repeat, pure airtime pollution next to the new wired AP. Unplug once RE200 coverage is confirmed; it has a LAN port but is not worth AP conversion.
-- Remaining `Loewen301-EXT`/`-EXT5G` broadcaster: third extender, not yet physically identified — same verdict likely. Find and retire.
+- **D-Link DAP-1520** (dual-band, MAC 1C:5F:2B:B9:08:62): the `Loewen301-EXT`/`-EXT5G` broadcaster. **RETIRE — no Ethernet port, conversion impossible** (Jeff spotted the disqualifier himself). eBay-able.
 - RE200 admin password set = WiFi password (recorded in HCC-secrets/att_bgw320_gateway.txt file).
