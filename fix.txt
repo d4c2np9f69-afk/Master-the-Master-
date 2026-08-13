@@ -1,0 +1,9 @@
+Write-Host "HCC GaragePC sharing fix - running..." -ForegroundColor Cyan
+Set-SmbServerConfiguration -EnableSMB2Protocol $true -Force
+Restart-Service LanmanServer -Force
+Set-NetConnectionProfile -NetworkCategory Private
+try { Set-Service FDResPub -StartupType Automatic -ErrorAction Stop; Start-Service FDResPub } catch {}
+try { Set-Service fdPHost -StartupType Automatic -ErrorAction Stop; Start-Service fdPHost } catch {}
+Write-Host "--- Results ---" -ForegroundColor Cyan
+Get-SmbServerConfiguration | Select-Object EnableSMB1Protocol, EnableSMB2Protocol | Format-List
+Write-Host "DONE. Tell Claude to check it now." -ForegroundColor Green
