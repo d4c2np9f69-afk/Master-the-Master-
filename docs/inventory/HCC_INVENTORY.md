@@ -36,8 +36,8 @@ swap to a ZBDongle-E, decided 2026-08-13).
 | Item | Qty | Status | Cost | Notes |
 |---|---|---|---|---|
 | Kasa HS220 dimmer, single-pole (WiFi, 150 W LED) | **2 (confirmed)** | ON HAND | — | **ASSIGNED: living room** (12 ft from dongle — mesh contribution redundant there, WiFi is fine). #2 = bedroom or spare, pending Inovelli test |
-| Inovelli Blue 2-1 (Zigbee) | 0 | **TO BUY — likely 2, not 3** | ~$60 ea | **#1 = KITCHEN** — farthest point from dongle, the mesh's critical router AND the dimming test unit. #2 = bedroom if mesh needs it there |
-| Leviton Decora E5603-SW 3-way (dumb) | 1 | ON HAND | — | **ASSIGNED: garage 2-location, stays dumb** — closes Pending Item 19 at $0 |
+| Inovelli Blue 2-1 VZM31-SN (Zigbee) | 0 | **TO BUY: 2** | ~$60 ea | **#1 = KITCHEN, dimmer mode** — far-point router + the dimming test. **#2 = GARAGE man-door, On/Off mode + "3-Way Dumb" type** — the existing kitchen 3-way toggle KEEPS WORKING, no dummy switch needed. Mesh chain: dongle → kitchen → garage, landing a router on top of the door relay + sensors. (Corrected 08-13: the 2-1 manual is titled "On-Off or Dimmer" — it does both modes.) |
+| Leviton Decora E5603-SW 3-way (dumb) | 1 | ON HAND — companion/spare | — | Reassigned 08-13: garage goes smart (Inovelli #2). Use this as a fresh dumb companion in the kitchen 3-way position if the existing toggle is worn; else shelf |
 | GE UltraPro paddle, single-pole (dumb) | 1 | ON HAND | — | bedroom repurposed-receptacle position |
 | MOES single-gang dimmer module (the beige box) | 1 | ON HAND | — | **ASSIGNED: single LED over kitchen sink (~12 W** vs 100 W/gang limit — finally a load it fits). ⚠️ needs a MOMENTARY push-button at the wall, not a standard toggle (toggles cause continuous-ramp misbehavior, researched 08-06). Confirm protocol from label: WM- prefix = WiFi/Tuya, ZM- = Zigbee |
 | Lepro 14 W LED downlights w/ j-boxes | several | ON HAND — **SPARES ONLY** | — | replacements for existing fixtures, NOT expansion (Jeff 08-13) |
@@ -72,6 +72,7 @@ multimeter · wire strippers/cutters · headlamp · screwdrivers · Energetic re
 | Item | Qty | Status | Cost | Notes |
 |---|---|---|---|---|
 | SONOFF MINI-D (Matter, dry contact) | 1 | ON HAND | — | wire + eWeLink Inching + Matter-commission (Pending Item 1) |
+| Garage door position: **2× contact sensors** (from inbound stock) | 2 | plan | — | **#1 at CLOSED position** (bottom of track/frame), **#2 at FULLY-OPEN position** (overhead track where the door rests when up). Template sensor derives 3 states: CLOSED / OPEN / **PARTIAL** — covers Jeff's hot-day "cracked open" venting. Possible later automation: pulse-wait-pulse for a repeatable vent stop |
 | MyQ hub + sensor | 1 set | RESALE | — | eBay when Jeff gets to it |
 
 ## Network
