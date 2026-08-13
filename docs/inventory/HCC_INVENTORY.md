@@ -107,3 +107,13 @@ TouchSmart 520
 4. **Wrong-variant purchases get flagged loudly** (see the Qianhong WiFi sensor) so
    the lesson survives: *verify the protocol variant in the listing before ordering.*
 5. Sync the iCloud copy after every edit.
+
+## 2026-08-13 — Sylvania WiFi plugs (4, living room lamps)
+**STATUS: ON HAND, working, but VENDOR LOCKED — cannot enter Home Assistant.**
+- Tuya hardware (port 6668 confirmed) at .199/.200/.202/.205, but Sylvania locked the product ID
+  so ONLY the "SYLVANIA Smart WiFi" app accepts them. Proven 08-13: Smart Life DETECTS a reset plug
+  then rejects it — "This device is not supported by this app."
+- Sylvania app CAN scan HA's Tuya QR but Tuya blocks the confirm step ("use the designated APP").
+- Only remaining route = LocalTuya with hand-extracted local keys. NOT attempted, not worth it.
+- **DECISION: replace with Zigbee plugs when the dongle arrives.** Keep these on Sylvania+Alexa meanwhile.
+- DO NOT re-attempt the Smart Life path — this is settled.
