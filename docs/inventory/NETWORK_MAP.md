@@ -86,7 +86,7 @@ cams) will re-register as they wake — that's correct behavior.
 | .197 | MyQ-E31 | ⚠️ MyQ hub — UNPLUG + reset for eBay |
 | .198 | CMWC1ZZABR | likely B-Hyve controller (?) |
 | .166 | dp-730602E4 | possibly AirTV 2 (?) |
-| .171 | "Nest Protect" | ⚠️ IMPOSTOR — mains-powered Tuya-family device. NOT the C20A (proven by battery-pull 08-13). Suspects: a Smart Life socket or Sharky dock. Identify by unplugging suspects one at a time |
+| .171 | "Nest Protect" | ✅ **UNMASKED 08-13: Angela's bed-lamp Tuya socket** — proven by unplug test (down, held 60s+, at 14:50). Cheap Tuya firmware self-reporting a fake hostname. There is NO Nest hardware in this house |
 | .209 | TY_WR | Tuya device (socket or vacuum) (?) |
 | .204 | Linux | Amazon MAC — likely Blink Sync Module |
 | .231 | Linux | (?) unknown, WiFi |
