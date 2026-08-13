@@ -79,7 +79,7 @@ cams) will re-register as they wake — that's correct behavior.
 | .194 | 301Server (Eth LAN-4, 1G) | ✅ **THE BEAST** — confirmed 08-13 (its own Ethernet reports .194). CodeProject.AI host, Claude coworker machine |
 | .222 | NETGEAR NTV300 (Eth LAN-1) | old NeoTV streamer — WIRED; still used? |
 | .68 | VIZIOCastAudio4523 (Eth LAN-1) | Vizio soundbar |
-| .164 | WS-SD00PJBA (Eth LAN-1) | ✅ **Angela's work computer** (Lenovo/LCFC-built, corporate hostname) — wired at her office jack (office = her Lenovo work laptop + the HP printer, confirmed by Jeff) |
+| .164 | WS-SD00PJBA (Eth LAN-1) | ✅ **Angela's work computer** (Lenovo/LCFC-built, corporate hostname) — wired at her office jack. ⚠️ Both of Angela's work machines run corporate VPN + firewall — they take a LAN address but tunnel all traffic and won't answer local probes; silence is NORMAL, never troubleshoot it. Her client Dell (2nd work machine, office) is likewise mostly invisible on the LAN |
 | .251 | VC-E-L-2T3HD74 | Vizio E-series TV |
 | .241 | 32onnRokuTV | onn 32" Roku TV |
 | .208 | HP444BD6 | HP printer |
