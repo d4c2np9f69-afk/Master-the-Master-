@@ -18,7 +18,7 @@ plus project knowledge. **(?) = needs Jeff to confirm.**
 | .66 | — | **Beehive** (HA, Beelink J45) — FIXED |
 | .196 | RE200 | ✅ CONVERTED 08-13: **wired Access Point** (Cat6 backhaul). Broadcasts Loewen301 (2.4, ch 6) + Loewen301-5G (WPA2, house password). Admin: http://192.168.1.196, password in HCC-secrets. The volatile wireless-repeater hop is GONE |
 | .194 | 301Server | (?) house-number name — the beast? CodeProject.AI host? |
-| .121 | GaragePC | HP TouchSmart — ⚠️ OFFLINE since extender retirement: its WiFi was joined to the extender's own `Loewen301_Ext` SSID (now gone). Fix on next garage visit: join `Loewen301` (same password). Both garage Tuya sockets + mower box reach the gateway fine without the extender |
+| .121 | GaragePC | HP TouchSmart — ⚠️ OFFLINE since extender retirement: ✅ ACCESSIBLE from beast 08-13. Account "Jeff Loewen Office 2" (NOT jeffl) needs its own password to browse — creds in HCC-secretsgaragepc.txt. Now on Loewen301-5G (.212) as well as .121. Win10 Pro, SMB2 on |
 
 ## HCC project devices
 | IP | Name | What it is |
