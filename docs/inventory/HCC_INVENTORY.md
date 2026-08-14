@@ -117,3 +117,21 @@ TouchSmart 520
 - Only remaining route = LocalTuya with hand-extracted local keys. NOT attempted, not worth it.
 - **DECISION: replace with Zigbee plugs when the dongle arrives.** Keep these on Sylvania+Alexa meanwhile.
 - DO NOT re-attempt the Smart Life path — this is settled.
+
+## ZIGBEE MESH PLUGS — selected 2026-08-14
+**BUY: THIRDREALITY Zigbee Smart Plug 4-Pack — ASIN B09KNHWF7L (~$50).** Listing MUST say
+"Zigbee Repeater" and "Requires ZigBee Hub". Z2M page 3RSP019BZ verified CLEAN — no routing
+warnings (contrast: Enbrighten 43080 warns it stops relaying for child devices). Tested better
+range than SONOFF S40 Lite (+5 ft through 2 walls) and zero dropouts over 14 days.
+
+**⚠️ SHIPS IN BLE MODE — must be manually switched to Zigbee mode before it will pair.**
+Out of the box it looks dead to the coordinator. Find the exact button sequence at pairing time.
+
+**⚠️ DO NOT BUY the lookalikes:**
+- THIRDREALITY "Smart Plug M3" B0FJRNW7YS = Matter over **WiFi**, not Zigbee.
+- SONOFF "S40 Lite" exists in BOTH Zigbee (B09XMH3X3G, currently OOS) and WiFi (B09LV7K4DH) versions,
+  same product name. Zigbee one says "Hub Needed"; WiFi one says "No Hub Required".
+**RULE: "Requires a hub" = the Zigbee one. "No hub required" = WiFi, useless for the mesh.**
+
+Quantity needed: 5 — four to replace the vendor-locked Sylvania living-room plugs, one for the
+garage as the relay to the door sensors.
