@@ -135,3 +135,21 @@ Out of the box it looks dead to the coordinator. Find the exact button sequence 
 
 Quantity needed: 5 — four to replace the vendor-locked Sylvania living-room plugs, one for the
 garage as the relay to the door sensors.
+
+## ORDER 2026-08-14 — arriving 4-8 AM Fri 8/15 (~$33.83)
+| Item | For | Cost | Status |
+|---|---|---|---|
+| **Orbit 57280 3/4" FPT L-Series** auto valve | **MASTER VALVE** — the reason today's valve work slipped | $13.58 | ORDERED |
+| **Kasa HS220** dimmer (Amazon Resale, **USED - Mint**) | 3rd dimmer — bedroom/kitchen/living room now all covered | $13.86 | ORDERED |
+| Leviton 3-Gang Decora/GFCI wall plate | one of the new multi-gang boxes | $1.82 | ORDERED |
+| Leviton F-Connector Decora insert | coax feed into a Decora plate | $4.57 | ORDERED |
+
+**Kasa switch count now 3** (2 on hand + this one) = bedroom, kitchen/dining, living room all covered.
+Still needed for lighting: 1x HS200 (garage) — plus the garage 2-location decision (HS210 kit vs cap one position).
+
+**⚠️ The HS220 is USED/refurb.** Before install: FACTORY RESET it (hold the button ~10 s until the LED
+blinks amber/green) so it is not still bound to the previous owner's TP-Link account, THEN disable
+auto-firmware-update, THEN pair. A used smart switch that is still claimed will silently refuse to pair.
+
+**Orbit 57280 is 3/4" FPT** — matches the existing 3/4" irrigation pipe. Installs below the hose-spigot
+tee, between the red winterization ball valve and the manifold; wires to PUMP + COMMON at the controller.
