@@ -120,3 +120,16 @@ cams) will re-register as they wake — that's correct behavior.
 - .224 = Jeff's bed lamp, .170 = garage fan (MAC-embedded IDs)
 - **.199/.200/.202/.205 = the 4 Sylvania WiFi lamp plugs** (Tuya port-scan, post-reset)
 Every fake-hostname mystery on the network is now identified.
+
+## Gateway changes 2026-08-14
+- **2.4 GHz Mode: G/N -> B/G/N.** Done while troubleshooting a Kasa HS220 that would connect to its
+  own setup AP but never join the WiFi. G/N excludes 802.11b; the HS220 is a b/g/n device. Change is
+  purely permissive. Verified afterwards: all four Tuya sockets, B-Hyve, garage fan, RE200 and the
+  mower box reconnected normally.
+- **Guest SSID (LoewenGuest): DISABLED.** Jeff confirmed nobody uses it. One less broadcasting
+  network and one less entry point. Reversible in the same Wi-Fi page.
+- **Confirmed good and left alone:** WPA-2 (NOT WPA3 - would break older IoT), channel 1 fixed,
+  20 MHz, SSID not hidden, WPS off, max clients 80, band steering off.
+- Kasa still had not joined as of this change. Prime remaining suspect is the Kasa app offering
+  **Loewen301-5G** in its network picker - the switch cannot see 5 GHz, so it accepts credentials
+  and then hunts forever. Must be Loewen301.
