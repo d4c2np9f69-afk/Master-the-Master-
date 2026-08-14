@@ -3070,11 +3070,15 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <span class="hive-chip-lbl">WATCH</span>
           <span class="hive-dot" id="fireTvDot" style="background:#444;top:3px;right:3px"></span>
         </div>
-        <div class="hive-chip hc-sling" onclick="openExternal('https://watch.sling.com')" title="Watch Sling in Safari">
+        <div class="hive-chip hc-appletv" onclick="appleTvOpen()" title="Apple TV remote + open any app on the TV">
+          <span class="hive-chip-icon">&#63743;</span>
+          <span class="hive-chip-lbl">APPLE TV</span>
+        </div>
+        <div class="hive-chip hc-sling" onclick="appleTvApp('Sling')" title="Open Sling on the Apple TV">
           <span class="hive-chip-icon">&#9654;&#65039;</span>
           <span class="hive-chip-lbl">SLING</span>
         </div>
-        <div class="hive-chip hc-braves" onclick="openExternal('https://www.braves.tv')" title="Watch Braves Vision in Safari">
+        <div class="hive-chip hc-braves" onclick="appleTvApp('MLB')" title="Open MLB on the Apple TV — no app needed on this device">
           <span class="hive-chip-icon">&#9918;</span>
           <span class="hive-chip-lbl">BRAVES</span>
         </div>
@@ -7481,6 +7485,142 @@ function fireTvCmd(cmd) {
     }).then(function() { setTimeout(fireTvOpen, 1000); });
     return;
   }
+}
+
+// ===== APPLE TV =====
+// The wall iPad can no longer install apps (iPadOS 15 is past what MLB/Sling ship for),
+// so instead of opening an app HERE, we tell the Apple TV to open it THERE.
+var APPLE_TV_ENTITY = 'media_player.bedroom_apple_tv';
+
+// Apps worth one tap. Names must match the Apple TV's source list exactly.
+var ATV_APPS = [
+  { name: 'MLB',         label: '&#9918; Braves' },
+  { name: 'Sling',       label: '&#128250; Sling' },
+  { name: 'Prime Video', label: 'Prime Video' },
+  { name: 'Netflix',     label: 'Netflix' },
+  { name: 'YouTube',     label: 'YouTube' },
+  { name: 'HBO Max',     label: 'HBO Max' },
+  { name: 'Hulu',        label: 'Hulu' },
+  { name: 'Fox News',    label: 'Fox News' },
+  { name: 'Paramount+',  label: 'Paramount+' },
+  { name: 'NFL',         label: '&#127944; NFL' },
+  { name: 'RadarScope',  label: '&#127785; Radar' },
+  { name: 'Spectrum TV', label: 'Spectrum' }
+];
+
+function appleTvOpen() {
+  if (!getHaToken()) {
+    grdShow('&#63743; Apple TV', '<div style="color:var(--muted);font-size:12px;line-height:1.6">Connect Beehive on the <b>HOME</b> tab first to control the Apple TV.</div>');
+    return;
+  }
+  grdShow('&#63743; Apple TV', '<div style="color:var(--muted);text-align:center;padding:20px 0">Loading Apple TV&hellip;</div>');
+  haFetch('/api/states/' + APPLE_TV_ENTITY, { signal: AbortSignal.timeout(15000) })
+    .then(function(r) { if (!r.ok) throw new Error('http_' + r.status); return r.json(); })
+    .then(function(tv) { appleTvRender(tv); })
+    .catch(function() {
+      grdShow('&#63743; Apple TV', '<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px 0">Could not reach the Apple TV &mdash; check the Beehive connection.</div>');
+    });
+}
+
+function appleTvRender(tv) {
+  var st = tv.state || 'unknown';
+  var a = tv.attributes || {};
+  var app = a.app_name || '';
+  var title = a.media_title || '';
+  var artist = a.media_artist || '';
+  var pic = a.entity_picture || '';
+  var isOn = st !== 'off' && st !== 'standby' && st !== 'unavailable';
+
+  var stateLabel = st === 'playing' ? '&#9654; Now Playing' : st === 'paused' ? '&#9208; Paused' : st === 'idle' ? 'Idle' : st === 'off' ? 'Asleep' : st;
+  var stateColor = st === 'playing' ? 'var(--ok)' : st === 'paused' ? 'var(--warn)' : 'var(--muted)';
+
+  var h = '';
+
+  if (pic) {
+    h += '<div style="text-align:center;margin-bottom:14px"><img src="' + camImgBase() + pic + '" style="max-width:100%;max-height:210px;border-radius:12px;border:1px solid var(--border)" onerror="this.style.display=\'none\'"></div>';
+  }
+
+  h += '<div style="text-align:center;margin-bottom:6px">';
+  h += '<div style="font-size:14px;font-weight:700;color:' + stateColor + ';margin-bottom:5px">' + stateLabel + '</div>';
+  if (title)  h += '<div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:3px">' + title + '</div>';
+  if (artist) h += '<div style="font-size:12.5px;color:var(--muted)">' + artist + '</div>';
+  if (app)    h += '<div style="font-size:11.5px;color:var(--muted);margin-top:5px">' + app + '</div>';
+  h += '</div>';
+
+  // transport
+  h += '<div style="display:flex;justify-content:center;gap:9px;margin:16px 0 6px;flex-wrap:wrap">';
+  if (!isOn) {
+    h += '<button onclick="appleTvCmd(\'power\')" class="btn-full btn-green" style="flex:0 0 auto;width:auto;padding:10px 22px;font-size:13px">&#9654; WAKE</button>';
+  } else {
+    h += '<button onclick="appleTvCmd(\'rewind\')" class="btn-full btn-gray" style="flex:0 0 auto;width:auto;padding:10px 16px;font-size:13px">&#9194;</button>';
+    h += '<button onclick="appleTvCmd(\'play_pause\')" class="btn-full btn-gray" style="flex:0 0 auto;width:auto;padding:10px 22px;font-size:13px">&#9199; Play / Pause</button>';
+    h += '<button onclick="appleTvCmd(\'ff\')" class="btn-full btn-gray" style="flex:0 0 auto;width:auto;padding:10px 16px;font-size:13px">&#9193;</button>';
+  }
+  h += '</div>';
+
+  // app launcher — this is the bit that saves the iPad
+  h += '<div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:center;margin:16px 0 8px">Open on the Apple TV</div>';
+  h += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">';
+  for (var i = 0; i < ATV_APPS.length; i++) {
+    var ap = ATV_APPS[i];
+    h += '<button onclick="appleTvApp(\'' + ap.name + '\')" class="btn-full btn-gray" style="width:auto;padding:11px 6px;font-size:11.5px;line-height:1.25">' + ap.label + '</button>';
+  }
+  h += '</div>';
+
+  h += '<div id="atvMsg" style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px;min-height:16px"></div>';
+  h += '<div style="text-align:center;margin-top:6px"><button onclick="appleTvOpen()" class="btn-full btn-gray" style="max-width:140px;margin:0 auto;font-size:10px;padding:7px 12px">&#128260; Refresh</button></div>';
+
+  grdShow('&#63743; Apple TV', h);
+}
+
+function appleTvApp(appName) {
+  var msg = document.getElementById('atvMsg');
+  if (msg) msg.textContent = 'Opening ' + appName + '…';
+  // Wake first — a sleeping Apple TV ignores a source change.
+  haFetch('/api/services/media_player/turn_on', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ entity_id: APPLE_TV_ENTITY }),
+    signal: AbortSignal.timeout(10000)
+  }).catch(function(){}).then(function() {
+    return haFetch('/api/services/media_player/select_source', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ entity_id: APPLE_TV_ENTITY, source: appName }),
+      signal: AbortSignal.timeout(15000)
+    });
+  }).then(function(r) {
+    if (msg) msg.textContent = (r && r.ok) ? (appName + ' opened on the Apple TV') : ('Could not open ' + appName);
+    setTimeout(appleTvOpen, 2500);
+  }).catch(function() {
+    if (msg) msg.textContent = 'Could not reach the Apple TV';
+  });
+}
+
+function appleTvCmd(cmd) {
+  if (cmd === 'power') {
+    haFetch('/api/states/' + APPLE_TV_ENTITY, { signal: AbortSignal.timeout(10000) })
+      .then(function(r) { return r.json(); })
+      .then(function(tv) {
+        var svc = (tv.state === 'off' || tv.state === 'standby') ? 'turn_on' : 'turn_off';
+        return haFetch('/api/services/media_player/' + svc, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ entity_id: APPLE_TV_ENTITY }),
+          signal: AbortSignal.timeout(10000)
+        });
+      })
+      .then(function() { setTimeout(appleTvOpen, 1800); });
+    return;
+  }
+  var svcMap = { play_pause: 'media_play_pause', ff: 'media_next_track', rewind: 'media_previous_track' };
+  if (!svcMap[cmd]) return;
+  haFetch('/api/services/media_player/' + svcMap[cmd], {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ entity_id: APPLE_TV_ENTITY }),
+    signal: AbortSignal.timeout(10000)
+  }).then(function() { setTimeout(appleTvOpen, 1200); });
 }
 
 var _activeVehicle = localStorage.getItem('hcc_vehicle') || 'merc';
