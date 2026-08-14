@@ -39,6 +39,25 @@ insists on a stream. Nobody online answers this specifically. Must be tested.
   `camera.301_driveway_clipframe`. (Avoids an Alexa-style flood into the Home app.)
 - Stale pairing notifications dismissed; one left.
 
+## ⚠️ ANNOTATED IMAGE REQUIREMENT (Jeff, 08-14) — READ BEFORE FINISHING
+Jeff confirmed what he actually likes about the current popup: **it fires essentially at the same
+time as the trigger, and it shows a RED BOX around the detected object with the confidence %.**
+That annotation is CodeProject.AI's output, written to  and passed to
+PiPup as . It is **NOT** the same image as  —
+the clipframe is the RAW frame fed INTO the AI. Staging the clipframe for HomeKit (done below)
+would show the right moment WITHOUT the box/percentage.
+
+**Fix required before this is done:** the annotated filename changes per detection, and HomeKit
+needs a FIXED path. So the AI automation must copy/symlink the annotated file to one constant
+name (e.g. ) on every detection, and a local_file
+camera points at THAT. Needs a Beehive config change (shell_command + automation step).
+
+**Deliberately NOT blocking the test:** the open question is whether tvOS pops up at all for a
+snapshot-only camera. Any image answers that. Prove the popup first, then fix the image source.
+
+Also noted: Jeff says the popup timing is already good — his complaint is RELIABILITY
+("half the time it doesn't come through"), not latency. Do not "fix" the timing.
+
 ## TEST — costs nothing, uses the BEDROOM Apple TV, no HDMI change needed
 The Apple TV is currently in the master bedroom ("Main Bedroom (2)"), so all of this can be
 proven before touching the living room.
