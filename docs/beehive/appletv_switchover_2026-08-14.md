@@ -42,15 +42,20 @@ insists on a stream. Nobody online answers this specifically. Must be tested.
 ## ⚠️ ANNOTATED IMAGE REQUIREMENT (Jeff, 08-14) — READ BEFORE FINISHING
 Jeff confirmed what he actually likes about the current popup: **it fires essentially at the same
 time as the trigger, and it shows a RED BOX around the detected object with the confidence %.**
-That annotation is CodeProject.AI's output, written to  and passed to
-PiPup as . It is **NOT** the same image as  —
+That annotation is CodeProject.AI's output, written to `/config/www/ai_snapshots/` and passed to
+PiPup as `trigger.event.data.saved_file`. It is **NOT** the same image as `camera.*_clipframe` —
 the clipframe is the RAW frame fed INTO the AI. Staging the clipframe for HomeKit (done below)
 would show the right moment WITHOUT the box/percentage.
 
 **Fix required before this is done:** the annotated filename changes per detection, and HomeKit
-needs a FIXED path. So the AI automation must copy/symlink the annotated file to one constant
-name (e.g. ) on every detection, and a local_file
-camera points at THAT. Needs a Beehive config change (shell_command + automation step).
+needs a FIXED path. So the AI automation must copy the annotated file to one constant name
+(e.g. `/config/www/ai_snapshots/homekit_driveway.jpg`) on every detection, and a local_file
+camera points at THAT. Needs a Beehive config change (shell_command + one automation step).
+
+Filename hunting note: probing `/local/ai_snapshots/*_latest.jpg` returned 404 for every guess,
+and the popup automation had 0 stored traces (cleared on HA restart), so the exact current
+filename is still unconfirmed. Easiest way to settle it: after the next real detection, read
+`trigger.event.data.saved_file` from that automation's trace.
 
 **Deliberately NOT blocking the test:** the open question is whether tvOS pops up at all for a
 snapshot-only camera. Any image answers that. Prove the popup first, then fix the image source.
