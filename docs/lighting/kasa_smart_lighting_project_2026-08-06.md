@@ -53,3 +53,12 @@
 
 - Instance: "Beehive" — local `homeassistant.local` / `192.168.1.66`, remote via Nabu Casa.
 - Kasa devices auto-discover locally, no cloud dependency for core on/off/dim control — matches the local-first pattern used elsewhere in the house (RTL-SDR utility reads, WS calls to HA).
+
+## CEILING FANS — CONFIRMED SEPARATE (Jeff, 2026-08-13)
+**Every ceiling fan is wired independently of the LED circuits.** Bedroom and office fans are
+pull-chain; the living room fan runs on its own RF remote. No wall switch in the plan controls a
+fan motor, so **a dimmer is safe on all four LED circuits** — the one real hazard in this project
+(dimming a fan motor damages it and is a fire risk) does not apply anywhere here. Closed.
+
+Future option, not planned: the living-room fan is RF-remote controlled, so it could be brought
+into HA later with an RF bridge that learns the remote. Separate purchase, separate project.
