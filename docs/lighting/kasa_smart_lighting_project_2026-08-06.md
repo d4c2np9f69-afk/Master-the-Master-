@@ -62,3 +62,16 @@ fan motor, so **a dimmer is safe on all four LED circuits** — the one real haz
 
 Future option, not planned: the living-room fan is RF-remote controlled, so it could be brought
 into HA later with an RF bridge that learns the remote. Separate purchase, separate project.
+
+## BOXES & WIRE PULLS — DONE BY JEFF (confirmed 2026-08-13)
+**Jeff pulled dedicated LED circuits himself through the attic and installed 2- and 3-gang boxes in
+every room.** Originally each room had ONE switch serving both the fan and the light; the LEDs now
+have their own switch on their own home run.
+
+This CLOSES two previously-open items:
+- "Confirm neutral present at kitchen and living room boxes" — he pulled the wire, neutrals confirmed present.
+- "Box fill/depth not inspected" — new multi-gang boxes, ample room for the deeper Kasa bodies.
+
+Also worth knowing: spare gang positions exist in these boxes, so future smart devices drop in
+WITHOUT another attic trip. Ganged-dimmer heat derating is a real rule but a non-issue here
+(96-108 W on a 150 W-rated switch).
