@@ -75,3 +75,25 @@ This CLOSES two previously-open items:
 Also worth knowing: spare gang positions exist in these boxes, so future smart devices drop in
 WITHOUT another attic trip. Ganged-dimmer heat derating is a real rule but a non-issue here
 (96-108 W on a 150 W-rated switch).
+
+## ✅ LIVING ROOM INSTALLED 2026-08-14
+`light.livingroom_cans` — HS220 at **192.168.1.178**, wired by Jeff, dimming verified from HA.
+
+**Setup took ~2 hours and the network was NEVER the problem.** Verified from inside the gateway:
+DHCP fine (190 free), MAC filtering off, WPA-2, channel 1, SSID visible, band steering off.
+2.4 GHz Mode was changed G/N -> **B/G/N** during troubleshooting (kept — harmless and more permissive).
+
+**These HS220s ship on NEW firmware** using an encrypted onboarding protocol (server identifies as
+"SHIP 2.0", port 80, NOT the legacy port 9999). Consequences:
+- HA needs **TP-Link account credentials** to add them. Control is still LOCAL — the account only
+  authenticates the local session; it keeps working without internet.
+- Direct provisioning over the setup AP is NOT possible: all payloads return `error_code 1003`
+  (JSON decode fail) and the handshake is undocumented. Do not waste time on this again.
+
+**USEFUL TOOL DISCOVERED:** the beast has a working Wi-Fi adapter (ASUS USB-AC53 Nano) whose radio
+sits software-off by default. It can be turned on via the WinRT Radio API and used to join an IoT
+devices private setup AP for diagnostics, without disturbing its wired LAN connection.
+
+**BONUS: HA exposes `switch.<device>_auto_update_enabled`** — the firmware auto-update toggle the
+Kasa app does NOT show. **Turned OFF for this switch. Do the same for every future Kasa device.**
+HA also exposes an overheat sensor, signal level, smooth on/off fade, presets and the status LED.
