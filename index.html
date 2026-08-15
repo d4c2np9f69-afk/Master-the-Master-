@@ -8456,11 +8456,19 @@ function saveHaTokenInline() {
 }
 
 var _camLastAutoRefresh = 0;
-// camera.<name>_clipframe entities are internal helper cameras (HA-side AI
-// popup pipeline) holding one extracted still, not real live cameras —
-// exclude them everywhere the app lists user-facing camera tiles.
+// Two families of internal helper cameras exist HA-side and must never appear
+// as user tiles:
+//   camera.<name>_clipframe — the raw frame pulled out of the Blink clip, the
+//                             INPUT the AI scans.
+//   camera.ai_<name>        — the annotated red-box output the AI writes, added
+//                             2026-08-15 so HomeKit/Apple TV popups show the
+//                             boxed image instead of the plain frame.
+// Both hold a single still, not a live feed. Excluding only _clipframe (the
+// original 08-03 fix) let the ai_* set leak into the grid as duplicate tiles.
 function isUserCamera(entityId) {
-  return entityId.indexOf('camera.') === 0 && !/_clipframe$/.test(entityId);
+  return entityId.indexOf('camera.') === 0 &&
+         !/_clipframe$/.test(entityId) &&
+         !/^camera\.ai_/.test(entityId);
 }
 // Fixed display order for the camera grid (driveway first, front doorbell right
 // under it per Jeff's request) — any camera not listed here falls after these,

@@ -153,3 +153,43 @@ auto-firmware-update, THEN pair. A used smart switch that is still claimed will 
 
 **Orbit 57280 is 3/4" FPT** — matches the existing 3/4" irrigation pipe. Installs below the hose-spigot
 tee, between the red winterization ball valve and the manifold; wires to PUMP + COMMON at the controller.
+
+## BACKFLOW / IRRIGATION CONNECTION — 2026-08-15
+
+**Finding:** the valve on the wall stub (old spigot penetration, 3/4" PEX from the main) is a plain
+Orbit valve with a **solid jar-top bonnet — no vent openings**. It is NOT a backflow device. The system
+has been running with **no backflow protection at the point of connection.**
+
+| Item | Role | Cost | Status |
+|---|---|---|---|
+| **Orbit 3/4" electric anti-siphon valve** | **DECIDED 8/15** — master valve **+** backflow in one body, on the wall stub | $18.34 | to order |
+| *old plain Orbit wall valve (jar-top, no vent)* | **BEING REMOVED ENTIRELY** — was never a backflow device | — | remove |
+| **Orbit 57280** 3/4" FPT L-Series valve | bought 8/14 as the master — **redundant now.** Becomes the **SPARE ZONE VALVE.** | $13.58 | HAVE |
+| **T&S B-969** 1/2" AVB (ASSE 1001, bronze) | too small — 1/2" chokes the 3/4" line. Not for this job. | — | have, unusable here |
+| 3/4" check valve | in the pit with the zone valves | — | installed |
+
+**Orbit 51059** (3/4" FTP brass AVB, $18.49) was looked at and NOT bought — the combined anti-siphon
+valve does the same job plus the master-valve function for the same money and fewer fittings.
+
+**The 57280 is not wasted.** Once the anti-siphon valve is the master, the 57280 becomes the spare zone
+valve — genuinely worth having, since a failed zone-1 diaphragm is exactly what caused the ~88 gal/day
+leak found 2026-08-13. Only ONE valve needs to be wired as the master; don't wire both in series.
+
+**Layout if the anti-siphon valve is used** (diagram: `docs/utilities/backflow_layout.html` + PDF):
+wall stub → ONE 90° elbow turning up → anti-siphon valve straddling the riser, **vent dome UP**, cast
+flow arrows followed → straight down into the blue 3/4" PEX → pit box (check valve → zones 1-6 → heads).
+The valve provides the up/across/down turns internally, so only one elbow is added.
+
+**Rules that govern the device:** dome up and above grade; critical level **6" min above the highest
+head** (wall height covers this easily); never more than 12 h under continuous pressure — satisfied
+because the vent sits downstream of the valve seat, so closing the valve unloads it.
+
+**Honest limit, unchanged by any option considered:** the six zone valves are shutoff valves DOWNSTREAM
+of an atmospheric breaker, which the standard does not strictly permit. The by-the-book fix is a
+pressure vacuum breaker (ASSE 1020, ~$80-150) **plus annual testing by a licensed tester** — which is
+exactly the utility attention Jeff is avoiding. Decision made knowingly.
+
+**Replacement strategy (Jeff's call, and it is the right one):** an AVB fails SILENTLY — a stiff poppet
+looks fine and simply doesn't open when needed. So swap the cheap valve on a schedule rather than pay
+~9x for bronze. Target: spring startup, every 1-2 years. **TODO: add a yearly HA reminder** in the
+alert batch.

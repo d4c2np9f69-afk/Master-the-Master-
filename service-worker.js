@@ -1,4 +1,4 @@
-const CACHE_NAME = "hcc-v77";
+﻿const CACHE_NAME = "hcc-v78";
 const CRITICAL_ASSETS = [
   "./",
   "./index.html",
@@ -64,7 +64,7 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // Images: STALE-WHILE-REVALIDATE — serve cached instantly, update in background.
+  // Images: STALE-WHILE-REVALIDATE â€” serve cached instantly, update in background.
   // This fixes the bug where new hero images never showed because old ones were cached forever.
   const isImage = url.pathname.startsWith("/images/") || url.pathname.endsWith(".jpg") || url.pathname.endsWith(".png");
   if (isImage) {
