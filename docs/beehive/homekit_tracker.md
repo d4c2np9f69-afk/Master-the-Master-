@@ -98,4 +98,4 @@ immediately afterward.
 
 ---
 
-*Last reviewed 2026-08-15. Update this file whenever anything is added to HA.*
+*Last reviewed 2026-08-15 evening — all six cameras on annotated images; mute system verified live (30-min back / 5-min front); clip archive running.*

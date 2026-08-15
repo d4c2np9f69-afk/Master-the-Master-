@@ -16,15 +16,21 @@ Status legend: **ORDERED** → **ON HAND** → **INSTALLED** · plus **RETIRED**
 
 | Item | Qty | Status | Cost | Location / Notes |
 |---|---|---|---|---|
-| Haozee Zigbee 3.0 dongle (CC2652P1, +20dBm) | 1 | ORDERED · ETA Aug 13–17 | $8.92 | Coordinator. USB extension cable ON HAND. Z2M, not ZHA. |
-| Tuya Zigbee door/window sensor (Excellux 2-pc) | 2 pks | ORDERED · ETA ~Aug 14 | $9.58 ×2 | battery end devices |
-| Zigbee door/window sensor (Coolo 2-pc) | 1 pk | ORDERED · ETA ~Aug 15 | $6.39 | battery |
-| Zigbee door/window sensor (Excellux 1-pc) | 1 | ORDERED · ETA ~Aug 15 | $2.79 | battery |
-| Zigbee water leak sensor (Haozee) | 2 | ORDERED · ETA ~Aug 14 | $5.09 ea | battery |
-| Zigbee water leak sensor (Gleco, probe cable) | 1 | ORDERED · ETA ~Aug 14 | $4.40 | battery |
-| Zigbee water leak sensor (Gleco **Z2M-only**) | 1 | ORDERED · ETA ~Aug 14 | $4.62 | ⚠️ no ZHA — this locked the Z2M decision |
-| Zigbee water detector (Excellux) | 1 | ORDERED · ETA ~Aug 15 | $6.19 | battery |
-| ⚠️ Tuya **WiFi** water sensor (Qianhong) | 1 | ORDERED · ETA ~Aug 14 | $5.68 | NOT Zigbee — wrong variant selected. Needs Tuya cloud/LocalTuya or shelf it. |
+| Haozee Zigbee 3.0 dongle (CC2652P1, +20dBm) | 1 | **ON HAND 08-15** (photo) | $8.92 | Coordinator. USB extension cable ON HAND. Z2M, not ZHA. SMA antenna in box. |
+| Tuya Zigbee door/window sensor (Excellux 2-pc) | 2 pks | **ON HAND 08-15** (photo) | $9.58 ×2 | battery end devices |
+| Zigbee door/window sensor (Coolo 2-pc) | 1 pk | **ON HAND 08-15** (photo) | $6.39 | battery |
+| Zigbee door/window sensor (Excellux 1-pc) | 1 | **ON HAND 08-15** (photo) | $2.79 | battery |
+| Zigbee water leak sensor (Haozee) | 2 | **ON HAND 08-15** (photo) | $5.09 ea | battery |
+| Zigbee water leak sensor (Gleco, probe cable) | 1 | **ON HAND 08-15** (photo) | $4.40 | battery — probe-cable unit visible in photo |
+| Zigbee water leak sensor (Gleco **Z2M-only**) | 1 | **ON HAND 08-15** (photo, TZ-SJ-SD_E) | $4.62 | ⚠️ no ZHA — this locked the Z2M decision |
+| Zigbee water detector (Excellux) | 1 | **ON HAND 08-15** (photo) | $6.19 | battery |
+| ⚠️ Tuya **WiFi** water sensor (Qianhong "WiFi-Shuijin-1") | 1 | **ON HAND 08-15** (photo) | $5.68 | NOT Zigbee — wrong variant. Smart Life or shelf. |
+
+**All 7 door/window + all 5 leak sensors + dongle photo-confirmed arrived 2026-08-15.
+NOT UNBOXED — Jeff's order: nothing gets set up until the camera/alert pipeline is verified.
+Setup day, first moves: disable any auto-firmware-update BEFORE first pairing (the Kasa rule);
+pick the Zigbee channel deliberately around the crowded 2.4 GHz WiFi (census 08-13); dongle on
+its USB extension cable, away from USB3 ports.**
 
 **Mesh status: zero routers.** Every device above is battery = end device. First
 routers will be the mains-powered light switches. Until then all devices connect
@@ -193,3 +199,6 @@ exactly the utility attention Jeff is avoiding. Decision made knowingly.
 looks fine and simply doesn't open when needed. So swap the cheap valve on a schedule rather than pay
 ~9x for bronze. Target: spring startup, every 1-2 years. **TODO: add a yearly HA reminder** in the
 alert batch.
+
+(Zigbee arrival 2026-08-15 is logged in the **Zigbee layer** table at the top of this file —
+all rows promoted to ON HAND, photo-confirmed, not unboxed per Jeff's order.)
