@@ -67,8 +67,9 @@ project's regression test; Jeff's rule.
 
 - Backyard PIR aim/sensitivity + driveway road-mask + Blink app notifications OFF — Jeff's phone.
 - Back-left/backyard popup photos — optional completeness, needs the Kiyo replugged.
-- Popup shows the PREVIOUS event's image for its first ~8 s (proven by the delivery-van picture);
-  the annotated file lands after the popup appears. Jeff's pending choice: instant-but-one-behind
-  (current) vs delaying popups ~8 s for the correct image.
+- ~~Popup image lag~~ **DECIDED AND SHIPPED same evening: Option B.** Popups now ride
+  trigger-based template sensors (binary_sensor.ai_doorbell_*) fired by the AI detection event, so
+  the annotated image exists BEFORE the ring and false motion never pops the TV. Verified live:
+  sensor rang instantly on a manual scan, auto_off 8 s clean. ('What good is an old picture?' — Jeff)
 - Apple Home alarm tile: `pyhap` logs `SecuritySystemState value=0 invalid` — glance at the tile;
   unexpose the alarm from the HCC Home bridge if it misbehaves.
