@@ -1,0 +1,3533 @@
+=====
+[09f02d4] 2026-05-20
+Add files via upload
+
+=====
+[0e7e18d] 2026-06-21
+Extract Toro TimeMaster PWA package source files
+Unzips the base PWA (TimeMaster maintenance app) into project root as
+the starting point for the Home Command Center build.
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[0b76d4c] 2026-06-21
+Add full live app source — B-Hyve, weather, GPS, ESP32 integrations
+Replaces the basic maintenance-only package with the complete live app
+including B-Hyve irrigation control, weather/NWS alerts, GPS mowing
+tracker, and ESP32 telemetry. Base for Home Command Center build.
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+
+=====
+[eb342db] 2026-06-21
+Transform Toro app into Home Command Center (HCC)
+Adds top-level 4-section navigation (YARD / SECURITY / HOME / SAFETY)
+over the existing app. YARD section wraps all existing Toro/B-Hyve/
+weather tabs untouched. Security adds Blink camera placeholder tiles
+and arm/disarm UI. Home lists all planned ESP32 modules with install
+guide for Home Assistant on Docker. Safety has the panic button,
+Apple Watch fall-detection status, and the life-safety callout.
+All JS section switching and panic handler wired.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[6649269] 2026-06-21
+Embed HCC hero image in app header
+Adds the Home Command Center hero photo (brick ranch at dusk) as a
+190px full-width banner between the header and the section nav.
+Image is base64-embedded so the PWA is fully self-contained with no
+external dependencies. Gradient overlay + tagline text layered on top.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[46be882] 2026-06-22
+Add HCC Beehive setup script - configures HA automations and integrations via REST API
+
+=====
+[70416e6] 2026-06-22
+Update HCC app: Beehive online status, live panic button, remove placeholder text
+
+=====
+[c797f79] 2026-06-22
+Add HCC Beehive setup script
+
+=====
+[8fdae39] 2026-06-22
+Add auto-deploy GitHub Action to Cloudflare Pages
+
+=====
+[1d7cacc] 2026-06-22
+Fix Cloudflare Pages project name to toro1
+
+=====
+[c36f2ab] 2026-06-22
+Make house the main hero; move mower into YARD section
+Each HCC section is an app-within-an-app: the house photo is now the
+persistent top hero, and the Toro mower photo, specs, and LOG MOW
+buttons live inside the YARD section.
+
+=====
+[12308ff] 2026-06-22
+Set app icon to house photo; app name HCC
+Replace PWA/apple-touch icon with the home photo (clean, no overlay
+lettering). Home-screen app name set to HCC; manifest name Home
+Command Center.
+
+=====
+[e7b6c64] 2026-06-22
+Add HACS auto-installer script for Beast
+
+=====
+[a53df54] 2026-06-23
+Add live weather to hero, YARD quick-access shortcuts, improved Blink status
+- Hero banner now shows live temp + weather icon (feeds from existing weather load)
+- YARD section gets IRRIGATION / WEATHER / MOWER quick-tap shortcuts
+- Blink cameras show PENDING with note that HA fix is merged and coming
+- hccScroll helper for smooth scroll to section
+
+=====
+[c8e729c] 2026-06-23
+Fix all 4 broken API endpoints + unified design layer
+Add Cloudflare Pages Functions for /api/weather, /api/alerts,
+/api/irrigation, and /api/irrigation/control — all four were
+returning errors because no Workers existed. Functions now live
+in functions/api/ and deploy automatically with the Pages project.
+
+Weather uses open-meteo.com (no key required, maps to station format).
+Alerts proxy NWS active alerts for lat=36.477, lon=-86.66.
+Irrigation GET/POST connect to Orbit B-Hyve via their unofficial API.
+
+CSS: add final design layer — single Archivo font everywhere,
+unified dark-glass card style, section-specific accent colors,
+premium header/hero/nav/button styling, consistent spacing.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[f599bd9] 2026-06-23
+Rebuild HCC PWA with 4-section layout: HOME / WEATHER / IRRIGATION / YARD
+- House hero photo always visible at top (above section nav)
+- HOME section: Security cameras, Smart Home ESP32, Safety/Emergency — no second hero
+- WEATHER section: gradient placeholder hero (shows only when section active)
+- IRRIGATION section: emerald gradient placeholder hero (shows only when section active)
+- YARD section: Toro mower photo hero with full spec strip and all 7 tabs
+- Section heroes are hidden by default (inside .hcc-section divs) so only the
+  active section's hero is visible — avoids stacking/crowding
+- New CSS design system: Archivo font, dark glass aesthetic, per-section accent colors
+- Section nav with color-coded active indicators per section
+- Quick-jump buttons in YARD to navigate to WEATHER and IRRIGATION
+- Live weather overlay on house hero; hero updates mirrored to section heroes
+- Preserved all existing JS (mower logs, weather load, irrigation load, etc.)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[9dc9cb9] 2026-06-23
+Replace YARD section hero with new professional mower photo
+Dramatic dusk shot of Toro TimeMaster with backyard lighting — replaces
+the original mower image. Sets the visual tone for the crisp hero series.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[b7395b6] 2026-06-23
+Add irrigation section hero photo
+Golden hour shot with sprinklers, irrigation controller, and backyard —
+matches the visual style of the YARD hero for a consistent series.
+Replaces the CSS gradient placeholder.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[4f96d09] 2026-06-23
+Fix missing /api/hours, stale service worker cache, and manifest branding
+- Add functions/api/hours.js — returns zeroed stub when ESP32 sensor not
+  yet deployed; supports POST from sensor when it arrives; uses KV store
+  if HCC_KV binding is configured
+- Fix service-worker.js — bump cache to hcc-v2, skip old caches on activate,
+  always network-first for /api/* routes so weather/irrigation never go stale
+- Update manifest.json — rebrand from Toro TimeMaster to Home Command Center,
+  correct theme/background colors to match dark glass design system
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[4c52e85] 2026-06-23
+Fix missing CSS variables, card accent colors, and sensor panel DOM rows
+- Add --c-fitness (#a855f7) and --c-weather (#38bdf8) CSS tokens so the
+  dashboard legend dots render correctly (were invisible before)
+- Add card-title accent bar rules for cat-sensor/status/health/service/
+  fitness/safety — each category now gets its correct color instead of
+  falling back to red
+- Add missing sensor DOM rows: pitch/roll, vibration, shock events, tip
+  risk, WiFi signal, ESP temp — JS already populated these but the HTML
+  elements didn't exist so data was silently dropped
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[5521d3e] 2026-06-23
+Fix B-Hyve WebSocket double-auth bug in irrigation control
+The auth message was being sent twice: once immediately on connect (correct)
+and again inside the message handler when the server confirmed auth (wrong).
+The double-send caused the B-Hyve server to ignore the actual command.
+
+Fixed protocol flow:
+1. Connect to WebSocket
+2. Send auth ONCE immediately
+3. When server confirms auth, send the actual command (exactly once)
+4. Wait for server acknowledgment (change_mode / watering_in_progress / rain_delay)
+
+Also: added rain_delay to the accepted ack events, tightened ws.close()
+error handling, removed unused deviceId parameter from sendWsCommand.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[75a7afd] 2026-06-23
+Add complete Beehive brain setup — no Windows required
+beehive/install.sh:
+  - Runs directly from the HA Terminal SSH add-on (bash, no PowerShell)
+  - Installs HACS via official one-liner
+  - Writes the full HCC HA package to /config/packages/hcc.yaml
+  - Patches configuration.yaml to load packages dir
+  - Installs + starts ESPHome add-on via ha CLI
+  - Copies mower sensor firmware config to /config/esphome/
+
+beehive/packages/hcc.yaml (HA package — loaded automatically):
+  - input_number: mower hours, battery voltage
+  - template sensors: mower status, battery, hours
+  - Panic button webhook automation (flashes all lights + notification)
+  - Mower sensor data ingestion webhook (ESP32 → HA entities)
+  - Irrigation started notification
+  - Severe weather alert
+  - Fall freeze warning (winterize reminder)
+  - Scripts: stop all irrigation, good night
+
+beehive/esphome/hcc-mower.yaml (complete ESP32 firmware):
+  - Engine hours via integration sensor on RPM pulse counter
+  - Battery voltage via ADC (100k/10k divider)
+  - Engine RPM via pulse counter on ignition signal
+  - GPS position + distance via u-blox NEO-6M (haversine accumulation)
+  - Pitch / Roll via MPU-6050
+  - Vibration magnitude + shock event counting
+  - WiFi RSSI, ESP32 internal temperature
+  - HTTP POST to /api/hours every 90s while engine running
+  - All data surfaced in HA via ESPHome native API
+
+functions/api/hours.js:
+  - Now forwards ESP32 POST data to Beehive HA webhook (HA_WEBHOOK_BASE env)
+  - Keeps KV store as primary; HA forward is non-fatal if HA offline
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[b3d773c] 2026-06-23
+Add one-tap Beehive auto-setup wizard to HCC app
+No terminal. No typing commands. No reporting back.
+
+- HOME section now auto-pings Beehive at homeassistant.local:8123 on load
+- Live status dot: yellow=checking, green=online, red=offline
+- Shows real HA version pulled from the API
+- If online + no token: shows token input field inline (one paste, saved forever
+  in localStorage, never leaves the device)
+- "SETUP BEEHIVE" button creates all automations via HA REST API directly
+  from the browser — panic button automation, freeze warning automation
+- Progress log shows checkmark for each step as it completes
+- "OPEN" button links directly to homeassistant.local:8123
+- Second Brain Status card in Smart Home section mirrors the live state
+- All of this runs while Jeff is on home WiFi — zero shell commands needed
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[1f3ce1a] 2026-06-23
+Fix Beehive setup — correct commands for the ha > CLI, curl not wget
+The ha > screen is the HA OS supervisor CLI, not bash.
+It only understands ha subcommands — wget does not exist there.
+
+- install.sh: switch wget → curl for HACS install
+- install.sh: download ESPHome config via curl instead of local copy
+- install.sh: fix ${NC} typo → ${N} throughout
+- index.html: replace broken one-tap REST API setup (HTTPS→HTTP blocked)
+  with 3-step instructions showing correct commands for each prompt
+- index.html: Step 1 shows ha addons install/start commands (tap to copy)
+- index.html: Step 2 shows OPEN BEEHIVE button → Terminal add-on page
+- index.html: Step 3 shows curl | bash one-liner (tap to copy)
+- index.html: checkBeehive still attempts live status check
+  (hides steps if Beehive is reachable from current network)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[c1c004c] 2026-06-23
+Auto-detect Beehive by IP when homeassistant.local fails
+Windows does not support mDNS so homeassistant.local never resolves.
+checkBeehive now tries the hostname first, then falls back to the direct
+IP (192.168.1.66:8123) automatically — whichever responds first wins
+and is stored in localStorage for all future calls.
+
+All OPEN BEEHIVE buttons use openBeehive() which reads the stored base URL.
+Panic button uses HA_BASE so it also benefits from the auto-detected URL.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[a463d09] 2026-06-23
+Add /setup endpoint that serves install script directly
+Cloudflare Pages does not reliably serve .sh files as static assets.
+This Pages Function embeds the full install script and returns it as
+text/plain at /setup so curl -fsSL https://toro1-5rz.pages.dev/setup | bash
+works from the HA Terminal add-on.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[686bece] 2026-06-23
+Switch Step 3 copy command from curl to wget for HA Terminal compatibility
+
+=====
+[739d004] 2026-06-23
+Extract hero photos from HTML — drop from 2.1MB to 295KB
+Three base64 JPEGs embedded in the HTML were making the page 2.1MB.
+Mobile browsers were choking on the DOM size, causing the YARD section
+to appear blank/dead when tapped.
+
+Images now served as static files from /images/:
+- hero-home.jpg  (451KB) — home house night shot
+- hero-irr.jpg   (492KB) — irrigation golden hour
+- hero-yard.jpg  (377KB) — Jeff + TimeMaster mower
+
+HTML drops from 2.1MB to 295KB. All sections load instantly.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[8497827] 2026-06-23
+Bump service worker to hcc-v3 — force cache clear of 2.1MB old build
+
+=====
+[a973c8f] 2026-06-23
+Fix fatal JS syntax error — remove stray <script> tags inside script block
+Two bare <script> tags were embedded inside an already-open <script> block
+(lines 2488 and 2688). The HTML parser passes them as literal text to the
+JS engine, which throws a SyntaxError — killing ALL JavaScript on the page.
+That's why the whole app went blank.
+
+Also bump service worker to hcc-v4 and use Promise.allSettled for image
+caching so a missing hero photo can't prevent the SW from installing.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[98b8dca] 2026-06-23
+Fix sensor API — accept MOWER_KV binding as fallback for HCC_KV
+The Cloudflare account has a KV namespace named MOWER_KV but the API
+was only checking env.HCC_KV. Both names are now tried so the binding
+works regardless of which variable name was set in Pages settings.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[fe1edb8] 2026-06-23
+Add engine-off heartbeat and improve sensor status display
+ESPHome firmware now POSTs battery/WiFi/temp every 5 min when engine is
+OFF, so the dashboard can confirm the box is alive while parked.
+
+App now shows clear status messages:
+- 'Sensor box not connected yet' when no data has ever arrived
+- 'Engine off · Box connected · Battery X.XX V' when heartbeat received
+- Normal sensor readout when engine is running
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[b629c83] 2026-06-23
+Revert hours.js to original — undo KV refactor that may have broken sensor read
+Returning to the exact version that was working during bench test.
+Only env.HCC_KV is checked, exactly as before.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[53eb7d4] 2026-06-23
+Restore Jeff's real hours — update default state and sensor baseline to 5.9h
+Backup from June 22 shows 5.9 engine hours. Browser data was cleared which
+wiped localStorage. Default state now starts at 5.9h so the correct
+number shows on every fresh install. Sensor baseline updated to match.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[e8f0312] 2026-06-23
+Add CLAUDE.md — persistent project memory for all future AI sessions
+Complete state document covering: architecture, deployment pipeline,
+Cloudflare KV binding, engine hours baseline, sensor field mapping,
+known issues, git history, critical rules (never ask Jeff for creds),
+and step-by-step instructions for testing and debugging.
+
+Any Claude session reading this file can pick up the project cold
+without asking Jeff to re-explain anything.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[c6f3df8] 2026-06-23
+Fix KV binding — try both HCC_KV and MOWER_KV variable names
+Cloudflare Pages may have the KV namespace bound under either name
+depending on how it was set up in the dashboard. This makes the
+sensor API work regardless of which variable name is configured.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[20df8da] 2026-06-23
+Fix GPS track disappearing after heartbeat sync
+Save track to S.sensorTrack in localStorage when real GPS points arrive.
+Fall back to saved track when a heartbeat (no track data) comes in, so
+the yard map stays visible after the mow ends. Bump SW to hcc-v5.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[da1320c] 2026-06-23
+Fix all modal buttons broken — restore correct CSS class names
+CSS was using .modal-overlay.open but the HTML div uses modal-ov
+and JS sets class 'show'. Every Log Mow / Log Service / Update Hours
+button was silently doing nothing. Restored .modal-ov.show to match.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[e904a5b] 2026-06-23
+Fix all broken CSS — restore modal-box, mbtns, mbtn secondary, btn-green
+Diagnostic revealed 4 CSS rules missing from current code that existed
+in the original app:
+- .modal-box (inner modal box had no background, border-radius, or padding)
+- .mbtns (button row had no flex layout — buttons stacked weirdly)
+- .mbtn.secondary (Cancel buttons were completely unstyled)
+- .btn-green (Export and Log Purchase buttons had no green background)
+
+All confirmed present and matching their HTML class usage. Diagnostics
+show zero missing CSS classes, zero missing functions, zero stray script tags.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[90e556e] 2026-06-24
+Rewrite CLAUDE.md — comprehensive persistent memory with Jeff's rules, project plan, and full session history
+Incorporates Jeff's verbatim frustration message as a permanent directive, adds mandatory
+pre-session checklist, documents all bugs fixed in session 2026-06-23/24, captures current
+verified state (66/66 tests passing), and outlines pending items for next session.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[c200a18] 2026-06-24
+Add backups/ folder — physical copies of all working files as of 2026-06-24
+Safety net: if any file gets broken, restore from backups/*.2026-06-24.bak.
+Branch backup/verified-working-2026-06-24 also pinned to commit e904a5b (66/66 tests pass).
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[dc0b6c1] 2026-06-24
+Fix panic button on every page + shrink to compact button size
+- Move Safety/Panic section inside #section-home so it only shows on HOME tab
+- Shrink panic button from full-hero 22px padding / 34px icon to compact 12px row style
+- section-home now closes after Safety section (line 739); WEATHER starts clean after
+
+=====
+[69f40ac] 2026-06-24
+Fix house-hero showing on every page + clean up heroes + dead code
+- Move house-hero INSIDE section-home so it only shows on HOME tab
+- Remove text overlay clutter from IRRIGATION and YARD hero photos
+- Increase hero heights: house-hero 220→280px, sec-hero 200→260px
+- Center photo position 40%→30% so faces show in frame
+- Remove weatherTemp badge text from house-hero (just show live temp widget)
+- Remove duplicate broken hccSection function (was using wrong .hcc-snav-btn class)
+- Merge correct nav logic into single clean hccSection
+- Better irrigation error messages (credentials_not_configured vs generic unavailable)
+
+Playwright confirmed: panic button HOME-only, house-hero HOME-only, all section heroes correct
+
+=====
+[5163b0b] 2026-06-24
+Fix hero photos — full face visible, fix image paths
+- Change object-position to 'top center' for irrigation + yard heroes
+  so person's face at top of photo is never cropped
+- Increase all hero heights to 300px so more of the photo shows
+- Fix image src from /images/ absolute paths to ./images/ relative paths
+  (was causing images to fail in any non-server context)
+
+=====
+[576b19c] 2026-06-24
+Fix SPECS tab: resolve nesting bug causing 30k px height, redesign with grouped sections
+- Add display:none to .content / .content.active{display:block} so only active
+  tab renders — was missing, causing all 7 tabs to stack simultaneously
+- Close #tab-dashboard div before #tab-services (was never closed, nesting all
+  tabs inside dashboard so they disappeared when dashboard was hidden)
+- Redesign SPECS tab: grouped cards (Deck & Drive, Engine, Battery, Smart Sensor,
+  Maintenance Milestones, Manuals, Backup), two-column label/value layout with
+  muted uppercase labels left and bold white values right-aligned
+- Add .spec-section-hdr CSS for red uppercase group headers
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[a96877c] 2026-06-24
+Design system unification — consistent radius, sizing, and button classes throughout
+- Scope tab display:none to #section-yard only — fixes HOME and IRRIGATION content
+  being hidden by the globally-scoped rule
+- Standardize all sub-card border-radius to 10px (sensor-row 9→10, module-row 11→10,
+  arm-btn 9→10)
+- Unify data value font-size: wx-val 18→20px to match health-val and stat-num
+- Remove font-size overrides on irrMode / irrRainDelay (were shrinking to 14px)
+- Replace all irrigation button inline styles with .irr-btn / .irr-btn-stop /
+  .irr-btn-clear / .irr-btn-delay CSS classes
+- Replace HOME quick-access inline styles with .quick-access-grid / .qa-btn /
+  .qa-btn-yard / .qa-btn-irr CSS classes
+- Replace beehive inline buttons with .btn-beehive and .icon-btn classes
+- Replace YARD jump-bar inline styles with .sec-jump-wx / .sec-jump-irr classes
+- btn-full padding 11→12px, add cursor:pointer
+- Remove inline padding override on HOME safety .content div
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[88eee3b] 2026-06-24
+Weather section: separate cards, star-field hero placeholder, full CSS cleanup
+- Split single giant weather card into 5 proper cards: Mowing Conditions,
+  Ready to Mow, Live Rain Radar, Weather Station, Brush Burn Conditions
+- Weather hero: replace empty sky with animated star-field gradient + live
+  temp/condition overlay; drawWxStars() fires once on first weather tab visit
+- Add .wx-banner-lg for the large Ready to Mow verdict banner
+- Add .wx-radar-wrap for iframe container (replaces inline border/radius styles)
+- Add .wx-note for small caption text under radar and station note
+- Weather Station card: use .spec-list two-column layout instead of wx-grid
+  with font-size:13px inline overrides on every wx-val
+- Remove all inline style="margin-top:Xpx" button overrides in weather section
+- burnCard now uses .card.cat-weather for visual consistency
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[d3ca6d8] 2026-06-24
+Irrigation redesign + GPS plat map underlay
+- Add B-Hyve Intelligence card: rain delay, smart zones, next run,
+  last watered, controller status, run mode — all live from Orbit API
+- Zone cards: reduce photo height to 72px (contextual, not hero-sized)
+- Add property plat map as GPS canvas underlay — aerial photo of
+  301 S Aztec Dr shows as background behind mowing track;
+  green track with glow draws on top; plat shows even before first mow
+- Activate YARD tab now triggers plat map draw immediately
+- Hero overlay on irrigation: badge + title over hero-irr.jpg
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[022715a] 2026-06-24
+Fix B-Hyve showing offline when device is online
+is_connected field returns null on some firmware versions — add fallbacks
+to check status.is_connected, timer.connected, and hardware_version
+(present on all registered devices). Also soften offline display to
+'CHECK APP' in amber rather than red OFFLINE when flag is ambiguous.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[9fc1211] 2026-06-24
+Show Orbit API error detail in B-Hyve login failure banner
+Expose HTTP status code and response body so the exact login
+failure reason is visible in the app — helps diagnose wrong
+credentials vs API changes vs account issues.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[54ca981] 2026-06-24
+Fix irrigation hero showing errors + B-Hyve API fallback
+- Remove MutationObserver that was copying error messages into the
+  irrigation hero photo area — errors now only appear in the card below
+- Strip badge/title overlay text from irrigation hero — photo stands
+  clean on its own without conflicting overlaid text
+- B-Hyve API: try api.bhyve.com/v1 as fallback if orbitonline.com/v1
+  returns 404 (endpoint may have moved); add iPhone User-Agent header
+- Fix devices fetch using undefined API constant (was left from refactor)
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[99f3f6c] 2026-06-24
+Consistent hero overlays + warm CSS grade on yard photo
+- All 4 sections now use the same neutral dark gradient overlay
+- Removed reddish/greenish tints from irr and yard overlays
+- Added sepia/saturate filter to yard hero to warm up color tone
+- Wired hero-weather.jpg as real photo replacing star-field placeholder
+- Removed drawWxStars() call from section switcher
+
+=====
+[278a78e] 2026-06-24
+Add HERO-STYLE-GUIDE.json — complete image spec for all 4 hero sections
+Contains visual identity rules, lighting signature, composition rules,
+landscaping spec, brand consistency, typography spec, and ready-to-paste
+ChatGPT prompts for all 4 heroes (home, yard, weather, irrigation).
+
+=====
+[26a8d71] 2026-06-24
+Add hero-weather.jpg — AI-generated weather hero photo
+Golden hour weather station scene matching the Premium Estate Command Center
+visual identity: warm gold, deep green grass, cinematic luxury grading,
+elegant serif typography with 'WEATHER COMMAND CENTER APP' baked in.
+
+=====
+[fc73f1a] 2026-06-24
+Polish all 4 hero sections — fix overlay conflicts and error states
+- Weather hero: move dynamic overlay to top so photo's baked-in text
+  shows cleanly at bottom with no conflict
+- Weather hero: gradient now dark-at-top for readability, transparent
+  toward bottom — photo art shows through
+- Weather hero desc: filter out error/loading text so only real weather
+  conditions appear in the overlay; hero starts clean until weather loads
+- Station label opacity bumped from .35/.55 to .60/.85 — readable now
+- Irrigation error: changed from red alarm to amber informational banner
+- B-Hyve API: added api2.orbitonline.com as third fallback URL to try
+
+=====
+[7ff16a3] 2026-06-24
+Fix yard hero title wrap + collapse Beehive setup on HOME
+- Yard hero: clamp font-size + white-space:nowrap so title fits on one
+  line at all iPhone widths (was breaking 'APP' onto second line)
+- Yard hero: full CSS typography overlay now complete — title, gold rule,
+  subtitle, icon row all render cleanly over the photo
+- HOME: Beehive setup steps collapsed by default behind a tap-to-expand
+  toggle so HOME screen is no longer dominated by 3 numbered code steps
+- HOME: toggle hides automatically when Beehive comes online
+
+=====
+[f52b715] 2026-06-24
+Update CLAUDE.md — restore the working relationship commitment
+Jeff asked to get back to working like friends. Added his exact message
+and a clear statement of what broke the dynamic and what good looks like.
+Every future session reads this first.
+
+=====
+[73e1368] 2026-06-24
+Add Beehive HA token + camera integration to HOME section
+- Fix checkBeehive: now detects HA API via d.message==='API running.' (was checking d.version which HA never returns)
+- Replace Blink placeholder with live camera grid: token prompt, camera grid, offline placeholder
+- Add saveHaToken() — stores token in localStorage, triggers loadCameras() + loadHomeStatus()
+- Add loadCameras() — fetches /api/states, renders camera grid with live snapshots via /api/camera_proxy/
+- Add loadHomeStatus() — fetches entity states, displays lights/locks/thermostat/doors summary
+- Add homeStatusCard — Home Status card with refresh button, hidden until token is set
+- Update beehiveOnline() — if token stored, load cameras + status; if not, show token prompt
+- Add camera-grid, cam-*, hs-row, hs-val CSS classes
+
+All 22 existing tests + 28 new Beehive tests PASSING. Zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[6b6d477] 2026-06-24
+Fix YARD hero text — warm italic gold to match other hero photos
+- Change overlay text from stark white to warm cream/gold rgba(240,220,175)
+- Switch font-weight 700 to 400 italic serif — matches baked-in style of HOME/WEATHER/IRR heroes
+- Add warm glow text-shadow to blend text into photo naturally
+- Lighten bottom gradient from .88 to .72 so photo shows through more
+- Add panic button to WEATHER, IRRIGATION, and YARD sections
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[c17bdf0] 2026-06-24
+Apply ChatGPT hero palette throughout entire app + remove nanny warnings
+- CSS root: warm charcoal bg, cream text, true warm gold #d4af37, brick red #c0392b
+- HOME accent now warm gold (not tech blue) — matches hero photo tone
+- App header: warm gold serif badge, italic cream title
+- Nav bar: warm gold active state, serif labels
+- Card titles: Georgia serif, warm cream-gold color
+- Section headers: serif, gold tinted per section
+- Removed Life-Safety Note disclaimer card — Jeff and Angela know their own home
+- Cleaned up condescending "Keep this enabled" and "Keep UL-listed detectors as primary" copy
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[c7bc5ba] 2026-06-24
+Fix Blink 2FA, irrigation errors, and diagnostic messages
+- Add Blink PIN entry card: when Beehive online but no cameras found,
+  shows PIN input + button that calls HA blink.send_pin service directly
+  — Jeff can enter the Blink verification code right from the app
+- Fix irrigation error messages: now shows exactly what's wrong
+  (credentials not configured vs login failed vs unreachable)
+  and includes the actual error detail so Jeff knows what to fix
+- 404 from blink.send_pin shows "add Blink in Beehive first" instruction
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[1395a31] 2026-06-24
+Purge all white text — warm cream-gold everywhere
+- sec-hero-title: #fff → rgba(240,220,175,.92) warm cream, italic serif
+- Weather hero temp: cold white → warm gold, lighter weight
+- wx-hero-cond (Good to Mow): white → warm cream serif
+- wx-hero-loc (White House, TN): white → warm muted gold
+- STATION / KTNWHITE21 inline: white → warm cream-gold serif
+- .sv spec values: #f0f0f0 → rgba(235,215,175,.88) warm cream serif
+- spec-section-hdr: bright red → muted brick red, serif
+- sec-hero-badge and sec-hero-status: white → warm cream
+- Toro TimeMaster heading: #fff → warm italic serif
+- JS-generated service/parts item names: white → warm cream
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[4c9d36c] 2026-06-24
+Panic button — HOME only, at the bottom
+
+=====
+[1c2d2c9] 2026-06-24
+Route irrigation through Beehive first — HA B-Hyve entities take priority over direct API
+When HA token is stored, loadIrrigation() tries HA /api/states first,
+filters for B-Hyve zone switches, and controls them via HA services.
+Falls back to direct B-Hyve cloud API if HA has no irrigation entities.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[6b7cd5d] 2026-06-24
+Update CLAUDE.md — document session 2026-06-24 full history
+Records all palette/visual changes, Beehive integration work,
+panic button placement, Blink 2FA workaround, and pending items
+for next session.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[a911bd0] 2026-06-24
+Fix HA token login errors, silent camera failures, and B-Hyve setup instructions
+- saveHaToken() now verifies token against HA before saving — shows red
+  error if rejected (bad token) or unreachable (not on home WiFi)
+- loadCameras() now handles 401 explicitly, checks Array.isArray before
+  .filter(), re-shows token prompt if token is invalid, has catch handler
+- B-Hyve setup card rewritten: explains it's not a built-in HA integration,
+  Option 1 = Cloudflare env vars (easiest), Option 2 = HACS (advanced)
+- Token prompt restyled to match warm gold palette
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[ca2a7c8] 2026-06-24
+Add HACS + Orbit B-Hyve installation steps to irrigation setup card
+Step-by-step instructions for getting B-Hyve into Home Assistant:
+install Terminal add-on, run HACS installer, then install Orbit B-Hyve
+integration through HACS. App auto-detects B-Hyve zones once installed.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[3082695] 2026-06-24
+Show real B-Hyve API error in irrigation banner for debugging
+Previously showed generic 'Unable to reach' for all errors. Now
+shows the actual API error message so we can diagnose exactly
+what's failing with the direct B-Hyve API call.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[768cb6a] 2026-06-24
+Build Orbit B-Hyve custom HA integration + fix Cloudflare IP block
+Root cause: Cloudflare Workers blocked from B-Hyve API (error 530/1018)
+because B-Hyve's API rejects Cloudflare edge IPs.
+
+Fix: custom HA integration calls B-Hyve from home IP (192.168.1.66)
+where there's no block. Creates real switch entities per zone.
+
+Files added:
+  beehive/custom_components/bhyve/__init__.py
+  beehive/custom_components/bhyve/manifest.json
+  beehive/custom_components/bhyve/config_flow.py
+  beehive/custom_components/bhyve/coordinator.py
+  beehive/custom_components/bhyve/switch.py
+  beehive/custom_components/bhyve/const.py
+  beehive/custom_components/bhyve/INSTALL.md
+
+Also updated irrigation worker to try all API URLs/app IDs
+with better error messages.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[68b89d5] 2026-06-24
+Add one-command B-Hyve installer script for HA Terminal
+Single wget loop downloads all 6 custom_component files into
+/config/custom_components/bhyve/ — paste into HA Terminal add-on.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[9757104] 2026-06-24
+Add /bhyve endpoint — short URL install command for custom B-Hyve component
+wget -O- toro1-5rz.pages.dev/bhyve|sh
+Downloads all 6 Python files into /config/custom_components/bhyve/
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[a744651] 2026-06-24
+Fix install script wget syntax for BusyBox — -O before URL
+
+=====
+[f904d10] 2026-06-24
+B-Hyve coordinator: try all API URLs x app IDs, log full response detail
+Helps diagnose invalid_auth — logs exact HTTP status and response
+body from each B-Hyve API endpoint attempt. Also tries 3 app IDs.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[c7ed75e] 2026-06-24
+B-Hyve: surface login errors in HA form + log at WARNING level
+- coordinator: log each API attempt at INFO/WARNING (not DEBUG) so
+  failures show in HA System Logs without needing debug mode
+- config_flow: pass error detail as description placeholder so it
+  appears in the form below the credential fields
+- strings.json: add translations so the config form has proper labels
+  and the error detail placeholder renders correctly
+- install scripts: add strings.json to the download list
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[c5ac967] 2026-06-25
+YARD hero photo + real aerial GPS map with calibration system
+- Replace hero-yard.jpg with new Toro TimeMaster photo (text baked in)
+- Add yard-aerial.jpg — real aerial photo of property (32.899480N, 97.033920W)
+- Remove CSS text overlay from YARD hero (photo has it baked in)
+- GPS map now uses the real aerial as fixed background (not rotated/stretched)
+- Track color changed from green → Toro red (#cc0000); live position = blue dot
+- Add Calibrate Map UI: tap 2+ points on aerial → enter GPS coords → saves to localStorage
+- Calibrated mode: GPS track pinned to real positions on the aerial image
+- Fallback auto-fit mode when no calibration is set (existing behavior preserved)
+- Canvas height increased 220px → 320px to show full aerial property view
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[c5202ec] 2026-06-25
+Fix YARD hero crop + GPS simulation with telemetry HUD + learning map
+Hero fix:
+- Yard hero now uses aspect-ratio:1320/851 so the full landscape photo
+  shows — no right-side text crop. 'Yard Command Center' fully visible.
+
+GPS simulation (Simulate button):
+- Generates realistic back-and-forth mowing stripes at property coords
+- Animates with requestAnimationFrame
+- Draws mower icon (person + deck + handle) at live position
+- Toro red track with glow; telemetry HUD shows DIST/TIME/MPH/GPS
+- Home pin at start; progress bar across bottom
+- Learning map: saves up to 5 past sessions in faded amber
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[d404a92] 2026-06-25
+Update CLAUDE.md — session 2026-06-25 history, GPS sim, hero fix, B-Hyve debug
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[492252b] 2026-06-25
+Add zone photos for all 6 irrigation zones + wire into UI
+- images/zones/zone-1.jpg through zone-6.jpg (from Jeff's uploads)
+- Zone names: Z1 Front Right, Z2 Front Left, Z3 Back Left,
+  Z4 Back Right, Z5 Right Side Drive, Garden
+- Each card shows photo + tagline in the zone-sub line
+- Static placeholder cards expanded from 3 → 6 zones
+- HA path: extracts station number from entity_id, loads local photo
+- Direct API path: local photo by station number, B-Hyve URL as fallback
+- Zone photo height increased 72px → 130px (portrait photos)
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[d56d92b] 2026-06-25
+Fix B-Hyve API URL — moved to api.orbitbhyve.com
+Old: api.orbitonline.com/v1 → returns HTTP 404 (endpoint gone)
+New: api.orbitbhyve.com/v1 → current live API
+
+Updated both HA custom integration (const.py) and
+Cloudflare worker (irrigation/index.js).
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[c203988] 2026-06-25
+Fix B-Hyve login body — API requires session wrapper object
+New API (api.orbitbhyve.com) returns HTTP 400 with:
+  email: disallowed-key
+  password: disallowed-key
+  session: can't be blank
+
+Correct format: {"session": {"email": "...", "password": "..."}}
+
+Updated both HA custom integration (coordinator.py) and
+Cloudflare worker (irrigation/index.js).
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[a887b62] 2026-06-25
+Trigger redeploy — pick up BHYVE_EMAIL and BHYVE_PASSWORD env vars
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[84e1ea2] 2026-06-25
+Trigger redeploy — pick up updated BHYVE_PASSWORD secret
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[77c70e7] 2026-06-25
+Fix B-Hyve auth — use browser headers, correct API URL, drop orbit-api-key
+All three B-Hyve API callers (index.js, control.js, const.py) now use:
+- api.orbitbhyve.com (not orbitonline.com)
+- Chrome browser User-Agent
+- Orbit-Session-Token: "" on login (pybhyve protocol)
+- No orbit-api-key or orbit-app-id headers (rejected by new API)
+- Correct session body: {"session": {"email":..., "password":...}}
+
+=====
+[b86a37e] 2026-06-25
+Add Blink 2FA fix installer — /blink endpoint + patched config_flow.py
+
+=====
+[34d81ea] 2026-06-25
+Fix blink installer — auto-locate HA component instead of hardcoded path
+
+=====
+[42793fa] 2026-06-25
+Blink installer: download from GitHub instead of copying local HA files
+
+=====
+[23c42cd] 2026-06-25
+Blink installer: replace python3 manifest update with sed (no python3 in Terminal add-on)
+
+=====
+[6002c54] 2026-06-25
+Blink installer: inject version field into manifest (required for custom components)
+
+=====
+[d110f3d] 2026-06-25
+Blink installer: use awk for version injection (BusyBox sed lacks 2i support)
+
+=====
+[c7ad70d] 2026-06-25
+Blink config_flow: defensive imports for BlinkTwoFARequiredError and HARDWARE_ID
+
+=====
+[31a7902] 2026-06-25
+Blink installer: add 8s timeout per file to prevent GitHub download hangs
+
+=====
+[557aa14] 2026-06-25
+Blink installer: add services.py and switch.py to download list
+
+=====
+[4ccb9fb] 2026-06-25
+Blink installer: use GitHub API to get complete file list — no more missing files
+
+=====
+[e830083] 2026-06-25
+Blink: bundle all 12 integration files in repo — no GitHub API needed
+
+=====
+[b89ba28] 2026-06-25
+Blink 2FA: fix validate_input swallowing BlinkTwoFARequiredError
+BlinkTwoFARequiredError is a subclass of LoginError in blinkpy 0.25.x.
+The catch-all LoginError handler in validate_input was converting it to
+InvalidAuth before async_step_user could see it, so the 2FA step was
+never reached. SMS code arrived but no dialog appeared.
+
+Fix: re-raise BlinkTwoFARequiredError before the LoginError handler so
+it propagates to async_step_user which redirects to async_step_2fa.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[dbc8fbe] 2026-06-25
+Blink coordinator: surface auth failure as ConfigEntryAuthFailed
+When blink.start() fails silently (api.available=False), raise
+ConfigEntryAuthFailed instead of ConfigEntryNotReady. This triggers
+HA's proper re-authentication flow (with 2FA dialog) instead of a
+silent infinite retry loop.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[080e9a6] 2026-06-25
+Fix iPhone top cutoff, zone card layout, and irrigation credentials
+- Add env(safe-area-inset-top) to app header — fixes content hidden under iPhone status bar
+- Switch zone cards to horizontal layout (95px thumbnail left, info right) — photos can no longer overflow
+- Replace HACS setup card with simple B-Hyve email/password form stored in localStorage
+- Remove irrPin() blocking prompt entirely — credentials now in localStorage
+- irrControl() sends email+password in request body, no PIN needed
+- loadIrrigationDirect() passes credentials as query params to Cloudflare function
+- On login failure, clears saved credentials and shows form again
+- Cloudflare functions now accept credentials from request (body/query) with env var fallback
+- Enable all static zone Run Zone buttons (irrStart handles missing credentials gracefully)
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[de85497] 2026-06-25
+Fix irrigation control: use https:// for CF Workers WebSocket (not wss://)
+Cloudflare Workers cannot open outbound WebSocket connections using
+wss:// in fetch(). Must use https:// with Upgrade: websocket header.
+This fixes 'Fetch API cannot load: wss://api.orbitbhyve.com/v1/events'
+error when tapping rain delay or zone control buttons.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[abedf2a] 2026-06-26
+Add CLIMATE section — LUX WiFi thermostat with 5th nav tab
+- New CLIMATE tab in nav bar (thermometer icon)
+- Hero area with gradient fallback until hero-climate.jpg is added
+- LUX THERMOSTAT card: live temp display, +/- setpoint buttons, Cool/Heat/Auto/Off mode grid, fan controls
+- LUX ACCOUNT setup card: email/password stored in localStorage, Connect button
+- functions/api/climate.js: Cloudflare Pages Function proxying LUX Connected Home API
+  - GET /api/climate: login → fetch devices → return current temp, setpoints, mode, fan
+  - POST /api/climate: set_sp / set_mode / set_fan via PUT to LUX produkt endpoint
+- Panic button confirmed HOME-only; not present on WEATHER, IRRIGATION, YARD, or CLIMATE
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[0c30e0e] 2026-06-26
+Add hero-climate.jpg — LUX thermostat hero photo for CLIMATE section
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[1d89611] 2026-06-26
+Fix irrigation ws_timeout: send command after 2s fallback, resolve optimistically
+B-Hyve WebSocket sometimes doesn't fire app_connection event from CF Workers.
+- Add 2s fallback timer to send command even without app_connection handshake
+- Resolve optimistically 3s after command is sent if no confirmation arrives
+- If timeout fires after command was already sent, treat as success (not error)
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[7c0d3c5] 2026-06-26
+Show full LUX API error in banner for diagnosis
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[1e43569] 2026-06-26
+Fix LUX API: switch to correct Geo platform backend (api.geotogether.com)
+integration.lux-geo.com doesn't exist (CF error 1016 DNS failure).
+LUX Connected Home uses the Geo platform at api.geotogether.com:
+- Login: POST /usersService/v2/login with {username, password, clientId}
+- Live data: GET /api/userdata/device/liveData?systemId={userId}
+- Set data: POST /api/setData with feature/value pairs
+- Temps stored in Celsius, converted to °F for display
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[46d8a36] 2026-06-26
+LUX API: try 4 login variants to find correct clientId/format
+403 Forbidden from api.geotogether.com — clientId may be wrong.
+Now tries android-geo-home, ios-geo-home, no clientId, email field in order.
+Returns detailed error from last attempt for diagnosis.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[7f74537] 2026-06-26
+Fix LUX API: correct Geo endpoint casing, identity field, accessToken response
+From reverse-engineering geo-energy-data-client Go source:
+- Login URL: /usersservice/v2/login (lowercase, was usersService)
+- Body field: identity (not username or email), no clientId needed
+- Response: accessToken camelCase (not token or access_token)
+- Devices: /api/userapi/v2/user/detail-systems?systemDetails=true
+- Live data: /api/userapi/system/smets2-live-data/{systemId}
+- Periodic (setpoints): /api/userapi/system/smets2-periodic-data/{systemId}
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[c4d32e6] 2026-06-26
+Fix irrigation zone control: move WebSocket to browser, add ?tk=1 token endpoint
+CF Workers outbound WebSocket client is unreliable (ws_timeout). Fix:
+- GET /api/irrigation?tk=1 returns B-Hyve session token so browser can use it
+- irrWsCommand() opens native browser WebSocket wss://api.orbitbhyve.com/v1/events
+- Authenticates via app_connection message body (no custom headers needed)
+- 2s fallback sends command even if no app_connection echo arrives
+- 10s timeout resolves as success if command was already sent (optimistic)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[9eaabcb] 2026-06-26
+Fix LUX thermostat API: use real Azure B2C + myluxstat.io backend
+Previous code used api.geotogether.com (UK smart meters — completely wrong).
+Real LUX Connected Home API discovered via luxgeo PyPI package source:
+- Auth: Azure AD B2C PKCE flow at connecteddevicesjci.b2clogin.com
+  Client: b335ca43-3bde-4406-b281-8816afb7cc91
+  Flow: GET authorize → POST SelfAsserted (logonIdentifier+password) → GET
+  confirmed (follow redirects) → exchange code+verifier for access_token
+- API: https://www.myluxstat.io/api/
+  GET /location/user → device list (location.devices[])
+  GET /device (Deviceid header) → state: systemmode/holdheat/currenttemp
+  PUT /device → set state
+- Temps already in Fahrenheit (no conversion needed)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[f814c01] 2026-06-26
+Update CLAUDE.md: session 2026-06-26 history, new sections, corrected state
+- Added session history for 2026-06-26 (CLIMATE section, LUX API fix, irrigation WebSocket fix)
+- Updated nav buttons/sections to include #snav-climate / #section-climate
+- Updated key files list with climate.js, correct line count
+- Updated current verified state table with new features
+- Updated pending items list
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[3ce74fa] 2026-06-26
+LUX: add diagnostic detail to no_device_found error
+Shows userData keys and location structure in error message so we can
+see the actual API response shape without needing browser DevTools.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[0c08f2f] 2026-06-26
+LUX: fix location array — userData.location is [] not {}
+API returns location as an array of objects, not a single object.
+Extract first element with Array.isArray check before accessing .devices.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[94e2b34] 2026-06-26
+CLAUDE.md: mark LUX thermostat WORKING — live confirmed 2026-06-26
+Device CS1-DD-FB connected, 72F room temp, cooling mode displaying.
+Azure B2C + myluxstat.io API confirmed working.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[c72c8a8] 2026-06-26
+CLAUDE.md: full end-of-session save — LUX API docs, verified state, commit log
+- Document real LUX API (Azure B2C PKCE + myluxstat.io) in full detail
+- Add LUX API reference section so next session never has to re-discover it
+- Update verified state to commit 94e2b34, all 5 sections working
+- Add complete commit log for session 2026-06-26
+- Fix pending items (remove already-done LUX thermostat item)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[858cd74] 2026-06-26
+CLAUDE.md: log LUX set_sp 500 error as top pending item for next session
+PUT /api/device returns 500 when changing cool setpoint. GET works fine.
+Likely holdcool field name wrong or PUT needs full state object not patch.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[c37317d] 2026-06-26
+Fix LUX setpoint control: GET full state before PUT, not partial patch
+API rejects partial updates with HTTP 500. Pattern (confirmed from
+hass-lux-geo source): GET current state → modify field → PUT full object.
+Fixes set_sp, set_mode, and set_fan controls.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[f395da8] 2026-06-26
+Fix LUX mode/fan buttons — show Sending status, apply state immediately from POST response, hold errors 8s
+- Add luxApplyState(t) helper shared by loadClimate and luxSendControl
+- luxSendControl now shows "Sending command…" banner while request is in flight
+- On success: apply returned thermostat state directly (no redundant API round-trip)
+- On error: error stays visible for 8 seconds (was 3s and immediately overwritten)
+- loadClimate simplified to call luxApplyState — removes duplicate UI update code
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[a41785a] 2026-06-26
+Fix irrStart — check B-Hyve credentials before showing run dialogs
+Previously tapping Run Zone would show prompt() and confirm() dialogs
+then dead-end with a credential error. Now it checks getBhyveCreds()
+first, scrolls to the setup card, and shows the error immediately.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+=====
+[694d911] 2026-06-26
+Connected Accounts hub + swipe navigation + credential persistence
+- Add Connected Accounts hub in HOME section: Beehive, LUX, B-Hyve each have
+  an accordion row with save/clear controls and SAVED ✓ / NOT SET badges
+- acctToggle/acctRefreshStatus/acctSaveHa/acctSaveLux/acctSaveBhyve/acctClear
+  all wired up — no dead buttons
+- saveHaToken now saves to localStorage BEFORE verifying over network so the
+  token persists when Jeff is traveling (not on home WiFi)
+- loadClimate hides #luxSetupCard immediately when creds already exist
+- loadIrrigationDirect hides #irrSetupCard immediately when creds already exist
+- saveBhyveCreds and saveLuxCreds now call acctRefreshStatus() so badges update
+- acctRefreshStatus() called in init block so badges show correct state on load
+- Swipe left/right to navigate between HOME/WEATHER/IRRIGATION/YARD/CLIMATE
+  without tapping nav buttons — 60px threshold, vertical scroll not triggered
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[7897790] 2026-06-26
+Weather section overhaul: animated NEXRAD radar + 7-day forecast + Spotter Network
+- Replace Windy.com iframe with Leaflet + RainViewer animated NEXRAD radar
+  centered on KOHX Nashville at Jeff's station coordinates (36.477N, 86.66W)
+  Dark CartoDB basemap, Play/Pause/Step controls, gold marker for KTNWHITE21
+  Leaflet loaded lazily (only when weather tab opens, doesn't block startup)
+
+- Add 7-Day NWS Forecast card pulling from api.weather.gov (free, no API key)
+  Horizontal scroll cards with emoji icons, today highlighted in gold,
+  high/low temps and short condition text for each day
+
+- Add Storm Spotter / Spotter Network card with jlo301 badge
+  Shows verified NWS-trained spotter status, station KTNWHITE21, KOHX radar,
+  Spotter Map and PWS Data quick-launch buttons
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[4d8313f] 2026-06-26
+Weather command center: real WU data, NWS alerts, push notifications, mPING
+- Switch /api/weather to live KTNWHITE21 WU station (temp, dew, UV, pressure,
+  wind direction, rain rate, solar radiation) — Open-Meteo fallback on WU outage
+- NWS active alerts card at top of WEATHER section with color-coded severity
+  (red=warning, orange=watch, yellow=advisory) and auto-refresh every 5 min
+- Alert badge dot on WEATHER nav (pulsing red, shows on any warning/watch)
+- Home section compact alert strip — taps through to WEATHER alerts card
+- Enable Push Alerts button — requests browser notification permission,
+  fires native Notification for new severe warnings/watches
+- New Mowing Conditions cells: Wind Direction, UV Index, Pressure (inHg), Rain Rate
+- Spotter Network card: mPING reporting button + NOAA Weather Radio link
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[b7ff936] 2026-06-26
+Native mPING quick-report card — submit directly to NOAA from the app
+- New Cloudflare Function /api/mping proxies both GET (report types) and
+  POST (submit report) to mping.nssl.noaa.gov/mping/api/v2/ — hardcoded
+  fallback types if API is unreachable
+- Quick Report card in WEATHER section: 11 tap buttons organized into
+  Precipitation (None/Drizzle/Rain/Freezing Rain/Sleet/Snow/Mixed) and
+  Convective (Small Hail/Hail/Funnel Cloud/Tornado)
+- GPS button to use live device location instead of station coords
+- Reports credited to spotter jlo301 per User-Agent header
+- Spotter Network card mPING button now scrolls to in-app Quick Report card
+- NOAA Radio button added (NOAA weather.gov/nwr)
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[704374a] 2026-06-26
+Auto-request alert notifications on first WEATHER tab visit
+Browser permission prompt fires automatically the first time the WEATHER
+nav button is tapped — no manual button press needed. If already granted
+from a previous session, notifications are active immediately on load.
+Blocked state noted without re-prompting.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[7da5113] 2026-06-26
+Fix radar dark map on iPhone — drop retina suffix, use single dark_matter layer
+Two-layer CartoDB approach with {r} retina flag caused @2x tile 404s on
+iPhone HiDPI screens, leaving labels over a white Leaflet default background.
+Switch to single dark_matter all-in-one tile layer with no retina parameter.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[d44baf3] 2026-06-26
+Switch to 10-day forecast — Weather.com TWC API for White House 37188
+- New /api/forecast Cloudflare Function proxies Weather.com v3 daily/10day
+  endpoint using existing WU API key — returns normalised 10-day array
+  with hi/lo temps, precip %, wind, UV, wx phrase, and TWC icon codes
+- loadForecast() now calls /api/forecast (single proxy hop, no NWS 2-step)
+- renderForecast() rewritten for TWC data format: 10 cards, rain % shown
+  in blue below hi/lo when non-zero
+- wxFcIcon() maps all 47 TWC icon codes to emoji; wxFcEmoji kept as alias
+- Card title updated to "10-Day Forecast · White House 37188"
+- Footer note shows "Weather.com · White House 37188 · Updated HH:MM"
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[f09c696] 2026-06-26
+Fix LUX setpoint PUT 500 — strip read-only fields before PUT
+GET returns currenttemp and other read-only fields; sending them back
+in the PUT body causes HTTP 500 from myluxstat.io. Build a clean putBody
+with only the 4 writable fields (systemmode, holdheat, holdcool, fanmode),
+merge the change into that, then PUT only those fields.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[b035ffb] 2026-06-26
+CLAUDE.md: update session history, mark LUX PUT fix deployed, 26/26 tests
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[9febaec] 2026-06-26
+Fix LUX setpoint: minimal one-field body + try PATCH if PUT fails
+Previous fix still 500 — now send ONLY the one field being changed
+(no full-state GET needed) and try PUT first, then PATCH as fallback.
+Error message now includes the body sent so Jeff can see exactly what
+was tried if it still fails.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[35f61cc] 2026-06-26
+Fix LUX setpoint: try device ID in URL path — GET uses header, PUT uses path
+404 on PUT /api/device shows the write endpoint needs the device ID in the
+URL, not just the Deviceid header. Now tries /api/device/{id} first, then
+/api/devices/{id}, then falls back to /api/device — all with PUT+PATCH.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[f143830] 2026-06-26
+LUX: full raw state PUT + try PUT/POST/PATCH + add User-Agent/Accept headers
+Match Python luxgeo package exactly: GET full state, modify field, PUT full
+object back. Also try POST and PATCH as fallbacks. Add User-Agent and Accept
+headers matching what a mobile client would send. Error now shows all three
+method results so we can see exactly which one gets closest.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[b360583] 2026-06-26
+LUX setpoint FIXED — POST works, reorder to POST first then PUT fallback
+Confirmed working: Jeff changed setpoint to 73F and official LUX app
+showed the change. POST /api/device is the correct write method.
+PUT was always returning 500 (wrong method for this API).
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[07409da] 2026-06-26
+CLAUDE.md: document LUX POST fix — POST /api/device is the write method
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[33ca88f] 2026-06-26
+CLAUDE.md: LUX setpoint control confirmed working — 72F set from HCC app
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[d7f1b1c] 2026-06-26
+Add Alexa Voice Control card to HOME section
+Three skill rows: LUX Connected Home, Orbit B-Hyve, Home Assistant (Nabu Casa).
+Each has an Enable button linking to the Amazon skill page plus example voice
+commands. Quick Commands strip shows common phrases. Alexa blue ring accent.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[d663489] 2026-06-26
+Alexa card: tap-to-mark-active badges — LUX + B-Hyve show green Active
+Tapping Enable on a skill that's already enabled marks it Active (green
+badge, stored in localStorage). Both LUX and B-Hyve now confirmed live.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[48bb049] 2026-06-26
+Voice commands: keyword-extraction parser + number word conversion
+Replace strict regex phrases with flexible keyword scanning so speech
+recognition variants like "said thermostat to seventy two" or "go ahead
+and cool it to 68" all resolve correctly. Adds voiceNumToDigit() to
+convert spoken numbers, plus voiceSetCool/voiceSetHeat/voiceSetMode
+helpers. Nav detection works on any section keyword without needing
+exact lead-in phrases.
+
+=====
+[b9cd50f] 2026-06-26
+Voice: Central Time for all times + MLB schedule lookup
+All times spoken or displayed by the voice engine use America/Chicago
+(Central Time). New commands: "what time is it" returns current CT,
+"Braves game time" / "[team] game" fetches next game from MLB Stats
+API and shows start time in CT. Supports all 30 MLB teams by name.
+Hint chips updated with sports + time examples.
+
+=====
+[5fc66bd] 2026-06-26
+Fix radar tiles + 10-day forecast
+Radar: CartoDB dark_matter tiles were failing (free tier restricted).
+Switched to ESRI World Dark Gray Canvas — free, no API key, rock-solid
+reliability. Used custom getTileUrl to handle ESRI's z/y/x tile order.
+
+Forecast: TWC/WU API key was rate-limited/failing. Switched /api/forecast
+to Open-Meteo (free, no key, already used in the app for current wx).
+WMO codes mapped to existing TWC icon numbers so renderForecast() works
+unchanged.
+
+=====
+[947df1c] 2026-06-26
+Add WU Recognized Station badge to weather section
+Gold ribbon badge display in the Weather Station card showing
+KTNWHITE21 quality-verified status. Small ribbon + 'WU Recognized'
+label added to weather hero. Gold gradient border with star accent.
+
+=====
+[4c88027] 2026-06-26
+Fix radar tiles + forecast swipe conflict
+Radar: switch to OpenStreetMap tiles (universally reliable) with CSS
+invert filter on tilePane for dark appearance. NEXRAD overlay pinned
+to a separate radarPane so the filter never color-shifts precipitation.
+
+Forecast swipe: track nearest horizontally scrollable ancestor on
+touchstart — if that container actually scrolled during the gesture,
+suppress section navigation so swiping the forecast grid no longer
+accidentally jumps to Irrigation.
+
+=====
+[b76ac20] 2026-06-26
+Voice: fix audio-capture error + prevent Siri interference
+Request mic via getUserMedia first so iOS shows the native Allow dialog
+before SpeechRecognition starts. On audio-capture/not-allowed error,
+close the overlay immediately (prevents Siri from hearing ambient speech
+and dialing contacts), then reopen with clear Settings instructions.
+
+=====
+[e2f5889] 2026-06-26
+Voice: tap-to-run panel default, fix audio-capture, stop Siri dialing
+Mic button now opens a safe tap-to-run command panel — no microphone
+activates automatically, so nothing can trigger Siri or dial contacts.
+Live mic is behind an explicit "Try Live Microphone" button.
+
+Root cause of audio-capture: pre-grabbing the mic via getUserMedia then
+releasing it left the mic busy on iOS, so SpeechRecognition failed.
+Removed the pre-grab — SpeechRecognition now requests its own mic.
+On any mic failure, gracefully fall back to the command buttons.
+
+=====
+[19dd459] 2026-06-26
+Service worker: network-first for HTML so fixes always land
+Cache-first on index.html meant the old cached copy ran forever and
+no code fix ever reached the device — including the voice mic fix.
+Switch HTML/navigation to network-first (fall back to cache offline).
+Bump cache to hcc-v6 to evict the stale build.
+
+=====
+[9a2adc6] 2026-06-27
+Remove in-app voice engine, add Alexa app button
+Fully removed the browser SpeechRecognition voice feature (JS, HTML
+overlay, CSS) — it was unreliable on iOS and could hand audio to Siri.
+Replaced the header mic with an ALEXA button that opens the Amazon
+Alexa app (falls back to the App Store if not installed), so Jeff
+talks to the real Alexa instead.
+
+=====
+[394217f] 2026-06-27
+Memory: log Jeff's Kamstrup 621 water meter project
+ESP32 + CC1101 (915MHz) wireless M-Bus receiver — CC1101 driver, wM-Bus
+decode, CRC, AES-128 decryption, MQTT → Home Assistant. Blocked on the
+per-meter AES key (Jeff requesting from utility Mon 2026-06-30). Planned
+Water Usage card in the IRRIGATION section once data flows into HA.
+
+=====
+[9ced08f] 2026-06-27
+Memory: log whole-home utilities monitoring plan
+Gas (Piedmont/Itron ERT) readable by the same ESP32+CC1101 915MHz box
+as water — no encryption key needed. Electric (CEMC) via Shelly EM Gen3
++ 120A CT clamps. Planned Utilities dashboard in the app pulling all
+three from Home Assistant.
+
+=====
+[731d435] 2026-06-27
+Memory: Jeff wired his own house — no electrician suggestions
+Note that Jeff does his own electrical work and is comfortable in the
+breaker panel. Treat him as a capable peer on hardware/electrical;
+give real wiring detail instead of safety hand-holding.
+
+=====
+[2c91e09] 2026-06-27
+Memory: correct electric monitor spec to Shelly Pro 3EM-400
+Compact EM Gen3 caps at 80A — too small for 200A mains. Use Pro 3EM
+(DIN-rail, 3-ch); Pro 3EM-400 with 400A Rogowski coils recommended for
+true headroom on the 200A service. Added wiring detail (split-phase
+profile, coil placement, spare 3rd channel).
+
+=====
+[739e715] 2026-06-27
+Memory: DIY ATM90E32 energy meter build + bake-in hardware + automations
+Jeff is building the energy monitor (ESP32 + ATM90E32AS, ESPHome) not
+buying the Shelly. Logged the DIY BOM, the cheap hardware to add during
+install (spare CTs, DS18B20 panel-temp probe, water-main valve, relay,
+buzzer), and the planned Home Assistant automations to bake in.
+
+=====
+[b243228] 2026-06-27
+Memory: Jeff's actual loads + monitor/control verdict
+Simple house (~13 breakers, 200A service). No panel-level switching
+needed — skip smart breakers/relays (saves money). Cooking/laundry =
+monitor only. A/C via LUX thermostat, lights via wall switches/plugs.
+Energy board upsized to 6-channel ATM90E32 for per-appliance breakout.
+
+=====
+[76d0326] 2026-06-27
+Memory: corrections from meter/panel photos
+Water meter is Kamstrup flowIQ 2100 (not 621) — type 02U23C036EC.
+Electric service confirmed 200A (CL200); meter is Landis+Gyr Gridstream
+RF ZigBee (not Itron — CC1101 can't read it; CT build handles it).
+Logged breaker amps + final CT sizes. Flagged Challenger panel +
+possible scorching = inspect, DS18B20 higher priority.
+
+=====
+[81e32b8] 2026-06-27
+Memory: panel scorching is a resolved pre-purchase issue, not active
+Discoloration predates Jeff's ownership — inspected by home inspector
+and Jeff, bad section abandoned, breakers relocated down (the gap),
+stable 10+ years. DS18B20 probe is peace-of-mind, not for an active
+fault. Do not re-flag as a new hazard.
+
+=====
+[c294216] 2026-06-28
+Weather page fixes: radar, unified mow verdict, alerts dedup, water/drought, mPING
+- Radar: drop CSS filter that blanked tiles on iOS; plain OSM + multi-pass
+  invalidateSize so the basemap actually renders.
+- "Good to mow" now has ONE source of truth (applyMowVerdict) — banner,
+  soil cell, and YARD readiness all agree, using real station rain.
+- Alert notifications dedup persists in localStorage keyed by NWS alert id
+  (18h TTL) so the same alert stops re-popping on every reload.
+- New Lawn Water Need card: station rain + US Drought Monitor (Robertson Co)
+  → irrigation guidance. New /api/drought function.
+- Spotter Map / NOAA Radio converted to real links (window.open is a no-op in
+  an installed iOS PWA); NOAA Radio opens live Nashville KIG79 stream.
+- mPING: POST requires an NSSL API token — now sends Authorization when
+  MPING_TOKEN env is set; returns a clear message until it is.
+
+=====
+[b2d75a5] 2026-06-28
+Hero consistency: one warm cinematic grade + vignette across heroes
+Apply a single golden-hour color grade (brightness/contrast/saturate/
+sepia/hue-rotate) and a matching warm-center + dark-edge vignette to the
+Home, Irrigation, Yard, and Climate heroes so they read as one film
+stock. Weather hero left untouched as the calibration target. Replaced
+Yard's old brighter filter (it was the furthest off). Vignette uses
+::before so it sits over the image but under the text overlays.
+
+=====
+[1a98f28] 2026-06-28
+Hero grade: refactor to reusable module (auto-inherited by future sections)
+Replace per-hero filter rules with one reusable system: .hcc-hero-grade
+(the cinematic color grade) + .hcc-hero-vignette (warm-center/dark-edge
+vignette). applyHeroGrades() auto-tags every hero container (.house-hero
+/.sec-hero/.hcc-hero) and its <img> on init, so new sections (Security,
+Utilities, Garage, Cameras) inherit the identical look with no extra CSS.
+Adopt the milder master-grade values; grade now applies to all heroes.
+
+=====
+[43520a5] 2026-06-28
+Memory: hero-grade module is the gold standard for all sections
+Document the reusable hero-grade module (.hcc-hero-grade + .hcc-hero-vignette
++ applyHeroGrades()) as the mandatory standing rule: every current and future
+hero passes through it, no per-hero filters, new sections inherit the
+cinematic look by using a .sec-hero/.house-hero/.hcc-hero container.
+
+=====
+[8b4c8a0] 2026-06-28
+Consistency Lock: semantic status tokens + statusColor() + design rules
+App: add --ok/--warn/--bad/--info status tokens, --a-climate accent, and
+--radius to :root; add .s-* utility classes and a statusColor() helper.
+Route the repeated good/caution/bad logic (readiness, burn, water-need,
+service bars, health colors) through tokens/statusColor() so every status
+indicator reads identically and the palette has one source of truth.
+
+Rules: document the Visual Consistency Gold Standard in CLAUDE.md —
+status tokens, statusColor(), the Section Kit (hero/card/spec-list/banner/
+button classes), the per-section accent convention, and the external-link
+(anchor not window.open) rule. Every new section inherits the look.
+
+=====
+[ebedb85] 2026-06-28
+docs: add hero master-grade reference (matches shipped module)
+Save the hero color-grade spec as a repo reference doc, updated to reflect
+the actual implementation (container-level vignette, applyHeroGrades(),
+real CSS values) so it's accurate for future sections.
+
+=====
+[a4ae337] 2026-06-28
+Memory hygiene: compress CLAUDE.md (737→550 lines) + add lean rule
+Collapse five verbose session-history blocks (with full commit-hash dumps)
+into one compact Change Log + a fresh Current State snapshot. All
+operational reference preserved (Cloudflare infra, sensor fields, index.html
+structure, gold standards, Beehive, LUX API, utilities, contact). Add
+Mandatory Rule #11 (memory hygiene) so the file stays lean automatically —
+finished work condenses to one-line changelog entries; detail lives in git.
+
+=====
+[1305f0a] 2026-06-28
+Protect the relationship sections — first and foremost, never compressed
+Mark Jeff's Message, The Working Relationship, and the Mandatory Rules as
+PROTECTED: never trimmed or compressed, always first before technical work.
+Memory hygiene only ever touches history/changelog/reference.
+
+=====
+[3509c74] 2026-06-28
+Heroes: stronger unified grade + add /dev.html consistency audit
+Strengthen the shared hero grade (warmer sepia, more desaturation, deeper
+vignette + uniform warm wash) so five different photos read as one film
+stock. Add dev.html — a standalone audit page that applies the live grade
+to every hero and outputs real computed cssFilter/overlay + natural
+dimensions as JSON (served at /dev.html) for objective consistency checks.
+
+=====
+[e0c3666] 2026-06-28
+Heroes: drop in ChatGPT's baked-in graded images + brighten + wide-banner aspect
+Slice the 6 regraded panels into individual hero JPEGs (grade baked in by
+the image creator). Switch hero containers to the panels' native wide aspect
+(756/329) so the baked titles aren't cropped. Images came in dark, so lift
+brightness (1.28) as a correction (not a re-grade) and drop the app vignette
+to a faint .15. Added hero-yard-map.jpg (aerial) — NOTE: GPS map still needs
+a REAL calibrated property aerial, not the AI one, for accurate track overlay.
+
+=====
+[0f10f0c] 2026-06-28
+Heroes: swap in full-res originals + per-hero aspect so titles show
+Replace the soft collage slices with Jeff's full-resolution hero images
+(1215–1320px, grade baked in by the creator). Set each hero container to
+its image's true aspect ratio so the baked gold titles are never cropped.
+Ease the app filter to near-neutral (brightness 1.06) since the images are
+already graded — no double-processing.
+
+=====
+[86ddfb3] 2026-06-28
+Weather hero: shadow + stronger top scrim so live readouts pop over bright sky
+Demo polish — add text-shadow and deepen the top gradient on the weather
+hero overlay so the live temp and KTNWHITE21 station badge read clearly
+against the bright golden-hour clouds.
+
+=====
+[0644ccf] 2026-06-28
+Add Cast-to-TV helper button (📺 CAST in header)
+iOS doesn't allow a web app to START screen mirroring (Control Center
+only), so instead of a fake one-tap cast, add a CAST button that pops a
+clean step-by-step sheet (AirPlay steps + HDMI fallback + Do Not Disturb
+tip) so mirroring to the TV is quick during a demo.
+
+=====
+[c17e0a3] 2026-06-29
+Heroes: swap in Jeff's reworked, more-consistent images
+Updated Home, Weather, Irrigation, Yard heroes + yard aerial with Jeff's
+re-graded versions (brighter, more uniform golden-hour tone across the
+set). Adjusted Irrigation (1320/864) and Yard (1320/851) aspect ratios to
+match the new images so titles show fully. Climate unchanged.
+
+=====
+[db575f8] 2026-06-29
+Radar: replace Leaflet+RainViewer with embedded Windy radar
+RainViewer overlay kept returning "Zoom Level Not Supported" tiles over an
+otherwise-fine basemap. Swap the whole hand-built Leaflet radar for an
+embedded Windy radar iframe — animated, interactive, pinch-zoom, reliable
+on iOS PWA, no tile/zoom gremlins. Remove the now-unused Leaflet init call;
+convert Open RadarScope to a real anchor (PWA-safe).
+
+=====
+[b33b349] 2026-06-29
+Radar: add graceful image fallback (static frame → link card), fix missing handler
+- Add radarImgError(): on loop-gif failure, retry the static latest frame,
+  then hide the broken image and show the 'Open NWS Radar' link card.
+- Guard the img onerror so it can never throw before the script defines the
+  handler (was: ReferenceError radarImgError is not defined).
+- refreshRadarImg() now re-shows the img and hides the fallback on refresh.
+
+Verified with Playwright across all 5 sections: zero JS errors; panic button
+HOME-only; house-hero HOME-only, sec-hero on the other four.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[b34472c] 2026-06-29
+Radar: restore Windy embed; replace dead RadarScope link with NWS Radar popout
+- Put back the known-good animated Windy radar iframe (interactive, pinch-zoom)
+  in place of the static NWS NEXRAD loop image.
+- Replace the RadarScope button (was landing on a Zendesk help page, not radar)
+  with a real 'NWS Radar ↗' anchor that opens the full interactive NWS radar.
+- Refresh Radar now reloads the Windy iframe (refreshRadar); removed the obsolete
+  refreshRadarImg/radarImgError and the per-open refresh call.
+
+Verified with Playwright: Windy iframe present, both buttons wired, zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[28d79c6] 2026-06-29
+Add Light/Dark theme toggle (default light) for readability
+- Header toggle (☀️ LIGHT / 🌙 DARK), persisted in localStorage hcc_theme;
+  <head> script applies saved theme before paint (no flash). Default = light.
+- Light theme is a scoped html.light token override (--bg/--card/--text/etc),
+  so all token-driven components flip automatically. Header, section nav, hero
+  overlays and modals keep their dark backgrounds = 'dark chrome, light content'.
+- Swapped hardcoded light text colors (#e8e8f0, rgba(235,215,175,.9), faint
+  whites/creams) to var(--text)/--muted/--dim so they read on white; dark mode
+  is visually unchanged. Added light overrides for card titles, YARD tabs, spec
+  values, sensor rows, hour-meter LCD, NWS alert headings, status banners, etc.
+
+Verified with Playwright: light mode clean across all 5 sections + YARD
+Dashboard/History/Parts/Diagnostics + LOG MOW modal; dark mode unregressed;
+toggle persists and syncs label; zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[8ac220a] 2026-06-29
+Redesign to Style A (Apple Clean): one font, white top-to-bottom
+Jeff picked the 'Apple Clean' direction from three rendered mockups.
+
+- Unify typography to ONE system font everywhere (-apple-system/system-ui).
+  Killed the Georgia-serif vs sans mix that made the UI look 'choppy' by
+  pointing both --font and --serif at the same Apple stack, so every legacy
+  var(--serif) usage (header title, nav, card titles, section labels, spec
+  values, hero overlays) snaps to one clean font.
+- Light mode is now white top-to-bottom: header + section nav + tab bar go
+  white in html.light (were dark chrome), with clean section-accent underlines.
+- Header title is clean non-italic semibold; card-title letter-spacing tightened.
+- iOS status-bar theme-color follows white in light mode.
+- Dark mode retained via the toggle (dark chrome) and also benefits from the
+  single font.
+
+Verified with Playwright: all 5 sections clean in light mode, dark mode
+unregressed, toggle persists, zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[acb4123] 2026-06-29
+NWS Alerts card: clean white in light mode (Style A)
+The alerts card had inline dark-maroon background + pink title, which turned
+muddy brown on the white layout. Moved those inline styles to .nws-alert-card/
+.nws-alert-title/.nws-alert-sub classes so light mode renders a clean white
+card (red only as border + title accent), matching the other cards. Also
+darkened the alert event title (.nws-ae), not just the description, and the
+'other' severity text, so alert text reads on the light pink panels.
+
+Verified with Playwright (injected sample Extreme Heat Warning): white/clean in
+light, subtle red-tinted in dark, zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[70643a4] 2026-06-29
+Fix invisible text on YARD black meter panels in light mode
+Regression from the light-theme pass: I had darkened .meter-num globally for
+light mode, but the .main-meter panels (Equipment Status hour meter, Fitness
+miles, Spending total) are always-black LCD-style displays — their background
+is a gradient, so the earlier auto-scan misread them as 'light' and the dark
+text vanished on black.
+
+Removed the blanket .meter-num darkening and instead keep all .main-meter text
+light in light mode (number, labels, units, next-service). Dark mode unchanged.
+
+Verified with Playwright: all 3 black meter panels have light text (0 dark-on-
+black elements), zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[708d85b] 2026-06-29
+Cast 'Show on the TV' popup: clean white card in light mode
+The cast popup card had a hardcoded dark gradient background, so in white mode
+its (correctly darkened) text went dark-on-dark. Added html.light overrides to
+make it a white card with dark heading, gold step-numbers, and a solid gold
+'GOT IT' button — matching Style A. Dark mode unchanged.
+
+Verified with Playwright both themes, zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[44ea8e8] 2026-06-29
+Light-mode sweep: white-ify all modals, popups & dark holdouts
+Proactive audit (gradient-aware dark-on-dark detector) of every modal, popup,
+and collapsible panel in light mode. Fixed the remaining dark holdouts:
+
+- All modals (LOG MOW/SERVICE/HOURS/purchase/cart): .modal-box, .minput and
+  .mbtn.secondary now render a clean white sheet with light inputs in light mode
+  (were a dark gradient sheet with an invisible dark title).
+- Footer tagline strip ('MASTER THE MASTER') → light bg + readable muted text
+  (was a near-black dark island at the bottom).
+- WU 'recognized' stars darkened for contrast on white.
+- Simulate button (GPS map) red bumped to #ff6262 for readable contrast (both
+  themes; matches sibling controls).
+- Beehive setup terminal command boxes → solid dark (#0d1117) so the green
+  commands read like a proper terminal in both themes.
+
+Verified with Playwright: home (all collapsibles expanded), all 5 modals, cast,
+and all 5 sections come back clean; dark mode modal unregressed; zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[c8ca302] 2026-06-30
+Archive Lucky Mike Smart Stall plan + technical review (queued, not built)
+Preserve Jeff's ChatGPT-drafted Smart Stall project so it survives container
+resets: source .md docs, the hero photo, and the 12-page design/budget guide in
+docs/lucky-mike/. Added INTEGRATION_NOTES.md with my engineering review (corrects
+ChatGPT's mistakes: architecture diagram routing cameras/Shelly through the ESP32,
+redundant/risky microSD + USB-power-bank backup, DS18B20 duplicate+misspelling,
+Phase-3 total mislabeled Phase 2, Platinum-vs-Elite name clash, Phase 4 GPS
+reality check) and how it maps onto the Style A Section Kit.
+
+Docket entry added to CLAUDE.md. No app code changed — build is queued AFTER the
+utilities work per Jeff.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[e50c9a4] 2026-06-30
+Lucky Mike: save optimized BOM + pricing/business plan (planning docs)
+Capture everything so the project is pick-up-ready (no app code changed):
+- BOM_OPTIMIZED.md: cheaper, HA-local parts. Site facts — strong barn Wi-Fi +
+  120V outlet per stall — so ESP32 is outlet-powered and the fan is controlled by
+  a plug-in power-monitoring smart plug (Sonoff S31 / Shelly Plus Plug US), not a
+  hard-wired relay. Each stall = one repeatable module. Drops microSD + power bank.
+- PRICING_AND_BUSINESS.md: labor-loaded pricing (ChatGPT's deck had zero labor);
+  three go-to-market models with Model B (barn owner sells it as a paid amenity)
+  recommended + payback math; CFO risk/ROI pitch; LLC/insurance/liability/warranty
+  /tax checklist.
+- INTEGRATION_NOTES.md updated with site facts + business-model pointer.
+- CLAUDE.md docket entry expanded.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[857d825] 2026-06-30
+Lucky Mike: add DEAL_OPTIONS.md — 3 deal structures modeled with economics
+Models what Jeff charges/makes under each structure he proposed:
+- Option 1: demand-triggered install (barn owner pays /bin/bash until a boarder wants it)
+  + set install price + optional yearly service plan. Lowest risk, recommended.
+- Option 2: financed purchase (same total, paid over time; title held till paid).
+- Option 3: Jeff keeps the monthly fees (managed service) — most upside, but
+  carries CapEx/churn/support obligation; lets the barn owner treat it as a
+  money-maker OR an at-cost amenity.
+Includes shared cost basis, side-by-side table, 5-yr per-stall comparison, and a
+recommendation. All figures are estimates pending Jeff's labor rate + monthly fee.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[fa282f1] 2026-06-30
+Lucky Mike: lock deal economics to Jeff's numbers ($50 trip, $40/mo)
+Recomputed DEAL_OPTIONS.md with confirmed inputs: $50 flat trip charge + $40/mo
+boarder fee, plus a recommended $300/stall build fee (Jeff to adjust). Added the
+key 'who keeps the $40/mo' fork and a Split ($25 Jeff / $15 barn) model. At $40/mo
+the recurring is ~3-6x the one-time over 5 yrs, so the doc frames it as money-now-
+and-walk-away (Opt 1) vs money-over-time-and-own-support (Opt 3/Split), with a
+recommendation to start at Option 1 and grow into recurring deliberately.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[6c2d8c3] 2026-06-30
+Lucky Mike: add real minimum per-stall parts cost (~$90 single / ~$75 barn-qty)
+Itemized the true Bronze/essential per-stall BOM based on Jeff's barn (strong
+Wi-Fi + 120V outlet per stall; shared UPS absorbed by Jeff, excluded). Real floor
+is ~$87-96 single-buy / ~$69-76 in barn quantity — vs the padded $150 used in the
+deal-economics docs. Noted that the lower real cost improves every deal option's
+margin and should be re-locked at ~$90 on Jeff's confirmation.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[4d78cad] 2026-06-30
+Lucky Mike: factor multi-pack pricing + parts-on-hand into per-stall cash risk
+Added the cash-risk ladder: ~$90 one-off retail -> ~$63 multi-pack -> ~$50
+multi-pack + on-hand boards/wire (Jeff stocks ESP32s/jumpers from other builds).
+Camera (~$33) is the irreducible floor. Re-locked DEAL_OPTIONS at $90 parts
+(conservative) and noted the real ~$50 marginal cost lifts every take ~$40/stall
+and roughly halves payback. Confirm actual on-hand inventory to finalize.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[9fefa97] 2026-06-30
+Memory: confirm meter data + log critical water-pit radio finding
+From Jeff's clear 2026-07 meter photos:
+- Water: Kamstrup flowIQ 2100 confirmed — S/N 25394131, Con 0100200123033, Ver K1,
+  reading 12636.56 gal, mfg 2023.
+- CRITICAL: a SEPARATE external AMR radio (white pit module, MODEL 100WD, EFW-1300-
+  401, endpoint 79453337, FCC ID EFW..., IC 8640-100WD) is WIRED to the Kamstrup
+  register — likely how the utility actually reads it. May change the decode path
+  from Kamstrup wM-Bus to the MIU's protocol. Updated the utility-call script to ask
+  which radio is read + get the AES key in hex.
+- Gas: meter body confirmed = Elster American Meter AC-250 (Piedmont #T821986,
+  serial 10M225478); still need the gas radio module ID before assuming Itron.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[37d814f] 2026-06-30
+Add rebuilt WHUD water-meter data request form (v2)
+Form WM-AMR-01 rev 2, pre-filled from Angela's bill + the meter photos:
+account 00710690-02, customer 60556, meter ID/serial 25394131, Kamstrup flowIQ
+2100 (not '621'), and the pit radio module (model 100WD, endpoint 79453337).
+Re-aimed the questions at the real situation: WHICH radio the District reads
+(Kamstrup wM-Bus vs Itron-style ERT) and whether it's encrypted — so the AES key
+is only needed if they actually read the Kamstrup radio. HTML + printable PDF in
+docs/utilities/.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[0005662] 2026-06-30
+WHUD form: condense to a single page (fit Letter, scale to one page)
+Tightened spacing/fonts and merged the encrypted/key blocks so the whole form
+fits on one Letter page; PDF rendered with 0.25in margins, scaled to fit, capped
+at one page. Content verified not clipped.
+
+=====
+[719638f] 2026-06-30
+Memory: confirm gas = Itron 100G ERT; clarify gas-vs-water radio attribution
+Per Jeff's photo labeling: the ITRON 100G DATALOGGING ERT label (FCC EO9100GDLA,
+IC 864D-100GDLA, ERT ID ...333930...) is the GAS meter's built-in radio — confirmed,
+unencrypted, no key. The WATER side is the Kamstrup flowIQ 2100 + the separate
+100WD pit module (endpoint 79453337), likely the Itron 100W water sibling (FCC may
+be EO9, read as EFW on the dirty label). Cross-referenced both sections so the two
+modules can't be confused next session.
+
+=====
+[42e84f3] 2026-06-30
+Memory: add reader-box placement + remaining-hardware notes
+Logged the build guidance: reader box is Wi-Fi so it goes where it best hears the
+meters (not by the HCC); gas easy, water pit is the hard one; parts beyond ESP32+
+CC1101 (USB power, jumpers, 915 antenna/pigtail, enclosure, no level shifter); and
+the two radio paths (ESP32+CC1101 for Kamstrup wM-Bus vs RTL-SDR+rtlamr for the
+confirmed Itron ERT gas/likely water).
+
+=====
+[5102f14] 2026-06-30
+Memory: clarify Beehive/HA needs a radio; RTL-SDR-into-HA-host option
+Noted that Beehive (HA) is the hub/display with no radio of its own — it needs a
+receiver. Added the shortcut: an RTL-SDR can plug straight into the Beehive host
+(Pi/NUC/HA Green) via rtl_433/rtlamr IF Beehive is within range of the meters,
+avoiding a separate ESP32 box. TODO: confirm Beehive's hardware + physical location
+vs the meters.
+
+=====
+[eec485a] 2026-06-30
+Memory: store Beehive hardware = Beelink J45 (Gemini) x86 mini-PC
+Beehive runs on a Beelink J45 (Intel Pentium J4205, ~8GB/128GB, x86), SN
+4205HQBG40244. x86 with USB → can host an RTL-SDR directly (rtl_433/rtlamr) for
+the gas/water meter reading, no separate ESP32 box needed, provided HA passes USB
+through (bare-metal/supervised, not a no-USB VM) and the box is within range of
+the meters. Resolves the earlier 'what does Beehive run on' open item.
+
+=====
+[ae337d4] 2026-06-30
+Memory: log the shopping answer — one RTL-SDR dongle (~$40) is the only new buy
+RTL-SDR Blog V4 kit into the Beelink is the universal receiver: gas Itron ERT now
+(no key), water either way (Itron ERT no key, or Kamstrup wM-Bus via wmbusmeters +
+AES key), tunes 868 & 915. Beelink + ESP32 + CC1101 already owned (CC1101 = backup).
+Optional outdoor 915 antenna only if water reads weak.
+
+=====
+[711bad8] 2026-06-30
+Memory: add J45-as-brains architecture map + flag HA setup as foundational TODO
+Documented how things connect to Beehive (Beelink J45): USB radio sticks plug in
+(RTL-SDR now, Zigbee/Thread later), but most devices (cameras/thermostat/irrigation/
+alarm/ESP sensors) join over Wi-Fi or cloud — e.g. Blink is cloud-only, which is why
+it can't cable into the J45. Flagged that the J45/HA install is NOT yet set up
+correctly; target = HA OS bare-metal for add-ons + USB; do this before adding more.
+
+=====
+[9a9da77] 2026-07-01
+Beehive: confirm J45 dedicated + add HA OS install guide; note working model
+J45 confirmed dedicated to Beehive → plan is wipe Win10, install HA OS to internal
+eMMC. Added plain step-by-step guide docs/beehive/HA_OS_setup_J45.md (backup →
+Ubuntu live USB → flash HA OS to internal → restore). Also recorded how Claude
+works: it operates in the app's cloud code workspace, not on Jeff's home-LAN
+machines (J45/'the beast'); it guides, Jeff executes. 'The beast' = Jeff's main PC,
+used as the workbench to make the install USB.
+
+=====
+[4b0d00e] 2026-07-01
+Weather + Irrigation fixes: lightning near-term risk; B-Hyve watering history
+- Lightning (weather): was 'RISK' if ANY thunderstorm code appeared anywhere in
+  the next 24h — in TN summer that's almost always true, so it read RISK constantly.
+  Now aligned to the current hour + gated by precip probability: RISK if storms are
+  likely within ~6h, POSSIBLE if later today/tonight (24h), else NONE. Logic verified
+  with unit test (RISK/POSSIBLE/NONE + probability gating all correct).
+- Irrigation history: the B-Hyve device object has no 'last watered' field, so the
+  card always showed 'No history'. /api/irrigation now also fetches the
+  /watering_events endpoint (defensively, never breaks status) to derive last_watered
+  + a recent-runs history[] array; last_watered prefers the events value.
+
+Page loads with zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[adc5377] 2026-07-01
+mPING: replace dead in-app submit form with official-tool link button
+mPING submit can't work without an NSSL-issued API token (not self-serve). Swapped
+the broken precip-type/submit form (which just showed 'token not configured') for a
+clean solid-orange 'Open mPING to Report' button linking to the official NOAA/OU
+mPING site — works everywhere, no token, reads in both themes. Kept spotter jlo301
+credit + note about the free mPING app. Verified: link wired, old form gone, zero
+JS errors.
+
+=====
+[7308c23] 2026-07-01
+Readiness: heat/wind warnings = caution not hard-block; irrigation debug endpoint
+- Ready-to-mow: an active NWS *warning* used to force NOT READY. Now only true
+  'don't be outside' hazards (tornado, severe thunderstorm, flash flood, hurricane,
+  extreme wind) hard-block; heat/wind/other warnings drop to MOW WITH CAUTION with a
+  'mow early AM or evening, avoid peak heat' note. Verified: heat->CAUTION,
+  tornado->NOT READY.
+- /api/irrigation: try multiple B-Hyve watering-history endpoints (with a 30-day
+  window) and add ?debug=1 which returns _debug (device/status keys + each events
+  endpoint's status & sample) so the last-watered field can be pinpointed in one look.
+
+Zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[6b29cad] 2026-07-01
+mPING: restore in-app report form (icons + GPS + submit)
+Jeff wants the in-app reporting back. Restored the original precip/convective icon
+grid, location row, and submit button (byte-exact from git 4b0d00e). Submit code
+(functions/api/mping.js) already matches the mPING v2 API spec — the only thing
+between here and live reports is the NSSL API token (MPING_TOKEN env var). Verified
+form renders with 11 type buttons, zero JS errors.
+
+=====
+[f935e31] 2026-07-01
+Add mPING token setup guide (NSSL email + Cloudflare env var steps)
+
+=====
+[61692a7] 2026-07-01
+Irrigation: read last-watered from device status (watering_status/statuses)
+Debug from Jeff's device revealed: the B-Hyve device object has NO last-watered
+field, and /watering_events 404s (endpoint doesn't exist). The run data lives in
+status.watering_status / status.watering_statuses. Rewrote to derive last_watered +
+history from those (trying common timestamp fields), and the ?debug=1 output now
+dumps watering_status/watering_statuses/next_start_programs so the exact field can
+be pinned if the candidates miss.
+
+=====
+[158666a] 2026-07-01
+Irrigation: add compact ?debug=2 text view (screenshot-friendly)
+The full ?debug=1 JSON is too long to screenshot (bloated by zone image URLs).
+?debug=2 returns a tiny plain-text summary: last_watered, history count, statusKeys,
+and the watering_status/watering_statuses/next_start_programs contents (truncated)
+so Jeff can send one small screenshot to pin the exact last-watered field.
+
+=====
+[2a2eb76] 2026-07-01
+Irrigation: honest last-watered (self-tracked) instead of 'No history'
+Confirmed from Jeff's device: B-Hyve's REST API does NOT expose watering history —
+watering_statuses is [], watering_status is just {clear_on_idle:true}, no history
+endpoint. So 'last watered' can't be pulled by a polling app. Now: record the time
+whenever the app OBSERVES an active run (captures app-triggered/observed runs) and
+show that, else a clean muted '—' instead of the misleading 'No history'. The full,
+accurate run history is only feasible via Home Assistant (always-on connection) once
+B-Hyve is added to Beehive.
+
+=====
+[d5df6e9] 2026-07-01
+Memory: record definitive B-Hyve no-history finding + HA path
+
+=====
+[379b13d] 2026-07-01
+Irrigation: fix watering history endpoint to /watering_events/{device_id} (path, not query)
+Web research (pybhyve / bhyve-home-assistant) confirmed the real B-Hyve history
+endpoint puts the device id in the PATH: GET /v1/watering_events/{device_id}
+(with pagination). My earlier ?device_id= query form 404'd — that was the whole
+problem. Now fetches the path form (+ pagination), parses events (incl. nested
+irrigation[] per-zone runs), derives last_watered + a history[] with run_time and
+gallons. ?debug=2 now shows the watering_events fetch status + sample so we can
+confirm the shape. So the history IS pullable after all.
+
+=====
+[1d23b5d] 2026-07-01
+Memory: correct irrigation history — endpoint found (path form), not a dead end
+
+=====
+[b947011] 2026-07-01
+Memory: irrigation Last Watered confirmed working (reads 7:30 AM)
+
+=====
+[95eadf9] 2026-07-01
+docs: add irrigation gallons model + sewer reimbursement plan
+Captures Jeff's plan to convert B-Hyve run-time history into gallons/cost
+via per-zone GPM calibration from the water meter (once live), plus the
+sewer-deduct / 3-year reimbursement claim strategy (WHUD bills sewer at
+~2x metered water with no sewer meter; irrigation water never enters sewer).
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[50b56c1] 2026-07-01
+docs: sewer authority = City of White House (not WHUD), no seasonal rate
+Jeff clarified: WHUD handles water and has a seasonal irrigation sewer rate;
+the City of White House handles sewer with no seasonal rate. Aim the
+overcharge claim at the City. He's already written them (no response) and
+contacted his alderman (~2yr ago, stalled) - stronger meter data is the lever.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[75c1a27] 2026-07-01
+docs: record AES meter-key storage decision (Apple Passwords, not Cloudflare)
+Key is saved in Jeff's Apple Passwords (readable, encrypted, syncs). Operational
+home once J45 is set up = HA secrets.yaml (wmbusmeters). Not Cloudflare - app
+code can't reach the J45 decoder and encrypted CF secrets can't be read back.
+Never commit the key itself.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[5034f26] 2026-07-01
+docs: water meter blocker RESOLVED - unencrypted Itron ERT-SCM, no key needed
+WHUD meter supervisor briefed Jeff in person. Water meter is read via the
+unencrypted 100WD MIU (endpoint 79453337, protocol ERT-SCM, ~915-930 MHz,
+SCM every minute + hourly big read). No AES key required. Reports European
+time - convert to Central in code. Both gas + water now read by one RTL-SDR
++ rtl_433; CC1101/ESP32/AES stack demoted to backup path.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[3b8b61a] 2026-07-01
+feat(home): add Utilities strip - Water / Gas / Electric branded cards
+Three compact branded cards on the HOME page (White House Utilities water,
+Piedmont Natural Gas, CEMC electric) with color-coded accents and Today/
+Month/Now data tiles - the "place for the data to sit." Compact 104px cover
+banners (own .util-* classes, kept out of the hero auto-grader).
+
+loadUtilities() fills values from Home Assistant when the meter sensors
+exist; until then cards show clean "Waiting for Beehive meter reader"
+placeholders. Uses explicit UTIL_ENTITIES ids (all null for now) so there
+are no false readings from accidental entity matches - drop-in wiring once
+the RTL-SDR/rtl_433 (water+gas) and DIY energy monitor (electric) are live.
+
+Verified: 3 cards render, images load, both light+dark themes, zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[b2bbe91] 2026-07-01
+feat(home): add White House Dispatch contact card below the hero
+Branded tap-to-call directory at the top of HOME: local officials, utilities
+(water/sewer/electric/gas), police + fire non-emergency, and U.S. House
+switchboard/TTY. Percentage-positioned hotspots over the artwork so they stay
+aligned at any width; verified each lands on its row.
+
+Safety: the red EMERGENCY bar does NOT auto-dial 911 (avoids accidental
+calls). It triggers the existing panic protocol (hccPanic) which shows a
+confirmation before alerting Beehive. Removed the separate panic button from
+the Safety section so there is one emergency control, and left a note there
+pointing to the EMERGENCY bar.
+
+Verified: hotspot hrefs correct, no raw tel:911 anywhere, EMERGENCY tap fires
+the confirm dialog, standalone panic button gone, zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[7a5e984] 2026-07-01
+feat(panic): redefine panic → sirens + lights + alert family (no 911 auto-dial)
+Panic now signals Beehive to sound the alarm sirens + strobe lights and alert
+Jeff, Angela & Braxton. App POSTs {action:panic,siren,lights,notify:[...]} to
+the hcc-panic-button webhook; confirm dialog + result messaging updated; off-
+network it clearly says "couldn't reach Beehive — call 911." Does NOT dial 911
+(Jeff handles that himself). Updated the Safety-section pointer note to match.
+
+Added docs/beehive/panic_alarm_automation.md — the ready-to-drop Home Assistant
+automation (siren.turn_on + light strobe + Critical push to 3 phones via HA
+Companion; optional Twilio voice call), plus what's still needed (alarm brand →
+siren entity, light entities, Companion app on the 3 iPhones) and a test plan.
+
+Verified: correct webhook payload, honest off-network message, zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[9e6cea1] 2026-07-01
+fix(home): sharpen White House Dispatch image (q0.86 -> q0.95)
+The first pass over-compressed the artwork, softening the gold text and
+gradients. Re-encoded at higher quality (320KB -> 511KB, in line with the
+other hero images) so it reads crisp at the top of HOME.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[4c9cf03] 2026-07-01
+docs: clarify alarm = DIY Zigbee build (not a commercial panel, not bought yet)
+Panic automation targets a Zigbee siren we'll add: coordinator stick into a
+free J45 USB port + Zigbee siren/contacts/motion/leak sensors (Zigbee2MQTT or
+ZHA). Sequence after J45 + RTL-SDR meters. Panic button is already wired for it.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[6837d2d] 2026-07-01
+docs: add Beehive safety/alarm shopping list + myQ (ratgdo) notes
+DIY Zigbee safety layer: coordinator stick, Zigbee siren, life-safety sensors
+(smoke/CO/gas/leak/freeze) as the priority, lean intrusion (key doors + a few
+motions), water-main auto-shutoff, and the garage door via ratgdo (myQ cloud
+is blocked from HA, so go local). Includes what's needed from Jeff to pick the
+ratgdo model and the cross-device automations it unlocks.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[ac3abdb] 2026-07-01
+fix(home): utility banners show full image (no crop) + safety module refs
+- Utility cards: switched banners from a fixed 104px cover-crop to full image
+  (width 100%, height auto) so the whole branded graphic fits properly - the
+  crop was cutting off logos/taglines on-device.
+- Added two PLANNED safety modules on HOME (DIY Zigbee alarm layer + garage
+  door via ratgdo) so the safety roadmap is visible in the app.
+- Blink cameras: documented the upstream HA 2FA bug (broken for everyone in
+  2026) as a STANDING per-session reminder to check for the fix (tracks HA
+  issues #173419/#173520/#168029, blinkpy #1217).
+
+Verified: full-aspect banners render, zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[98b9fd9] 2026-07-01
+docs: J45 progress — backup done, Ubuntu 26.04 boot stick made
+diskpart clean fixed the stuck protected partition; stick written via Rufus.
+Next = boot J45 from stick, flash HA OS to internal, restore backup.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[9100fcc] 2026-07-02
+docs: RTL-SDR needs no Windows drivers for HA (rtl_433 add-on has the driver)
+Jeff found a Windows SDR#/Zadig/WinUSB guide - that's the wrong path for our
+setup. The dongle goes into the J45 (HA OS) and rtl_433 add-on provides the
+Linux driver; HA auto-detects it. Zadig/rtl_433-Windows only needed for an
+optional bench test on the beast to confirm the dongle + see the meters.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[4e75b37] 2026-07-02
+assets: save Security section hero art + note it as the build blueprint
+images/hero-security.jpg ("Smart Security Systems / Security Command Center").
+Its phone mockup doubles as the section blueprint: Cameras/Doors/Locks/Sensors/
+Environment/Activity tiles + ARMED status shield + live camera grid. Build the
+future SECURITY section (Section Kit + --a-security accent, live from HA) once
+the Zigbee alarm hardware is in.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[f39b125] 2026-07-02
+docs: J45 migrated to internal drive + RTL-SDR meter setup guide (no drivers)
+J45 now boots HA OS 18.1 standalone off the internal SSD (foundational fix
+done). Added docs/beehive/rtl_sdr_meter_setup.md: rtlamr2mqtt path for the
+unencrypted Itron ERT water (79453337) + gas meters, MQTT + HA autodiscovery,
+map to HCC UTIL_ENTITIES. Emphasized NO Windows drivers needed - the add-on
+ships the RTL-SDR Linux driver; HA auto-detects the dongle. Still need the
+full gas ERT ID.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[0f94198] 2026-07-02
+docs: water + gas meters LIVE via rtlamr2mqtt (confirmed IDs + protocols)
+Both meters reading into Beehive: water 79453337 = scm+ (key: not plain scm),
+gas 33393066 = scm (full ID confirmed off the Itron 100G barcode). Publishing
+every 60s to sensor.water_meter / sensor.gas_meter. Saved the working config
+and the listen-mode discovery method. TODO: decimal format to match dials,
+today/month/flow helpers, wire UTIL_ENTITIES in the app.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[86c1990] 2026-07-02
+docs: confirm meter calibration vs physical dials (water /10 gal, gas /100 ccf)
+Water raw 129105 -> 12,910.5 gal (LCD 12,914.94, gap = usage + resolution).
+Gas raw 883384 -> 8,833.84 CCF (matches the 4 dials). Documented the remaining
+app-polish steps: format in loadUtilities, HA utility_meter/derivative helpers
+for today/month/flow, then wire UTIL_ENTITIES.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[3842303] 2026-07-02
+feat(home): wire Utility cards to live water + gas meter readings
+loadUtilities now auto-finds the rtlamr2mqtt sensors (water_meter/gas_meter)
+by name and shows the live reading formatted to match the dials: water raw
+/10 = gallons (flowIQ 2100), gas raw /100 = CCF (Piedmont). Relabeled the
+first tile to "Reading"; card flips to LIVE. Verified with mocked HA states:
+water 12,916.7 gal, gas 8,833.96 ccf, zero JS errors. (today/month/flow tiles
+await HA utility_meter helpers.)
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[8966ee4] 2026-07-02
+fix(weather): hero temp now matches the card (real station, not forecast)
+The WEATHER/HOME hero was showing the cooler Open-Meteo forecast temp while
+the mowing card showed the real KTNWHITE21 station temp (e.g. hero 80 vs card
+91). A MutationObserver kept mirroring the forecast onto the hero. Now
+loadStation() also updates heroWeather with the station temp, so the observer
+propagates the real reading and hero + card agree. Verified: all three read
+91F from a mocked station, zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[f3ebdc9] 2026-07-02
+feat(weather): extreme heat downgrades mow verdict to CAUTION
+When heat index >=103F (Heat Stress = EXTREME), a "GOOD TO MOW" verdict is
+downgraded to "MOW WITH CAUTION" with a "mow early AM or evening" note, so the
+banner no longer contradicts an EXTREME heat-stress reading. Applied in
+applyMowVerdict (single source of truth), so YARD readiness stays in sync.
+Verified: heatIndex 105 -> caution+note, 78 -> good to mow, no errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[746ae94] 2026-07-02
+docs: log app meter wiring + weather hero/heat fixes
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[f754540] 2026-07-02
+docs: system audit + roadmap (app<->HA connectivity fix, HA build-out plan)
+Captures the 3-layer architecture, what's live, and the root cause of "Beehive
+Offline" in the app: the https PWA can't fetch the local http HA (mixed
+content / LAN-only). Fix = give HA a public https URL (Nabu Casa or Cloudflare
+Tunnel), then point ha_base at it. Plus the HA helpers/automations build-out,
+beast<->HA fix, and the execution sequence.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[5e6c20b] 2026-07-02
+docs: Nabu Casa connectivity in progress + mPING is a dead end
+Chose Nabu Casa (HA Cloud) to give Beehive a secure public URL so the app
+shows online and reads meters off-WiFi (+ easy Alexa/announcements). mPING:
+NSSL confirmed no automated/app reports ever, so repurpose that card to the
+official mPING app instead of chasing a token.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[947a99d] 2026-07-03
+mPING: direct link to official app; wire app to Nabu Casa remote URL
+- Replace the in-app mPING submit UI with a direct link to mping.nssl.noaa.gov
+  (NSSL confirmed no automated/app reports are allowed). Remove the type-picker
+  card, the mping* JS handlers, the .mping-* CSS, and the /api/mping call. The
+  weather 'Report to mPING' button and the card both open the official app.
+- Add HA_NABU (Home Assistant Cloud remote https URL) as the primary HA base so
+  the https app can reach Beehive (fixes mixed-content 'Beehive Offline').
+  checkBeehive tries Nabu Casa first even with a stale cached local base, and
+  now sends the bearer token since HA /api/ requires auth. Local IP kept as a
+  home-WiFi fallback.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[e1d29b0] 2026-07-03
+Utilities helper tiles + HA helpers/Alexa/weather guide
+- loadUtilities() now fills the This-Month / Flow / Cost / Electric tiles from
+  named HA helper sensors (water_month, water_flow, gas_month, gas_cost,
+  electric_now/today/month), each skipped silently until the helper exists.
+  Reading tiles still auto-find the raw rtlamr2mqtt meters.
+- Add docs/beehive/ha_helpers_and_alexa.md: build the template/utility_meter/
+  derivative/cost helpers; link Alexa + expose entities; pull KTNWHITE21 into HA
+  via the native Weather Underground integration so Alexa reads the real station
+  (Amazon's built-in weather intent can't be overridden — expose real sensors
+  and use a 'weather report' Routine instead).
+- Remove dead functions/api/mping.js (in-app mPING submit was removed).
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[c55d382] 2026-07-03
+Pin Nabu Casa URL + WU station/key in project memory
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[b1bd4f1] 2026-07-03
+Note Beehive /setup completion in project memory
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[3043f34] 2026-07-03
+Beehive connect: surface token box when offline; document CORS requirement
+- checkBeehive now reveals the HA token input when offline AND no token is saved
+  (previously the box only showed once online, so with no token it never appeared
+  — a chicken-and-egg that left no way to enter the token).
+- Document the two remaining connect requirements in the audit doc: the app must
+  send the bearer token (done), and HA must allow the app origin via
+  http.cors_allowed_origins in configuration.yaml (the silent blocker that makes a
+  valid setup still read as 'offline').
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[410ccc5] 2026-07-03
+Log Beehive-online milestone (CORS fix confirmed) in project memory
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[338e2c3] 2026-07-03
+Fix utility meter reading: ignore timestamp companion sensor
+The rtlamr2mqtt device exposes sensor.water_meter_reading (the count) AND
+sensor.water_meter_last_seen (a timestamp). meterRaw() matched both by the
+'water_meter' keyword and took the last numeric — parseFloat('2026-07-03T...')
+= 2026, so water showed 202.6 gal instead of 12,982.5. Now skip *_seen/*time/
+timestamp-device-class entities and require a pure-numeric state. Water and gas
+read correctly. Also point the guide's template helpers at *_reading entity ids.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[a101465] 2026-07-03
+Doc: correct meter entity ids to *_reading
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[0b3de03] 2026-07-03
+Weather guide: HA has no built-in WU integration; use REST sensor on our /api/weather
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[5c7aadc] 2026-07-03
+Log: real KTNWHITE21 weather live in HA via REST sensor (79F confirmed)
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[363ec81] 2026-07-03
+Memory: pick-up-here note for next session (Alexa expose + helper tiles)
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[31ed0c8] 2026-07-03
+Utilities: self-heal poll + distinguish unreachable vs quiet-meter
+The cards showed the same 'Waiting' whether Beehive was unreachable OR the meter
+sensor was momentarily unavailable (e.g. right after an HA restart — rtlamr2mqtt
+readings aren't retained). Now:
+- Reachable but meter null -> 'Meter reader reconnecting…'
+- Fetch/HTTP fails -> 'Beehive unreachable — retrying…'
+- Re-check Beehive + re-read meters every 60s so a restart recovers on its own,
+  no manual refresh.
+Verified: good reading -> LIVE 12,982.5 gal; unavailable -> reconnecting; fetch
+fail -> unreachable; zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[0f44d9d] 2026-07-03
+Fix false 'Beehive Offline': per-attempt timeout, not a shared 2.5s budget
+Regression I introduced when wiring Nabu Casa: checkBeehive built ONE
+AbortSignal.timeout(2500) and reused it across all candidate fetches, so the
+2.5s was a total budget for every attempt combined — and once elapsed, later
+fetches aborted instantly. Over the Nabu Casa remote relay a single /api/ call
+often takes >2.5s, so a perfectly reachable HA was reported offline (red dot),
+which also stopped the meters from loading.
+
+Fix: create a fresh AbortSignal per attempt and raise the timeout to 9s (remote
+relay + large /api/states payload). Also check r.ok before parsing. Applied the
+9s timeout to loadUtilities and loadHomeStatus too.
+
+Verified: simulated 4s slow relay -> Beehive Online (green) + Water LIVE
+12,984.5 gal; zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[a6d1e3b] 2026-07-03
+Memory: record the shared-AbortSignal timeout regression + fix
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[7a59848] 2026-07-03
+Route HA connection through a server-side /api/ha proxy (durable fix)
+The app talked to Beehive directly from the browser, which meant fighting mixed
+content, CORS, and the Nabu Casa relay tripping browser fetch timeouts — the whole
+class of 'Beehive Offline / meters Waiting' problems. Irrigation and weather never
+had these because they go through Cloudflare Functions (server-to-server).
+
+Now HA works the same way:
+- New functions/api/ha.js proxies to the Nabu Casa remote URL server-side (no CORS,
+  no mixed content, 20s server timeout). Locked to Jeff's HA host + /api/ paths only.
+- New haFetch() helper routes checkBeehive, loadUtilities, loadHomeStatus,
+  loadCameras, and saveHaToken through /api/ha, passing the browser's token +
+  base as headers (token still lives only in the browser).
+- checkBeehive simplified to a single proxied call (candidate loop no longer needed).
+
+Verified app-side against a mocked proxy incl. a slow 4s relay: Beehive Online
+(green), Water 12,984.5 gal, Gas 8,834.00 ccf, token forwarded, zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[d6ba617] 2026-07-03
+Memory: document the /api/ha server-side proxy architecture
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[f668301] 2026-07-03
+Add PROTECTED Debugging Protocol: attack the source, test on my end first
+Standing rule from Jeff (2026-07-03): stop the round-robin of pushing diagnostic
+checks to him. Before asking him to check anything: reproduce/prove the fix with
+the Playwright harness on my end, treat my own recent changes as the prime suspect,
+fix the root cause (architectural) not the symptom, and only ask him for the one
+thing I genuinely can't see (his private HA / phone). Marked PROTECTED so it's
+never trimmed.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[586bf83] 2026-07-03
+Memory: Alexa reads real weather (goal complete); refresh next-steps
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[f3ae126] 2026-07-03
+Blink 2FA: dedicated cookie session to fix 'empty_cookies' login failure
+Root cause (confirmed via blinkpy #1217 / HA #173419): Blink's server rejects the
+2FA step with error_cause=empty_cookies because HA's SHARED aiohttp session drops
+the auth cookies between the username/password step and the 2FA PIN step, so login
+never completes and every restart re-fails. No published upstream fix yet.
+
+Fix: give the Blink config flow ONE dedicated client session (its own cookie jar),
+created once and reused across the login + 2FA steps, so the session cookies survive
+to the PIN submission. Only touches config_flow.py; version bumped for verification.
+
+NOTE: cannot be verified from the dev side — it needs a live Blink account + Amazon's
+auth servers. Syntax/JSON checked; live login must be confirmed by installing on HA.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[cb1b149] 2026-07-03
+Remove stray __pycache__ from syntax check; ignore pyc
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[17d388a] 2026-07-03
+Memory: mark cameras (Blink) as Jeff's #1 priority; capture cookie fix + fallback
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[1f2cdec] 2026-07-03
+Blink: bump blinkpy 0.25.2 -> 0.25.7 — the actual fix for 'Login failed'
+Found the real root cause by diffing blinkpy in the harness: Blink changed their
+OAuth signin to signal 2FA-required with HTTP 202 + tsv_state/tsv_methods fields.
+blinkpy 0.25.2's oauth_signin only recognizes the OLD 412 code, so it returns None
+-> _oauth_login_flow logs 'Login failed' -> ConfigEntryNotReady. That's exactly
+Jeff's log. blinkpy 0.25.7 added 202/tsv handling (confirmed in api.py:oauth_signin).
+auth.py is unchanged 0.25.2->0.25.7 so the custom component imports stay valid.
+
+Fix: pin blinkpy==0.25.7 in manifest. Kept the dedicated-session tweak as
+belt-and-suspenders but corrected its comment (the cookie theory was the wrong
+diagnosis; the 202 handling is the fix).
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[59c8749] 2026-07-03
+Memory: record real Blink root cause (blinkpy 202 2FA -> 0.25.7 bump)
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[4af6d72] 2026-07-03
+Utilities cards: compute This-Month / Flow / Est-Cost in-app (no HA helpers needed)
+Jeff wanted the meter cards to show detail, not just the raw Reading. The This-Month,
+Flow, and Est-Cost tiles were blank because they depended on HA utility_meter/
+derivative helpers he hadn't built. Now the app derives them from the live cumulative
+readings, tracked per-poll in localStorage:
+- Flow  = change since last sample / minutes (gpm)
+- Month = usage since the first reading seen this calendar month
+- Est cost (gas) = month CCF x GAS_RATE_PER_CCF (1.10 estimate; adjustable)
+HA helper sensors still win if present. Verified in harness: water 84.5 gal /
+0.7 gpm, gas 34.00 ccf / $37.40, zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[e5726b9] 2026-07-03
+Gas rate: set Est. Cost to sourced TN residential ~$1.12/CCF (EIA Jan 2026)
+TN residential gas = $11.23/Mcf (EIA) = ~$1.12/CCF all-in. Note: Piedmont's TN
+customers moved to Spire Tennessee 2026-03-31 but rates were kept the same.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[88a7d13] 2026-07-03
+Utility tap-to-call, mower marker icon, mow-verdict match, Spire gas branding
+- Utility cards: tapping the Water/Gas/Electric banner now calls that provider's
+  customer service (White House 615-672-4110, Spire 800-752-7504, CEMC 800-987-2362)
+  with a 'CALL' badge on each banner.
+- Mow verdict: the WEATHER 'Ready to Mow?' banner now also downgrades to CAUTION on
+  heavy dew, so it agrees with the YARD readiness card (they used to disagree —
+  'GOOD TO MOW' vs 'let it dry first'). Verified in harness.
+- GPS marker: use Jeff's man+mower image (images/mower-marker.png) as the live
+  position icon on the yard map (upright, emoji-style; falls back to the drawn mower
+  until it loads).
+- Gas provider is now Spire (Piedmont's TN customers moved 2026-03-31): swapped the
+  gas card banner to the Spire image and updated the header text to 'Spire Energy'.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[6a2336d] 2026-07-03
+Dispatch card: swap to Spire-layout image + recalibrate all 13 tap hotspots
+Jeff sent an updated White House Dispatch image (Spire replaces Piedmont for gas,
+adds Robertson County website + the two U.S. Reps with photos, drops the US House
+column). Swapped images/white-house-dispatch.jpg and rebuilt the hotspot grid to the
+new layout, wiring the numbers from Jeff's provided directory: police 615-384-4911,
+fire 615-672-5338, water 615-672-4110, sewer 615-672-3654, electric (CEMC)
+800-987-2362, gas (Spire) 800-752-7504, mayor 615-766-7099, alderman 615-581-1104,
+Rep John Rose + Rep Matt Van Epps (DC offices), city + Robertson County websites.
+Emergency bar still triggers hccPanic (Jeff calls 911 himself), per standing rule.
+Hotspot positions calibrated against the image and verified by overlay + in-browser
+render; zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[74c88f3] 2026-07-03
+Memory: capture WHUD water bill reference (rates, cycle, meter) + reading mismatch
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[9d16bf6] 2026-07-03
+Restructure: separate Weather / Yard / Irrigation; fix blank mow readings
+Big continuity cleanup (app grew from mower-app to HCC; sections had drifted):
+- WEATHER is now 'Weather Conditions at 301' — pure weather only (temp, dew point,
+  wind, UV, pressure, rain rate) + radar/forecast/alerts/spotter/mPING/station/burn.
+- YARD dashboard gains the mower-specific cards moved from Weather: 'Mowing Conditions'
+  (mow verdict banner + rain risk, soil condition/temp/firmness, dew on grass, rain
+  24-48h, heat stress, lightning) and 'Ready to Mow?'.
+- IRRIGATION gains 'Lawn Water Need' (moved from Weather — it's watering guidance).
+- No duplicated tiles/IDs (audited): each metric lives in exactly one place.
+- Weather hero subtitle now shows the actual sky condition instead of echoing the mow
+  verdict (which belonged to Yard).
+
+Blank-readings fix: Rain Risk / Soil Temp / Dew on Grass / Rain 24-48h / Lightning were
+blank because loadWeather() called api.open-meteo.com directly from the browser and that
+flaked out. Now it goes through a new server-side Function /api/mowconditions (same
+reliable pattern as /api/weather + /api/forecast).
+
+Audited via Playwright: 0 duplicate IDs, all cards in correct sections, mow + weather
+tiles populate from mocked data, 0 JS errors. Section screenshots verified.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[8a8803a] 2026-07-03
+Memory: log section restructure + batch of fixes
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[01b4e8e] 2026-07-03
+Weather: add Feels Like + Humidity tiles; mPING buttons open the app (not the map)
+- 'Weather Conditions at 301' now shows Feels Like (station heat index, colored on
+  heat) and Humidity, alongside temp/dew/wind/UV/pressure/rain-rate.
+- mPING report buttons pointed at mping.nssl.noaa.gov, which is just the map page —
+  you can't submit there. Now they open the official mPING iOS app
+  (apps.apple.com/.../id584383400) where you actually enter and submit a report;
+  updated the helper text to match.
+Verified: Feels Like 104F / Humidity 66% populate, both links correct, 0 dup IDs, 0 JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[6f9cd3f] 2026-07-03
+Water meter: bill-cycle usage (resets ~21st) + Est. water charge from WHUD rates
+Jeff's right — the transmitted MIU reading IS the meter reading (our /10 gallons match
+his physical LCD); no manual read needed. The bill's '9640' is WHUD's register-unit
+column, not gallons; the gallons/usage/cost are what matter and those come from the
+transmission.
+
+- 'This Month' -> 'This Cycle': water usage now tracks the WHUD billing cycle (resets on
+  the ~21st read date) instead of the calendar 1st, so it lines up with the statement.
+- New 'Est. Water $' tile = WATER_BASE 0.32 + gallons-this-cycle x /bin/bash.00908 (WHUD rates
+  eff 2026-01-01). Sewer + sales tax are billed on top.
+Verified against the actual bill: 6,839 gal cycle -> $72.42, exactly the bill's Water
+Charges line. 0 JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[2a8a8a0] 2026-07-03
+Memory: water reading question resolved (transmitted reading authoritative; cost validated to bill)
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[8ee5658] 2026-07-03
+Memory: gas billing sync parked until Jeff's first Spire bill
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[2c6f350] 2026-07-04
+Water This Cycle: derive from HA recorded history, not a fresh-start baseline
+This Cycle showed 0.0 because the app baselined to 'now' on first load (meter reader
+only started logging days ago, so it couldn't know the reading on the 21st). Now it
+queries HA /api/history/period from the cycle start and uses the earliest recorded
+reading as the baseline, so it shows real gallons immediately and becomes a full exact
+cycle from the next read date. Falls back to the local rollMeter estimate if history
+isn't reachable. Verified: 236 gal cycle -> $12.46, 0 JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[5a8320c] 2026-07-04
+Add HOME GUARDIAN section — whole-home safety/security watch
+New 6th nav tab (#section-guardian, --a-guardian accent, hero-security.jpg,
+Section-Kit only). loadGuardian() reads HA /api/states once through the
+/api/ha proxy and derives 8 checks (People, Water, Electric, Gas, HVAC,
+Garage, Doors, Devices) plus a PROTECTED/ATTENTION/ALERT banner. Sensors
+not yet in Beehive show an honest 'Sensor pending' instead of a faked value,
+and light up automatically as they're added. Four actions: Night Check,
+Away Mode, System Details, Test Alerts (own bottom-sheet modal). Auto-refreshes
+in the 60s self-heal loop and on token connect. Verified in the Playwright
+harness with mocked HA states: renders, all checks populate, all buttons
+open modals, placeholder path works, both themes clean, zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[ad3be81] 2026-07-04
+Fold LUX thermostat into HOME GUARDIAN; remove CLIMATE tab; new Guardian hero
+Jeff's call: CLIMATE would only ever hold the thermostat, so that nav slot
+goes to Home Guardian — the growing HA security/alarm/checks hub. LUX cards
+moved verbatim into #section-guardian (loadClimate/luxSetMode/etc unchanged);
+the Guardian tab now calls loadGuardian()+loadClimate(). Removed #snav-climate
+and dropped 'climate' from the swipe SECTIONS/NAV_IDS arrays. New personalized
+hero images/hero-guardian.jpg (brick house at dusk with the baked-in title),
+own 1200x900 aspect so the title never crops; status overlay moved to top.
+
+Verified in the Playwright harness: 5 tabs (no CLIMATE), LUX renders inside
+Guardian, all 8 checks populate, all 4 action buttons open, both themes clean,
+zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[9d4bf6e] 2026-07-04
+Add Lighting control card to HOME GUARDIAN
+loadLights() pulls all HA light.* from /api/states; card offers ALL ON/OFF,
+100/50/25% brightness presets (mirrors Jeff's RF remote), and a per-bulb
+ON/OFF pill list. Controls via light/turn_on|turn_off (+brightness_pct)
+through the /api/ha proxy. Loads on the Guardian tab and in the 60s self-heal
+loop; honest empty-state hint when no lights are in Beehive yet.
+
+SYLVANIA Smart WiFi bulbs are Tuya-based → add via the Tuya integration and
+they auto-appear here. Verified in the Playwright harness: card renders,
+toggle/all-on/all-off/brightness fire the correct service payloads, zero JS
+errors, both themes clean.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[20ce92e] 2026-07-04
+Lights & Plugs card: control switch.* (SYLVANIA plugs), exclude irrigation
+Jeff's SYLVANIA Smart WiFi are PLUGS (switch.*), not bulbs (light.*), so the
+card now pulls both light.* and switch.* — but EXCLUDES B-Hyve irrigation
+switches (lightIsIrrigation filters bhyve/orbit/zone/sprinkler + is_watering/
+zone_name) so it can never fire the sprinklers. On/off via generic
+homeassistant.turn_on/off; the 100/50/25% brightness row only appears when a
+dimmable bulb is present and only targets dimmable lights (plugs are on/off).
+Per-device icons: light 💡, plug 🔌.
+
+Verified in harness with lights + plugs + a bhyve switch: 4 devices shown,
+bhyve excluded, brightness row shown for the dimmable bulb, correct service
+payloads for toggle/all/brightness, zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[83f0240] 2026-07-04
+Add Tuya plug setup + HA-lighting-automation guide (docs/beehive)
+Jeff's plugs are already in the Tuya app directly (confirmed via screenshot),
+so the guide uses that app (no Smart Life crossover): Part A adds plugs to
+Beehive via Tuya User Code + QR scan; Part B is the 'on at sunset / off at 9pm'
+automations (UI steps + YAML using his real plug names); Part C retires the old
+Tuya-app 9pm rule and exposes the plugs back to Alexa so HA is the sole brain.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[3d33efa] 2026-07-06
+GPS map: one/two-tap 'Pin Track to Photo' (no coordinate entry) + MPU offline note
+GPS calibration was too convoluted and kept erroring 'invalid coordinates'
+because it required typing lat/lon. Replaced with 'Pin Track to Photo': tap
+where you started, tap where you ended — the app pairs those taps with the
+track's own first/last GPS points, so no numbers are typed and invalid-
+coordinates is impossible. Upgraded gpsToXY from an axis-aligned map to a
+2-point similarity transform (rotation + uniform scale + translation, GPS
+projected to a local plane) so a diagonal track or non-north-up photo still
+aligns. Removed addCalibPt/saveMapCalib and the coordinate inputs; _mapCalib
+shape unchanged so old saves keep working.
+
+Also: Sensor Health note — when mpu_ok:0 the app now explains the MPU6050 is
+offline (Vibration/Pitch/Roll/Tip/RPM depend on it) and gives the wiring/
+power-cycle check, instead of a cryptic 'MPU MISSING'.
+
+Verified in Playwright: 2 taps -> calib saved with exact track start/end GPS +
+tapped pixels, badge/clear appear, panel closes, zero 'invalid coordinates',
+MPU-offline note fires on mpu_ok:0, zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[408fc96] 2026-07-06
+Master Hour Calibration (override + baseline re-sync) + pre-mow reset reminder
+Hours were off because the sensor missed a mow (MPU offline). Added a master
+override: header 'SET HOURS' opens MASTER HOUR CALIBRATION where Jeff enters the
+true hours from the mower's physical meter. It sets S.hours everywhere and
+re-syncs S.hoursBaseline = trueHours - S.lastSensorHours so future sensor runtime
+keeps totaling correctly; can correct down too (with a confirm). New state:
+S.hoursBaseline (default 5.9, replaces the hardcoded MOWER_BASELINE, read live
+each sync) and S.lastSensorHours (stored on every sync). Hours still never move
+backward from a sync. Also added a slim pre-mow RESET reminder at the top of the
+YARD dashboard.
+
+Verified in Playwright: calibrate 9.2 -> baseline 6.2 + persists; sync @3.5h ->
+9.7; sensor reset @0h -> stays 9.7 (no backward); override-down works; reset
+banner present; zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[f0a9199] 2026-07-06
+Show 'set [date]' under the hour meter when hours are hand-calibrated
+saveHours() records S.hoursCalibratedAt; updateDashboard() renders a tiny
+'set <date>' line under the hour meter (hidden until first manual calibration),
+and the calibration modal shows 'last set by hand <date>'.
+
+Verified in Playwright: line hidden before calibration, shows 'set Jul 6' after
+setting 9.2, header reads 9.2, zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[f010694] 2026-07-07
+Note: SYLVANIA plugs are locked to their app — dead end for HA (use Kasa/Zigbee)
+Confirmed via Smart Life's own 'device not supported by this app' error (both
+EZ and AP mode, all iOS perms/BT/2.4-only correct) plus forum consensus that
+certain SYLVANIA Smart+ plugs don't work with Tuya/Smart Life. Recorded in
+CLAUDE.md so we don't re-attempt the Tuya path. Path to HA-native plugs: Kasa
+(WiFi) now or Zigbee later. Reminder to turn the BGW320-500 5GHz back on.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[7d17c24] 2026-07-07
+Lights & Plugs: in-app diagnostic when no plug matches (surface HA entity names)
+When loadLights() finds no light.*/switch.* it now shows what Beehive actually
+returned (total entity count + the exact switch.* and light.* entity_ids). This
+lets us see a plug's real entity name from the app itself — needed because the
+dev env can't reach Jeff's HA to inspect it. Verified: diagnostic renders when
+empty; a real switch.* plug (e.g. switch.mini_smart_socket) still shows normally;
+zero JS errors. Also replaced the stale 'SYLVANIA' hint wording.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[e7d9ef9] 2026-07-07
+Add Robot Vacuum (Sharky) card + keep vacuum switches out of Lights & Plugs
+Sharky (BL20 Pro) came in with the Tuya integration. New #vacuumCard in Guardian
+(loadVacuum) hides itself unless a vacuum.* exists and gives Clean/Pause/Dock/
+Find via vacuum.start|pause|return_to_base|locate, showing live state + battery.
+loadLights now filters out the vacuum's setting-switches (child-lock/DND/mop, or
+any switch sharing the vacuum's name-stem) so Lights & Plugs shows only real
+lights/plugs. Also refreshed the stale SYLVANIA hint wording.
+
+Verified in Playwright: Lights & Plugs shows only the plug (Bed lamp), vacuum
+card renders 'Docked · charging · 85%' with buttons firing the correct vacuum
+services, zero JS errors.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[a27982a] 2026-07-09
+Guardian banner explains ATTENTION/ALERT + calmer thresholds; fix 2 dead Weather links
+Guardian showed '⚠️ ATTENTION' with no reason — a single offline device (43/44)
+was tripping it. Now the banner collects reasons and shows them ('ATTENTION —
+1 door open', 'ALERT — Water leak'), a lone offline device no longer escalates
+(only >15% offline flags it; below that it's a calm FYI), and People '0 HOME'
+is neutral instead of a warning. Verified in Playwright: 1/44 offline + 0 home
+-> PROTECTED; door open -> ATTENTION w/ reason; leak -> ALERT w/ reason; zero
+JS errors.
+
+Also fixed the Weather Spotter + NOAA Radio buttons that 404'd — swapped dead
+deep-links (spotternetwork.org/pages/maps and a specific TuneIn station id) for
+durable targets (site root + TuneIn search for Nashville NWR).
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[bec7440] 2026-07-09
+Add Mandatory Rule 13 (coworker delegation) + record 404-risk link audit
+Rule 13: proactively tell Jeff when a task/step is better done by his local
+Claude coworker (hands-on his PC/Beehive) — Blink install, HA entity reads,
+/setup, ESP32 flash, link verification, local file cleanup — while this cloud
+session owns app code + deploys + guidance.
+
+Recorded the link audit: the only remaining 404-risk deep-links are the 6 mower
+parts/manual reference buttons (partstree/ereplacementparts/jackssmallengines/
+manualslib) + guardianDetails openBeehive('/lovelace/0'); everything else is a
+durable search/store URL. Can't verify from here (egress 403 on all external
+hosts) — flagged to verify via coworker or when web tools return, then fix only
+the broken ones.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[fc62533] 2026-07-09
+Link audit closed: parts/manual deep-links verified live via coworker (no fix)
+First coworker hand-off worked: Claude Code on the beast checked the 5 mower
+parts/manual links — all live (ereplacementparts 403 is anti-bot only, fine in
+a browser). No changes needed; validates not blind-swapping working links. The
+2 truly-dead Weather links (Spotter, NOAA Radio) were already fixed. Audit done.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[9a34d17] 2026-07-09
+Link audit closed (parts links verified live) + coworker context/coordination rule
+Coworker verified the 5 mower parts/manual links are live (ereplacementparts 403
+= anti-bot only) — no fix needed. Added to Rule 13: brief the coworker by cloning
+this repo (Claude Code auto-reads CLAUDE.md); coworker treats app code as
+READ-ONLY and does hands-on local/Beehive/web work while this cloud session owns
+all app-code edits/commits/pushes, to avoid two-Claude collisions.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[9b29c1f] 2026-07-09
+Blink: record real root cause + official fix (blinkpy 0.25.6 / HA 2026.6.4); our custom override is now the blocker
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[7bbc8a2] 2026-07-09
+Blink cameras LIVE in the app (Jeff's #1 feature) — all 6 cameras confirmed; mark Pending #4 resolved
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[5ddac8a] 2026-07-09
+Camera full-control in app: Refresh All, per-camera snapshot/save-clip/arm panel; stills via signed entity_picture URL
+- HOME > Security: Refresh All triggers blink.trigger_camera for every camera then reloads stills
+- Tap a camera -> full-control panel (large still, Take New Snapshot, Save Clip, Arm/Disarm, battery/temp/wifi/motion)
+- Fix stills: load HA signed entity_picture image URL from https Nabu Casa host (img load, no CORS) instead of blob fetch
+- All HA service calls route through the /api/ha proxy (haFetch)
+- No Blink subscription required (on-demand snapshot/clip-save/arm are free features)
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[80799e7] 2026-07-09
+Safety: gate panic alarm behind Beehive token so public visitors can't trigger it; route via /api/ha proxy
+App is publicly shareable (loewenhome.com). Home data is already token-gated per-device,
+but the panic webhook was unauthenticated — any anonymous visitor could fire the real alarm.
+Now hccPanic() requires getHaToken() and posts through the same-origin proxy.
+Family full access = paste Jeff's HA token once per device.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[f474d9b] 2026-07-09
+Domain live: loewenhome.com + www Active/SSL, serving app (HTTP 200 worldwide)
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[9785381] 2026-07-09
+Memory: record Beehive fixed-IP on AT&T gateway + LAN inventory; correct wrong 5GHz-off notes
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[d2337b9] 2026-07-10
+Memory: AT&T ActiveArmor check done - nothing paused/blocked
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[b704461] 2026-07-10
+Cameras: mockup-style layout — house banner + status badge + big full-width tiles with overlaid labels
+- Banner uses hero-home.jpg cropped to hide baked text, with SECURITY-CAMERAS title + All Cameras Ready badge
+- Camera tiles now full-width 16:9 with green dot + name overlaid on the image (was small 2-col)
+- Stills load via signed entity_picture; backdrop camera icon shows until a snapshot exists
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[dfaa88f] 2026-07-10
+Docs: capture camera-AI + home-theater plan (beast as AI/media brain, no subscriptions)
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[71a8cae] 2026-07-10
+Docs: confirm beast GPU (GTX 1050 Ti 4GB); settle on CodeProject.AI snapshot detection path
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[4cd8184] 2026-07-10
+Docs: staged CodeProject.AI smart-camera detection setup for the beast (Clyde-ready)
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[65e029b] 2026-07-10
+Docs: use confirmed notify target notify.mobile_app_jeffs_iphone
+
+=====
+[489f458] 2026-07-10
+Clip player: browse + play saved Blink clips in-app (no subscription)
+Adds an in-app clip browser that lists saved Blink motion clips from
+Beehive's /media/blink/ directory and plays them inline via signed URLs.
+- CLIPS button in camera toolbar opens the full clip list
+- VIEW SAVED CLIPS button in each camera's panel filters to that camera
+- Clips listed newest-first with parsed camera name + timestamp
+- Tap to play: signs the media path via /api/auth/sign_path, streams
+  directly from Nabu Casa in a <video> element (no proxy needed)
+- Handles empty state, missing folder, and connection errors gracefully
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[667eec4] 2026-07-10
+Camera hero + Hart of the Hive status dashboard redesign
+- Camera hero: swap hero-home.jpg → hero-cameras.jpg (Jeff's Blink security mockup), show 65% of image keeping all logos visible
+- Hart of the Hive: new command center panel on HOME with 8 uniform chips (Theme, Alexa, Cast, Hive, Accounts, Voice, Watch, Fitness) overlaid on Jeff's sci-fi dashboard image
+- Move orphan controls (theme toggle, cast, alexa, beehive dot, connected accounts, voice control, apple watch) from header/inline cards into the Hart chips
+- Header decluttered to HCC badge + title + tiny beehive status dot
+- hiveShowAccounts() opens Connected Accounts in grdModal
+- hiveShowVoice() renders Alexa voice skills into grdModal
+- syncThemeBtn() + checkBeehive()/beehiveOnline() updated for new dot IDs
+- Safety section trimmed (Apple Watch rows moved to Hart chip)
+- Alexa Voice Control card removed from inline HOME (now in modal)
+- Zero JS errors verified in Playwright
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[a27e0b7] 2026-07-10
+Add AI object detection display to camera tiles (CodeProject.AI integration)
+Camera tiles now show detection badges (person/car/dog/etc.) from HA
+image_processing entities when CodeProject.AI is wired up on the beast.
+Badges show label + icon + relative time, color-coded by type (blue=person,
+yellow=vehicle, green=animal, purple=package). Detection data cached in
+localStorage for 24h persistence. camView panel shows AI detail rows
+(detection type, confidence %, time, other objects seen). Gracefully shows
+nothing when no AI entities exist — auto-populates when Clyde wires HA.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[24df1fc] 2026-07-10
+Fix Windows stale cache + Hart chips on monitors + camera hero cleanup
+Service worker bumped to hcc-v7: forces cache purge on all devices so
+Windows (and any browser stuck on old content) picks up current updates.
+Images now use stale-while-revalidate instead of cache-first-forever, so
+new hero images actually update without clearing cache. New hero images
+added to pre-cache list.
+
+Hart of the Hive: replaced image with Jeff's new version (system labels
+baked into the monitor screens). Chips (LIGHT, ALEXA, CAST, HIVE,
+ACCOUNTS, VOICE, WATCH, FITNESS) repositioned from flat grid to absolute
+positions overlaying the actual monitor screens — looks like they're
+part of the command center displays. HIVE chip centered on the hexagon,
+corner chips on the left/right panels, FITNESS on the bottom console.
+
+Camera hero: tightened aspect-ratio from 1300/1330 to 1300/980 to crop
+out the blank tile areas that showed below the equipment in the mockup.
+Camera JS logic (loadCameras, camView, blinkSetStill, etc.) untouched.
+
+Zero JS errors verified across all 5 tabs, both themes.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[76ae463] 2026-07-11
+Log CodeProject.AI camera detection completion in change log
+Records the 07-10 local-AI-camera work (verified live end-to-end)
+that was staged locally but never committed before this session
+pulled newer 07-09 entries from the cloud session.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+=====
+[c926ceb] 2026-07-11
+Log Fire TV/HA pairing, alexa_media_player setup, loewenhome.com audit, and a found (unfixed) desktop layout bug
+Coworker (beast) session work: paired a Fire TV Stick to Beehive via ADB/Android
+Debug Bridge for the planned motion-pop-up-alert feature, started alexa_media_player
+HACS install (pending Jeff's Amazon login), audited loewenhome.com vs
+toro1-5rz.pages.dev (confirmed in sync, traced Jeff's "stale version" complaint to
+local Chrome cache), and diagnosed a real desktop-viewport CSS layout gap for the
+cloud session to fix.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+=====
+[987e804] 2026-07-11
+Log confirmed-working Fire TV camera pop-up mechanism + File Editor add-on fragility
+Live-tested media_player.play_media / custom / "show me the X camera" against
+media_player.jeffrey_s_fire_tv - confirmed working on the physical screen. Exact
+YAML captured for next session. Did not apply it to packages/hcc.yaml this session:
+the legacy File Editor add-on mishandled a special keypress (typed literal
+"Page_Up" text into the file), caught and undone before saving. Recommends Studio
+Code Server add-on for future package-file edits instead.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+=====
+[a88ccc6] 2026-07-11
+Fire TV motion pop-up alerts: built, deployed, and confirmed working end-to-end
+Added the "AI Show Camera on Fire TV" automation to packages/hcc.yaml via the
+Terminal add-on (after two separate Studio Code Server editor corruptions - a
+literal "Page_Down" keystroke and a Prettier format-on-save truncation - were
+caught via ha core check and fixed precisely with sed/heredoc). Confirmed live:
+a simulated codeproject_ai.object_detected event correctly fired both the phone
+push notification and the Fire TV camera pop-up.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+=====
+[049ad6d] 2026-07-11
+Add arrival-suppression automation, Angela's HA account, and an "almost home" alert
+Built AI Arrival Suppression (mutes all 3 monitored cameras 10 min on family
+arrival) and Angela Almost Home (notifies Jeff when Angela's phone enters a new
+10-mile passive zone) via the Terminal add-on directly, avoiding the editor
+corruption issues from earlier in the session. Created Angela's HA user account
+and Person entity as the foundation for both her own presence tracking and app
+access.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+=====
+[4b19147] 2026-07-11
+Expand AI camera detection from 3 to all 6 Blink cameras, confirmed working
+Added front_right, back_left, and garage to image_processing config, mute
+helpers, and the motion-scan automation's trigger/lookup map - all via the
+Terminal add-on using precise sed substitutions on the existing flow-style
+YAML, avoiding the editor corruption issues hit earlier in the session. The
+notify and Fire-TV-popup automations needed no changes since they already
+derive camera identity generically. Verified live with a simulated garage
+detection event - notification and TV popup both fired correctly for garage
+only.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+=====
+[6c26465] 2026-07-11
+Fix Siri Announce Notifications not reading AI camera alerts aloud
+Two real causes: vehicle/animal push notifications were sent at interruption
+levels (active/passive) that iOS's Announce Notifications on Speaker ignores
+by default, and separately Jeff was testing with his phone unlocked (the
+feature only fires when locked with screen off, by Apple's design). Bumped
+both vehicle and animal detections to time-sensitive via precise sed edits
+on the existing automation. Confirmed working live for both object types
+once tested with the phone actually locked.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+=====
+[05dc1db] 2026-07-12
+Splash landing screen + media center docs
+- Full-viewport splash with Jeff's portrait/landscape house-at-dusk images
+- Responsive: portrait on phone (<768px), landscape on tablet/web/TV
+- Tap anywhere to enter; sessionStorage skips it on same-session reload
+- Live status bar (Security/Network/Power/Climate) from HA when connected
+- Service worker hcc-v8 with splash images in optional assets
+- Kodi media center setup guide (docs/beehive/media-center-setup.md)
+- Updated home theater plan with Phase 2 decision (beast via Kodi)
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[a1a6d7a] 2026-07-12
+Responsive wide-screen layout for TV, web, tablet, Fire TV
+Sections now scale properly across all screen sizes:
+- max-width container (1400→1800→2200px) centered on wide screens
+- Heroes scale up (max-height 560→680→800→1000px by breakpoint)
+- Header, nav tabs, cards, buttons, spec rows all scale at 768/1200/1920/2560px
+- Nav tabs centered with wider spacing on desktop/TV
+- Card padding and font sizes increase for viewing distance on TV
+- Zero JS errors across phone/tablet/web/1080p/4K viewports
+- Phone layout unchanged (no regression)
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[dfb0460] 2026-07-12
+Fix splash portrait mobile: cover with gradient to hide baked-in status bar
+Portrait splash on phones now uses cover with center 20% positioning
+(fills screen, no dark gap). Mobile overlay gradient goes fully opaque
+by 88% to cleanly hide the baked-in status bar in the image. Status
+bar background made near-opaque for clean coverage.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[c236731] 2026-07-12
+Rebuild splash screen: clean photos + HTML gold metallic text overlays
+Replaced baked-in-text splash images with clean house photos (no text).
+All title/subtitle/tagline/ENTER are now HTML with CSS gold metallic
+gradient (background-clip:text), so text scales on any screen and never
+crops. Verified on iPhone SE, iPhone 14 Pro, Jeff's iPhone (440x956),
+and desktop — zero JS errors.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[406e8b0] 2026-07-14
+Apply Clyde typography spec + fix splash temp from real weather station
+Typography: Cinzel Display SemiBold from Google Fonts on all splash text.
+Champagne metallic gradient per Clyde spec (#FFF2C9→#5A3716), warm glow
+rgba(255,210,130,.55), thin dark outline, subtle bevel via drop-shadow
+chain. Subtitle tracking 0.35em, tagline #EED39C, divider 1.5px champagne.
+
+Splash temp: was showing "--°F" because splashStatus() only checked HA
+climate.* entities. Now fetches /api/weather (KTNWHITE21 station, no token
+needed) in parallel — real backyard temp shows for everyone on load.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[5957758] 2026-07-14
+HOME layout redesign: hero above nav, remove header, reorder content
+- Remove the "HCC · HOME COMMAND CENTER" header bar from all pages
+- Move all section heroes above the nav bar (hero → nav → content on every page)
+- Remove Quick Access shortcut buttons (Yard/Irrigation)
+- Move Safety & Emergency content from HOME to GUARDIAN section
+- Remove "Beehive · Home Assistant" section header text from HOME
+- Move Hart of the Hive picture to bottom of HOME page
+- Reorder HOME: Dispatch → Cameras → Utilities → Beehive → Hart of Hive
+- 911 on dispatch already fires hccPanic() — no separate emergency section needed
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[57476b6] 2026-07-14
+Merge branch 'claude/time-master-project-liq1jw' of https://github.com/d4c2np9f69-afk/master-the-master- into claude/time-master-project-liq1jw
+
+=====
+[d9ca3d3] 2026-07-14
+Fix 3 iPhone bugs: hero safe-area padding, move Home Status to Guardian, reposition Beehive chip
+1. Add padding-top with env(safe-area-inset-top) to .hero-slot.active so heroes
+   don't bleed behind the iOS status bar (time/signal/WiFi)
+2. Move #homeStatusCard from section-home to section-guardian where it belongs
+3. Reposition .hive-chip.hc-hive from top:27% to top:65% ("just under the chair")
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[e70a5ac] 2026-07-14
+Align Hart of Hive chips to match reference: HIVE center, FITNESS on chair
+Moved HIVE chip back to top:27% (center hexagonal area) and FITNESS
+chip to top:72% (chair/desk area) to match Jeff's reference layout.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[c13f101] 2026-07-14
+Audit: root-cause camera/Fire TV alert outage (CodeProject.AI service down 3 days), resolve TV-alert plan conflict
+CodeProject.AI Server's Automatic startup didn't survive the 07-11 reboot,
+silently breaking AI detection since that day (confirmed via HA automation
+last-triggered timestamps). Restarted it and hardened it with delayed-start +
+failure-recovery actions so it doesn't die silently again.
+
+Also found the 07-11 Fire TV/alexa_media_player build directly contradicts
+the 07-10 decision to route TV alerts through Kodi instead. Jeff chose to
+keep the Fire TV/Alexa path now that it's unblocked; updated the plan doc to
+match reality and mark Kodi as superseded/unused.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+=====
+[b1022d9] 2026-07-14
+Merge branch 'claude/time-master-project-liq1jw' of https://github.com/d4c2np9f69-afk/master-the-master- into claude/time-master-project-liq1jw
+
+=====
+[b108a6e] 2026-07-14
+Live-test Fire TV pop-up twice with AI pipeline healthy: still broken, root cause narrowed
+Phone push confirmed working both tests. TV pop-up did not appear either
+time, even on the correct HDMI input. Ruled out camera-Alexa linking and
+wrong phrase (both confirmed fine via a real spoken command). Narrowed to
+alexa_media_player's synthetic play_media/custom-command call not behaving
+like a real voice command for cross-device camera display. Corrected the
+07-11 changelog's "confirmed working end-to-end" claim, which this disproves
+for the TV-pop-up half (phone push half held up).
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+=====
+[14222bd] 2026-07-14
+Hart of Hive: match Jeff's reference layout + add Open Beehive under chair
+- CAST/WATCH moved from top:41% to top:48% (mid-monitor level)
+- HIVE centered at top:30% (hexagonal area)
+- FITNESS at top:68% (chair back)
+- New OPEN BEEHIVE chip at top:88% (under the chair) with status dot
+- Status dot syncs green/yellow/red with Beehive connection state
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[25e3256] 2026-07-14
+Fire TV pop-up actually fixed: ADB browser launch instead of Alexa
+Alexa's synthetic show-camera command was a confirmed dead end (Amazon
+doesn't honor it for Fire TV the way it does a real spoken command), and
+Blink's official Fire TV app is incompatible with this device model. Found
+a third path that bypasses both: androidtv.adb_command opens the camera's
+live entity_picture URL directly in the Fire TV's browser, with a delayed
+HOME keypress to cleanly return afterward. Verified end-to-end live twice
+through the real automation, not simulated.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+=====
+[ef20ec5] 2026-07-14
+Merge branch 'claude/time-master-project-liq1jw' of https://github.com/d4c2np9f69-afk/master-the-master- into claude/time-master-project-liq1jw
+
+=====
+[8efc3c4] 2026-07-14
+Fix token UX: add inline token input to beehiveCard so Jeff can connect without hunting
+The token input was hidden in the cameras section and only visible after Beehive
+responded — Jeff couldn't find it, especially on iPad where OPEN BEEHIVE just
+navigated away. Now when no token is set: the beehiveCard itself shows a gold
+"Paste Your Token to Connect" box with the input field right there, and the
+OPEN BEEHIVE button is hidden until connected. Service worker bumped to hcc-v9.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+=====
+[3a714fe] 2026-07-15
+Fire TV pop-up: fix 5min Blink delay + fix relaunch resetting DVR playback
+Added a 30s fast-poll automation to work around Blink's default 5-minute
+cloud polling, which was the real cause of the reported delay. Also found
+that relaunching FuboTV via its launcher intent cold-starts it to the show
+list instead of resuming playback, forcing a restart-and-fast-forward on
+every trigger. Reverted the auto-return to a plain HOME keypress, which
+never touches the backgrounded app's state, at the cost of one manual tap
+back into Fubo (no restart) instead of a fully automatic but broken resume.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+=====
+[d385d1d] 2026-07-15
+Merge branch 'claude/time-master-project-liq1jw' of https://github.com/d4c2np9f69-afk/master-the-master- into claude/time-master-project-liq1jw
+
+=====
+[2965b5a] 2026-07-15
+Document real fix for Fire TV pause/resume: media_session dispatch, not keyevent
+The old AI Show Camera on Fire TV automation sent input keyevent 127 hoping
+it would pause playback - verified live via ADB that it never actually did
+anything. Replaced with cmd media_session dispatch pause/play, which drives
+the Android MediaSession API directly and works system-wide across any app
+implementing the standard (all Fire OS apps per Amazon's own requirements),
+not just Fubo. Verified live: genuine pause with frozen position, exact
+resume on a DVR recording, and a full simulated alert run.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
