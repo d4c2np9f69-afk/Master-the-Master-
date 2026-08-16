@@ -30,6 +30,31 @@ Mirror: `C:\Users\jeffl\iCloudDrive\HCC-Archive\SESSION_START.md`
 All are mirrored to `iCloudDrive\HCC-Archive\`. **Grep the archive BEFORE re-investigating any
 subsystem** — the answer is usually already in there, paid for in Jeff's time.
 
+## 2b. 🔴 THE DOC INDEX — 52 files exist. Survey before you plan ANYTHING.
+
+**This section exists because on 2026-08-16 a session planned the Zigbee buildout off ONE doc from
+08-13 and re-asked four questions that later commits had already settled. Jeff, verbatim:
+*"you did not read the archives on what was settled and planned."* Before planning any area, list
+`docs/` sorted by date, and read every file touching it — newest first, because older docs go stale.**
+
+| Area | Read these before touching it |
+|---|---|
+| **Zigbee / mesh** | `zigbee/zigbee_buildout_2026-08-13.md` (⚠️ superseded in parts), `lighting/zigbee_dimmer_selection_2026-08-13.md`, `beehive/zigbee-buy-now-checklist.md`, `inventory/HCC_INVENTORY.md` |
+| **Guardian / alarm** | `beehive/safety_shopping_list.md` (**Jeff's philosophy lives here**), `beehive/panic_alarm_automation.md`, `beehive/alert_fatigue_fix_2026-08-14.md` |
+| **Cameras / AI** | `beehive/camera_pipeline_VERIFIED_2026-08-15.md`, `beehive/alert_fatigue_fix_2026-08-14.md`, `beehive/camera-ai-setup.md`, `beehive/appletv_popup_SOLVED_2026-08-14.md` |
+| **Lighting** | `lighting/HCC_Lighting_Plan.html`, `lighting/zigbee_dimmer_selection_2026-08-13.md`, `lighting/bedroom_wiring_plan_2026-08-06.md`, `lighting/HCC_Floorplan_DRAFT.html` |
+| **Water / utilities** | `UTILITIES_REFERENCE.md`, `utilities/backflow_layout.html`, `utilities/sewer_overcharge_*`, `utilities/irrigation_gpm_calibration_2026-08-06.md` |
+| **Mower** | `mower/CLOUD_SESSION_TASKS_2026-08-11.md`, `mower/gps_firmware_coworker_findings_2026-08-11.md` |
+| **Network** | `inventory/NETWORK_MAP.md` |
+
+**Two standing corrections a session must know before proposing Guardian work:**
+- **Jeff wants *tons* of LIFE-SAFETY (smoke/CO/gas/leak/freeze) and LEAN intrusion** — key doors and
+  a few motions only, NOT every window. Do not present door sensors as "the perimeter."
+- **Alert fatigue is a security failure, not an annoyance.** Too many alerts → Jeff disarms Blink →
+  every camera automation silently stops → no security at all, with no error anywhere. It already
+  happened once (48 h dead, Aug 10–14). Any change that increases detections must be paired with a
+  suppression story.
+
 ## 3. Hard-won invariants — violating these has cost real hours
 
 - **Never declare done without verifying the far end.** Component checks said "healthy" through
