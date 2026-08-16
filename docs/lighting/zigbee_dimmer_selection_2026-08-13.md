@@ -1,5 +1,22 @@
 # Zigbee dimmer selection — researched 2026-08-13
 
+> ## 🔴 SCRAPPED BY JEFF — DO NOT PROPOSE INOVELLI AGAIN
+> **Jeff rejected the Inovelli Blue on price and says he did so early on:** *"those were scrapped at
+> the freaking beginning — told you I was not paying $120 for a freaking dimmer switch."*
+> ~$60 each / ~$120 for the pair is over his line, full stop.
+>
+> **This was never recorded until 2026-08-16**, so the inventory and CLAUDE.md both still said
+> "TO BUY: 2" a day later, and a session planned the whole Zigbee mesh around them and pitched them
+> back to him. That is exactly how a settled decision gets re-litigated. **If a decision is made in
+> conversation, it goes in the doc the same session.**
+>
+> The research below is kept ONLY as the record of why Enbrighten was rejected (documented
+> mesh-routing defects — still valid and still worth avoiding). **The selection at the bottom is dead.**
+>
+> **Open:** the mesh still needs mains-powered routers, and a budget alternative has NOT been chosen.
+> Do not name one from memory — research real current products and prices in-session, cheapest-first,
+> and include the $0 option (Kasa HS220 ×2 and the MOES module are already ON HAND).
+
 ## Rejected: Enbrighten Z-Wave 800 toggle dimmer ($39)
 **Wrong radio.** Z-Wave (908 MHz) cannot talk to the Haozee CC2652P1 Zigbee dongle.
 Would need a second ~$40 Z-Wave stick + a second ecosystem. Real cost for 2 switches:
