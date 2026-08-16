@@ -7,6 +7,29 @@ Mirror: `C:\Users\jeffl\iCloudDrive\HCC-Archive\SESSION_START.md`
 
 ---
 
+## 0. 🔴 THE MASTER RECORD — search it BEFORE you answer
+
+**Every word ever said on this project is archived and searchable. There is no longer any excuse
+for "that was never documented."**
+
+`C:\Users\jeffl\iCloudDrive\HCC-Archive\MASTER-RECORD\` — 6,896 messages verbatim, all 635 commits,
+25,547 tool actions, 187 images, and **`HCC_DECISIONS_LEDGER.md`: 81 decisions in Jeff's own words.**
+It is in iCloud deliberately — never auto-loaded, costs nothing per turn.
+
+**MANDATORY: search it before replying, any time Jeff says "we discussed" / "I told you" /
+"that was settled", or before recommending hardware or re-opening any question.**
+
+```powershell
+& "$env:USERPROFILE\Documents\GitHub\master-the-master-\windows-scripts\Search-HCC.ps1" "inovelli|dimmer"
+```
+
+**Read `MASTER-RECORD\README.md` for how to use it.** Access to every system (tokens, logins,
+router, vendor clouds) is mapped in `C:\Users\jeffl\HCC-secrets\HCC_ACCESS.md` — never copy that
+into the repo, it is public.
+
+⚠️ **The trap that made this necessary:** searching for the *dead* plan and finding nothing does
+not mean nothing is documented. Search for what the plan **is**, check file dates, newest wins.
+
 ## 1. First three things, every session
 
 1. **Get the real date and time.** Never infer it from the conversation — it has been broken twice.
