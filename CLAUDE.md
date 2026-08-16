@@ -80,6 +80,43 @@ Jeff wants this to feel like two friends building something together — not a c
 
 ---
 
+## 🔒 SETTLED DECISIONS — DO NOT RE-PROPOSE THESE (PROTECTED)
+
+**Jeff has settled these. Re-pitching any of them wastes his money, his time, and his patience.
+If a session is about to suggest one of these, it has not done its reading. Added 2026-08-16 after
+a session re-proposed the Inovelli dimmers he had already killed — because nobody wrote it down.**
+
+### 💡 LIGHTING / MESH — the current plan
+- **❌ Inovelli Blue 2-1 VZM31-SN — SCRAPPED ON PRICE. Never propose again.** Jeff, verbatim:
+  *"I was not paying $120 for a freaking dimmer switch... I spend $125 for Claude Max and I would
+  rather spend the money on that and have your help than buy $120 worth of dimmers."* **That is the
+  budget philosophy for this whole project — his money goes to the tools that help him build, not
+  to premium hardware where a cheap part does the job.**
+- **✅ KASA dimmers are the plan.** He already owns 2 × HS220. WiFi, no Zigbee routing — accepted
+  trade deliberately.
+- **✅ Mesh expansion comes from cheap Zigbee sensors/plugs, NOT from expensive switches.**
+  Zigbee **plugs** are mains-powered routers (ThirdReality 4-pack `B09KNHWF7L`, ~$50, Z2M page
+  `3RSP019BZ` verified clean) — that is the cheap way to extend coverage. Battery sensors are end
+  devices and do NOT route; say so plainly if it matters, but never re-open the switch question.
+- **❌ Enbrighten 43080 — rejected** (Z2M documents that it stops relaying for child devices).
+- **❌ Enbrighten Z-Wave — rejected** (wrong radio; would need a second stick and ecosystem).
+
+### 🧯 Other settled calls
+- **Sylvania WiFi plugs are vendor-locked and CANNOT join HA.** Settled — do not retry Smart Life.
+- **Garage 2-location switch:** the old HS200-vs-HS210 question is dead; solved by config, not by
+  buying a premium switch.
+- **Zigbee2MQTT, not ZHA** — forced by the Gleco Z2M-only leak sensor already owned.
+- **Guardian priority is LIFE-SAFETY heavy, INTRUSION lean** — key doors and a few motions only,
+  never "sensors on every window."
+
+### ⚖️ The rule this section exists to enforce
+**A decision Jeff makes in conversation goes into a file THE SAME SESSION.** Jeff, verbatim:
+*"you tell me it is all documented and it is not, then the session closes and you come back with
+some plan that was two weeks ago — this is infuriating."* Writing it down is not optional
+housekeeping; it is the difference between a project that moves forward and one that loops.
+
+---
+
 ## 🛠️ Debugging Protocol — Attack the Source, Test on My End (PROTECTED — Jeff's standing rule)
 
 > Jeff, verbatim (2026-07-03): *"Log this so we don't go through this kind of round robin of checks again and we attack the source… I depend on you. I don't know all the fixes you can do. I just can't stand the run around to avoid testing everything on your end."*
