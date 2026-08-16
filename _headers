@@ -1,3 +1,12 @@
+# Security headers — audit 2026-08-15. Deliberately NO Content-Security-Policy:
+# index.html is one big inline <script>/<style>, so any CSP would need 'unsafe-inline'
+# and would risk blanking the app for no real gain. SAMEORIGIN (not DENY) keeps the
+# same-origin 390px iframe preview rig working.
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+
 /service-worker.js
   Cache-Control: no-cache, no-store, must-revalidate
   CDN-Cache-Control: no-store
