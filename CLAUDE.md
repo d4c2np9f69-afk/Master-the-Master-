@@ -123,6 +123,20 @@ a session re-proposed the Inovelli dimmers he had already killed — because nob
 - **Guardian priority is LIFE-SAFETY heavy, INTRUSION lean** — key doors and a few motions only,
   never "sensors on every window."
 
+### 🎯 Jeff's standing work preferences — recovered from the archive 2026-08-16
+*These were said once, acted on, and never written as rules. They are rules.*
+
+- **"Not some of it, ALL of it, with all ingredients, like baking a cake"** (08-06, after a partial
+  pass on a spec he supplied). **When Jeff hands over a spec, a doc, or a reference — apply every
+  part of it, not the parts that seem important.** He noticed the gap immediately and he was right.
+- **"Is everything fixed and 💯 correct… make sure we don't have any other situation like this out
+  there waiting"** / **"Run all the diagnostic checks you got… no surprises!!"** (08-11). **After
+  fixing a bug, sweep for others of the same CLASS before reporting done.** Finding one instance is
+  half the job; the 08-11 contrast sweep found 19 more by measuring instead of assuming.
+- **"If the GPS is going to be useful it has to work automatically — no pushing buttons at the
+  beginning and end of mows"** (08-10). **Design principle: a feature that needs Jeff to remember
+  to trigger it is not finished.** Automate the trigger, or it will silently stop being used.
+
 ### ⚖️ The rule this section exists to enforce
 **A decision Jeff makes in conversation goes into a file THE SAME SESSION.** Jeff, verbatim:
 *"you tell me it is all documented and it is not, then the session closes and you come back with
