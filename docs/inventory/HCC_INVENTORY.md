@@ -43,7 +43,8 @@ swap to a ZBDongle-E, decided 2026-08-13).
 |---|---|---|---|---|
 | Kasa HS220 dimmer, single-pole (WiFi, 150 W LED) | **2** | **INSTALLED** | — | **#1 living room** (`light.livingroom_cans`, installed 08-13/14). **#2 kitchen/dining, INSTALLED 2026-08-17** (`light.kitchen_dining_room`, 192.168.1.179, fw 240802 — this one REQUIRED TP-Link cloud login at HA add; creds now stored in HA, future Kasa auto-adds). Both verified dimming live, auto-update OFF on both. Bedroom = the used 3rd unit below |
 | ~~Inovelli Blue 2-1 VZM31-SN (Zigbee)~~ | 0 | **🔴 SCRAPPED — DO NOT BUY (Jeff, on price)** | ~~~$60 ea~~ | **Jeff rejected these early on and it was never written down: *"I was not paying $120 for a freaking dimmer switch."* Recorded 2026-08-16 after a session re-proposed them. A budget router/dimmer alternative is still UNCHOSEN — research real prices in-session, cheapest-first, and lead with the $0 option (Kasa HS220 ×2 + MOES module already on hand).** Old plan kept below only for the wiring context: | **#1 = KITCHEN, dimmer mode** — far-point router + the dimming test. **#2 = GARAGE man-door, On/Off mode + "3-Way Dumb" type** — the existing kitchen 3-way toggle KEEPS WORKING, no dummy switch needed. Mesh chain: dongle → kitchen → garage, landing a router on top of the door relay + sensors. (Corrected 08-13: the 2-1 manual is titled "On-Off or Dimmer" — it does both modes.) |
-| Leviton Decora E5603-SW 3-way (dumb) | 1 | ON HAND — companion/spare | — | Reassigned 08-13: garage goes smart (Inovelli #2). Use this as a fresh dumb companion in the kitchen 3-way position if the existing toggle is worn; else shelf |
+| **Ecoeler YM2108T 3-way PIR occupancy sensor switch** | 1 | ON HAND — **ASSIGNED: GARAGE MAN DOOR (Jeff, 08-17)** | $0 (found new in Jeff's supplies) | **Closes the garage two-location question — no HS200/HS210 purchase.** Sensor at man door (MASTER, needs the LOAD-side box), existing kitchen toggle stays as 3-way auxiliary. LED-OK, neutral required (present). Settings + manual scans: `docs/lighting/ecoeler_ym2108t_garage_2026-08-17.md` |
+| Leviton Decora E5603-SW 3-way (dumb) | 1 | ON HAND — companion/spare | — | Use as a fresh dumb companion in the kitchen 3-way position if the existing toggle is worn; else shelf |
 | GE UltraPro paddle, single-pole (dumb) | 1 | ON HAND | — | bedroom repurposed-receptacle position |
 | MOES single-gang dimmer module (the beige box) | 1 | ON HAND | — | **ASSIGNED: single LED over kitchen sink (~12 W** vs 100 W/gang limit — finally a load it fits). ⚠️ needs a MOMENTARY push-button at the wall, not a standard toggle (toggles cause continuous-ramp misbehavior, researched 08-06). Confirm protocol from label: WM- prefix = WiFi/Tuya, ZM- = Zigbee |
 | Lepro 14 W LED downlights w/ j-boxes | several | ON HAND — **SPARES ONLY** | — | replacements for existing fixtures, NOT expansion (Jeff 08-13) |
@@ -151,7 +152,8 @@ garage as the relay to the door sensors.
 | Leviton F-Connector Decora insert | coax feed into a Decora plate | $4.57 | ORDERED |
 
 **Kasa switch count now 3** (2 on hand + this one) = bedroom, kitchen/dining, living room all covered.
-Still needed for lighting: 1x HS200 (garage) — plus the garage 2-location decision (HS210 kit vs cap one position).
+~~Still needed for lighting: 1x HS200 (garage) — plus the garage 2-location decision (HS210 kit vs cap one position).~~
+**RESOLVED 08-17 at $0: garage gets the Ecoeler YM2108T motion sensor switch Jeff found in his supplies (see Lighting table above). Nothing left to buy for lighting.**
 
 **⚠️ The HS220 is USED/refurb.** Before install: FACTORY RESET it (hold the button ~10 s until the LED
 blinks amber/green) so it is not still bound to the previous owner's TP-Link account, THEN disable
