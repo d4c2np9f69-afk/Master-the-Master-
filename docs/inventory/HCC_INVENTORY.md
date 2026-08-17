@@ -26,11 +26,14 @@ Status legend: **ORDERED** → **ON HAND** → **INSTALLED** · plus **RETIRED**
 | Zigbee water detector (Excellux) | 1 | **ON HAND 08-15** (photo) | $6.19 | battery |
 | ⚠️ Tuya **WiFi** water sensor (Qianhong "WiFi-Shuijin-1") | 1 | **ON HAND 08-15** (photo) | $5.68 | NOT Zigbee — wrong variant. Smart Life or shelf. |
 
-**All 7 door/window + all 5 leak sensors + dongle photo-confirmed arrived 2026-08-15.
-NOT UNBOXED — Jeff's order: nothing gets set up until the camera/alert pipeline is verified.
-Setup day, first moves: disable any auto-firmware-update BEFORE first pairing (the Kasa rule);
-pick the Zigbee channel deliberately around the crowded 2.4 GHz WiFi (census 08-13); dongle on
-its USB extension cable, away from USB3 ports.**
+**INSTALL STATUS 2026-08-17 (Zigbee network went LIVE today — Z2M, channel 25, dongle on extension):**
+- **INSTALLED door/window (3 of 7):** Back Deck Door (verified open/close ×2), Front Door,
+  Mailbox (inside the METAL box at the street — works, LQI at floor until a plug routes it).
+  Z2M identifies these as SONOFF SNZB-04 (white-label Tuya clones of it).
+- **INSTALLED leak (3 of 5):** Guest Bath (⚠️ 30% part-used cell — swap), Kitchen Refrigerator (80%),
+  Kitchen Sink (80%). All three wired into `automation.hcc_water_leak_alarm` same day.
+- **REMAINING: 4 door + 2 leak — PAUSED, out of AAA batteries. More AAAs ORDERED, arrive 2026-08-18.**
+- Wet-rag alarm test still owed on all 3 leak sensors; one open/close owed on Front Door.
 
 **Mesh status: zero routers.** Every device above is battery = end device. First
 routers will be the mains-powered light switches. Until then all devices connect
