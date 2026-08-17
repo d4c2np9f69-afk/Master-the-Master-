@@ -1,56 +1,111 @@
 # THE COST LEDGER — what not following the rules has cost Jeff
 
-**Read this before you start work. It is short on purpose.**
-Every figure is measured from git, not estimated. Full derivation:
-`MASTER-RECORD/CLOUD_SESSION/sections/22-cost-accounting.md`.
+**Read this before you start work.** Every figure is measured from git, not estimated.
+Full derivation: `MASTER-RECORD/CLOUD_SESSION/sections/20-research-vs-guessing.md`
+and `21-md-not-read.md` — 20 catalogued incidents with hashes.
 
-## The running total, 2026-05-20 → 08-16
+## The bill, 2026-05-20 → 08-16
 
 | | |
 |---|---|
 | Measured active error-fighting | **28.8 hours** (commit brackets only) |
-| With pre-commit debugging | **≈44 hours** (stated 0.5 h/burst assumption) |
+| With pre-commit debugging | **≈44 hours** |
 | Incident-days open | **128** |
 | Commits spent fixing self-inflicted problems | **95 of 636 — 14.9%** |
 | Subscription burned over the span | **~$234** of Claude Max |
 | Hardware bought that wasn't needed | replacement mower sensors |
 
-**Jeff was present for essentially every hour of it** — pasting commands, running 2FA codes, live-testing, refreshing a blank app. That is the real bill.
+**Jeff was present for nearly every hour** — pasting commands, running 2FA codes, live-testing,
+refreshing a blank app, fact-checking part numbers. That is the real bill.
 
-## The incidents — what happened · what it cost · which rule was skipped
+---
 
-**THE HOUR-METER MISS — 50 incident-days, the worst one.**
-The box sent `hours_seconds`; the app read `hours`. Nothing converted. The sensor contributed exactly 0.0 hours across **5 real mows** while Jeff re-entered them by hand. He was told the sensors were faulty and **bought replacement hardware he did not need.**
-→ *Coded against a written description of the firmware instead of reading the firmware.*
+## THE ONE-LINE VERSION
 
-**THE GREAT BLANK PAGE — 4 h 17 m, one evening, 11 commits.**
-A stray `</script>` inside the JS block blanked the entire app. Jeff spent the evening refreshing and reporting each new breakage.
-→ *Shipped without loading the page once.*
+> *Two weeks on Blink. Five days of dead CAR buttons. Four days planning AES decryption for an
+> unencrypted meter. Six days on a form NOAA would never accept. Three guessed part numbers Jeff
+> had to fact-check himself.* **Every one ended the moment somebody finally read the actual source,
+> the actual release notes, the actual vendor page — or asked the actual person.**
+>
+> **The record contains no counterexample where sustained guessing beat the lookup.**
 
-**THE PIT-RADIO FALSE ALARM — 5 commits, nearly a call to the utility.**
-Declared the water meter's radio dead from 47 minutes of flat readings. It was healthy — `rtlamr -unique=true` only republishes when the value changes.
-→ *Concluded from too small a window, then reported it as fact.*
+---
 
-**BLINK DISARMED — 4 days, zero cameras, no error anywhere.**
-Alert fatigue made Jeff disarm the system. Every camera automation silently stopped. Found by accident.
-→ *Never asked what the alert volume was doing to him.*
+## THE BIG ONES — what happened · what it cost · what ended it
 
-**THE SHARED ABORTSIGNAL — Jeff diagnosed it himself.**
-The app reported his gear offline when it was online. A reused `AbortSignal.timeout` across retries.
-→ *He had to find my bug. A PROTECTED protocol had to be written to stop the pattern.*
+**HOUR METER — 50 incident-days.** Box sent `hours_seconds`; app read `hours`. Zero hours logged
+across **5 real mows** while Jeff typed them in by hand. He was told his sensors were faulty and
+**bought replacements he didn't need.** They were fine — recording 6.3 km the whole time.
+→ *Coded against CLAUDE.md's prose description of the firmware. The description was wrong.*
 
-**THE INOVELLI AFFAIR — 2026-08-16, most of a day, nearly the project.**
-$120 of dimmers re-pitched after he killed them on price. Then told twice it "was never documented" — it was, in `HCC_Lighting_Plan.html`, written 16 minutes after he decided.
-→ *A decision made in conversation never written to a file; then a search for the DEAD plan whose absence was mistaken for absence of any plan.*
-→ Jeff: *"I can't keep doing this every time the session changes."*
+**BLINK — 14 days on Jeff's #1 feature.** Two weeks building a custom override for a 2FA bug.
+The override then **became** the bug, shadowing HA's own fix. It had hammered Blink's login every
+~10s for days. → *Ended by one web search finding the official fix in the release notes.*
 
-## The four rules these keep breaking
+**WATER METER — 4 days** designing an ESP32 + CC1101 + **AES-128 decryption** stack, plus a
+storage decision for the key. → *The meter was unencrypted. One in-person briefing from the WHUD
+supervisor ended it. Nobody had asked which radio they actually read.*
 
-1. **Verify at the far end.** Component checks were green through every real failure above.
-2. **Write the decision down the same session.** Not "I'll remember." A file, before the session ends.
-3. **Search before claiming.** Never say "that isn't documented" without running `Search-HCC.ps1` first.
-4. **Don't conclude from a small window.** Watch longer, or say the data is inconclusive.
+**CAR COMMANDS — 5 days, every button dead.** Keyword-guessing at entity names; the guess
+`'preheat'` was matching an **EV-only** service on a gas GLE 350. → *Rewritten from the
+integration's source in 21 minutes.*
 
-## Appending to this file
+**"ALEXA, FAST FORWARD" — 13 days** of a feature that was architecturally impossible. → *HA's
+`alexa/handlers.py` has no FastForward handler at all. One read of the source settled it.*
 
-**When an avoidable mistake costs time, add a line here that session** — what happened, what it cost, which rule was skipped. This file grows only when something goes wrong, so its length is the scoreboard. Keep entries to three lines.
+**mPING — 6 days** building a submission form, a proxy, and a token guide. → *NSSL: automated
+reports are never allowed. One question to the people who run the API.*
+
+**MERCEDES PIN — 13 days** of dead unlock/remote-start/windows, removed on a CLAUDE.md claim that
+was wrong. Then a *wrong correction* shipped before the right one. → *One line of Jeff's system
+log had the answer. **Jeff made the key observation both times.***
+
+**COVERAGE MAP — Jeff's entire saved state wiped**, hour meter reset to the 5.9 default, on the
+one number this project exists to track. → *"Root cause is mine."*
+
+**B-HYVE HISTORY — declared a "definitive dead end" at 03:42, solved by research at 03:53.**
+Eleven minutes. Had the session ended first, the false verdict would have entered CLAUDE.md as
+settled fact.
+
+**INOVELLI — 08-16, most of a day.** $120 re-pitched after Jeff killed it; told twice it "was never
+documented" when it was, written 16 minutes after he decided. → *"This is infuriating."*
+
+---
+
+## TWO WAYS TO BE WRONG — both are in the record
+
+**Class A — the file existed and wasn't read** (or was searched badly). The Inovelli grep trap:
+searching for the *dead* plan, finding nothing, and calling it undocumented.
+
+**Class B — the file WAS read, and the file was wrong.** The hour meter. The Mercedes PIN. The
+inventory that said "TO BUY: 2" a day after the purchase was killed.
+> **"Docs that disagree with reality are worse than no docs — they make the next session
+> confidently wrong."**
+
+Class B is why decisions get written the same session, and why stale docs get annotated on sight.
+
+---
+
+## THE RULES THESE KEEP BREAKING
+
+1. **Look it up before guessing.** Source, release notes, vendor page, or the actual human. No
+   counterexample exists where guessing won.
+2. **Verify at the far end.** Component checks were green through every real failure above.
+   "Confirmed working end-to-end" was disproven three days later, once.
+3. **Write the decision down the same session.** Research cannot save you from an unrecorded
+   decision.
+4. **Search before claiming.** Never say "that isn't documented" without running `Search-HCC.ps1`.
+5. **Never name a part from memory.** Three wrong models in a row; Jeff found the right one himself.
+6. **Don't conclude from a small window.** 47 minutes of flat data nearly triggered a utility call.
+
+---
+
+## APPENDING
+
+**When an avoidable mistake costs time, add a line here that session** — what happened, what it
+cost, what ended it. This file grows only when something goes wrong, so its length is the
+scoreboard. Three lines maximum per entry.
+
+*Note on what this cannot count: git records the confessions, not the crimes. Every incident above
+entered the record because a session caught itself and wrote it down. The ones nobody caught left
+no trace.*
