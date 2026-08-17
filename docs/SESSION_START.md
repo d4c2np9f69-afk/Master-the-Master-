@@ -7,6 +7,15 @@ Mirror: `C:\Users\jeffl\iCloudDrive\HCC-Archive\SESSION_START.md`
 
 ---
 
+## 00. 💸 READ `docs/COST_LEDGER.md` FIRST — every session, before any work
+
+**~2 KB. It is the bill for not following these rules: 28.8 measured hours of error-fighting,
+128 incident-days, 14.9% of all commits, hardware Jeff bought that he did not need.**
+
+It is deliberately the first thing in this file because the rules below read as bureaucracy until
+you have seen what skipping them actually cost him. **When an avoidable mistake costs time, add a
+line to it that same session** — what happened, what it cost, which rule was skipped.
+
 ## 0. 🔴 THE MASTER RECORD — search it BEFORE you answer
 
 **Every word ever said on this project is archived and searchable. There is no longer any excuse
