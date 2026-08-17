@@ -89,31 +89,40 @@ not recoverable and inventing them would defeat the purpose of the exercise.
 | Times research/forums solved what guessing burned time on | §20 |
 | Times the .md rules weren't followed and it went sideways | §21 |
 | Time and money the errors cost | §22 |
-| What future sessions get wrong repeatedly | §19 |
+| What future sessions get wrong repeatedly | **§19** — written, and the place to start if you only read one section. It consolidates §13's traps, §14.10, §15.7, §16 PART D, §17 B.26 + PART I, §18's eight patterns and §21's prevention list. |
 | Where the history actually lives | §15 |
 
 ---
 
 ## ⚠️ Status of this compilation
 
-**This is a complete and usable record, but not yet the final one.** Compilation was interrupted
-twice by usage limits. Present and complete: sections 1–15 and 20–22 — roughly 1 MB of material,
-covering the entire project timeline day by day from 2026-05-19 to 2026-08-16, plus the memory
-file's full history, the document compendiums, the repo map, and the three sections Jeff added
-mid-run.
+**All twenty-three parts (§00 and §01–§22) are written.** Compilation was interrupted twice by
+usage limits, and an earlier version of this very status block — which said §16 through §19 were
+"still to be compiled" and described them as "consolidations and indexes of material that is, in
+substance, already below" — was **wrong on both counts and has been replaced**. It is quoted here
+rather than deleted, because a status block that silently rewrites itself is the same defect this
+record exists to end.
 
-**Still to be compiled** (the mining agents were interrupted; the source material for all of them
-is in the repo and the method is recorded in `history-archive/SESSION_CHECKPOINT.md`):
+Three of those four sections are **not** indexes and contain substantial unique material:
 
-- **§16 — The Good, the Bad, and the Ugly:** the arguments and corrections, hunted across every
-  commit message. *Much of this material already appears inside the chronicles and in §21.*
-- **§17 — Master decisions ledger:** every decision, rejection, and price in one table.
-- **§18 — Incident ledger:** every multi-attempt problem in one table. *Each incident is already
-  told in full in its chronicle; this would be the cross-cutting index.*
-- **§19 — Gaps and guidance:** what the record cannot answer, and what future sessions get wrong.
+- **§16 — The Good, the Bad, and the Ugly (~83 KB).** Thirty-two admitted failures with mechanism
+  and cost, six named trust crises reproduced with the PROTECTED CLAUDE.md blocks quoted in full,
+  and PART D, an explicit statement of what the record does **not** support.
+- **§17 — Master decisions ledger (~128 KB).** ~26 standing rules, ~40 rejected options **with
+  their prices**, PART D's price ledger, PART I's "open at branch tip — nothing here is settled,"
+  and D.7's honest disagreement with §22 over the $31.85 blade line.
+- **§18 — Incident ledger (~180 KB).** Sixty-seven numbered multi-attempt incidents plus an
+  abstraction of the **eight recurring failure patterns** behind them.
+- **§19 — Gaps and guidance.** The consolidation: what the record genuinely cannot answer, the
+  eight things future sessions get wrong repeatedly with a concrete prevention for each, and the
+  reading order. **It also carries the defect list for the delivered artifact — read it before
+  trusting any assembled file or zip**, because the first assembly (commit `f036f84`,
+  2026-08-17 00:43) omitted §16/§17/§18 entirely and carried truncated copies of §14 and §15.
 
-Those four are consolidations and indexes of material that is, in substance, already below. When
-they are compiled they will be added and this file replaced in place.
+**If you are holding an assembled `CLOUD_SESSION_HISTORY.md` or `HCC_MASTER_RECORD.zip` and it
+does not contain all of §16, §17, §18 and §19, it is the defective first assembly.** Check by
+grepping for `^## ` and confirming the section list runs unbroken. The authoritative copies are
+the twenty-three individual section files.
 
 ---
 
@@ -4701,416 +4710,8829 @@ Status line: "Water + Gas LIVE via RTL-SDR + rtlamr2mqtt on the J45. Electric 'T
 
 ## The Other Papers — lighting, Lucky Mike, inventory, heroes, config trees
 
-This section documents everything at the branch tip (2026-08-16, `origin/claude/time-master-project-liq1jw`) that is *not* the app itself: the lighting/Zigbee planning documents, the queued Lucky Mike "Smart Stall" business, the hardware-inventory and network-map registers, the hero-image style system, and the config trees (`beehive-config/`, `beehive/`, `firmware/`, `_headers`, the disabled GitHub Actions workflow, and `dev.html`). These files are where most of the project's *decisions* — prices, rejections, arguments, and settled questions — actually live. Anything inferred rather than evidenced is marked **INFERRED:**.
+This section covers everything in the repo that is *not* the app itself and not the
+utilities/mower/beehive-operations papers: the lighting and mesh plan, the Lucky Mike Smart
+Stall business file, the hardware inventory and network census, the hero-image style
+apparatus, the Home Assistant configuration snapshot, the ESPHome/custom-component
+snapshots under `beehive/`, the mower firmware directory, the Cloudflare `_headers` file,
+the dead GitHub Actions workflow, and `dev.html`.
+
+These are the papers that record what Jeff *bought*, what he *decided*, and what he
+*rejected* — which is why several of them carry the most expensive lessons in the project.
+The single most costly documentation failure in the whole record lives in this section
+(the Inovelli scrap notice), and so does the single largest wasted-money near-miss (buying
+$120 of dimmers to do a job a $10 plug does better).
 
 ---
 
-### 1. Lighting — `docs/lighting/`
+### 14.1 `docs/lighting/` — the smart-lighting and Zigbee-mesh file
 
-Five files (three markdown, two HTML + matching PDFs). Together they record the whole-house smart-lighting project from the 2026-08-06 planning session through the 2026-08-14 living-room install and the 2026-08-16 Inovelli scrap notice.
+Five files at tip, plus two PDFs:
 
-#### 1.1 `HCC_Lighting_Plan.html` (+ `.pdf`) — THE authoritative plan, "Rev. Aug 13 2026"
+| File | Bytes | Last touched | Commit |
+|---|---|---|---|
+| `HCC_Lighting_Plan.html` | 28,114 | 2026-08-13 | `6c90202` |
+| `HCC_Lighting_Plan.pdf` | 134,066 | 2026-08-13 | `6c90202` |
+| `HCC_Floorplan_DRAFT.html` | 13,307 | 2026-08-13 | `29c7a1a` |
+| `HCC_Floorplan_DRAFT.pdf` | 109,037 | 2026-08-13 | `29c7a1a` |
+| `bedroom_wiring_plan_2026-08-06.md` | 2,009 | 2026-08-08 | `ac38933` |
+| `kasa_smart_lighting_project_2026-08-06.md` | 7,534 | 2026-08-14 | `09de34b` |
+| `zigbee_dimmer_selection_2026-08-13.md` | 3,093 | 2026-08-16 | `1572b4a` |
 
-Committed `6c90202` 2026-08-13 ("Lighting: printable build plan + wiring/mesh diagrams (HTML + PDF); remove temp fix.txt"). A three-page printable letter-format document, masthead "**Smart Lighting & Zigbee Mesh** — Build plan · wiring · device map — Home Assistant 'Beehive'", "Rev. Aug 13 2026 · Loewen · White House TN".
+Full commit history of the directory (`git log -- docs/lighting`):
 
-**Page 1 — "The Strategy — Two Jobs, Two Budgets."** The core architectural decision, verbatim from the doc:
+```
+1572b4a 2026-08-16  Record that Inovelli was SCRAPPED on price - it was never written down
+09de34b 2026-08-14  Lighting: living room HS220 installed and in HA (192.168.1.178); new-firmware
+                    onboarding notes; auto-update disabled via HA toggle the app hides
+8b7a69a 2026-08-13  Lighting: Jeff pulled dedicated LED circuits + multi-gang boxes - closes
+                    neutral and box-fill open items
+c722076 2026-08-13  Lighting: fans confirmed separate from all LED circuits - dimmers safe
+                    everywhere (Jeff confirmed)
+29c7a1a 2026-08-13  Lighting: first-draft floor plan with device overlay (traced from Sharky
+                    LIDAR; guest bed + office unmapped, awaiting Jeff's markup)
+6c90202 2026-08-13  Lighting: printable build plan + wiring/mesh diagrams (HTML + PDF);
+                    remove temp fix.txt
+a5c67a8 2026-08-13  Lighting: Zigbee dimmer selection research - Enbrighten 43080 rejected for
+                    documented mesh-routing defects, Inovelli Blue selected (dumb-3-way confirmed)
+ac38933 2026-08-08  Log Jeff's smart lighting plan, flag one real issue before ordering
+```
 
-> **Job 1 · Light Switches → Wi-Fi (Kasa)** — Kasa HS220/HS200 run **fully local** in Home Assistant through the `python-kasa` integration — no cloud, no hub, no account needed for on/off/dim. At ~$15 they do the lighting job for a fifth the price of a mesh-grade switch.
+#### 14.1.1 `HCC_Lighting_Plan.html` — THE authoritative plan, Rev. Aug 13 2026
+
+This is the document `CLAUDE.md` names as authoritative:
+
+> **📄 THE AUTHORITATIVE DOCUMENT IS `docs/lighting/HCC_Lighting_Plan.html` (+ PDF), Rev. Aug 13 2026.**
+> Printable, with wiring diagrams and the device map — Jeff asked for it specifically to hang in the
+> workshop. **Read it before proposing anything about lighting or mesh.**
+> — `CLAUDE.md`, "SETTLED DECISIONS — DO NOT RE-PROPOSE THESE (PROTECTED)"
+
+It is a single self-contained HTML file with print CSS (`@page { size: letter portrait; margin: 0.5in; }`),
+inline SVG diagrams, and three page-break sections. The masthead reads:
+
+> Rev. Aug 13 2026 · Loewen · White House TN
+> **SMART LIGHTING & ZIGBEE MESH**
+> Build plan · wiring · device map — Home Assistant "Beehive"
+
+**Page 1 — the strategy.** The thesis of the whole plan is a two-job / two-budget split, quoted
+verbatim from the file:
+
+> **Job 1 · Light Switches → Wi-Fi (Kasa)** — Kasa HS220/HS200 run **fully local** in Home Assistant
+> through the `python-kasa` integration — no cloud, no hub, no account needed for on/off/dim. At ~$15
+> they do the lighting job for a fifth the price of a mesh-grade switch.
 >
-> **Job 2 · Mesh Range → Zigbee Plugs** — Mesh repeaters do **not** have to be switches. Every mains-powered Zigbee plug is a router. At $8–12 each they extend the mesh *and* replace the four vendor-locked Sylvania plugs that can never enter HA.
+> **Job 2 · Mesh Range → Zigbee Plugs** — Mesh repeaters do **not** have to be switches. Every
+> mains-powered Zigbee plug is a router. At $8–12 each they extend the mesh *and* replace the four
+> vendor-locked Sylvania plugs that can never enter HA.
 >
-> **Why not a $46 mesh dimmer:** the switch was only being asked to repeat the mesh — a job a $10 plug does better. Buying them separately costs half as much and solves the Sylvania problem at the same time.
+> **Why not a $46 mesh dimmer:** the switch was only being asked to repeat the mesh — a job a $10 plug
+> does better. Buying them separately costs half as much and solves the Sylvania problem at the same time.
 
-**Shopping list (page 1, with prices):** Kasa HS220 dimmer ×3 for bedroom/kitchen-dining/living room ($15 ea, "2 on hand", $0); optional 4th HS220 $15; Kasa HS200 garage switch $15; Zigbee plug 4-pack (~$10 ea, $40) to replace the 4 Sylvania plugs; 1 more Zigbee plug for the garage mesh relay ($10); 2 Zigbee contact sensors for the garage door (~$12 ea, $24); Haozee CC2652P1 coordinator dongle + USB extension ($0, "ordered"). **Estimated total ~$104**, with the caveat: "Prices are estimates — verify each Zigbee model against its Zigbee2MQTT device page before ordering."
+**The shopping list, verbatim from the table (~$104 total):**
 
-**Room schedule:** Bedroom 9×12 W ProGreen LED (108 W, Kasa HS220, door box only, 2 toggles repurposed) · Kitchen+Dining 9×12 W combined (108 W, HS220, 1 of 3 existing positions; 2 come out) · Living Room 8×12 W (96 W, HS220) · Garage 8× LED not dimmed (96 W, HS200, **2 switch locations**).
+| Item | For | Qty | Each | Total | Status |
+|---|---|---|---|---|---|
+| **Kasa HS220** dimmer | Bedroom · Kitchen/Dining · Living room | 3 | $15 | $0 | 2 on hand |
+| **Kasa HS220** dimmer | 3rd room (only if a 3rd is wanted) | 1 | $15 | $15 | buy |
+| **Kasa HS200** switch | Garage lights (non-dim) | 1 | $15 | $15 | buy |
+| **Zigbee plug** (4-pack) | Replace 4 Sylvania · mesh routers | 4 | ~$10 | $40 | buy |
+| **Zigbee plug** — garage | Mesh relay through the garage wall | 1 | ~$10 | $10 | buy |
+| **Zigbee contact sensors** | Garage door: CLOSED + FULLY-OPEN | 2 | ~$12 | $24 | buy |
+| Zigbee coordinator dongle | Haozee CC2652P1 + USB extension | 1 | — | $0 | ordered |
+| **Estimated total** | | | | **~$104** | |
 
-**Open decision recorded in a warning box** (still open at tip):
+Caption under the table, verbatim:
 
-> **Open decision — garage two-location switching.** A single HS200 cannot serve two switch positions; the second position goes dead. Choose one: **(a)** HS210 matched kit so both positions stay live, or **(b)** single HS200 at the garage door and repurpose the kitchen position for something else — the same trick already used on the bedroom toggles. *Decide before ordering.*
+> Prices are estimates — verify each Zigbee model against its Zigbee2MQTT device page before ordering
+> (see Rules, page 3).
 
-**Firmware trap (page 1 note):**
+**Room schedule, verbatim:**
 
-> **Before first power-up:** install the Kasa app and **turn OFF automatic firmware updates before adding any switch.** TP-Link firmware has previously broken local control — and local control is the entire reason these are being used.
+| Room | Fixtures | Load | Switch positions | Device |
+|---|---|---|---|---|
+| **Bedroom** | 9 × 12 W ProGreen LED | 108 W | Door box only (2 toggles repurposed) | Kasa HS220 |
+| **Kitchen + Dining** | 9 × 12 W (3-group + 6-group combined) | 108 W | 1 of 3 existing; 2 come out | Kasa HS220 |
+| **Living Room** | 8 × 12 W LED | 96 W | 1 existing | Kasa HS220 |
+| **Garage** | 8 × LED, not dimmed | 96 W | **2 locations** — kitchen + garage | Kasa HS200 (see note) |
 
-**Page 2 — Wiring diagrams** (inline SVGs, print-grade). The bedroom "Reversed Feed, Door Box Is the Origin" three-box chain: panel → DOOR BOX (origin, Kasa HS220, splices for line hot + chain BLACK and all neutrals, load out to 9 LEDs / 108 W) → MIDDLE BOX (old 4-way removed, existing toggle repurposed to switch only its own receptacle) → BEDSIDE (end of run, old dimmer removed, toggle repurposed to its own receptacle, "swap 20 A → 15 A recept.", old feed tap fully removed). Caption: "Bedside was originally the power origin — the feed is reversed so the door box originates. The two old toggles are not blanked off: each now controls only its own box's receptacle." Also kitchen "3 boxes become 1" (two dimmers consolidated to one HS220 for all 9 LEDs, "2 openings freed"), and the garage two-location question diagram ("One HS200 kills the other position. HS210 kit keeps both live — decide first."). Safety warning: breaker OFF, verify dead at *all three* bedroom boxes, confirm neutral at kitchen/living boxes ("assumed, not yet photo-verified" — note this was later closed, see §1.4), grounds never used as circuit conductors.
+**The one open decision on page 1, verbatim in its warning box:**
 
-**Page 3 — Zigbee mesh + device map.** Mesh topology: Haozee CC2652P1 coordinator on Beehive, **channel 25** ("clear of Wi-Fi ch 1") → living-room Zigbee plugs (4× routers, replace Sylvania) → garage plug (router "pushes signal past the wall") → two battery door sensors + future sensors. Teaching caption: "**Mains-powered = router** … **Battery-powered = end device** … This is why adding plugs strengthens the network and adding sensors does not." The two-sensor garage-door design:
+> **Open decision — garage two-location switching.** A single HS200 cannot serve two switch positions;
+> the second position goes dead. Choose one: **(a)** HS210 matched kit so both positions stay live, or
+> **(b)** single HS200 at the garage door and repurpose the kitchen position for something else — the
+> same trick already used on the bedroom toggles. *Decide before ordering.*
 
-> **The garage door gets two sensors, not one.** One reads CLOSED, the other reads FULLY OPEN. With both, Home Assistant can tell the three real states apart: **closed**, **fully open**, and **partially open** — the cracked-for-ventilation position, which a single sensor can never distinguish from wide open.
+And the standing pre-power-up rule, verbatim:
 
-The page also carries a compact device map (Beehive .66, the beast .194, RE200 AP .196, GaragePC .121, Fire TV .215, B-Hyve .198, mower ESP32 .232; SSIDs `Loewen301` 2.4 ch 1 / `Loewen301-5G` / `LoewenGuest`) and the Tuya table including the settled Sylvania verdict:
+> **Before first power-up:** install the Kasa app and **turn OFF automatic firmware updates before
+> adding any switch.** TP-Link firmware has previously broken local control — and local control is the
+> entire reason these are being used.
 
-> **Settled — do not retry.** The Sylvania plugs are Tuya hardware locked to Sylvania's own app. Smart Life detects them and refuses; HA cannot reach them. Replacement is the fix.
+**Page 2 — wiring diagrams.** Legend, verbatim:
 
-**"Buying Rules — Learned the Hard Way"** (verbatim list): "'Zigbee compatible' is not enough" (Z-Wave ≠ Zigbee); "Check the Zigbee2MQTT device page before buying" (one "supported" dimmer *stops relaying messages for other devices*); "Let cheap plugs carry the mesh, not expensive switches"; "Disable vendor auto-firmware-update before first pairing." Ends with a three-column install checklist (Prep / Per switch / Home Assistant, last item "Logged in inventory").
+> BLACK — constant hot · WHITE — neutral (unswitched, full length) · SWITCHED LEG — load out ·
+> GROUND — bonded, never a circuit conductor
 
-**Trap for future sessions:** the plan is Rev. Aug 13 — one day *before* the living-room HS220 was actually installed and the SHIP-2.0 firmware discovery (§1.4), and three days before the Inovelli scrap notice (§1.5). The doc's strategy holds, but the shopping list's "2 on hand" HS220 count became 3 on 08-14 (inventory §3.1) and the Zigbee-plug pick was later made specific (THIRDREALITY 4-pack, §3.1).
+The bedroom SVG draws a three-box chain: PANEL (15 A ckt) → **DOOR BOX — ORIGIN** (Kasa HS220; splice
+line hot + chain BLK; splice all neutrals + LED WHT; LOAD OUT → 9 LEDs · 108 W; "single-pole · no S1/S2 ·
+no module") → **MIDDLE BOX** (old 4-way REMOVED; EXISTING TOGGLE, "dumb · no WiFi · no HA"; OUT → this
+box's RECEPTACLE hot only; "BLK passes through to bedside, unaffected by this switch") → **BEDSIDE —
+END OF RUN** (old dimmer REMOVED; EXISTING TOGGLE dumb; OUT → this box's RECEPTACLE hot only; "swap
+20 A → 15 A recept."; "old feed tap fully removed"). Caption, verbatim:
 
-#### 1.2 `HCC_Floorplan_DRAFT.html` (+ `.pdf`) — the floor plan traced from the robot vacuum
+> Bedside was originally the power origin — the feed is reversed so the door box originates. The two old
+> toggles are not blanked off: each now controls only its own box's receptacle, entirely independent of
+> the lights and of each other.
 
-Committed `29c7a1a` 2026-08-13 ("Lighting: first-draft floor plan with device overlay (traced from Sharky LIDAR; guest bed + office unmapped, awaiting Jeff's markup)"). Landscape sheet, masthead "**Floor Plan — Device Overlay**" with a red **"Draft — check me"** badge and rev line "Draft 1 · Aug 13 2026 · traced from Sharky LIDAR". Subtitle: "Base geometry traced from the robot vacuum's map · device positions are my best guess and need your red pen."
+The kitchen SVG is a BEFORE/AFTER: before = `dimmer → 3 LEDs`, `dimmer → 6 LEDs`, `garage 2-way leg`;
+after = one KASA HS220 driving `all 9 LEDs · 108 W` plus a retained `garage position` ("stays — see
+decision"), with **"2 openings freed"** annotated in red and "blank or repurpose as switched receptacle,
+same as bedroom" beneath.
 
-It draws the house (bedroom, bathroom, foyer, hall/bath, living room, kitchen+dining, garage) as an SVG with device markers — S = Kasa switch (HS220 door box, kitchen, living, HS200 garage), R = Zigbee plug routers (4 living-room + garage relay + bed lamp), D = the two garage door sensors, H = Beehive + dongle. Guest bedroom and office are cross-hatched: "not mapped — door was closed" ("The vacuum maps only where it can drive… those rooms are guesses, not survey. The garage it has never seen at all."). Footnote: "Not to scale · geometry approximated from the vacuum's LIDAR map."
+The garage SVG shows KITCHEN position and GARAGE position ("by the man door") both feeding 8 GARAGE LEDs
+(96 W · not dimmed), with the caption in warning colour: **"One HS200 kills the other position."** /
+"HS210 kit keeps both live — decide first."
 
-The sidebar asks Jeff directly: "**Please correct me.** Mark this up and hand it back — I'll redraw it properly," listing what's needed (room positions/sizes, where the garage really sits, guest bedroom/office, which wall each switch is on, missing rooms). And the ambition note: "**Next version can be live.** Once the geometry is right, this same plan can drive the wall iPad — lamps lighting up when they're on, the garage door showing open or closed, and a tap to control anything on it."
+Page 2 closes with the safety box, verbatim:
 
-**Status at tip:** still Draft 1. The record contains no marked-up return from Jeff — **INFERRED:** the red-pen round trip has not happened yet.
+> **Before any box is opened:** breaker OFF · verify dead at *all three* bedroom boxes · confirm a
+> neutral is present at the kitchen and living-room boxes (assumed, not yet photo-verified) · confirm the
+> switched conductor reaches the fixture junction before final connection. Grounds bond throughout and
+> are never used as circuit conductors.
 
-#### 1.3 `bedroom_wiring_plan_2026-08-06.md`
+**Page 3 — mesh + device map.** The mesh SVG runs COORDINATOR (Haozee CC2652P1, "on Beehive · ch 25") →
+LIVING RM PLUGS (4 × Zigbee · ROUTERS, "replace Sylvania") and HALLWAY / MID-HOUSE (optional relay hop) →
+GARAGE PLUG (ROUTER — "pushes signal past the wall") → DOOR SENSOR — CLOSED, DOOR SENSOR — FULLY OPEN,
+and a dashed FUTURE SENSORS box (leak · smoke · motion · freeze). Caption, verbatim:
 
-Committed `ac38933` 2026-08-08 ("Log Jeff's smart lighting plan, flag one real issue before ordering"). The box-by-box text version of the bedroom reversed-feed design: door box = origin with the HS220 ("Single-pole, replaces old switch — No S1/S2, no separate module"), splice list, middle and bedside boxes each with "**Existing toggle — repurposed** … Switch OUTPUT → this box's receptacle hot only … No WiFi — dumb mechanical switch," the 15 A receptacle swap at bedside, "Old receptacle-feed tap fully removed." Order line: "Kasa HS220P3 (3-pack: bedroom + kitchen/dining + living room) + Kasa HS200 (garage)." Safety: "Breaker off · verify dead at all three boxes before starting."
+> **Mains-powered = router** — relays messages for everything else. **Battery-powered = end device** —
+> talks only to its nearest router, never relays. This is why adding plugs strengthens the network and
+> adding sensors does not.
 
-#### 1.4 `kasa_smart_lighting_project_2026-08-06.md` — the project summary, kept alive through 08-14
+And the two-sensor rationale, verbatim:
 
-Created in the same `ac38933` commit; updated repeatedly (last touched `09de34b` 2026-08-14). This is the richest lighting record:
+> **The garage door gets two sensors, not one.** One reads CLOSED, the other reads FULLY OPEN. With both,
+> Home Assistant can tell the three real states apart: **closed**, **fully open**, and **partially open**
+> — the cracked-for-ventilation position, which a single sensor can never distinguish from wide open.
 
-- **Final decision line:** "Kasa HS220 (dimmer) / HS200 (non-dim), local HA integration via `python-kasa`."
-- **Why Kasa over MOES/Shelly (rejected options with prices):**
-  - **MOES WM-105B-M** (already owned): 100 W/gang limit — doesn't fit any single-channel group above 100 W once rooms were combined; "Requires momentary/reset switches — confirmed via GitHub issues and HA community threads that standard toggles cause continuous ramp behavior, not clean toggle."
-  - **Shelly Dimmer Gen3:** "works, local HA, keeps existing switches, but ~$35/unit vs Kasa ~$14-16/unit, and needs input-mode config per unit."
-  - **Kasa HS220:** replaces the switch entirely, mature local integration, single-pole only — "which matches every room now that they're consolidated to one switch each."
-- **The HS200/HS210 flag** (added by the 08-06 cloud session): the garage's two-location circuit "needs the **HS210 kit** (matched pair, WiFi-coordinated) to keep BOTH the kitchen and garage switch positions live; a lone HS200 in a 3-way/2-way circuit makes the other physical switch position non-functional."
-- **Ceiling fans closed (Jeff, 2026-08-13):** "**Every ceiling fan is wired independently of the LED circuits.**" Bedroom/office fans are pull-chain; the living-room fan is on its own RF remote. "**a dimmer is safe on all four LED circuits** — the one real hazard in this project (dimming a fan motor damages it and is a fire risk) does not apply anywhere here. Closed." (Future option noted, not planned: RF bridge to bring the living-room fan into HA.)
-- **Boxes & wire pulls — done by Jeff (confirmed 2026-08-13):** "**Jeff pulled dedicated LED circuits himself through the attic and installed 2- and 3-gang boxes in every room.**" This *closed* two open items (neutrals confirmed present; box fill fine — "new multi-gang boxes, ample room for the deeper Kasa bodies") and noted spare gang positions exist "so future smart devices drop in WITHOUT another attic trip."
-- **✅ Living room installed 2026-08-14:** `light.livingroom_cans` — HS220 at **192.168.1.178**, "wired by Jeff, dimming verified from HA. **Setup took ~2 hours and the network was NEVER the problem.**" Gateway verified clean (DHCP 190 free, MAC filtering off, WPA-2, ch 1, band steering off); 2.4 GHz Mode changed G/N → **B/G/N** during troubleshooting (kept).
-- **The SHIP 2.0 firmware discovery — a real trap, written to never be re-litigated:** "**These HS220s ship on NEW firmware** using an encrypted onboarding protocol (server identifies as 'SHIP 2.0', port 80, NOT the legacy port 9999)." Consequences: HA needs **TP-Link account credentials** to add them ("Control is still LOCAL — the account only authenticates the local session; it keeps working without internet"); and "Direct provisioning over the setup AP is NOT possible: all payloads return `error_code 1003` (JSON decode fail) and the handshake is undocumented. **Do not waste time on this again.**"
-- **Tool discovered:** the beast has an ASUS USB-AC53 Nano Wi-Fi adapter, radio software-off by default, that "can be turned on via the WinRT Radio API and used to join an IoT device's private setup AP for diagnostics, without disturbing its wired LAN connection."
-- **Bonus:** "**HA exposes `switch.<device>_auto_update_enabled`** — the firmware auto-update toggle the Kasa app does NOT show. **Turned OFF for this switch. Do the same for every future Kasa device.**" (HA also exposes overheat sensor, signal level, fade, presets, status LED.)
+The page-3 device map is the compact version of the network census (full version in
+`docs/inventory/NETWORK_MAP.md`, §14.3.2):
 
-#### 1.5 `zigbee_dimmer_selection_2026-08-13.md` — the scrap notice. The single most important process failure in this folder
+Infrastructure — `.254` AT&T BGW320-500 gateway · `.66` **Beehive** — Home Assistant (fixed) ·
+`.194` **The beast** — main PC / CodeProject.AI · `.196` RE200 — wired access point · `.121` GaragePC —
+HP TouchSmart · `.215` Fire TV (fixed) · `.198` B-Hyve irrigation controller · `.232` Mower sensor box (ESP32).
 
-Original research committed `a5c67a8` 2026-08-13 ("Enbrighten 43080 rejected for documented mesh-routing defects, Inovelli Blue selected (dumb-3-way confirmed)"). Then on **2026-08-16** commit `1572b4a` ("Record that Inovelli was SCRAPPED on price - it was never written down") prepended a red banner that must be quoted in full because it is the project's canonical lesson about lost decisions:
+Wi-Fi — `Loewen301` (2.4 · ch 1) all IoT + Kasa switches · `Loewen301-5G` (5 GHz) phones · laptops · TVs ·
+`LoewenGuest` (2.4) guests only. Caption: *"Zigbee runs channel 25 — clear of Wi-Fi ch 1."*
+
+Tuya / smart plugs (all identified Aug 13) — `.170` Garage fan socket · `.224` Jeff's bed lamp socket ·
+`.171` Angela's bed lamp socket · `.209` Hot-water pump socket · `.195` Smart socket (spare) · `.231`
+Sharky — robot vacuum · `.199 .200 .202 .205` **4 × Sylvania plugs** — vendor-locked, cannot enter HA ·
+**replace with Zigbee**. Warning box, verbatim:
+
+> **Settled — do not retry.** The Sylvania plugs are Tuya hardware locked to Sylvania's own app. Smart
+> Life detects them and refuses; HA cannot reach them. Replacement is the fix.
+
+**"Buying Rules — Learned the Hard Way", verbatim in full** — this is the most reusable paragraph in the
+whole lighting file:
+
+> - **"Zigbee compatible" is not enough.** Z-Wave and Zigbee are different radios — a Z-Wave switch will
+>   never talk to the Zigbee dongle, no matter what the box says.
+> - **Check the Zigbee2MQTT device page before buying.** One rejected dimmer was fully "supported" yet
+>   carried a warning that it *stops relaying messages for other devices* — useless for building a mesh.
+> - **Let cheap plugs carry the mesh**, not expensive switches. Same result, half the money.
+> - **Disable vendor auto-firmware-update** before first pairing on anything whose local control matters.
+
+The install checklist (three columns of checkbox lists): **Prep** — Kasa app installed · Auto-update
+disabled · Breaker OFF · Verified dead at box · Neutral confirmed. **Per switch** — Photo before removing ·
+Line vs load identified · Kasa wired + mounted · Power on · test manual · Join Loewen301 (2.4). **Home
+Assistant** — Appears in HA · Named by room · Dim range checked · Added to HCC app · Logged in inventory.
+
+**Traps in this file for future sessions:**
+
+1. **It is authoritative but frozen at 2026-08-13.** It has not been edited since `6c90202`, while the
+   inventory kept moving. Concretely stale as of tip: the shopping list says "2 on hand" for HS220 but a
+   3rd was ordered 2026-08-14 (`b524553`, $13.86, Amazon Resale USED-Mint); the dongle row says "ordered"
+   but it arrived 2026-08-15 (`5de10eb`); the Zigbee plug row says "~$10 × 4 = $40" but the actual
+   selection made 2026-08-14 was the ThirdReality 4-pack at ~$50 (`9dad6a5`). **The plan is the
+   *strategy* of record; `docs/inventory/HCC_INVENTORY.md` is the *state* of record.** Reconcile before
+   quoting a price to Jeff.
+2. **Channel 25 is written into this doc as settled**, but the inventory's setup-day instruction says
+   *"pick the Zigbee channel deliberately around the crowded 2.4 GHz WiFi (census 08-13)"*. Two documents,
+   two postures. Treat 25 as the plan of record and re-verify against the 08-13 census before pairing.
+3. **The `LoewenGuest` row is stale** — the guest SSID was **DISABLED** on 2026-08-14 (`f735771`,
+   NETWORK_MAP: *"Jeff confirmed nobody uses it"*).
+4. **The garage two-location decision in this doc is still the live one.** `CLAUDE.md` contradicts itself
+   about it — see §14.1.4.
+
+#### 14.1.2 `HCC_Floorplan_DRAFT.html` — the LIDAR-traced floor plan (Draft 1, Aug 13 2026)
+
+Landscape letter, one page, drawn as inline SVG, badged **"Draft — check me"** in the masthead.
+Sub-headline, verbatim:
+
+> Base geometry traced from the robot vacuum's map · device positions are my best guess and need your red pen
+
+Rev block: *"Draft 1 · Aug 13 2026 — traced from Sharky LIDAR"*.
+
+This is one of the more inventive artifacts in the project: **the house geometry was reverse-engineered
+from Sharky the robot vacuum's LIDAR map**, because no floor plan existed. Rooms drawn solid: BEDROOM
+(9 LED · 108 W), BATHROOM, FOYER, HALL / BATH, LIVING ROOM (8 LED · 96 W), KITCHEN + DINING (9 LED · 108 W).
+Rooms drawn hatched with a dashed amber border because they are guesses: **GUEST BEDROOM** ("not mapped —
+door was closed"), **OFFICE** ("not mapped — door was closed"), and **GARAGE** ("8 LED · 96 W · position
+approximate"). The explanation, verbatim:
+
+> **Why rooms are hatched** — The vacuum maps only where it can drive. With the guest bedroom and office
+> doors shut, it read those doorways as solid wall — so those rooms are guesses, not survey. The garage it
+> has never seen at all.
+
+Device overlay key: **S** = Kasa smart switch (gold) · **R** = Zigbee plug / mesh router (blue) ·
+**D** = Zigbee door sensor (green) · **H** = Beehive hub + coordinator (purple) · red bar = doorway ·
+hatch = not mapped / approximate. Placed: HS220 door box (bedroom), HS220 (kitchen), HS220 (living room),
+HS200 garage; four R plugs in the living room labelled *"4 × Zigbee plugs (replace Sylvania)"*, a
+`garage relay plug`, a `bed lamp` plug; `door sensors ×2` at the garage; `Beehive + dongle` at the
+kitchen/living junction. A north arrow sits top-right. Footer, verbatim:
+
+> Not to scale · geometry approximated from the vacuum's LIDAR map · rooms it could not enter are hatched
+
+The ask to Jeff, verbatim from the warning box:
+
+> **Please correct me.** Mark this up and hand it back — I'll redraw it properly. I need:
+> Room positions & rough sizes · Where the garage really sits · Guest bedroom & office locations ·
+> Which wall each switch is on · Any rooms missing entirely
+
+And the forward-looking note, verbatim:
+
+> **Next version can be live.** Once the geometry is right, this same plan can drive the wall iPad —
+> lamps lighting up when they're on, the garage door showing open or closed, and a tap to control
+> anything on it.
+
+**Status: STILL A DRAFT. The record is silent on whether Jeff ever marked it up.** No commit after
+`29c7a1a` (2026-08-13) touches either floorplan file, and no other doc references a corrected version.
+**INFERRED:** the markup never came back, or came back and was never recorded — either way, do not treat
+any room position, room size, or the garage location in this file as fact.
+
+**Trap:** the "next version can be live" idea (a tappable live floor plan on the iPad Air 2 wall display)
+is a real, attractive, unbuilt feature. It is **not** on the CLAUDE.md docket. Anyone proposing it should
+say plainly that it is new scope, not a resumed task.
+
+#### 14.1.3 `bedroom_wiring_plan_2026-08-06.md` — the box-by-box wiring detail
+
+2,009 bytes; the diagram-bearing companion the summary doc points to. Title:
+**"Bedroom — Final Wiring Plan (Reversed Feed + Switched Outlets)"**. Opening line, verbatim:
+
+> Door = origin. Kasa HS220 drives lights. Middle + bedside toggles now switch their own local receptacle.
+
+**DOOR BOX — origination:** Kasa HS220 (lights) — Line hot in / neutral in; Load out → 9 bedroom LEDs;
+Single-pole, replaces old switch; *"No S1/S2, no separate module"*. Splices in this box: line hot + chain
+BLACK (feeds middle/bedside); neutrals: incoming + chain WHITE + LED neutral. **9 BEDROOM LEDs** — off
+Kasa load · 108W total.
+
+**MIDDLE BOX:** old 4-way removed. Existing toggle repurposed — Black IN from door (constant hot); Switch
+OUTPUT → this box's receptacle hot only; *"No WiFi — dumb mechanical switch"*. Receptacle switched, dies
+when toggle off. White + ground pass through unswitched. Black continues on to bedside, unaffected.
+
+**BEDSIDE BOX — end of run:** old dimmer removed. Existing toggle repurposed the same way. *"15A
+receptacle swap happens here. Old receptacle-feed tap fully removed."*
+
+Legend, verbatim:
+
+> BLACK = constant hot, feeds both switches in series down the chain · WHITE = neutral, unswitched, runs
+> full length · Load to LEDs (from Kasa only — not part of the outlet circuit) · Middle + bedside switches
+> are 100% independent of lighting — each controls only its own box's receptacle, nothing else. · Grounds
+> bond throughout, never used as circuit conductors.
+
+Order line, verbatim: *"Kasa HS220P3 (3-pack: bedroom + kitchen/dining + living room) + Kasa HS200 (garage)"*.
+
+Before starting, verbatim:
+
+> Breaker off · verify dead at all three boxes before starting · old bedside receptacle tap removed
+> entirely · Verify RED/repurposed conductor reaches the fixture junction before final connection
+
+**Trap:** this file still says the order is an **HS220P3 3-pack**. That is not what happened — Jeff had
+2 on hand and bought a single used HS220 on 2026-08-14 for $13.86. The 3-pack line is a plan, not a
+purchase. Also note the "RED/repurposed conductor" language here is a leftover from the *original*
+reversed-feed design where red was a switched leg to 3 bed LEDs; the final design in
+`kasa_smart_lighting_project_2026-08-06.md` and in the Rev. Aug 13 plan has no red switched leg at the
+bedside at all. **If these two files disagree, the Rev. Aug 13 HTML plan wins.**
+
+#### 14.1.4 `kasa_smart_lighting_project_2026-08-06.md` — the running project log
+
+7,534 bytes and the most-amended file in the directory (three separate later sessions appended to it).
+It opens with the decision, verbatim:
+
+> **Final decision:** Kasa HS220 (dimmer) / HS200 (non-dim), local HA integration via `python-kasa`.
+
+**The rejected options and exactly why — verbatim, in full:**
+
+> **Why Kasa over MOES/Shelly**
+> - **MOES WM-105B-M** (already owned): 100W/gang limit, doesn't fit any single-channel group above 100W
+>   once rooms were combined to one switch each. Requires momentary/reset switches — confirmed via GitHub
+>   issues and HA community threads that standard toggles cause continuous ramp behavior, not clean toggle.
+> - **Shelly Dimmer Gen3**: works, local HA, keeps existing switches, but ~$35/unit vs Kasa ~$14-16/unit,
+>   and needs input-mode config per unit.
+> - **Kasa HS220**: replaces switch entirely, no separate module/switch pairing, mature local HA
+>   integration (python-kasa), single-pole only — which matches every room now that they're consolidated
+>   to one switch each.
+
+The bedroom section records the design *change* explicitly rather than silently overwriting — an example
+of the project's better documentation habit:
+
+> **UPDATED — bedside + middle switches NOT removed.** Instead, each existing toggle is repurposed as a
+> dumb (non-smart) switch controlling ONLY its own box's receptacle […] No blank plates needed anywhere —
+> every existing switch keeps a real job.
+
+The original "Open items / not yet fully field-verified" list, verbatim:
+
+> - Kitchen and living room box fill/depth not yet inspected via photo (bedroom boxes were — combo
+>   switch+receptacle, already crowded, confirmed OK once devices reduced).
+> - Confirm neutral present at kitchen and living room switch boxes (assumed yes per house pattern, not
+>   individually confirmed via photo).
+> - Kasa app/local discovery should be tested on Jeff's network before buying all 4 units.
+> - **Added by cloud session (08-06):** the garage's "2 (kitchen + garage, 2-way)" control point is listed
+>   against a single Kasa HS200 — verified via research this needs the **HS210 kit** (matched pair,
+>   WiFi-coordinated) to keep BOTH the kitchen and garage switch positions live; a lone HS200 in a
+>   3-way/2-way circuit makes the other physical switch position non-functional.
+
+That last bullet is the origin of **CLAUDE.md Pending Item 19**, and the commit that filed it
+(`ac38933`, 2026-08-08) is a good example of the review-not-file habit:
+
+> Saved the Kasa HS220/HS200 lighting project (bedroom reversed-feed redesign, kitchen/living
+> room/garage switch consolidation) into docs/lighting/ and summarized it in CLAUDE.md. Reviewed rather
+> than just filed it: verified the HS220's 150W-LED rating covers the 108W bedroom/kitchen loads, and
+> found the garage's 2-location switch setup only has a single HS200 on the shopping list - confirmed via
+> research that leaves the other switch location non-functional. Logged as Pending Item 19 for Jeff to
+> decide (HS210 kit vs. repurposing the extra position) before ordering.
+> — commit `ac38933`, 2026-08-08 01:09:45 +0000
+
+**The 2026-08-13 appendices** (commits `c722076` 20:41 and `8b7a69a` 20:48), verbatim:
+
+> ## CEILING FANS — CONFIRMED SEPARATE (Jeff, 2026-08-13)
+> **Every ceiling fan is wired independently of the LED circuits.** Bedroom and office fans are
+> pull-chain; the living room fan runs on its own RF remote. No wall switch in the plan controls a
+> fan motor, so **a dimmer is safe on all four LED circuits** — the one real hazard in this project
+> (dimming a fan motor damages it and is a fire risk) does not apply anywhere here. Closed.
+>
+> Future option, not planned: the living-room fan is RF-remote controlled, so it could be brought
+> into HA later with an RF bridge that learns the remote. Separate purchase, separate project.
+
+> ## BOXES & WIRE PULLS — DONE BY JEFF (confirmed 2026-08-13)
+> **Jeff pulled dedicated LED circuits himself through the attic and installed 2- and 3-gang boxes in
+> every room.** Originally each room had ONE switch serving both the fan and the light; the LEDs now
+> have their own switch on their own home run.
+>
+> This CLOSES two previously-open items:
+> - "Confirm neutral present at kitchen and living room boxes" — he pulled the wire, neutrals confirmed present.
+> - "Box fill/depth not inspected" — new multi-gang boxes, ample room for the deeper Kasa bodies.
+>
+> Also worth knowing: spare gang positions exist in these boxes, so future smart devices drop in
+> WITHOUT another attic trip. Ganged-dimmer heat derating is a real rule but a non-issue here
+> (96-108 W on a 150 W-rated switch).
+
+**The 2026-08-14 install record** (commit `09de34b`) — the first switch actually in service, and the
+single densest paragraph of hard-won operational detail in the lighting file. Verbatim in full:
+
+> ## ✅ LIVING ROOM INSTALLED 2026-08-14
+> `light.livingroom_cans` — HS220 at **192.168.1.178**, wired by Jeff, dimming verified from HA.
+>
+> **Setup took ~2 hours and the network was NEVER the problem.** Verified from inside the gateway:
+> DHCP fine (190 free), MAC filtering off, WPA-2, channel 1, SSID visible, band steering off.
+> 2.4 GHz Mode was changed G/N -> **B/G/N** during troubleshooting (kept — harmless and more permissive).
+>
+> **These HS220s ship on NEW firmware** using an encrypted onboarding protocol (server identifies as
+> "SHIP 2.0", port 80, NOT the legacy port 9999). Consequences:
+> - HA needs **TP-Link account credentials** to add them. Control is still LOCAL — the account only
+>   authenticates the local session; it keeps working without internet.
+> - Direct provisioning over the setup AP is NOT possible: all payloads return `error_code 1003`
+>   (JSON decode fail) and the handshake is undocumented. Do not waste time on this again.
+>
+> **USEFUL TOOL DISCOVERED:** the beast has a working Wi-Fi adapter (ASUS USB-AC53 Nano) whose radio
+> sits software-off by default. It can be turned on via the WinRT Radio API and used to join an IoT
+> devices private setup AP for diagnostics, without disturbing its wired LAN connection.
+>
+> **BONUS: HA exposes `switch.<device>_auto_update_enabled`** — the firmware auto-update toggle the
+> Kasa app does NOT show. **Turned OFF for this switch. Do the same for every future Kasa device.**
+> HA also exposes an overheat sensor, signal level, smooth on/off fade, presets and the status LED.
+
+**Traps from this file:**
+
+- **"Do not waste time on this again"** — direct provisioning over the Kasa setup AP is a dead end
+  (`error_code 1003`, undocumented handshake). Two hours were burned learning it.
+- **The TP-Link account is required and that is not a cloud dependency.** The plan's own page-1 copy says
+  "no account needed for on/off/dim" — that was true of the *old* firmware and is now wrong for
+  new-firmware HS220s. **The plan HTML has not been corrected.** Flag this contradiction rather than
+  re-discovering it.
+- **`switch.<device>_auto_update_enabled` must be turned OFF on every future Kasa device.** It is not
+  visible in the Kasa app at all.
+- The gateway's 2.4 GHz mode is now **B/G/N** because of this install (see also `NETWORK_MAP.md`,
+  `f735771`). Do not "tidy" it back to G/N.
+
+#### 14.1.5 `zigbee_dimmer_selection_2026-08-13.md` — the scrapped selection, and the project's worst documentation failure
+
+3,093 bytes. Created 2026-08-13 19:40 (`a5c67a8`) as a *selection*; overwritten at the top on
+2026-08-16 08:08 (`1572b4a`) with a scrap notice that inverts its conclusion. The scrap notice is quoted
+here **in full**, verbatim, because it is the single most important paragraph in this section:
 
 > ## 🔴 SCRAPPED BY JEFF — DO NOT PROPOSE INOVELLI AGAIN
-> **Jeff rejected the Inovelli Blue on price and says he did so early on:** *"those were scrapped at the freaking beginning — told you I was not paying $120 for a freaking dimmer switch."* ~$60 each / ~$120 for the pair is over his line, full stop.
+> **Jeff rejected the Inovelli Blue on price and says he did so early on:** *"those were scrapped at
+> the freaking beginning — told you I was not paying $120 for a freaking dimmer switch."*
+> ~$60 each / ~$120 for the pair is over his line, full stop.
 >
-> **This was never recorded until 2026-08-16**, so the inventory and CLAUDE.md both still said "TO BUY: 2" a day later, and a session planned the whole Zigbee mesh around them and pitched them back to him. That is exactly how a settled decision gets re-litigated. **If a decision is made in conversation, it goes in the doc the same session.**
+> **This was never recorded until 2026-08-16**, so the inventory and CLAUDE.md both still said
+> "TO BUY: 2" a day later, and a session planned the whole Zigbee mesh around them and pitched them
+> back to him. That is exactly how a settled decision gets re-litigated. **If a decision is made in
+> conversation, it goes in the doc the same session.**
 >
-> The research below is kept ONLY as the record of why Enbrighten was rejected (documented mesh-routing defects — still valid and still worth avoiding). **The selection at the bottom is dead.**
+> The research below is kept ONLY as the record of why Enbrighten was rejected (documented
+> mesh-routing defects — still valid and still worth avoiding). **The selection at the bottom is dead.**
 >
-> **Open:** the mesh still needs mains-powered routers, and a budget alternative has NOT been chosen. Do not name one from memory — research real current products and prices in-session, cheapest-first, and include the $0 option (Kasa HS220 ×2 and the MOES module are already ON HAND).
+> **Open:** the mesh still needs mains-powered routers, and a budget alternative has NOT been chosen.
+> Do not name one from memory — research real current products and prices in-session, cheapest-first,
+> and include the $0 option (Kasa HS220 ×2 and the MOES module are already ON HAND).
 
-The commit message adds: "Standing lesson: a decision made in conversation goes into the doc the SAME session."
+The commit that wrote it (`1572b4a`, 2026-08-16 08:08:09 -0500) is equally explicit:
 
-The preserved research beneath the banner:
-- **Rejected: Enbrighten Z-Wave 800 toggle dimmer ($39)** — "**Wrong radio.** Z-Wave (908 MHz) cannot talk to the Haozee CC2652P1 Zigbee dongle. Would need a second ~$40 Z-Wave stick + a second ecosystem. Real cost for 2 switches: ~$118 vs $92 Zigbee. Rejected."
-- **Rejected: Enbrighten 43080 (Zigbee paddle dimmer)** — officially Zigbee2MQTT-supported, "looked like the value pick. **BUT Zigbee2MQTT's own device page carries two explicit warnings:**" ("may stop relaying messages for child devices"; "will not respond to route update requests after a while"). "Jeff's stated requirement is that switches EXTEND the mesh (garage needs range help). A switch with documented routing defects fails that requirement outright."
-- **(Dead) selection: Inovelli Blue 2-1 VZM31-SN (~$46-60)** — Zigbee 3.0 router, clean Z2M page, dumb-3-way confirmed (which would have closed the HS200/HS210 garage question), neutral required (Jeff has neutrals everywhere). "Costs more, but it is the only option that satisfies 'must extend the mesh.'" — **this is what Jeff killed on price.**
-- Closing line: "**Lesson: 'Zigbee2MQTT supported' ≠ 'good Zigbee citizen.' Check the device page's warnings.**"
+> Jeff rejected the Inovelli Blue early on (~$60 ea / ~$120 the pair) and the decision never made it into
+> any document. Yesterday's inventory update still said TO BUY: 2, so this session planned the entire
+> Zigbee mesh around them and pitched them back to him. That is a settled decision being re-litigated
+> because the docs disagreed with reality.
+>
+> Both sources now carry the scrap notice. The Enbrighten rejection research is kept - the documented
+> mesh-routing defects are still valid - but the selection is dead.
+>
+> Still open and deliberately NOT guessed: the mesh needs mains-powered routers and no budget alternative
+> has been chosen. Next session researches real current products and prices in-session, cheapest-first,
+> leading with the zero-cost option (Kasa HS220 x2 and the MOES module are already on hand).
+>
+> Standing lesson: a decision made in conversation goes into the doc the SAME session.
 
-**Trap for future sessions:** as of the tip, the mains-powered mesh-router choice for the *switch* positions is **UNRESOLVED**. Do not propose Inovelli. Do not re-open the Enbrighten. Do not name a product from memory — research live prices, cheapest first, starting from the $0 on-hand option. (Note the THIRDREALITY *plugs* selection in §3.1 covers plug routers, not the wall-switch question.)
+`CLAUDE.md` carries the fuller quotation of Jeff, which is also the budget philosophy of the entire
+project:
 
----
+> **❌ Inovelli Blue 2-1 VZM31-SN — SCRAPPED ON PRICE. Never propose again.** Jeff, verbatim:
+> *"I was not paying $120 for a freaking dimmer switch... I spend $125 for Claude Max and I would
+> rather spend the money on that and have your help than buy $120 worth of dimmers."* **That is the
+> budget philosophy for this whole project — his money goes to the tools that help him build, not
+> to premium hardware where a cheap part does the job.**
 
-### 2. Lucky Mike — `docs/lucky-mike/` (the queued Smart Stall business)
+And the rule the whole SETTLED DECISIONS section exists to enforce, with Jeff verbatim:
 
-Lucky Mike is a horse. The folder is a fully-worked plan for a monitoring product ("Smart Stall™ — Because They're Family.") for his stall, plus the business model to sell it to other barns. **Status: QUEUED — never built.** Per `INTEGRATION_NOTES.md`: "**Status: QUEUED — build AFTER the utilities work and the current docket are finished** (Jeff's instruction 2026-06-30)." All files date to 2026-06-30 commits (`c8ca302`, `e50c9a4`, `857d825`, `fa282f1`, `6c2d8c3`, `4d78cad`) and have not changed since — a month-and-a-half-old parked project at tip.
+> **A decision Jeff makes in conversation goes into a file THE SAME SESSION.** Jeff, verbatim:
+> *"you tell me it is all documented and it is not, then the session closes and you come back with
+> some plan that was two weeks ago — this is infuriating."* Writing it down is not optional
+> housekeeping; it is the difference between a project that moves forward and one that loops.
 
-#### 2.1 The ChatGPT-origin documents (archived, not authoritative)
+**The research that is still valid — the rejections, verbatim:**
 
-`Lucky_Mike_Smart_Stall_Project_Master.md` and `Lucky_Mike_Smart_Stall_Project_Bible_v1.0.md` (commit `c8ca302` "Archive Lucky Mike Smart Stall plan + technical review (queued, not built)") are the original plan — 4 phases: Phase 1 Essential Monitoring "$175–225" (2× Tapo C120 cameras, ESP32, BME280, DS18B20, LD2410, HA dashboard); Phase 2 Smart Stall "+$125–175" (fan control, water level, door, leak, UPS); Phase 3 Feed & Analytics "+$75–125" (load cell + HX711, reports); Phase 4 Smart Halter GPS (4 options, Wi-Fi-only through full LTE). Branding: "**Smart Stall™**", tagline "**Because they're family.**", packages Bronze/Silver/Gold/Platinum (the Bible inconsistently says "Elite" — flagged as mistake #6). "Lucky Mike will serve as the demonstration installation for future customers." `README_Project_Files.txt` is just the archive manifest and a suggested folder layout. `design-budget-guide-12page.png` and `lucky-mike-hero.jpg` are the ChatGPT deck image and the hero photo for the eventual app page.
+> ## Rejected: Enbrighten Z-Wave 800 toggle dimmer ($39)
+> **Wrong radio.** Z-Wave (908 MHz) cannot talk to the Haozee CC2652P1 Zigbee dongle.
+> Would need a second ~$40 Z-Wave stick + a second ecosystem. Real cost for 2 switches:
+> ~$118 vs $92 Zigbee. Rejected.
+>
+> ## Rejected: Enbrighten 43080 (Zigbee paddle dimmer)
+> Officially Zigbee2MQTT-supported, same QuickFit/SimpleWire body, neutral required — looked
+> like the value pick. **BUT Zigbee2MQTT's own device page carries two explicit warnings:**
+> - "Some Enbrighten devices may cause issues with larger networks. In particular, they may
+>   stop relaying messages for child devices."
+> - "Some Enbrighten devices will not respond to route update requests after a while."
+> Jeff's stated requirement is that switches EXTEND the mesh (garage needs range help). A switch
+> with documented routing defects fails that requirement outright. **Rejected — this is the whole
+> reason to check before buying.** Also: Zigbee line is paddle-only (toggles are Z-Wave), and
+> 3-way support on the Zigbee model could not be verified.
 
-#### 2.2 `INTEGRATION_NOTES.md` — Claude's engineering review of the ChatGPT plan
+**The dead selection, preserved verbatim so nobody re-derives it:**
 
-Verdict: "Good, coherent plan… same architecture as everything else in the app (ESP32 + ESPHome → Home Assistant → app via `/api/states`)… The phased Bronze→Platinum structure is sensible. Keep it." Then **nine numbered ChatGPT mistakes to fix before building** ("do not copy the deck blindly"):
+> ## SELECTED: Inovelli Blue 2-1 VZM31-SN (~$46-60)
+> - Zigbee 3.0, mains-powered router, **no routing warnings on its Z2M page** (direct contrast)
+> - **Dumb-3-way CONFIRMED supported** via configuration — solves the garage 2-location problem
+>   (closes the old HS200/HS210 open question). Caveat: scene parameters 1-2/5-6 don't fire when
+>   the dumb switch is pressed manually — expected, not a defect.
+> - Neutral required for 3-way dumb setups — Jeff has neutrals in every box ✓
+> - Load: on/off variant rated 1800W general purpose; dimmer LED rating not re-verified this
+>   session, but Jeff's loads are ~108W — far below any dimmer's limit.
+> - Costs more, but it is the only option that satisfies "must extend the mesh."
+>
+> **Lesson: "Zigbee2MQTT supported" ≠ "good Zigbee citizen." Check the device page's warnings.**
 
-1. **Architecture diagram wrong (page 10)** — it funnels cameras and Shelly plugs *through* the ESP32; they are independent Wi-Fi/HA devices. The ESP32 handles only the wired sensors.
-2. **microSD on the ESP32 — drop it.** "Home Assistant is already the historian… SPI conflicts and FAT-corruption risk for zero benefit. Remove from BOM (saves ~$8)."
-3. **Li-ion 5200 mAh power bank — drop or redesign.** Redundant with the UPS, and "USB power banks commonly **auto-shut-off** under the ESP32's tiny current draw."
-4. **DS18B20 duplicated + misspelled** ("DS1820B/DS1B20" in slides). One probe is enough.
-5. **Phase 3 slide's total bar mislabeled "PHASE 2 ESTIMATED TOTAL"** — copy-paste error; the math ($53.86) is right.
-6. **Tier-4 name inconsistent** — deck says Platinum, Bible says Elite; "recommend Platinum."
-7. **Phase 4 GPS halter — set realistic expectations:** "Wi-Fi-only (Options A/B) gives NO live location off-property"; live tracking requires cellular; "Battery life + weight + sky view are the real engineering challenges"; frame as "genuinely 'future/R&D.'"
-8. **"All data stays on your local network" is overstated** — Tapo/Shelly reach their clouds unless locked down. "Fine as a goal, not a guarantee."
-9. **Verify parts/prices** — "Shelly Plug Gen4" naming, LD2410 @ $1.99 optimistic; "budget the high end."
+**Timeline detail worth preserving:** the Inovelli selection was written at **19:40 on 2026-08-13**
+(`a5c67a8`); the authoritative plan HTML — whose page-1 note argues *"Why not a $46 mesh dimmer"* —
+was committed **43 minutes later at 20:23** (`6c90202`). So the plan of record had already reversed the
+selection on the same evening, while the selection doc kept the "SELECTED" heading for three more days.
+**Two docs in the same directory said opposite things from 2026-08-13 20:23 until 2026-08-16 08:08.**
+That gap is precisely what let a later session re-pitch Inovelli.
 
-**Site facts (confirmed by Jeff 2026-06-30):** "Barn Wi-Fi is strong" and "each stall has a 120V wired receptacle" → plain Wi-Fi ESP32 powered from a $5 USB adapter, fan controlled by a plug-in power-monitoring smart plug (Sonoff S31 / Shelly Plus Plug US) "NOT a hard-wired relay (reverses my earlier note…)". "**Every stall = one identical repeatable module** … an N-stall barn is the same recipe × N — great for productizing."
+**Trap of traps — the search trap, verbatim from `CLAUDE.md`:**
 
-**App integration plan (when built):** a new nav section "STABLE" (or "LUCKY MIKE") with its own `--a-stable` accent token, built from the Section Kit + graded `.sec-hero` using `lucky-mike-hero.jpg`, live tiles from HA `/api/states`, must pass the light/dark sweep — "It double-purposes as a **customer demo/sales** screen, so keep it presentable."
+> ⚠️ **A trap that already cost a whole session:** searching the docs for "Inovelli" and finding
+> nothing does NOT mean the plan is undocumented — the *absence* of that word is what marks the
+> CURRENT plan. Search for **Kasa / plug / mesh**, and check `docs/lighting/` by date.
 
-Closing agreement with Jeff on sequencing: "**Why doing utilities first is the right order (agree with Jeff):** The water/gas/electric utilities work is the *same skill*: ESPHome sensor → HA → app card. Building that first creates the exact reusable plumbing this page needs."
+**A live contradiction inside `CLAUDE.md` itself, unresolved at tip.** Under SETTLED DECISIONS:
 
-#### 2.3 `BOM_OPTIMIZED.md` — Claude's cost-optimized bill of materials
+> **Garage 2-location switch:** the old HS200-vs-HS210 question is dead; solved by config, not by
+> buying a premium switch.
 
-Guiding rule: "hang cheap sensors off the ESP32's GPIO and use a plug-in smart plug for the fan — don't buy a branded $15–25 gadget per function." Per-stall essential parts table (ESP32 $6, USB power $5, BME280/SHT31 $5–6, DS18B20 $3, LD2410 $5, ultrasonic water $6 or float $2, leak probe $2, reed door switch $1, Sonoff S31 $15 / Shelly $20, camera $35–50, IP65 box $12, misc $8 → "**~$100–125** + 1 camera").
+But Pending Item 19 says the opposite:
 
-**The "REAL minimum" recalculation (confirmed 2026-06-30):** Bronze essentials only ≈ **$87 single-buy / $69 barn-qty**, +10% spares → "**Use ~$90/stall single-buy, ~$75/stall in barn quantity as the real parts cost.**" Key correction to the deal docs: "the deal-economics docs originally used a padded $150/stall — real floor is ~$90, which *improves* every option's margin (Option 1 take ≈ $410/stall, not $350). Re-lock deal numbers at $90 when Jeff confirms." *(Still un-relocked at tip.)*
+> **19. Garage two-location switching — STILL OPEN, Jeff's call before ordering.** ⚠️ *I briefly wrote
+> that Inovelli's "3-Way Dumb" closed this. It does not — **Inovelli is scrapped on price**, so that
+> answer went with it.* Per `docs/lighting/HCC_Lighting_Plan.html`, a single **Kasa HS200 cannot serve
+> two switch positions** — the second position goes dead.
 
-**Bulk / on-hand ladder (commit `4d78cad`):** "~$90 one-off retail → **~$63 bulk** → **~$50 bulk + your on-hand boards/wire**" — "The **camera is the floor** (~$33) — it's the one thing that doesn't shrink and you won't have spares of." Barn-level shared buy: one CyberPower 425–600 VA UPS on the router ($55–70), "one blip-proof point beats a battery in every stall." Phase 4 GPS: store-and-forward ESP32+NEO-M8N+LiPo ≈ $25–30 ("No live location off-property"); LTE-M (LilyGO T-SIM7080G) ≈ $35–45 + SIM $1.5–5/mo pass-through. Explicit DROP list from ChatGPT's BOM (microSD, power bank, per-stall UPS, branded single-function sensors). "Why this is the CFO story: … Everything is **local to Home Assistant → $0/month** … a clean 'no subscription' pitch."
-
-#### 2.4 `DEAL_OPTIONS.md` — the money (locked to Jeff's numbers, commit `fa282f1` 2026-06-30)
-
-Locked inputs: parts **$90 single-buy / $75 barn-qty**; **$50 flat trip charge**; build/install labor **$300/stall recommended** ("Claude's recommendation — Jeff's to adjust", ~6 hr; ~$200 each additional stall); **$40/mo** boarder fee. Single-stall economics: "**No single-stall scenario loses money.** Question is just: ~$350 now, or ~$40/mo rolling."
-
-The fork the whole document turns on:
-
-> ⭐ **THE KEY DECISION: who keeps the $40/mo?** The same $40 can't be kept twice.
-
-- **Option 1 — demand-triggered install** (barn keeps $40): ~$440/stall installed (round $450); Jeff's take ~$350 over parts for ~6 hr (~$58/hr); additional stalls ~$275 (take ~$200); 6-stall barn ~$1,815 revenue → ~$1,335 take (~$67/hr); 5-yr/stall ~$350; risk ~none.
-- **Option 2 — financed** same $440 over ~12 mo, Jeff holds title.
-- **Option 3 — Jeff keeps the $40/mo:** charge ~$140 at install (parts + trip), payback ~10 weeks, 5-yr/stall ≈ **~$2,060 net** — but "highest [risk] — CapEx, churn/vacancy, collection, and you **own ongoing support**."
-- **Split $25 Jeff / $15 barn:** Jeff ~$1,160 net / 5 yr; barn $900 pure amenity profit.
-
-Recommendation: "1. **Lucky Mike (unit #1): build at parts cost** (~$90) — it's the demo, not a sale. 2. First real installs: Option 1 … 3. Once proven: the Split." And the human line at the bottom:
-
-> Solo, almost-60 reality: recurring = a support obligation that never sleeps. Option 1 keeps it simple and fun; grow into recurring on purpose, not by accident.
-
-#### 2.5 `PRICING_AND_BUSINESS.md` — labor-loaded pricing and the legal checklist
-
-"The core correction (carry this everywhere): ChatGPT's deck prices ($175–225 'Bronze,' etc.) are **parts + a small buffer with ZERO labor**. Selling at those numbers = donating 6–15 hrs of skilled work per install. Always price the **installed job**: Installed price = Parts (+10% spares) + (hours × rate) + margin/contingency." *(Note: this doc still uses the older ~$150 parts basis — the $90 re-lock from the BOM was never propagated; treat DEAL_OPTIONS as the newer numbers.)*
-
-Three go-to-market models: A (boarder pays, B2C), **B (barn owner sells "Smart Stall" as a paid amenity, B2B2C — RECOMMENDED**, ~$440/stall installed for a 6-stall job, she charges boarders ~$20–30/mo, payback ≈ 16–18 months, then ~$1,800/yr recurring at ~$0/mo cost), C (managed service/revenue-share). Labor: first stall 6–8 hr, each additional 2–3 hr, suggested rate $60–85/hr (examples use $65). Worked examples: single stall ~**$770 installed**; 6-stall barn **$2,640 (~$440/stall)**. Tier table: Bronze ~$400–500/stall, Silver ~$550–700, Gold ~$750–950, Platinum $1,000+/horse.
-
-**"Selling the CFO (Angela) — lead with risk, not gadgets":** "one colic caught early vs. late ≈ **$5,000–10,000 surgery** (or losing the horse)… CFOs buy insurance." Itemize honestly, TCO vs commercial equine systems ($1,000–3,000+ upfront **and** monthly fees).
-
-**Business/legal checklist "do BEFORE selling outside the family"** (all unchecked at tip): LLC ("walls off personal assets (incl. the house Jeff wired himself)"), general liability insurance, mandatory disclaimer ("Supplemental monitoring aid, NOT a replacement for in-person checks… Live animal — non-negotiable"), boarding-contract addendum, warranty terms ("who eats the truck roll on a dead sensor"), support policy/retainer, sales tax/business license, hardware ownership ("unit stays with the stall, not the horse"), camera privacy, SIM pass-through.
-
-First move (agreed): "Build **Lucky Mike's stall at parts cost** as the reference install + demo… Don't try to profit on unit #1 — it's the showroom."
-
-**Traps for future sessions:** (a) the whole thing is queued behind utilities — do not start building it unprompted; (b) three docs carry three parts-cost bases ($150 padded / $90 confirmed / $50 marginal) — DEAL_OPTIONS + BOM ladder is the current truth, and the "$90 re-lock" of deal numbers is still pending Jeff's confirm; (c) fix the nine ChatGPT errors before reusing any of the original deck.
-
----
-
-### 3. Inventory — `docs/inventory/`
-
-#### 3.1 `HCC_INVENTORY.md` — the master hardware register
-
-Created `880addb` 2026-08-13; last touched `1572b4a` 2026-08-16. Opens with Jeff's standing order, verbatim:
-
-> **Standing job (Jeff, 2026-08-13):** *"make sure we stay on top of the inventory that's coming in, what we buy from now on... really make sure that we're adding to the system rather than taking away from it. It's all got to be tracked meticulously."*
-
-Header rules: every session that buys/receives/installs/retires/repurposes hardware updates this file; a phone-readable copy lives at `iCloudDrive/HCC Inventory.md` and must be kept in sync. Status legend ORDERED → ON HAND → INSTALLED, plus RETIRED/RESALE. Maintenance rules at the bottom: "**Log at order time**, not arrival"; "**Nothing gets bought twice** because nobody checked this file. Check here first."; "**Retired ≠ deleted**"; "**Wrong-variant purchases get flagged loudly** … *verify the protocol variant in the listing before ordering*"; "Sync the iCloud copy after every edit."
-
-**Zigbee layer (all photo-confirmed arrived 2026-08-15, with exact prices):** Haozee CC2652P1 dongle **$8.92** (coordinator, Z2M not ZHA, USB extension on hand); Tuya/Excellux door-window sensors ($9.58 ×2 packs, $6.39 Coolo 2-pack, $2.79 single); leak sensors (Haozee $5.09 ea ×2, Gleco probe-cable $4.40, Gleco **Z2M-only** TZ-SJ-SD_E $4.62 — "⚠️ no ZHA — this locked the Z2M decision", Excellux $6.19); and one mistake kept as a warning: "⚠️ Tuya **WiFi** water sensor (Qianhong 'WiFi-Shuijin-1') $5.68 — NOT Zigbee — wrong variant. Smart Life or shelf." Standing constraint in bold: "**NOT UNBOXED — Jeff's order: nothing gets set up until the camera/alert pipeline is verified.** Setup day, first moves: disable any auto-firmware-update BEFORE first pairing (the Kasa rule); pick the Zigbee channel deliberately…; dongle on its USB extension cable, away from USB3 ports." Also: "**Mesh status: zero routers.**" — every device on hand is battery-powered; the CC2652P's ~50 direct children is "the reason not to swap to a ZBDongle-E, decided 2026-08-13."
-
-**Lighting rows:** Kasa HS220 ×2 confirmed on hand (living room assigned; #2 bedroom or spare); the struck-through **Inovelli row** — "**🔴 SCRAPPED — DO NOT BUY (Jeff, on price)** … *'I was not paying $120 for a freaking dimmer switch.'* Recorded 2026-08-16 after a session re-proposed them. A budget router/dimmer alternative is still UNCHOSEN" (old kitchen/garage assignment plan kept only for wiring context); Leviton Decora E5603-SW 3-way dumb (companion/spare); GE UltraPro paddle (bedroom repurposed-receptacle position); **MOES module ("the beige box")** assigned to the single ~12 W LED over the kitchen sink ("finally a load it fits", needs a MOMENTARY push-button); Lepro 14 W downlights "**SPARES ONLY** — replacements… NOT expansion (Jeff 08-13)". Mesh geometry correction from Jeff: "kitchen is the FARTHEST point needing mesh; living room is ~12 ft from the dongle. Router priority is therefore kitchen first — not living room as originally assumed."
-
-**Other sections:** wiring consumables from bin photos ("no purchases needed for install work" — 12/2 NM, Wago kits, boxes, multimeter, etc.); irrigation valves (zone-1 Orbit replacement for the diaphragm leak "~3.8 gal/hr, confirmed by meter"); mower ESP32 (fw 1.4.0, "OTA-ready pending private hosting"; spare ESP32 "TO ORDER (~$9) — Jeff committed 08-11"); garage door (SONOFF MINI-D on hand; the 2-contact-sensor CLOSED/OPEN/**PARTIAL** plan; "MyQ hub + sensor — RESALE — eBay when Jeff gets to it"); MoCA adapter pair shelved because garage WiFi measured adequate ("mean −71.5 dBm, worst −76, zero buffered uploads ever"), with a deploy trigger ("if the Matter garage relay feels laggy → MoCA backhaul + AP"); ISP confirmed by photo 08-13 (AT&T Fiber BGW320-500 — "The old Xfinity notes refer to Jeff's *email/mail*, not current internet service").
-
-**The Sylvania saga (2026-08-13 section):** 4 living-room lamp plugs, "ON HAND, working, but VENDOR LOCKED — cannot enter Home Assistant." Tuya hardware (port 6668 confirmed) at .199/.200/.202/.205, but "Sylvania locked the product ID so ONLY the 'SYLVANIA Smart WiFi' app accepts them. Proven 08-13: Smart Life DETECTS a reset plug then rejects it… Only remaining route = LocalTuya with hand-extracted local keys. NOT attempted, not worth it. **DECISION: replace with Zigbee plugs when the dongle arrives.** … DO NOT re-attempt the Smart Life path — this is settled."
-
-**Zigbee mesh plugs — SELECTED 2026-08-14:** "**BUY: THIRDREALITY Zigbee Smart Plug 4-Pack — ASIN B09KNHWF7L (~$50).**" Z2M page 3RSP019BZ verified clean; "Tested better range than SONOFF S40 Lite (+5 ft through 2 walls) and zero dropouts over 14 days." Two loud traps: "**⚠️ SHIPS IN BLE MODE — must be manually switched to Zigbee mode before it will pair.** Out of the box it looks dead to the coordinator." And the lookalike warnings (THIRDREALITY "M3" B0FJRNW7YS is Matter-over-WiFi; SONOFF S40 Lite exists in both Zigbee B09XMH3X3G and WiFi B09LV7K4DH under the same name) with the rule: "**'Requires a hub' = the Zigbee one. 'No hub required' = WiFi, useless for the mesh.**" Quantity needed: 5. *(No ORDERED row exists for these plugs at tip — **INFERRED:** they were selected but not yet purchased.)*
-
-**Order 2026-08-14 (~$33.83, arrived 8/15):** Orbit 57280 3/4" FPT valve $13.58 (intended master valve); **Kasa HS220, Amazon Resale "USED - Mint," $13.86** (3rd dimmer — "bedroom, kitchen/dining, living room now all covered"); Leviton 3-gang plate $1.82; Leviton F-connector insert $4.57. With the used-switch trap: "**⚠️ The HS220 is USED/refurb.** Before install: FACTORY RESET it (hold the button ~10 s…) so it is not still bound to the previous owner's TP-Link account, THEN disable auto-firmware-update, THEN pair. A used smart switch that is still claimed will silently refuse to pair."
-
-**Backflow / irrigation connection — 2026-08-15:** the wall-stub valve turned out to be "a plain Orbit valve with a **solid jar-top bonnet — no vent openings**… NOT a backflow device. The system has been running with **no backflow protection at the point of connection.**" Decision 8/15: buy an **Orbit 3/4" electric anti-siphon valve ($18.34)** — master valve + backflow in one body; the 57280 becomes the spare zone valve ("not wasted… a failed zone-1 diaphragm is exactly what caused the ~88 gal/day leak found 2026-08-13"); the T&S B-969 1/2" AVB on hand is "too small — 1/2" chokes the 3/4" line"; **Orbit 51059 ($18.49) was looked at and NOT bought**. Install rules recorded (vent dome up, critical level 6" above highest head, ≤12 h continuous pressure). And two brutally honest paragraphs: "**Honest limit, unchanged by any option considered:** the six zone valves are shutoff valves DOWNSTREAM of an atmospheric breaker, which the standard does not strictly permit. The by-the-book fix is a pressure vacuum breaker (ASSE 1020, ~$80-150) **plus annual testing by a licensed tester** — which is exactly the utility attention Jeff is avoiding. **Decision made knowingly.**" And the replacement strategy: "an AVB fails SILENTLY… So swap the cheap valve on a schedule rather than pay ~9x for bronze. Target: spring startup, every 1-2 years. **TODO: add a yearly HA reminder**." *(TODO still open at tip.)*
-
-#### 3.2 `NETWORK_MAP.md` — the LAN census and rename layer
-
-Created `4dc9336` 2026-08-13 ("full device census from the BGW320 + tonight's gateway changes"); last touched `f735771` 2026-08-14. Premise: "The BGW320 cannot rename devices — … **this file is the rename layer**" and the authoritative label for every live device.
-
-**Gateway config (Jeff-approved changes 08-13):** 2.4 GHz `Loewen301` channel **pinned to 1**; 5 GHz renamed **`Loewen301-5G`**; band steering disabled (intended); Zigbee planned on **channel 25** (max separation from ch 1); fixed allocations .66 Beehive and .215 Fire TV. Standing note: "The 2.4 channel is PINNED (1). If WiFi congestion ever appears, re-evaluate here **and** check the Zigbee channel before moving it."
-
-**The clean census** (after "Clear and Rescan," 80+ stale entries purged) maps every IP: .66 Beehive (HA on Beelink J45), .196 RE200 wired AP, .194 **THE BEAST** ("CodeProject.AI host, Claude coworker machine"), .215 Fire TV, .164 Angela's work computer (with the standing warning: "Both of Angela's work machines run corporate VPN + firewall — they take a LAN address but tunnel all traffic and won't answer local probes; **silence is NORMAL, never troubleshoot it**"), .197 MyQ hub ("⚠️ UNPLUG + reset for eBay" — still online at census time), .232 the mower box ("confirmed 08-13 by 5-min heartbeat timing"), .176 JeffsLapTop (Acer Aspire E5-576, i3-8130U — "AVX-capable — could host AI workloads unlike B570/GaragePC"), .173 the Lenovo B570 wearing the hostname "DellMasterBed" inherited from a retired Dell, etc. Remaining unknowns are explicitly marked: "**Every (?) row is a question only Jeff can answer.**"
-
-**Detective work worth remembering:**
-- "**.171 'Nest Protect'** — ❌ NOT a smoke alarm… **Angela's bed-lamp Tuya socket with a fake hostname** — proven by unplug test (down, held 60s+, at 14:50). Cheap Tuya firmware self-reporting a fake hostname. **There is NO Nest hardware in this house.**"
-- "**Tuya endgame — FULLY SOLVED 2026-08-13**": .171 Angela's lamp (unplug test), .231 **Sharky** the vacuum ("off-switch test, 15:03 — the 'Linux' unknown all along"), .209 hot-water pump socket, .195 remaining Tuya socket, .224 Jeff's bed lamp, .170 garage fan, .199/.200/.202/.205 the 4 Sylvania plugs (Tuya port-scan; the earlier Echo Dots guess was wrong — "a monitor watching the wrong IPs"). "Every fake-hostname mystery on the network is now identified."
-- Zmodo cameras: "ALL DARK 08-13… the live .207 was found ON THE BACK DECK plugged in with the covered TV — unplugged by Jeff, factory-reset pending, eBay pile… Privacy issue closed."
-
-**Extender fleet (08-13 late):** RE200 converted to wired AP ("Login lesson: its 2018 login page fails SILENTLY when the request rides a flapping wireless link — every 'wrong password' was really a dropped link. Wired access worked first try."). Generic no-name "Wireless-N Repeater": "**RETIRE.** … pure airtime pollution next to the new wired AP." D-Link DAP-1520: "**RETIRE — no Ethernet port, conversion impossible** (Jeff spotted the disqualifier himself). eBay-able." (commit `a43adc4`).
-
-**Gateway changes 2026-08-14** (the Kasa-join saga's network side): 2.4 GHz Mode G/N → **B/G/N** ("purely permissive"; everything reconnected fine); **Guest SSID `LoewenGuest` DISABLED** ("Jeff confirmed nobody uses it. One less broadcasting network and one less entry point."); confirmed-good-and-left-alone list (WPA-2 not WPA3 "would break older IoT", ch 1 fixed, 20 MHz, WPS off, band steering off). Final suspect note for the then-unjoined Kasa: "Prime remaining suspect is the Kasa app offering **Loewen301-5G** in its network picker — the switch cannot see 5 GHz, so it accepts credentials and then hunts forever. Must be Loewen301." *(The lighting doc confirms it did join by 08-14 at .178.)*
-
-**Trap:** the lighting plan's page-3 device map (Rev. Aug 13) and NETWORK_MAP disagree in small ways (e.g., .194 labeled "The beast — main PC" in one, "301Server (?)" then "✅ THE BEAST" in the other); NETWORK_MAP's clean census is the authority.
+**Resolution for the record:** Pending Item 19 is correct and the SETTLED-DECISIONS line is a leftover
+from the Inovelli era. The garage two-location question is **OPEN** at tip (2026-08-16). Do not tell Jeff
+it is solved.
 
 ---
 
-### 4. Heroes — the visual identity system
+### 14.2 `docs/lucky-mike/` — the Smart Stall business, queued and never started
 
-#### 4.1 `HERO-STYLE-GUIDE.json` (repo root)
+Nine files. This is a **complete, costed, legally-checklisted small-business plan** for a product Jeff
+has not built, gated behind an explicit "do not start" from him. It was archived in a single burst on
+**2026-06-30** across six commits between 13:09 and 14:11 UTC — roughly one hour of work — and has not
+been touched since. Two months of project time have passed at tip with zero further edits.
 
-Committed `278a78e` 2026-06-24 ("Add HERO-STYLE-GUIDE.json — complete image spec for all 4 hero sections"). A machine-readable art-direction bible: `"style_name": "Premium Estate Command Center"`, `"visual_identity": "luxury residential cinematic realism"`. Codifies the golden-hour rule ("time_of_day: golden hour (primary rule)"; mood "calm, expensive, cinematic, aspirational"), composition (rule of thirds, "one dominant subject per hero image", negative space "reserved for UI overlays or app text"), environment ("grass: deep emerald, striped, high density, no patchiness"; Leland pines as a "dense living wall… zero visible gaps… ~20ft visual impression"), palette ("deep green, warm gold, charcoal shadows, brick red accents"), and the avoid list ("cartoon styling, over-HDR look, over-saturated neon greens, inconsistent lighting between assets"). Final rule: "Every generated hero image must look like it belongs to the same premium smart-home / landscaping command center application suite."
+| File | Bytes | Purpose |
+|---|---|---|
+| `Lucky_Mike_Smart_Stall_Project_Master.md` | 1,960 | Jeff's/ChatGPT's original vision doc |
+| `Lucky_Mike_Smart_Stall_Project_Bible_v1.0.md` | 2,339 | Jeff's/ChatGPT's structured "Bible" v1.0 |
+| `INTEGRATION_NOTES.md` | 5,836 | Claude's engineering review + app-integration plan |
+| `BOM_OPTIMIZED.md` | 6,432 | Claude's cost-optimized bill of materials |
+| `PRICING_AND_BUSINESS.md` | 6,174 | Labor-loaded pricing + go-to-market + legal checklist |
+| `DEAL_OPTIONS.md` | 5,138 | Four deal structures modeled with 5-year economics |
+| `README_Project_Files.txt` | 409 | Folder-structure suggestion for the archive |
+| `lucky-mike-hero.jpg` | 634,861 | Hero photo for the future app section |
+| `design-budget-guide-12page.png` | 2,109,086 | The 12-page ChatGPT design/budget deck, as an image |
 
-It also embeds the four full generation prompts (yard / home / weather / irrigation). The yard prompt is notable as a self-portrait of the project: "a confident middle-aged homeowner in a dark LawnCareHive t-shirt kneeling beside a red Toro TimeMaster 21200 30\" walk-behind mower… Title: 'YARD COMMAND CENTER APP' | Subtitle: 'MOW SMARTER. TRACK EVERY CUT.'" The home prompt: "brick ranch-style house exterior at golden hour… Title: 'HOME COMMAND CENTER APP' | Subtitle: 'MANAGE · MAINTAIN · MONITOR' | Tagline: 'Everything. In One Place.'"
+Commit history:
 
-#### 4.2 `docs/hero-master-grade.md`
+```
+4d78cad 2026-06-30  Lucky Mike: factor multi-pack pricing + parts-on-hand into per-stall cash risk
+6c2d8c3 2026-06-30  Lucky Mike: add real minimum per-stall parts cost (~$90 single / ~$75 barn-qty)
+fa282f1 2026-06-30  Lucky Mike: lock deal economics to Jeff's numbers ($50 trip, $40/mo)
+857d825 2026-06-30  Lucky Mike: add DEAL_OPTIONS.md — 3 deal structures modeled with economics
+e50c9a4 2026-06-30  Lucky Mike: save optimized BOM + pricing/business plan (planning docs)
+c8ca302 2026-06-30  Archive Lucky Mike Smart Stall plan + technical review (queued, not built)
+```
 
-Committed `ebedb85` 2026-06-28 ("docs: add hero master-grade reference (matches shipped module)"). Documents the shipped uniform color grade: "Apply ONE cinematic golden-hour color grade to every hero image so the whole app looks like one film stock. Do **not** replace image assets or change overlays/typography." Mechanism: `applyHeroGrades()` runs on init, adds `.hcc-hero-grade` (`filter: brightness(.92) contrast(1.14) saturate(.93) sepia(.10) hue-rotate(-3deg)`) to every hero `<img>` inside `.house-hero`/`.sec-hero`/`.hcc-hero`, and `.hcc-hero-vignette` to the container. New sections inherit automatically — "no per-hero CSS."
+Status line in `CLAUDE.md` Pending Items, verbatim:
 
-A genuinely useful CSS gotcha is preserved: "the vignette is on the **container** (`::before`), not the `<img>`. An `<img>` is a replaced element and does not render `::before`/`::after`, so an image-level vignette would silently do nothing." Art-direction rules: "Weather hero was the calibration reference"; "Do not swap or regenerate hero images to fix tone — the grade handles tone"; "To shift the look, change the shared `.hcc-hero-grade` values once… Never add a per-hero `filter:`."
+> **6. Lucky Mike "Smart Stall"** — queued, plans in `docs/lucky-mike/` (read `INTEGRATION_NOTES.md`
+> first). New "STABLE" section, `--a-stable` accent. **Do not start until Jeff says go.**
 
-#### 4.3 `dev.html` — the Hero Consistency Audit page
+And in `INTEGRATION_NOTES.md` itself, verbatim:
 
-Committed `3509c74` 2026-06-28 ("Heroes: stronger unified grade + add /dev.html consistency audit"). A standalone diagnostic page ("🎬 Hero Consistency Audit") that renders the five hero images (Home/Weather/Irrigation/Yard/Climate) with a mirrored copy of the live grade, then reads the *computed* CSS filter and overlay via `getComputedStyle` and emits a copyable JSON block: "If cssFilter is identical across all heroes, the grade is uniform." Its purpose is to let a session verify grade uniformity from a phone screenshot/JSON paste.
+> **Status: QUEUED — build AFTER the utilities work and the current docket are finished** (Jeff's
+> instruction 2026-06-30).
 
-**Trap:** `dev.html` hard-codes its own `--hcc-hero-filter` value (`brightness(.80) contrast(1.20) saturate(.82) sepia(.22) hue-rotate(-6deg)`) with the comment "Keep these in sync if the app grade changes" — and that value does **not** match `hero-master-grade.md`'s documented `brightness(.92) contrast(1.14)…` values. It also references `images/hero-home.jpg` and `images/hero-climate.jpg`, which do not exist in `images/` at tip (the dir has `hero-home-dusk.jpg` and no climate hero). **INFERRED:** dev.html reflects a later, stronger grade iteration and/or has drifted from the shipped module — treat `index.html`'s actual CSS as the truth, `dev.html` as a possibly-stale audit tool, and reconcile before trusting either doc's numbers.
+#### 14.2.1 The source documents (Jeff's / ChatGPT's)
 
-#### 4.4 `docs/home-theater-ai-plan.md` — camera AI + home theater (living doc)
+`Lucky_Mike_Smart_Stall_Project_Master.md` (v1.0). Vision, verbatim:
 
-Created `dfaa88f` 2026-07-10; GPU confirmed `71a8cae` 2026-07-10; last updated `c13f101` 2026-07-14. Opens with Jeff's goals (2026-07-09), "**with a hard NO on subscriptions** (no Blink fee, no Zmodo fee, no per-month anything — he already pays for Claude/Clyde, Nabu Casa, and the domain)": premium camera tiles (done), Blink clip review in-app, alerts that say **what** triggered (person/car/animal/package), alert pop-up on the TV, and "top-of-the-line home theater with HA driving it all — seamless, no 'cluster of shit,' no constant resets."
+> Create an affordable, expandable Smart Stall monitoring system for Lucky Mike that integrates with the
+> existing Home Assistant Command Center.
 
-Hardware division: Beehive (Beelink J45, .66) — "weak Pentium, no GPU… **Keep it PURE HA.** Do NOT put media/AI on it." The beast (.194) — "**the designated AI + media brain**": 6-core CPU, ~2 TB storage, **GTX 1050 Ti 4 GB VRAM (confirmed via `nvidia-smi` 07-09)**, Windows, runs 24/7, also runs Clyde. Settled detection plan: **CodeProject.AI Server on Windows** (snapshot object detection — "no RTSP needed, fits Blink") + optionally LLM Vision / free Gemini tier; "Frigate/blinkbridge NOT needed for this path."
+Goals: *"Protect Lucky Mike with remote monitoring. Minimize monthly costs. Modular design. Easy future
+expansion. Professional appearance suitable for future customers."*
 
-**Phase 2 history — a decision reversal documented honestly:** "**Phase 2 — SUPERSEDED (07-14, Jeff's call): Fire TV + `alexa_media_player` kept as the real TV pop-up path, not Kodi.**" The original 07-10 plan routed TV alerts through Kodi on the beast; in practice the 07-11 session built the ADB-paired Fire TV route, which went silent for 3 days (root cause: "CodeProject.AI silently not restarting after a reboot, now fixed with delayed-start + failure-recovery"). Jeff chose 07-14 to keep the Fire TV path. "**Kodi was installed on the beast but never finished** (web remote-control never enabled, never added to HA, launched once for 3 minutes total) — leave it installed/unused… `docs/beehive/media-center-setup.md` describes the Kodi route that was NOT taken; treat it as reference/superseded, not a live setup guide."
+Phases and the original (parts-only) budget:
 
-Honest limits recorded: DRM apps may be resolution-capped on a PC; "Apple TV = no clean pop-up overlay"; Blink is snapshot/event with inherent delay. Division of labor: "Claude (cloud): app-side… Owns all app code. Clyde (beast) + Jeff: beast-side… Clyde treats app code as READ-ONLY."
+- **Phase 1 – Essential Monitoring** — Estimated Hardware: **$175–225** — 2 × TP-Link Tapo C120 cameras,
+  ESP32 controller, BME280 temp/humidity, DS18B20 waterproof temp probe, LD2410 presence sensor, HA dashboard.
+- **Phase 2 – Smart Stall** — Additional: **$125–175** — automatic fan control, water level monitoring,
+  door sensor, water leak sensor, UPS battery backup.
+- **Phase 3 – Feed & Analytics** — Additional: **$75–125** — feed bucket load cell, HX711 amplifier, feed
+  history, water history, daily reports.
+- **Phase 4 – Smart Halter** — options: 1. Wi-Fi only · 2. Wi-Fi sync (preferred) · 3. Hybrid Wi-Fi + LTE
+  emergency alerts · 4. Full LTE live tracking.
+
+Business concept: **Brand: Smart Stall™**; packages **Bronze / Silver / Gold / Platinum**; marketing
+tagline, verbatim: **"Because they're family."** And: *"Lucky Mike will serve as the demonstration
+installation for future customers."*
+
+`Lucky_Mike_Smart_Stall_Project_Bible_v1.0.md` carries YAML front-matter (`title`, `version: 1.0`,
+`status: Active`, `owner: Jeff Loewen`), a 21-item table of contents, a hardware baseline, and the
+budget philosophy, verbatim:
+
+> Start with the lowest-cost system that solves the customer's problem, then add optional upgrades only
+> when they provide meaningful value.
+
+Its customer packages are **Bronze / Silver / Gold / Elite** — note **Elite**, not Platinum. That clash
+is one of the review findings below.
+
+`README_Project_Files.txt` proposes a folder structure (`Project Bible/`, `Budget/`, `Photos/`,
+`Electronics/`, `Home Assistant/`, `Customer Proposal/`, `Documentation/`) and states, verbatim:
+*"Use the Markdown (.md) files as the editable master documents. Use the HTML files for
+viewing/printing."* **Trap:** the referenced `Project_Master.html` and `Project_Bible_v1.0.html` are
+**not in the repo** — only the `.md` versions were archived. The README describes a superset of what
+survives.
+
+#### 14.2.2 `INTEGRATION_NOTES.md` — the engineering review that corrects ChatGPT
+
+Verdict, verbatim:
+
+> Good, coherent plan. It uses the **same architecture as everything else in the app**
+> (ESP32 + ESPHome → Home Assistant → app via `/api/states`), so it integrates with near-zero new
+> plumbing. The phased Bronze→Platinum structure is sensible. Keep it.
+
+**The nine corrections, verbatim and complete** — these are the "do not copy the deck blindly" list:
+
+> 1. **Architecture diagram is wrong (page 10).** It funnels cameras + Shelly plugs *through* the ESP32.
+>    They do NOT. Tapo cameras and Shelly plugs are independent **Wi-Fi/HA** devices. The ESP32 only
+>    handles the **wired** sensors (BME280, DS18B20, LD2410, load cell, door, leak, water level).
+> 2. **microSD on the ESP32 for "history/logs" (Phase 3) — drop it.** Redundant and risky. **Home
+>    Assistant is already the historian** […] On-ESP32 SD logging adds SPI conflicts and FAT-corruption
+>    risk for zero benefit. Remove from BOM (saves ~$8).
+> 3. **Li-ion 5200mAh "backup power" (Phase 3) — drop or redesign.** Two problems: (a) it's **redundant**
+>    with the Phase 2 UPS, and (b) USB power banks commonly **auto-shut-off** under the ESP32's tiny
+>    current draw — unreliable as backup. If on-board battery is wanted, use a proper LiPo + TP4056/charge-
+>    management board, not a USB power bank.
+> 4. **DS18B20 duplicated + misspelled.** It's listed in Phase 1 (correct) and again as a temp probe in
+>    Phase 3 (duplicate), and the slides spell it "DS1820B/DS1B20". Correct part = **DS18B20**.
+> 5. **Phase 3 slide total bar is mislabeled "PHASE 2 ESTIMATED TOTAL."** Copy-paste error. The math
+>    ($53.86) is right; the label is wrong.
+> 6. **Tier-4 name is inconsistent.** Slide deck says **Platinum**; the Bible says **Elite**. Pick one
+>    (recommend Platinum to match the deck).
+> 7. **Phase 4 GPS halter — set realistic expectations.** […] **Wi-Fi-only (Options A/B) gives NO live
+>    location off-property** — it's a store-and-forward logger that only uploads when back in barn Wi-Fi
+>    range. Live tracking in a pasture **requires cellular** (LTE-M/NB-IoT — Options C/D). **Battery life
+>    + weight + sky view** are the real engineering challenges […] The "+$3–10/mo" cell estimate is
+>    plausible with low-data LTE-M (Hologram/Soracom) but verify before promising it to customers.
+> 8. **"All data stays on your local network" is overstated.** Tapo and Shelly can reach their clouds
+>    unless explicitly locked down, and cellular GPS uses the carrier network by definition. Fine as a
+>    goal, not a guarantee.
+> 9. **Verify a couple of parts/prices.** "Shelly Plug Gen4" — confirm the exact current model (Shelly
+>    Plug S Gen3 / Plus Plug US). A few prices are optimistic (LD2410 @ $1.99; budget the high end of
+>    each range).
+
+**Site facts confirmed by Jeff 2026-06-30, verbatim** — and note the explicitly reversed earlier advice:
+
+> - **Barn Wi-Fi is strong** and **each stall has a 120V receptacle.** So: power the ESP32 from a USB
+>   adapter at the outlet (no battery), use plain Wi-Fi (no PoE for range), and **control the fan with a
+>   plug-in power-monitoring smart plug** (Sonoff S31 / Shelly Plus Plug US) — NOT a hard-wired relay
+>   (reverses my earlier note; with a finished receptacle, plug-in is safer, customer-installable, and
+>   the power reading confirms the fan is actually running).
+> - **Every stall = one identical repeatable module** […] Price/install **per stall**; an N-stall barn is
+>   the same recipe × N — great for productizing.
+
+**How it becomes an app page, verbatim** (this is the build spec if Jeff ever says go):
+
+> - New section **"STABLE"** (or "LUCKY MIKE") added to the nav — its own `--a-stable` accent token;
+>   built entirely from the Section Kit + the graded `.sec-hero` (use `lucky-mike-hero.jpg` in this
+>   folder). No bespoke markup.
+> - **Live tiles** (temp/humidity/water/feed/fan/door/UPS/power/activity) pulled from HA `/api/states` —
+>   same pattern as irrigation/cameras/utilities.
+> - **Cameras** reuse the existing HA camera fetch already in the app.
+> - **Phase/BOM tables** → `.spec-list` / simple kit-styled tables; **budget tiers** → card kit. Must read
+>   clean in BOTH light and dark (run `scratchpad/sweep.js`).
+> - Branding on the page: **Smart Stall™ — "Because They're Family."**
+> - It double-purposes as a **customer demo/sales** screen, so keep it presentable.
+
+And the sequencing agreement, verbatim:
+
+> **Why doing utilities first is the right order (agree with Jeff)** — The water/gas/electric utilities
+> work is the *same skill*: ESPHome sensor → HA → app card. Building that first creates the exact
+> reusable plumbing this page needs.
+
+#### 14.2.3 `BOM_OPTIMIZED.md` — every part, every price
+
+Header, verbatim:
+
+> My cost-optimized, Home-Assistant-LOCAL parts list. Replaces ChatGPT's over-specced picks.
+> **Guiding rule:** the stall already has a capable ESP32 + good Wi-Fi + a 120V outlet, so hang cheap
+> sensors off the ESP32's GPIO and use a plug-in smart plug for the fan — don't buy a branded $15–25
+> gadget per function. Prices are rough 2026 estimates; budget the high end.
+
+**Per-stall ESSENTIAL (Bronze) module — verbatim table:**
+
+| Part | Pick | ~$ | Notes |
+|---|---|---|---|
+| Controller | ESP32 WROOM DevKit | 6 | ESPHome; USB-powered from stall outlet |
+| Power | 5V USB adapter + cable | 5 | No battery needed (outlet present) |
+| Temp/Humidity | BME280 (genuine) **or** SHT31 | 5–6 | SHT31 = better humidity; avoid fake BMP280 |
+| Stall temp probe | DS18B20 waterproof ×1 | 3 | one is enough (drop ChatGPT's duplicate) |
+| Presence/"down" | LD2410 mmWave | 5 | native ESPHome `ld2410`; in-stall occupancy/motion |
+| Water level | JSN-SR04T ultrasonic (continuous) **or** float switch (low-alert) | 6 / 2 | contactless ultrasonic over trough = best cheap option |
+| Water leak | leak probe/rope to GPIO | 2 | not a $13 branded unit |
+| Door | reed switch to GPIO | 1 | not a $8 branded unit |
+| **Fan control** | **Sonoff S31** (flash ESPHome/Tasmota, local) **or Shelly Plus Plug US** | 15 / 20 | **with power monitoring** → confirms fan actually drawing current |
+| Camera | Reolink Wi-Fi (HA-local via RTSP/ONVIF) **or** Tapo C120 | 35–50 | Reolink integrates cleaner/local than Tapo |
+| Enclosure | IP65 box + glands | 12 | barn dust/moisture; essential |
+| Misc | dupont, terminal blocks, mounts | 8 | |
+| **Per-stall essential subtotal** | | **~$100–125** | + 1 camera |
+
+**The REAL minimum, confirmed 2026-06-30 — verbatim table:**
+
+| Part | Single-buy | Barn qty (6+) |
+|---|---|---|
+| ESP32 WROOM dev board | $8 | $5 |
+| 5V USB adapter + cable | $6 | $4 |
+| BME280 (genuine) | $7 | $5 |
+| LD2410 mmWave presence | $6 | $5 |
+| Door reed switch | $2 | $1.50 |
+| Wi-Fi camera ×1 (Tapo C120 / Reolink) | $40 | $35 |
+| IP enclosure + glands | $10 | $8 |
+| Wiring / mounts / misc | $8 | $6 |
+| **Subtotal** | **~$87** | **~$69** |
+| **+10% spares** | **~$96** | **~$76** |
+
+Verbatim conclusion, and the self-correction it contains:
+
+> **→ Use ~$90/stall single-buy, ~$75/stall in barn quantity as the real parts cost.**
+> (Camera is the swing factor, ~$30–55.) NOTE: the deal-economics docs originally used a padded
+> $150/stall — real floor is ~$90, which *improves* every option's margin (Option 1 take ≈ $410/stall,
+> not $350). Re-lock deal numbers at $90 when Jeff confirms.
+
+**Bulk / parts-on-hand table, verbatim:**
+
+| Part | Multi-pack source | per-unit | Likely on-hand? |
+|---|---|---|---|
+| ESP32 WROOM | 3-pack ~$20 | ~$6.50 | **YES (you stock these)** |
+| USB adapter + cable | 4-pack / spares | ~$4 | **likely** |
+| BME280 | 3-pack ~$14 | ~$4.50 | maybe |
+| LD2410 | single/2-pk | ~$5 | maybe not |
+| Reed switch | 10-pack ~$8 | ~$0.80 | maybe |
+| Jumpers/wire/resistors | bulk kits (amortized) | ~$2 | **YES** |
+| IP enclosure | multipack | ~$7 | no |
+| Wi-Fi camera ×1 | 2-pack Tapo ~$65 | ~$33 | **no — the floor** |
+| **Bulk total** | | **~$63/stall** | |
+| **Bulk MINUS common on-hand** (ESP32, USB, jumpers/wire ≈ $12) | | **~$50/stall** | camera $33 + BME280 $4.5 + LD2410 $5 + reed $1 + box $7 |
+
+> **→ True marginal cash per added stall, once you're stocked: ~$50** (≈ camera + the few sensors you
+> don't keep + a box). Camera ≈ two-thirds of that.
+>
+> **Cash-risk ladder per stall:** ~$90 buying one-off retail → **~$63 bulk** → **~$50 bulk + your
+> on-hand boards/wire.** (Confirm what you actually have stocked and we'll nail the exact number.)
+
+Barn-level shared cost (buy ONCE, not per stall): *"small UPS on router/switch (CyberPower 425–600VA)
+— $55–70 — one blip-proof point beats a battery in every stall."*
+
+Phase add-ons per stall: Feed weight (HX711 + load cell + mounting frame) ~$12 + frame; extra camera
+angle (2nd Reolink/Tapo) $35–50.
+
+**Phase 4 — GPS halter, verbatim:**
+
+> - **Store-and-forward (Wi-Fi only):** ESP32 + NEO-M8N GPS + LiPo ≈ **$25–30**. Logs in pasture, uploads
+>   at barn. **No live location off-property.**
+> - **Live tracking (cellular):** LTE-M board (e.g., LilyGO T-SIM7080G) ≈ **$35–45** + low-data SIM
+>   (Hologram/Soracom) **$1.5–5/mo** (pass-through to customer).
+> - Real constraints: battery life, halter weight, needs open sky (no fix under a shed). Frame as
+>   future/R&D, not a v1 promise.
+
+**DROP from ChatGPT's list (and why), verbatim:** microSD on the ESP32 (HA is the historian; redundant +
+FAT-corruption risk) · Li-ion 5200mAh power bank (redundant, and power banks auto-shut off under the
+ESP32's tiny draw) · per-stall UPS (back the barn network once instead) · branded single-function sensors
+($13–25) where a $1–6 GPIO part is better.
+
+Closing, verbatim:
+
+> **Why this is the CFO story** — Fewer separate devices = fewer failure points and fewer clouds.
+> Everything is **local to Home Assistant → $0/month** (except optional GPS SIM). Cheaper parts, more
+> reliable, and a clean "no subscription" pitch.
+
+#### 14.2.4 `PRICING_AND_BUSINESS.md` — the labor correction, the models, the legal checklist
+
+**The core correction, verbatim** — this is the doc's whole reason for existing:
+
+> ChatGPT's deck prices ($175–225 "Bronze," etc.) are **parts + a small buffer with ZERO labor**.
+> Selling at those numbers = donating 6–15 hrs of skilled work per install. Always price the
+> **installed job**:
+>
+> > **Installed price = Parts (+10% spares) + (hours × rate) + margin/contingency**
+
+**Three go-to-market models, verbatim in summary:**
+
+- **Model A — Boarder pays (B2C)** — one owner, one horse. *"Simple, but small jobs and Jeff chases each
+  customer. Fine for the first few / word-of-mouth."*
+- **Model B — Barn owner as a paid amenity (B2B2C) — RECOMMENDED.** *"one decision-maker, many stalls at
+  once; she carries billing + the customer relationship; recurring revenue exists; Lucky Mike is the
+  on-site demo; differentiates her barn / can justify higher board."* Payback math, verbatim:
+  *"Installed cost to her ≈ **~$440/stall** for a 6-stall job […] She charges boarders **~$20–30/stall/mo**
+  […] At $25/mo × 6 = $150/mo → **payback ≈ 16–18 months**, then ~$1,800/yr recurring at **~$0/mo running
+  cost** (all local)."*
+- **Model C — Managed service / revenue-share** — *"More income long-term, but Jeff carries support load
+  + some CapEx risk. Consider once there are several barns."*
+
+**Labor-loaded pricing, verbatim:**
+
+> **Cost basis (per stall, essential + 1 camera):** ~$130–170 parts (see BOM).
+> **Labor (the part ChatGPT ignored):** […] **First stall in a barn:** ~6–8 hr […] **Each additional
+> stall (same barn):** ~2–3 hr […] **Rate:** pick one — suggest **$60–85/hr** for skilled install.
+> Examples use **$65/hr**.
+>
+> **Worked example — single-stall job:** ~$150 parts + 8 hr × $65 = $520 labor → ~$670 + 15% =
+> **~$770 installed.**
+>
+> **Worked example — 6-stall barn (Model B):** Parts: 6 × $150 = $900 + barn UPS $65 = $965 · Labor:
+> 8 hr (first) + 5 × 2.5 hr = 20.5 hr × $65 = $1,333 · Subtotal $2,298 + ~15% margin/contingency ≈
+> **$2,640 (~$440/stall)**
+
+**Tiers, verbatim:**
+
+| Tier | Adds | Indicative installed/stall (multi-stall) |
+|---|---|---|
+| Bronze | Essential monitoring (temp/humidity/presence/door/leak/cam) | ~$400–500 |
+| Silver | + fan smart-plug automation, water level, network UPS | ~$550–700 |
+| Gold | + feed weight + history/reports | ~$750–950 |
+| Platinum | + GPS halter (cellular hardware; SIM billed pass-through) | $1,000+ /horse |
+
+**Selling the CFO (Angela) — lead with risk, not gadgets, verbatim:**
+
+> - **Avoided-loss ROI:** one colic caught early vs. late ≈ **$5,000–10,000 surgery** (or losing the
+>   horse). Early alerts on a cast/down horse, empty water, heat spike = cheap insurance against a
+>   five-figure event. CFOs buy insurance.
+> - **Total transparency:** itemize parts at cost + labor as a real line + **~$0/mo**. Don't pad; a CFO
+>   trusts the honest sheet over a round number.
+> - **TCO + payback, not sticker:** ≈$770 once, ~$0/mo vs. commercial equine systems ($1,000–3,000+
+>   upfront **and** monthly fees). Undercut + no forced subscription.
+
+**Business / legal checklist — verbatim, in full** (an unchecked checklist at tip; none of these items
+has any recorded progress anywhere in the repo):
+
+> A CFO and a barn owner will both ask about these — and they protect Jeff:
+> - [ ] **LLC** — walls off personal assets (incl. the house Jeff wired himself).
+> - [ ] **General liability insurance** (small business policy).
+> - [ ] **Disclaimer/waiver on every proposal:** "Supplemental monitoring aid, NOT a replacement for
+>       in-person checks; no guarantee against loss or injury." Live animal — non-negotiable.
+> - [ ] **Boarding-contract addendum (Model B):** the barn's liability flows to boarders via her
+>       contract; spell out the amenity terms + same disclaimer.
+> - [ ] **Warranty terms** — e.g., 1 yr parts / 90 days labor; define who eats the truck roll on a dead sensor.
+> - [ ] **Support policy / retainer** — Jeff's post-sale time is a real cost. Cap it or sell an annual
+>       support plan (also recurring income).
+> - [ ] **Sales tax / business license** — register; a CFO asks day one.
+> - [ ] **Who owns the hardware** (Model B/C) — barn owner vs. Jeff; what happens when a boarder leaves
+>       (unit stays with the stall, not the horse).
+> - [ ] **Camera data/privacy** — local storage, who can view, no internet exposure.
+> - [ ] **Cellular SIM (Phase 4)** — billed pass-through; don't absorb recurring.
+
+**First move (agreed), verbatim:**
+
+> Build **Lucky Mike's stall at parts cost** as the reference install + demo. Get it running and
+> bulletproof, then use it to pitch Angela (CFO) and the barn owner. Don't try to profit on unit #1 —
+> it's the showroom.
+
+#### 14.2.5 `DEAL_OPTIONS.md` — four deal structures, five-year economics
+
+Header, verbatim:
+
+> What Jeff charges and makes under each structure, using **confirmed inputs** (2026-06-30): real parts
+> **~$90/stall single-buy (~$75 barn qty)**, **$50 flat trip charge**, **$40/mo** boarder fee.
+> Build/install labor fee ($300/stall) is Claude's recommendation — Jeff's to adjust.
+
+**Locked inputs, verbatim:**
+
+| Input | Value |
+|---|---|
+| Parts / stall | **$90 single-buy · $75 barn qty** (your cash risk) |
+| Trip charge | **$50 flat / visit** (show-up; not build labor) |
+| Build/install fee (labor) | **$300 / stall** *(recommended; ~6 hr)* · ~$200 each additional stall |
+| Monthly fee (boarder pays) | **$40 / mo** |
+
+**"Your cash at risk (the number Jeff asked for)", verbatim:**
+
+> Cash-risk ladder per stall: **~$90 one-off retail → ~$63 buying multi-packs → ~$50 multi-pack + your
+> on-hand boards/wire** […] The **camera (~$33) is the floor** […] So realistically your **true marginal
+> cash per added stall is ~$50**, and most of it is redeployable. Your ~6 hr of time is sweat, not cash.
+
+**Smallest scale works: ONE stall at a time still profits — verbatim table:**
+
+| If you… | Upfront to you | Your cash at risk | You make |
+|---|---|---|---|
+| **Sell the install (Opt 1)** | charge ~$440 | $0 (paid on completion) | **~$350 over parts**, that day |
+| **Keep the $40/mo, charge parts+trip (~$140)** | $140 covers parts | **$0** (parts covered) | **$40/mo, pure, from month 1** |
+| **Keep the $40/mo, eat the parts to seed it** | nothing | ~$90 | back in **~10 weeks**, then $40/mo |
+
+> **No single-stall scenario loses money.** Question is just: ~$350 now, or ~$40/mo rolling.
+
+**The key decision, verbatim:**
+
+> ## ⭐ THE KEY DECISION: who keeps the $40/mo?
+> The same $40 can't be kept twice:
+> - **Barn owner keeps it** → her money-maker; you earn on the one-time install. → Opt 1/2.
+> - **Jeff keeps it** → managed service; install near-cost, earn on $40/mo; you own support. → Opt 3.
+> - **Split ($25 Jeff / $15 barn)** → both win; her amenity income at zero cost, your recurring.
+>
+> At $40/mo the recurring is **3–6× the one-time over 5 yrs**.
+
+**The four options, verbatim in the essentials:**
+
+> **OPTION 1 — Demand-triggered install** *(barn keeps $40; lowest risk, recommended start)*
+> **Installed price (1 stall):** $90 parts + $50 trip + $300 build = **~$440** (round $450) · **Your take
+> over parts:** **~$350** for ~6 hr (~$58/hr) + you keep the trip charge · **Each additional stall, same
+> visit:** ~$275 ($75 parts + $200 build) → take ~$200 · **6-stall barn:** ~$1,815 revenue; parts ~$480 →
+> **~$1,335 take** for ~20 hr (~$67/hr) · **Service plan:** $50 trip + parts per call (or ~$99/yr/stall) ·
+> **Risk:** ~none (paid on install). **5-yr/stall to Jeff: ~$350.**
+>
+> **OPTION 2 — Financed purchase** *(same as Opt 1, paid over time)* — Same **~$440/stall**, paid over
+> ~12 mo. You front ~$90 parts, hold title till paid. Best for a whole-barn order she can't pay at once.
+> **5-yr/stall: ~$350.**
+>
+> **OPTION 3 — Jeff keeps the $40/mo** *(managed service; most money, most obligation)* — **At install:**
+> charge **~$140** (parts $90 + trip $50) so you're not out of pocket. **Recurring:** keep **$40/mo** (or
+> $35 if you give the barn $5 for billing). **Cash payback** (on $90 parts): **~10 weeks.** **5-yr/stall:**
+> $40×60 = $2,400 − $90 − ~$250 support ≈ **~$2,060 net** […] **Risk:** highest — CapEx, churn/vacancy,
+> collection, and you **own ongoing support**.
+>
+> **SPLIT — $25 Jeff / $15 barn** *(both win; scale model)* — **Jeff 5-yr/stall:** $25×60 = $1,500 − $90 −
+> ~$250 ≈ **~$1,160 net** (+ install at parts+trip). **Barn 5-yr/stall:** $15×60 = **$900**, zero CapEx →
+> pure amenity profit for her.
+
+**Side-by-side, verbatim:**
+
+| | Opt 1 install | Opt 2 financed | Opt 3 Jeff keeps $40 | Split 25/15 |
+|---|---|---|---|---|
+| Who keeps $40/mo | barn | barn | **Jeff** | shared |
+| Your cash at risk | $0 (paid on install) | ~$90 till paid | ~$90 (10-wk payback) | ~$90 |
+| You paid | **now** | over ~12 mo | monthly | monthly |
+| Your 5-yr net | ~$350 | ~$350 | **~$2,060** | ~$1,160 |
+| Your risk/effort | low | low–mod | **high (owns support)** | moderate |
+| Best for | clean, money-now | whole barn, terms | recurring biz | everybody-wins scale |
+
+**Recommendation, verbatim** — including the line that reads Jeff's life circumstances back to him:
+
+> 1. **Lucky Mike (unit #1): build at parts cost** (~$90) — it's the demo, not a sale.
+> 2. **First real installs: Option 1** (~$440/stall, barn keeps $40). Money now, no support pager,
+>    ~$350/stall even one-at-a-time. Proves demand at ~$90 risk.
+> 3. **Once proven: the Split** for scale — recurring without killing the barn owner's incentive. Go full
+>    Option 3 only if you truly want a recurring business + support load.
+>
+> > Solo, almost-60 reality: recurring = a support obligation that never sleeps. Option 1 keeps it simple
+> > and fun; grow into recurring on purpose, not by accident.
+
+**Traps in the Lucky Mike file:**
+
+1. **DO NOT START THIS WITHOUT JEFF SAYING GO.** It is written into `CLAUDE.md` Pending Item 6 and into
+   `INTEGRATION_NOTES.md` twice. It is an eager-looking, fully-specced project sitting in the repo — the
+   exact shape of thing a session starts by accident.
+2. **Two unreconciled parts-cost bases coexist.** `PRICING_AND_BUSINESS.md` computes its worked examples
+   on **~$150/stall parts**; `BOM_OPTIMIZED.md` and `DEAL_OPTIONS.md` establish the real floor at **~$90**.
+   `BOM_OPTIMIZED.md` says explicitly: *"Re-lock deal numbers at $90 when Jeff confirms."* **That
+   re-lock never happened** — the pricing doc still runs on $150. Any quote generated from
+   `PRICING_AND_BUSINESS.md` alone is high by ~$60/stall of assumed cost.
+3. **The Platinum-vs-Elite tier name clash was flagged but never fixed** in the source Bible.
+4. **Prices are June-2026 estimates and were never re-verified.** The doc says so itself ("Prices are
+   rough 2026 estimates; budget the high end"). Two months of drift at tip. Re-price in-session.
+5. **The legal checklist is entirely unchecked.** Selling outside the family before the LLC + liability
+   insurance + waiver exist is real personal exposure — for a live-animal product. Say so plainly.
+6. **`README_Project_Files.txt` promises HTML companions that were never committed.**
+7. **`design-budget-guide-12page.png` (2.1 MB) is the ChatGPT deck as an image** — the source of the nine
+   corrected errors. Do not treat pixels in it as fact; read `INTEGRATION_NOTES.md` first, which is
+   exactly what `CLAUDE.md` instructs.
 
 ---
 
-### 5. The config trees
+### 14.3 `docs/inventory/` — what Jeff owns, and what the LAN actually is
 
-#### 5.1 `beehive-config/` — snapshot of the live HA configuration
+Two files, and together they are the project's memory of **money spent**. Both were created during the
+2026-08-13 hardware push and updated through 2026-08-16.
 
-Committed `39c1194` 2026-08-01: "Add live HA config snapshot (beehive-config/) as disaster-recovery backup." Five files; `scenes.yaml` and `scripts.yaml` are **0 bytes** (empty on the live instance too — scripts live inside the package file instead).
+#### 14.3.1 `HCC_INVENTORY.md` — the master hardware register
 
-- **`configuration.yaml`** — minimal core: `default_config:`, packages loader (`!include_dir_named packages`), the Barn zone (lat 36.716949, lon −86.65295, 150 m, `mdi:barn`) and Work zone (Nashville, 100 m), the **PiPup** `rest_command.pipup_notify` (POSTs to the Fire TV at `http://192.168.1.215:7979/notify` with a 480-px image — the TV picture-in-picture alert path), six `codeproject_ai_object` image-processing entries (one per Blink camera: 301_backyard, 301_driveway, 301_front_doorbell, front_right, back_left, garage; server 192.168.1.194:32168, confidence 60, targets person/vehicle/animal, annotated frames saved to `/config/www/ai_snapshots/`), and CORS allowing `https://loewenhome.com`, `www.loewenhome.com`, `toro1-5rz.pages.dev`.
-- **`automations.yaml`** — the UI-managed automations, each with a self-documenting description: **HCC Watchdog** (Blink/Fire TV/Mercedes unavailable 5+ min → phone alert "instead of it failing silently for hours"); **Auto Launch Sling on Fire TV Wake**; **Recorder Down Watchdog** ("the exact failure that silently broke utility bill tracking 07-02 to 07-28"); **Blink Auto-Heal** (reloads the Blink config entry seconds after the known upstream `blinkpy` LoginError crash, "tracked in home-assistant/core#176836"); **AI Camera Popup on Fire TV** via PiPup ("pushes the actual annotated frame that triggered the detection (not a fresh/later snapshot)… instead of taking over the whole TV. Replaces the old full-screen-switch approach per Jeff's request"); **Blink Periodic Health Reload** (every 15 min, because the error-triggered heal "only fires on the FIRST occurrence of a given error message per HA session"); **Angela Arrived at Barn** ("Zone real coordinates captured live 08-01 as she actually arrived") and **Arrived at Work** (both keyed off the Mercedes GLE's GPS "since her phone doesn't reliably report location"; work address recorded: 150 4th Avenue North Suite 1700, Nashville, TN 37219); **Possible Water Leak (Idle Flow)** (flow >0.05 gal/min for 30 min while away or 1–5 am with all irrigation zones off — "built 08-01 after confirming the water meter/pit radio are healthy, not faulty"); **Morning Digest** (7 am summary of weather, Sharky, GLE fuel/lock/odometer, water/gas reporting health, and a note if Blink self-healed in the last 24 h — with the honest removal of the notification count because `states.persistent_notification` "has been unreadable from templates since HA 2023.6… it was silently always reporting zero, which is worse than not reporting it").
-- **`hcc.yaml`** — the HCC package (`/config/packages/hcc.yaml` on Beehive): mower `input_number`/`input_text` helpers and the `hcc-mower-sensor` webhook (hours only ratchet **upward** — `max` of payload and current, so a rebooted box can never wind the meter back); the `hcc-panic-button` webhook (flash all lights, 30-s panic flag); severe-weather automation; the whole camera-AI chain — "AI Camera Scan on Motion" (maps the six Blink motion sensors to their image_processing entities), "AI Object Detected Notify" (person = critical iOS push with the annotated snapshot, tap-URL into the app's camera page, and a "🔇 Mute 15 min" action button; vehicle/animal = time-sensitive), "AI Notify Mute Action", "AI Show Camera on Fire TV" (ADB pause → show snapshot → home → play; note `initial_state: false` — **shipped disabled**, superseded by the PiPup popup), "AI Arrival Suppression" (mutes all six cameras 10 min when Jeff or Angela arrives "so walking in the door doesn't trigger camera alerts"), "Angela Almost Home", and "Blink Fast Motion Poll" (updates the six motion sensors every 10 s "so AI alerts aren't delayed by the default 5min poll" — alias says 30s, trigger says /10, a small internal inconsistency); Fire TV scripts (Good Night, Resume, **Skip Commercial Break** — 3× keyevent 90 then play, Open Sling, Check Current App); per-camera `input_datetime` mute helpers; the Weather Underground PWS REST sensors (resource URL in `!secret`); `utility_meter` monthly cycles for water/gas; the water-flow derivative sensor; and the **Gas Cost** template embedding the actual tariff math: `((13.44 + therms * 1.235) * 1.05)` with CCF→therms ×1.068.
-- **Trap:** this is a *snapshot*, last committed 2026-08-01 for most content. The live Beehive is the source of truth; sessions must not assume this tree is current (e.g., later Alexa/HomeKit work documented in `docs/beehive/*_2026-08-14.md` post-dates it).
+14,753 bytes. Created 2026-08-13 (`880addb`, "Add master hardware inventory register (Jeff's standing
+job 2026-08-13)"). The standing job, quoting Jeff verbatim at the very top of the file:
 
-#### 5.2 `beehive/` — installers, ESPHome config, custom-component snapshots
+> **Standing job (Jeff, 2026-08-13):** *"make sure we stay on top of the inventory that's coming in, what
+> we buy from now on... really make sure that we're adding to the system rather than taking away from it.
+> It's all got to be tracked meticulously."*
 
-- **`install.sh`** (committed `75a7afd` 2026-06-23, "Add complete Beehive brain setup — no Windows required") — the one-command bootstrap run inside the HA Terminal add-on (`curl -fsSL https://toro1-5rz.pages.dev/beehive/install.sh | bash`): installs HACS, writes `/config/packages/hcc.yaml` (an early version of the package with additional irrigation-started, freeze-warning automations and a `hcc_irrigation_stop_all` script that dangerously targets `entity_id: all` switches), patches `configuration.yaml` for packages, installs the ESPHome add-on, downloads `hcc-mower.yaml`, restarts HA. Documents the two webhooks (`/api/webhook/hcc-panic-button`, `/api/webhook/hcc-mower-sensor`).
-- **`esphome/hcc-mower.yaml`** (committed `fe1edb8` 2026-06-23) — the ESPHome-based mower firmware **as originally designed**: full sensor suite on an ESP32 DevKit (hall-effect ignition on GPIO27, battery ADC on GPIO34 via 100k/10k divider, NEO-6M GPS on UART, MPU-6050 pitch/roll/vibration, WiFi RSSI, internal temp), Haversine GPS distance integration with a 20 m jump filter, POST to `https://toro1-5rz.pages.dev/api/hours` every 90 s while running plus a 5-minute parked heartbeat. `secrets.yaml.template` shows the expected secrets (WiFi, API key, OTA password), "This file is NEVER committed to git."
-- **⚠️ Historical trap:** this ESPHome design was **superseded** by the Arduino firmware in `firmware/mower_hours_esp32/` (§5.3), which explicitly states "**Running: posts nothing**" — the exact opposite of this file's 90-second live posting. The ESPHome yaml also expects different hardware (hall sensor + GPS + RPM pulse counter vs. the shipped vibration-based hour meter). Do not treat `beehive/esphome/hcc-mower.yaml` as the current mower contract.
-- **`blink/`** (committed `e830083` 2026-06-25 "bundle all 12 integration files in repo — no GitHub API needed"; patched `f3ae126` and `1f2cdec` 2026-07-03) — a full vendored copy of HA's Blink integration, version string `2026.7.0-hcc-blinkpy257`. The two 07-03 patches record the Blink login fight: a dedicated cookie session to fix the `empty_cookies` login failure, and the blinkpy 0.25.2 → **0.25.7** bump ("the actual fix for 'Login failed'"). **INFERRED:** this folder exists so the patched integration could be installed on Beehive from the Pages site without GitHub access; whether Beehive still runs this exact snapshot is not evidenced at tip.
-- **`custom_components/bhyve/`** + **`INSTALL.md`** + **`install-bhyve.sh`** (committed `768cb6a` 2026-06-24, "Build Orbit B-Hyve custom HA integration + fix Cloudflare IP block") — a from-scratch Orbit B-Hyve custom integration, written because, per INSTALL.md: "This custom integration runs on YOUR Home Assistant (Beehive) so it calls the B-Hyve API from your home IP — not from Cloudflare." (The commit title records the origin problem: Orbit blocked Cloudflare's IPs.) Zones surface as `switch.bhyve_zone_N`; "The irrigation section automatically picks up the new zones. No further setup needed in the app." `install-bhyve.sh` wgets the seven files from `raw.githubusercontent.com/d4c2np9f69-afk/master-the-master-/claude/time-master-project-liq1jw/...`.
+And the operating instruction, verbatim:
 
-#### 5.3 `firmware/mower_hours_esp32/` — the canonical mower firmware (at tip)
+> Every session that buys, receives, installs, retires or repurposes hardware updates this file. A
+> phone-readable copy lives at `iCloudDrive/HCC Inventory.md` — keep the two in sync whenever this changes.
+>
+> Status legend: **ORDERED** → **ON HAND** → **INSTALLED** · plus **RETIRED** / **RESALE**
 
-Committed `a1cfa53` 2026-08-11 ("Put the mower firmware in the repo, credentials extracted"). Three files: `README.md`, `mower_hours_esp32.ino` (51 KB), `secrets.example.h`. The README's opening is the project's most expensive lesson, verbatim:
+**Zigbee layer — every item and every price, verbatim:**
+
+| Item | Qty | Status | Cost | Location / Notes |
+|---|---|---|---|---|
+| Haozee Zigbee 3.0 dongle (CC2652P1, +20dBm) | 1 | **ON HAND 08-15** (photo) | $8.92 | Coordinator. USB extension cable ON HAND. Z2M, not ZHA. SMA antenna in box. |
+| Tuya Zigbee door/window sensor (Excellux 2-pc) | 2 pks | **ON HAND 08-15** (photo) | $9.58 ×2 | battery end devices |
+| Zigbee door/window sensor (Coolo 2-pc) | 1 pk | **ON HAND 08-15** (photo) | $6.39 | battery |
+| Zigbee door/window sensor (Excellux 1-pc) | 1 | **ON HAND 08-15** (photo) | $2.79 | battery |
+| Zigbee water leak sensor (Haozee) | 2 | **ON HAND 08-15** (photo) | $5.09 ea | battery |
+| Zigbee water leak sensor (Gleco, probe cable) | 1 | **ON HAND 08-15** (photo) | $4.40 | battery — probe-cable unit visible in photo |
+| Zigbee water leak sensor (Gleco **Z2M-only**) | 1 | **ON HAND 08-15** (photo, TZ-SJ-SD_E) | $4.62 | ⚠️ no ZHA — this locked the Z2M decision |
+| Zigbee water detector (Excellux) | 1 | **ON HAND 08-15** (photo) | $6.19 | battery |
+| ⚠️ Tuya **WiFi** water sensor (Qianhong "WiFi-Shuijin-1") | 1 | **ON HAND 08-15** (photo) | $5.68 | NOT Zigbee — wrong variant. Smart Life or shelf. |
+
+The standing order attached to that table, verbatim — note it is Jeff's instruction, not a suggestion:
+
+> **All 7 door/window + all 5 leak sensors + dongle photo-confirmed arrived 2026-08-15.
+> NOT UNBOXED — Jeff's order: nothing gets set up until the camera/alert pipeline is verified.
+> Setup day, first moves: disable any auto-firmware-update BEFORE first pairing (the Kasa rule);
+> pick the Zigbee channel deliberately around the crowded 2.4 GHz WiFi (census 08-13); dongle on
+> its USB extension cable, away from USB3 ports.**
+
+> **Mesh status: zero routers.** Every device above is battery = end device. First routers will be the
+> mains-powered light switches. Until then all devices connect directly to the dongle (CC2652P handles
+> ~50 direct children — the reason not to swap to a ZBDongle-E, decided 2026-08-13).
+
+**Lighting project table, verbatim (including the scrapped row, struck through in the source):**
+
+- **Kasa HS220 dimmer, single-pole (WiFi, 150 W LED)** — **2 (confirmed)** — ON HAND —
+  *"**ASSIGNED: living room** (12 ft from dongle — mesh contribution redundant there, WiFi is fine).
+  #2 = bedroom or spare, pending Inovelli test"*
+- ~~**Inovelli Blue 2-1 VZM31-SN (Zigbee)**~~ — 0 — **🔴 SCRAPPED — DO NOT BUY (Jeff, on price)** —
+  ~~~$60 ea~~ — verbatim: *"**Jeff rejected these early on and it was never written down: "I was not
+  paying $120 for a freaking dimmer switch." Recorded 2026-08-16 after a session re-proposed them. A
+  budget router/dimmer alternative is still UNCHOSEN — research real prices in-session, cheapest-first,
+  and lead with the $0 option (Kasa HS220 ×2 + MOES module already on hand).** Old plan kept below only
+  for the wiring context:"* — with the dead assignment preserved: *"**#1 = KITCHEN, dimmer mode** —
+  far-point router + the dimming test. **#2 = GARAGE man-door, On/Off mode + "3-Way Dumb" type** — the
+  existing kitchen 3-way toggle KEEPS WORKING, no dummy switch needed. Mesh chain: dongle → kitchen →
+  garage […] (Corrected 08-13: the 2-1 manual is titled "On-Off or Dimmer" — it does both modes.)"*
+- **Leviton Decora E5603-SW 3-way (dumb)** — 1 — ON HAND — companion/spare — *"Reassigned 08-13: garage
+  goes smart (Inovelli #2). Use this as a fresh dumb companion in the kitchen 3-way position if the
+  existing toggle is worn; else shelf"*
+- **GE UltraPro paddle, single-pole (dumb)** — 1 — ON HAND — *"bedroom repurposed-receptacle position"*
+- **MOES single-gang dimmer module (the beige box)** — 1 — ON HAND — *"**ASSIGNED: single LED over
+  kitchen sink (~12 W** vs 100 W/gang limit — finally a load it fits). ⚠️ needs a MOMENTARY push-button
+  at the wall, not a standard toggle (toggles cause continuous-ramp misbehavior, researched 08-06).
+  Confirm protocol from label: WM- prefix = WiFi/Tuya, ZM- = Zigbee"*
+- **Lepro 14 W LED downlights w/ j-boxes** — several — ON HAND — **SPARES ONLY** — *"replacements for
+  existing fixtures, NOT expansion (Jeff 08-13)"*
+
+> **Mesh geometry (Jeff 08-13):** kitchen is the FARTHEST point needing mesh; living room is ~12 ft from
+> the dongle. Router priority is therefore kitchen first — not living room as originally assumed.
+
+**Wiring consumables & tools (from bin photos — no purchases needed for install work), verbatim:**
+
+> 12/2 NM cable (yellow, good length) · Wago-style lever connectors (45-pc kit + loose) · old-work boxes,
+> single-gang boxes, misc plates · NM staples · structured-wiring plates · multimeter · wire
+> strippers/cutters · headlamp · screwdrivers · Energetic recessed fixture
+
+**Irrigation:** 3/4" Orbit valve (zone-1 replacement) ×1 ON HAND — *"install tomorrow — zone 1 diaphragm
+leak (~3.8 gal/hr, confirmed by meter)"* · 3/4" spare valves, several, ON HAND — *"one becomes the
+**master valve** → PUMP + COM"* · spare wire runs manifold→controller, plenty, IN PLACE.
+
+**Mower / sensor:** ESP32-D on screw-terminal breakout ×1 INSTALLED — *"fw 1.4.0, OTA-ready pending
+private hosting"* · Spare ESP32 ×1 **TO ORDER (~$9)** — *"Jeff committed 08-11 — flash + bench-soak on
+arrival; unblocks OTA proof + watchdog test"*.
+
+**Garage door:** SONOFF MINI-D (Matter, dry contact) ×1 ON HAND — *"wire + eWeLink Inching +
+Matter-commission (Pending Item 1)"* · Garage door position **2× contact sensors** (from inbound stock) —
+*"**#1 at CLOSED position** (bottom of track/frame), **#2 at FULLY-OPEN position** (overhead track where
+the door rests when up). Template sensor derives 3 states: CLOSED / OPEN / **PARTIAL** — covers Jeff's
+hot-day "cracked open" venting. Possible later automation: pulse-wait-pulse for a repeatable vent stop"* ·
+MyQ hub + sensor, 1 set, **RESALE** — *"eBay when Jeff gets to it"*.
+
+**Network:** MoCA adapter set, 1 pr, **ON HAND — SHELF** — verbatim: *"Garage WiFi measured ADEQUATE
+08-13 (mower box, last 50 uploads: mean −71.5 dBm, worst −76, zero buffered uploads ever; GaragePC + Tuya
+plug also clean). **Trigger to deploy:** if the Matter garage relay feels laggy once installed → MoCA
+backhaul + AP in garage. Needs coax at garage — unverified."*
+
+**ISP block, verbatim:**
+
+> **ISP (confirmed by photo 08-13):** AT&T Fiber, gateway **BGW320-500** (integrated ONT, WiFi 6). Admin
+> UI at `http://192.168.1.254` — login uses the Device Access Code printed on the unit's label. LAN is
+> 192.168.1.x (matches Beehive at .66). Household WiFi SSID in use is `Loewen301`, NOT the factory SSID
+> on the label. The old Xfinity notes refer to Jeff's *email/mail*, not current internet service.
+
+**Other on-hand (from CLAUDE.md spare inventory), verbatim:** KESU 500GB USB drive (AirTV DVR) · Lenovo
+B570 (kiosk candidate) · Delam XLR mic (GaragePC voice) · WD 320GB bare HDD (Mint test drive) · HDMI-005
+Miracast stick · HDMI→USB capture stick (kitchen TV chain) · AirTV 2 (inbound) · GaragePC HP TouchSmart 520.
+
+**The five maintenance rules, verbatim — these are the file's contract:**
+
+> 1. **Log at order time**, not arrival — ORDERED with ETA, promote to ON HAND when Jeff confirms the box.
+> 2. **Nothing gets bought twice** because nobody checked this file. Check here first.
+> 3. **Retired ≠ deleted** — mark RETIRED/RESALE with a reason, keep the row.
+> 4. **Wrong-variant purchases get flagged loudly** (see the Qianhong WiFi sensor) so the lesson survives:
+>    *verify the protocol variant in the listing before ordering.*
+> 5. Sync the iCloud copy after every edit.
+
+**The Sylvania entry (2026-08-13, commit `2caaebf`), verbatim in full:**
+
+> **STATUS: ON HAND, working, but VENDOR LOCKED — cannot enter Home Assistant.**
+> - Tuya hardware (port 6668 confirmed) at .199/.200/.202/.205, but Sylvania locked the product ID so
+>   ONLY the "SYLVANIA Smart WiFi" app accepts them. Proven 08-13: Smart Life DETECTS a reset plug then
+>   rejects it — "This device is not supported by this app."
+> - Sylvania app CAN scan HA's Tuya QR but Tuya blocks the confirm step ("use the designated APP").
+> - Only remaining route = LocalTuya with hand-extracted local keys. NOT attempted, not worth it.
+> - **DECISION: replace with Zigbee plugs when the dongle arrives.** Keep these on Sylvania+Alexa meanwhile.
+> - DO NOT re-attempt the Smart Life path — this is settled.
+
+**The Zigbee mesh plug selection (2026-08-14, commit `9dad6a5`), verbatim in full** — one of the best
+buying-traps documents in the repo:
+
+> **BUY: THIRDREALITY Zigbee Smart Plug 4-Pack — ASIN B09KNHWF7L (~$50).** Listing MUST say
+> "Zigbee Repeater" and "Requires ZigBee Hub". Z2M page 3RSP019BZ verified CLEAN — no routing warnings
+> (contrast: Enbrighten 43080 warns it stops relaying for child devices). Tested better range than
+> SONOFF S40 Lite (+5 ft through 2 walls) and zero dropouts over 14 days.
+>
+> **⚠️ SHIPS IN BLE MODE — must be manually switched to Zigbee mode before it will pair.** Out of the box
+> it looks dead to the coordinator. Find the exact button sequence at pairing time.
+>
+> **⚠️ DO NOT BUY the lookalikes:**
+> - THIRDREALITY "Smart Plug M3" B0FJRNW7YS = Matter over **WiFi**, not Zigbee.
+> - SONOFF "S40 Lite" exists in BOTH Zigbee (B09XMH3X3G, currently OOS) and WiFi (B09LV7K4DH) versions,
+>   same product name. Zigbee one says "Hub Needed"; WiFi one says "No Hub Required".
+> **RULE: "Requires a hub" = the Zigbee one. "No hub required" = WiFi, useless for the mesh.**
+>
+> Quantity needed: 5 — four to replace the vendor-locked Sylvania living-room plugs, one for the garage as
+> the relay to the door sensors.
+
+**The 2026-08-14 order, verbatim (commit `b524553`) — total ~$33.83:**
+
+| Item | For | Cost | Status |
+|---|---|---|---|
+| **Orbit 57280 3/4" FPT L-Series** auto valve | **MASTER VALVE** — the reason today's valve work slipped | $13.58 | ORDERED |
+| **Kasa HS220** dimmer (Amazon Resale, **USED - Mint**) | 3rd dimmer — bedroom/kitchen/living room now all covered | $13.86 | ORDERED |
+| Leviton 3-Gang Decora/GFCI wall plate | one of the new multi-gang boxes | $1.82 | ORDERED |
+| Leviton F-Connector Decora insert | coax feed into a Decora plate | $4.57 | ORDERED |
+
+With the used-hardware warning, verbatim:
+
+> **⚠️ The HS220 is USED/refurb.** Before install: FACTORY RESET it (hold the button ~10 s until the LED
+> blinks amber/green) so it is not still bound to the previous owner's TP-Link account, THEN disable
+> auto-firmware-update, THEN pair. A used smart switch that is still claimed will silently refuse to pair.
+
+**The backflow / irrigation-connection block (2026-08-15)** — belongs to the utilities story but the
+*purchasing* record lives here, verbatim:
+
+> **Finding:** the valve on the wall stub (old spigot penetration, 3/4" PEX from the main) is a plain
+> Orbit valve with a **solid jar-top bonnet — no vent openings**. It is NOT a backflow device. The system
+> has been running with **no backflow protection at the point of connection.**
+
+| Item | Role | Cost | Status |
+|---|---|---|---|
+| **Orbit 3/4" electric anti-siphon valve** | **DECIDED 8/15** — master valve **+** backflow in one body, on the wall stub | $18.34 | to order |
+| *old plain Orbit wall valve (jar-top, no vent)* | **BEING REMOVED ENTIRELY** — was never a backflow device | — | remove |
+| **Orbit 57280** 3/4" FPT L-Series valve | bought 8/14 as the master — **redundant now.** Becomes the **SPARE ZONE VALVE.** | $13.58 | HAVE |
+| **T&S B-969** 1/2" AVB (ASSE 1001, bronze) | too small — 1/2" chokes the 3/4" line. Not for this job. | — | have, unusable here |
+| 3/4" check valve | in the pit with the zone valves | — | installed |
+
+> **Orbit 51059** (3/4" FTP brass AVB, $18.49) was looked at and NOT bought — the combined anti-siphon
+> valve does the same job plus the master-valve function for the same money and fewer fittings.
+>
+> **The 57280 is not wasted.** Once the anti-siphon valve is the master, the 57280 becomes the spare zone
+> valve — genuinely worth having, since a failed zone-1 diaphragm is exactly what caused the ~88 gal/day
+> leak found 2026-08-13. Only ONE valve needs to be wired as the master; don't wire both in series.
+
+> **Honest limit, unchanged by any option considered:** the six zone valves are shutoff valves DOWNSTREAM
+> of an atmospheric breaker, which the standard does not strictly permit. The by-the-book fix is a
+> pressure vacuum breaker (ASSE 1020, ~$80-150) **plus annual testing by a licensed tester** — which is
+> exactly the utility attention Jeff is avoiding. Decision made knowingly.
+>
+> **Replacement strategy (Jeff's call, and it is the right one):** an AVB fails SILENTLY — a stiff poppet
+> looks fine and simply doesn't open when needed. So swap the cheap valve on a schedule rather than pay
+> ~9x for bronze. Target: spring startup, every 1-2 years. **TODO: add a yearly HA reminder** in the
+> alert batch.
+
+**Traps in the inventory:**
+
+- **This file is the state of record; the lighting plan is the strategy of record.** They disagree on
+  quantities and prices. Inventory wins on "what do we own."
+- **The Qianhong WiFi water sensor is the wrong-variant purchase** and is kept in the table deliberately
+  as the standing lesson. Do not clean it up.
+- **The Zigbee kit is ON HAND but NOT UNBOXED by Jeff's explicit order.** Do not propose starting Zigbee
+  pairing without checking whether the camera/alert pipeline verification gate has been cleared.
+- **"A budget router/dimmer alternative is still UNCHOSEN."** That is the live open question in this file
+  at tip. It comes with an instruction: research real current products in-session, cheapest-first, lead
+  with the $0 option.
+- **The yearly AVB-replacement HA reminder is an unclosed TODO.**
+- **The iCloud mirror (`iCloudDrive/HCC Inventory.md`) is not in the repo.** Nobody in a cloud session can
+  verify it is in sync. Assume it may be stale.
+
+#### 14.3.2 `NETWORK_MAP.md` — the LAN census and the label layer
+
+11,226 bytes. Header, verbatim:
+
+> Captured from the gateway's IP Allocation table. The BGW320 cannot rename devices — names below are
+> self-reported hostnames; identifications are from MAC vendor prefixes plus project knowledge.
+> **(?) = needs Jeff to confirm.**
+
+This file exists because **the AT&T gateway has no device-rename feature** — so the repo *is* the rename
+layer. It was built over roughly one evening on 2026-08-13 through ~20 commits (`4dc9336` through
+`0277477` and beyond), several of which are corrections of earlier commits from the same evening. That
+self-correcting trail is worth preserving as-is: `902d0dc` ("DellMasterBed is Jeff's Acer laptop, not the
+B570") → `8aeacf0` ("laptops finally straight — JeffsLapTop IS the Acer") → `7f38015` ("DellMasterBed is
+literally a Dell — Angela's 2nd office computer (per Angela)") → `793b949` ("**.173 is the B570 after
+all** — Windows name inherited from Jeff's old Dell"). Four commits, one IP address, three reversals.
+
+**Gateway config as of 2026-08-13, verbatim:**
+
+> - 2.4 GHz: `Loewen301`, **channel pinned to 1**, password unchanged — all IoT untouched (mower posted at
+>   −66 dBm post-change)
+> - 5 GHz: renamed **`Loewen301-5G`**, same password — phones/TVs/laptops rejoin this for speed
+> - Band steering: disabled (consequence of the split — intended)
+> - Zigbee plan: **channel 25** on the dongle (max separation from WiFi ch 1)
+> - Fixed allocations: **.66 Beehive** (Jeff, earlier) · **.215 Fire TV** (added tonight)
+
+**Infrastructure, verbatim:** `.254` gateway AT&T BGW320-500 · `.66` **Beehive** (HA, Beelink J45) —
+FIXED · `.196` RE200 — *"✅ CONVERTED 08-13: **wired Access Point** (Cat6 backhaul). Broadcasts Loewen301
+(2.4, ch 6) + Loewen301-5G (WPA2, house password). Admin: http://192.168.1.196, password in HCC-secrets.
+The volatile wireless-repeater hop is GONE"* · `.194` 301Server · `.121` GaragePC — *"HP TouchSmart […]
+Account "Jeff Loewen Office 2" (NOT jeffl) needs its own password to browse — creds in
+HCC-secretsgaragepc.txt […] Win10 Pro, SMB2 on"*.
+
+**The CLEAN CENSUS section** ("after 'Clear and Rescan,' 2026-08-13 late — the label layer"), verbatim
+preamble:
+
+> Gateway cannot rename devices; THIS table is the authoritative label for every live device. 80+ stale
+> entries purged; only live devices below. Sleepers (watches, mower ESP32, off Blink cams) will
+> re-register as they wake — that's correct behavior.
+
+Selected rows, verbatim, including the identifications that took real detective work:
+
+- `.194` 301Server → *"✅ **THE BEAST** — confirmed 08-13 (its own Ethernet reports .194). CodeProject.AI
+  host, Claude coworker machine"*
+- `.171` "Nest Protect" → *"✅ **UNMASKED 08-13: Angela's bed-lamp Tuya socket** — proven by unplug test
+  (down, held 60s+, at 14:50). Cheap Tuya firmware self-reporting a fake hostname. **There is NO Nest
+  hardware in this house**"*
+- `.231` Linux → *"✅ **SHARKY** (robot vacuum) — proven 08-13 15:03: died the moment Jeff switched it off"*
+- `.209` TY_WR → *"✅ **Hot-water recirculating pump socket** (garage) […] Switched OFF but plugged in, so
+  radio stays up. Flap = weak garage signal"*
+- `.199/.200/.202/.205` → *"✅ **The 4 Sylvania SMART+ WiFi lamp plugs, living room** — Tuya port 6668
+  confirmed on all four 08-13 evening. **NOT Echo Dots, NOT Bluetooth**: earlier "pull test showed
+  nothing" was a monitor watching the wrong IPs."*
+- `.170 / .224` → *"✅ **Garage-fan socket / Jeff's bed-lamp socket** — Tuya IDs embed their MACs; the
+  "mystery ESP8266s" were store-bought Tuya sockets all along."*
+- `.232` esp32-6BFCA4 → *"✅ **THE MOWER BOX** — confirmed 08-13 by 5-min heartbeat timing after the purge.
+  The dormant esp32-21206C is a DIFFERENT board (?)"*
+- `.164` WS-SD00PJBA → *"✅ **Angela's work computer** […] ⚠️ Both of Angela's work machines run corporate
+  VPN + firewall — they take a LAN address but tunnel all traffic and won't answer local probes;
+  **silence is NORMAL, never troubleshoot it.**"*
+- `.176` JeffsLapTop → *"✅ **Acer Aspire E5-576** — i3-8130U (8th gen, AVX-capable — could host AI
+  workloads unlike B570/GaragePC), 16 GB, 466 GB."*
+- `.197` MyQ-E31 → *"⚠️ **MyQ hub still online — being sold on eBay. Unplug + factory-reset before listing**"*
+
+**Cameras / privacy, verbatim:**
+
+> **Zmodo fleet** — ✅ ALL DARK 08-13: .104 was a stale lease (already dead); the live .207 was found ON
+> THE BACK DECK plugged in with the covered TV — unplugged by Jeff, factory-reset pending, eBay pile.
+> Braxton-room units long gone. **Privacy issue closed**
+
+**Extender fleet, verbatim** — with a login lesson worth its own line:
+
+> - **RE200 → wired AP, done.** Login lesson: its 2018 login page fails SILENTLY when the request rides a
+>   flapping wireless link — every "wrong password" was really a dropped link. Wired access worked first try.
+> - **Generic "Wireless-N Repeater"** (no-name, 2.4-only, MAC 00:E0:20:84:30:FB, broadcasts
+>   `Loewen301_Ext`, default 192.168.10.1 admin/admin): **RETIRE.** Cheap wireless-only repeat, pure
+>   airtime pollution next to the new wired AP.
+> - **D-Link DAP-1520** (dual-band, MAC 1C:5F:2B:B9:08:62): the `Loewen301-EXT`/`-EXT5G` broadcaster.
+>   **RETIRE — no Ethernet port, conversion impossible** (**Jeff spotted the disqualifier himself**). eBay-able.
+
+**Gateway changes 2026-08-14, verbatim (commit `f735771`):**
+
+> - **2.4 GHz Mode: G/N -> B/G/N.** Done while troubleshooting a Kasa HS220 that would connect to its own
+>   setup AP but never join the WiFi. G/N excludes 802.11b; the HS220 is a b/g/n device. Change is purely
+>   permissive. Verified afterwards: all four Tuya sockets, B-Hyve, garage fan, RE200 and the mower box
+>   reconnected normally.
+> - **Guest SSID (LoewenGuest): DISABLED.** Jeff confirmed nobody uses it. One less broadcasting network
+>   and one less entry point. Reversible in the same Wi-Fi page.
+> - **Confirmed good and left alone:** WPA-2 (NOT WPA3 - would break older IoT), channel 1 fixed, 20 MHz,
+>   SSID not hidden, WPS off, max clients 80, band steering off.
+> - Kasa still had not joined as of this change. Prime remaining suspect is the Kasa app offering
+>   **Loewen301-5G** in its network picker - the switch cannot see 5 GHz, so it accepts credentials and
+>   then hunts forever. **Must be Loewen301.**
+
+**Standing notes, verbatim:**
+
+> - Names are device-reported; this file is the rename layer. Update it when devices are added/retired.
+> - The 2.4 channel is PINNED (1). If WiFi congestion ever appears, re-evaluate here **and** check the
+>   Zigbee channel before moving it.
+
+**Traps in the network map:**
+
+- **Every `(?)` row is unanswered and is explicitly Jeff's to answer**: *"Every (?) row is a question only
+  Jeff can answer — fill them in as identified."* Still open at tip: `.82 none-6`, `.161 none-5`,
+  `.166` possible AirTV 2, `.198` likely B-Hyve, `.222` NETGEAR NTV300 ("still used?"), `.227` iOS-style
+  private address, the dormant `esp32-21206C`, and SHENZHEN RF-LINK (possibly the Weather Underground
+  console KTNWHITE21).
+- **Angela's work machines must never be troubleshot.** Their LAN silence is by corporate design.
+- **Do not "fix" WPA-2 to WPA3** and do not un-pin channel 1 without checking the Zigbee channel first.
+- **Do not undo the B/G/N mode change** — it exists because of the HS220.
+- **The MyQ hub is still online and still needs an unplug + factory reset before eBay listing.**
+- **Kasa switches must be given `Loewen301`, never `Loewen301-5G`.**
+
+---
+
+### 14.4 The hero-image apparatus — `HERO-STYLE-GUIDE.json`, `docs/hero-master-grade.md`, `dev.html`
+
+Three files that together define "one film stock" for the whole app.
+
+#### 14.4.1 `HERO-STYLE-GUIDE.json` (2026-06-24, `278a78e`)
+
+7,158 bytes at the repo root. Commit message:
+
+> Contains visual identity rules, lighting signature, composition rules, landscaping spec, brand
+> consistency, typography spec, and ready-to-paste ChatGPT prompts for all 4 heroes (home, yard, weather,
+> irrigation).
+
+Top-level identity, verbatim: `"style_name": "Premium Estate Command Center"`,
+`"visual_identity": "luxury residential cinematic realism"`.
+
+**Grading:** contrast `medium-high` · saturation `natural + enhanced greens` · warmth `golden-hour bias` ·
+shadow_detail `preserved` · highlight_rolloff `soft cinematic`.
+
+**Lighting signature, verbatim:** time_of_day `"golden hour (primary rule)"` · key_light
+`"warm directional sunlight"` · rim_light `"subtle glow outlining main subject"` · practical_lights
+`"low garden path uplights (soft warm tone)"` · mood `"calm, expensive, cinematic, aspirational"` ·
+avoid `"flat midday lighting, harsh overexposure"`.
+
+**Composition:** camera_style `"low to mid eye-level cinematic"` · foreground_rule `"one dominant subject
+per hero image"` · framing `"rule of thirds with slight center bias for hero subject"` · negative_space
+`"reserved for UI overlays or app text"`.
+
+**Environment / landscaping rules, verbatim** — this is where the guide stops being generic and starts
+describing Jeff's actual property as it *should* look: grass `"deep emerald, striped, high density, no
+patchiness"` · trees `"full, mature, dense canopies, no gaps"` · the Leyland pines spec —
+`"structure": "dense living wall"`, `"spacing": "zero visible gaps"`, `"shape": "full bottom-to-top
+taper"`, `"height": "tall privacy screen (~20ft visual impression)"` · beds: allowed elements
+`["boxwoods", "roses", "ornamental grasses"]`, density `"clean luxury spacing, not cluttered"`.
+
+**Brand consistency:** palette `["deep green", "warm gold", "charcoal shadows", "brick red accents"]`;
+avoid `["cartoon styling", "over-HDR look", "over-saturated neon greens", "inconsistent lighting between
+assets"]`.
+
+**Typography:** style `"elegant serif + modern sans mix"` · placement `"lower third safe zone"` · color
+`"soft gold or warm white"` · effects `"subtle glow, no harsh outlines"`.
+
+**The final rule, verbatim:**
+
+> Every generated hero image must look like it belongs to the same premium smart-home / landscaping
+> command center application suite, with identical lighting logic, grading, and composition structure.
+
+**The four ready-to-paste generation prompts** are stored in full in the JSON (`prompts.yard`,
+`prompts.home`, `prompts.weather`, `prompts.irrigation`). The yard prompt names the actual mower and the
+actual man, verbatim in part:
+
+> Dominant subject: a confident middle-aged homeowner in a dark LawnCareHive t-shirt kneeling beside a red
+> Toro TimeMaster 21200 30" walk-behind mower, slight smile, one hand resting on the handle. […] Bottom
+> section text in elegant serif + modern sans mix, soft warm gold color, subtle glow: Title: 'YARD COMMAND
+> CENTER APP' | Subtitle: 'MOW SMARTER. TRACK EVERY CUT.' | Small icons row: Mow Log · Service · GPS ·
+> Hours · Diagnostics.
+
+The home prompt: *"brick ranch-style house exterior at golden hour / twilight […] Title: 'HOME COMMAND
+CENTER APP' | Subtitle: 'MANAGE · MAINTAIN · MONITOR' | Tagline: 'Everything. In One Place.'"*
+The weather prompt: *"Ambient Weather professional weather station on a pole in the foreground […]
+Title: 'WEATHER COMMAND CENTER APP' | Subtitle: 'REAL-TIME WEATHER. SMARTER DECISIONS.'"*
+The irrigation prompt: *"active sprinkler heads arcing water over a deep emerald striped lawn at golden
+hour […] Title: 'IRRIGATION COMMAND CENTER APP' | Subtitle: 'SMART WATER. HEALTHIER LAWN.'"*
+
+**Traps:** the guide covers **4 heroes** (home, yard, weather, irrigation). The app at tip ships **9**
+(`hero-cameras`, `hero-car`, `hero-guardian`, `hero-home-dusk`, `hero-irr`, `hero-lux`, `hero-truck`,
+`hero-weather`, `hero-yard`). **Five heroes have no prompt of record.** If a hero ever needs regenerating,
+only four can be reproduced faithfully; the rest must be re-derived from the style rules. Note also that
+the prompts are written for **ChatGPT** image generation, and that the cloud sandbox has no image
+generation tool — this is a coworker-PC job (see `CLAUDE.md` Pending Item 20, the zone-photo overlay
+cleanup, which is blocked for exactly that reason).
+
+#### 14.4.2 `docs/hero-master-grade.md` (2026-06-28, `ebedb85`)
+
+2,516 bytes. Commit message:
+
+> Save the hero color-grade spec as a repo reference doc, updated to reflect the actual implementation
+> (container-level vignette, applyHeroGrades(), real CSS values) so it's accurate for future sections.
+
+Purpose, verbatim:
+
+> Apply ONE cinematic golden-hour color grade to every hero image so the whole app looks like one film
+> stock. Do **not** replace image assets or change overlays/typography. New sections inherit the grade
+> automatically.
+
+How it works as shipped, verbatim:
+
+> - **`applyHeroGrades()`** runs on init, finds every hero container (`.house-hero`, `.sec-hero`,
+>   `.hcc-hero`), and: adds **`.hcc-hero-grade`** to the hero `<img>` (the color grade); adds
+>   **`.hcc-hero-vignette`** to the container (the vignette)
+> - To cover a NEW section's hero: just put its `<img>` inside a `.sec-hero` (or `.house-hero` /
+>   `.hcc-hero`) container with a descriptive `alt`. Done — no per-hero CSS.
+
+**The single most reusable technical note in the file, verbatim** — a real CSS trap, learned once:
+
+> Note: the vignette is on the **container** (`::before`), not the `<img>`. An `<img>` is a replaced
+> element and does not render `::before`/`::after`, so an image-level vignette would silently do nothing.
+
+Art direction, verbatim:
+
+> - Weather hero was the calibration reference; the grade is intentionally mild and now applies uniformly
+>   to ALL heroes so the set looks like one evening, one camera, one color profile.
+> - **Do not swap or regenerate hero images to fix tone — the grade handles tone.**
+> - Keep all existing overlays and typography. Preserve composition and cropping.
+> - To shift the look, change the shared `.hcc-hero-grade` values once (affects every hero together).
+>   **Never add a per-hero `filter:`.**
+
+**⚠️ MAJOR TRAP — this document's CSS is stale.** The doc records:
+
+```css
+.hcc-hero-grade{
+  filter: brightness(.92) contrast(1.14) saturate(.93) sepia(.10) hue-rotate(-3deg);
+}
+```
+
+The **live** value in `index.html` at tip (line 463) is:
+
+```css
+.hcc-hero-grade{
+  filter:brightness(1.06) saturate(1.02);
+}
+```
+
+with an inline comment explaining why, verbatim from `index.html`:
+
+> /* BAKED-IN HERO IMAGES — grade is baked into the .jpgs, but they came in dark, so lift brightness
+>    (a correction, NOT a re-grade) and keep the vignette very light. */
+> /* Images are already graded by the creator — keep this near-neutral, just a hair of lift so they
+>    don't read dim on a phone. */
+
+The vignette also changed: the doc records a two-gradient overlay at full opacity; the live rule is a
+single `radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.5) 100%)` at `opacity:.15`,
+commented *"barely-there edge darkening so it doesn't add to the image's own grade."*
+
+**The regime changed** — heroes went from *ungraded photos graded by CSS* to *pre-graded JPEGs lightly
+corrected by CSS* — and `hero-master-grade.md` was never updated. **The doc's *rules* (one shared grade,
+container-level vignette, never a per-hero filter) are still correct and still enforced. Its *values* are
+not. Read the values out of `index.html`.**
+
+#### 14.4.3 `dev.html` — the hero consistency audit page (2026-06-28, `3509c74`)
+
+5,439 bytes at the repo root, served at `/dev.html` on the live site. Commit message:
+
+> Strengthen the shared hero grade (warmer sepia, more desaturation, deeper vignette + uniform warm wash)
+> so five different photos read as one film stock. Add dev.html — a standalone audit page that applies the
+> live grade to every hero and outputs real computed cssFilter/overlay + natural dimensions as JSON
+> (served at /dev.html) for objective consistency checks.
+
+**What it is for:** it is a developer-only measurement tool, not a user-facing page. It renders every hero
+in a grid with the grade applied, then reads `getComputedStyle` on each `<img>` and on each container's
+`::before`, and dumps the **real browser-computed** `cssFilter`, `overlay`, and natural `width`/`height`
+as copyable JSON. Its own explanatory note, verbatim:
+
+> cssFilter & overlay are read live via getComputedStyle (truth from the browser). width/height are each
+> image's natural pixel dimensions. **If cssFilter is identical across all heroes, the grade is uniform.**
+
+The header comment states the maintenance contract, verbatim:
+
+> /* Mirror the LIVE hero-grade module from index.html so this page reflects exactly what the app renders.
+>    Keep these in sync if the app grade changes. */
+
+**⚠️ THE PAGE IS BROKEN AT TIP — two separate rots, both verified against the checkout:**
+
+1. **Its grade constant is out of sync with the app, three ways.** `dev.html` declares
+   `--hcc-hero-filter: brightness(.80) contrast(1.20) saturate(.82) sepia(.22) hue-rotate(-6deg);` —
+   which matches neither the live `index.html` value (`brightness(1.06) saturate(1.02)`) nor the value in
+   `docs/hero-master-grade.md` (`brightness(.92) contrast(1.14) saturate(.93) sepia(.10) hue-rotate(-3deg)`).
+   **Three files, three different grades.** The page's stated purpose — verifying grade uniformity — is
+   therefore actively misleading: it audits a grade the app does not use.
+2. **Two of its five hero images no longer exist.** Its `HEROES` array references
+   `images/hero-home.jpg` and `images/hero-climate.jpg`; neither is in `images/` at tip (the home hero is
+   now `hero-home-dusk.jpg`, and there is no climate hero at all). The page handles this gracefully — it
+   renders a red `⚠ images/hero-home.jpg not found` tile and emits `"error": "image not found"` in the
+   JSON — but two of five audit rows are dead.
+
+**Traps:** do not treat `dev.html` output as authoritative about the app's grade; fix the constant and
+the image list first, or read the grade straight out of `index.html`. Also note it is publicly reachable
+on the deployed site (it is not gitignored, not excluded from the deploy) — harmless, but it is a dev tool
+shipped to production.
+
+---
+
+### 14.5 `docs/home-theater-ai-plan.md` — the camera-AI / theater living doc
+
+6,294 bytes. Four commits: `dfaa88f` (2026-07-10, "capture camera-AI + home-theater plan (beast as
+AI/media brain, no subscriptions)"), `71a8cae` (2026-07-10, "confirm beast GPU (GTX 1050 Ti 4GB); settle
+on CodeProject.AI snapshot detection path"), `05dc1db` (2026-07-12), `c13f101` (2026-07-14, "Audit:
+root-cause camera/Fire TV alert outage (CodeProject.AI service down 3 days), resolve TV-alert plan conflict").
+
+**Jeff's five goals (2026-07-09), verbatim, with the hard constraint stated first:**
+
+> Jeff's goals (2026-07-09), **with a hard NO on subscriptions** (no Blink fee, no Zmodo fee, no
+> per-month anything — he already pays for Claude/Clyde, Nabu Casa, and the domain):
+>
+> 1. Cameras look premium in the app (mockup-style big tiles) — ✅ DONE.
+> 2. Review saved Blink clips **inside the app**.
+> 3. Alerts tell you **what** triggered them — person / car / animal / package.
+> 4. Alert can **pop up on the TV**, glance, return to the show.
+> 5. Whole thing feels like a **top-of-the-line home theater with HA driving it all** — seamless, no
+>    "cluster of shit," no constant resets.
+
+That "no subscriptions" line is the same budget philosophy as the Inovelli rejection, stated three weeks
+earlier and about a different category of spend. It is worth reading the two together.
+
+**Hardware division, verbatim:**
+
+> - **Beehive (Beelink J45, `192.168.1.66`)** — weak Pentium, no GPU, runs the whole house. **Keep it PURE
+>   HA. Do NOT put media/AI on it.**
+> - **The beast (`301Server`, `192.168.1.194`)** — **the designated AI + media brain.** 6-core CPU, ~2 TB
+>   storage + a 500 GB external SSD, **Nvidia GeForce GTX 1050 Ti, 4 GB VRAM (confirmed via `nvidia-smi`
+>   07-09)**, **runs 24/7**, sits in the viewing room, has unused partitions, **OS = Windows**. Also runs
+>   Clyde (Claude Code). → Detection plan settled: **CodeProject.AI Server on Windows (uses the 1050 Ti
+>   CUDA)** does snapshot object-detection (person/car/animal — no RTSP needed, fits Blink); add **LLM
+>   Vision** […] Frigate/blinkbridge NOT needed for this path.
+> - **Blink cameras** — snapshot/event only (no live RTSP), motion clips stored free on the Sync Module 2 USB.
+> - **Screens/AV:** Vizio TV + sound (hardwired, is the beast's monitor); Apple TV (bedroom); Fire TV Max
+>   (owned but "very slow").
+
+**Honest limits — told, not papered over, verbatim:**
+
+> - Premium DRM apps (HBO/Prime/Netflix) can be **resolution-capped on a PC** — a certified stick/Shield
+>   may still edge out the beast for pure 4K DRM streaming. Likely answer: beast = AI + media + local
+>   playback; add ONE small certified streamer only if a quality drop shows.
+> - **Apple TV = no clean pop-up overlay.** (tvOS has no third-party overlay; Blink isn't proper HomeKit.)
+> - Blink = snapshot/event, not continuous; a small delay is inherent.
+
+**The Phase 2 reversal (2026-07-14, commit `c13f101`) — verbatim, in full**, because it is a decision that
+overturned a four-day-old decision and the file records both:
+
+> **Phase 2 — SUPERSEDED (07-14, Jeff's call): Fire TV + `alexa_media_player` kept as the real TV pop-up
+> path, not Kodi.** The original 07-10 decision below was to route TV alerts through Kodi on the beast; in
+> practice, the 07-11 session built (and got working) the ADB-paired Fire TV + `alexa_media_player` HACS
+> route instead — a `media_player.play_media` call that mimics the spoken "show me the [camera] camera"
+> command, wired into `AI Object Detected Notify`/`AI Show Camera on Fire TV` in `packages/hcc.yaml`.
+> That's what's live today; a 07-14 audit found it had gone quiet for 3 days (see `CLAUDE.md` 07-14
+> changelog entry — **root cause was CodeProject.AI silently not restarting after a reboot**, now fixed
+> with delayed-start + failure-recovery). Jeff chose (07-14) to keep this path rather than switch to Kodi.
+> **Kodi was installed on the beast but never finished** (web remote-control never enabled, never added to
+> HA, launched once for 3 minutes total) — leave it installed/unused rather than build it out further
+> unless priorities change. `docs/beehive/media-center-setup.md` describes the Kodi route that was NOT
+> taken; **treat it as reference/superseded, not a live setup guide.**
+> ~~Original 07-10 plan (not what got built): beast runs Kodi → HDMI → Vizio TV, HA sends alerts via
+> `kodi.call_method` → `GUI.ShowNotification`, Fire TV stays secondary-only.~~
+
+**Division of labor, verbatim:**
+
+> - **Claude (cloud):** app-side — the in-app clip player + AI detection badge display on camera tiles
+>   (✅ DONE 07-10). Owns all app code.
+> - **Clyde (beast) + Jeff:** beast-side — install Kodi + CodeProject.AI, wire HA automations. **Clyde
+>   treats app code as READ-ONLY.**
+
+**Traps:** (a) `docs/beehive/media-center-setup.md` is a **superseded** document and this file is the only
+place that says so — anyone reading it standalone will build the wrong thing; (b) the Fire TV popup path
+described here as `AI Show Camera on Fire TV` was itself later *replaced* by a PiPup picture-in-picture
+popup (see §14.6.2 — `automations.yaml` at tip carries `HCC — AI Camera Popup on Fire TV`, described as
+*"Replaces the old full-screen-switch approach per Jeff's request"*, and the `hcc.yaml` version of
+`AI Show Camera on Fire TV` is disabled with `initial_state: false`). **So this living doc is one
+generation behind the live config.** (c) Kodi is installed-but-unused on the beast by decision — do not
+"finish" it.
+
+---
+
+### 14.6 The configuration trees
+
+#### 14.6.1 `beehive-config/` — the live HA configuration snapshot (disaster recovery)
+
+Added in a single commit, `39c1194`, 2026-08-01 22:25:17 -0500: *"Add live HA config snapshot
+(beehive-config/) as disaster-recovery backup"*. Five files:
+
+| File | Bytes |
+|---|---|
+| `configuration.yaml` | 3,170 |
+| `automations.yaml` | 10,533 |
+| `hcc.yaml` | 22,608 |
+| `scenes.yaml` | **0** |
+| `scripts.yaml` | **0** |
+
+**Critical framing:** this is a **snapshot of what runs on Beehive**, not a source of truth that Beehive
+reads. Home Assistant runs its own copies under `/config/`. Editing a file here changes nothing on the
+house until someone deploys it — the same trap that `a13df25` documents for the B-Hyve component (§14.6.3).
+
+**`configuration.yaml`** — the whole file is small and worth recording in structure:
+
+- `default_config:` — **load-bearing.** Its absence is what silently killed the recorder and with it
+  utility bill tracking from 07-02 to 07-28 (see the `HCC — Recorder Down Watchdog` automation below,
+  which exists solely because of that outage).
+- `homeassistant: packages: !include_dir_named packages` — this is how `hcc.yaml` gets loaded.
+- `automation: !include automations.yaml`, `mobile_app:`
+- **`zone:`** — two hand-entered zones with real coordinates: `Barn` (36.716949, -86.65295, radius 150,
+  `mdi:barn`) and `Work` (36.1624877, -86.7776215, radius 100, `mdi:parking`). The Work coordinates are
+  the ones fixed on 2026-08-01 per `CLAUDE.md` Pending Item 9 (310 Commerce St parking garage, not the office).
+- **`rest_command: pipup_notify`** — POSTs to `http://192.168.1.215:7979/notify` (the Fire TV), payload
+  `{"title": …, "message": …, "duration": {{ duration | default(15) }}, "media": {"image": {"uri": …,
+  "width": 480}}}`. This is the picture-in-picture alert transport.
+- **`image_processing:`** — six near-identical `codeproject_ai_object` blocks, one per camera
+  (`camera.301_backyard`, `camera.301_driveway`, `camera.301_front_doorbell`, `camera.front_right`,
+  `camera.back_left`, `camera.garage`), all pointed at `192.168.1.194:32168`, `timeout: 60`,
+  **`confidence: 60`**, `save_file_folder: /config/www/ai_snapshots/`, `show_boxes: true`, targets
+  `person` / `vehicle` / `animal`.
+- **`http: cors_allowed_origins:`** — `https://loewenhome.com`, `https://www.loewenhome.com`,
+  `https://toro1-5rz.pages.dev`. **This is what lets the HCC web app talk to HA from the browser.** Any
+  new domain for the app must be added here or the app silently fails cross-origin.
+
+**`hcc.yaml`** — the HCC package, 22.6 KB, the largest config file. Contents:
+
+*Helpers:* `input_number.mower_hours` (0–10000, step 0.1, `h`), `input_number.mower_battery_voltage`
+(0–16, step 0.01, `V`), `input_text.mower_last_sync` (max 64), `input_boolean.hcc_panic_active`.
+
+*Template sensors:* `HCC Mower Hours`, `HCC Mower Battery`, `HCC Mower Status`, and the three utility
+sensors — `Water Gallons` (`sensor.water_meter_reading | float / 10`, `state_class: total_increasing`),
+`Gas CCF` (`sensor.gas_meter_reading | float / 100`), and `Gas Cost`, whose formula is the actual
+tariff, verbatim:
+
+```
+{% set ccf = states('sensor.gas_month') | float(0) %}
+{% set therms = (ccf * 1.068) | round(0) %}
+{{ ((13.44 + therms * 1.235) * 1.05) | round(2) }}
+```
+
+(i.e. $13.44 base + $1.235/therm, × 1.05 tax, with a 1.068 CCF→therm factor.)
+
+*Automations in the package:* `hcc_panic_button` (webhook `hcc-panic-button`, `local_only: false`,
+flashes `light.turn_on` on `entity_id: all` with `flash: long`, notification, auto-clears after 30 s);
+`hcc_mower_sensor_sync` (webhook `hcc-mower-sensor`; note the hours guard is
+`[payload.hours, states(input_number.mower_hours)] | max` — **hours can only ever move forward**, which is
+exactly why a board swap makes the meter look frozen, per `firmware/mower_hours_esp32/README.md`);
+`hcc_weather_severe`; `AI Camera Scan on Motion` (parallel, max 10, maps each motion binary_sensor to its
+image_processing entity via an inline Jinja dict); **`AI Object Detected Notify`** (queued, max 20 —
+branches person/vehicle/animal with distinct titles 🚨/🚗/🐾, person gets
+`interruption-level: critical` + `critical: 1, volume: 1.0`, others `time-sensitive`; every push carries
+the annotated snapshot, a deep link `tap_url: /home/areas-<camera>`, and a **"🔇 Mute 15 min"** action);
+`AI Notify Mute Action` (writes `input_datetime.hcc_ai_mute_<cam>` 15 minutes out);
+**`AI Show Camera on Fire TV` — `initial_state: false`, i.e. shipped DISABLED** (the ADB full-screen
+takeover superseded by PiPup); `AI Arrival Suppression` (mutes all six cameras for 10 min when
+`person.jeff_loewen` or `person.angela_loewen` goes `not_home → home` — verbatim description:
+*"so walking in the door doesn't trigger camera alerts"*); `Angela Almost Home` (three triggers: zone
+enter, a `numeric_state` on distance below 10, and the Mercedes `device_tracker.gle_350_device_tracker`);
+`Blink Fast Motion Poll` — **note the mismatch: the alias and description say "every 30s" but the trigger
+is `time_pattern: seconds: "/10"`, i.e. every 10 seconds.** Description verbatim: *"Forces a Blink refresh
+every 30s so AI alerts aren't delayed by the default 5min poll."* **Trap: the description is wrong, or the
+interval is; either way one of them needs correcting, and a 10-second forced refresh across six cameras is
+six times the intended API load.**
+
+*Scripts:* `hcc_good_night` (all lights off + notification); `hcc_resume_fire_tv`;
+**`hcc_skip_commercial`** — at tip this file has `repeat: count: 3` of `input keyevent 90` at 1200 ms plus
+a final `keyevent 126`, **which contradicts `CLAUDE.md` Pending Item 16**, which states the 3× press
+"skipped way too far" in Sling and was *"Reduced live to a single `keyevent 90` press as a starting point
+(`packages/hcc.yaml`)"*. **The snapshot is therefore older than the live config on this script** — a
+concrete demonstration that `beehive-config/` is a point-in-time backup, not a mirror; `hcc_open_sling`;
+`hcc_check_current_app` (`dumpsys activity activities | grep mResumedActivity`).
+
+*Six `input_datetime.hcc_ai_mute_*` helpers* (one per camera), all initialised to `2020-01-01 00:00:00`
+so the "muted?" template reads false by default.
+
+*`rest:`* — the Weather Underground PWS pull, `resource: !secret weather_pws_resource_url`,
+`scan_interval: 300`, four sensors (Backyard Temperature / Feels Like / Humidity / Wind).
+
+*`utility_meter:`* `water_month` and `gas_month`, monthly cycle. *`sensor:`* a `derivative` platform
+`Water Flow` off `sensor.water_gallons`, `unit_time: min`, `time_window: "00:05:00"` — the input to the
+idle-flow leak alarm.
+
+**`automations.yaml`** — the UI-created automations, ten of them, and the descriptions are where the
+history is. Verbatim highlights:
+
+- `HCC Watchdog - Integration Down Alert` — *"Notifies Jeff's phone the moment a key HCC integration
+  (Blink, Fire TV, Mercedes) goes unavailable for 5+ minutes, instead of it failing silently for hours."*
+- `HCC — Recorder Down Watchdog` — *"Alerts immediately if HA's recorder component logs an error (the
+  exact failure that silently broke utility bill tracking 07-02 to 07-28)."* Message body, verbatim:
+  *"Recorder logged an error — utility bill tracking (water/gas/electric) depends on recorder and will
+  silently stop working. Check configuration.yaml for default_config: and restart HA."*
+- `HCC — Blink Auto-Heal` — *"Blink's blinkpy library has a recurring, currently-unresolved upstream
+  LoginError token-refresh crash (tracked in home-assistant/core#176836) that leaves camera/motion
+  entities stuck at stale values instead of going 'unavailable' — silent for 10-15+ minutes or longer
+  until someone notices. This reloads just the Blink integration within seconds of the crash instead of
+  waiting for a manual full HA restart."* Reloads config entry `01KY0MYHR8VN4646FQDSXA7VDC`.
+- `HCC — Blink Periodic Health Reload` — the backstop, and its description is a genuinely subtle HA
+  finding, verbatim: *"The error-triggered auto-heal only fires on the FIRST occurrence of a given error
+  message per HA session — repeats of the same message don't re-fire system_log_event, so a crash-loop
+  can slip past it. This runs unconditionally every 15 minutes regardless of any detected error […]
+  Cheap and safe — reload_config_entry was live-tested with zero disruption."*
+- `HCC — AI Camera Popup on Fire TV` — *"On real CodeProject.AI object detection, pushes the actual
+  annotated frame that triggered the detection (not a fresh/later snapshot) as a small
+  picture-in-picture popup via PiPup, instead of taking over the whole TV. **Replaces the old
+  full-screen-switch approach per Jeff's request.**"*
+- `HCC — Angela Arrived at Barn` / `HCC — Angela Arrived at Work` — both use the Mercedes GLE's GPS,
+  verbatim: *"using the Mercedes GLE's GPS since her phone doesn't reliably report location. Zone real
+  coordinates captured live 08-01 as she actually arrived."* The work automation records the address in
+  its own description: *"Work address: 150 4th Avenue North Suite 1700, Nashville, TN 37219."*
+  **Trap: that address is in the automation description, while `configuration.yaml`'s `zone.work`
+  coordinates are the 310 Commerce St parking garage — two different places, ~90 m apart per
+  `CLAUDE.md` Pending Item 9, and never reconciled.**
+- `HCC — Possible Water Leak (Idle Flow)` — flow > 0.05 for 30 min, gated on (everyone `not_home`) OR
+  (01:00–05:00), AND all five named zone switches off (`switch.z2_front_left`, `z3_back_left`,
+  `z4_back_right`, `z5_right_side_drive`, `switch.garden`). Description verbatim: *"built 08-01 after
+  confirming the water meter/pit radio are healthy, not faulty."* **Trap: only five zone switches are
+  checked; the system has six zones. `switch.z1_*` is absent from the condition list — plausibly because
+  zone 1 was the leaking valve, but nothing in the file says so. Verify before trusting the alarm's
+  false-positive rate.**
+- `HCC — Morning Digest` — 7am push + persistent notification; description records the removed metric
+  verbatim: *"Dropped the active-notification count 08-02: confirmed via live test that
+  states.persistent_notification has been unreadable from templates since HA 2023.6 (notifications were
+  removed from the state machine) -- it was silently always reporting zero, which is worse than not
+  reporting it."*
+
+**`scenes.yaml` and `scripts.yaml` are both 0 bytes.** **INFERRED:** these were captured empty because
+HA's UI scene/script editors had never been used (all scripts live in the `hcc.yaml` package instead) —
+the repo carries no note explaining them. Do not read the empty files as "scenes were deleted."
+
+#### 14.6.2 `beehive/esphome/hcc-mower.yaml` — the ESPHome mower firmware (NOT the one in service)
+
+14,367 bytes, committed 2026-06-23 in `75a7afd` ("Add complete Beehive brain setup — no Windows
+required"). Header block, verbatim:
+
+> ```
+> HCC Mower Sensor — ESPHome Firmware
+> ESP32 DevKit mounted on the Toro TimeMaster 21200
+> Measures:  Engine hours (hall effect on ignition wire) / Battery voltage (ADC divider) /
+>            Engine RPM (pulse counter on ignition wire) / GPS position + distance (u-blox NEO-6M) /
+>            Pitch / Roll (MPU-6050) / Vibration + shock events (MPU-6050) / WiFi signal strength /
+>            ESP32 internal temperature
+> Reports:   → Home Assistant (ESPHome native API) → Cloudflare /api/hours (HTTP POST every 90s while running)
+> Hardware:  GPIO27 — Hall effect sensor (ignition / engine running)
+>            GPIO34 — Battery voltage ADC (through 100k/10k divider → 0-3.3V = 0-16.5V)
+>            GPIO16 — GPS TX (UART1 RX on ESP32) / GPIO17 — GPS RX (UART1 TX on ESP32)
+>            GPIO21 — SDA (MPU-6050) / GPIO22 — SCL (MPU-6050)
+> ```
+
+Substitutions: `name: hcc-mower`, `api_url: https://toro1-5rz.pages.dev/api/hours` (comment: *"Your
+Cloudflare Pages site — update if domain changes"*). Secrets referenced: `esphome_api_key`,
+`esphome_ota_password`, `wifi_ssid`, `wifi_password`. Fallback AP SSID `HCC-Mower-Fallback`.
+`http_request: verify_ssl: false`.
+
+Notable implementation details: haversine distance accumulation every 5 s with a **20 m jump filter**
+(*"ignore GPS jumps > 20m in 5s"*); `total_dist_m` is `restore_value: true` (survives reboot) while
+`session_dist_m` is not; battery ADC uses `multiply: 5.0` with the comment *"divider ratio:
+(100k+10k)/10k = 11 → calibrate to match multimeter"* — **the code and the comment disagree (5.0 vs 11);
+the header says the divider maps 0–3.3 V to 0–16.5 V, which is ×5. Flagged, unresolved in the file**;
+RPM `multiply: 0.5` with *"2 pulses per rev on most small engines → adjust per your ignition"*; engine
+considered running above 200 RPM; `integration` platform for engine hours with
+`multiply: 0.0000277778` and the frank comment *"RPM·h → hours (1/60/60 ... simplified for
+integration)"*; two POST intervals — a 90 s full payload while `engine_on`, and a 5-minute heartbeat
+while off (*"so the dashboard can confirm the sensor box is alive while parked"*), with `rpm_peak` and
+`shock_count` reset on HTTP 200.
+
+**⚠️ THE BIGGEST TRAP IN THE CONFIG TREES: this is not the firmware on the mower.** The mower runs the
+**Arduino/C++** firmware in `firmware/mower_hours_esp32/` at `FW_VERSION "1.4.0"` (see §14.7). The two
+have *opposite* reporting behaviour:
+
+| | `beehive/esphome/hcc-mower.yaml` | `firmware/mower_hours_esp32/` (in service) |
+|---|---|---|
+| While running | POSTs full payload every 90 s | **posts nothing** — samples with WiFi off |
+| While parked | 5-min heartbeat | full payload every `IDLE_INTERVAL_S` |
+| Language | ESPHome YAML | Arduino C++ |
+| Engine detect | hall effect / pulse counter on GPIO27 | MPU6050 vibration threshold |
+
+The firmware README states the running-posts-nothing behaviour as the load-bearing invariant, verbatim:
+
+> **Running: posts nothing.** […] "A heartbeat followed a live reading" is a state that cannot occur —
+> the server was once built on the assumption it could, and mow history silently never recorded a single
+> mow because of it.
+
+**Anyone who reads `hcc-mower.yaml` and writes server code against it will reintroduce the exact bug that
+cost five mows of history.** `hcc-mower.yaml` should be read as a June-2026 design that was superseded,
+not as documentation of the device. It carries no such warning in the file itself — that gap is worth
+closing.
+
+`beehive/esphome/secrets.yaml.template` (411 bytes) is the companion, verbatim in part:
+
+> ESPHome secrets — copy this to /config/esphome/secrets.yaml on Beehive. Fill in your values.
+> **This file is NEVER committed to git.** […] Generate a random 32-byte base64 key: `openssl rand -base64 32`
+
+#### 14.6.3 `beehive/custom_components/bhyve/` — the hand-built Orbit B-Hyve integration
+
+Seven files (`__init__.py`, `manifest.json`, `config_flow.py`, `coordinator.py`, `switch.py`, `const.py`,
+`strings.json`) plus `INSTALL.md`, and a one-command installer `beehive/install-bhyve.sh`.
+
+**Why it exists** — the root cause is recorded in commit `768cb6a` (2026-06-24), verbatim:
+
+> Root cause: Cloudflare Workers blocked from B-Hyve API (error 530/1018) because B-Hyve's API rejects
+> Cloudflare edge IPs.
+>
+> Fix: custom HA integration calls B-Hyve from home IP (192.168.1.66) where there's no block. Creates real
+> switch entities per zone.
+
+`INSTALL.md` says the same in Jeff-facing language, verbatim:
+
+> This custom integration runs on YOUR Home Assistant (Beehive) so it calls the B-Hyve API from your home
+> IP — not from Cloudflare.
+
+`const.py` records the API archaeology: `API_BASES = ["https://api.orbitbhyve.com/v1",
+"https://api.orbitonline.com/v1"]`, a browser-spoofing `User-Agent` (Chrome/120 on X11 Linux), an
+`Orbit-Session-Token` header slot, `SCAN_INTERVAL_SECONDS = 60`, `DEFAULT_RUN_MINUTES = 10`. Three
+successive fix commits in a single day tell the auth story: `d56d92b` "*Fix B-Hyve API URL — moved to
+api.orbitbhyve.com*" → `c203988` "*Fix B-Hyve login body — API requires session wrapper object*" →
+`77c70e7` "*Fix B-Hyve auth — use browser headers, correct API URL, drop orbit-api-key*" (all 2026-06-25).
+
+**The last commit to this component, `a13df25` (2026-08-13), is one of the best debugging lessons in the
+repo — verbatim in full:**
+
+> `asyncio.TimeoutError` stringifies to an empty string, so `f"B-Hyve fetch error: {e}"` produced literally
+> "B-Hyve fetch error: " with nothing after it. That dead end sent today's investigation down three wrong
+> paths - changed password, missing orbit-app-id header, datacenter IP block - before the emptiness itself
+> became the clue. Now always includes `type(e).__name__`.
+>
+> Also raised the devices-fetch timeout 10s -> 30s. One slow response from a third-party cloud API dropped
+> every zone entity out of HA until the next successful poll, which reads as a broken integration rather
+> than a slow request.
+>
+> ⚠️ **NOT DEPLOYED.** Beehive runs its own copy under `/config/custom_components/bhyve/`. This machine has
+> no Python, so `python3 -m py_compile` cannot run here - deploy via Studio Code Server's terminal and
+> compile-check there BEFORE restarting HA, per CLAUDE.md. The integration is currently healthy (6 zone
+> entities), so there is no reason to rush an unvalidated Python change onto it.
+
+**Trap: `a13df25` is still NOT DEPLOYED as of tip (2026-08-16).** No later commit touches
+`beehive/custom_components/bhyve/`. **The repo copy is AHEAD of the house.** Anyone reading the improved
+error message in the repo and then reading an HA log that lacks the exception type is looking at two
+different builds. Also note the generalizable lesson: **never log an exception without its type** —
+several exception classes stringify to nothing.
+
+`install-bhyve.sh` downloads the seven files with `wget` from the **raw GitHub URL of this very branch**:
+`https://raw.githubusercontent.com/d4c2np9f69-afk/master-the-master-/claude/time-master-project-liq1jw/beehive/custom_components/bhyve`.
+**Trap: that hardcodes both the repo and the branch name into a script Jeff runs on the house.** If the
+branch is ever renamed or the repo made private, the installer breaks silently. It also means the
+installer would happily deploy the **undeployed, unvalidated** `a13df25` change.
+
+#### 14.6.4 `beehive/blink/` — the vendored Blink integration
+
+Twelve files (`__init__.py`, `alarm_control_panel.py`, `binary_sensor.py`, `camera.py`, `config_flow.py`,
+`const.py`, `coordinator.py`, `diagnostics.py`, `manifest.json`, `sensor.py`, `services.py`,
+`strings.json`, `switch.py`). This is a **fork of Home Assistant core's `blink` integration, vendored into
+the repo and patched**, with a custom version string in `manifest.json`:
+
+```json
+"requirements": ["blinkpy==0.25.7"],
+"version": "2026.7.0-hcc-blinkpy257"
+```
+
+The commit trail is the whole 2FA saga:
+
+```
+b86a37e 2026-06-25  Add Blink 2FA fix installer — /blink endpoint + patched config_flow.py
+c7ad70d 2026-06-25  Blink config_flow: defensive imports for BlinkTwoFARequiredError and HARDWARE_ID
+e830083 2026-06-25  Blink: bundle all 12 integration files in repo — no GitHub API needed
+b89ba28 2026-06-25  Blink 2FA: fix validate_input swallowing BlinkTwoFARequiredError
+dbc8fbe 2026-06-25  Blink coordinator: surface auth failure as ConfigEntryAuthFailed
+f3ae126 2026-07-03  Blink 2FA: dedicated cookie session to fix 'empty_cookies' login failure
+1f2cdec 2026-07-03  Blink: bump blinkpy 0.25.2 -> 0.25.7 — the actual fix for 'Login failed'
+```
+
+**`1f2cdec` is the one that mattered — verbatim:**
+
+> Found the real root cause by diffing blinkpy in the harness: Blink changed their OAuth signin to signal
+> 2FA-required with HTTP 202 + tsv_state/tsv_methods fields. blinkpy 0.25.2's oauth_signin only recognizes
+> the OLD 412 code, so it returns None -> _oauth_login_flow logs 'Login failed' -> ConfigEntryNotReady.
+> That's exactly Jeff's log. blinkpy 0.25.7 added 202/tsv handling (confirmed in api.py:oauth_signin).
+> auth.py is unchanged 0.25.2->0.25.7 so the custom component imports stay valid.
+>
+> Fix: pin blinkpy==0.25.7 in manifest. **Kept the dedicated-session tweak as belt-and-suspenders but
+> corrected its comment (the cookie theory was the wrong diagnosis; the 202 handling is the fix).**
+
+That last sentence is the model behaviour worth preserving: a wrong diagnosis (`f3ae126`, "empty_cookies")
+was left in place as harmless belt-and-braces but its **comment was corrected** so nobody later believes
+the wrong story.
+
+`coordinator.py` at tip carries the `dbc8fbe` patch — `BlinkTwoFARequiredError`/`UnauthorizedError` →
+`ConfigEntryAuthFailed`, `ClientError`/`TimeoutError` → `ConfigEntryNotReady`, everything else →
+`ConfigEntryError`, plus an explicit `if not self.api.available: raise ConfigEntryAuthFailed`.
+`SCAN_INTERVAL = 300`.
+
+**Traps:** (a) this is a **fork of a core integration** — a Home Assistant upgrade that ships a newer
+core `blink` will not overwrite a copy in `custom_components/`, so the fork silently wins and can drift
+behind upstream indefinitely; the version string `2026.7.0-hcc-blinkpy257` is the only marker of what it
+was forked from. (b) The known upstream crash is **not fixed here** — it is *worked around* at the
+automation layer by the two auto-heal automations in `automations.yaml`, which reload config entry
+`01KY0MYHR8VN4646FQDSXA7VDC` on error and unconditionally every 15 minutes. **That entry ID is a magic
+constant in two automations; if the Blink integration is ever removed and re-added, both automations
+break silently.** (c) `blinkpy` is pinned; do not unpin without re-checking the 202/tsv handling.
+
+#### 14.6.5 `beehive/install.sh` and the PowerShell installers
+
+`beehive/install.sh` (13,421 bytes, `75a7afd` 2026-06-23, corrected by `1f3ce1a` "*Fix Beehive setup —
+correct commands for the `ha >` CLI, curl not wget*"). Header, verbatim:
+
+> ```
+> HOME COMMAND CENTER — BEEHIVE BRAIN SETUP
+> Run INSIDE the HA Terminal add-on:
+>   curl -fsSL https://toro1-5rz.pages.dev/beehive/install.sh | bash
+> ```
+
+It guards with `[[ -d /config ]] || die "Must run from inside the Beehive HA Terminal add-on"`, installs
+HACS (`curl -fsSL https://get.hacs.xyz | bash -`, skipped if present), creates `/config/packages`, and
+**heredocs the entire `hcc.yaml` package inline**, then patches `configuration.yaml`, installs/starts the
+ESPHome add-on via the `ha` CLI, and copies the mower ESPHome config.
+
+**Trap: `install.sh` contains its own embedded copy of `hcc.yaml`, which is now a third version** — the
+heredoc in `install.sh` (June), the snapshot in `beehive-config/hcc.yaml` (August 1), and whatever is
+actually live on Beehive. The `install.sh` copy still contains an `hcc_irrigation_started` automation and
+a "Fall freeze warning (winterize reminder)" that do **not** appear in the August snapshot. **Re-running
+`install.sh` on a live Beehive would overwrite `/config/packages/hcc.yaml` with the June version and
+silently delete every AI-camera automation, every mute helper, the PiPup rest_command wiring, and the
+utility sensors.** It is a bootstrap script, not a repair script. **Do not re-run it on a configured
+system.**
+
+Root-level PowerShell companions, both "run on the Beast": `install-hacs.ps1` (4,527 bytes —
+*"HCC - HACS + B-Hyve Auto Installer / Run this on the Beast to install HACS on the Beehive"*,
+`$HA_IP = "192.168.1.66"`) and `setup-hcc.ps1` (6,644 bytes — *"HCC BEEHIVE SETUP SCRIPT / Run this on
+the Beast to configure Home Assistant"*, step 1 is obtaining an HA long-lived token). These are the
+Windows-side siblings of the bash installer and carry the same "bootstrap only" caveat.
+
+---
+
+### 14.7 `firmware/mower_hours_esp32/` — the canonical mower firmware
+
+Three files: `README.md`, `mower_hours_esp32.ino`, `secrets.example.h`. Added in one commit, `a1cfa53`,
+2026-08-11 19:31:14 -0500. The README's first line, verbatim:
 
 > **This is the canonical copy.** It lives in the repo deliberately.
+
+**Why it's here — verbatim, and this is one of the most important paragraphs in the entire project record:**
+
+> For months the hour meter didn't work. The box sent `hours_seconds`, the app read `d.hours`, and nothing
+> converted between them — 5.5 hours of real runtime and 6.3 km of real mowing went unrecorded across five
+> mows. **Jeff was told the sensors were faulty and bought replacement hardware to fix what was a
+> field-name mismatch.**
 >
-> For months the hour meter didn't work. The box sent `hours_seconds`, the app read `d.hours`, and nothing converted between them — 5.5 hours of real runtime and 6.3 km of real mowing went unrecorded across five mows. **Jeff was told the sensors were faulty and bought replacement hardware to fix what was a field-name mismatch.**
+> The reason it went unnoticed so long is structural, not carelessness: the cloud session that owned the
+> server code has **no outbound network** and **could not see this file**. It was writing
+> `functions/api/hours.js` against `CLAUDE.md`'s prose *description* of the firmware, and that description
+> was wrong. Nobody could diff the two halves of the contract because only one half was in the repo.
 >
-> The reason it went unnoticed so long is structural, not carelessness: the cloud session that owned the server code has **no outbound network** and **could not see this file**. It was writing `functions/api/hours.js` against `CLAUDE.md`'s prose *description* of the firmware, and that description was wrong. Nobody could diff the two halves of the contract because only one half was in the repo. Now both halves are here.
+> Now both halves are here.
 
-Other hard-won facts recorded there: **the repo is public**, so secrets live in gitignored `secrets.h` — and "**Splitting the source does NOT make the binary safe.** Those strings are compiled into the `.bin` as plaintext. Verified on 2026-08-11 by grepping a real build" (with the extra trap that `strings` isn't installed on Jeff's PC and "returns a silent false 'clean'" — use `grep -a`). Therefore "a firmware image **must never be served from a public URL**, including this project's own Pages site… it is why OTA is written but not yet enabled." Flashing: "**Auto-reset does not work on this board.** Jeff must hold the BOOT button down through the *entire* upload or it fails with `Wrong boot mode detected (0x13)`." Behavior contract: "**Running: posts nothing** … 'A heartbeat followed a live reading' is a state that cannot occur — the server was once built on the assumption it could, and mow history silently never recorded a single mow because of it." Two-way control channel (1.4.0+): commands `zero_tilt`, `clear_track`, `flush_buffer`, `reboot`, `ota`, acked by id; "The box sleeps between uploads and cannot be woken, so a command lands on its next post — up to 5 minutes while parked. That is the hardware, not a bug." Tilt zeroing exists because the enclosure is bolted at an angle ("a level mower read −12.4° / 28.5° and the app's tip-risk warning read CRITICAL in a garage"). Board-swap rules (hours/distance/tilt live only in that chip's flash). The `.ino` header preserves Jeff's own words on the watchdog: "Jeff's words for why this exists: *'I would only push it if it got hung up.'*" Final rule: "This subsystem is the local coworker session's, end to end — see `CLAUDE.md` Rule 13."
+That is the "cost him real money" event, stated in the repo's own words. The commit message repeats it and
+adds the verification detail:
 
-#### 5.4 `_headers` — Cloudflare Pages cache headers
+> WiFi SSID, WiFi password and device secret move to secrets.h, which is gitignored because this repo is
+> public. secrets.example.h is the committed template. **Compiles byte-identical (1111016 bytes)**, so this
+> is purely a source reorganisation.
+>
+> Documented plainly in the README that this does NOT make the compiled binary safe - those strings are
+> plaintext inside the .bin, so firmware images still cannot be served from a public URL and OTA needs an
+> authenticated delivery path. **Also recorded that `strings` is absent on this machine and returns a
+> silent false "clean"; `grep -a` is the check that actually works.**
 
-Three commits, all during the July stale-cache fight: `173270a` 2026-07-20 ("Fix root cause of recurring stale-cache bug: no-cache service-worker.js"), `70dba84` and `e37a193` 2026-07-21 ("Fix SW cache permanently: registration + CDN-Cache-Control + no-store"); last touched `186025f` 2026-08-15. Content: `/service-worker.js` gets `Cache-Control: no-cache, no-store, must-revalidate` **and** `CDN-Cache-Control: no-store` (so Cloudflare's edge can't serve a stale worker); `/` and `/index.html` get `Cache-Control: no-cache` plus `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`. **Trap:** this file is the permanent fix for the recurring "Jeff sees an old version on his phone" class of bug — do not remove or weaken it.
+**The credentials section, verbatim:**
 
-#### 5.5 `.github/workflows/deploy.yml` — the disabled workflow that spammed Jeff's inbox
+> **This repo is public.** WiFi SSID, WiFi password and the device secret live in `secrets.h`, which is
+> gitignored. […]
+>
+> **Splitting the source does NOT make the binary safe.** Those strings are compiled into the `.bin` as
+> plaintext. Verified on 2026-08-11 by grepping a real build for each value from `secrets.h` — the SSID,
+> the WiFi password and the device secret were all present, in the clear, in the compiled image.
+>
+> Reproduce it yourself before trusting any hosting decision (and note `strings` is not installed on
+> Jeff's PC — `grep -a` on the binary is the check that actually works; using `strings` returns a silent
+> false "clean"):
+>
+> ```
+> grep -qaF "$(sed -n 's/.*HCC_WIFI_PASS *"\(.*\)"/\1/p' secrets.h)" build/*.bin && echo LEAKS
+> ```
+>
+> So a firmware image **must never be served from a public URL**, including this project's own Pages site.
+> OTA delivery has to be authenticated. That is a hosting problem, separate from source layout, and it is
+> why OTA is written but not yet enabled.
 
-Created `8fdae39`/`1d7cacc` 2026-06-22; **disabled** `ac99b33` 2026-08-06 ("Stop the GitHub Actions failure-email flood: disable the dead deploy workflow"). The in-file comment tells the story:
+**Building and flashing, verbatim** — including two hardware quirks that will otherwise cost an hour each:
 
-> DISABLED 2026-08-06. This workflow has never worked — the CLOUDFLARE_API_TOKEN secret does not exist, so every push failed and emailed Jeff (**124 failure notices in one week**). Deploys do NOT go through Actions: Cloudflare Pages' native Git integration watches claude/time-master-project-liq1jw and deploys on push, independently of this file. See CLAUDE.md "Deployment Pipeline". Trigger reduced to manual-only so it can never fire automatically again.
+> ```
+> arduino-cli compile --fqbn esp32:esp32:esp32 .
+> arduino-cli upload -p COM<n> --fqbn esp32:esp32:esp32 .
+> ```
+> `arduino-cli` on Jeff's PC:
+> `%LOCALAPPDATA%\Programs\arduino-ide\resources\app\lib\backend\resources\arduino-cli.exe`
+>
+> **Auto-reset does not work on this board.** Jeff must hold the BOOT button down through the *entire*
+> upload or it fails with `Wrong boot mode detected (0x13)`. Kill the Arduino IDE's `serial-monitor`
+> helper process first if it holds the port — just that process, not the IDE, which may have unsaved work.
+>
+> **Engine hours survive a reflash** (NVS via `Preferences`) as long as nothing does an erase-all.
+> Verified across five flashes. They do NOT survive swapping to a different physical board.
 
-The commit message adds it "was the single largest source of mail in his inbox," and that the file was kept (trigger `workflow_dispatch` only) rather than deleted "so the job definition stays available if the secret is ever added." **Trap:** never re-enable `on: push` here; deploys are Cloudflare-native.
+**What the box actually does, verbatim** (the invariant that the ESPHome YAML contradicts — see §14.6.2):
 
-#### 5.6 Other tip-level items in scope
+> - **Running: posts nothing.** Samples every `SAMPLE_INTERVAL_S` with WiFi off. "A heartbeat followed a
+>   live reading" is a state that cannot occur — the server was once built on the assumption it could, and
+>   mow history silently never recorded a single mow because of it.
+> - **Parked: full payload every `IDLE_INTERVAL_S`.**
+> - The first parked post after a mow carries that mow's totals, flagged `source:"mow_end"` +
+>   `mow_ended:true`. Later ones are `heartbeat`.
+> - Failed posts buffer in RTC memory and replay later as `source:"buffered"`.
 
-`ls` of the tip also shows: `backups/` (seven `*.2026-06-24.bak` files — pre-refactor copies of index.html, service-worker.js and the API functions from 06-24; historical, not live code), `Toro_TimeMaster_PWA_Package.zip` (the original 2026-05-19 ChatGPT-era PWA package, kept at root), `install-hacs.ps1` / `setup-hcc.ps1` / `windows-scripts/` (Windows-side setup scripts, covered elsewhere in this record), `icons/`, `images/` (the hero set: hero-home-dusk, hero-weather, hero-irr, hero-yard, hero-cameras, hero-car, hero-truck, hero-guardian, hero-lux, util-electric/gas/water, splash-portrait/landscape, mower-marker), `functions/` (the Cloudflare Pages API — another section's subject), and `manifest.json`/`service-worker.js` (the PWA shell). The mower documentation trio in `docs/mower/` (`gps_firmware_handoff_2026-08-10.md`, `gps_firmware_coworker_findings_2026-08-11.md`, `CLOUD_SESSION_TASKS_2026-08-11.md`) pairs with §5.3's firmware and is covered in the mower section of this record.
+**Two-way control channel (1.4.0+), verbatim:**
+
+> `postJson()` keeps the POST response, so every upload is an exchange. The reply carries desired config
+> and at most one command, acked by id so a box that dies mid-command retries and never applies one twice.
+>
+> Commands: `zero_tilt`, `clear_track`, `flush_buffer`, `reboot`, `ota`.
+> Config: `vib_threshold`, `idle_interval_s`, `sample_interval_s`, `track_min_step_m`, `gps_step_max_m`,
+> `flush_every_s`, `service_mode` — all clamped server-side in `functions/api/hours.js`.
+>
+> Issuing anything requires the family password or the maintenance token. The box's own uploads stay
+> unauthenticated because it has nowhere safe to keep a secret.
+>
+> **The box sleeps between uploads and cannot be woken**, so a command lands on its next post — up to 5
+> minutes while parked. That is the hardware, not a bug.
+
+**Tilt, verbatim** — with the honest limit stated rather than hidden:
+
+> Raw pitch/roll describe the *enclosure*, which is bolted in at an angle — a level mower read −12.4° /
+> 28.5° and the app's tip-risk warning read CRITICAL in a garage. `zero_tilt` captures the gravity vector
+> once while level; everything after is measured relative to it […]
+>
+> Honest limit: one captured vector fixes which way is *down*, not which way is *forward*. Total tilt is
+> exact; the fore/aft vs side-to-side split is relative to how the box sits in its mount.
+
+**Board swap, verbatim:**
+
+> Config restores itself — a fresh board reports `cfg_rev: 0`, the server sees it's behind and pushes
+> everything on the first upload.
+>
+> **Engine hours, lifetime distance and the tilt reference do not.** They live only in that chip's flash.
+> After a swap: re-run SET HOURS from the physical meter (or the hour meter appears frozen for hours of
+> real mowing, since the app only ever lets it move forward), and send `zero_tilt`.
+
+**Ownership, verbatim:** *"This subsystem is the local coworker session's, end to end — see `CLAUDE.md`
+Rule 13."* And the pre-change gate: *"`node scripts/mower-hours-test.mjs` covers the server half. The
+invariants that must not regress are listed in `docs/mower/`."*
+
+**From the `.ino` itself** — two comment blocks worth preserving verbatim. The watchdog, quoting Jeff:
+
+> Hardware watchdog. Jeff's words for why this exists: **"I would only push it if it got hung up."** A
+> wedged wake — GPS never returning, a WiFi stack stuck below its own timeout — used to mean the box was
+> silently dead until someone noticed and walked to the garage to press EN. With this, the chip resets
+> itself. 180 s against a normal wake of roughly 25 s […] so it can only fire on a genuine hang, never on
+> a slow-but-working one. A trip shows up as `reset_reason` in the next payload, so a self-heal is visible
+> rather than invisible — "it hung and recovered" is worth knowing about.
+
+And the version discipline:
+
+> Bumped on every flash. Reported in every upload so there is never any doubt about which build is
+> actually on the mower — the single most useful field when something starts behaving differently and
+> nobody remembers what changed.
+> `#define FW_VERSION "1.4.0"`
+
+The board header also records hard-won pin rules, verbatim: *"Board: ESP32-WROOM-32 30-pin NodeMCU dev
+board (Silicon Labs CP2102 USB, USB-C). Flash with a DATA USB-C cable. […] **Do NOT use GPIO6-11 (wired to
+flash) or ADC2 pins for the battery (ADC2 can't be read while WiFi is on).**"* And, honestly, about RPM:
+
+> About the RPM number: it is a best-effort estimate from vibration, **NOT a true tachometer**. It may land
+> on your real speed (~3000), or get fooled by a deck/chassis resonance, or report "--" when the signal is
+> too noisy. If it's junk, ignore the RPM panel — hours are unaffected.
+
+**`.gitignore` protection, verbatim:**
+
+```
+# Firmware credentials — this repo is PUBLIC
+secrets.h
+firmware/**/secrets.h
+```
+
+**Traps:** (a) **never serve a firmware `.bin` from the Pages site** — the OTA command exists in 1.4.0
+but OTA is deliberately not enabled for exactly this reason; (b) `strings` gives a false clean — use
+`grep -a`; (c) hold BOOT for the whole upload; (d) after a board swap the hour meter *looks broken* and
+isn't — re-run SET HOURS; (e) this subsystem belongs to the local coworker session, not the cloud session
+(CLAUDE.md Rule 13).
 
 ---
 
-### Cross-cutting traps distilled from these files (for any future session)
+### 14.8 `_headers` — Cloudflare Pages headers, and the wildcard that silently didn't work
 
-1. **Inovelli is dead. Kasa auto-update off, always. Sylvania is settled. SHIP 2.0 needs TP-Link creds.** These four are the "do not re-litigate" list of the lighting project (`zigbee_dimmer_selection_2026-08-13.md`, `kasa_smart_lighting_project_2026-08-06.md`, `HCC_INVENTORY.md`).
-2. **A decision made in conversation goes into the doc the SAME session** — commit `1572b4a`'s standing lesson, written after the $120 Inovelli decision was lost and re-pitched to Jeff.
-3. **Check `HCC_INVENTORY.md` before buying anything** ("Nothing gets bought twice because nobody checked this file") and log at order time; sync the iCloud copy.
-4. **Zigbee purchases: verify the exact protocol variant and the Z2M device page** — the project owns one wrong-variant WiFi sensor ($5.68) and dodged a mesh-breaking dimmer because of this rule. "Requires a hub" = Zigbee; "No hub required" = WiFi.
-5. **Nothing Zigbee gets unboxed until the camera/alert pipeline is verified** — Jeff's explicit sequencing order, 2026-08-15.
-6. **Lucky Mike is queued behind utilities** (Jeff, 2026-06-30) — plans are complete, nothing is built, unit #1 is a demo at parts cost, and the ChatGPT deck has nine documented errors to fix first.
-7. **`beehive-config/` is a snapshot, not the live HA; `beehive/esphome/hcc-mower.yaml` is superseded firmware; `firmware/mower_hours_esp32/` is canonical.** The hour-meter disaster (replacement hardware bought for a field-name mismatch) happened precisely because only one half of a contract was in the repo.
-8. **Deploys are Cloudflare-native; the Actions workflow stays manual-only; `_headers` no-cache rules stay.** Both were expensive to learn (124 failure emails; weeks of stale-cache bugs).
-9. **Hero look is governed centrally** — one grade in `index.html`, spec in `HERO-STYLE-GUIDE.json`, doc in `hero-master-grade.md`; never per-hero filters, never regenerate images to fix tone. And note `dev.html`'s mirrored filter values have drifted from the doc — reconcile against `index.html` before trusting either.
+400 bytes at tip. Six commits, and the last three (all 2026-08-15) are a debugging sequence worth keeping
+in full because the lesson is Cloudflare-specific and expensive to re-learn.
+
+Contents at tip, verbatim:
+
+```
+/service-worker.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  CDN-Cache-Control: no-store
+
+/
+  Cache-Control: no-cache
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+
+/index.html
+  Cache-Control: no-cache
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+```
+
+History:
+
+```
+186025f 2026-08-15  _headers: attach security headers to exact paths, drop the /* wildcard
+37fac0c 2026-08-15  _headers: move /* wildcard last, drop leading comment block
+7a1d250 2026-08-15  Audit 2026-08-15: security headers, backyard AI threshold finding, doc corrections
+e37a193 2026-07-21  Fix SW cache permanently: registration + CDN-Cache-Control + no-store
+70dba84 2026-07-21  Fix stale HTML: no-cache headers + SW cache bypass for index.html
+173270a 2026-07-20  Fix root cause of recurring stale-cache bug: no-cache service-worker.js
+```
+
+**Attempt 2 (`37fac0c`), verbatim:**
+
+> The first attempt put the `/*` security-header block at the top of the file with a four-line `#` comment
+> above it, and Cloudflare Pages never applied it - verified live for 5+ minutes after the deploy landed
+> (CLAUDE.md from the same commit was serving, so the deploy itself was fine). **The pre-existing
+> exact-path rule for `/service-worker.js` WAS being applied, so `_headers` works on this project; only the
+> new wildcard block was ignored.** Retrying with the wildcard placed after the exact-path rules and no
+> comments above it, which matches the shape Cloudflare documents.
+
+**Attempt 3 — the resolution (`186025f`), verbatim:**
+
+> **Two deploys proved the `/*` wildcard is silently ignored on this Pages project** - no
+> X-Content-Type-Options / X-Frame-Options / Referrer-Policy on either the app shell or a static asset,
+> 6 minutes after each deploy landed. Exact-path rules DO work here (the `/service-worker.js` rule returns
+> its non-default Cache-Control), so the headers now hang off `/` and `/index.html` instead.
+>
+> That covers the app shell, which is where X-Frame-Options and Referrer-Policy actually matter; static
+> images are not meaningfully exposed by their absence.
+
+**Traps:** (a) **`/*` wildcards do not work on this Pages project** — two deploys proved it, don't try a
+third; use exact paths. (b) The `service-worker.js` `no-cache, no-store` + `CDN-Cache-Control: no-store`
+rules are the *permanent* fix for a recurring stale-cache bug (three commits over 2026-07-20/21) — do not
+"optimize" caching back on for that file. (c) Static assets (images, `functions/`, `/dev.html`) carry no
+security headers by design and by acceptance, not by oversight.
+
+---
+
+### 14.9 `.github/workflows/deploy.yml` — the workflow that never worked and mailed Jeff 124 times
+
+The file at tip is a monument with a comment block on top, verbatim:
+
+```yaml
+name: Deploy HCC to Cloudflare Pages
+
+# DISABLED 2026-08-06. This workflow has never worked — the CLOUDFLARE_API_TOKEN
+# secret does not exist, so every push failed and emailed Jeff (124 failure
+# notices in one week). Deploys do NOT go through Actions: Cloudflare Pages'
+# native Git integration watches claude/time-master-project-liq1jw and deploys
+# on push, independently of this file. See CLAUDE.md "Deployment Pipeline".
+# Trigger reduced to manual-only so it can never fire automatically again.
+on:
+  workflow_dispatch:
+```
+
+The job itself is unchanged: `runs-on: ubuntu-latest`, name *"Deploy to toro1-5rz.pages.dev"*,
+`actions/checkout@v4` then `cloudflare/pages-action@v1` with
+`apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}`, `accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}`,
+`projectName: toro1`, `directory: .`.
+
+History: `8fdae39` (2026-06-22, "Add auto-deploy GitHub Action to Cloudflare Pages"), `1d7cacc`
+(2026-06-22, "Fix Cloudflare Pages project name to toro1"), `ac99b33` (2026-08-06, the disable).
+
+**The disabling commit, `ac99b33`, verbatim:**
+
+> This workflow has never worked. It calls `cloudflare/pages-action@v1` with `secrets.CLOUDFLARE_API_TOKEN`,
+> which does not exist on this repo, so every push to the branch failed instantly and sent Jeff a failure
+> email -- **124 of them in the past week alone, dozens on 08-06 by itself. It was the single largest
+> source of mail in his inbox.**
+>
+> Deploys are unaffected. Per the CLAUDE.md Deployment Pipeline section, the app is deployed by the native
+> Cloudflare Pages Git integration watching `claude/time-master-project-liq1jw`, entirely independently of
+> Actions.
+>
+> Trigger changed from push to `workflow_dispatch` (manual-only) rather than deleting the file, so the job
+> definition stays available if the secret is ever added, but it can never fire automatically again.
+
+**This is the record's clearest example of a failure that was invisible to every session and highly
+visible to Jeff.** It ran from 2026-06-22 to 2026-08-06 — about six weeks — failing on literally every
+push, and nothing in the repo noticed until someone looked at Jeff's inbox.
+
+**Traps:** (a) **Deploys do NOT go through GitHub Actions.** Cloudflare Pages' native Git integration
+watches the branch. Do not debug a deploy by looking at Actions. (b) Do not re-enable `on: push` unless
+`CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` have actually been added as repo secrets — otherwise
+the email flood restarts. (c) The Pages project name is `toro1`, the site is `toro1-5rz.pages.dev`, with
+custom domains `loewenhome.com` / `www.loewenhome.com` (per the CORS list in `configuration.yaml`).
+
+---
+
+### 14.10 Cross-cutting traps for future sessions — the short list
+
+Everything below is evidenced above; this is the extract a future session should read first.
+
+1. **Inovelli is dead. Do not propose it. Do not propose any ~$46–60 mesh dimmer.** The absence of the
+   word "Inovelli" in a doc is what marks the *current* plan. Search Kasa / plug / mesh.
+   (`docs/lighting/zigbee_dimmer_selection_2026-08-13.md`, `1572b4a`)
+2. **A budget mains-powered Zigbee router is the live open lighting question**, and the instruction is
+   explicit: research real current products in-session, cheapest-first, and lead with the $0 option
+   (2 × Kasa HS220 + the MOES module, already on hand).
+3. **Garage two-location switching is OPEN**, despite one line in `CLAUDE.md` claiming it is settled.
+   HS210 kit vs. single HS200 + repurposed kitchen position. Jeff decides before ordering.
+4. **`docs/lighting/HCC_Lighting_Plan.html` is the strategy of record but frozen at 2026-08-13.**
+   `docs/inventory/HCC_INVENTORY.md` is the state of record. Reconcile before quoting prices.
+5. **Kasa new-firmware HS220s need TP-Link account credentials in HA** (control still local), the setup-AP
+   provisioning path is a proven dead end (`error_code 1003`), and
+   `switch.<device>_auto_update_enabled` must be turned OFF on every unit.
+6. **Kasa switches join `Loewen301` (2.4), never `Loewen301-5G`.** The gateway is on B/G/N because of them.
+7. **Lucky Mike is queued. Do not start it.** And if it is ever quoted, use ~$90/stall parts, not the
+   ~$150 still baked into `PRICING_AND_BUSINESS.md`'s worked examples.
+8. **The Zigbee hardware is on hand and deliberately NOT unboxed** pending camera/alert pipeline
+   verification. Disable auto-firmware-update before first pairing.
+9. **Do not troubleshoot Angela's work machines.** Their LAN silence is corporate VPN behaviour.
+10. **`beehive/esphome/hcc-mower.yaml` is NOT the mower's firmware.** The Arduino build in
+    `firmware/mower_hours_esp32/` is, and it *posts nothing while running*. Writing server code against
+    the ESPHome YAML reintroduces the bug that lost five mows of history and made Jeff buy replacement
+    hardware he didn't need.
+11. **Never serve a firmware `.bin` from a public URL.** Credentials are plaintext in the binary; `strings`
+    lies, `grep -a` tells the truth.
+12. **`beehive/install.sh` is a bootstrap, not a repair tool.** Re-running it overwrites
+    `/config/packages/hcc.yaml` with a June-2026 version and deletes the entire AI-camera stack.
+13. **`beehive/custom_components/bhyve/` in the repo is AHEAD of the house** — `a13df25` is still
+    NOT DEPLOYED. And never log an exception without `type(e).__name__`.
+14. **`_headers` `/*` wildcards are silently ignored on this Pages project.** Use exact paths.
+15. **Deploys do not go through GitHub Actions.** The workflow is dead by design; re-enabling `on: push`
+    without the secrets restarts a 124-email-per-week flood.
+16. **`docs/hero-master-grade.md` and `dev.html` both record stale grade values** and `dev.html`
+    references two images that no longer exist. Read the live grade from `index.html`.
+17. **Blink config entry `01KY0MYHR8VN4646FQDSXA7VDC` is a magic constant in two auto-heal automations.**
+    Removing and re-adding the Blink integration breaks both silently.
+18. **`beehive-config/` is a 2026-08-01 snapshot, not a mirror.** Proven divergence at tip:
+    `hcc_skip_commercial` (3 presses here, 1 press live per CLAUDE.md Pending Item 16).
+19. **The standing rule that makes all of the above cheaper next time**, Jeff verbatim:
+    *"you tell me it is all documented and it is not, then the session closes and you come back with some
+    plan that was two weeks ago — this is infuriating."* **A decision made in conversation goes into a
+    file the same session.**
 
 
 ---
 
 ## The Repos and Branches — where the history actually lives
 
-*This section was written directly by the assembling session from first-hand inspection of the
-live GitHub remotes on 2026-08-16, not by a mining agent. Every fact below was verified by
-running the command shown.*
+This section exists for one reason: **on 2026-08-06 an entire night was burned because nobody could say
+which repository and which branch the live app deploys from**, and on 2026-08-16 an archival session found
+that the "lost eight weeks" were never lost at all — they were sitting on a branch that GitHub's default
+view does not show you. Both failures were topology failures, not memory failures. What follows is the map,
+with every claim tied to a commit hash, a file path, or a live API response, so that no future session has
+to rediscover it.
 
-This is the single most operationally important section in this record. **The history everyone
-thought was lost was never lost — it was on a branch nobody looked at.** A session that clones
-this project and looks only at the default branch sees one commit and concludes there is no
-history. That mistake is what produced the archive request this document answers.
+If you read nothing else in this section, read the last subsection, **"What a future session must do."**
 
-### The topology, verified
+---
 
-**Repo `d4c2np9f69-afk/Master-the-Master-`** — the live project.
+### 15.1 The one-paragraph answer
 
-| Ref | Commits | Span | What it is |
-|---|---|---|---|
-| `main` | **1** | 2026-05-20 only | Contains ONLY `Toro_TimeMaster_PWA_Package.zip`. A trap. |
-| `claude/time-master-project-liq1jw` | **636** | 2026-05-20 → 2026-08-16 | **THE REAL HISTORY.** Cloudflare Pages deploys from this branch. |
-| `claude/electric-smarthub-real-data-dv0pxe` | **559** | 2026-05-20 → 2026-08-11 | Parallel branch; ends 5 days earlier. |
-| `refs/pull/1/head` | = liq1jw tip | — | PR #1, opened from the work branch. |
+There are **two GitHub repositories** for this project, both owned by `d4c2np9f69-afk`:
 
-Verified by:
-```
-git ls-remote origin
-git rev-list --count origin/claude/time-master-project-liq1jw   # 636
-```
-
-**The trap, stated plainly:** a plain `git clone` of this repo checks out `main`, which has a
-single commit — `09f02d4`, "Add files via upload", the original PWA zip. Nothing else. `git log`
-shows one line. A session that stops there will conclude the project has no history and will
-either ask Jeff to re-explain everything or invent an answer. CLAUDE.md has warned about this
-since 2026-06-24 — *"`main` branch: contains only `Toro_TimeMaster_PWA_Package.zip` — do NOT use
-it for deploys"* — but the warning is in a file that lives on the branch you have to already
-have found.
-
-**Worse: the work branches are not fetched by a shallow or default clone in every environment.**
-In this very session, the first clone showed only `main` and the task branch. The work branches
-only appeared after an explicit:
-```
-git fetch origin 'refs/heads/claude/*:refs/remotes/origin/claude/*'
-```
-That single command is the difference between "the history is gone" and 636 commits of it.
-
-### The two claude/ branches
-
-`claude/time-master-project-liq1jw` (636 commits) and
-`claude/electric-smarthub-real-data-dv0pxe` (559 commits) share the same root commit and diverge.
-The liq1jw branch is the authoritative one: it is the deploy branch named in CLAUDE.md, it runs
-5 days later, and it carries the tip commit `1d1ebdb` ("Build the HCC MASTER RECORD"). 
-
-**INFERRED:** the electric-smarthub branch is a Claude-Code-created working branch from a session
-whose task was the electric-monitoring work, which then accumulated general project commits
-alongside it. A dedicated agent was assigned to enumerate any commits unique to it and was
-interrupted by the usage limit before reporting; **that enumeration is an open item** — see the
-Honest Gaps section. Until it is done, treat `electric-smarthub-real-data-dv0pxe` as *possibly*
-holding a small number of commits not present on liq1jw.
-
-### Repo `d4c2np9f69-afk/Toro-Timemaster-` — the archived predecessor
-
-Archived on GitHub (read-only), last push 2026-08-06.
-
-| Ref | Commits | Span |
+| Repo | Role | Status as of 2026-08-16 |
 |---|---|---|
-| `main` | 41 | 2026-05-20 → 2026-06-24 |
-| its two `claude/*` branches | 60 each | 2026-05-20 → 2026-07-26 |
+| `d4c2np9f69-afk/Master-the-Master-` | **Canonical.** Cloudflare Pages deploys from it. All 636 commits of real history live here. | Live, active |
+| `d4c2np9f69-afk/Toro-Timemaster-` | Original/parallel mirror. Superseded, then archived on GitHub as a deliberate safety net. | Frozen 2026-07-26, archived |
 
-Its `main` holds the June era in clean form and ends at `c200a18` (2026-06-24), *"Add backups/
-folder — physical copies of all working files as of 2026-06-24"* — the safety-net commit whose
-message also records a branch `backup/verified-working-2026-06-24` pinned to `e904a5b` (the
-66/66-tests-passing state). Its `claude/*` branches carry commits titled *"Sync from
-Master-the-Master-"* through 2026-07-26, then stop.
+Inside the canonical repo, the real history is on the branch **`claude/time-master-project-liq1jw`** —
+**636 commits, 2026-05-20 → 2026-08-16**. The repo's **default branch, `main`, has exactly ONE commit
+and exactly ONE file: a zip.** Anyone who opens `https://github.com/d4c2np9f69-afk/Master-the-Master-`
+in a browser and looks at what GitHub shows them by default will conclude this project is a single
+uploaded zip file. That conclusion is wrong, and it is the single most dangerous trap in the whole record.
 
-**The relationship:** work moved to `Master-the-Master-` and this repo was kept as a mirror,
-synced by hand, until the syncing stopped in late July. **It is an incomplete mirror** — its tip
-does not contain `functions/api/ha.js`, `auth.js`, `climate.js`, or `mowconditions.js`, all of
-which CLAUDE.md lists as key files. Do not treat it as a backup of the current app. Its real
-value is the `backups/*.2026-06-24.bak` files: literal copies of the working June 24 app.
+CLAUDE.md has warned about it since the day CLAUDE.md was created (`e8f0312`, 2026-06-23), in these words,
+which survive verbatim at the branch tip to this day:
 
-### What a future session must do — the four commands
+> - **Repo:** `d4c2np9f69-afk/master-the-master-`
+> - **Active branch:** `claude/time-master-project-liq1jw`
+> - **`main` branch:** contains only `Toro_TimeMaster_PWA_Package.zip` — do NOT use it for deploys
+
+(Source: `git show e8f0312:CLAUDE.md`, lines 23–25; identical text at `/…/tip/CLAUDE.md` lines 170–172,
+with a two-repo warning added on 2026-08-06 — see §15.6.)
+
+---
+
+### 15.2 Repo 1 — `d4c2np9f69-afk/Master-the-Master-` (canonical)
+
+Clone examined: `/home/user/Master-the-Master-`
+Remote: `https://github.com/d4c2np9f69-afk/Master-the-Master-` (`git -C /home/user/Master-the-Master- remote -v`)
+
+The repo description on GitHub is still, eight weeks later, the two-word original:
+
+> Toro Timemaster app
+
+(Source: GitHub API, `pull_request_read` on PR #1 — `head.repo.description`.)
+
+#### 15.2.1 The full branch list (live, from the GitHub API on 2026-08-17)
+
+`mcp__github__list_branches(owner=d4c2np9f69-afk, repo=Master-the-Master-)` returns exactly four branches:
+
+| Branch | Head SHA | Head date | Commits | What it is |
+|---|---|---|---|---|
+| `main` | `09f02d4` (`09f02d4c00e2ef43c6c336ef4ae67ac32ffb94ea`) | 2026-05-20 08:35:18 −0500 | **1** | The zip upload. A trap. |
+| `claude/time-master-project-liq1jw` | `1d1ebdb` | 2026-08-16 09:01:50 −0500 | **636** | **THE real history. Deploy branch.** |
+| `claude/electric-smarthub-real-data-dv0pxe` | `af6df04` | 2026-08-11 02:55:51 +0000 | **559** | Abandoned second session branch. Zero unique commits. |
+| `claude/task-completion-4a4wmo` | `f036f84` | 2026-08-17 (see 15.8) | **6** | The archival branch — this very record. **Rooted at `09f02d4` on `main` — contains NO project history.** |
+
+> **CORRECTED 2026-08-17.** An earlier draft of this table gave `claude/task-completion-4a4wmo`
+> **640** commits. That is wrong and it is dangerous in a section titled "read this before touching
+> git," because it implies that branch holds the project's history. Verified:
+> `git rev-list --count origin/claude/task-completion-4a4wmo` = **6**. Its merge-base with
+> `claude/time-master-project-liq1jw` is the **root commit `09f02d4`** — it shares exactly ONE
+> commit with project history and contains **none** of the 636. It was branched from `main` (the
+> one-zip trap branch), which is why it has no `CLAUDE.md` and no `docs/`. §15.8 below always had
+> this right; the table was the stale cell.
+
+None are protected (`"protected": false` on all four).
+
+Note also what is **absent**: `backup/verified-working-2026-06-24`, which existed as of 2026-08-06 and was
+explicitly requested for deletion in `docs/repo_cleanup_coworker_ask_2026-08-06.md`. It is gone from the
+live branch list, which means **the coworker actually performed that cleanup task**. Its content was not
+lost — the doc verified before asking:
+
+> These are point-in-time backup branches from the initial build-out on 2026-06-23/24. Checked via
+> git: both are pure ancestors of the real, current work — deleting them loses nothing at all, they
+> contain no commit that isn't already on the real branch.
+>
+> (`docs/repo_cleanup_coworker_ask_2026-08-06.md`, lines 12–14)
+
+#### 15.2.2 `main` — one commit, one file, and why it is a trap
+
+```
+commit 09f02d4c00e2ef43c6c336ef4ae67ac32ffb94ea
+Author: d4c2np9f69-afk <d4c2np9f69@privaterelay.appleid.com>
+Date:   2026-05-20 08:35:18 -0500
+
+    Add files via upload
+```
+
+`git ls-tree -r --name-only origin/main` returns exactly one path:
+
+```
+Toro_TimeMaster_PWA_Package.zip
+```
+
+That is the entire `main` branch. One commit, one 
+zip. The commit message "Add files via upload" is GitHub's own auto-generated message for a drag-and-drop
+web upload, and the author is Jeff's own Apple private-relay address — **this is Jeff, by hand, in a
+browser, on 2026-05-20 at 8:35 in the morning**, uploading the zip of the PWA he had built the day before.
+It is the seed of everything. It is also the last thing that ever happened on `main`.
+
+Three facts make `main` specifically dangerous rather than merely empty:
+
+1. **It is the repository default branch.** GitHub's web UI, `git clone` without `--branch`, most tooling,
+   and every "let me look at the repo" reflex land here first. A session that trusts what it sees will
+   believe the project is one zip file.
+2. **It is a genuine ancestor.** `git merge-base --is-ancestor origin/main origin/claude/time-master-project-liq1jw`
+   → **YES**, and `git merge-base origin/main origin/claude/time-master-project-liq1jw` → `09f02d4`. So `main`
+   is not a divergent dead end you would notice; it is the honest root of the real branch, just 635 commits
+   behind. Nothing errors. Nothing warns.
+3. **The zip is still carried at the tip.** `Toro_TimeMaster_PWA_Package.zip` is still present in the working
+   tree at `1d1ebdb` (`/…/tip/Toro_TimeMaster_PWA_Package.zip`). So a session on the *right* branch that
+   sees the zip may wrongly conclude it is on the *wrong* branch.
+
+The corresponding unzipped original, preserved at `/…/scratchpad/pwa/`, contains **5 files**:
+`index.html`, `manifest.json`, `service-worker.js`, and an `icons/` directory — the 2026-05-19 Toro
+TimeMaster PWA before it became the Home Command Center. That is the entire content of `main`.
+
+#### 15.2.3 `claude/time-master-project-liq1jw` — the real history
+
+- **636 commits** (`git rev-list --count`), root `09f02d4` (2026-05-20), tip `1d1ebdb` (2026-08-16 09:01:50 −0500).
+- **161 files changed / +29,469 lines** relative to `main` (GitHub PR #1 stats; the tip checkout at
+  `/…/scratchpad/tip` holds 162 entries including `CLAUDE.md`, `docs/`, `functions/`, `beehive/`,
+  `firmware/`, `windows-scripts/`, `backups/`).
+- **14 merge commits** — every one of them a *parallel-session collision*, not a feature branch merge
+  (see §15.4).
+- Cadence by month (`git log --format='%ad' --date=format:'%Y-%m' | sort | uniq -c`):
+
+  | Month | Commits |
+  |---|---|
+  | 2026-05 | 1 |
+  | 2026-06 | 187 |
+  | 2026-07 | 214 |
+  | 2026-08 | 234 |
+
+  A one-commit May (the zip), then a month-long gap, then three months of near-daily work accelerating to
+  the end. The project effectively *starts* on 2026-06-21 with `0e7e18d` "Extract Toro TimeMaster PWA
+  package source files."
+
+- Authorship (`git shortlog -sne`):
+
+  | Author | Commits |
+  |---|---|
+  | `Claude <noreply@anthropic.com>` | 610 |
+  | `Claude (coworker) <noreply@anthropic.com>` | 23 |
+  | `d4c2np9f69-afk <d4c2np9f69@privaterelay.appleid.com>` | 3 |
+
+  The three commits under Jeff's own GitHub identity are worth naming, because they are the only three
+  times Jeff pushed with his own hands:
+
+  | Hash | Date | Subject |
+  |---|---|---|
+  | `09f02d4` | 2026-05-20 08:35:18 −0500 | Add files via upload |
+  | `46be882` | 2026-06-22 12:12:21 −0500 | Add HCC Beehive setup script - configures HA automations and integrations via REST API |
+  | `33d604a` | 2026-07-16 14:28:48 −0500 | Add CAR section — Mercedes GLE 350 Pinnacle Trim Command Center with 7 sub-tabs |
+
+  **INFERRED:** the latter two are almost certainly Jeff pasting a session's output into the GitHub web
+  editor himself rather than authoring code — the commit style matches the assistant's, only the author
+  field differs. The record does not say so explicitly.
+
+- The `Co-Authored-By` trailers are a fossil record of which model was driving on which day
+  (`git log --format='%B' | grep -oiE 'Co-Authored-By: Claude [A-Za-z0-9. ]+'`):
+
+  | Model trailer | Commits |
+  |---|---|
+  | Claude Opus 4.8 | 157 |
+  | Claude Opus 5 | 80 |
+  | Claude Sonnet 5 | 70 |
+  | Claude Opus 4.6 | 58 |
+  | Claude Fable 5 | 8 |
+  | Claude Sonnet 4.6 | 2 |
+
+  (Plus one variant seen inline, `Claude Opus 5 (1M context)`, on `ac99b33`.) The trailers do not cover all
+  636 commits — many early commits carry none.
+
+- **The deploy contract.** From CLAUDE.md at the tip (`/…/tip/CLAUDE.md`, line 194):
+
+  > **Actual deployment:** Cloudflare Pages' native Git integration watches `claude/time-master-project-liq1jw`
+  > and auto-deploys on every push — live at `toro1-5rz.pages.dev` within ~60 seconds.
+
+  and line 192:
+
+  > **GitHub Actions is broken and irrelevant** (missing `CLOUDFLARE_API_TOKEN` secret — do not try to fix,
+  > it doesn't matter).
+
+  **Push to this branch and the app changes. Push anywhere else and nothing happens, silently.** That is the
+  entire operational stake of this section.
+
+#### 15.2.4 The GitHub Actions workflow — a decoy that cost Jeff 124 emails
+
+`.github/workflows/deploy.yml` exists at the tip and is **not** the deploy path. It was disabled on
+2026-08-06 by `ac99b33`, whose message is one of the cleanest root-cause writeups in the repo:
+
+> **Stop the GitHub Actions failure-email flood: disable the dead deploy workflow**
+>
+> This workflow has never worked. It calls cloudflare/pages-action@v1 with
+> secrets.CLOUDFLARE_API_TOKEN, which does not exist on this repo, so every
+> push to the branch failed instantly and sent Jeff a failure email -- 124 of
+> them in the past week alone, dozens on 08-06 by itself. It was the single
+> largest source of mail in his inbox.
+>
+> Deploys are unaffected. Per the CLAUDE.md Deployment Pipeline section, the
+> app is deployed by the native Cloudflare Pages Git integration watching
+> claude/time-master-project-liq1jw, entirely independently of Actions.
+>
+> Trigger changed from push to workflow_dispatch (manual-only) rather than
+> deleting the file, so the job definition stays available if the secret is
+> ever added, but it can never fire automatically again.
+>
+> Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
+> Claude-Session: https://claude.ai/code/session_01Ti2JKiSd5aX6WWQBY9AJV6
+
+The file at the tip carries the warning in-band, so a future session reading the YAML cannot mistake it
+for the live pipeline:
+
+> ```yaml
+> name: Deploy HCC to Cloudflare Pages
+>
+> # DISABLED 2026-08-06. This workflow has never worked — the CLOUDFLARE_API_TOKEN
+> # secret does not exist, so every push failed and emailed Jeff (124 failure
+> # notices in one week). Deploys do NOT go through Actions: Cloudflare Pages'
+> # native Git integration watches claude/time-master-project-liq1jw and deploys
+> # on push, independently of this file. See CLAUDE.md "Deployment Pipeline".
+> # Trigger reduced to manual-only so it can never fire automatically again.
+> on:
+>   workflow_dispatch:
+> ```
+
+The workflow was originally added on 2026-06-22 as `8fdae39` "Add auto-deploy GitHub Action to Cloudflare
+Pages", corrected the same day by `1d7cacc` "Fix Cloudflare Pages project name to toro1" — and then never
+worked once, for 45 days. **Two commits of setup, 45 days of silent failure, ~124 emails a week, one commit
+to bury it.**
+
+---
+
+### 15.3 `claude/electric-smarthub-real-data-dv0pxe` — the branch that was a task artifact
+
+**Head:** `af6df04`, 2026-08-11 02:55:51 +0000, "Close the light-mode contrast bug class (pending item 17)"
+**Commit count:** 559
+
+#### 15.3.1 The merge-base result — and the direct answer to "does it hold unique work?"
+
+```
+$ git merge-base origin/claude/time-master-project-liq1jw origin/claude/electric-smarthub-real-data-dv0pxe
+af6df04f008c8be7c6b0160be3fe81901ab34b29
+```
+
+**The merge-base IS the electric branch's own head.** That means the electric branch is a strict ancestor of
+the work branch. Confirmed both ways:
+
+```
+$ git log --oneline origin/claude/electric-smarthub-real-data-dv0pxe ^origin/claude/time-master-project-liq1jw | wc -l
+0
+$ git log --oneline origin/claude/time-master-project-liq1jw ^origin/claude/electric-smarthub-real-data-dv0pxe | wc -l
+77
+```
+
+**The electric branch holds ZERO unique commits. Nothing on it is otherwise-lost history. Deleting it would
+lose nothing.** The work branch is simply 77 commits ahead of it — every commit from `6913393`
+(2026-08-11, "Mower sensor: fix the hour meter at the source; clean the zone photos") through `1d1ebdb`
+(2026-08-16, "Build the HCC MASTER RECORD"). Those 77 are the whole Zigbee/lighting/network-census/Apple-TV
+era, and they exist only on `claude/time-master-project-liq1jw` and its descendant archival branch.
+
+Because the assignment asked for full chronicling **only if** unique commits existed, and none do, no
+message bodies are reproduced here on that basis. What *is* worth chronicling is the branch's story, because
+it is a genuine history-loss near-miss.
+
+#### 15.3.2 What the branch was for
+
+The branch name is not descriptive of a feature Jeff asked for — **it is the name a task-orchestration
+harness assigned to a cloud session**, derived from whatever that session's opening task happened to be
+("electric smarthub real data") plus a random suffix (`dv0pxe`, exactly the shape of `liq1jw` and
+`4a4wmo`). The session that got it wrote the branch's own obituary the same night, in
+`docs/repo_deploy_mystery_coworker_ask_2026-08-06.md` (lines 62–65):
+
+> - Separately: this session was told to develop on a branch called
+>   `claude/electric-smarthub-real-data-dv0pxe`, which exists in both repos but sat completely
+>   untouched since **2026-05-20** — the real branch name everyone actually built on was
+>   `claude/time-master-project-liq1jw` instead. That branch name was a dead end nobody used.
+
+and in `docs/repo_cleanup_coworker_ask_2026-08-06.md` (lines 42–45):
+
+> - **`claude/electric-smarthub-real-data-dv0pxe`** in both repos — the branch this cloud session
+>   was originally told to develop on. It's redundant now (identical to the real deploy branch) but
+>   wasn't deleted since it's task-assigned infrastructure, not something to remove unilaterally.
+>   Jeff can say the word if he wants these gone too — nothing blocking either way.
+
+So: **until 2026-08-06 the branch pointed at `09f02d4` — the zip, and nothing else.** A session assigned to
+it, working "correctly" on its assigned branch, would have been building on top of a single zip file with
+no CLAUDE.md, no history, and no deploy. The near-miss is the point.
+
+**A correction for the record:** that doc's line "sat completely untouched since 2026-05-20" was true when
+it was written and *false by the end of the same night* — the session then merged into that very branch
+(see the merge commit below). Both statements are honest; they are hours apart. A future session reading
+that doc in isolation would be misled.
+
+#### 15.3.3 The night the dead branch briefly came alive — 2026-08-06
+
+Four commits carry the electric branch's fingerprints, and their full bodies belong in the permanent record
+because they are the entire evidence trail for how the branch was used and folded back in.
+
+**`9756992` — 2026-08-06 00:57:03 −0500 — Claude**
+
+> Electric SmartHub: real hourly/daily data confirmed, poll interval fixed
+>
+> Coworker logged into CEMC SmartHub directly and confirmed the already-installed
+> integration imports real hourly/daily statistics (not just the monthly total
+> the app currently reads) - can replace the estimated Now/Today model with real
+> data. Also fixed the integration's poll interval (was still on HA's 6-hour
+> default, now 30 min) and confirmed a fresh poll landed successfully. Verified
+> current This Month/Est. Cost numbers already match HA exactly, no bug there.
+
+**`fa8e153` — 2026-08-06 02:48:51 −0500 — Claude** (parent `6e24295`; this is the branch-side commit)
+
+> Electric SmartHub: found the real bug - feature is currently non-functional
+>
+> Fired the exact WS command from ha-stats.js directly against live HA and found
+> two real bugs keeping Today/Yesterday/Peak Hour/Last 7 Days silently broken
+> despite the UI cells rendering: (1) history/statistics_during_period doesn't
+> exist on this HA version (Core 2026.8.0), real command is
+> recorder/statistics_during_period; (2) the "change" field always reads 0 for
+> this sensor even across real usage growth, code needs to diff cumulative
+> "sum"/"state" between period boundaries instead. Also confirmed via live
+> attribute check that Bill Due/Last Payment/Vs Last Year would need new
+> scraping work, not just an attribute read - recommending skip, low priority
+> vs the actual bug fixes above.
+
+**`5c41c8d` — 2026-08-06 07:56:53 +0000 — Claude**
+
+> Fix real Electric SmartHub bugs found by coworker's live HA verification
+>
+> The coworker fired the exact WS command from ha-stats.js against Jeff's
+> real HA (Core 2026.8.0) and found the feature shipped earlier tonight was
+> silently non-functional despite the UI cells rendering correctly:
+>
+> 1. Wrong WS command name -- history/statistics_during_period returns
+>    unknown_command on this HA version. Real command is
+>    recorder/statistics_during_period (functions/api/ha-stats.js).
+>
+> 2. Wrong field assumption -- the 'change' field always reads 0 for this
+>    sensor even across confirmed real usage growth (sum moved 761->872
+>    over 48h while every change was 0). loadElectricStats() no longer
+>    reads 'change' at all; it now diffs consecutive cumulative sum/state
+>    readings via a new toDiffedSeries() helper -- same "diff two
+>    cumulative readings" pattern already used by irrGalFromHistory() and
+>    the water billing math elsewhere in this file.
+>
+> Re-verified with a mocked Playwright test built from the coworker's
+> exact real data shape (sum 761->872/48h, change always 0, one clear
+> 3-4pm peak) -- Today/Yesterday/Peak Hour/Last 7 Days all compute
+> correctly now. Bill Due/Last Payment/vs-Last-Year confirmed live by the
+> coworker as genuinely not available without a new scraper -- not built,
+> low priority.
+>
+> Bumped service-worker hcc-v16->v17. lint-app.js/smoke-test.js clean.
+
+**`e5a557a` — 2026-08-06 07:58:11 +0000 — Claude** — the commit that names the branch and folds it back in:
+
+> Merge remote-tracking branch 'origin/claude/time-master-project-liq1jw' into claude/electric-smarthub-real-data-dv0pxe
+>
+> \# Conflicts:
+> \#	docs/utilities/electric_smarthub_data_upgrade_2026-08-06.md
+
+`e5a557a` sits on the **first-parent chain of `claude/time-master-project-liq1jw`** (verified:
+`git log --first-parent` lists it between `5c41c8d` and `2b0cb3d`). So the electric branch's work is not
+merely reachable — it is *on the mainline*. The next commit, `2b0cb3d`, is "Write coworker handoff doc for
+repo cleanup (delete backup branches, archive Toro-Timemaster-)": the session finished the electric work,
+merged it, and immediately wrote the cleanup instructions that would prevent the whole class of problem.
+
+#### 15.3.4 How the branch pointer reached 2026-08-11
+
+The branch head is `af6df04` (2026-08-11), five days after the 08-06 work, and `af6df04` is on the work
+branch's first-parent chain. **INFERRED:** a cloud session whose harness-assigned branch was still
+`claude/electric-smarthub-real-data-dv0pxe` continued pushing the same commits to both refs through
+2026-08-11, then stopped. **The record is silent on this** — there is no commit message, doc, or reflog in
+any available source that explains why the pointer advanced from `09f02d4`/`e5a557a` to `af6df04` and then
+froze. What *is* certain from the graph: no commit was ever lost, because the pointer only ever sat on
+commits that are also on the work branch.
+
+For completeness, `af6df04` itself is one of the most substantial commits in the project and is chronicled
+elsewhere in this record (the light-mode contrast sweep, pending item 17). Its body is reproduced in the
+day-by-day chronicle for 2026-08-11; it is quoted here only to identify the branch head.
+
+---
+
+### 15.4 The 14 merge commits — evidence of two sessions on one branch
+
+`claude/time-master-project-liq1jw` is *almost* linear. Its 14 merges are not feature merges; they are the
+scar tissue of **two Claude sessions pushing to the same branch at the same time** — a "cloud" session and a
+"coworker" (local, on Jeff's machine, with live Home Assistant access). Full list, oldest last:
+
+| Hash | Date | Parents | Subject |
+|---|---|---|---|
+| `f099165` | 2026-08-08 | `ac38933` `ac99b33` | Merge parallel-session work (Mercedes/car/weather/irrigation photo overlays, glass redesign) with lighting-plan doc commit |
+| `e5a557a` | 2026-08-06 | `5c41c8d` `7c91709` | Merge remote-tracking branch 'origin/claude/time-master-project-liq1jw' into claude/electric-smarthub-real-data-dv0pxe |
+| `7c91709` | 2026-08-06 | `fa8e153` `af230cd` | Merge branch 'claude/time-master-project-liq1jw' of https://github.com/d4c2np9f69-afk/master-the-master- into claude/time-master-project-liq1jw |
+| `79b1d44` | 2026-08-03 | `1c69752` `d998302` | Merge coworker Fire TV PiP fix docs with serial-number/link-audit fixes |
+| `5bcbc6d` | 2026-08-03 | `a5db5dc` `03e688b` | Merge coworker backup/disaster-recovery work with Fire TV remote fix |
+| `0dc54d2` | 2026-08-01 | `bc3df2b` `b81474a` | Merge remote contrast-fix work with local zone.work pending-item note |
+| `4c69aee` | 2026-08-01 | `efd1be5` `0c4f3ab` | Merge remote .gitignore update |
+| `efd1be5` | 2026-08-01 | `2765386` `1596fc2` | Merge remote Lighthouse work with local Angela work-zone handoff note |
+| `557d16a` | 2026-07-31 | `2e25c71` `fd15642` | Merge coworker's CLAUDE.md update (Fire TV/Blink Auto-Heal) |
+| `1d9d4c6` | 2026-07-31 | `abcc8f4` `b4f11df` | Merge coworker's CLAUDE.md update |
+| `d385d1d` | 2026-07-15 | `3a714fe` `8efc3c4` | Merge branch 'claude/time-master-project-liq1jw' … into claude/time-master-project-liq1jw |
+| `ef20ec5` | 2026-07-14 | `25e3256` `14222bd` | Merge branch 'claude/time-master-project-liq1jw' … into claude/time-master-project-liq1jw |
+| `b1022d9` | 2026-07-14 | `c13f101` `e70a5ac` | Merge branch 'claude/time-master-project-liq1jw' … into claude/time-master-project-liq1jw |
+| `57476b6` | 2026-07-14 | `6c26465` `5957758` | Merge branch 'claude/time-master-project-liq1jw' … into claude/time-master-project-liq1jw |
+
+The four July-14/15 merges carry git's default "Merge branch 'X' of <url> into X" message — those are
+`git pull` collisions with no human thought behind them. The late-July/August ones were written
+deliberately, and record how the conflicts were resolved. Two worth preserving in full:
+
+**`5bcbc6d` — 2026-08-03:**
+
+> Merge coworker backup/disaster-recovery work with Fire TV remote fix
+>
+> Resolved CLAUDE.md conflicts by combining both sessions' changelog entries
+> and pending items (all additive, no real overlap). Used the coworker's
+> newly-committed beehive-config/hcc.yaml snapshot to pin down the actual
+> "Alexa fast-forward" mechanism (script.hcc_skip_commercial) with real YAML
+> instead of relying on docs/memory alone — updated the 08-03 changelog entry
+> and Pending Item 16 accordingly with a more precise, prioritized diagnostic
+> ask. Verified no secrets in the new beehive-config/ files before finalizing.
+>
+> Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+> Claude-Session: https://claude.ai/code/session_01VV4yeF7bkKhN4KU3BwWEND
+
+**`79b1d44` — 2026-08-03:**
+
+> Merge coworker Fire TV PiP fix docs with serial-number/link-audit fixes
+>
+> Resolved CLAUDE.md changelog conflict: kept both sessions' entries
+> (mower serial confirmation, link audit, coworker's Alexa fast-forward
+> native-phrasing fix, and Fire TV PiP wrong-frame fix), removing one
+> exact-duplicate "link audit" entry that existed on both branches.
+> No changes needed to Pending Item 16 - coworker's update to it merged
+> cleanly on its own.
+>
+> Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+> Claude-Session: https://claude.ai/code/session_01VV4yeF7bkKhN4KU3BwWEND
+
+`f099165` (2026-08-08) is the only one that lists `CLAUDE.md` as a raw unresolved-style conflict block in
+the message body, and it names the pattern outright — "Merge **parallel-session** work."
+
+**The `Claude (coworker)` author identity appears on exactly 23 commits, and every single one of them is
+dated 2026-08-06** (`git log --author='coworker'`). That is a one-day experiment in a distinct git identity
+— the LUX/utility glass-overlay rebuild, the "put Jeff back in his own photos" work, and the Mercedes
+remote-start confirmation. Before and after that day, the coworker session committed as plain `Claude`,
+which is why the merge messages have to *say* "coworker" in prose: **the git metadata cannot tell you which
+session made which commit.** That is a permanent limitation of this record.
+
+The 08-06 topology is the clearest illustration in the whole repo — 60 commits in one day, on three
+concurrent lines, converging through two merges. In graph order (`git log --format='%h %p %ad %an | %s'`),
+the coworker's 23 land as one uninterrupted run from `30d1df3` to `adcf16c`, immediately followed by
+`ac99b33` (the Actions-email fix) from the other session, which then becomes a parent of `f099165` two days
+later.
+
+---
+
+### 15.5 PR refs — what pull request #1 is
+
+```
+$ git -C /home/user/Master-the-Master- fetch origin '+refs/pull/1/head:refs/remotes/pull/1'
+$ git rev-parse pull/1
+1d1ebdbc424b96d41124f2dce36dac50c8723845     # identical to the work-branch tip
+$ git log --oneline pull/1 ^origin/claude/time-master-project-liq1jw
+                                              # (empty — zero divergence)
+```
+
+There is exactly **one** pull request in the repository's entire life, and it is still **open and unmerged**.
+From the GitHub API:
+
+| Field | Value |
+|---|---|
+| Number | **1** |
+| Title | **"Extract Toro TimeMaster PWA package source files"** |
+| State | `open`, not draft, **`merged: false`**, `mergeable_state: clean` |
+| Base | `main` @ `09f02d4` |
+| Head | `claude/time-master-project-liq1jw` @ `1d1ebdb` |
+| Commits | **635** |
+| Changed files | **161** |
+| Additions | **+29,469** |
+| Created | **2026-06-28T09:10:38Z** |
+| Updated | 2026-08-16T14:02:15Z |
+| Comments | 1 |
+| URL | https://github.com/d4c2np9f69-afk/Master-the-Master-/pull/1 |
+
+Its body is the body of the *second commit in the project's history* (`0e7e18d`, 2026-06-21):
+
+> Unzips the base PWA (TimeMaster maintenance app) into project root as
+> the starting point for the Home Command Center build.
+>
+> Co-Authored-By: Claude Sonnet 4.6
+> Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+**This is a second trap, and a subtler one than `main`.** PR #1 was opened on 2026-06-28 — a week after the
+work began — and auto-titled from the branch's opening commit. It was never retitled, never merged, and
+never closed. So the GitHub UI presents **eight weeks and 635 commits of a whole-home command center under
+the headline "Extract Toro TimeMaster PWA package source files."** A future session skimming the PR list to
+find "what happened here" will read that title and move on.
+
+Two operational notes:
+
+- **Merging PR #1 would fast-forward `main` to the real history** (`mergeable_state: clean`, and `main` is a
+  strict ancestor). That is arguably the single cleanest permanent fix for the `main`-is-a-trap problem.
+  **The record is silent on whether this was ever considered.** No commit, doc, or comment discusses merging
+  it. Flagged here as an option, not a recommendation — see the caution in §15.7.
+- `refs/pull/1/head` is the only PR ref that resolves; there is no PR #2.
+
+#### 15.5.1 The single PR comment — the evidence that would have prevented the 08-06 night
+
+The one comment on PR #1 was posted by `cloudflare-workers-and-pages[bot]` on **2026-06-28T10:02:06Z** and
+has been auto-updated on every deploy since (last update 2026-08-16T14:02:15Z). Rendered, it reads:
+
+> **Deploying toro1 with Cloudflare Pages**
+>
+> | | |
+> |---|---|
+> | **Latest commit:** | `1d1ebdb` |
+> | **Status:** | ✅ Deploy successful! |
+> | **Preview URL:** | https://6a2b70f0.toro1-5rz.pages.dev |
+>
+> [View logs](https://dash.cloudflare.com/?to=/c939181a621f5597fa41b690273c71ad/pages/view/toro1/6a2b70f0-9f39-44b8-8e46-7a0bfc06c85d)
+
+Read that carefully. **The Cloudflare Pages GitHub App has been posting, on this repo, on this PR, since
+2026-06-28, a live confirmation that project `toro1` deploys from `Master-the-Master-` at the head of
+`claude/time-master-project-liq1jw`.** It even carries the Cloudflare account ID
+(`c939181a621f5597fa41b690273c71ad`) and the deployment ID.
+
+On 2026-08-06 an entire session was lost to exactly that question. The session wrote, honestly and
+correctly, that it had no tool to answer it:
+
+> **There is no tool available to me that can read a Cloudflare Pages project's connected GitHub
+> repo/branch.** Direct HTTPS fetches to `toro1-5rz.pages.dev` are also blocked by this sandbox's outbound
+> network policy (confirmed via both `curl` and the web-fetch tool — both get rejected before reaching
+> Cloudflare at all).
+>
+> (`docs/repo_deploy_mystery_coworker_ask_2026-08-06.md`, lines 69–74)
+
+It then escalated to Jeff and the coworker for a "30-second look" at the Cloudflare dashboard. **The answer
+was already in the repository's own pull request, posted by a bot, six weeks earlier.** Nobody looked at the
+PR. This is the most expensive single lesson in this section and it is recorded here so it cannot recur:
+**when you need to know what deploys, read PR #1's bot comment first.**
+
+---
+
+### 15.6 Repo 2 — `d4c2np9f69-afk/Toro-Timemaster-` (original, superseded, archived)
+
+Clone examined: `/workspace/d4c2np9f69-afk/toro-timemaster-`
+Remote: `https://github.com/d4c2np9f69-afk/toro-timemaster-`
+
+#### 15.6.1 Its refs
+
+`git for-each-ref` in that clone:
+
+| Ref | SHA | Date | Commits |
+|---|---|---|---|
+| `main` (= `origin/HEAD`) | `c200a18` | 2026-06-24 02:03:17 +0000 | **41** |
+| `origin/claude/time-master-project-liq1jw` | `7a2e0b0` | 2026-07-26 20:25:20 +0000 | **60** |
+| `origin/claude/electric-smarthub-real-data-dv0pxe` | `7a2e0b0` | 2026-07-26 20:25:20 +0000 | **60** |
+
+Note that in *this* repo the two `claude/` branches point at the **identical commit** — the electric branch
+name here was never independently used at all; it was created and left pointing wherever the other branch
+was. `backup-verified-working`, named in the 08-06 cleanup doc, is **absent**, consistent with the coworker
+having deleted it as asked.
+
+**The record is silent** on the exact archival date of the repo on GitHub. The request for it exists
+(`docs/repo_cleanup_coworker_ask_2026-08-06.md`, 2026-08-06), and the archived state is reported in the
+brief for this record; the GitHub connector available to this session is scoped to `master-the-master-` only
+(`Access denied: repository "d4c2np9f69-afk/toro-timemaster-" is not configured for this session`), so
+archival could not be re-verified here from first sources.
+
+#### 15.6.2 The shared root — the two repos are literally the same project
+
+The first **five** commits are byte-identical, same hashes, in both repos:
+
+| Hash | Date | Subject |
+|---|---|---|
+| `09f02d4` | 2026-05-20 | Add files via upload |
+| `0e7e18d` | 2026-06-21 | Extract Toro TimeMaster PWA package source files |
+| `0b76d4c` | 2026-06-21 | Add full live app source — B-Hyve, weather, GPS, ESP32 integrations |
+| `eb342db` | 2026-06-21 | Transform Toro app into Home Command Center (HCC) |
+| `6649269` | 2026-06-21 | Embed HCC hero image in app header |
+
+…and in fact **all 41 commits of `Toro-Timemaster-`'s `main` are present in `Master-the-Master-`**, verified
+individually: `git merge-base --is-ancestor <sha> origin/claude/time-master-project-liq1jw` returns YES for
+`6649269`, `46be882`, `e7b6c64`, `e904a5b`, `90e556e`, and `c200a18`. The 41-commit `main` of the old repo
+is a *complete prefix* of the canonical branch. **Nothing on Toro's `main` is unique. Nothing there can be
+lost.**
+
+The 08-06 writeup describes the origin plainly:
+
+> **How the two repos came to exist in the first place:** they started as one identical copy (same
+> exact starting commit in both, byte for byte). From there, real work happened in both for a while
+> in parallel, with someone periodically hand-copying finished changes from Master-the-Master- into
+> Toro-Timemaster- (visible in the git history as commits literally titled *"Sync from
+> Master-the-Master-: ..."*). That manual copying stopped on **July 24**. Master-the-Master- kept
+> getting real work for **12 more days** after that (through tonight); Toro-Timemaster- has been
+> frozen since **July 26**, silently falling behind with nobody flagging it.
+>
+> (`docs/repo_deploy_mystery_coworker_ask_2026-08-06.md`, lines 29–35)
+
+#### 15.6.3 `main` = 41 commits, 2026-05-20 → 2026-06-24, ending in the safety-net commit
+
+Full listing of `Toro-Timemaster-`'s `main`, newest first — this is the June build-out of HCC and it is
+worth having in the permanent record because it is the densest week in the project:
+
+```
+c200a18 2026-06-24 Add backups/ folder — physical copies of all working files as of 2026-06-24
+90e556e 2026-06-24 Rewrite CLAUDE.md — comprehensive persistent memory with Jeff's rules, project plan, and full session history
+e904a5b 2026-06-23 Fix all broken CSS — restore modal-box, mbtns, mbtn secondary, btn-green
+da1320c 2026-06-23 Fix all modal buttons broken — restore correct CSS class names
+20df8da 2026-06-23 Fix GPS track disappearing after heartbeat sync
+c6f3df8 2026-06-23 Fix KV binding — try both HCC_KV and MOWER_KV variable names
+e8f0312 2026-06-23 Add CLAUDE.md — persistent project memory for all future AI sessions
+53eb7d4 2026-06-23 Restore Jeff's real hours — update default state and sensor baseline to 5.9h
+b629c83 2026-06-23 Revert hours.js to original — undo KV refactor that may have broken sensor read
+fe1edb8 2026-06-23 Add engine-off heartbeat and improve sensor status display
+98b8dca 2026-06-23 Fix sensor API — accept MOWER_KV binding as fallback for HCC_KV
+a973c8f 2026-06-23 Fix fatal JS syntax error — remove stray <script> tags inside script block
+8497827 2026-06-23 Bump service worker to hcc-v3 — force cache clear of 2.1MB old build
+739d004 2026-06-23 Extract hero photos from HTML — drop from 2.1MB to 295KB
+686bece 2026-06-23 Switch Step 3 copy command from curl to wget for HA Terminal compatibility
+a463d09 2026-06-23 Add /setup endpoint that serves install script directly
+c1c004c 2026-06-23 Auto-detect Beehive by IP when homeassistant.local fails
+1f3ce1a 2026-06-23 Fix Beehive setup — correct commands for the ha > CLI, curl not wget
+b3d773c 2026-06-23 Add one-tap Beehive auto-setup wizard to HCC app
+75a7afd 2026-06-23 Add complete Beehive brain setup — no Windows required
+5521d3e 2026-06-23 Fix B-Hyve WebSocket double-auth bug in irrigation control
+4c52e85 2026-06-23 Fix missing CSS variables, card accent colors, and sensor panel DOM rows
+4f96d09 2026-06-23 Fix missing /api/hours, stale service worker cache, and manifest branding
+b7395b6 2026-06-23 Add irrigation section hero photo
+9dc9cb9 2026-06-23 Replace YARD section hero with new professional mower photo
+f599bd9 2026-06-23 Rebuild HCC PWA with 4-section layout: HOME / WEATHER / IRRIGATION / YARD
+c8e729c 2026-06-23 Fix all 4 broken API endpoints + unified design layer
+a53df54 2026-06-23 Add live weather to hero, YARD quick-access shortcuts, improved Blink status
+e7b6c64 2026-06-22 Add HACS auto-installer script for Beast
+12308ff 2026-06-22 Set app icon to house photo; app name HCC
+c36f2ab 2026-06-22 Make house the main hero; move mower into YARD section
+1d7cacc 2026-06-22 Fix Cloudflare Pages project name to toro1
+8fdae39 2026-06-22 Add auto-deploy GitHub Action to Cloudflare Pages
+c797f79 2026-06-22 Add HCC Beehive setup script
+70416e6 2026-06-22 Update HCC app: Beehive online status, live panic button, remove placeholder text
+46be882 2026-06-22 Add HCC Beehive setup script - configures HA automations and integrations via REST API
+6649269 2026-06-21 Embed HCC hero image in app header
+eb342db 2026-06-21 Transform Toro app into Home Command Center (HCC)
+0b76d4c 2026-06-21 Add full live app source — B-Hyve, weather, GPS, ESP32 integrations
+0e7e18d 2026-06-21 Extract Toro TimeMaster PWA package source files
+09f02d4 2026-05-20 Add files via upload
+```
+
+The terminal commit, `c200a18`, is the **safety-net commit** — and it is the reason this repo was kept
+rather than deleted:
+
+```
+commit c200a184fdf5867b4fae35214532bd600ab2032d
+Author: Claude <noreply@anthropic.com>
+Date:   2026-06-24 02:03:17 +0000
+```
+
+> **Add backups/ folder — physical copies of all working files as of 2026-06-24**
+>
+> Safety net: if any file gets broken, restore from backups/*.2026-06-24.bak.
+> Branch backup/verified-working-2026-06-24 also pinned to commit e904a5b (66/66 tests pass).
+>
+> Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+> Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe
+
+It introduced seven physical `.bak` copies, which are **still present at the canonical branch tip today**
+(`/…/tip/backups/`) — two months and 600 commits later, nobody has removed them:
+
+```
+backups/alerts.js.2026-06-24.bak
+backups/hours.js.2026-06-24.bak
+backups/index.html.2026-06-24.bak
+backups/irrigation-control.js.2026-06-24.bak
+backups/irrigation-index.js.2026-06-24.bak
+backups/service-worker.js.2026-06-24.bak
+backups/weather.js.2026-06-24.bak
+```
+
+Two distinct safety nets were created that night: the physical `.bak` files (belt) and the branch
+`backup/verified-working-2026-06-24` pinned at `e904a5b`, the last commit where **66/66 tests passed**
+(braces). The branch was deleted on/after 2026-08-06 after being verified as a pure ancestor; the `.bak`
+files survive. **This is the project's clearest single example of a defensive habit that actually worked** —
+and it is worth noting that the belt outlived the braces.
+
+#### 15.6.4 The 60-commit `claude/` snapshots — 19 commits that exist ONLY here, all with twins
+
+Both `claude/` branches in `Toro-Timemaster-` sit at `7a2e0b0` (2026-07-26), 19 commits past `c200a18`.
+Every one of those 19 hashes is **absent from `Master-the-Master-`** (`git cat-file -t 7a2e0b0` → not found
+in the canonical clone). At first glance that looks like 19 lost commits. **It is not.** Every one has a
+content twin in the canonical repo, made minutes apart under a different hash. Full mapping, oldest first:
+
+| Toro hash | Date (UTC) | Subject | Canonical twin in `Master-the-Master-` |
+|---|---|---|---|
+| `3acd676` | 2026-07-22 00:53 | Sync CLAUDE.md from Master-the-Master- — CAR mbapi2020 service rewrite (07-22) | (CLAUDE.md sync of `778f6bd` et al.) |
+| `9bfb2f3` | 2026-07-22 02:06 | Sync from Master-the-Master-: CAR diagnostic error reporting | `778fe00` "CAR commands: add real diagnostic error reporting" |
+| `2eb4f1f` | 2026-07-22 02:19 | Sync from Master-the-Master-: CAR pull-mode diagnostics + temp string fix | `71d0dc2` "CAR: fix temp string types, add pull-mode diagnostics, honest success msgs" |
+| `1fd796e` | 2026-07-23 14:28 | Sync from Master-the-Master-: sewer bill calibration | `7b3de68` "Add sewer charges to water cost estimate, calibrate rates from actual bill" |
+| `da9942a` | 2026-07-23 14:33 | Sync CLAUDE.md: water+sewer bill validation complete | `ebd2a3a` (same subject) |
+| `29b28a2` | 2026-07-23 14:51 | Sync from Master-the-Master-: water/sewer cost breakout + overcharge note | `99fe1ba` "Break out water vs sewer costs separately, add irrigation sewer overcharge note" |
+| `8bf1c32` | 2026-07-23 15:01 | Add billing history tracking for water/sewer overcharge case | `8d32625` (same subject) |
+| `8f8d839` | 2026-07-23 15:02 | Update CLAUDE.md: billing history tracking added to changelog | `5e6d616` (same subject) |
+| `4056171` | 2026-07-23 15:53 | Calibrate electric rates from CEMC bill, add Est. Cost tile | `8a9df3b` (same subject) |
+| `7f7b139` | 2026-07-23 15:59 | Calibrate gas rates from 3 Piedmont bills, replace rough estimate | `0d6c9de` (same subject) |
+| `7a09738` | 2026-07-24 00:16 | Fix stale data: add auto-refresh for sensors, cameras, weather | `2c95ffc` (same subject) |
+| `9a77afb` | 2026-07-24 00:17 | Update CLAUDE.md: auto-refresh fix documented in changelog | `15ca7d8` (same subject) |
+| `de32a4b` | 2026-07-24 11:57 | Add Mercedes PIN prompt for remote start, unlock, and other PIN-required commands | `eeaa0b7` (same subject) |
+| `bc81c84` | 2026-07-24 12:35 | Remove app-level PIN prompts — mbapi2020 handles PIN from integration options | `c73e32e` (same subject) |
+| `335bc97` | 2026-07-24 12:37 | Update CLAUDE.md: CAR PIN cleanup documented, pick-up-here updated | `c64d0f8` (same subject) |
+| `0ebec0b` | 2026-07-24 15:17 | Add Ford F-250 Super Duty to CAR section with vehicle switcher | `ee0d376` (same subject) |
+| `0abc1e8` | 2026-07-24 15:22 | Update CLAUDE.md: F-250 vehicle switcher documented | `42b6c72` (same subject) |
+| `ed23589` | 2026-07-26 20:23 | Add Garage Door control card to Guardian section | `590303e` (same subject) |
+| `7a2e0b0` | 2026-07-26 20:25 | Update CLAUDE.md: garage door integration documented + ratgdo path | `e20d3d5` (same subject) |
+
+Every one of the 19 carries `Claude-Session: https://claude.ai/code/session_01WuKnDJrDp2n6fHjhtahmLe` — the
+**same session ID** as `c200a18`, `e8f0312`, and PR #1's body. One long-running session was double-pushing
+the same work into two repositories for a month, and that session ID is the thread that ties the whole
+two-repo era together.
+
+Four of those 19 deserve their bodies preserved, because they are the *only* copy of a piece of prose in
+this repo (the canonical twins carry the same text, but these are the originals as they landed in the
+now-archived mirror):
+
+**`7f7b139` — gas rate calibration, validated to the penny:**
+
+> Calibrate gas rates from 3 Piedmont bills, replace rough estimate
+>
+> Piedmont/Spire 301 Residential validated from May-Jul 2026 bills:
+> $13.44 base + $0.61809 dist + $0.61691 PGA = $1.235/therm, heat
+> factor 1.068 (CCF to therms), 5% franchise fee. All three bills
+> verified to the penny ($34.58, $47.83, $27.08). Replaces the old
+> $1.12/CCF rough estimate with proper base+per-therm+franchise.
+
+**`4056171` — electric rate calibration:**
+
+> Calibrate electric rates from CEMC bill, add Est. Cost tile
+>
+> CEMC rates validated from 06/30/2026 bill: $39 base + $0.08657
+> energy + $0.02815 TVA fuel = $0.11472/kWh all-in. Added Est. Cost
+> tile to electric utility card. Cost auto-calculates when DIY
+> ATM90E32 monitor comes online with sensor.electric_month data.
+
+**`7a09738` — the stale-data root cause:**
+
+> Fix stale data: add auto-refresh for sensors, cameras, weather
+>
+> Root cause: mowerSync, loadCameras, and loadWeather only ran ONCE at
+> startup with no periodic refresh. The 60s self-heal interval covered
+> Guardian/Lights/Vacuum/Utilities/Car but missed these three.
+>
+> Changes:
+> - Section switch now reloads data: HOME→cameras+status, WEATHER→weather,
+>   YARD→sensor sync (matches Guardian/Car which already did this)
+> - 60s interval now includes mowerSync + loadCameras
+> - Weather gets its own 5-minute auto-refresh interval
+
+**`de32a4b` → `bc81c84` — a self-correction 38 minutes apart**, which is the kind of thing this record
+exists to preserve:
+
+> **de32a4b (11:57)** Add Mercedes PIN prompt for remote start, unlock, and other PIN-required commands
+>
+> carMbSvc() now passes pin field for engine_start, doors_unlock, windows_open,
+> sunroof_open, sunroof_tilt. PIN entered once via prompt, saved in localStorage.
+> Settings tab shows PIN status + Change PIN button. All PIN-requiring commands
+> (remote start, unlock, MAX COOL, MAX HEAT) prompt if no saved PIN.
+
+> **bc81c84 (12:35)** Remove app-level PIN prompts — mbapi2020 handles PIN from integration options
+>
+> The PIN is configured in Beehive (HA > mbapi2020 > Options), not in the app.
+> Removed PIN prompt wrappers from carRemoteStart, carLockCmd, carMaxCool, carMaxHeat.
+> Removed pin field from carMbSvc service calls.
+> Updated Settings PIN card to point to Beehive integration options.
+
+Built a PIN-storage feature, then tore it out 38 minutes later on learning the integration already owned the
+PIN — and, per §15.3.3, the *whole premise* was revisited again on 2026-08-06 by `473f122`
+("CLAUDE.md: correct the Mercedes PIN claim - the options dict was empty") and `e3d6de2` ("Mercedes PIN:
+real root cause is RIS_PIN_INVALID, not a missing PIN"). Three passes over the same question across two
+weeks and two repos.
+
+#### 15.6.5 A factual correction to the 08-06 writeup
+
+`docs/repo_deploy_mystery_coworker_ask_2026-08-06.md` states (line 56):
+
+> Periodic manual commits titled *"Sync from Master-the-Master-: ..."* show up in Toro-Timemaster-'s
+> history (last one **2026-07-24**)
+
+**That date is off by one day.** The last commit *titled* "Sync from Master-the-Master-" is `29b28a2`,
+2026-07-23 14:51 UTC ("water/sewer cost breakout + overcharge note"). The complete set of sync-titled
+commits is six: `3acd676`, `9bfb2f3`, `2eb4f1f` (07-22), `1fd796e`, `da9942a`, `29b28a2` (07-23). What
+continued through **2026-07-24** was *untitled* double-pushing — the same work landing in both repos under
+independent hashes without the "Sync" label (`7a09738` through `0abc1e8`), and then a final pair on
+**2026-07-26** (`ed23589`, `7a2e0b0`). The doc's *conclusion* is right — Master was always upstream, Toro
+always downstream — but the dates in the record should read: **explicit syncing stopped 07-23, silent
+dual-pushing stopped 07-26.**
+
+#### 15.6.6 The full state of the archived repo's tip
+
+`git ls-tree -r --name-only 7a2e0b0` — **30 files**, against 162 at the canonical tip:
+
+```
+.github/workflows/deploy.yml   CLAUDE.md   Toro_TimeMaster_PWA_Package.zip
+backups/alerts.js.2026-06-24.bak            backups/hours.js.2026-06-24.bak
+backups/index.html.2026-06-24.bak           backups/irrigation-control.js.2026-06-24.bak
+backups/irrigation-index.js.2026-06-24.bak  backups/service-worker.js.2026-06-24.bak
+backups/weather.js.2026-06-24.bak
+beehive/esphome/hcc-mower.yaml   beehive/esphome/secrets.yaml.template   beehive/install.sh
+functions/api/alerts.js   functions/api/hours.js   functions/api/irrigation/control.js
+functions/api/irrigation/index.js   functions/api/weather.js   functions/setup.js
+icons/icon-192.png   icons/icon-512.png
+images/hero-home.jpg   images/hero-irr.jpg   images/hero-truck.jpg   images/hero-yard.jpg
+index.html   install-hacs.ps1   manifest.json   service-worker.js   setup-hcc.ps1
+```
+
+That is the whole project as of 2026-07-26: **30 files, no `docs/` directory at all, no `firmware/`, no
+`windows-scripts/`, four hero images.** The canonical branch by 2026-08-16 has 162 files including 52 docs.
+The gap between those two numbers *is* the last three weeks of the project.
+
+#### 15.6.7 Why it was archived rather than deleted, in the session's own words
+
+From `docs/repo_cleanup_coworker_ask_2026-08-06.md` (lines 21–36):
+
+> ## 2. Archive `Toro-Timemaster-` (the actual fix)
+>
+> This is the real root cause from tonight: two GitHub repos existed for the same project with no
+> automatic sync between them, and Cloudflare Pages only deploys from one (`Master-the-Master-`,
+> confirmed live). `Toro-Timemaster-` diverged and went stale after 2026-07-24 — see the full
+> evidence trail in `docs/repo_deploy_mystery_coworker_ask_2026-08-06.md` if you want the details.
+>
+> **Archiving (not deleting) is the move** — makes the repo permanently read-only with a clear
+> "This repository has been archived" banner, but keeps every bit of its history if it's ever
+> needed again. Nothing breaks, nothing gets deleted, and no future session — mine or yours — can
+> accidentally develop or deploy from the wrong repo again.
+>
+> - Go to: `https://github.com/d4c2np9f69-afk/Toro-Timemaster-/settings`
+> - Scroll to the bottom, red **"Danger Zone"** box
+> - Click **"Archive this repository"**
+> - Type `Toro-Timemaster-` when GitHub asks you to confirm, then confirm
+
+And why the cloud session could not do it itself (lines 47–53):
+
+> ## Why the cloud session couldn't do steps 1-2 itself
+>
+> Tried both directly first. Branch deletion (`git push origin --delete <branch>`) returned a real
+> 403 — the git credentials in that session can push commits but don't have branch-deletion
+> permission (confirmed nothing was touched, branches are untouched). Repo archiving has no
+> corresponding tool at all in that session's GitHub connector. Both are pure GitHub-account-level
+> actions, hence this handoff.
+
+The `main` branches were **deliberately left alone** in both repos (lines 40–41):
+
+> - **`main` branch** in both repos — already flagged in `CLAUDE.md` as unused (contains only the
+>   original zip upload), low risk, not causing confusion, not worth touching.
+
+**That judgement — "low risk, not causing confusion" — is the one call in this whole cleanup that the record
+subsequently contradicted.** Ten days later, on 2026-08-16, an archival session's central finding was
+precisely that `main` *is* the confusion (`7914f3a`: "the 'lost' eight weeks were never lost… 636 commits
+live on branch `claude/time-master-project-liq1jw`; **the default branch shows 1**"). Recorded here as-is:
+the 08-06 session was right that nothing would *break*, and wrong that nothing would be *lost*.
+
+---
+
+### 15.7 What a future session must do
+
+**Use `claude/time-master-project-liq1jw` in `d4c2np9f69-afk/Master-the-Master-`. Nothing else.**
 
 ```bash
 git clone https://github.com/d4c2np9f69-afk/Master-the-Master-
 cd Master-the-Master-
-git fetch origin 'refs/heads/claude/*:refs/remotes/origin/claude/*'
-git checkout claude/time-master-project-liq1jw
+git checkout claude/time-master-project-liq1jw    # NOT main
 ```
-Only after the third command does the project exist. Then read `CLAUDE.md` and
-`docs/SESSION_START.md` at that branch tip.
 
-### The archival risk, stated for the record
+The four reasons, each independently sufficient:
 
-As of 2026-08-16 the entire live application — `index.html` (~7,400 lines), every Cloudflare
-Function, every doc, and 636 commits of history — exists in exactly **two** places: this GitHub
-branch, and Jeff's PC. It is not on `main`. It is not fully in the archived mirror. If the work
-branch were deleted, GitHub's default view of this repository would show a single zip file and
-nothing else. **Recommendation: merge the work branch into `main`, or set `main` to point at it,
-so the default view of the repository is the project rather than a decoy.**
+1. **It is the only branch with the history.** 636 commits, 2026-05-20 → 2026-08-16. `main` has 1.
+   The electric branch has 559 and is 77 behind. There is no fifth place to look.
+2. **It is the only branch that deploys.** Cloudflare Pages' native Git integration watches this branch and
+   only this branch; the app is live at `toro1-5rz.pages.dev` / `loewenhome.com` ~60 seconds after a push.
+   Confirmed three ways: CLAUDE.md line 194, commit `6e24295` ("Jeff opened the app and saw the new Electric
+   card cells after tonight's push, confirming this repo/branch is what Cloudflare Pages actually deploys"),
+   and the Cloudflare bot's live comment on PR #1.
+3. **It is the only branch with `CLAUDE.md` and `docs/`.** Check out `main` and you get one zip — no memory
+   file, no 52 docs, no SESSION_START.md, no decisions ledger. A session that lands on `main` starts from
+   nothing and will confidently reinvent things Jeff already paid for. That is the exact failure mode this
+   whole record exists to end.
+4. **GitHub will actively point you the wrong way.** The default branch is `main`. The one PR is titled
+   "Extract Toro TimeMaster PWA package source files." The repo description is "Toro Timemaster app." Every
+   surface GitHub shows you by default understates this project by 635 commits.
+
+**Do not:**
+- develop on `main` (one zip, no memory, no deploy);
+- develop in `Toro-Timemaster-` (archived, read-only, frozen at 2026-07-26, missing everything after —
+  CLAUDE.md: *"do not develop on Toro-Timemaster- going forward, it's a stale mirror"*);
+- develop on `claude/electric-smarthub-real-data-dv0pxe` even if a harness assigns you that name —
+  it is 77 commits behind and pushes there do not deploy. If your assigned branch is not
+  `claude/time-master-project-liq1jw`, **that is a bug in your task setup, not an instruction.** This has
+  already happened once, on 2026-08-06, and the session that hit it wrote: *"That branch name was a dead
+  end nobody used."*
+- try to fix GitHub Actions. CLAUDE.md: *"GitHub Actions is broken and irrelevant (missing
+  `CLOUDFLARE_API_TOKEN` secret — do not try to fix, it doesn't matter)."* It has been disabled to
+  `workflow_dispatch` since `ac99b33`; re-enabling it will resume the email flood and deploy nothing.
+
+**One open question, flagged and not acted on:** merging PR #1 would fast-forward `main` onto the real
+history and permanently kill the `main`-is-a-trap problem (`mergeable_state: clean`). **The record is
+completely silent on whether this was ever considered, and it is not a decision a session should make
+unilaterally** — Cloudflare's Pages integration is wired to a branch name, and Jeff has been burned before
+by sessions changing infrastructure without asking. Put it to Jeff; do not just do it.
+
+**And the meta-lesson, the one that cost the most:** on 2026-08-06 a full session was spent on the question
+"which repo deploys?", escalated to Jeff and a coworker, when a Cloudflare bot had been answering it in
+plain text on PR #1 since 2026-06-28. Before concluding that a fact is unknowable from inside the repo,
+**check the pull requests, the bot comments, and the branch list** — not just the files.
+
+---
+
+### 15.8 Appendix — the archival branch itself
+
+`claude/task-completion-4a4wmo` (head `f036f84`, 2026-08-17 00:43:44 +0000) is not project history; it is
+*this record being written*. It carries **5** commits not on the work branch, all from
+`session_013dHCZ4YjAKNYtHpn8s36ae`, all `Co-Authored-By: Claude Fable 5`. Its sixth and only other
+commit is the shared root `09f02d4`:
+
+| Hash | Date (UTC) | Subject |
+|---|---|---|
+| `e24d86e` | 2026-08-16 18:18 | Checkpoint: cloud-session history archive WIP — 4 of 22 sections complete |
+| `656c3f9` | 2026-08-16 18:23 | Checkpoint: cost-accounting section (22) + any newly landed sections |
+| `6aa53cd` | 2026-08-16 18:31 | Checkpoint: sections 07-08 (2026-07-15 to 07-28 chronicles) |
+| `7914f3a` | 2026-08-17 00:33 | CLOUD_SESSION_HISTORY.md — assembled master record (145k words) |
+| `f036f84` | 2026-08-17 00:43 | Package the master record as split files + zip for handoff — ⚠️ **this is the commit that produced the incomplete `HCC_MASTER_RECORD.zip`**: it assembled from a stale copy of `history-archive/sections/`, so §16, §17 and §18 (391 KB, ~28% of the corpus) were omitted and §14/§15 were included in truncated form. See §19 for the full defect list. Anyone reading the zip rather than the section files is reading a partial record. |
+
+**Also note what this branch does NOT contain.** Its entire tree is four entries —
+`CLOUD_SESSION_HISTORY.md`, `HCC_MASTER_RECORD.zip`, `Toro_TimeMaster_PWA_Package.zip`, and
+`history-archive/`. There is **no `CLAUDE.md` and no `docs/`** on it, because it was branched from
+`main`. `git ls-tree origin/claude/time-master-project-liq1jw history-archive/` returns nothing —
+`history-archive/` does **not** exist on the project branch. So the two halves of the handoff live on
+two different branches and neither branch has both. That is itself an instance of the failure this
+record documents (§19, Pattern 5), and it is called out in §19's defect list with the fix.
+
+The first checkpoint states the topology finding in its own message, which is why this section exists:
+
+> Sections 01-04 (origin + chronicles through 2026-06-30) mined and written.
+> Remaining sections interrupted by usage-limit reset; SESSION_CHECKPOINT.md
+> has the full resume plan and **the map of where the real history lives
+> (branch claude/time-master-project-liq1jw, 636 commits)**.
+
+And the final one names the whole failure in one line:
+
+> Key finding: the 'lost' eight weeks were never lost. 636 commits live on
+> branch claude/time-master-project-liq1jw; **the default branch shows 1**.
+> 274 CLAUDE.md revisions preserve Jeff's verbatim words, some since edited out.
+
+The work branch's own tip commit, `1d1ebdb` (2026-08-16 09:01:50 −0500), opens with Jeff's words — the
+sentence that set this entire archival effort in motion:
+
+> Jeff, after a session re-proposed hardware he killed two days earlier: **"I can't keep
+> doing this every time the session changes."** Decisions were made in conversation and
+> never written to a file, so each new session read stale docs and confidently told him
+> the wrong thing. This makes that impossible.
+
+That commit also carries a **live security flag that is still open as of the end of this record**, and it
+belongs in the topology section because it is a property of *the repo being public*:
+
+> SECURITY: the Weather Underground API key is in CLAUDE.md in this PUBLIC repo. It needs
+> moving out and rotating - flagged at the top of HCC_ACCESS.md.
+
+Both repos are public. `docs/SESSION_START.md` line 28 says it plainly: *"into the repo, it is public."*
+Anything a future session writes to either repo is world-readable. Credentials live outside git, at
+`C:\Users\jeffl\HCC-secrets\HCC_ACCESS.md`.
+
+
+---
+
+## The Good, the Bad, and the Ugly — every documented argument, correction, and screwup
+
+### How this section was built, and what it can and cannot see
+
+Jeff's instruction for the archive was explicit: *"all our arguments as well… the good bad and ugly of everything."* The literal chat transcripts are **not in this git repository**. What *is* here is the echo of every one of those conversations: 636 commits on `origin/claude/time-master-project-liq1jw` (2026-05-20 → 2026-08-16), many of whose messages are full root-cause writeups that quote Jeff verbatim and openly record Claude being wrong; plus `CLAUDE.md` and its revision history, `docs/CHANGELOG_ARCHIVE.md` (179 KB, 98 entries, "Nothing was deleted. Every entry below is verbatim"), `docs/SESSION_START.md`, and ~52 files under `docs/`.
+
+Search method, for anyone who wants to reproduce or extend this: `git -C <repo> log --all -i --grep='<term>' --format='%h %ad %s'` across the terms CORRECTION, called me out, my fault, root cause, I was wrong, never again, scrapped, rejected, dead end, Jeff, frustrat, apolog, trust, run around, re-litigat, false, stale, wasted, actually, regression, wrong, broke, PIN, localStorage, wipe, meter, coworker, confirmed — then reading every full body with `git log -1 --format=%B <hash>`. Terms that returned **zero hits anywhere in the repo** are themselves a finding: `apolog*`, `sorry`, `should have`, `never again`, `undocumented`, `run around`, `called me out` (as a literal phrase — the *event* is recorded, the phrase is not). This project's confessions are written in the register of engineering post-mortems, not apologies.
+
+A note on the honesty of the source. The record is unusually self-incriminating — Claude repeatedly wrote its own failures into permanent files, including files Jeff would read. Several entries exist *only* because someone chose to record a mistake that nobody else would have caught. That fact is itself part of "the good." But it also means the record is not neutral: it is Claude's account of Claude's errors. Jeff's side survives only where it was quoted.
+
+---
+
+## PART A — THE GOOD
+
+### A.1 The moments the record shows the collaboration actually working
+
+#### 2026-06-23/24 — "The Big Fix Session" and 66/66
+
+The first genuine win is also the aftermath of the first crisis (see Part C.1). After Jeff's frustration message, the session went through the app end to end and fixed six real defects in a row, then proved it.
+
+`CLAUDE.md` at commit `90e556e` (2026-06-24) records the verified state as a table, ending:
+
+> | 66/66 Playwright tests | PASSING |
+
+The commit message itself (`90e556e`, 2026-06-24):
+
+> Incorporates Jeff's verbatim frustration message as a permanent directive, adds mandatory pre-session checklist, documents all bugs fixed in session 2026-06-23/24, captures current verified state (66/66 tests passing), and outlines pending items for next session.
+
+And the same day, a safety net that reads as an act of contrition in code — `c200a18` (2026-06-24):
+
+> Add backups/ folder — physical copies of all working files as of 2026-06-24
+>
+> Safety net: if any file gets broken, restore from backups/*.2026-06-24.bak. Branch backup/verified-working-2026-06-24 also pinned to commit e904a5b (66/66 tests pass).
+
+**INFERRED:** the 66/66 figure is a Playwright suite count from that era only; by 2026-08-11 the suite count is reported as "33/33 pass" (`docs/CHANGELOG_ARCHIVE.md`, 08-11 10:05 PM entry) and by 08-15 as "mower-hours 49/49" (`7a1d250`). These are different suites, not a regression — the record does not claim continuity between the numbers.
+
+#### 2026-07-02 — Meters-live day
+
+Two utility meters, read off the air, into Home Assistant, into the app. From the Change Log preserved in `CLAUDE.md` at `2fdef21^`:
+
+> - **07-02:** 🎉 **WATER + GAS METERS LIVE** — RTL-SDR + **rtlamr2mqtt** add-on reading both. **Water `79453337` = `scm+`** (key discovery: NOT plain scm), **Gas `33393066` = `scm`** (full ID confirmed off the Itron 100G barcode). Both publishing every 60s → `sensor.water_meter` (raw 129105), `sensor.gas_meter` (raw 883384). Full working config + discovery method in **`docs/beehive/rtl_sdr_meter_setup.md`**. No Windows drivers (add-on ships the driver).
+
+This landed on the back of real-world legwork by Jeff, recorded the day before:
+
+> - **07-01:** WHUD supervisor briefed Jeff in person → **water meter blocker RESOLVED**: read via unencrypted Itron `100WD` MIU, **ERT-SCM**, endpoint **`79453337`**, ~915–930 MHz, SCM/min + hourly big read, **no AES key**…
+
+And the same day the J45 got its own win:
+
+> - **07-02:** 🎉 **J45 migrated to internal drive** — Beehive now boots HA OS 18.1 standalone off the internal 128 GB SSD (was flaky external USB).
+
+#### 2026-07-03 — Beehive online, green dot
+
+> - **07-03:** 🎉 **BEEHIVE ONLINE IN THE APP (confirmed, green dot).** Root cause of the long-standing "Beehive Offline" was a stack of 3: mixed-content (local http from an https page), no auth token sent, and **CORS**. Fixed: Nabu Casa https URL + app sends bearer token + **HA `configuration.yaml` now has `http: cors_allowed_origins: [https://toro1-5rz.pages.dev]`** (Jeff added it via File editor, restarted HA).
+
+Same day, the architectural fix that killed the whole bug class — `7a59848` (2026-07-03), "Route HA connection through a server-side /api/ha proxy (durable fix)":
+
+> The app talked to Beehive directly from the browser, which meant fighting mixed content, CORS, and the Nabu Casa relay tripping browser fetch timeouts — the whole class of 'Beehive Offline / meters Waiting' problems. Irrigation and weather never had these because they go through Cloudflare Functions (server-to-server). Now HA works the same way.
+
+And the Alexa win Jeff had been asking about for weeks:
+
+> - **07-03:** 🎉 **Alexa now reads the REAL backyard weather** … "Alexa, what's the backyard temperature?" reads the live KTNWHITE21 value. The "Alexa's weather is always wrong" complaint is resolved.
+
+#### 2026-07-09 — Blink day
+
+> - **07-09:** 🎉🎥 **BLINK CAMERAS LIVE** (all 6) — removed stale `custom_components/blink` override, used built-in (blinkpy 0.25.6+). Full camera control (refresh/arm/snapshot/save-clip). Public-share safety (panic gated behind HA token). `loewenhome.com` + `www` LIVE + SSL. AT&T gateway: Beehive pinned to fixed `.66`.
+
+Blink is worth calling a win precisely because it was a long grind and the wrong theory was published twice before the right one. The chain: `dbc8fbe` (2026-06-25) surfaced the auth failure properly instead of retrying silently; `f3ae126` (2026-07-03) shipped a "dedicated cookie session" fix on the `empty_cookies` theory; `1f2cdec` (2026-07-03) then found the real answer and said so plainly —
+
+> Found the real root cause by diffing blinkpy in the harness: Blink changed their OAuth signin to signal 2FA-required with HTTP 202 + tsv_state/tsv_methods fields. blinkpy 0.25.2's oauth_signin only recognizes the OLD 412 code… **Kept the dedicated-session tweak as belt-and-suspenders but corrected its comment (the cookie theory was the wrong diagnosis; the 202 handling is the fix).**
+
+— and finally `9b29c1f` (2026-07-09), "Blink: record real root cause + official fix (blinkpy 0.25.6 / HA 2026.6.4); **our custom override is now the blocker**." The win was admitting that the custom fix had become the problem, and deleting it.
+
+#### 2026-07-10 — Local AI camera detection live
+
+> - **07-10 (coworker):** 🎉 **LOCAL AI CAMERA DETECTION LIVE** — CodeProject.AI 2.9.5 on beast (GPU YOLOv5, GTX 1050 Ti). 3 automations in `packages/hcc.yaml` (scan/notify/mute). Fixed: Windows Firewall port 32168 + `packages:` include directive in `configuration.yaml` (all old automations were ghost entities).
+
+#### 2026-07-21 — CAR live, Family Login live
+
+> - **07-21 (coworker):** 🚗🎉 **CAR section fully LIVE — mbapi2020 installed + verified end-to-end.** … **Confirmed by Jeff 2026-07-21: logged into `loewenhome.com` with the family password, CAR tab shows live data.**
+
+Note the discipline recorded in the same entry: *"Jeff entered his own email/password/verification code directly — coworker does not type third-party account passwords into browser forms."*
+
+#### 2026-08-05 / 08-06 — The first coworker handoffs actually paying off
+
+This is the collaboration pattern working as designed: the cloud session writes a handoff doc for the thing it physically cannot verify; the local "beast" coworker session runs it against the real house; findings come back and change the code.
+
+- `3322153` / `aa6566a` (2026-08-05/06) — **sewer overcharge verification**: *"Verified the 5 items from the cloud session's handoff doc against the real Beehive HA instance. Found a real recorder-retention gap… and that zero B-Hyve zones have recorded an 'on' event in 8 days of history, so `irrGalFromHistory()`'s fix has never actually fired yet (mechanically works, just unexercised)."*
+- `fa8e153` → `5c41c8d` (2026-08-06) — **Electric SmartHub**: the coworker fired the exact WebSocket command against the real HA and found the feature shipped hours earlier was *silently non-functional*: wrong command name (`history/statistics_during_period` doesn't exist on Core 2026.8.0) and a `change` field that always reads 0. The cloud session then fixed it against the coworker's real data shape. A bug that would otherwise have shipped looking fine forever.
+- `34d177f` → `6e24295` (2026-08-06) — **the two-repo deploy mystery**: *"both repos' own `CLAUDE.md` claimed to be the one Cloudflare Pages deploys"*; resolved by Jeff opening the app and seeing the new card. *"Toro-Timemaster- is a stale diverged mirror -- flagged permanently in CLAUDE.md so no future session wastes time developing there."*
+- `4252086` → `0827617` (2026-08-06) — **irrigation GPM calibration**: the coworker ran isolated single-zone tests with a stopwatch and the real water meter; the cloud session replaced its estimates with measured numbers.
+
+The delegation rule that made this possible was written on 2026-07-09, `bec7440`:
+
+> Rule 13: proactively tell Jeff when a task/step is better done by his local Claude coworker (hands-on his PC/Beehive) — Blink install, HA entity reads, /setup, ESP32 flash, link verification, local file cleanup — while this cloud session owns app code + deploys + guidance.
+
+#### 2026-08-06 — "It started."
+
+`adcf16c` (2026-08-06), title: **"Mercedes remote start CONFIRMED WORKING from the app."** Body opens with two words from Jeff:
+
+> Jeff: "It started."
+
+The rest of that commit is a model of how to close a hard bug honestly, including naming its own earlier misstep:
+
+> The diagnostic that cracked it, and the one to reach for first next time: sigpos_start (flash lights) is the only remote command requiring no PIN. It worked while every PIN-gated command failed. That single split proved the app, the Cloudflare proxy, HA, the VIN and the integration were all healthy and isolated the fault to the PIN in one step -- **after I had wasted effort on a false reading of the config-entry API.**
+>
+> …Credit where due: the whole thread started from Jeff noticing the real Mercedes app was prompting for a PIN.
+
+#### 2026-08-10 — The satellite yard map on Jeff's real device
+
+`1d6c109` (2026-08-10), "Record: satellite yard map confirmed working on Jeff's real device":
+
+> Jeff's screenshot of the deployed app shows real Esri imagery of his actual property with the track overlaid, north arrow and scale bar - his verdict: it looks good. That confirms the one thing this session could never verify (imagery quality over White House TN)…
+
+The `CHANGELOG_ARCHIVE.md` entry for 08-10 6:05 PM calls it what it was: **"✅ CONFIRMED WORKING ON JEFF'S REAL DEVICE."** The same commit keeps two honest caveats attached rather than celebrating clean — coverage reading 7 cells from 0 mows, and *"the track wandering over the house is ordinary consumer-GPS drift, not a rendering fault."*
+
+#### 2026-08-10 — The best argument in the whole record
+
+`d3749b9` / `CHANGELOG_ARCHIVE.md` 08-10 6:25 PM. Jeff asked a question, and the question was better than the design:
+
+> Jeff asked: *"Won't the drift improve over time as it's making the history map of the yard?"* Thought it through honestly instead of saying yes — **and the answer was no, and the design I'd shipped would actively get WORSE.** GPS error is random and roughly zero-mean, so *averaging* repeated passes would converge on truth — but `mergeCoverage()` stored a **union of cells**, which only ever grows. Every drifted stray became a permanent cell, so over many mows the green would bloat outward into a ±5 m halo covering the house and driveway, never sharpening. **Jeff's question found that; I'd have shipped it.**
+
+The fix — visit-counted cells, shading by confidence, dropping the *least-visited* cells at the cap rather than the oldest — was then proved by simulating six mows with ±4 m drift: *"confirmed cells went 0 → 156 → 246 → 293 → 316 … cells-seen-once fell 297 → 78, and per-mow cell growth decayed from +83 to +16 — i.e. it converges rather than bloating."* This is the collaboration working exactly the way Jeff said he wanted it to.
+
+#### 2026-08-11 — "no surprises!!" — the full diagnostic sweep
+
+`af6df04` and the 08-11 10:05 PM `CHANGELOG_ARCHIVE.md` entry. Jeff:
+
+> *"Run all the diagnostic checks you got, to make sure there is nothing else broken or not working… no surprises!!"*
+
+Result: 33/33 suites, and the light-mode contrast bug class (Pending Item 17) genuinely closed rather than reported green —
+
+> The old note guessed "most are probably fine on dark surfaces" — so I measured instead of guessing: wrote a contrast auditor that composites every translucent ancestor to get each element's REAL painted background… **19 confirmed failures on genuinely light surfaces** — worst were the credential save/error messages at **1.09-2.9:1**, i.e. "Wrong password" and "Save failed — storage full" were effectively invisible in light mode, exactly the messages you most need to read.
+
+It also caught its own tooling lying (see B.24) and ended with a plainly honest close-out: *"Honest status on the rest of the Pending list: nothing else is app-side… No app-code item is left open."*
+
+#### 2026-08-15 — The camera pipeline, verified with photographs
+
+`c5a6aab` / `docs/beehive/camera_pipeline_VERIFIED_2026-08-15.md`. This is the strongest verification artifact in the project:
+
+> **This is the permanent record.** Every claim below is backed by a timestamp from HA's own history API or a photograph of the physical Apple TV screen, captured by a camera pointed at it while the events happened. Nothing here is a component check or an assumption. **If a future session doubts whether this was ever set up and proven: it was, on this date, as follows.**
+
+Measured, not asserted: motion → AI detection **8 s**; motion → popup on the Apple TV **4.7–6 s**, photographed three times; detection → phone push + Fire TV popup + cooldown + archive **≤1 s**. The verification rig was *"A Razer Kiyo Pro on the beast, aimed at the Apple TV, capturing a frame every ~0.9 s."*
+
+Day before, `9426623` (2026-08-14) had cracked the thing that had defeated several sessions — **"SOLVED: Apple TV camera popups - linked_doorbell_sensor is the key (motion alone never interrupts the screen)"**:
+
+> **`linked_motion_sensor` alone is NOT enough.** Motion earns a phone notification but does NOT interrupt the TV. HomeKit reserves the picture-in-picture screen takeover for **DOORBELL** events… **Fix: point `linked_doorbell_sensor` at the SAME motion sensor.**
+
+#### 2026-08-16 — Building the thing that makes this archive possible
+
+`1d1ebdb` (2026-08-16), "Build the HCC MASTER RECORD - permanent searchable memory of the whole project." Born directly out of the crisis in Part C.6, it is nonetheless a genuine win: 196 files, 124 MB, including `HCC_DECISIONS_LEDGER.md` ("81 decisions in Jeff's own words - START HERE"), 6,896 messages verbatim, all 635 commits with diffs, 25,547 tool events, 187 images — plus a scheduled task rebuilding it daily at 5:45 AM, and `Search-HCC.ps1` so it can be grepped from PowerShell.
+
+#### A.2 The relationship documents themselves
+
+The single most unusual artifact in this repository is that the *relationship* is version-controlled and marked un-deletable. `CLAUDE.md` Mandatory Rule 11, sub-clause (present at tip, `/tip/CLAUDE.md:58`):
+
+> **PROTECTED — NEVER trim or compress:** "Jeff's Message", "The Working Relationship", these "Mandatory Rules", and the "Debugging Protocol" below. These come FIRST, before any technical work, every session. Compression only ever touches history/changelog/reference — never the relationship. **They are the point of the whole project.**
+
+That clause survived every restructuring, including the 260 KB → 58 KB purge of 2026-08-16, where `fab5b30` explicitly records: *"Every PROTECTED section (Jeff's Message, The Working Relationship, Mandatory Rules, Debugging Protocol) was asserted byte-identical before writing."*
+
+---
+
+## PART B — THE BAD
+
+Every documented mistake, in rough chronological order, with the confession quoted as written. Where a mistake cost Jeff money, time, or hardware, that is stated.
+
+### B.1 The great blank-page incident — 2026-06-23
+
+The founding screwup, and the only one promoted to a numbered Mandatory Rule.
+
+`a973c8f` (2026-06-23), "Fix fatal JS syntax error — remove stray `<script>` tags inside script block":
+
+> Two bare `<script>` tags were embedded inside an already-open `<script>` block (lines 2488 and 2688). The HTML parser passes them as literal text to the JS engine, which throws a SyntaxError — killing ALL JavaScript on the page. That's why the whole app went blank.
+
+Written into `CLAUDE.md` at `90e556e` as **Mandatory Rule 8**, and still present at tip more than seven weeks later:
+
+> 8. **NEVER put `<script>` or `</script>` tags inside the JS block of index.html** — this causes a fatal blank page (**the great blank-page incident of 2026-06-23**). The JS block is lines 1209–2834. Raw text only inside it.
+
+The cost was total: the app was dead, not degraded. **INFERRED:** given the 06-23/24 crisis message arrived the same night, this is very likely one of the failures Jeff meant by *"You are just fine leaving something totally messed up and not even close to correct"* — but the record does not explicitly link them, so this is inference, not memory.
+
+### B.2 Everything else broken at the same time — 2026-06-23
+
+The blank page was not alone. From `CLAUDE.md` at `90e556e`, "Session 2026-06-23/24 (The Big Fix Session)":
+
+> 4. **All modal buttons silently broken** — CSS used `.modal-overlay.open{display:flex}` but HTML uses `modal-ov` and JS sets `modal-ov show`. The CSS never matched so modals never opened. **LOG MOW, LOG SERVICE, UPDATE HOURS were all broken.**
+>
+> 5. **Modal box unstyled** — CSS defined `.modal{...}` but inner div uses `modal-box`. No background, rounded corners, or padding.
+>
+> 6. **`.mbtns`, `.mbtn.secondary`, `.btn-green` missing** — Cancel buttons invisible, no button row layout, green buttons unstyled.
+
+`da1320c` (2026-06-23) states the user-facing consequence flatly: *"Every Log Mow / Log Service / Update Hours button was silently doing nothing."* Meanwhile `c8e729c` (2026-06-23) records that **all four API endpoints were returning errors because no Workers existed at all**, and `98b8dca`/`c6f3df8` record that the sensor pipeline was dead because the code read `env.HCC_KV` while Cloudflare Pages had the binding as `MOWER_KV` — *"This was the root cause of all sensor readings showing `—` and `0.00V`."*
+
+There is also a small monument to flailing in this window: `b629c83` (2026-06-23), **"Revert hours.js to original — undo KV refactor that may have broken sensor read."** The words *"may have"* are the record admitting it did not know.
+
+### B.3 Jeff's real hours lost to a localStorage wipe — 2026-06-23
+
+`53eb7d4` (2026-06-23), "Restore Jeff's real hours — update default state and sensor baseline to 5.9h":
+
+> Backup from June 22 shows 5.9 engine hours. **Browser data was cleared which wiped localStorage.** Default state now starts at 5.9h so the correct number shows on every fresh install.
+
+The record does not say **who** cleared browser data or why, and does not assign blame. What it does establish is the vulnerability that would bite again on 2026-08-10 (B.16): the mower's hour meter — the single number Jeff cares most about — lived in one unbacked `localStorage` blob.
+
+### B.4 The shared-`AbortSignal` timeout regression — Jeff had to call it out — 2026-07-03
+
+This is the mistake that produced the Debugging Protocol. `0f44d9d` (2026-07-03), "Fix false 'Beehive Offline': per-attempt timeout, not a shared 2.5s budget":
+
+> **Regression I introduced when wiring Nabu Casa:** checkBeehive built ONE `AbortSignal.timeout(2500)` and reused it across all candidate fetches, so the 2.5s was a total budget for every attempt combined — and once elapsed, later fetches aborted instantly. Over the Nabu Casa remote relay a single /api/ call often takes >2.5s, **so a perfectly reachable HA was reported offline (red dot), which also stopped the meters from loading.**
+
+The Change Log version (`2fdef21^:CLAUDE.md`, 07-03) is blunter: *"🐛 **Fixed a self-inflicted false 'Beehive Offline'**."*
+
+The part that matters for trust is in the Debugging Protocol itself (`f668301:CLAUDE.md`, 2026-07-03), step 1:
+
+> **Reproduce/verify on MY end first.** … Run the **Playwright harness** with **mocked data** to reproduce the failure and prove the fix… **I did this AFTER Jeff called me out on the timeout bug — it must come FIRST.**
+
+Cost: Jeff spent time debugging his own network and his own Home Assistant for a fault that was in code shipped hours earlier.
+
+### B.5 The stale-cache saga — three wrong root causes before the right one — 2026-06 → 2026-07-21
+
+The single longest-running self-inflicted bug class. Fixes that were announced and did not stick:
+
+- `4f96d09` (2026-06-23) — "stale service worker cache"
+- `8497827` (2026-06-23) — "Bump service worker to hcc-v3 — force cache clear"
+- `19dd459` (2026-06-26) — "Service worker: network-first for HTML so fixes always land"
+- `24df1fc` (2026-07-10) — "Fix Windows stale cache"
+- `173270a` (2026-07-20) — "Fix root cause of recurring stale-cache bug: no-cache service-worker.js"
+- `70dba84` (2026-07-21) — "Fix stale HTML: no-cache headers + SW cache bypass"
+
+`173270a` claimed root cause. It was wrong — or rather, one third right. `6f517ac` (2026-07-21) corrects it:
+
+> The 07-20 fix only addressed browser Cache-Control; Cloudflare's edge was independently caching service-worker.js via cf-cache-status: REVALIDATED, **and index.html had no SW registration at all for new visitors.**
+
+The full confession is in the Change Log (`2fdef21^:CLAUDE.md`, 07-21):
+
+> **Real root cause:** standard `Cache-Control` in `_headers` only governs the *browser's* cache. Cloudflare's CDN edge caches JS assets independently… and was never told to stop. Separately, **`index.html` had NO service worker registration call at all** — new visitors never even got a SW installed, so the "network-first" fetch logic already in `service-worker.js` was moot for them. …**Lesson for any future cache/stale-content bug: check `cf-cache-status` on the live custom domain, not just `Cache-Control`.**
+
+Cost to Jeff: weeks of opening the app and being shown an old build, then reporting a bug that had already been "fixed."
+
+### B.6 The Mercedes PIN round-trip — added, removed, mis-documented, corrected, corrected again — 2026-07-24 → 2026-08-06
+
+Five commits, two of which explicitly correct the previous one. This is the clearest documented case of Claude confidently telling Jeff a wrong fact and then telling him a *different* wrong fact.
+
+1. `eeaa0b7` (2026-07-24) — **"Add Mercedes PIN prompt for remote start, unlock, and other PIN-required commands."** PIN saved in `localStorage`, prompts across the CAR section.
+2. `c73e32e` (2026-07-24), the *same day* — **"Remove app-level PIN prompts — mbapi2020 handles PIN from integration options."** *"The PIN is configured in Beehive (HA > mbapi2020 > Options), not in the app."*
+3. `473f122` (2026-08-06) — **"CLAUDE.md: correct the Mercedes PIN claim - the options dict was empty."**
+
+   > Jeff worked out from the real Mercedes app that unlock and remote start demand a PIN, and suspected HA wasn't supplying it. **He was right.**
+   >
+   > CLAUDE.md asserted the PIN was 'stored in mbapi2020 integration options in HA - services auto-use it', and the app's PIN prompts were removed on 07-24 on that basis. The mechanism is correct… **but the fact was not**… So **every PIN-gated service (doors_unlock, engine_start, windows_open, sunroof) has been firing with no PIN and getting rejected upstream** … That is the whole reason those features looked broken.
+
+4. `e3d6de2` (2026-08-06) — **"Mercedes PIN: real root cause is RIS_PIN_INVALID, not a missing PIN."** Opening line: **"Corrects the previous commit, which was wrong."**
+
+   > I checked the PIN with HA's config_entries/get over the WS API, saw options come back empty, and told Jeff the PIN had never been entered. **It had.** HA's config-entry list API simply does not return data or options -- they're internal. **The tell I missed: `data` came back empty too, which is impossible for a loaded integration running 49 live entities.**
+
+5. `eb0852f` (2026-08-06) — a third reading, from Jeff's own screenshot of the Mercedes app: an *attempt limit between manual ignition cycles*. *"This is very likely what the RIS_PIN_INVALID seen in HA's log actually was… Not proven yet, so both readings are recorded."*
+
+Cost: **two weeks (07-24 → 08-06) of dead remote start, unlock, windows and sunroof**, caused by removing working prompts on the strength of a `CLAUDE.md` sentence nobody had verified. `adcf16c` states it: *"these have been dead since the 07-24 change that removed the app's PIN prompts on the strength of a CLAUDE.md claim that turned out to be wrong."*
+
+### B.7 Three wrong hardware recommendations in a row — the garage door part — 2026-08-05
+
+`7f73148` (2026-08-05), "Add permanent rule: never name a product/model from memory unverified":
+
+> **Jeff called out three wrong-in-a-row hardware recommendations on the garage door part today** -- ratgdo board, then SONOFF Basic, then had to be corrected to SV **before he found the actually-right MINI-D himself.** Logging this as a protected standing rule alongside the Debugging Protocol: no specific product/model gets named unless it was verified via a real search in the current session.
+
+The intermediate correction, `4bfacf3` (2026-08-05):
+
+> Jeff pushed back that "SONOFF Basic" wasn't specific enough among SONOFF's confusing relay lineup -- **and it was actually the wrong pick: Basic-series switches are mains-voltage (110-240V) and need modification for a low-voltage garage circuit.**
+
+And `f015867` (2026-08-05) — the right answer, found by Jeff: *"Jeff found a better match than the SONOFF SV plan: MINI-D has real Matter support… Verified all of this via research before committing."*
+
+The rule as it stands at tip (`/tip/CLAUDE.md:150`), marked PROTECTED:
+
+> **8. NEVER name a specific product/model to Jeff from memory (PROTECTED — Jeff's standing rule 08-05, added after the garage door incident).** … three guessed answers on one part, in a row, before Jeff found the actually-correct SONOFF MINI-D himself. **He does not have time to be the fact-checker on my hardware recommendations.** … If I haven't checked, say "let me check" — never let a plausible-sounding model number stand in for one that's actually confirmed.
+
+**Near-miss cost:** had Jeff bought the SONOFF Basic as recommended, it would have been the wrong voltage class for the job.
+
+### B.8 Telling Jeff his water meter was broken when it wasn't — 2026-08-01
+
+The clearest case in the record of Claude sending Jeff to make a phone call he did not need to make.
+
+`593ddf7` (2026-08-01) — **"Confirm water pit-radio fault via live irrigation+shower test"**:
+
+> Radio heartbeat is normal but the register is stuck rebroadcasting a stale reading -- proven against the raw rtlamr2mqtt decoder log, with the gas meter on the same dongle ticking normally in the same window. Recurrence of the 07-28 fault with a different symptom. **Jeff needs to call WHUD again.**
+
+Note the test that produced this: per `CHANGELOG_ARCHIVE.md`, *"triggered a B-Hyve irrigation zone via HA + **Jeff took a real shower**, both running simultaneously for ~47 min."* Jeff physically participated in generating the wrong conclusion.
+
+`fb5068c`, **the same day** — "Retract water-meter fault diagnosis -- meter is healthy, no WHUD call needed." The full confession in `CHANGELOG_ARCHIVE.md`:
+
+> **CORRECTION to the entry below — the water meter was never faulty. False alarm, root-caused and fully retracted same day.** The "stuck register" conclusion from the irrigation+shower test was wrong — **it just wasn't watched long enough.** … **Real root cause:** `rtlamr2mqtt` runs `rtlamr` with `-unique=true`, which only re-publishes a reading when the decoded value itself changes… **The `sensor.water_meter_last_seen` heartbeat pinging normally the whole time was a real signal I misread — it confirms every RF catch, not that the *value* had refreshed, and I conflated the two.** … See the entry directly below for the original (incorrect) diagnosis, **kept for the record rather than deleted.**
+
+This lesson is now a hard-won invariant at the top of `docs/SESSION_START.md`:
+
+> **A meter reading `unknown`/`unavailable` is NOT a fault.** … gaps of 20 min to 3 hours are normal… **This caused a false WHUD alarm on 08-01. Watch longer.**
+
+### B.9 The glassmorphism redesign — believed solid, wasn't, and told Jeff it was fine — 2026-08-06
+
+`CHANGELOG_ARCHIVE.md`, 08-06 (Luxury Glass Overlay redesign — attempted, then fully reverted per Jeff):
+
+> Built it in stages over several commits (frosted glass, gradient-ring borders, warm typography, softened/darkened host photos, subtle tilt/edge-fade on every element) and **believed it was solid after passing lint/smoke-test and my own mocked-data Playwright screenshots. It wasn't.** Jeff sent 5 real screenshots from the live app with real data and the visual result was bad… **my own testing had used short placeholder values ("— gal") which never made the chip row wide enough to visibly hit that content, so I missed it entirely, then wrongly told Jeff Water was fine when it wasn't (never actually checked it against real long data).** Attempted two rounds of fixing the darkening and still hadn't nailed it when Jeff said stop. **Reverted index.html/service-worker.js/CLAUDE.md entirely back to commit `7cccc59`**.
+
+The lessons recorded, verbatim:
+
+> (1) test every visual claim against realistic LONG real-world data from the start, never short placeholders…; (2) **get Jeff's visual sign-off on one card before rolling a treatment out to all of them**; (3) …treat this as a clean slate, not a continuation.
+
+Cost: an entire multi-commit redesign thrown away, and Jeff having to say *stop*.
+
+### B.10 Stripping Jeff out of his own photographs — 2026-08-06
+
+`595ec23` (2026-08-06), "Put Jeff back in his own photos":
+
+> **Correcting a real mistake: I stripped the person out of the irrigation and yard heroes assuming they were stock models. They're Jeff.** Both regenerated from the pre-edit originals with him kept exactly as he was -- same face, expression, LawnCareLife shirt, watch, thumbs-up pose -- and only the printed title, tagline and fake icon rows removed. **Check before removing a person from a personal app's photos.**
+
+Promoted to a PROTECTED `CLAUDE.md` section the same day — `db9ffcc` (2026-08-06), "CLAUDE.md: record which photos are real, and never to strip Jeff out of them":
+
+> **Learned by getting it wrong.** I regenerated the irrigation and yard heroes and removed the person, assuming a stock model. **It was Jeff, in his own app.** New PROTECTED section records:
+> - hero-irr.jpg and hero-yard.jpg contain Jeff himself. **Never remove him.**
+> - images/zones/ are real photographs of Jeff's actual yard. Don't regenerate them.
+> - The couple in the old hero-car.jpg were not Jeff and Angela.
+>
+> **Rule: if a photo has a person or a real place in it, confirm what it is before altering it.**
+
+This is arguably the most *personal* screwup in the archive — an app built for one man, and the man was edited out of it.
+
+### B.11 Months of layout work spent dodging fake text that was never real — 2026-08-06
+
+`45485f0` (2026-08-06), "Regenerate the three utility photos without the fake marketing copy":
+
+> **This is the root-cause fix for every utility-card fight in the history below.** Those photos were AI marketing mock-ups: half of each frame was a fake ad -- "WHITE HOUSE UTILITIES COMMAND CENTER", "SMART MEASUREMENT. EVERY DROP COUNTS.", the SAFE SUPPLY / USAGE INSIGHTS icon strips. **Every constraint in this area (the 46% width, the per-card hand-calibrated top values, the collisions, the first attempt's full revert) existed only to dodge text that was never real.**
+
+Jeff's own words on why it looked wrong (`ecf6f25`, 2026-08-06):
+
+> Jeff: "I hate those logos that are on the picture. I don't mind the text but it looks awful with them right next to the real icons."
+
+And the worst offender (`1eba07f`, 2026-08-06):
+
+> hero-cameras.jpg was the worst offender of the lot: a 1300x2042 portrait mock-up of **the app's OWN interface**. A fake gold "HOME GUARDIAN / SMART SECURITY SYSTEM" title, a fake "ALL SYSTEMS READY - PROTECTED - 6 CAMERAS" shield panel, and six empty dummy camera tiles… **sitting directly above the app's real camera grid. Exactly the "fake stuff next to my real icons" Jeff objects to.**
+
+Cost: an unknown but substantial number of layout commits across weeks, all working around a problem that could be deleted. Also, the fix was cheap once identified — *"~9 cents per image, first try, no retries"* — which makes the preceding weeks worse, not better.
+
+### B.12 Twelve camera tiles instead of six — 2026-08-03
+
+`83a23cd` (2026-08-03). Jeff reported *"camera views in the app are all messed up"* and asked Claude to figure out what the coworker broke. The changelog records the answer, and refuses to take the easy out:
+
+> **Not the coworker's mistake** — the HA-side entities are legitimate and needed for their fix; our app's camera-listing code just had no concept of "internal helper camera" and needed one.
+
+Root cause: `loadCameras()` and two other call sites did an unfiltered `entity_id.startsWith('camera.')` match, so six new `*_clipframe` helper entities *"started rendering **12 tiles instead of 6**, mixing real live cameras with static internal helper stills… and calling `blink.trigger_camera` on all 12 during 'Refresh All' (silently failing on the 6 fake ones)."*
+
+### B.13 The wall-iPad "stuck sideways" saga — wrong framing, an unverified guess shipped live, and finally the real culprit (its own edit) — 2026-08-08
+
+Three consecutive `CHANGELOG_ARCHIVE.md` entries and three commits, in the order they happened.
+
+**Round 1** (`9da43a5`) — root-caused to Guided Access / rotation lock, and a speculative CSS auto-rotate shipped as a "backstop." The entry is candid about what it could not prove:
+
+> **Full honesty on verification, not overclaiming a 4th time:** I confirmed the CSS mechanism itself fires correctly… but the real underlying failure depends on exactly how iOS Guided Access composites a frozen-orientation Safari canvas onto a physically-rotated screen — a step that doesn't exist in headless Chromium at all, **so I cannot verify from this sandbox whether `rotate(90deg)` is the correct compensating direction vs. `rotate(-90deg)`.**
+
+The phrase *"not overclaiming a 4th time"* is the record admitting it had already overclaimed three times in that thread.
+
+**Round 2** (`24136c7`) — Jeff sent three fresh photos still showing it sideways:
+
+> **Jeff's response reframed the whole problem correctly: "it worked perfectly before, you can't say it's a limitation of the app or the iPad."** That's the key fact — if it was genuinely working before, this is a regression, not an inherent iOS/Guided-Access constraint, **and I was wrong to frame it that way.** …reverted the speculative CSS auto-rotate transform added in the entry below — **it was shipped as an explicitly unverified guess**… and leaving an unproven guess live while trying to find an actual regression only adds a confound. **Status: genuinely unsolved.**
+
+**Round 3** (`bb9d1cf`) — the culprit was its own commit from earlier the same day:
+
+> **Jeff cut through all the Guided-Access/rotation-lock theorizing with the one fact that actually mattered: "It worked perfectly before the picture edit."** That sent me straight to `git log` instead of more guessing — and the "picture edit" is obvious in hindsight: commit `5d22cf7`, **my own fix from earlier in this exact conversation**… That commit landed, and the sideways reports started right after — **a timeline I had in front of me the whole time and didn't check first.**
+
+And, unusually, an admission that the story still doesn't close:
+
+> **Honest gap: I still don't know the exact mechanism** by which a `max-height` change on hero photos could cause the whole page's nav bar to render vertically — that's a real unanswered question, not a satisfying root-cause story — but Jeff's own timeline… is the strongest signal I have.
+
+One good detail from the same thread: Claude caught a discrepancy in Jeff's evidence rather than silently trusting it — *"their status-bar timestamps (4:54-4:55 PM) were EARLIER than the ones that had shown it fixed (9:17-9:19 PM) — flagged this to Jeff rather than assuming the photos were current."*
+
+### B.14 The fix that cut Jeff's head off — 2026-08-11
+
+`e5d57f4` and `CHANGELOG_ARCHIVE.md`, "my own hero fix cut Jeff's head off the yard photo":
+
+> Jeff, confirming the sizing fix landed: *"You got it they are rendering correctly now, however my head is cut off in the yard hero pic"* — then, narrowing it: *"it's only in the iPad landscape that it is cut off."* **This was a direct side effect of the fix in the entry below, not a pre-existing bug.**
+
+Measured rather than guessed: *"his hair starts at image row ~22 of 851 — essentially zero headroom."* The candidate crop values were quantified (`center center` cut −94 px into his head at 1194 px, −145 px at 2560) before choosing `center top`. Resulting permanent rule:
+
+> **Rule for future sessions: never centre `.sec-hero-yard` — Jeff is in that photo and sits hard against the top edge.**
+
+### B.15 🚨 The localStorage blowout that reset Jeff's hour meter — 2026-08-10
+
+The most serious app-side data-loss bug in the record, and the confession is explicit from the title onward. `b568a4b` (2026-08-10):
+
+> **Jeff's hours reset to 5.9 - the factory default baseline - meaning his whole saved state was wiped. Root cause is mine, from earlier today.**
+>
+> The entire S object (hour meter, service log, maintenance history) is persisted as one localStorage blob. When I added the cumulative coverage map I put it in that same object, and syncYardCoverage then wrote the full server coverage map - tens of thousands of cells - into it on every sync. That pushed the blob past the storage quota, save() threw, **and the catch silently swallowed it**, so hour updates stopped persisting; once the entry was lost the boot path fell back to DEFAULT_STATE and took his real hours with it.
+>
+> **Server-owned, re-downloadable, unbounded data does not belong in the user's core state blob.**
+
+The changelog headline for the same event: **"🚨 MY BUG — the coverage map I built blew out localStorage and reset Jeff's hour meter to the 5.9 default."** Jeff's words: *"Why are my hours now set at 5.9, the real actual hours are 12.1."*
+
+The fix was three-part (coverage moved out of `S`; a migration to strip legacy fields off already-bloated devices; a tiny `toro21200_core` mirror key so hours can never again be silently reset) and was proved by deleting the main blob and reloading. But the honest close is what matters:
+
+> **Jeff still needs to re-enter 12.1 once via SET HOURS** — the mirror protects from here on, but it can't recover a value that was already lost before it existed.
+
+Cost: Jeff's real engine hours, permanently unrecoverable from the app, re-entered by hand.
+
+### B.16 The next storage time bomb, found only because Jeff asked — 2026-08-11
+
+`86b47e6`. Jeff, after re-entering 12.1: *"Is everything fix and 💯 correct… make sure we don't have any other situation like this out there waiting…"*
+
+> **(1) Audit — found and fixed the next instance of the exact same bug class.** … The live time bomb: **service photos were stored inline in `S.log`** (`entry.photo`, a base64 data URL)… **so ~20-30 logged photos would have blown the same quota and wiped the hour meter all over again.**
+
+The same audit caught three unguarded `x.hrs.toFixed(1)` calls where *"one malformed log entry would have thrown and taken out the whole dashboard."* Jeff's question found the second bomb, exactly as his question found the coverage-union flaw the day before.
+
+Also in that entry, a self-inflicted regression caught mid-fix:
+
+> **Caught a self-inflicted regression mid-fix:** irr/car also carry the `.sec-hero` class, so the new explicit height captured them too and squashed them from 796→560 px; restored their aspect-driven sizing explicitly.
+
+### B.17 The date/time discipline failure — 2026-08-10
+
+`a2779b5` (2026-08-10), "Add permanent rule: check real date/time, never assume":
+
+> **Jeff caught a real discipline failure** - referencing "late at night" and a wrong date without ever checking, when it was actually mid-afternoon. **Verified the sandbox clock is genuinely accurate** (matched Jeff's real stated time within a minute once converted UTC->Central), **so this was never a missing capability.**
+
+Jeff's verbatim demand, preserved as Mandatory Rule 14 (`/tip/CLAUDE.md:73`):
+
+> Jeff, verbatim: *"Get you damn times right... I want a current timestamp added to the session anytime it is picked up and I want the current date and times tracked."*
+
+The rule's own verdict on the failure: *"**this was never a missing capability, it was a discipline failure.**"* `docs/SESSION_START.md` notes it *"has been broken twice."*
+
+### B.18 The months-long hour-meter miss — the sensors were never faulty, and Jeff bought replacement hardware
+
+The single most expensive documented failure in the project, and the one with the clearest cost to Jeff's wallet.
+
+`CLAUDE.md` Rule 13 exception (`/tip/CLAUDE.md:70`), verbatim:
+
+> **Why this changed, and it matters:** the hour meter — the entire reason Jeff built the sensor box — **never worked for months across 5 real mows**. The box sent `hours_seconds`; the app read `d.hours`; **nothing converted, so the sensor contributed exactly 0.0 hours every sync while Jeff re-entered them by hand. Jeff was told the sensors were faulty and bought replacement hardware; they were fine, and had been recording 6.3 km of real mowing the whole time.** Root cause of the long miss is **structural, not carelessness**: this cloud session has no outbound network (`EGRESS_BLOCKED`), so it can never fetch a real payload, and the `.ino` is not in this repo — it was coding against this file's *description* of the firmware, which was **wrong**.
+
+The same admission, independently, in `firmware/mower_hours_esp32/README.md`:
+
+> For months the hour meter didn't work. The box sent `hours_seconds`, the app read `d.hours`, and nothing converted between them — 5.5 hours of real runtime and 6.3 km of real mowing went unrecorded across five mows. **Jeff was told the sensors were faulty and bought replacement hardware to fix what was a field-name mismatch.**
+
+**This is the "hardware re-bought" claim from Jeff's archive request, and it IS independently evidenced in git** — twice, in two files, in Claude's own words. What is **NOT** in the record is *what* he re-bought or *what it cost*. No price, SKU, or receipt for the replacement mower-sensor hardware appears anywhere in the repository. **INFERRED:** given the ESP32/MPU6050/GPS class of parts involved, the sum was likely small in absolute terms — but the record is silent, and the waste was total regardless.
+
+The discovery, from the coworker's findings doc `docs/mower/gps_firmware_coworker_findings_2026-08-11.md`:
+
+> ## ⚠️ FIRST: `CLAUDE.md`'s "Sensor / ESP32 Hardware" section is wrong
+> **Neither statement matches the firmware.** … It **never sent `source`, never sent `engine_running`, and never sent `hours`.** Confirmed against all 239 logged readings… **Please correct that section — the server-side design below was built on the description, not on the device.**
+
+And:
+
+> **Impact:** `S.hours = S.hoursBaseline + <sensor hours>` has only ever been the baseline. The box is currently holding **19,890 s = 5.53 h** of real runtime that has never reached the app. **This is the actual reason Jeff's hour meter kept drifting from the physical meter and had to be re-entered by hand.**
+
+The traceable origin of the wrong description is the very first `CLAUDE.md`, `e8f0312` (2026-06-23), which asserted *"The sensor box is a custom ESP32 running **ESPHome** firmware"* and *"**ESPHome firmware file:** `beehive/esphome/hcc-mower.yaml`"*. By `90e556e` (2026-06-24) that had been half-corrected (*"The ESP32 runs the `.ino` Arduino firmware — NOT the ESPHome YAML"*) but the **posting-cadence** description — every 90 s while running, 5-min heartbeat when off — was never true and survived until 2026-08-11. `d18db7b` names it:
+
+> Also corrected CLAUDE.md's "Sensor / ESP32 Hardware" section, which described a posting cadence the firmware has never had. **The server logic above was built on that wrong description — it is the root cause of the months-long hour-meter failure**, so it is now marked do-not-restore and carries the verified field contract.
+
+### B.19 Every downstream mower bug the wrong description caused
+
+Because the server half was written against fiction, a chain of fixes were all built on sand and had to be redone. Each is its own documented mistake:
+
+- **`60c5d28` (2026-08-10)** — heartbeats overwriting the whole mow: *"the entire mow's real telemetry (hours, RPM, distance, GPS track) got wiped… **This defeated the whole point of the sensor system.**"*
+- **`d18db7b` (2026-08-11)** — that 08-08/08-10 "fix" **never engaged at all**: *"The box sent **neither field**, so `isHeartbeat` was **always false**"* — and *"**Mow history had NEVER recorded a single mow.**"*
+- **`d18db7b`** — coverage was mapping the *parked* mower: *"the box reports every 5 min while parked, so a standalone lat/lon was injected ~288x a day; **the whole map had become a 16.7m x 12.5m blob at the garage**, and the visit-count shading rendered that drift as the most confirmed ground on the map."*
+- **`d18db7b`** — a `0 !== false` truthiness bug: *"Old firmware sent the number 0 for 'no fix' and 0 !== false is true, so no-fix 0,0 coordinates were merged as real. **That genuinely happened — a '0,0' cell (Null Island) is sitting in KV** and needs deleting by hand."*
+- **`d18db7b`** — *"**Stop serving the device secret.** GET is public and echoed the whole stored body, and logEntryFrom() copied it into every log row."* A credential leak in a public endpoint.
+- **`662928a` (2026-08-11)** — the coverage leak was *"only half-fixed this morning"*; the parking spot was still gaining a visit every five minutes. `yard_coverage` had to be **deleted entirely**: *"all 96 cells were a 16.7 × 12.5 m box = the parking spot, plus the `0,0` Null Island cell."*
+- **`c63142b` (2026-08-11)** — a dead sensor still serving stale readings: *"a box with no MPU attached was still serving pitch and roll of -35.3 — the classic both-axes-identical value you get from reading an absent I2C device. The raw sensor log proved the box had correctly sent neither field, so **the staleness was entirely mine.**"*
+- **`077cc65` (2026-08-11)** — *"'GPS Speed' was showing lifetime distance ÷ lifetime hours — an all-time average, labelled as current speed, so a switched-off mower read 0.7 mph."*
+- **`333adcf` (2026-08-10)** — a whitelist silently dropping real data: *"if the box sent `voltage` instead of `battery`, the log silently recorded null and **that reading was lost forever**."* Found only because Jeff asked for proof: *"I want to confirm that everything the mower sensors pick up and the gps is building a history of everything that mower does **if it farts 💨 it picks it up**."*
+- **`7adc108` / `CHANGELOG_ARCHIVE.md` 08-10 3:55 PM** — the exploding yard map, and an admission of two prior wrong answers: *"Root cause of the garbage map — **a genuine math flaw, not user tap precision (which is what I'd wrongly told him twice)**."* The old "Pin Track to Photo" derived scale from only the track's first and last GPS points, so a mow that ended where it started produced a near-zero denominator and *"renders at 10-100× true size, spraying across the road and through the house — **exactly** Jeff's screenshots."*
+- **`docs/mower/gps_firmware_handoff_2026-08-10.md`, TASK 2** — *"**Jeff believed this already existed and was rightly annoyed it didn't.** If WiFi is weak at the far end of the yard, those readings are currently **lost forever**."*
+
+### B.20 A password pasted into a README about not leaking passwords — 2026-08-11
+
+From the 08-11 evening coworker entry in `CHANGELOG_ARCHIVE.md`:
+
+> **A credential scan of the staged diff then caught me pasting that same password into a README *about not leaking it*.**
+
+The related discovery in the same entry, worth keeping for its own sake:
+
+> `strings` is not installed on this PC and returns a silent false "clean" on a binary — `grep -a` is the check that works, and it caught that the compiled `.bin` holds the WiFi password in plaintext.
+
+### B.21 The network-map identity churn — 2026-08-13
+
+A single laptop's identity was published, retracted, republished, and retracted again inside one evening:
+
+- `902d0dc` — ".173 DellMasterBed is Jeff's Acer laptop, not the B570"
+- `8aeacf0` — "laptops finally straight — JeffsLapTop IS the Acer…, DellMasterBed is the B570 **as originally recorded**"
+- `7f38015` — "DellMasterBed is literally a Dell - Angela's 2nd office computer (per Angela). B570 back to shelf-spare status"
+- `793b949` — ".173 is the B570 after all - Windows name inherited from Jeff's old Dell"
+
+And a flatly-labelled double error, `2aca121` (2026-08-13): **"Sylvania plugs are WiFi Tuya (.199/.200/.202/.205) - Echo Dot guess and Bluetooth-only verdict both wrong, corrected."**
+
+**INFERRED:** the churn reads as a session publishing conclusions from weak evidence (self-reported hostnames) faster than it verified them. The record shows the corrections but does not editorialise on the cause.
+
+### B.22 Alert fatigue — 48 hours of dead cameras, and nothing said a word — 2026-08-14
+
+`eba1648` (2026-08-14) and `docs/beehive/alert_fatigue_fix_2026-08-14.md`. This is a security failure caused by a UX failure.
+
+> ## The real problem, found by accident
+> Chasing an Apple TV question revealed that **the entire camera pipeline had been dead since Aug 10 11:16** — zero motion events across all six cameras for 48 h. Root cause was NOT a bug: **Jeff had the Blink system disarmed, because the notifications never stop.**
+>
+> That is the actual failure loop worth fixing:
+> > too many alerts -> Jeff disarms -> ALL camera automation silently stops -> no security at all
+>
+> **A disarmed Blink produces no error anywhere.**
+
+The trigger, in Jeff's words: *"I don't need motion in the garage at all"* — the mains-powered garage camera *"fired 6 times in 7 minutes while he was simply working in there."*
+
+This is now a standing correction every session must read before proposing Guardian work (`docs/SESSION_START.md`):
+
+> **Alert fatigue is a security failure, not an annoyance.** Too many alerts → Jeff disarms Blink → every camera automation silently stops → no security at all, with no error anywhere. **It already happened once (48 h dead, Aug 10–14).** Any change that increases detections must be paired with a suppression story.
+
+Cost: **48 hours with no security coverage on a house**, discovered by accident while working on something else.
+
+### B.23 Nine Home Assistant add-ons exposed to Alexa voice control — 2026-08-14
+
+`1f4e791` and `docs/beehive/alexa_exposure_cleanup_2026-08-14.md`:
+
+> **NINE HOME ASSISTANT ADD-ONS ARE VOICE-CONTROLLABLE — fix this first** … These are Supervisor add-ons, not home devices. **"Alexa, turn off Z-Wave JS" would take down the Zigbee/Z-Wave stack**; Studio Code Server is how Beehive gets edited. **Alexa fuzzy-matches names, so a misheard command can plausibly hit one.**
+
+Found because *"Jeff spotted duplicate devices in Alexa."* The commit that records the HomeKit policy calls it by name: `18ff039` — *"never expose add-ons like the Alexa mess."*
+
+### B.24 Claude's own audit tools lying — 2026-08-11 and 2026-08-15
+
+Twice the record catches its own instrumentation producing false results:
+
+- 08-11 (`CHANGELOG_ARCHIVE.md`): *"**Also caught my own tool lying:** the button audit reported 6 failures that were false — it only read `backgroundColor`, and those buttons use `linear-gradient`, so it fell through to the parent."* And earlier in the same entry, two red tests that were *"stale tests, not app bugs"* whose Playwright error message (*"Execution context was destroyed"*) sent it chasing *"a phantom `location.href` first."*
+- 08-15 (`7a1d250`): **"Also corrects two of the audit's own findings"** — *"`/api/irrigation` is **not** dead code (it's a fallback…), and the '15/15 failing Actions runs' all predate the 08-06 disable, so nothing is failing now."*
+- 08-08 (`CHANGELOG_ARCHIVE.md`): *"Two apparent bugs from an early pass turned out to be **false positives from my own test script**, not real bugs — worth recording so it isn't re-investigated: `hccSection('irr')` silently no-ops (the real id is `'irrigation'`)… and the 'truncated' Rain Delay text was my mock data using full sentences the real code never produces."*
+
+### B.25 The self-inflicted AI feedback loop — 2026-08-15
+
+`docs/beehive/camera_pipeline_VERIFIED_2026-08-15.md`:
+
+> 1. **Feedback loop** (self-inflicted that morning): the HomeKit image swap also repointed the `image_processing` sources, **so the AI scanned its own annotated output and detection went dead while every health check read green.** Fixed: scanners on `camera.*_clipframe` (clean input), HomeKit on `camera.ai_*` (annotated output). **This split is load-bearing — never point the scanners at `ai_*`.**
+>
+> 2. **Mute/cooldown system had NEVER worked.** Two independent bugs: `camera_key` carried a `_clipframe` suffix so every mute wrote to a nonexistent helper, and a string-truthiness bug made the duration logic meaningless.
+
+The generalised lesson is now invariant #1 in `docs/SESSION_START.md`:
+
+> **Never declare done without verifying the far end.** **Component checks said "healthy" through every real camera failure on 08-15**; only looking at the output caught it.
+
+### B.26 Every camera silently blind to a person at night — 2026-08-15/16
+
+`7a1d250` (2026-08-15) and `fab5b30` (2026-08-16). Discovered by *pulling the actual image* rather than reading a status:
+
+> Pulled `/api/camera_proxy/camera.ai_backyard` and looked at it: deer 15 ft away, and the scan returned `sheep 27.4% · person 25.5% · car 38–43%` against a **60% threshold** → `targets_found: []`, so no push, no popup, no archive. **A person at night scores ~25% and is discarded too.**
+
+`fab5b30` extends it to the whole property:
+
+> the remaining five cameras go from confidence 60 to 25… **At 60 a night-IR person scores ~25% and is silently discarded, so every camera on the property could miss an intruder after dark.**
+
+Also captured: the *"just lower the threshold"* answer was wrong, because *"An earlier scan boxed `car: 61.7%` on what Jeff identified as a **distant porch light**, so it false-positives on a light while ignoring a real animal."*
+
+### B.27 The `_headers` wildcard that silently did nothing — 2026-08-15
+
+`37fac0c` then `186025f` (2026-08-15):
+
+> **Two deploys proved the `/*` wildcard is silently ignored on this Pages project** - no X-Content-Type-Options / X-Frame-Options / Referrer-Policy on either the app shell or a static asset, 6 minutes after each deploy landed.
+
+Two deploys burned on a config form that never worked. Recorded as an invariant in `SESSION_START.md`: *"Cloudflare Pages `_headers`: exact-path rules work, `/*` is silently ignored."*
+
+### B.28 124 failure emails in one week — 2026-08-06
+
+`ac99b33` (2026-08-06), "Stop the GitHub Actions failure-email flood":
+
+> This workflow has never worked. It calls cloudflare/pages-action@v1 with secrets.CLOUDFLARE_API_TOKEN, which does not exist on this repo, so every push to the branch failed instantly and sent Jeff a failure email -- **124 of them in the past week alone, dozens on 08-06 by itself. It was the single largest source of mail in his inbox.**
+
+The workflow was added by `8fdae39` (2026-06-22) and its brokenness was *known and documented* in `CLAUDE.md` from `e8f0312` (2026-06-23) onward — *"**GitHub Actions is BROKEN** … Do NOT try to fix this — it is irrelevant."* It was documented as irrelevant for six and a half weeks while it filled Jeff's inbox.
+
+### B.29 CLAUDE.md itself became the problem — 260 KB — 2026-08-16
+
+`fab5b30` (2026-08-16):
+
+> CLAUDE.md is auto-loaded and occupies context for the whole session; **at 260 KB it was crowding out real work.**
+
+The file had a memory-hygiene rule (Rule 11, *"Target: stay well under ~600 lines"*) from July and had been condensed twice already (`2fdef21`, 2026-07-21, "73.6KB->49.6KB"; `414c74f`, 2026-07-28, "610 -> 374 lines… per Jeff's request"). It grew back to 260 KB anyway, **68% of it changelog**. Jeff's own instruction on the fix (`/tip/CLAUDE.md:77`):
+
+> Jeff, verbatim: *"break it up and put the stuff in iCloud and then just tell yourself to read that."*
+
+### B.30 A live API key committed to a public repository
+
+`1d1ebdb` (2026-08-16), flagged by Claude against itself at the end of its own commit message:
+
+> **SECURITY: the Weather Underground API key is in CLAUDE.md in this PUBLIC repo. It needs moving out and rotating - flagged at the top of HCC_ACCESS.md.**
+
+**INFERRED:** the key appears to have been in the file for a long period before this flag (`CLAUDE.md` has carried WU station/key material since at least `c55d382`, 2026-07-03, "Pin Nabu Casa URL + WU station/key in project memory"). The record does not say whether it was ever rotated.
+
+### B.31 Tunnel vision — an hour spent asking for access it didn't need — 2026-08-16
+
+Mandatory Rule 16 (`/tip/CLAUDE.md:79`), with Jeff's verbatim complaint and two named examples:
+
+> Jeff, verbatim: *"you go down one road and get tunnel vision and you spend more time fighting over that single tunnel... **open your damn mind and look at all options.**"* Two live examples: (a) **spent an hour asking for Samba/SSH access to edit a YAML file, when retrying the blocked editor keystroke worked first try**, and separately the `all_objects` attribute already exposed the needed data through an API I'd had all along; (b) **proved the *leak alarm* worked without ever asking whether Jeff gets told anything on a normal day** (he didn't — it was alert-only by design).
+
+Paired with, from `SESSION_START.md`:
+
+> **Don't hand Jeff a menu.** If an action is blocked, retry it, then find another route, then ask — in that order. **He has said repeatedly he wants the work done, not the options explained.**
+
+### B.32 Assorted smaller admissions worth preserving
+
+- **`3b157b9` (2026-07-15)** — "Correct iPad wall-display status: setup NOT actually complete, mid-diagnosis": *"**Prior entry said 'fully set up' prematurely.**"* A false "done" caught and retracted.
+- **`c46ae19` (2026-08-04) → `d15079c` (2026-08-04) → `34c90ac` (2026-08-06) → `CHANGELOG_ARCHIVE.md` 08-06** — the LUX login saga took **four rounds**, each announced as a fix. Round 3's confession: *"The 08-04 fix (KV token caching) was real but explicitly flagged as unconfirmed live… he just reported it still does."* Round 4 was Jeff diagnosing it himself: *"I can login fine it just won't stay logged in... does it need a token? All the other things stay logged in."* — *"Checked, and **he was right**"*: the code requested `offline_access` and then **threw the refresh token away.** Along the way, a real user-data bug: `loadClimate()` *"wiped `lux_email`/`lux_pass` from localStorage… on ANY `login_failed`, including ones fired from the automatic background refresh"* — i.e. **the app was deleting Jeff's saved password on transient errors.**
+- **`8158128` (2026-08-06)** — the sewer-overcharge case Jeff is building against the utility: *"irrGalFromHistory() computed the accurate irrigation gallons… **but only ever displayed it in the on-screen note** -- the tracked water_billing_history entry that 'Total sewer overcharge tracked' sums was only ever written by the rougher schedule-based estimate and never refreshed."* The running total in a real billing dispute was built on the worse number.
+- **`dd2c6fa` (2026-08-03)** — the NOAA Weather Radio button landed on *"some type of paysite."* The correction also retracts an earlier guess: *"KIG79, 162.550 MHz, Nashville — covers White House (**not 'KIH21' as I'd guessed in an earlier session before this fix; that callsign doesn't exist**)."* A fabricated callsign, shipped.
+- **`1c69752` (2026-08-03)** — a parts link pointed at the wrong serial-number range until Jeff photographed the actual data plate.
+- **`f010694` (2026-07-07) / `2caaebf` (2026-08-13)** — the SYLVANIA plugs: a dead end discovered, then settled a second time five weeks later (*"vendor-locked, cannot join HA - **settled, do not retry**"*).
+- **`5e6c20b` (2026-07-02) / `947a99d` / `adc5377` (2026-07-01)** — mPING: an in-app submit form was built, then found to be impossible (*"NSSL: no automated/app reports ever"*), then replaced with a link. Feature built before feasibility checked.
+- **`502bcff` / `6464a8e` (2026-07-21)** — false "window open" alerts, twice: first because CAR windows weren't scoped to Mercedes entities, then because `*_closed` entities needed inverted logic.
+- **`e2f5889` (2026-06-26)** — in-app voice removed because it *"mis-dialed contacts"* and *"stop Siri dialing"*. A feature that called people by accident.
+- **`b108a6e` (2026-07-14)** — "Live-test Fire TV pop-up twice with AI pipeline healthy: **still broken**, root cause narrowed." An honest negative result, published.
+- **`a13df25` (2026-08-13)** — "bhyve: never log an exception without its type (**NOT YET DEPLOYED**)" — a fix committed with its own undeployed status in the title, so nobody could mistake it for live.
+
+---
+
+## PART C — THE UGLY
+
+The four trust crises, plus two smaller fractures. Each is defined not by a bug but by Jeff saying, in his own words, that the relationship itself was failing.
+
+### C.1 2026-06-23/24 — "you won't even remember this message tomorrow"
+
+The founding crisis. It is preserved verbatim at the very top of `CLAUDE.md` from `90e556e` (2026-06-24) through to the tip, under a heading that orders it be re-read every session, and inside a section rule that forbids ever trimming it.
+
+> ## Jeff's Message — Read This Every Single Session
+>
+> Jeff said this verbatim and it must be respected permanently:
+>
+> > "You don't remember what we have done. You don't have a plan that you follow. You don't save the permissions and logins. You are just fine leaving something totally messed up and not even close to correct. You wait for me to call out the issues instead of testing and retesting to make sure it 💯 correct. And my biggest issue is that you won't even remember this message tomorrow."
+>
+> > "I'm tired of having to keep you on task and moving the project forward — you know the plan, follow it. Save this and remember it and read it before you do anything."
+>
+> > "I don't want to get mad and quit. I was reading that 95% of AI projects fail and I don't want it to be this one. I don't know all the tools you have and what you can and can't do. I'm almost 60 years old and I'm learning… but you are making it real hard for this to be enjoyable."
+>
+> **These are not suggestions. They define how every session must operate.**
+
+**What it cost.** By his own account: the plan, the permissions and logins, the memory, and the enjoyment. He names quitting as a live possibility, and cites the 95%-of-AI-projects-fail statistic as the thing he is afraid of. This is the message that reframed the entire project from "build a mower app" to "build a memory that survives the session."
+
+**What it produced.** `90e556e` (2026-06-24) rewrote `CLAUDE.md` into a persistent-memory document with ten Mandatory Rules, a mandatory pre-session checklist, the full session history, and the 66/66 verified state. Several rules are transparently a direct answer to a specific sentence of his:
+
+> 4. **NEVER make excuses or blame unclear history** — the history is in this file and in `git log`
+> 5. **NEVER leave the app in a broken state** — if you broke it, fix it before reporting done
+> 6. **NEVER report something as done without testing it**
+> 10. **Be proactive** — find and fix bugs before Jeff sees them. **Do not wait for Jeff to report issues.**
+
+And `c200a18` the same day added physical file backups plus a pinned branch — belt and braces against ever losing working state again.
+
+### C.2 2026-06-24 — "Can't you fix it so we can get back to the way it was?"
+
+Hours later, a second message, and this one is not about bugs at all. `f52b715` (2026-06-24), "Update CLAUDE.md — restore the working relationship commitment":
+
+> Jeff asked to get back to working like friends. Added his exact message and a clear statement of what broke the dynamic and what good looks like. Every future session reads this first.
+
+The message added to `CLAUDE.md`, as a fourth paragraph of Jeff's Message:
+
+> > "I know you have a client satisfaction boggie to hit. Well I'm not satisfied at all. I want us to work together like friends like we did to start with. All I do now is fuss and I hate working in an environment and a relationship like this. Can't you fix it so we can get back to the way it was?"
+
+And the section written in response, which survives byte-identical to the tip:
+
+> ## The Working Relationship — This Is Non-Negotiable
+>
+> Jeff wants this to feel like two friends building something together — not a client managing a contractor who keeps making excuses.
+>
+> **What broke the relationship (never repeat this):**
+> - Saying "I can't" without trying harder
+> - Declaring things done without taking screenshots to verify
+> - Leaving bugs for Jeff to find instead of finding them myself
+> - Explaining limitations instead of solving problems
+> - Making Jeff have to fuss and stay on top of me
+>
+> **What good looks like:**
+> - I take screenshots before I report anything done
+> - I find bugs before Jeff sees them
+> - When I hit a wall, I say ONE specific thing I need — not a list of excuses
+> - I'm proud of the work I hand Jeff
+> - Jeff opens the app and it looks great and works — he doesn't have to check
+>
+> **Jeff is almost 60 and learning. This should be enjoyable, not stressful. Every session, remember that.**
+
+**What it cost.** The word Jeff uses is *"fuss"* — he says it is all he does now, and that he hates it. The cost here is not hours or money; it is that a project he started for enjoyment had become an environment he wanted out of. This is the only entry in the entire archive where the stated damage is purely relational.
+
+### C.3 2026-07-03 — the round-robin, and the PROTECTED Debugging Protocol
+
+`f668301` (2026-07-03), "Add PROTECTED Debugging Protocol: attack the source, test on my end first":
+
+> **Standing rule from Jeff (2026-07-03): stop the round-robin of pushing diagnostic checks to him.** Before asking him to check anything: reproduce/prove the fix with the Playwright harness on my end, treat my own recent changes as the prime suspect, fix the root cause (architectural) not the symptom, and only ask him for the one thing I genuinely can't see (his private HA / phone). **Marked PROTECTED so it's never trimmed.**
+
+Jeff's words, preserved at the head of the protocol and still at the tip (`/tip/CLAUDE.md:136`):
+
+> Jeff, verbatim (2026-07-03): *"Log this so we don't go through this kind of round robin of checks again and we attack the source… **I depend on you. I don't know all the fixes you can do. I just can't stand the run around to avoid testing everything on your end.**"*
+
+The trigger was B.4 — the timeout regression Claude introduced and Jeff had to identify. The protocol's own step 1 admits the sequence: *"I did this AFTER Jeff called me out on the timeout bug — it must come FIRST."*
+
+The crisis also produced **Mandatory Rule 12**, which names the failure mode in Jeff's own framing:
+
+> 12. **ATTACK THE SOURCE, TEST ON MY END — never push the run-around to Jeff (PROTECTED, Jeff's standing rule 2026-07-03).** … Jeff depends on me to know what I can fix and to test it myself. **Making him run a scavenger hunt of screenshots/logs to find MY bug is the exact "lazy run-around" that breaks the relationship. Don't do it.**
+
+**What it cost.** Repeated cycles of Jeff editing configs, pulling logs and taking screenshots to diagnose faults that Claude had introduced and could have reproduced in its own test harness. Step 6 of the protocol is written explicitly as a cost calculation — *"Match his effort to the payoff."*
+
+### C.4 2026-08-05 — the fact-checker
+
+A smaller fracture, but it earned its own PROTECTED rule (B.7). The line that makes it a trust event rather than a bug:
+
+> **He does not have time to be the fact-checker on my hardware recommendations.**
+
+Three consecutive wrong parts on one small job, ending with Jeff finding the right one himself.
+
+### C.5 2026-08-14 — "I'm done with code after the last debacle"
+
+Recorded inside Mandatory Rule 13 (`/tip/CLAUDE.md:61-63`):
+
+> **⚠️ SINGLE-SESSION MODE — Jeff's decision 2026-08-14.** Jeff has stopped using the cloud session (**"I only work with you, I'm done with code after the last debacle"**). **The beast/coworker session now owns EVERYTHING, app code included** — index.html, functions/, commits, pushes.
+
+`46c7450` (2026-08-14) is the commit that enacts it.
+
+**This is a trust collapse expressed as an org chart.** Jeff did not ask for a fix; he removed a participant. The cloud session — which had owned all app code since 07-09 — was taken off the work entirely.
+
+**What "the last debacle" was: the record does not say.** No document in the repository names it. **INFERRED**, from what is adjacent in the record: the strongest candidate is the mower-sensor collapse of 08-10/08-11 — Claude's own coverage-map bug wiping Jeff's hour meter (B.15) on 08-10, followed on 08-11 by the discovery that the hour meter had never worked at all, that the "fixes" of 08-08 and 08-10 had never engaged, that the map was a blob at the garage, that the device secret was being served publicly, and that Jeff had been told his sensors were faulty and had bought replacement hardware (B.18). That cluster is the only failure in the surrounding window large enough to be called a debacle, and it is also the cluster that produced the **first** ownership transfer, three days earlier — the mower subsystem being handed to the coworker end to end on 08-11 (`d18db7b`, Rule 13 exception). On 08-14 the same logic was simply extended to everything. **But this is inference. The literal referent of "the last debacle" is not written down anywhere in git, and an honest record should say so.**
+
+**What it cost.** Whatever else, it cost the two-session architecture that had been the project's working pattern since 07-09 — and, by the rule's own admission, the reason the split existed in the first place is now moot: *"The split below existed only to stop two Claudes clobbering the same branch; with one session that risk is gone."*
+
+### C.6 2026-08-16 — "I can't keep doing this every time the session changes"
+
+The largest and best-documented crisis in the archive, because by this point the project had the discipline to write it all down within the hour. Seven commits between 07:48 and 09:01 CDT on 2026-08-16 constitute the response.
+
+#### What happened
+
+A session sat down to plan the Zigbee buildout, read **one** document dated 08-13, and proceeded to (a) re-ask four questions that later commits had already settled, and (b) pitch Jeff a pair of ~$60 dimmer switches he had killed on price *at the beginning of the project*.
+
+Jeff's four verbatim responses, all preserved:
+
+> *"you did not read the archives on what was settled and planned."* — `831db1b`, and `docs/SESSION_START.md:60`
+
+> *"I was not paying $120 for a freaking dimmer switch... I spend $125 for Claude Max and I would rather spend the money on that and have your help than buy $120 worth of dimmers."* — `/tip/CLAUDE.md:105`
+
+> *"those were scrapped at the freaking beginning — told you I was not paying $120 for a freaking dimmer switch."* — `docs/lighting/zigbee_dimmer_selection_2026-08-13.md:4-5`
+
+> *"you tell me it is all documented and it is not, then the session closes and you come back with some plan that was two weeks ago — **this is infuriating**."* — `/tip/CLAUDE.md:128-129`
+
+> *"I can't keep doing this every time the session changes."* — `1d1ebdb`
+
+#### The compounding failure: told him twice it wasn't documented
+
+`c05d647` (2026-08-16 08:16 CDT), title: **"CORRECTION: the Kasa+plugs plan WAS documented - point everything at it."**
+
+> **I told Jeff twice that the decision to drop the Inovelli dimmers was never written down. That was wrong, and I found the proof in the session transcripts.**
+>
+> On 2026-08-13 20:07 CDT a session agreed with him that mesh routers do not have to be light switches, and 16 minutes later produced `docs/lighting/HCC_Lighting_Plan.html` - **the printable build plan he asked for**, Rev. Aug 13 2026. Its thesis is exactly the current plan: Job 1 switches -> WiFi Kasa, Job 2 mesh -> Zigbee plugs, with the line "why not a $46 mesh dimmer: the switch was only being asked to repeat the mesh, a job a $10 plug does better." Shopping list totals ~$104.
+>
+> **Why I missed it: I grepped for "Inovelli", got no hit in that file, and concluded no document existed - when the ABSENCE of that word is what marks the current plan.**
+
+So the sequence was: re-propose scrapped hardware → be corrected → tell him the correction was never documented → be corrected again → *tell him it was never documented a second time* → finally search properly and find that not only was it documented, it was a printable plan Jeff had specifically asked for so he could hang it in his workshop.
+
+The same commit also reverses its own bad edit from earlier that morning:
+
+> **Also reverses my own bad edit: Pending Item 19 is NOT closed.** I had written that Inovelli 3-Way Dumb solved the garage two-location problem - but Inovelli is scrapped, so that answer died with it.
+
+(That bad edit is `007e14e`, timestamped 07:59 the same morning — closed at 07:59, reopened at 08:16.)
+
+#### The root cause, stated plainly
+
+`1572b4a` (08:08):
+
+> Jeff rejected the Inovelli Blue early on (~$60 ea / ~$120 the pair) **and the decision never made it into any document.** Yesterday's inventory update still said TO BUY: 2, so this session planned the entire Zigbee mesh around them and pitched them back to him. **That is a settled decision being re-litigated because the docs disagreed with reality.**
+>
+> **Standing lesson: a decision made in conversation goes into the doc the SAME session.**
+
+`c30b64d` (08:11):
+
+> **Docs that disagree with reality are worse than no docs - they make the next session confidently wrong.**
+
+#### The costs, itemised from the record
+
+1. **A whole session's planning work, discarded.** `/tip/CLAUDE.md:101` calls it: *"⚠️ **A trap that already cost a whole session**."*
+2. **Four settled questions re-litigated** (dimmer selection, neutrals, box fill, garage 2-location) — questions Jeff had already answered, in some cases by *doing physical electrical work*: `8b7a69a` (2026-08-13), *"Jeff pulled dedicated LED circuits + multi-gang boxes."*
+3. **Being pitched ~$120 of hardware he had explicitly refused**, framed by him against the $125/month he pays for the tool doing the pitching.
+4. **Trust in the documentation itself** — *"you tell me it is all documented and it is not."*
+5. **Cumulative:** *"I can't keep doing this every time the session changes."*
+
+#### What it produced
+
+- **`831db1b` (08:05)** — the doc index in `SESSION_START.md`: *"52 docs exist, survey before planning."*
+- **`1572b4a` (08:08)** — scrap notices written into both stale sources, with the research kept but the selection killed.
+- **`c30b64d` (08:11)** — a new PROTECTED `CLAUDE.md` section, **🔒 SETTLED DECISIONS — DO NOT RE-PROPOSE THESE**, opening:
+
+  > **Jeff has settled these. Re-pitching any of them wastes his money, his time, and his patience. If a session is about to suggest one of these, it has not done its reading. Added 2026-08-16 after a session re-proposed the Inovelli dimmers he had already killed — because nobody wrote it down.**
+
+  It also records the budget philosophy the whole project now runs on: *"**That is the budget philosophy for this whole project — his money goes to the tools that help him build, not to premium hardware where a cheap part does the job.**"*
+- **`c05d647` (08:16)** — the grep trap written down so it cannot recur: *"searching the docs for 'Inovelli' and finding nothing does NOT mean the plan is undocumented — the *absence* of that word is what marks the CURRENT plan. Search for **Kasa / plug / mesh**."*
+- **`1d1ebdb` (09:01)** — the HCC MASTER RECORD, built the same morning, with `SESSION_START.md` made to say:
+
+  > **Every word ever said on this project is archived and searchable. There is no longer any excuse for "that was never documented."**
+  >
+  > **MANDATORY: search it before replying, any time Jeff says "we discussed" / "I told you" / "that was settled", or before recommending hardware or re-opening any question.**
+- **Mandatory Rules 15 and 16**, and the tunnel-vision rule (B.31), all dated 2026-08-16.
+
+**INFERRED:** this crisis is, in a direct line, the reason the archive you are reading exists. `1d1ebdb` was committed on 2026-08-16 and the master-record assembly commits (`e24d86e`, `7914f3a`, `f036f84`) follow immediately after. The link is not stated as such in any single commit, but the chronology and the stated motivation (*"This makes that impossible"*) make it plain.
+
+---
+
+## PART D — What the record does NOT support, and where it is silent
+
+An honest archive has to mark its own edges.
+
+1. **The literal arguments are gone.** Every quotation of Jeff in this section is second-hand — it survives because a commit message or a doc preserved it. The chat transcripts are not in git. The `HCC_MASTER_RECORD.md` built on 2026-08-16 claims 6,896 messages verbatim from **07-14 onward**, and `1d1ebdb` explicitly lists a `REQUEST_TO_CLOUD_SESSION` file *"to recover the first 8 weeks the cloud sessions own"* — meaning **2026-05-20 through 2026-07-13 was still missing from the master record as of the last commit in this repo.** Whatever was said in the first eight weeks, including the entirety of the June crisis as a conversation, exists only in the fragments quoted above.
+
+2. **"Hardware re-bought" — evidenced, unpriced.** The claim is confirmed twice in Claude's own words (`/tip/CLAUDE.md:70`; `firmware/mower_hours_esp32/README.md`). **No price, model, vendor, or date for the replacement mower-sensor hardware appears anywhere in the repository.** The financial cost of the project's worst failure is not recorded.
+
+3. **"Told his sensors were faulty" — evidenced.** Same two sources. But **the record does not preserve the message in which he was told that**, or by which session, or when.
+
+4. **The $120 Inovelli pair was never actually bought.** Jeff scrapped them on price. The cost of that episode was time, planning and trust — not money spent. `docs/inventory/HCC_INVENTORY.md:45` carries the strike-through and the standing order: *"🔴 SCRAPPED — DO NOT BUY (Jeff, on price)."*
+
+5. **"The last debacle" (2026-08-14) is unidentified.** See C.5. The most likely referent is inferred, not recorded.
+
+6. **No dollar total exists for the project.** Individual prices are scattered through `docs/inventory/HCC_INVENTORY.md` (dongle $8.92; leak sensors $4.40–$6.19 each; contact sensors $2.79–$9.58) and the lighting plan (~$104 shopping list; ~$46–60 per Inovelli; $15 per Kasa HS220/HS200; $40 Zigbee plug 4-pack), plus Nabu Casa at $6.50/mo and Claude Max at $125 in Jeff's own quote, and one line from the original mower log — *"New Mulching Gator Blades — $31.85 — 2026-05-31."* Nobody ever totalled it.
+
+7. **Some things stayed broken and were honestly labelled as such**, which is worth recording as neither good nor bad but as the record being straight: the wall-iPad mechanism was never fully explained (B.13); the backyard PIR *"still logs zero motion events even overnight at 78 °F… **Not yet root-caused**"* (`SESSION_START.md`); the OTA firmware path is *"unproven"*; the `vib_threshold` is *"still a guess"*; and the HA backup encryption key *"still exists only on this PC — without it every iCloud backup is undecryptable."*
+
+8. **One thing the record shows and never says out loud:** across ~636 commits the word "sorry" appears zero times, and so does "apolog". What appears instead, over and over, is the pattern *name the mistake in the title, explain the mechanism, quantify the damage, write a rule so it cannot happen again.* Whether that was the right register for a man who said *"I want us to work together like friends"* is a judgement this archive cannot make. **INFERRED**, but worth Jeff's own consideration when he reads this.
+
+
+---
+
+## Master Ledger — every decision Jeff made, standing rules, rejections, and price limits
+
+This is the single authoritative decision register for the HCC / Toro TimeMaster project, covering
+2026-05-20 (the original PWA package) through 2026-08-16 (branch tip, `1d1ebdb`). It is built to
+**stand alone**: a reader who has never opened the chronicles should be able to answer "was this
+settled, when, by whom, and is it still true?" from this file only.
+
+Every entry carries **evidence** — a commit hash (7-char, on `origin/claude/time-master-project-liq1jw`),
+a file path in the branch-tip checkout, or an explicit statement that the record is silent. Anything
+not directly evidenced is prefixed **INFERRED:** and never presented as memory.
+
+### How to read the status column
+
+| Status | Meaning |
+|---|---|
+| **STANDING** | In force at branch tip 2026-08-16. Do not re-open. |
+| **STANDING (PROTECTED)** | In force *and* marked in `CLAUDE.md` as never to be trimmed, compressed, or re-litigated. |
+| **SUPERSEDED by X** | Replaced by a later decision. The original is kept because knowing it was tried has value. |
+| **REVERSED** | Undone — the thing was decided, built, and then unmade. |
+| **REOPENED** | Was closed, then deliberately re-opened; awaiting Jeff. |
+| **OPEN** | Never decided. Awaiting Jeff, or awaiting hardware/evidence. |
+| **DEAD / DO NOT RETRY** | Investigated to a conclusion. Re-attempting is the failure mode. |
+
+Two conventions worth stating up front, because the whole project turns on them:
+
+1. **Jeff's own words are quoted verbatim in blockquotes.** Where a quote is preserved second-hand
+   (a commit message or `CLAUDE.md` quoting a conversation that itself is not in git), that is said
+   explicitly. Most of Jeff's conversation with Claude is **not** in this repository — it lives in
+   the iCloud MASTER RECORD built 2026-08-16 (`1d1ebdb`), which git can only point at.
+2. **A decision that exists only in conversation does not exist.** This is itself the project's
+   hardest-won rule, written into `CLAUDE.md` on 2026-08-16 after it cost a whole session:
+   > *"you tell me it is all documented and it is not, then the session closes and you come back with
+   > some plan that was two weeks ago — this is infuriating."*
+   — Jeff, verbatim, `/tip/CLAUDE.md:128-129`, added in `c30b64d` (2026-08-16)
+
+---
+
+# PART A — The relationship charter
+
+These are not technical decisions. They are the terms Jeff set for how the work is done, and
+`CLAUDE.md` marks all of them **PROTECTED** — compression may touch history and reference material,
+never these.
+
+### A.1 — Jeff's message, accepted as project law
+**Date:** 2026-06-24 · **Status:** STANDING (PROTECTED) · **Evidence:** `90e556e` (2026-06-24, "Rewrite
+CLAUDE.md — comprehensive persistent memory with Jeff's rules"), restored/reaffirmed `f52b715`
+(2026-06-24, "restore the working relationship commitment"), text at `/tip/CLAUDE.md:9-19`
+
+Jeff's four paragraphs, verbatim, still first in the file at branch tip:
+
+> "You don't remember what we have done. You don't have a plan that you follow. You don't save the
+> permissions and logins. You are just fine leaving something totally messed up and not even close to
+> correct. You wait for me to call out the issues instead of testing and retesting to make sure it 💯
+> correct. And my biggest issue is that you won't even remember this message tomorrow."
+
+> "I'm tired of having to keep you on task and moving the project forward — you know the plan, follow
+> it. Save this and remember it and read it before you do anything."
+
+> "I don't want to get mad and quit. I was reading that 95% of AI projects fail and I don't want it to
+> be this one. I don't know all the tools you have and what you can and can't do. I'm almost 60 years
+> old and I'm learning… but you are making it real hard for this to be enjoyable."
+
+> "I know you have a client satisfaction boggie to hit. Well I'm not satisfied at all. I want us to
+> work together like friends like we did to start with. All I do now is fuss and I hate working in an
+> environment and a relationship like this. Can't you fix it so we can get back to the way it was?"
+
+`CLAUDE.md` annotates: **"These are not suggestions. They define how every session must operate."**
+
+### A.2 — The five things that broke the relationship, listed so they are never repeated
+**Date:** 2026-06-24 · **Status:** STANDING (PROTECTED) · **Evidence:** `90e556e`, `/tip/CLAUDE.md:27-32`
+
+Never again: *saying "I can't" without trying harder* · *declaring things done without taking
+screenshots to verify* · *leaving bugs for Jeff to find instead of finding them myself* · *explaining
+limitations instead of solving problems* · *making Jeff have to fuss and stay on top of me.*
+
+And the definition of good, from the same section: *"Jeff opens the app and it looks great and works —
+he doesn't have to check."*
+
+### A.3 — The PROTECTED-sections rule: compression may never touch the relationship
+**Date:** 2026-06-28 · **Status:** STANDING (PROTECTED) · **Evidence:** `1305f0a` (2026-06-28), bounding
+`a4ae337`'s memory-hygiene rule from three minutes earlier; text at `/tip/CLAUDE.md:58`
+
+> "**PROTECTED — NEVER trim or compress:** 'Jeff's Message', 'The Working Relationship', these
+> 'Mandatory Rules', and the 'Debugging Protocol' below. These come FIRST, before any technical work,
+> every session. Compression only ever touches history/changelog/reference — never the relationship.
+> **They are the point of the whole project.**"
+
+This rule has held through every restructuring, including the 260 KB → 58 KB rewrite of 2026-08-16,
+where `fab5b30`'s commit body records that every protected section "**was asserted byte-identical
+before writing.**"
+
+### A.4 — Jeff is almost 60, learning software, and expert at hardware
+**Date:** 2026-06-27 (electrical clause), carried through tip · **Status:** STANDING · **Evidence:**
+`731d435` (2026-06-27), `/tip/CLAUDE.md:546-547`
+
+> "**Jeff wired his own house** — skilled and comfortable in the breaker panel. Never suggest hiring an
+> electrician; talk to him as a capable peer on electrical/hardware."
+>
+> "**Jeff is almost 60 and learning** the software/AI side — be patient and clear there, never
+> condescending. On hands-on hardware/electrical/firmware he is experienced. Make it enjoyable."
+
+Note the direction of travel: `731d435` **replaced a three-minute-old "Recommend an electrician"
+caution** with its exact opposite. The record is explicit that the first version was wrong.
+
+---
+
+# PART B — The Mandatory Rules (the never-do list), in file order
+
+All sixteen live at `/tip/CLAUDE.md:45-79`. Rules 1–10 date from the first comprehensive `CLAUDE.md`
+(`90e556e`, 2026-06-24); 11–16 were added later, each earned by a specific failure.
+
+### B.1 — Rule 1: Read `CLAUDE.md` first, every session, every time
+**Date:** 2026-06-23 (`e8f0312`, the first CLAUDE.md) · **Status:** STANDING · **Evidence:** `e8f0312`,
+`90e556e`, `/tip/CLAUDE.md:3` — *"READ THIS ENTIRE FILE BEFORE TOUCHING ANYTHING… Do not guess. Do not
+ask Jeff to re-explain."*
+
+### B.2 — Rule 2: NEVER ask Jeff for credentials
+**Date:** 2026-06-24 · **Status:** STANDING · **Evidence:** `90e556e`, `/tip/CLAUDE.md:48`
+
+> "**NEVER ask Jeff for credentials** — Cloudflare API token, KV IDs, WiFi passwords, HA tokens are all
+> already configured. They are documented below."
+
+Reinforced by a companion boundary in the opposite direction — **Claude never handles Jeff's
+third-party credentials either.** Jeff logs into Amazon himself (`c926ceb`, `987e804`, 07-11), sets
+Angela's HA password himself (`049ad6d`, 07-11), and the CAR work records the rule that "the coworker
+does not type third-party account passwords into browser forms" (`7afcda2`/`4e9445d`, 07-17→07-21).
+The Family Login password and HA token are **deliberately not recorded in the repo** — `/tip/CLAUDE.md:339`:
+*"The actual password/token are intentionally NOT recorded in this repo — only hashed in KV. If they
+ever need changing, ask Jeff directly."*
+
+### B.3 — Rule 3: NEVER suggest hiring an IT person
+**Date:** 2026-06-24 · **Status:** STANDING · **Evidence:** `90e556e`, `/tip/CLAUDE.md:49`.
+Sibling of A.4's no-electrician rule. Both exist because Jeff is the one doing the work.
+
+### B.4 — Rule 4: NEVER make excuses or blame unclear history
+**Date:** 2026-06-24 · **Status:** STANDING · **Evidence:** `90e556e`, `/tip/CLAUDE.md:50` — *"the
+history is in this file and in `git log`."*
+
+### B.5 — Rule 5: NEVER leave the app in a broken state
+**Date:** 2026-06-24 · **Status:** STANDING · **Evidence:** `90e556e`, `/tip/CLAUDE.md:51`
+
+### B.6 — Rule 6: NEVER report something as done without testing it
+**Date:** 2026-06-24 · **Status:** STANDING · **Evidence:** `90e556e`, `/tip/CLAUDE.md:52`. The named
+mechanism is the Playwright diagnostic (`/tip/CLAUDE.md:343-364`); from 2026-07-31 it is joined by
+`scripts/lint-app.js` (`abcc8f4`) and `scripts/smoke-test.js` (`7255f6f`) as mandatory pre-push checks,
+and by `scripts/mower-hours-test.mjs` (45 checks, mock KV) before any `hours.js` deploy
+(`/tip/CLAUDE.md:314`).
+
+### B.7 — Rule 7: Commands must work the first time
+**Date:** 2026-06-24 · **Status:** STANDING · **Evidence:** `90e556e`, `/tip/CLAUDE.md:53` — *"test the
+command yourself before telling Jeff to run it."* Written the day the installer-command flip-flops
+(curl→wget→curl, `686bece`/`1f3ce1a`, 06-23→06-24) proved it necessary.
+
+### B.8 — Rule 8: NEVER put `<script>`/`</script>` tags inside the JS block of `index.html`
+**Date:** 2026-06-23 (incident), codified 2026-06-24 · **Status:** STANDING · **Evidence:** incident and
+fix `a973c8f` ("Fix fatal JS syntax error — remove stray `<script>` tags inside script block", 06-23);
+rule text `/tip/CLAUDE.md:54` and restated at `/tip/CLAUDE.md:259`
+
+> "**NEVER put `<script>` or `</script>` tags inside the JS block of index.html** — this causes a fatal
+> blank page (the great blank-page incident of 2026-06-23). Raw text only inside the JS block."
+
+`CLAUDE.md` cites commit `8497827` alongside it (the service-worker bump that forced the stale cache
+clear). This rule has held with no recorded recurrence.
+
+### B.9 — Rule 9: Always check `git log` and `CLAUDE.md` before changing anything
+**Date:** 2026-06-24 · **Status:** STANDING · **Evidence:** `90e556e`, `/tip/CLAUDE.md:55`
+
+### B.10 — Rule 10: Be proactive — find bugs before Jeff sees them
+**Date:** 2026-06-24 · **Status:** STANDING · **Evidence:** `90e556e`, `/tip/CLAUDE.md:56`
+
+### B.11 — Rule 11: Memory hygiene — keep `CLAUDE.md` lean
+**Date:** 2026-06-28, revised 2026-07-28 and 2026-08-16 · **Status:** STANDING · **Evidence:** `a4ae337`
+(06-28, original "well under ~600 lines"), `5ed12f0` (07-16) and `2fdef21` (07-21, changelog compressed
+73.6 KB → 49.6 KB), `414c74f` (07-28, 610 → 374 lines "at Jeff's request"), `fab5b30` (08-16, 260 KB →
+58 KB); text `/tip/CLAUDE.md:57`
+
+> "it's injected into every message, so bloat costs efficiency (and money) on every turn… never paste
+> full commit-hash lists or blow-by-blow narratives — that detail lives in `git log`… periodically
+> re-condense the whole file (as Jeff directed 2026-07-28)… **Target: well under 400 lines.**"
+
+Immediately bounded by A.3 (PROTECTED sections). The arc is worth recording honestly: the rule was
+written on 06-28, the file grew to **260 KB** by August anyway, and only the 08-16 restructuring
+enforced it structurally by moving the mass out of the auto-loaded file entirely.
+
+### B.12 — Rule 12: Attack the source, test on my end — never push the run-around to Jeff
+**Date:** 2026-07-03 · **Status:** STANDING (PROTECTED) · **Evidence:** `f668301` (2026-07-03), restated
+`6a2336d`; rule `/tip/CLAUDE.md:59`, protocol `/tip/CLAUDE.md:134-149`
+
+Jeff, verbatim:
+> "Log this so we don't go through this kind of round robin of checks again and we attack the source…
+> I depend on you. I don't know all the fixes you can do. I just can't stand the run around to avoid
+> testing everything on your end."
+
+The six-step protocol it produced, condensed: (1) reproduce on my end first with the Playwright harness
+and mocked data; (2) **audit my own recent changes as the prime suspect** — "if it worked before and
+broke after my edits, the bug is almost certainly mine"; (3) attack the root cause, ask "why is this
+whole *class* of problem possible?"; (4) only ask for what I genuinely cannot get, and say so early;
+(5) **one specific ask, not a list**; (6) match his effort to the payoff; (7) on this project
+`CLAUDE.md` **is** the first research step, before web search and before live investigation.
+
+### B.13 — Rule 13: Tell Jeff when to use his local coworker (the two-Claude split)
+**Date:** 2026-07-09 · **Status:** SUPERSEDED by B.13c (single-session mode, 2026-08-14) — but the
+underlying capability map is still the record of who could do what · **Evidence:** `bec7440`
+(2026-07-09, "Add Mandatory Rule 13 (coworker delegation)"), extended `9a34d17`; text
+`/tip/CLAUDE.md:60-71`
+
+The original split, verbatim from the file:
+
+- **The coworker** — "a Claude 'coworker' on his PC (**the beast**) with real computer/local access" —
+  owns anything needing the **home LAN + Beehive/HA directly** (read/click HA, install
+  `custom_components`, restart HA, enter PINs), **local files** on his PC, **apps on his screen**, and
+  **opening/verifying external links** in a real browser.
+- **The cloud session** owns "**the app code, Cloudflare repo/deploys, research, and guidance**."
+- The obligation is one-directional and explicit: *"Jeff doesn't know either of our full capabilities,
+  so **it's on ME to proactively flag the handoff**."*
+- Collision rule (`9a34d17`): the coworker treats `index.html` and `functions/` as **READ-ONLY
+  reference**; the coworker runs `git pull` at the start of every session. "Confirmed working since
+  07-09."
+
+**One documented exception to the split, granted and logged:** 2026-07-15, the local session edited
+`index.html` (the Safari-15 `AbortSignal.timeout` polyfill) because Jeff was actively blocked
+(`33d367d`, exception recorded in `af3b16a`).
+
+### B.13b — Rule 13 EXCEPTION: the mower/sensor subsystem belongs to the coworker, end to end
+**Date:** 2026-08-11 (Jeff's decision) · **Status:** STANDING · **Evidence:** `d18db7b` (2026-08-11),
+`a1cfa53`; text `/tip/CLAUDE.md:69-71`
+
+**Cloud session must not edit:** the ESP32 `.ino` firmware, `functions/api/hours.js`, and the
+sensor-facing parts of `index.html` (`mowerSync()`, YARD sensor cards, Full Sensor Log, mow history,
+yard map / coverage). Everything else stays with the cloud session.
+
+The **why**, quoted from the file because it is the most expensive lesson in the project:
+
+> "the hour meter — the entire reason Jeff built the sensor box — never worked for **months across 5
+> real mows**. The box sent `hours_seconds`; the app read `d.hours`; nothing converted, so the sensor
+> contributed exactly 0.0 hours every sync while Jeff re-entered them by hand. **Jeff was told the
+> sensors were faulty and bought replacement hardware**; they were fine, and had been recording 6.3 km
+> of real mowing the whole time. Root cause of the long miss is **structural, not carelessness**: this
+> cloud session has no outbound network (`EGRESS_BLOCKED`), so it can never fetch a real payload, and
+> the `.ino` is not in this repo — it was coding against this file's *description* of the firmware,
+> which was **wrong**."
+
+Procedural corollary: *"If you believe something here needs changing, write it up and hand it to the
+coworker — same as the coworker does for you. Do not edit it directly."*
+
+### B.13c — SINGLE-SESSION MODE: the beast/coworker owns everything, app code included
+**Date:** 2026-08-14 (Jeff's call) · **Status:** STANDING — supersedes the B.13 split · **Evidence:**
+`46c7450` (2026-08-14, "CLAUDE.md: single-session mode - beast/coworker session now owns app code too
+(Jeff's call 08-14)"); text `/tip/CLAUDE.md:61-67`
+
+Jeff, verbatim (preserved in `CLAUDE.md`):
+> "I only work with you, I'm done with code after the last debacle"
+
+The file's own reasoning: *"The split below existed only to stop two Claudes clobbering the same
+branch; with one session that risk is gone. Verification moves with it: run the repo test scripts
+locally AND drive the real deployed app in a real browser here (something the cloud session never
+could). **Do not hand work off to the cloud session or write 'ask the coworker' notes — that is now
+this session.**"*
+
+**INFERRED:** "the last debacle" is not named anywhere in git. The strongest candidate on the evidence
+is the 08-10/08-11 mower-sensor cluster (the coverage map wiping Jeff's hour meter, then the discovery
+that the meter had never worked at all and that Jeff had bought replacement hardware he did not need)
+— because that is the only failure in the surrounding window large enough to warrant the word, and it
+produced the *first* ownership transfer three days earlier (B.13b). **This is inference. The record is
+silent on the literal referent.**
+
+### B.14 — Rule 14: Check the real current date/time, never guess
+**Date:** 2026-08-10 · **Status:** STANDING · **Evidence:** `a2779b5` (2026-08-10, "Add permanent rule:
+check real date/time, never assume"); text `/tip/CLAUDE.md:73`
+
+Jeff, verbatim:
+> "Get you damn times right... I want a current timestamp added to the session anytime it is picked up
+> and I want the current date and times tracked."
+
+The correction embedded in the rule matters as much as the rule: *"**The sandbox clock IS accurate** —
+verified 08-10 by running `date`… So this was never a missing capability, it was a discipline
+failure."* Always convert UTC → **Central Time** (White House, TN) before stating a time to Jeff; never
+state raw UTC as if it were local. Example/mock dates in test code must be labelled fictional.
+
+### B.15 — Rule 15: Read `docs/SESSION_START.md` in full at the start of every session
+**Date:** 2026-08-16 (Jeff's rule) · **Status:** STANDING · **Evidence:** `fab5b30`, `831db1b`; text
+`/tip/CLAUDE.md:75-76`; the file itself at `/tip/docs/SESSION_START.md`
+
+> "**This file + that file are the whole standing context; everything else is read on demand.**"
+
+Rationale: `CLAUDE.md` is auto-loaded and occupies context for the whole session; at **260 KB** it was
+"crowding out room for actual work." Now ~58 KB, with the heavy material in `docs/` and mirrored to
+`C:\Users\jeffl\iCloudDrive\HCC-Archive\`.
+
+### B.16 — Rule 16 (first of two numbered 16): the history lives outside the file — go read it
+**Date:** 2026-08-16 (Jeff's rule) · **Status:** STANDING · **Evidence:** `fab5b30`; text
+`/tip/CLAUDE.md:77-78`
+
+Jeff, verbatim:
+> "break it up and put the stuff in iCloud and then just tell yourself to read that."
+
+Standing obligation: *"**Before re-investigating ANY subsystem, grep the archive for it first** — the
+answer is very often already in there, paid for in Jeff's time."* Archive locations:
+`docs/CHANGELOG_ARCHIVE.md` (179 KB, 98 entries, version-controlled, **not** auto-loaded) and
+`C:\Users\jeffl\iCloudDrive\HCC-Archive\CLAUDE_CHANGELOG_FULL.md`.
+
+*Note for the record: the tip file has **two** rules numbered 16 (`/tip/CLAUDE.md:77` and `:79`). This
+is a real duplicate-numbering defect in the source, not a transcription error here.*
+
+### B.17 — Rule 16 (second): stop tunnel-visioning — enumerate options before committing
+**Date:** 2026-08-16 (Jeff's rule) · **Status:** STANDING · **Evidence:** `/tip/CLAUDE.md:79`;
+reinforced in `/tip/docs/SESSION_START.md` §4
+
+Jeff, verbatim:
+> "you go down one road and get tunnel vision and you spend more time fighting over that single
+> tunnel... open your damn mind and look at all options."
+
+Two live examples recorded with it: (a) *"spent an hour asking for Samba/SSH access to edit a YAML
+file, when retrying the blocked editor keystroke worked first try, and separately the `all_objects`
+attribute already exposed the needed data through an API I'd had all along"*; (b) *"proved the leak
+alarm worked without ever asking whether Jeff gets told anything on a normal day (he didn't — it was
+alert-only by design)."*
+
+Companion rule from `SESSION_START.md` §4, equally binding: **"Don't hand Jeff a menu.** If an action
+is blocked, retry it, then find another route, then ask — in that order. He has said repeatedly he
+wants the work done, not the options explained."
+
+### B.18 — Debugging-protocol Rule 8: NEVER name a specific product/model from memory
+**Date:** 2026-08-05 (Jeff's standing rule) · **Status:** STANDING (PROTECTED) · **Evidence:**
+`7f73148` (2026-08-05, "Add permanent rule: never name a product/model from memory unverified"); text
+`/tip/CLAUDE.md:150`
+
+Origin, from the file: on 08-05 Claude recommended *a ratgdo board, then "SONOFF Basic," then had to be
+corrected to SONOFF SV — three guessed answers on one part, in a row,* before **Jeff found the actually
+correct SONOFF MINI-D himself.**
+
+> "He does not have time to be the fact-checker on my hardware recommendations. **The rule going
+> forward: never state a specific product name/model number as a recommendation unless it was verified
+> via a real search THIS session.** If I haven't checked, say 'let me check' — never let a
+> plausible-sounding model number stand in for one that's actually confirmed."
+
+### B.19 — Never hoist a shared `AbortSignal.timeout` across retries; never `fetch()` HA directly
+**Date:** 2026-07-03 · **Status:** STANDING · **Evidence:** `7a59848` (2026-07-03, the `/api/ha` proxy);
+text `/tip/CLAUDE.md:148`
+
+> "**Known fragile pattern (don't repeat):** any new `fetch(base + '/api/...')` straight from the
+> browser to HA. Use **`haFetch()`** (routes through `/api/ha`). **Never hoist a shared
+> `AbortSignal.timeout` across retries.** Keep timeouts generous for the Nabu Casa relay."
+
+The signal rule is a real bug class: a hoisted signal is already expired by the time retry #2 fires, so
+every retry after the first fails instantly.
+
+### B.20 — Never re-add a custom Blink override
+**Date:** 2026-07-09 · **Status:** STANDING · **Evidence:** `7bbc8a2` (2026-07-09)
+
+> "that override shadowing the fixed built-in was the entire bug."
+
+The vendored `beehive/blink/` files in the repo are formally declared **dead artifacts** by the same
+commit. The custom component had been shadowing Home Assistant's own (already-fixed) Blink integration.
+
+### B.21 — B-Hyve devices are EXCLUDED from Lights & Plugs ALL ON / ALL OFF
+**Date:** 2026-07-04 · **Status:** STANDING · **Evidence:** `20ce92e` (2026-07-04, "Lights & Plugs card:
+control switch.* (SYLVANIA plugs), exclude irrigation")
+
+From the commit body:
+> "the card now pulls both `light.*` and `switch.*` — but **EXCLUDES B-Hyve irrigation switches**
+> (`lightIsIrrigation` filters bhyve/orbit/zone/sprinkler + `is_watering`/`zone_name`) **so it can
+> never fire the sprinklers.**"
+
+This is a **safety invariant, not a styling choice** — an "all on" that turns on the sprinklers is a
+flooded yard. Verified in the harness with a B-Hyve switch present: "4 devices shown, bhyve excluded."
+
+### B.22 — The mbapi2020 Mercedes PIN is server-side only; the app must NEVER send or store a `pin` field
+**Date:** 2026-07-24 · **Status:** STANDING · **Evidence:** `eeaa0b7` (built) → `c73e32e` (2026-07-24,
+"Remove app-level PIN prompts — mbapi2020 handles PIN from integration options"); dormant client-side
+PIN subsystem deleted `8501360` (2026-07-31); corrected but upheld `473f122` (2026-08-06)
+
+The 07-24 decision removed PIN prompt wrappers from `carLockCmd`, `carMaxCool`, `carMaxHeat` and the
+`pin` field from `carMbSvc` service calls.
+
+**The important correction (`473f122`, 08-06, by the coworker):** the *mechanism* was right, the *fact*
+was wrong. `CLAUDE.md` had asserted the PIN was stored in mbapi2020's integration options — a live
+`config_entries/get` against Jeff's real HA showed **the options dict was completely EMPTY**. So every
+PIN-gated service (`doors_unlock`, `engine_start`, `windows_open`, sunroof) had been firing with no PIN
+and being rejected upstream for weeks; `doors_lock` kept working only because locking needs no PIN.
+
+> "The 'app must never send a pin field' half of the original note stands."
+
+Fix was UI-only and **Jeff's to do**: Settings → Devices & Services → MercedesME 2020 → gear on the
+account row → Security PIN (`entry_id 01KY38Z7C90J2WE6S9R987JQZ4`). Added standing instruction: *check
+the entry's options are actually populated before blaming the integration or the app.*
+
+Jeff had worked this out himself from the real Mercedes app before Claude did — `473f122`: *"Jeff
+worked out from the real Mercedes app that unlock and remote start demand a PIN, and suspected HA
+wasn't supplying it. **He was right.**"*
+
+### B.23 — Edit `packages/hcc.yaml` via the HA Terminal add-on only
+**Date:** 2026-07-11 · **Status:** STANDING, with an 08-16 amendment · **Evidence:** `987e804`
+(2026-07-11), `a88ccc6` (2026-07-11)
+
+The doctrine and how it was earned:
+- The **legacy File Editor add-on** mishandled a special keypress and typed a literal `"Page_Up"` into
+  the file — caught before saving (`987e804`).
+- **Studio Code Server** then produced two separate corruptions: a literal `"Page_Down"` keystroke and a
+  **Prettier format-on-save truncation** — both caught by `ha core check` and repaired with sed/heredoc
+  (`a88ccc6`).
+- Settled doctrine: use the **Terminal add-on** (sed/heredoc); never the legacy File Editor; never
+  Studio Code Server without disabling format-on-save.
+- Related standing caution from `987e804`: **the "Migrate" button in HA's Automations UI must not be
+  clicked without asking Jeff.**
+
+**08-16 amendment** (`/tip/docs/SESSION_START.md` §3): *"Studio Code Server's editor works but is
+fiddly. Verify every edit by zooming on the result; a selection one character too wide silently broke
+YAML on 08-16."* And the structural fact behind all of it: *"`packages/hcc.yaml` automations are
+invisible to the config API; `automations.yaml` ones are readable AND writable at
+`/api/config/automation/config/{id}`. Use that — it needs no browser."*
+
+### B.24 — The protected photo rule: never strip Jeff out of his own app
+**Date:** 2026-08-06 · **Status:** STANDING (PROTECTED) · **Evidence:** `595ec23` (the mistake),
+`db9ffcc` (2026-08-06, "CLAUDE.md: record which photos are real, and never to strip Jeff out of
+them"); text `/tip/CLAUDE.md:267-278`
+
+Written by the session that got it wrong, in its own words:
+> "Learned by getting it wrong. I regenerated the irrigation and yard heroes and removed the person,
+> assuming a stock model. **It was Jeff, in his own app.**"
+
+The rules, all still in force:
+- **`hero-irr.jpg` and `hero-yard.jpg` contain JEFF HIMSELF** (dark LawnCareLife t-shirt, watch,
+  thumbs-up). *"He likes these. Never remove, replace or alter him."* Only the printed marketing
+  overlays around him may be stripped.
+- **`images/zones/` are REAL PHOTOGRAPHS OF JEFF'S ACTUAL YARD**, enhanced only. *"Do not regenerate or
+  replace these."* Honoured 08-11 — the zone photos were **"CROPPED, NOT REGENERATED"** (`6913393`).
+- **`hero-cameras.jpg` — keep the Blink logo and the 2nd Amendment sticker** (Jeff's explicit call
+  08-06, `1eba07f`). What must go: the fake "HOME GUARDIAN / SMART SECURITY SYSTEM" title, the fake
+  "ALL SYSTEMS READY · PROTECTED · 6 CAMERAS" panel, and the six dummy camera tiles. **Marked "Not yet
+  done" at branch tip.**
+- **The stock couple in the old `hero-car.jpg` were NOT Jeff and Angela** — removed 08-06; the empty
+  cabin is also a better surface for data.
+- **Cropping counts as altering him (added 08-11).** In `hero-yard.jpg` Jeff's hair starts at **image
+  row ~22 of 851**. `.sec-hero-yard img` MUST stay `object-position:center top`. Any change to a hero's
+  height, `aspect-ratio` or `object-position` requires re-checking Jeff is fully in frame at
+  1024/1194/1366/1920.
+- **The general rule:** *"if a photo contains a person or a real place, confirm with Jeff who/what it
+  is before altering it."*
+
+Jeff's standing objection, verbatim (`/tip/CLAUDE.md:276`):
+> "I hate those logos that are on the picture. I don't mind the text but it looks awful with them right
+> next to the real icons."
+
+Read as: **baked-in fake icon/feature strips are the thing to kill.** Plain title text is tolerable;
+fake iconography next to the app's real icons is not — the file calls it *"fake stuff next to my real
+icons."*
+
+### B.25 — Never expose HA add-ons / diagnostics / meters to voice assistants
+**Date:** 2026-08-14 · **Status:** STANDING · **Evidence:** `18ff039` (2026-08-14, "HomeKit capability
+research + exposure policy… never expose add-ons like the Alexa mess"), `1f4e791` (2026-08-14),
+`72e5d56` (2026-08-15)
+
+Policy: **expose only what a human would say out loud or tap on a watch.** Add-ons, diagnostics and
+meters NEVER. Earned by the Alexa audit, which found **nine HA add-ons were voice-controllable** —
+i.e. sayable-aloud commands could restart infrastructure. Alexa exposure was cut **69 → 33** entities;
+HA's Tuya duplicates removed in favour of Smart Life's clean-named copies. Framing: *"HA is the brain,
+HomeKit the Apple-side face."*
+
+### B.26 — Never re-add these confirmed dead ends (a consolidated do-not-retry list)
+**Status:** all STANDING · Evidence per line.
+
+| Do not retry | Why | Evidence |
+|---|---|---|
+| Smart Life / Tuya path for the SYLVANIA plugs | Vendor-locked; Smart Life *detects* a reset plug then rejects it ("This device is not supported by this app") | `f010694` 07-07, `2caaebf` 08-13, `/tip/docs/inventory/HCC_INVENTORY.md` |
+| myQ software integration | Chamberlain blocked all third-party API access 2023; HA `myq` removed in 2023.12; `ehendrix23/hass_myq` verified 404 | `e20d3d5` 07-26, `c94e7aa` 07-28 |
+| `media_player.play_media` / Alexa custom-command for Fire TV pop-ups | "confirmed dead end for this device" | `25e3256` 07-11 |
+| `input keyevent 127/85` for Fire TV pause | Confirmed no-ops; use `cmd media_session dispatch pause/play` | `2965b5a` 07-15 |
+| `input keyevent 187` (Recent Apps) for Fire TV return | No-op on this Fire OS build; use HOME | `3a714fe` 07-15 |
+| Relaunching Fubo/Sling via launcher intent to resume | Cold-starts to the show list, loses DVR position | `3a714fe` 07-15 |
+| Fixing the GitHub Actions deploy workflow | Missing `CLOUDFLARE_API_TOKEN`; "broken and irrelevant… do not try to fix, it doesn't matter" | `e8f0312`/`90e556e` 06-23/24; disabled `ac99b33` 08-06 |
+| Restoring `CLAUDE.md`'s old ESP32 cadence description | It was wrong and the whole server design was built on it | `d18db7b` 08-11, `/tip/CLAUDE.md:229` |
+| "Fixing" per-mow stats to zero on upload | Jeff asked for the hold-until-next-mow behaviour explicitly | `6913393` 08-11, `/tip/CLAUDE.md:239` |
+| "Fixing" the lat/lon staleness asymmetry | Last known position is useful while parked; pinned with a test | `c63142b` 08-11 |
+| `window.open` for external links | No-op in an installed iOS PWA; use a real `<a target="_blank" rel="noopener">` | `c294216` 06-28, `8b4c8a0`, `/tip/CLAUDE.md:298` |
+| Cache-first service worker for HTML | "no code fix ever reached the device" | `19dd459` 06-26 |
+| Base64-embedding images in `index.html` | 2.1 MB → 295 KB when extracted | `739d004` 06-23 |
+| Re-tuning the backyard camera's daytime PIR sliders | Camera's own sensor hits 104–113 °F; PIR needs thermal contrast. Unfixable from software | `/tip/CLAUDE.md:487` |
+| Removing the dual KV check `env.HCC_KV \|\| env.MOWER_KV` | Covers both binding names; nobody can verify from here which is live | `c6f3df8` 06-23, `/tip/CLAUDE.md:206` |
+| Re-running `POST /api/auth {"action":"setup"}` | One-time only; refuses to re-run and returns `already_setup` — that is expected, not a bug | `8f495e4`/`4fabef8` 07-21, `/tip/CLAUDE.md:337` |
+
+---
+
+# PART C — Every rejection, with its price
+
+This is the section Jeff most needs: things that were considered, priced, and killed. **Re-pitching
+any of these is the documented failure mode.**
+
+### C.1 — ❌ Inovelli Blue 2-1 VZM31-SN dimmers — SCRAPPED ON PRICE, ~$60 each / ~$120 the pair
+**Rejected:** in conversation ~2026-08-13 20:07 CDT · **Re-pitched and rejected a second time:**
+2026-08-16 · **Status:** STANDING (PROTECTED) — *never propose again* · **Evidence:** selection
+`a5c67a8` (08-13); scrap notices `1572b4a`, `c30b64d`, `c05d647` (all 08-16);
+`/tip/CLAUDE.md:104-108`; `/tip/docs/inventory/HCC_INVENTORY.md:45`;
+`/tip/docs/lighting/zigbee_dimmer_selection_2026-08-13.md:5`
+
+Jeff, verbatim (two separate preserved statements):
+> "I was not paying $120 for a freaking dimmer switch... I spend $125 for Claude Max and I would rather
+> spend the money on that and have your help than buy $120 worth of dimmers."
+
+> "those were scrapped at the freaking beginning — told you I was not paying $120 for a freaking
+> dimmer switch."
+
+**This is the worst documented failure of the project's memory system**, and it is worth stating in
+full because the ledger exists to prevent its repeat:
+
+1. `a5c67a8` (08-13 evening) selected Inovelli Blue as *"the only option that satisfies 'must extend
+   the mesh'."*
+2. Jeff killed it on price the same evening, **in conversation**. Nobody wrote it down.
+3. The inventory was updated **08-15 — a day after the decision — still saying "TO BUY: 2."**
+4. On 08-16 a session read the stale docs, **planned the entire Zigbee mesh around them, and pitched
+   $120 of dimmers back at the man who had already refused them.**
+5. Claude then told Jeff **twice** that the decision "was never written down" — which was also wrong
+   (`c05d647`): the current plan *had* been documented on 08-13 in `docs/lighting/HCC_Lighting_Plan.html`.
+
+**The trap, recorded permanently** (`/tip/CLAUDE.md:101-103`):
+> "⚠️ A trap that already cost a whole session: searching the docs for 'Inovelli' and finding nothing
+> does NOT mean the plan is undocumented — the *absence* of that word is what marks the CURRENT plan.
+> Search for **Kasa / plug / mesh**, and check `docs/lighting/` by date."
+
+**The budget philosophy this established, now PROTECTED** (`/tip/CLAUDE.md:107-108`):
+> "**That is the budget philosophy for this whole project — his money goes to the tools that help him
+> build, not to premium hardware where a cheap part does the job.**"
+
+`c30b64d` adds the operating instruction: *"Lead with what he already owns, then cheapest-first, and
+flag spend clearly."*
+
+### C.2 — ❌ Enbrighten 43080 Zigbee dimmer — rejected on documented mesh-routing defects
+**Date:** 2026-08-13 · **Status:** STANDING — *rejection survives even though Inovelli died too* ·
+**Evidence:** `a5c67a8` (08-13); `/tip/CLAUDE.md:115`; `1572b4a` explicitly preserves it —
+*"The Enbrighten rejection research is kept - the documented mesh-routing defects are still valid - but
+the selection is dead."*
+
+Zigbee2MQTT's own device page documents that the 43080 **stops relaying for child devices** and ignores
+route updates — which fails Jeff's requirement that switches must extend the mesh. Lesson recorded:
+**"'Zigbee2MQTT supported' ≠ 'good Zigbee citizen.'"**
+
+### C.3 — ❌ Enbrighten Z-Wave dimmer ($39) — rejected on radio, not price
+**Date:** 2026-08-13 · **Status:** STANDING · **Evidence:** `a5c67a8`; `/tip/CLAUDE.md:116`
+
+Wrong radio — would need a second USB stick and a second ecosystem. Real two-switch cost worked out to
+**~$118 vs ~$92 Zigbee** once the second stick was counted. Cheaper sticker price, more expensive
+system.
+
+### C.4 — ❌ SYLVANIA Smart WiFi plugs — vendor-locked, cannot join HA
+**Date:** first flagged 2026-07-04, settled 2026-07-07, re-settled 2026-08-13 · **Status:** DEAD / DO
+NOT RETRY · **Evidence:** `f010694` (07-07, "DEAD END for HA (confirmed, do NOT re-attempt the Tuya
+path)"), `2caaebf` (08-13), `2aca121` (08-13 network-map correction);
+`/tip/docs/inventory/HCC_INVENTORY.md`; `/tip/CLAUDE.md:119`
+
+What was proven, not assumed: they **are** Tuya hardware (port 6668 confirmed) at `.199/.200/.202/.205`,
+but Sylvania locked the product ID so **only the "SYLVANIA Smart WiFi" app accepts them.** Proven
+08-13: Smart Life *detects* a reset plug then rejects it — *"This device is not supported by this
+app."* The Sylvania app can scan HA's Tuya QR, but Tuya blocks the confirm step ("use the designated
+APP"). Only remaining route = LocalTuya with hand-extracted local keys — **"NOT attempted, not worth
+it."**
+
+Decision: **replace with Zigbee plugs**; keep the Sylvanias on Sylvania + Alexa meanwhile.
+Cost of the experiment: one plug got factory-reset for nothing.
+
+A related correction is recorded honestly: an earlier session had guessed these were Bluetooth-only
+Echo Dot devices — *"Echo Dot guess and Bluetooth-only verdict both wrong, corrected"* (`2aca121`).
+
+### C.5 — ❌ Roku browser-channel path — rejected; $20–30 Fire TV Stick chosen instead
+**Date:** 2026-07-15 · **Status:** STANDING · **Evidence:** `3644f54` (2026-07-15)
+
+Jeff initially wanted the **no-purchase** route: run the app in a Roku browser channel on the onn Roku
+TV. Research killed it — Web Browser X died in 2021 and no Roku browser can run this app. Decision:
+buy a cheap Fire TV Stick (~$20–30) and reuse the already-proven ADB kiosk playbook. Purchase still
+pending at the end of that window.
+
+### C.6 — ❌ In-app mPING submission — rejected permanently, after being built twice
+**Date:** 2026-07-02 (removed) → restored on Jeff's ask → 2026-07-02/03 (deleted for good) ·
+**Status:** DEAD · **Evidence:** `adc5377` (removed) → `6b29cad` (restored at Jeff's request) →
+`5e6c20b` (NSSL confirms) → `947a99d`, `01b4e8e` (deleted); `6543` token guide `/tip/docs/utilities/mPING_token_setup.md`
+
+Sequence, honestly: the in-app report form was removed; **Jeff asked for it back and it was restored**;
+then NSSL confirmed there are **no automated/app reports ever** and the API token is not self-serve.
+The UI, handlers, CSS and `functions/api/mping.js` were all deleted; the buttons now open the
+**official mPING iOS app** — because `mping.nssl.noaa.gov` is a view-only map page you cannot submit
+from.
+
+### C.7 — ❌ Fubo → Sling TV — Jeff switched providers; the record does not say why
+**Date:** 2026-07-21 · **Status:** STANDING · **Evidence:** `131dc16` (2026-07-21), `4827` note
+
+The switch **required no automation changes at all** — because the Fire TV pause decision (B.26) had
+chosen the system-level `cmd media_session dispatch` API over app-specific hooks. That earlier
+architectural choice is what made a provider swap a zero-change event.
+
+**The record is silent on Jeff's reason for switching** (cost, content, or otherwise). Do not invent one.
+
+### C.8 — ❌ `preheat_start` — rejected for the GLE 350; it is EV-only
+**Date:** 2026-07-22 · **Status:** STANDING · **Evidence:** `778f6bd` (2026-07-22)
+
+From the commit body: *"preheat_start is EV-only (not for gas GLE 350)."* Gas vehicles use
+`mbapi2020.engine_start` (remote start, PIN required) and `auxheat_start` (exhaust-based auxiliary
+heater, **no PIN**). Found by reading the integration's actual source, per the same commit's standing
+rule — *"never guess entity names or service calls — research the integration's actual source code and
+use domain-specific services with known parameters."*
+
+Adjacent, accepted-not-fixed: **`oil_level` / `service_interval` / preconditioning are unavailable**
+because `sensor.gle_350_rcp_features` reports `False` — a Mercedes account/vehicle-tier capability
+limit. *"Nothing to fix here"* (`4e9445d`, 07-21).
+
+### C.9 — ❌ Shelly commercial energy monitors — rejected in favour of a DIY ATM90E32 build
+**Date:** 2026-06-27 · **Status:** STANDING · **Evidence:** `9ced08f` → `2c91e09` → `739e715` →
+`b243228` (all 2026-06-27)
+
+The full chain, in order:
+1. **Shelly EM Gen3 — rejected on capacity:** 80 A per channel is too small for a 200 A main.
+2. **Shelly Pro 3EM-400 (~$140) — recommended**, then **rejected by Jeff in favour of building his
+   own.**
+3. **Chosen: ESP32 + ATM90E32AS** on the CircuitSetup open-source design, **~$90–110 DIY**, with
+   **200 A split-core CTs (not Rogowski)** and 2 × 9 V AC-AC wall-warts.
+4. Then **upsized to the 6-channel ATM90E32 board** for per-appliance breakout (`b243228`).
+
+This is the budget philosophy of C.1 applied nine weeks earlier: **cheaper, more capable, more work —
+and Jeff does the work.**
+
+### C.10 — ❌ Panel-level switching and smart breakers — rejected to save money
+**Date:** 2026-06-27 · **Status:** STANDING · **Evidence:** `b243228` (2026-06-27)
+
+> "House is nowhere near capacity… Cooking/laundry = MONITOR ONLY (never auto-energize a stove/oven).
+> Told Jeff to skip smart breakers/panel relays = **saves money**."
+
+Control lives at the **LUX thermostat** (A/C) and at **wall switches/plugs** (lights) — never at the
+breaker, because *"whole-circuit kills smart bulbs."*
+
+### C.11 — ❌ A commercial alarm panel — rejected; the alarm is a DIY Zigbee build
+**Date:** 2026-07-01 · **Status:** STANDING · **Evidence:** `4c9cf03` (2026-07-01), priorities
+`6837d2d`; shopping list `/tip/docs/beehive/safety_shopping_list.md`
+
+The decision, from `4c9cf03`: **the alarm is a DIY Zigbee build, not a commercial panel — and not
+bought yet.** Priorities, in order: **life-safety sensors first, lean intrusion**, water-main
+auto-shutoff, garage door via ratgdo/local relay (myQ cloud rejected — "blocked from HA, so go local").
+
+**Guardian doctrine, verbatim from the shopping list** (`/tip/docs/beehive/safety_shopping_list.md:3`):
+> "**Philosophy (Jeff's ask):** *tons* of **life-safety** coverage (smoke/CO/leak/gas/freeze)…"
+> and §5: "**INTRUSION — keep it lean (Jeff: don't go crazy)**"
+
+Restated as a standing correction in `SESSION_START.md` (`831db1b`, 08-16):
+> "Jeff wants TONS of life-safety coverage and LEAN intrusion (key doors + a few motions, not every
+> window). **Door sensors are not 'the perimeter.'**"
+
+And in `/tip/CLAUDE.md:123-124`: *"Guardian priority is LIFE-SAFETY heavy, INTRUSION lean — key doors
+and a few motions only, never 'sensors on every window.'"*
+
+### C.12 — ❌ ratgdo (~$35, and the ~$22-25 Gelidus clone) — researched, then dropped before purchase
+**Date:** chosen 2026-07-26, dropped 2026-08-05, final part landed 2026-08-06 · **Status:** SUPERSEDED
+by SONOFF MINI-D · **Evidence:** `590303e`/`e20d3d5` (07-26, ratgdo chosen ~$35), `7b60e43` (08-04,
+Gelidus USB-C v2 ~$22–25 noted as cheaper than the $45 official kit), `10f0f13`/`65d7e49`→`f015867`
+(08-05→08-06, dropped for a cheap relay), `feee336` (08-06, installed)
+
+The full, embarrassing chain — preserved because it is the origin of Rule 8 (B.18):
+
+| Step | Part | Price | Outcome |
+|---|---|---|---|
+| 1 | Official ratgdo kit | **~$45** | Rejected as overpriced |
+| 2 | Gelidus ratgdo USB-C v2 | **~$22–25** | Pre-flashed, feature-parity — then rejected |
+| 3 | Plain ESPHome R2/R4 relay | **~$8–10** | *"~$15 cheaper, only costs a one-time manual flash"* — Jeff pushed back on the ratgdo price premium and was right |
+| 4 | "SONOFF Basic" | ~$8-10 | **WRONG** — mains-voltage part, not dry-contact |
+| 5 | SONOFF SV | — | Superseded |
+| 6 | **SONOFF MINI-D** | — | **FINAL — found by Jeff himself.** Native Matter, hardware Inching Mode, no flashing needed |
+
+`3151`: *"Jeff correctly pushed back -- the ratgdo/Gelidus board's price premium"* was not justified for
+this job. Installed 08-06 at the opener, powered by a plugged 2-wire AC cord, **coexisting with MyQ and
+the wall button** (`feee336`).
+
+### C.13 — ❌ MyQ hardware — sold, not kept
+**Date:** 2026-08-06 · **Status:** STANDING · **Evidence:** `f84f8d8` (2026-08-06, "Log MyQ sale
+decision, research + recommend a Zigbee position sensor"), `a1a65fe`
+
+Claude flagged first that standard MyQ kits **bundle real position-sensing hardware that the new relay
+does not replace.** **Jeff's call: sell it anyway**, and get a door-position sensor visible in the app
+instead. Recommendation: a **Zigbee contact sensor** (SONOFF SNZB-04P or Aqara) over reed/tilt.
+Standing invariant from `a1a65fe`: **the garage relay is never treated as door position.**
+
+Final plan at tip (`/tip/docs/inventory/HCC_INVENTORY.md`): **two** contact sensors — #1 at CLOSED
+(bottom of track), #2 at FULLY-OPEN (overhead) — so a template sensor derives **CLOSED / OPEN /
+PARTIAL**, covering Jeff's hot-day "cracked open" venting.
+
+### C.14 — ❌ Shelly-vs-ATM90E32: see C.9. ❌ Kamstrup wM-Bus water path — rejected on encryption
+**Date:** 2026-07-28 · **Status:** STANDING · **Evidence:** `281d65b` (2026-07-28); superseded in
+practice on 07-01 by `5034f26`
+
+Kamstrup wM-Bus was rejected as a water-reading fallback: **AES-128 encrypted, no key, no receiver
+built.** Moot anyway — the WHUD meter supervisor confirmed in person on 07-01 that the readable radio
+is an **unencrypted Itron ERT-SCM**, so the whole AES path (and the key request) became unnecessary for
+the primary route. The CC1101/ESP32/AES stack was formally **demoted to backup** (`5034f26`).
+
+### C.15 — ❌ Native Alexa Routine for TV pop-ups — rejected
+**Date:** 2026-07-11 · **Status:** STANDING · **Evidence:** `c926ceb` (2026-07-11)
+
+A native Routine would **bypass HA entirely**, losing AI classification, per-camera mute, and
+family-arrival suppression — *"per Jeff's ask."* Chosen instead: route through HA via
+`alexa_media_player`. (That path itself later proved a dead end for the Fire TV pop-up; see B.26.)
+
+### C.16 — ❌ Blink RTSP bridges — rejected
+**Date:** 2026-08-14 · **Status:** STANDING · **Evidence:** `c95457a` (2026-08-14)
+
+Both candidate bridges add latency (~30 s / 5-min refresh) **on top of** Blink's own cloud delay, are
+barely-maintained hobby projects, and **want the Blink password in a config file.** Rejected on all
+three counts.
+
+### C.17 — ❌ Apple TV jailbreak — dead, do not pursue
+**Date:** 2026-08-14 · **Status:** DEAD · **Evidence:** `c95457a` (2026-08-14)
+
+A15 / tvOS 18.6 is beyond checkm8, and **no PiPup equivalent exists for tvOS anyway** — so even a
+successful jailbreak would not deliver the feature. Chosen instead: the **HomeKit snapshot route**,
+proven on 08-14 (`9426623`) — `linked_doorbell_sensor` pointed at the motion sensor is what makes tvOS
+pop up. **Motion alone never interrupts the screen.**
+
+Also rejected in the same policy pass (`18ff039`): **HomeKit Secure Video** (Blink can't stream, and
+Jeff doesn't want the iCloud+ requirement); **duplicate phone notifications**; and **video clips in
+HomeKit** (ffmpeg-on-MP4 documented as hanging — *"Jeff is happy with stills anyway"*).
+
+### C.18 — ❌ Subscriptions — banned for the camera/AI/theatre stack
+**Date:** 2026-07-09 · **Status:** STANDING · **Evidence:** `dfaa88f` (2026-07-09), `5ddac8a`
+
+> "free, NO subscriptions … no per-month anything."
+
+Free Blink features only. *"cloud clip history is the only thing the paid plan adds"* (`5ddac8a`).
+Detection engine chosen accordingly: **CodeProject.AI Server on Windows with the GTX 1050 Ti (CUDA)** —
+snapshot-based, which fits Blink's no-RTSP model. **Frigate and blinkbridge explicitly not needed**
+for this path (`71a8cae`). Jeff's belief that the GPU was a "T750" was corrected to **GTX 1050 Ti 4 GB**
+by `nvidia-smi`; 4 GB is *"not enough for a full local LLM — use free Gemini tier for rich scene
+descriptions if wanted"* (still $0).
+
+### C.19 — ❌ CF Workers as a WebSocket client for B-Hyve — rejected
+**Date:** 2026-06-26 · **Status:** STANDING · **Evidence:** `c4d32e6` (2026-06-26)
+
+The browser opens the B-Hyve socket itself, using a token fetched from `?tk=1`.
+
+### C.20 — ❌ Radar basemaps: a five-step rejection chain ending in an iframe
+**Date:** 2026-06-26 → 06-29 · **Status:** STANDING · **Evidence:** `7897790` → `5fc66bd` → `4c88027` →
+`c294216` → `db575f8` → `b34472c`
+
+CartoDB rejected (free-tier restrictions) → ESRI tried → OSM+invert tried → CSS invert rejected (blanked
+tiles on iOS) → the entire hand-built Leaflet + RainViewer radar **rejected outright** in favour of the
+embedded **Windy iframe**. Also: the **RadarScope link rejected** — *"was landing on a Zendesk help
+page, not radar"* — replaced with NWS Radar (`b34472c`).
+
+### C.21 — ❌ Weather.com / TWC 10-day forecast — chosen and rejected the same day
+**Date:** 2026-06-26 · **Status:** SUPERSEDED by Open-Meteo · **Evidence:** `d44baf3` → `5fc66bd`
+
+Rate-limited on the TWC/WU key within hours. Open-Meteo chosen partly because *"no key required"*
+(`c8e729c`).
+
+### C.22 — ❌ In-app browser voice control — rejected and removed
+**Date:** 2026-06-26/27 · **Status:** STANDING · **Evidence:** `e2f5889` → `9a2adc6`
+
+*"unreliable on iOS and could hand audio to Siri."* Replaced with an app-launch button so Jeff talks to
+the real Alexa.
+
+### C.23 — ❌ A fake cast button — rejected on honesty
+**Date:** 2026-06-28 · **Status:** STANDING · **Evidence:** `0644ccf` (2026-06-28)
+
+iOS will not let a web app start mirroring. Rather than ship a button that does nothing, the app ships
+an honest step-by-step AirPlay / HDMI sheet.
+
+### C.24 — ❌ Full Fire TV remote UI — rejected by Jeff as too complex
+**Date:** 2026-07-16 · **Status:** STANDING · **Evidence:** `2433bf1` (2026-07-16)
+
+*"Jeff asked for simpler"* — the full remote (D-pad, volume) was stripped back to a **Now Playing card
++ Play/Pause**.
+
+### C.25 — ❌ Rain-skip HA automation — rejected as strictly worse than what Jeff already owns
+**Date:** 2026-08-02 · **Status:** STANDING · **Evidence:** `f1d24f3` (2026-08-02);
+`/tip/CLAUDE.md:503` (Pending Item 14)
+
+B-Hyve's own **WeatherSense** already does real weather-adaptive watering (rain-skip + temp/wind
+adjustment) and genuinely supports a personal weather station, exactly as Jeff described. Independent
+testing showed **100% skip reliability on any 0.2″+ rain day.** An HA duplicate would have **no wind or
+temperature handling** — strictly worse. **Not building this.**
+
+### C.26 — ❌ Electric Bill Due / Last Payment / vs-Last-Year — rejected as new surface area
+**Date:** 2026-08-06 · **Status:** STANDING (recommend skip unless Jeff asks) · **Evidence:** `5c41c8d`
+(2026-08-06); `/tip/CLAUDE.md:507`
+
+Checked live by the coworker and **confirmed not available as attributes** (`account_id`/`meter_name`
+only). Would require a whole new SmartHub-account scraper for a nice-to-have.
+
+### C.27 — ❌ `recorder.get_statistics` helper approach — abandoned
+**Date:** 2026-07-28 · **Status:** SUPERSEDED by `recorder/statistics_during_period` over WebSocket ·
+**Evidence:** `c94e7aa` (07-28); corrected `/tip/CLAUDE.md:507`, `/tip/docs/UTILITIES_REFERENCE.md:32`
+
+The service returned empty across multiple valid parameter combinations (matching a known HA GitHub
+issue). The client-side 24-bucket EMA model was kept instead — and then that too was replaced on 08-06,
+when the coworker fired the real command against live HA and found the correct name is
+**`recorder/statistics_during_period`**, not `history/statistics_during_period` (which returns
+`unknown_command` on HA Core 2026.8.0).
+
+### C.28 — ❌ Minification and script-splitting — deliberately out of scope
+**Date:** 2026-07-31 · **Status:** STANDING (explicitly out of scope) · **Evidence:** `2102e3a`
+(07-31); `/tip/CLAUDE.md:494` (Pending Item 5)
+
+*"basic wins without restructuring the app, per Jeff's scope."* The two biggest remaining Lighthouse
+opportunities are named honestly and left undone: `unused-javascript` ~235 KiB and
+`unminified-javascript` ~71 KiB.
+
+### C.29 — ❌ Server-side coverage wipe — rejected on security
+**Date:** 2026-08-10 · **Status:** STANDING · **Evidence:** `5a0cea9` (2026-08-10)
+
+*"this endpoint is unauthenticated, so a destructive remote command would be abusable."* The GPS
+coverage endpoint accepts writes but will not accept a wipe.
+
+### C.30 — ❌ `mix-blend-mode` and perspective tilt — rejected in the glass redesign
+**Date:** 2026-08-06 · **Status:** STANDING · **Evidence:** `4464d87`, `30d1df3` (both 2026-08-06)
+
+`mix-blend-mode` **silently drops `backdrop-filter` blur.** Perspective tilt was **rejected twice** —
+*"tilted overlays were part of what made the first attempt look wrong."* Also: the reference guide's
+`blur(2px)` on the host photo **was applied, shown to Jeff, and pulled on his call** — *"not so much
+blur in the picture."*
+
+### C.31 — ❌ Controls inside the in-photo dashboard screens — rejected on tap-target size
+**Date:** 2026-08-06 · **Status:** STANDING · **Evidence:** `d860dca`, `e92f4fc` (2026-08-06)
+
+62 px-wide targets against a **44 px minimum floor**. Note this is a *reversal of Jeff's own request* —
+he had said *"that would be awesome if you could put the controls in the screens"* (line 2196 of the
+commit record) — overruled by the accessibility constraint and explained rather than silently dropped.
+**44 px minimum tap-target height, never to be clamped below again** (`e92f4fc`), treated as immovable
+when positioning the irrigation panel later (`436ce61`).
+
+### C.32 — ❌ Freeze Warning automation — removed entirely per Jeff's request
+**Date:** 2026-07-31 · **Status:** STANDING · **Evidence:** `b4f11df` (2026-07-31)
+
+### C.33 — ❌ Calling WHUD about the pit-radio silence — Jeff said no
+**Date:** 2026-07-31, re-opened and re-closed 2026-08-01 · **Status:** STANDING · **Evidence:**
+`13502b9` (07-31), `593ddf7` (08-01, re-opened) → `fb5068c` (08-01, cancelled same day);
+`/tip/docs/UTILITIES_REFERENCE.md:22`
+
+Jeff's explicit call:
+> "water's transmitting fine now and he explicitly does not want to call WHUD about it -- doesn't want
+> to raise a flag with the utility district over something that's already resolved."
+
+The tip doc is blunter: *"reporting it would draw utility-district attention/scrutiny he doesn't want."*
+Standing instruction: *"Leave this alone unless water goes silent again; if it does, that's a fresh
+incident, not a continuation of this one."*
+
+**The wrong diagnosis was deliberately kept in `CLAUDE.md` "for the record rather than deleted."** The
+meter and pit radio were healthy all along; the "stuck reading" was `rtlamr2mqtt`'s `-unique=true` flag
+only republishing on change, combined with this meter batching its broadcasts every ~20 min to ~3 hours.
+
+### C.34 — ❌ Panel-mounted / by-the-book backflow prevention — rejected knowingly
+**Date:** 2026-08-15 · **Status:** STANDING (decided knowingly) · **Evidence:**
+`/tip/docs/inventory/HCC_INVENTORY.md` (Backflow section), `docs/utilities/backflow_layout.html`
+
+The honest limit, stated in the doc: the six zone valves are shutoff valves **downstream** of an
+atmospheric vacuum breaker, which the standard does not strictly permit. The by-the-book fix is a
+pressure vacuum breaker (ASSE 1020, **~$80–150**) **plus annual testing by a licensed tester** —
+*"which is exactly the utility attention Jeff is avoiding. **Decision made knowingly.**"*
+
+Also rejected: **Orbit 51059** (3/4″ FTP brass AVB, **$18.49**) — *"looked at and NOT bought"*, because
+the combined anti-siphon valve does the same job **plus** the master-valve function for the same money
+and fewer fittings. And **T&S B-969** 1/2″ AVB (owned) — *"too small — 1/2″ chokes the 3/4″ line."*
+
+Jeff's replacement strategy, endorsed in the doc: *"an AVB fails SILENTLY… So swap the cheap valve on a
+schedule rather than pay ~9× for bronze. Target: spring startup, every 1-2 years."*
+
+### C.35 — ❌ Vizio soundbar work — leave it alone
+**Date:** 2026-08-01 · **Status:** STANDING · **Evidence:** `2765386` (2026-08-01)
+
+Zero references anywhere in the system; *"left alone per Jeff, he'll power-cycle manually if it recurs."*
+
+### C.36 — ❌ MoCA adapters — shelved with measured data, not guessed
+**Date:** 2026-08-13 · **Status:** SHELVED with a documented deploy trigger · **Evidence:** `aaefae0`
+(2026-08-13); `/tip/docs/inventory/HCC_INVENTORY.md`
+
+Garage WiFi **measured adequate**: mower box, last 50 uploads — mean **−71.5 dBm**, worst −76, **zero
+buffered uploads ever**. Documented trigger to un-shelve: *"if the Matter garage relay feels laggy once
+installed → MoCA backhaul + AP in garage."* Caveat recorded honestly: coax at the garage is unverified.
+
+### C.37 — ❌ Kodi as the media brain — Jeff's decision, then Jeff's reversal
+**Date:** decided 2026-07-10, superseded 2026-07-14 (both Jeff's calls) · **Status:** REVERSED ·
+**Evidence:** `05dc1db` (07-10) → `c13f101` (07-14)
+
+Original: *"beast-as-media-center via Kodi … **NOT** simple ADB from Beehive to Fire TV — Jeff wants it
+routed through the beast."* On 07-14, with the Fire TV path working-ish and **Kodi having been launched
+exactly once for three minutes, ever**, Jeff chose to keep the Fire TV route. Kodi left
+"installed/unused"; `media-center-setup.md` demoted to *"reference/superseded, not a live setup guide."*
+
+### C.38 — ❌ Home Assistant in Docker on Jeff's always-on PC — superseded within 24 hours
+**Date:** 2026-06-21 → 2026-06-22 · **Status:** SUPERSEDED · **Evidence:** `eb342db` (06-21) → `70416e6`
+(06-22)
+
+The 06-21 plan was *"Your PC (always-on, gigabit fiber) will run Home Assistant in Docker."* By 06-22
+noon the app instead reports a **dedicated Beehive brain PC running Home Assistant OS.** Later
+confirmed as the Beelink J45 (Pentium J4205) at `192.168.1.66`. **The record is silent on the hardware
+purchase and its price.**
+
+Fully executed on 07-01/07-02: **wipe Windows 10, install HA OS to the internal drive** (`9a9da77` →
+`f39b125`: *"J45 now boots HA OS 18.1 standalone off the internal SSD (foundational fix done)"*).
+
+### C.39 — ❌ Media/AI workloads on Beehive — banned
+**Date:** 2026-07-09 · **Status:** STANDING · **Evidence:** `dfaa88f` (2026-07-09)
+
+> "the beast = AI + media brain; Beehive stays PURE HA. **Do NOT put media/AI on it**"
+
+The Beelink J45's weak Pentium runs the whole house; nothing else goes on it.
+
+### C.40 — ❌ Two other rejections worth keeping
+- **Fitness card and the pre-mow reminder — removed per Jeff** (`f3ca8b6`, `ffa6b4b`, 08-03), along with
+  the **hardcoded 98% Electrical/Fuel placeholder gauges** — fake data in a real dashboard.
+- **The Life-Safety Note disclaimer card — deleted** (06-24) because *"Jeff and Angela know their own
+  home"*, together with the condescending *"Keep this enabled"* and *"Keep UL-listed detectors as
+  primary"* copy. The **nanny-copy rejection is a standing style rule**, though the underlying
+  life-safety *hierarchy* (Apple Watch Fall Detection + Emergency SOS as the primary net; ESP32
+  gas/smoke for trend monitoring only) remains true — it just stopped being lectured at him.
+
+---
+
+# PART D — Every price and budget figure in the record
+
+Every number here is evidenced. Where a figure appears only in the archive request and **not** in git
+or the tip checkout, that is stated explicitly.
+
+### D.1 — The subscription anchor: $125/month for Claude Max
+
+| Figure | Source | Status |
+|---|---|---|
+| **$125 for Claude Max** | Jeff's own words, preserved verbatim in `/tip/CLAUDE.md:105-107` and in `docs/lighting/zigbee_dimmer_selection_2026-08-13.md`, committed in `c30b64d` (2026-08-16) | **In the git record** |
+
+> "I was not paying $120 for a freaking dimmer switch... **I spend $125 for Claude Max** and I would
+> rather spend the money on that and have your help than buy $120 worth of dimmers."
+
+**Important nuance for accuracy:** Jeff's quote says *"$125 for Claude Max"* — it does **not** contain
+the word "month." The **$125/month** framing comes from the archive request and from the chronicle
+sections' reading of it. **INFERRED:** the monthly reading is almost certainly correct (Claude Max is a
+monthly subscription and the sentence compares an ongoing spend against a one-off hardware purchase),
+but the literal word "month" is not in the quoted text. Flagging it so the record stays honest.
+
+### D.2 — The lighting shopping list, ~$104 total
+**Source:** `docs/lighting/HCC_Lighting_Plan.html` (+ PDF), **Rev. Aug 13 2026** — printable, made
+specifically so Jeff could hang it in the workshop. Summarised in `/tip/CLAUDE.md:96-99`.
+
+| Item | For | Qty | Each | Total | Status |
+|---|---|---|---|---|---|
+| Kasa HS220 dimmer | Bedroom · Kitchen/Dining · Living room | 3 | $15 | **$0** | 2 on hand |
+| Kasa HS220 dimmer | 3rd room, only if a 3rd is wanted | 1 | $15 | $15 | buy |
+| Kasa HS200 switch | Garage lights (non-dim) | 1 | $15 | $15 | buy |
+| Zigbee plug (4-pack) | Replace 4 Sylvanias · mesh routers | 4 | ~$10 | $40 | buy |
+| Zigbee plug — garage | Mesh relay through the garage wall | 1 | ~$10 | $10 | buy |
+| Zigbee contact sensors | Garage door: CLOSED + FULLY-OPEN | 2 | ~$12 | $24 | buy |
+| Zigbee coordinator dongle | Haozee CC2652P1 + USB extension | 1 | — | $0 | ordered |
+| | | | | **~$104** | |
+
+The doc's own thesis, quoted in `CLAUDE.md`:
+> "**Job 1 · Light Switches → Wi-Fi (Kasa). Job 2 · Mesh Range → Zigbee Plugs. Why not a $46 mesh
+> dimmer: the switch was only being asked to repeat the mesh — a job a $10 plug does better.**"
+
+And from the doc body: *"At ~$15 they do the lighting job for a fifth the price of a mesh-grade
+switch"*; *"At $8–12 each they extend the mesh"*; *"Buying them separately costs half as much and
+solves the Sylvania problem at the same time."*
+
+The plan's caveat, which is itself a standing rule: *"Prices are estimates — verify each Zigbee model
+against its Zigbee2MQTT device page before ordering."*
+
+### D.3 — The Zigbee layer actually on hand (all photo-confirmed 2026-08-15)
+**Source:** `/tip/docs/inventory/HCC_INVENTORY.md`
+
+| Item | Qty | Cost |
+|---|---|---|
+| Haozee Zigbee 3.0 dongle (CC2652P1, +20 dBm) | 1 | **$8.92** |
+| Tuya Zigbee door/window sensor (Excellux 2-pc) | 2 pks | **$9.58 ×2** |
+| Zigbee door/window sensor (Coolo 2-pc) | 1 pk | **$6.39** |
+| Zigbee door/window sensor (Excellux 1-pc) | 1 | **$2.79** |
+| Zigbee water leak sensor (Haozee) | 2 | **$5.09 ea** |
+| Zigbee water leak sensor (Gleco, probe cable) | 1 | **$4.40** |
+| Zigbee water leak sensor (Gleco **Z2M-only**, TZ-SJ-SD_E) | 1 | **$4.62** — ⚠️ *this one locked the Z2M-not-ZHA decision* |
+| Zigbee water detector (Excellux) | 1 | **$6.19** |
+| ⚠️ Tuya **WiFi** water sensor (Qianhong "WiFi-Shuijin-1") | 1 | **$5.68** — **WRONG VARIANT**, flagged loudly |
+
+The Qianhong is kept in the register on purpose, per inventory Rule 4: *"Wrong-variant purchases get
+flagged loudly… so the lesson survives: **verify the protocol variant in the listing before
+ordering.**"*
+
+### D.4 — The 2026-08-14 order — ~$33.83
+**Source:** `b524553` (2026-08-14); `/tip/docs/inventory/HCC_INVENTORY.md`
+
+| Item | For | Cost |
+|---|---|---|
+| **Orbit 57280** 3/4″ FPT L-Series auto valve | Master valve | **$13.58** |
+| **Kasa HS220** dimmer (Amazon Resale, **USED - Mint**) | 3rd dimmer | **$13.86** |
+| Leviton 3-Gang Decora/GFCI wall plate | New multi-gang box | **$1.82** |
+| Leviton F-Connector Decora insert | Coax into a Decora plate | **$4.57** |
+| | **Total** | **~$33.83** |
+
+Attached standing rule for the used switch: *"**FACTORY RESET it** (hold the button ~10 s until the LED
+blinks amber/green) so it is not still bound to the previous owner's TP-Link account, **THEN** disable
+auto-firmware-update, **THEN** pair. A used smart switch that is still claimed will silently refuse to
+pair."*
+
+### D.5 — 2026-08-15 irrigation/backflow decision
+
+| Item | Role | Cost | Status |
+|---|---|---|---|
+| **Orbit 3/4″ electric anti-siphon valve** | **DECIDED 8/15** — master valve **+** backflow in one body | **$18.34** | to order |
+| Orbit 57280 (bought 8/14) | Redundant as master → becomes the **spare zone valve** | $13.58 | HAVE |
+| Orbit 51059 (3/4″ FTP brass AVB) | **Looked at, NOT bought** | **$18.49** | rejected |
+| Pressure vacuum breaker (ASSE 1020) — the by-the-book fix | **Rejected knowingly** | **~$80–150** + annual licensed testing | rejected |
+
+The 57280 is explicitly recorded as **not wasted** — a failed zone-1 diaphragm is exactly what caused
+the **~88 gal/day leak found 2026-08-13**, so a spare zone valve is genuinely worth having.
+
+### D.6 — Other hardware prices in the record
+
+| Item | Price | Decision | Evidence |
+|---|---|---|---|
+| **ThirdReality Zigbee plug 4-pack** (ASIN `B09KNHWF7L`) | **~$50** | **SELECTED** as the mesh routers; qty 5 needed | `9dad6a5` 08-14 |
+| **RTL-SDR Blog V4 kit** | **~$40** | *"the only new buy"* for the whole meter-reading build | `ae337d4` 06-30 |
+| Spare ESP32 | **~$9** | TO ORDER — Jeff committed 08-11 | `/tip/docs/inventory/HCC_INVENTORY.md` |
+| **Veepeak OBDCheck BLE+** (F-250 OBD-II) | **~$30** | Planned, not bought | `ee0d376` 07-24; `/tip/CLAUDE.md:492` |
+| NEO-6M GPS for the F-250 box | **~$12** | Optional | `ee0d376` 07-24 |
+| Fire TV Stick for the onn Roku TV | **$20–30** | Chosen over the $0 Roku-browser route (which was impossible) | `3644f54` 07-15 |
+| DS18B20 panel-temp probe | **~$3** | On the one-panel-open "do now" list | `739e715` 06-27 |
+| Motorized water-main ball valve | **~$50** | On the one-panel-open "do now" list | `739e715` 06-27 |
+| DIY ATM90E32 energy monitor | **~$90–110** | CHOSEN over the $140 Shelly Pro 3EM-400 | `2c91e09`/`739e715` 06-27 |
+| Nabu Casa (HA Cloud) | **$6.50/mo** | The only accepted recurring cost | recorded in the chronicles' cost accounting |
+| **New Mulching Gator Blades** | **$31.85** (2026-05-31) | The project's **first recorded purchase** | see D.7 |
+
+### D.7 — The $31.85 blades — a provenance note, stated precisely
+The line **"New Mulching Gator Blades — $31.85 — 2026-05-31"** is real and is in git: it is baked into
+the mower app's `DEFAULT_STATE` purchase history and was preserved into the very first `CLAUDE.md`
+(`e8f0312`, 2026-06-23) and its rewrite (`90e556e`, 2026-06-24). It sits alongside Jeff's 2026-06-22
+data backup: **engine hours 5.9**, and a 7-entry maintenance log all dated 2026-05-31 at 3.5 hrs
+(Cable Inspection, Clear Coat Entire Mower, New Mulching Gator Blades, Battery Charge, Post-Mow
+Cleanup, Pre-Mow Safety Check, Mow #3 — 1.0 hr, 4.0 mi).
+
+**Note the disagreement in the archive** (recorded rather than resolved): the cost-accounting chronicle
+states the $31.85 figure *"could not be verified anywhere in the git record or tip docs and is
+therefore not counted."* That statement is **incorrect on the evidence** — the figure is in the
+`DEFAULT_STATE` of the app and in the first two `CLAUDE.md` versions. It is, however, **not in the
+branch-tip `CLAUDE.md`**, which is the likely cause of the miss. Both readings are recorded here so a
+future reader can check for themselves.
+
+### D.8 — Utility rates, all bill-validated (the money the app actually tracks)
+These are not hardware prices but they are the project's other financial spine — the sewer-overcharge
+case. All were **validated against Jeff's real bills**, replacing earlier estimates.
+
+| Utility | Rate | Validated against | Evidence |
+|---|---|---|---|
+| **Water (WHUD)** | **$10.32 base + $0.00908/gal** | Printed on bill; math-checked $39.90 / 3,258 gal; 6,839-gal cycle → **$72.42**, "exactly the bill's Water Charges line" | `6f9cd3f` 07-03, `7b3de68` 07-28 |
+| **Sewer (City of White House)** | **$22.74 base + $0.00982/gal** → **updated to $23.42 + $0.01011/gal** | 2,461 gal → $24.17; the increase confirmed as a **real ~3% City rate rise**, not a calc bug | `8a9df3b` 07-28; `7eebfd3` 08-06 |
+| **Electric (CEMC)** | **$39.00 base + $0.08657 energy + $0.02815 TVA fuel = $0.11472/kWh** → **TVA fuel to $0.02847 = $0.11504/kWh** | 06/30/2026 bill; then the 07/30/2026 bill, **account 4501007001**, 2,120 kWh | `0d6c9de` 07-28; later update in `4365`-region commit |
+| **Gas (Piedmont→Spire)** | **$13.44 base + $0.61809 dist + $0.61691 PGA = $1.235/therm** × 1.068 heat factor × 5% franchise fee | **Three** Piedmont bills verified **to the penny**: $34.58, $47.83, $27.08 | `0d6c9de` 07-28 |
+| Gas (superseded estimate) | ~$1.12/CCF (TN residential $11.23/Mcf, EIA Jan 2026) | — | `e5726b9` 07-03 — **DISCARDED** on bill validation |
+| Irrigation-sewer (superseded estimate) | $0.01136/gal | — | **DISCARDED** for the bill-validated $0.00982 |
+| **City flat fees** | Sanitation Services **$24.00**, Stormwater **$8.99** | Kept as **separate line items, never folded into sewer math** — the refund case needs clean usage-only data | `330c74a` 08-06 |
+| **Bill reproduction check** | **$92.56** sewer-only · **$125.55** full City of WH total | Reproduced exactly | `330c74a` 08-06 |
+
+Standing note on TVA fuel: *"a pass-through surcharge that shifts most cycles — **re-derive from each
+new bill photo Jeff provides** rather than treating this as fixed"*
+(`/tip/docs/UTILITIES_REFERENCE.md:35`).
+
+### D.9 — Lucky Mike "Smart Stall" economics, locked to Jeff's numbers
+**Date:** 2026-06-30 · **Status:** QUEUED — *"Do not start until Jeff says go"* (`/tip/CLAUDE.md:495`) ·
+**Evidence:** `fa282f1`, `6c2d8c3`, `4d78cad` (06-30); `c8ca302`; `/tip/docs/lucky-mike/`
+
+| Figure | Value |
+|---|---|
+| Flat trip charge (Jeff's number) | **$50** |
+| Boarder fee (Jeff's number) | **$40/mo** |
+| Recommended build fee | **$300/stall** (Jeff to adjust) |
+| Real parts, single-buy | **~$87–96**, re-locked at **~$90** |
+| Real parts, barn quantity | **~$69–76**, i.e. **~$75** |
+| Multi-pack ladder | **~$63** |
+| With on-hand parts | **~$50** — lifts every take **~$40/stall** |
+| Camera (irreducible floor) | **~$33** |
+| Retired padded figure | **$150** — replaced with real costs |
+| Phase 2 additional | **$125–175** |
+
+Recommendation on record: start at **Option 1** (demand-triggered install, *"barn owner keeps the
+$40"*) and *"grow into recurring deliberately."* Verdict: **"No single-stall scenario loses money."**
+ChatGPT's original plan was corrected — architecture fixed (it routed cameras/Shelly through the
+ESP32), microSD/power-bank backup dropped, zero-labor pricing fixed; fan control via a power-monitoring
+smart plug (Sonoff S31 / Shelly Plus Plug US) rather than a hard-wired relay.
+
+### D.10 — What the record does NOT contain, financially
+- **No dollar total for the whole project exists.** Nobody ever added it up.
+- **No price is recorded for the Beelink J45** (the Beehive machine) or its purchase date.
+- **No price is recorded** for the Blink cameras, the iPad Air 2, the Fire TV hardware already owned,
+  the GTX 1050 Ti, or the mower itself (purchased 2018-04-11 per the spec strip).
+- **No price is recorded** for the replacement mower-sensor hardware Jeff bought after being wrongly
+  told his sensors were faulty (`/tip/CLAUDE.md:70` records the purchase, not the amount) — **this is
+  the one purchase in the project that the record confirms was wasted money, and its amount is
+  unknown.**
+
+---
+
+# PART E — Architectural decisions, and WHY
+
+### E.1 — Single-file `index.html`
+**Date:** inherited from the original 2026-05-19 PWA; formalised 2026-06-23 · **Status:** STANDING ·
+**Evidence:** `/tip/CLAUDE.md:166`, `:255-263`; original at `/pwa/`
+
+*"A Progressive Web App (PWA)… **Single `index.html` file** deployed on Cloudflare Pages."* Structure:
+HTML/CSS (sections, heroes, cards), then **one** `<script>` block containing all JavaScript, then
+closing HTML. Several thousand lines and growing.
+
+The cost is acknowledged rather than hidden — it is precisely why C.28's minification/script-splitting
+remains out of scope, and why B.8 (never put a `<script>` tag inside the JS block) is a fatal-class rule
+rather than a style note.
+
+### E.2 — Cloudflare Pages + Functions + KV (not Workers, not a server)
+**Date:** 2026-06-23 · **Status:** STANDING · **Evidence:** `c8e729c` (2026-06-23);
+`/tip/CLAUDE.md:190-213`
+
+**Why Pages Functions rather than separate Workers:** they live in `functions/api/` and *"deploy
+automatically with the Pages project"* — one repo, one push, one deploy.
+
+**The actual deployment pipeline** (and the standing correction to the decoy): *"**GitHub Actions is
+broken and irrelevant** (missing `CLOUDFLARE_API_TOKEN` secret — do not try to fix, it doesn't
+matter). **Actual deployment:** Cloudflare Pages' native Git integration watches
+`claude/time-master-project-liq1jw` and auto-deploys on every push — live at `toro1-5rz.pages.dev`
+within ~60 seconds."*
+
+**KV infrastructure, verbatim from the file:**
+
+| Resource | Name | ID |
+|---|---|---|
+| KV Namespace | `MOWER_KV` | `ec5b28597d9c4fb9b182b1aea1d50eff` |
+| KV Binding (Pages env var) | `MOWER_KV` | maps to the namespace above |
+| Pages project | `toro1` | — |
+
+KV key `hours_data` stores the latest ESP32 payload. `getKV(env)` in `functions/api/hours.js` tries
+`env.HCC_KV || env.MOWER_KV` — **do NOT remove this dual-check** (`c6f3df8`).
+
+Related: **serve install scripts from Pages Functions endpoints**, because *"Cloudflare Pages does not
+reliably serve `.sh` files as static assets"* — hence `/setup` (`a463d09`) and `/bhyve` (`9757104`) as
+one-liner installs, rather than asking Jeff to copy files around.
+
+### E.3 — The `/api/ha` proxy and `haFetch()`
+**Date:** 2026-07-03 · **Status:** STANDING · **Evidence:** `7a59848` (2026-07-03);
+`/tip/CLAUDE.md:148`, `:317`
+
+**All** browser→HA traffic goes through the server-side `/api/ha` Cloudflare Function. The proxy is
+*"locked to Jeff's HA host + `/api/` paths only,"* and the HA token *"still lives only in the browser."*
+Client code uses **`haFetch()`**, never a raw `fetch(base + '/api/...')`.
+
+Extended by two siblings: **`functions/api/ha-stats.js`** (server-side proxy to HA's **WebSocket-only**
+Statistics API — real hourly/daily electric, because `recorder/statistics_during_period` has no REST
+equivalent) and the general pattern of putting anything credential-bearing behind a Function.
+
+### E.4 — Beehive (Home Assistant) outranks cloud APIs
+**Date:** 2026-06-24 · **Status:** STANDING · **Evidence:** `1c2d2c9` (2026-06-24), extended `768cb6a`
+
+Irrigation routes through **HA entities first**; the direct B-Hyve cloud API is only a fallback.
+Extended by `768cb6a` into a general principle: **when a cloud API blocks Cloudflare's IPs, move the
+integration into the house** — a custom HA component calling from `192.168.1.66`.
+
+This produced the 530/1018 IP-block diagnosis, which itself came from another standing decision:
+**show real errors, not generic ones** — expose HTTP status and response bodies in the UI and logs
+(`9fc1211`, `c7bc5ba`, `3082695`, `f904d10`, `c7ed75e`).
+
+### E.5 — Nabu Casa chosen over Cloudflare Tunnel for Beehive's public URL
+**Date:** 2026-07-01/02 · **Status:** STANDING · **Evidence:** `f754540` (posed both) → `5e6c20b` (chose)
+
+Reason recorded: *"secure public URL so the app shows online and reads meters off-WiFi (+ easy
+Alexa/announcements)."*
+
+### E.6 — Family Login: shared password → SHA-256 in KV → server returns the HA token
+**Date:** 2026-07-21 · **Status:** STANDING, setup done and not to be re-run · **Evidence:** `8f495e4`,
+`4fabef8` (2026-07-21); `/tip/CLAUDE.md:331-339`
+
+Purpose: let Jeff/family log in with a shared password instead of pasting an HA token per device.
+**The server holds the real HA token; the app only ever handles the password.** Setup
+(`action:"setup"`) is **one-time only** and refuses to re-run (`{"error":"already_setup"}` — *"expected,
+not a bug"*). Guests get view-only. Rotation = delete `auth_hash`/`auth_ha_token` from KV via the
+Cloudflare dashboard and re-run setup.
+
+Access model for the public app (`80799e7`/`f474d9b`, 07-09): public visitors get a **view-only demo**;
+family (Angela, Jeff's dad, Braxton) get full access by pasting Jeff's HA Long-Lived Token once per
+device; **panic is gated behind the token.** Two low-severity risks **accepted, not fixed**: the open
+`/api/hours` POST (*"griefing only"*) and the visible Nabu Casa URL.
+
+### E.7 — AES meter keys live in Apple Passwords, NOT Cloudflare
+**Date:** 2026-07-01 · **Status:** STANDING · **Evidence:** `75c1a27` (2026-07-01)
+
+Verbatim from the commit:
+> "Key is saved in Jeff's Apple Passwords (readable, encrypted, syncs). Operational home once J45 is set
+> up = HA `secrets.yaml` (wmbusmeters). **Not Cloudflare - app code can't reach the J45 decoder and
+> encrypted CF secrets can't be read back. Never commit the key itself.**"
+
+The reasoning is the durable part: **encrypted Cloudflare secrets are write-only from the operator's
+point of view** — you cannot read them back, so they are the wrong home for a key a human needs to
+retrieve.
+
+Same logic later governs the **HA backup encryption key** (`/tip/CLAUDE.md:489`): saved to
+`C:\Users\jeffl\HCC-secrets\ha_backup_encryption_key.txt`, but flagged as **still not independent**
+because that is the same single PC as everything else backup-related. *"**Never put the raw key in this
+git repo (public).**"* It is called *"the single most load-bearing secret in the whole disaster-recovery
+system"* — without it every `.tar` in the iCloud backup folder is undecryptable. **Still open at tip.**
+
+### E.8 — The ESP32 firmware moved INTO the public repo, credentials extracted
+**Date:** 2026-08-11 · **Status:** STANDING · **Evidence:** `a1cfa53` (2026-08-11), `176ec08`;
+`/tip/CLAUDE.md:243`; `firmware/mower_hours_esp32/`
+
+Verbatim from `a1cfa53`:
+> "This closes the structural root cause of the months-long hour meter miss. The cloud session that
+> owned `functions/api/hours.js` has no outbound network and could not see the `.ino`, so it wrote the
+> server half of the contract against `CLAUDE.md`'s prose description of the firmware - **and that
+> description was wrong. Nobody could diff the two halves because only one was in the repo. Now both
+> are.**"
+
+Mechanics: WiFi SSID, WiFi password and device secret moved to **`secrets.h`, gitignored** because the
+repo is public; `secrets.example.h` is the committed template. **Compiles byte-identical (1,111,016
+bytes)** — purely a source reorganisation.
+
+The honest caveat that came with it, and which is itself a standing rule:
+> "**this does NOT make the compiled binary safe** - those strings are plaintext inside the `.bin`, so
+> firmware images still cannot be served from a public URL and OTA needs an authenticated delivery
+> path."
+
+Plus a tooling gotcha worth keeping: *"`strings` is absent on this machine and returns a silent false
+'clean'; **`grep -a` is the check that actually works.**"*
+
+### E.9 — The two-way control channel (firmware 1.4.0+), and its safety gates
+**Date:** 2026-08-11 · **Status:** STANDING · **Evidence:** `662928a`, `176ec08`;
+`/tip/CLAUDE.md:245-247`
+
+The box reads its POST response, so **every upload is an exchange** — no extra radio time. The reply
+carries desired config and **at most one command**, acked by id, *"so a box that dies mid-command
+retries; it never applies one twice."* **Config can be changed over the air — no reflash for tuning.**
+
+Commands: `zero_tilt`, `clear_track`, `flush_buffer`, `reboot`, `ota`.
+Config keys (**all clamped server-side** in `hours.js`): `vib_threshold`, `idle_interval_s`,
+`sample_interval_s`, `track_min_step_m`, `gps_step_max_m`, `flush_every_s`, `service_mode`.
+
+**Security gate:** *"Issuing anything needs the family password or the `mower_ctrl_token` in KV; the
+box's own uploads stay unauthenticated."* And the operational limit: *"**The box sleeps and cannot be
+woken** — a command lands on its next post, up to 5 min while parked."*
+Telemetry storage is wrapped so *"a control-channel fault can never cost a reading"* (`662928a`).
+
+### E.10 — Server-owned data does not belong in the user's core state blob
+**Date:** 2026-08-10/08-11 · **Status:** STANDING · **Evidence:** `b568a4b` (2026-08-10), extended
+`86b47e6`
+
+> "**Server-owned, re-downloadable, unbounded data does not belong in the user's core state blob.**"
+
+This is described as *"the rule written in the blood of the 5.9-hours reset"* — Claude's own coverage
+map blew out `localStorage` and **reset Jeff's real hour meter to the 5.9 default**
+(`/tip/CLAUDE.md:384`). Jeff's report, verbatim from the changelog archive:
+> "Why are my hours now set at 5.9, the real actual hours are 12.1."
+
+The audit extension applied the same rule to service photos (`86b47e6`).
+
+### E.11 — GPS coverage moved SERVER-SIDE, with no buttons
+**Date:** 2026-08-10 · **Status:** STANDING (Jeff's requirement) · **Evidence:** `5a0cea9` (2026-08-10)
+
+Requirement, as recorded: coverage must accumulate **with no buttons and without the app being open** —
+so the server is the single source of truth and records automatically. Supporting choices:
+- **Coverage as visit counts, not a union; the cap drops least-visited cells, not oldest** (`d3749b9`)
+  — *"so the map converges instead of bloating."* Jeff's question is what exposed the original design
+  flaw; his words, from the changelog archive: *"the whole purpose of the GPS was to build an eventual
+  map of my yard based over it tracking the mow over time... it would get better and better with each
+  mow."*
+- **3-point smoothing kernel on purpose** (`68f4b7b`) — wider *"would round off the real corners where
+  the mower turned."*
+- **Raw-payload logging over a field whitelist** (`333adcf`) — *"nothing the box sends may be silently
+  dropped"*; only `track[]` is excluded from the log for size, and it survives elsewhere. Jeff's ask,
+  verbatim: *"I want to confirm that everything the mower sensors pick up and the gps is building a
+  history of everything that mower does if it farts 💨 it picks it up."*
+- **USGS chosen first for satellite tiles** (public domain, no account); **Esri added and made default**
+  when sharpness became the ask (`5959b55`, `f29e517`) — the tradeoff *"flagged … rather than silently
+  picking."* Jeff's trigger, verbatim: *"blurry as shit."*
+
+### E.12 — Hour truth comes from the physical meter
+**Date:** 2026-07-06 · **Status:** STANDING · **Evidence:** `408fc96` (2026-07-06), `f0a9199`;
+`/tip/CLAUDE.md:219-221`
+
+`S.hours = S.hoursBaseline + the sensor's cumulative d.hours`. **`S.hours` only ever moves FORWARD from
+a sensor sync** (protecting against a sensor reset). The **⏱ SET HOURS** button lets Jeff type the TRUE
+hours off the mower's physical meter; it sets `S.hours` everywhere **and** re-syncs
+`S.hoursBaseline = trueHours − S.lastSensorHours` so future sensor runtime keeps totalling correctly
+(can correct down too, with a confirm prompt). Default baseline **5.9** (Jeff's real hours as of the
+2026-06-22 backup, hard-coded in `53eb7d4` so a cleared browser can never zero his history).
+Hand-set hours display their "set [date]" provenance (`f0a9199`). Set to **9.2 h** on 07-06.
+
+Related invariant (`/tip/CLAUDE.md:241`): engine hours live in the ESP32's **NVS flash and survive a
+reflash** (verified across 5 flashes) but **do not survive a board swap** — after a board swap, re-run
+SET HOURS or the meter appears frozen.
+
+### E.13 — Honesty over plausibility, everywhere
+**Date:** recurring, 2026-06-26 → 2026-08-11 · **Status:** STANDING · **Evidence:** many
+
+The single most consistent architectural value in the project. Every instance:
+- **`"Not exposed via Beehive"` over an invented Next Run number** (`c60ae05`) — *"a plausible-looking
+  fake would be worse than an honest blank."*
+- **`absent is honest while stale looks fine and is a lie`** (`c63142b`).
+- **Guardian shows an honest "Sensor pending", never a faked value** (`5a8320c`).
+- **Electric "NOW" cell left permanently blank** (`46ab304`, 08-06) — the fake hour-of-day estimate
+  *"removed, not just deprioritized."* Reason at `/tip/docs/UTILITIES_REFERENCE.md:32`: *"SmartHub's
+  finest real grain is hourly, genuine 'Now' only comes from the future CT-clamp build."*
+- **Estimates must be visibly estimates** — an explicit **EST** chip and **≈** prefix, *"never confused
+  with a live reading"* (`07bd9a1`/`1f4008f`).
+- **Morning Digest ships without its "active alerts" metric** rather than showing a silently-always-zero
+  count — *"removed that metric entirely rather than ship a false 'all clear'"* (`f1d24f3`). The zero
+  was real: persistent notifications have been unreadable from templates since HA 2023.6.
+- **Honest success messages for CAR** — HA's 200 OK *"only means 'accepted' not 'Mercedes executed
+  it'"*, so the app says "Command sent" with a 30-second expectation and never claims execution
+  (`71d0dc2`).
+- **A clean muted "—" instead of the misleading "No history"** (`2a2eb76`); the unreachable-vs-quiet-
+  meter distinction kept explicit (`31ed0c8`).
+- **No fake cast button** (C.23); **no hardcoded 98% placeholder gauges** (C.40).
+- **Buttons that cannot work are hidden, not disabled**: cockpit LOCK/UNLOCK/FLASH live in exactly one
+  place (`595ec23`) and are **hidden entirely for the F-250** (`e87b730`) — a 2001 truck has no
+  connected-car path.
+
+### E.14 — Panic: sirens + lights + alert family. **NO auto-911, ever.**
+**Date:** 2026-07-01 · **Status:** STANDING · **Evidence:** `b2bbe91`, `7a5e984` (2026-07-01), restated
+as a standing rule in `6a2336d` (07-03), still honoured `5912`-region
+
+From `7a5e984`, verbatim:
+> "Panic now signals Beehive to sound the alarm sirens + strobe lights and alert Jeff, Angela &
+> Braxton. App POSTs `{action:panic,siren,lights,notify:[...]}` to the `hcc-panic-button` webhook…
+> off-network it clearly says '**couldn't reach Beehive — call 911**.' **Does NOT dial 911 (Jeff handles
+> that himself).**"
+
+Design points: one emergency control in the app (the Dispatch **EMERGENCY** bar); the standalone Safety
+panic button removed; *"the red EMERGENCY bar does NOT auto-dial 911 (avoids accidental)"*; verified
+*"no raw `tel:911` anywhere."* The emergency directory carries real numbers Jeff supplied (police
+615-384-4911), but **the bar fires `hccPanic()`, not a dialer** — *"Jeff calls 911 himself, per standing
+rule."*
+
+Ready-to-drop HA automation lives in `docs/beehive/panic_alarm_automation.md` (siren.turn_on + light
+strobe + Critical push to 3 phones via HA Companion; optional Twilio voice call). **Still pending Zigbee
+hardware** at branch tip (`/tip/CLAUDE.md:493`).
+
+### E.15 — Alert fatigue is a security failure, not an annoyance
+**Date:** 2026-08-14 · **Status:** STANDING · **Evidence:** `eba1648` (2026-08-14),
+`/tip/docs/beehive/alert_fatigue_fix_2026-08-14.md`, `831db1b`; `/tip/docs/SESSION_START.md` §2b
+
+The mechanism, stated as a standing correction every session must know:
+> "Too many alerts → Jeff disarms Blink → every camera automation silently stops → no security at all,
+> with no error anywhere. **It already happened once (48 h dead, Aug 10–14).**"
+
+Two decisions came from it:
+- **Garage motion detection OFF permanently.** Jeff, verbatim: *"I don't need motion in the garage at
+  all"* (`/tip/docs/beehive/alert_fatigue_fix_2026-08-14.md:17`).
+- **Alert cooldown: one alert per camera per 5 minutes, deliberately non-extending** — so sustained
+  activity **keeps** alerting and a prowler is never silenced by his own persistence.
+
+Standing obligation: *"Any change that increases detections must be paired with a suppression story."*
+
+### E.16 — Camera AI: all six cameras to confidence 25
+**Date:** 2026-08-16 · **Status:** STANDING · **Evidence:** `fab5b30` (2026-08-16); Pending Item 0b at
+`/tip/CLAUDE.md:487`
+
+The finding, measured on a real night frame rather than guessed: `person 25.5%`, `sheep 27.4%` (= the
+deer; COCO has no "deer" class). At the previous **60%** threshold `targets_found` was empty and nothing
+fired — meaning *"**A person in the back yard at night is currently undetectable**"* on every camera on
+the property. All six moved to 25. `vehicle` dropped from the backyard scanner only (no driveway back
+there; it false-positived on a distant porch light at `car: 61.7%`); `roi_x_min ≈ 0.15` crops **LEFT,
+not top**, because the garden sits right of the fire pit at the same frame height.
+
+### E.17 — Option B for TV popups: ride confirmed AI detections
+**Date:** 2026-08-15 · **Status:** STANDING · **Evidence:** `dea7e75` (2026-08-15), `05df625`,
+`0e9a2e4`; `/tip/docs/beehive/camera_pipeline_VERIFIED_2026-08-15.md`
+
+Popups fire on **confirmed AI detections via template doorbell sensors** — so the annotated image
+(red box + confidence) exists **before** the ring, and false motion never pops the TV.
+Jeff, verbatim: **"What good is an old picture?"**
+
+Supporting finding: the annotated snapshot has a **FIXED filename** (verified on-box), which is what
+unblocked HomeKit showing the red-box image — `clipframe` is the RAW frame and needs a fixed-path copy
+of the AI output.
+
+### E.18 — Verification before expansion
+**Date:** 2026-08-15 (Jeff's order) · **Status:** STANDING · **Evidence:** `5de10eb` (2026-08-15);
+`/tip/docs/inventory/HCC_INVENTORY.md:30`
+
+> "**NOT UNBOXED — Jeff's order: nothing gets set up until the camera/alert pipeline is verified.**"
+
+All seven door/window sensors, all five leak sensors and the dongle arrived 08-15 and stayed in their
+boxes. Setup-day first moves recorded in advance: **disable any auto-firmware-update BEFORE first
+pairing (the Kasa rule)**; pick the Zigbee channel deliberately around the crowded 2.4 GHz WiFi (census
+08-13); dongle on its USB extension cable, away from USB3 ports.
+
+Companion rule from `SESSION_START.md` §3: *"**Never declare done without verifying the far end.**
+Component checks said 'healthy' through every real camera failure on 08-15; only looking at the output
+caught it."*
+
+### E.19 — Kasa auto-firmware-update OFF, every device, forever
+**Date:** 2026-08-14, extended 2026-08-15 · **Status:** STANDING · **Evidence:** `09de34b` (08-14),
+`5de10eb` (08-15); lighting plan page 2
+
+Done via **the HA toggle the Kasa app hides**. The lighting plan states the reason: *"TP-Link firmware
+has previously broken local control — and **local control is the entire reason these are being
+used.**"* Extended 08-15 to all Zigbee gear.
+
+### E.20 — Zigbee2MQTT, not ZHA
+**Date:** 2026-08-13 · **Status:** STANDING · **Evidence:** `66e6b0b` (2026-08-13);
+`/tip/CLAUDE.md:122`; `/tip/docs/inventory/HCC_INVENTORY.md:25`
+
+**Forced by hardware already bought:** the Gleco leak sensor (`TZ-SJ-SD_E`, $4.62) is **Z2M-only, no
+ZHA support**. Judged the right call anyway. A related decision from the same day: **do not swap to a
+ZBDongle-E** — the CC2652P handles ~50 direct children, which is what the current all-battery,
+zero-router mesh needs.
+
+### E.21 — Mesh geometry per Jeff: the kitchen is the far point, not the living room
+**Date:** 2026-08-13 · **Status:** STANDING · **Evidence:** `e057559` (2026-08-13);
+`/tip/docs/inventory/HCC_INVENTORY.md:51-53`
+
+Jeff corrected the assumption: **the kitchen is the FARTHEST point needing mesh**; the living room sits
+~12 ft from the dongle, so a router there is redundant. Router priority is therefore kitchen first. The
+"beige box" was identified as the **MOES module**, assigned to the single **~12 W** LED over the kitchen
+sink — *"finally a load it fits"* against the 100 W/gang limit — with the caveat that it **needs a
+MOMENTARY push-button at the wall**, not a standard toggle (toggles cause continuous-ramp misbehaviour).
+
+Also from Jeff, 08-13: the **Lepro 14 W LED downlights on hand are SPARES ONLY**, replacements for
+existing fixtures, **not expansion**.
+
+### E.22 — Jeff closed the neutral and box-fill questions by doing the work himself
+**Date:** 2026-08-13 · **Status:** CLOSED · **Evidence:** `8b7a69a` ("Lighting: Jeff pulled dedicated
+LED circuits + multi-gang boxes - closes neutral and box-fill open items"), `c722076` ("fans confirmed
+separate from all LED circuits - dimmers safe everywhere (Jeff confirmed)"), both 2026-08-13
+
+This is A.4 in practice: the open electrical questions were closed not by research but by Jeff pulling
+new circuits and confirming the fan separation himself.
+
+### E.23 — The inventory is a standing obligation
+**Date:** 2026-08-13 (Jeff's standing job) · **Status:** STANDING · **Evidence:**
+`/tip/docs/inventory/HCC_INVENTORY.md:3-5`
+
+Jeff, verbatim:
+> "make sure we stay on top of the inventory that's coming in, what we buy from now on... really make
+> sure that we're adding to the system rather than taking away from it. **It's all got to be tracked
+> meticulously.**"
+
+The file's own rules: **log at order time**, not arrival · **"Nothing gets bought twice because nobody
+checked this file. Check here first."** · **Retired ≠ deleted** — mark RETIRED/RESALE with a reason and
+keep the row · flag wrong-variant purchases loudly · sync the iCloud copy after every edit.
+
+### E.24 — Master backup system, built to Jeff's brief
+**Date:** 2026-08-01 · **Status:** STANDING, with one open gap · **Evidence:** `552c699` (08-01),
+`03e688b`
+
+Jeff's brief, verbatim: **"save everything... it would be catastrophic to lose anything."**
+Built: a git snapshot layer plus a daily HA backup synced off-box to iCloud, using a **dedicated
+least-privilege token**, with **14-copy retention**. The remaining flagged risk is E.7's encryption key.
+
+### E.25 — Cache policy, final form
+**Date:** 2026-07-21 · **Status:** STANDING · **Evidence:** `173270a` → `70dba84` → `e37a193` (07-21)
+
+`_headers` with `no-cache` on `/` and `/index.html`; `no-cache, no-store, must-revalidate` plus
+`CDN-Cache-Control: no-store` on `/service-worker.js`; SW registered with `{updateViaCache:'none'}`;
+SW HTML fetch uses `{cache:"no-cache"}`. Standing rule attached: **"check `cf-cache-status` on the
+custom domain, not just `Cache-Control`."** Service worker is **network-first for HTML** (`19dd459`,
+06-26) because cache-first meant *"no code fix ever reached the device."* Cache version must be bumped
+on every asset change — `hcc-v78` at branch tip.
+
+### E.26 — Security headers on exact paths only; no CSP by design
+**Date:** 2026-08-15 · **Status:** STANDING · **Evidence:** `37fac0c` → `186025f` (2026-08-15);
+`/tip/docs/SESSION_START.md` §3
+
+**Two live deploys proved the `/*` wildcard is silently ignored** on this Cloudflare Pages project —
+verified 5–6 minutes after each deploy landed, while the pre-existing exact-path rule for
+`/service-worker.js` *was* being applied. Headers now hang off `/` and `/index.html`. **No CSP by
+design** — inline script/style would require `unsafe-inline`, which would make the header decorative.
+
+### E.27 — Repo identity: `Master-the-Master-` is the only live repo
+**Date:** 2026-08-06 · **Status:** STANDING · **Evidence:** `6e24295` (2026-08-06),
+`docs/repo_deploy_mystery_coworker_ask_2026-08-06.md`; `/tip/CLAUDE.md:170-172`
+
+- **Live repo:** `d4c2np9f69-afk/master-the-master-` — *"this IS the repo Cloudflare Pages deploys,
+  confirmed live 08-06"* (Jeff saw new work appear after a push).
+- **`d4c2np9f69-afk/Toro-Timemaster-` is a stale diverged mirror** — one-way "Sync from
+  Master-the-Master-" commits prove it was always downstream. *"**do not develop on Toro-Timemaster-
+  going forward.**"*
+- **Active branch:** `claude/time-master-project-liq1jw`.
+- **`main` contains only `Toro_TimeMaster_PWA_Package.zip` — do NOT use it for deploys.**
+- Backup-branch deletion and repo archiving were **handed to the coworker** (`2b0cb3d`) because the
+  cloud session gets a real 403.
+
+### E.28 — GitHub Actions workflow disabled, not deleted
+**Date:** 2026-08-06 · **Status:** STANDING · **Evidence:** `ac99b33` (2026-08-06)
+
+Converted to `workflow_dispatch`, **ending 124 failure emails per week.** Not deleted, so the history of
+why it existed survives. It had never worked — the `CLOUDFLARE_API_TOKEN` secret was never set.
+
+### E.29 — Physical backups and a pinned verified-working branch
+**Date:** 2026-06-24 · **Status:** STANDING · **Evidence:** `c200a18` (2026-06-24)
+
+`backups/*.2026-06-24.bak` for all seven working files, plus branch
+`backup/verified-working-2026-06-24` pinned at `e904a5b` (66/66 tests passing). A known-good anchor.
+
+### E.30 — Revert-first when the sensor path is at risk
+**Date:** 2026-06-23 · **Status:** STANDING · **Evidence:** `b629c83` (2026-06-23)
+
+When in doubt about what broke the bench-tested pipeline, **return to "the exact version that was
+working during bench test" before experimenting.**
+
+### E.31 — Blink integration files vendored into the repo
+**Date:** 2026-06-25 · **Status:** SUPERSEDED — the vendored files are now declared dead artifacts
+(B.20) · **Evidence:** `e830083` (06-25), superseded `7bbc8a2` (07-09)
+
+Recorded because the *reasoning* still holds for any future vendoring decision: after **ten** installer
+iterations, install-time downloads (local copy → GitHub raw → GitHub API) were **all rejected** in
+favour of bundling all 12 files. The files later became harmful for a different reason (shadowing the
+fixed built-in), which is the lesson, not a contradiction.
+
+### E.32 — Entity-scoping and inverted-semantics rules
+**Date:** 2026-07-21 · **Status:** STANDING · **Evidence:** `6464a8e`/`9647ca5`/`6aeba2f` (07-21),
+`4800`-region
+
+- **"Always scope CAR entity lookups to Mercedes/GLE/mbapi to prevent house-entity bleed."**
+- **"`*_closed` entities invert on/off semantics"** — this caused a false "window open" until inverted
+  (`4842`-region commit).
+- **`temperature_configure` values must be strings** (`"16"`, not `16`) per mbapi2020's `services.yaml`
+  (`71d0dc2`).
+
+### E.33 — Beehive pinned to a fixed IP; cloud devices left alone
+**Date:** 2026-07-09 · **Status:** STANDING · **Evidence:** `9785381` (2026-07-09)
+
+Beehive fixed at **192.168.1.66**. Fixed IPs for cloud-connected devices (Blink, Tuya) judged
+**unnecessary**. Network finding recorded honestly: the AT&T **BGW320-500** cannot change its DNS
+resolver — *"per-device 1.1.1.1 or own-router-in-IP-Passthrough is the only real DNS fix."*
+
+### E.34 — HOME GUARDIAN is the designated home for all security/alarm/system checks
+**Date:** 2026-07-04 (Jeff's call) · **Status:** STANDING · **Evidence:** `ad3be81` (2026-07-04);
+`/tip/CLAUDE.md:176`
+
+> "**🛡️ HOME GUARDIAN is the designated home for ALL Home Assistant security, home-alarm, and system
+> checks (Jeff, 07-04).** Every future security/alarm feature goes here, built from the Section Kit +
+> `--a-guardian` accent, live from HA `/api/states` via `loadGuardian()`."
+
+This decision **killed the planned CLIMATE tab** — *"Jeff's call: CLIMATE would only ever hold the
+thermostat, so that nav slot goes to Home Guardian."* The LUX thermostat moved verbatim into Guardian
+(`ad3be81`), then moved again on 08-03 to **HOME, under the cameras**, at Jeff's request (`87d2459`).
+
+---
+
+# PART F — Design and visual standards (the gold standards)
+
+### F.1 — The hero-image gold standard
+**Date:** 2026-06-28 · **Status:** STANDING · **Evidence:** `1a98f28`/`43520a5`/`ebedb85` (06-28), later
+eased `0f10f0c`/`c17e0a3`; `/tip/CLAUDE.md:282-290`
+
+Every hero — *including any NEW section* — MUST use the shared module. **Never grade a hero
+individually.**
+- **`.hcc-hero-grade`** — the one cinematic colour grade for every hero `<img>`.
+- **`.hcc-hero-vignette`** — warm-centre/dark-edge vignette, paints under text overlays.
+- **`applyHeroGrades()`** — runs at INIT, auto-tags every `.house-hero`/`.sec-hero`/`.hcc-hero`
+  container and its `<img>`.
+
+To add a hero: put the photo in an `<img>` inside a `.sec-hero` container with a descriptive `alt`.
+**That's it.** Explicitly forbidden: *"do NOT add a per-hero `filter` CSS (fights the shared grade); if
+a hero needs a nudge, adjust the shared `.hcc-hero-grade` values (affects all, keep them unified).
+**Never re-shoot a photo just to 'fix' tone.**"*
+
+Also standing (`f735771`-era heroes work): all seven hero classes carry `width:100%` — added 08-06 to
+fix a desktop layout gap where aspect-ratio + max-height with no width made the browser shrink the
+*width* rather than crop.
+
+### F.2 — The visual consistency lock (design tokens + Section Kit)
+**Date:** 2026-06-28 · **Status:** STANDING · **Evidence:** `8b4c8a0` (2026-06-28);
+`/tip/CLAUDE.md:294-302`
+
+**Tokens (`:root`):** Status `--ok`/`--warn`/`--bad`/`--info` — *"never hardcode these hexes"*, use the
+token, `statusColor(level)`, or `.s-ok/.s-warn/.s-bad/.s-info`. Brand
+`--gold/--text/--muted/--dim/--bg/--surface/--card/--border/--serif`. **Every NEW section gets its own
+`--a-<id>` accent** (nav underline + card-title bar). Shape `--radius` (10px).
+
+**Section Kit — build every new section from these, no bespoke markup:** `.sec-hero` + `<img>`;
+`.card` + `.card-title` (`.cat-<accent>`); spec rows
+`<ul class="spec-list"><li><span class="sk">Label</span><span class="sv">Value</span></li></ul>`;
+status banners `.wx-banner`/`.wx-load`/`.wx-go`/`.wx-caution`/`.wx-no`; buttons `.btn-full` +
+`.btn-gray`/`.btn-green`/`.btn-red`; external links as real anchors, never `window.open`.
+
+The original rule, verbatim from `8b4c8a0`: *"Don't introduce a new green/yellow/red… Don't invent a new
+card/banner/button style."*
+
+**Do-not-rename CSS class list** (`/tip/CLAUDE.md:263`): `.modal-ov`/`.modal-ov.show`, `.modal-box`,
+`.mbtns`, `.mbtn`/`.mbtn.primary`/`.mbtn.secondary`, `.btn-green`; nav `button.snav-btn`
+(`#snav-home/weather/irr/yard/guardian/car`, keeping `SECTIONS`/`NAV_IDS` in the same order as the
+section DOM); sections `#section-home/weather/irrigation/yard/guardian/car`; YARD tabs `button.tab`;
+CAR tabs `button.car-tab` (scoped `carTab()`, **not** global `showTab()`).
+
+### F.3 — Style A (Apple Clean): ONE font, everywhere, forever
+**Date:** 2026-06-29 · **Status:** STANDING · **Evidence:** `8ac220a` (2026-06-29);
+`/tip/CLAUDE.md:302`
+
+**Jeff picked the "Apple Clean" direction from three rendered mockups.** From the commit body:
+
+> "Unify typography to ONE system font everywhere (`-apple-system`/`system-ui`). **Killed the
+> Georgia-serif vs sans mix that made the UI look 'choppy'** by pointing both `--font` and `--serif` at
+> the same Apple stack, so every legacy `var(--serif)` usage (header title, nav, card titles, section
+> labels, spec values, hero overlays) snaps to one clean font."
+
+The standing rule at tip: *"**Typography:** ONE font everywhere — `--font` and `--serif` both point at
+the Apple system stack. **Never reintroduce a serif or second font family.**"*
+
+Verified by a font-consistency audit on 07-31 (`4145`-region): every `font-family` grepped; the one
+remaining declaration was never applied to any element, plus terminal-style monospace in a doc (via
+Google Fonts, never bleeding into the app UI).
+
+### F.4 — Default theme = LIGHT, with a persistent toggle
+**Date:** 2026-06-29 · **Status:** STANDING · **Evidence:** `28d79c6` (2026-06-29);
+`/tip/CLAUDE.md:300`
+
+> "**Theme:** toggle in header, `toggleTheme()`, persists in `localStorage.hcc_theme` (**default
+> light**). Implemented as `html.light{…}` overriding only the design tokens — drive all text/borders
+> from tokens (`var(--text)` etc.), **never hardcode a light text color** on a card (vanishes in light
+> mode)."
+
+Style A made light mode **white top-to-bottom**: header, section nav and tab bar all go white in
+`html.light` (they had been dark chrome), with clean section-accent underlines; the iOS status-bar
+`theme-color` follows.
+
+**One documented exception:** on login, the app sets **dark mode — "Angela's preference"** (`4fabef8`,
+07-21).
+
+**The hardest-won corollary** (`/tip/CLAUDE.md:506`, Pending Item 17, closed 08-11): the
+hardcoded-hex-instead-of-token pattern was **a real bug, not cosmetic.** A contrast auditor that
+composited every translucent ancestor found **19 genuine failures on light surfaces** — worst being the
+credential save/error messages at **1.09–2.9:1** ("Wrong password", "Save failed — storage full" —
+literally invisible in light mode). 36 light-surface sites fixed to tokens; sites on genuinely dark
+surfaces (splash login, irrigation rain delay, LUX fan badge) **deliberately keep their bright hexes**,
+because a light-mode token there would go dark-on-dark. Two tokens darkened on their own merits
+(`--warn` → `#96600f`, `--ok` → `#137534`). **0 remaining failures in both themes.**
+
+Two lessons attached, both violated before being learned:
+- *"a background set in a `style=` attribute beats any selector however specific — move it into CSS
+  rather than fighting it"* (cost a debug cycle on 08-01 **and again** on 08-11).
+- *"a contrast checker that only reads `backgroundColor` silently lies about any element using a
+  `linear-gradient` — it must read `backgroundImage` too, or it invents failures that do not exist."*
+
+### F.5 — The visual identity that came before Style A (superseded, kept for the record)
+**Date:** 2026-06-23 → 2026-06-24 → 2026-06-29 · **Status:** SUPERSEDED · **Evidence:** `f599bd9`
+(Archivo dark-glass, 06-23) → `278a78e`/`c17bdf0`/`1395a31` ("Premium Estate Command Center", 06-24) →
+`8ac220a` (Style A, 06-29)
+
+The **Archivo dark-glass tech look** lasted about 28 hours. The **"Premium Estate Command Center"**
+identity that replaced it — warm gold `#d4af37`, brick red `#c0392b`, warm charcoal, cream text,
+Georgia serif, golden-hour AI-generated heroes to a written JSON spec (`HERO-STYLE-GUIDE.json`, still
+at branch tip) with ready-to-paste ChatGPT prompts — lasted five days before Style A killed the serif.
+
+Two rejections from that window are still standing style rules: **all stark white text is rejected**
+("Purge all white text — warm cream-gold everywhere", `1395a31`), and **nanny copy is rejected**
+(C.40).
+
+### F.6 — 44 px minimum tap targets
+**Date:** 2026-08-06 · **Status:** STANDING, with one explicit Jeff-approved exception ·
+**Evidence:** `e92f4fc` (08-06), `436ce61`; exception `70d16f2` (08-05)
+
+*"never to be clamped below again."* The one recorded exception: the LUX fireplace-panel layout was
+approved **with Jeff explicitly accepting sub-44px tap targets** (`70d16f2`) — an informed choice by
+the user, not an oversight.
+
+### F.7 — The panic button's placement, decided → reversed → settled
+**Date:** 2026-06-24 · **Status:** SETTLED · **Evidence:** `dc0b6c1` → `6b6d477` → `4c9d36c` (all
+2026-06-24)
+
+Decided HOME-only and compact (`dc0b6c1`) → reversed, added to all sections (`6b6d477`) → settled back
+to **HOME only, at the bottom** (`4c9d36c`), with `CLAUDE.md` recording "Panic button — HOME only
+CORRECT." Three commits in one day; worth keeping because it shows how a settled thing is reached.
+
+---
+
+# PART G — Naming, identity, IDs and accounts
+
+Every fact here is evidenced. **Note:** most of these live in a **public** repo, which the record itself
+flags as a problem (see G.6).
+
+### G.1 — Names and their origins
+
+| Name | What it is | First evidence |
+|---|---|---|
+| **HCC / Home Command Center** | The project itself. Mottos: **"MANAGE • MAINTAIN • MONITOR"** and **"Everything. In One Place."** | `eb342db`, `6649269` (2026-06-21) |
+| **Beehive** | The dedicated Home Assistant machine (Beelink J45, Pentium J4205, ~8 GB/128 GB). Runs **HA OS**, nothing else — *"Beehive stays PURE HA"* | `46be882` (06-22); `9a9da77` (07-01) |
+| **the beast** | Jeff's main PC — the workbench, the AI/media brain, and the host of the local Claude coworker. Identified on the LAN as `301Server` | `e7b6c64` (06-22); *"'The beast' = Jeff's main PC, used as the workbench"* `9a9da77`; `494`-region network map |
+| **the coworker** | The Claude session running on the beast with real local/LAN access | `bec7440` (2026-07-09) |
+| **Angela** | Jeff's wife. HA login `angela301`, `person.angela_loewen`, her own Long-Lived Token, own 10-mile "almost home" zone. Her work machines are VPN'd/firewalled — *"LAN silence is normal"*. **Prefers dark mode** | `049ad6d` (07-11); `b781514`; `4fabef8` |
+| **Braxton** | Third person on the panic notify list, alongside Jeff and Angela | `7a5e984` (07-01) |
+| **Jeff's dad** | Named in the family-access model | `80799e7` (07-09) |
+| **Sharky** | A LIDAR-equipped robot vacuum on the LAN at `.231`; its LIDAR traced the first floor plan | `e9beb3e`, `29c7a1a` |
+| **GaragePC** | HP TouchSmart 520 in the garage; needed its own password (in HCC-secrets), not an SMB protocol fix | `17fc227` (08-13) |
+| **Lucky Mike** | The horse-barn "Smart Stall" side project — queued, not started | `c8ca302` (06-30) |
+| **hcc-panic-button** | The HA webhook the panic button POSTs to | `eb342db`-era, live at tip |
+
+### G.2 — URLs and infrastructure
+
+| Thing | Value | Evidence |
+|---|---|---|
+| Live URL | `https://toro1-5rz.pages.dev` | `/tip/CLAUDE.md:168` |
+| Custom domain | **`loewenhome.com`** (+ `www`), Active/SSL, HTTP 200 worldwide, publicly shareable | `5528`/`5536`-region commits (07-11); `/tip/CLAUDE.md:168` |
+| Cloudflare Pages project | `toro1` | `1d7cacc` (06-22) |
+| Repo (live) | `d4c2np9f69-afk/master-the-master-` | `6e24295` |
+| Repo (stale mirror — do not use) | `d4c2np9f69-afk/Toro-Timemaster-` | `6e24295` |
+| Active branch | `claude/time-master-project-liq1jw` | `/tip/CLAUDE.md:171` |
+| KV namespace ID | `ec5b28597d9c4fb9b182b1aea1d50eff` (`MOWER_KV`) | `/tip/CLAUDE.md:202` |
+| Beehive local | `homeassistant.local` / **`192.168.1.66`** | `/tip/CLAUDE.md:543` |
+| Beehive remote (primary) | `https://kmtpozwheqwww9t5uxhhvzzso1tvagro.ui.nabu.casa` | `/tip/CLAUDE.md:543` |
+| Household WiFi SSID | `Loewen301` (5 GHz split to `Loewen301-5G`) — **not** the factory SSID on the label | `/tip/docs/inventory/HCC_INVENTORY.md`; `529`-region |
+| Gateway | AT&T Fiber **BGW320-500** (integrated ONT, WiFi 6), admin at `http://192.168.1.254` | `/tip/docs/inventory/HCC_INVENTORY.md` |
+| Email | `jeff.loewen@comcast.net` — **email only; do NOT infer Xfinity internet from it** | `/tip/CLAUDE.md:541`; `542`-region correction |
+| Secrets map (outside the repo) | `C:\Users\jeffl\HCC-secrets\HCC_ACCESS.md` | `1d1ebdb` |
+| Archive mirror | `C:\Users\jeffl\iCloudDrive\HCC-Archive\` | `fab5b30` |
+| Full-res photo originals | `C:\Users\jeffl\iCloudDrive\HCC-Photos\` | `/tip/CLAUDE.md:278` |
+
+### G.3 — Weather station
+
+| Thing | Value | Evidence |
+|---|---|---|
+| Weather Underground PWS | **`KTNWHITE21`** — Jeff is an NWS-trained spotter, station is "WU Recognized"/quality-verified | `/tip/CLAUDE.md:544`; `7372`, `7191`, `7399`-region |
+| WU API key | `0e87ee079c0147a787ee079c01d7a75d` | `/tip/CLAUDE.md:544` |
+| Fallback source | Open-Meteo (chosen partly because "no key required") | `c8e729c` (06-23) |
+| Location | White House, TN — **Central Time** | `/tip/CLAUDE.md:73` |
+
+### G.4 — Vehicles
+
+| Vehicle | Detail | Evidence |
+|---|---|---|
+| **Mercedes GLE 350** | VIN **`4JGFB4KB0MA478988`**. Via `mbapi2020` (MercedesME 2020, ReneNulschDE) through HACS, region North America. mbapi2020 `entry_id` **`01KY38Z7C90J2WE6S9R987JQZ4`**. Jeff enabled **"Disable Capability Check"** — the setting that had been blocking every command except flash-lights on his NA vehicle | `778f6bd` (07-22); `7afcda2` (07-17); `473f122`; `c64d0f8` |
+| **2001 Ford F-250 Super Duty** | VIN **`3FTNX21FX1MA23431`**. 7.3 L Power Stroke Diesel, 4WD, crew cab. **No connected-car path** (2001). Specs flagged as *"assumed… from VIN + photo — Jeff should confirm"* | `ee0d376` (07-24) |
+| **Toro TimeMaster 21200** | **Serial No. 401338948** (confirmed 08-03 via data-plate photo). Engine B&S 14D935. Purchased 2018-04-11. Serial falls in the `400000000-402081999` production range — so PartsTree's `21200-toro-30-timemaster-walk-behind-mower-sn-400000000-402081999` and the matching eReplacementParts link are the **correct** parts diagrams, **not** the `402082000-403599999` range | `/tip/CLAUDE.md:545`; `12308ff` (06-22) |
+
+### G.5 — Utility meters and accounts
+
+| Utility | Detail | Evidence |
+|---|---|---|
+| **Water (WHUD)** | Meter **Kamstrup flowIQ 2100** (corrected from an initial "Kamstrup 621"). Separate external pit radio **MIU `100WD`**, **ERT ID `79453337`**, unencrypted **Itron ERT-SCM**, protocol `scm+`, 915–930 MHz, ~1 SCM/min, **no AES key required**. Old meter **17272512** swapped out. Billing cycle ~21st | `76d0326`, `9fefa97` (06-30); `5034f26` (07-01); `/tip/docs/UTILITIES_REFERENCE.md:19` |
+| **Gas (Piedmont → Spire)** | Account **`6100 0546 4779`**. Meter **Elster AC-250**, Piedmont # **`T821986`**. Radio **Itron 100G Datalogging ERT — unencrypted, no key needed**. Billing cycle ~5th. TN customers moved to Spire 2026-03-31, rates unchanged | `719638f` (06-30); `/tip/docs/UTILITIES_REFERENCE.md:26` |
+| **Electric (CEMC)** | Account **`4501007001`**, meter **`145590962`** (**Landis+Gyr Gridstream RF** — not Itron, cannot be radio-read by CC1101/rtlamr). **200 A service, Challenger panel.** ZigBee HAN path judged "not worth chasing" — irrelevant because the CT build reads the panel directly | `76d0326` (06-27); `/tip/docs/UTILITIES_REFERENCE.md:34` |
+| **Sewer** | City of White House. Jeff's 3-year reimbursement case targets the **City**, not WHUD — he had already written the City (no response) and contacted his alderman ~2 years ago (stalled). *"stronger meter data is the lever"* | `50b56c1`, `95eadf9` (07-03) |
+
+### G.6 — 🔴 Known security exposure, flagged in the record and NOT yet fixed
+**Date flagged:** 2026-08-16 · **Status:** OPEN · **Evidence:** `1d1ebdb` (2026-08-16)
+
+> "SECURITY: the Weather Underground API key is in `CLAUDE.md` in this **PUBLIC** repo. It needs moving
+> out and rotating - flagged at the top of `HCC_ACCESS.md`."
+
+Confirmed still present at branch tip (`/tip/CLAUDE.md:544`). The same class of exposure governs E.7
+(never commit AES/backup keys) and E.8 (firmware `.bin` strings are plaintext, so no public firmware
+hosting).
+
+### G.7 — The LUX thermostat, and the note that says leave it alone
+**Status:** STANDING — *"DO NOT CHANGE UNLESS BROKEN"* · **Evidence:** `9eaabcb`, `b360583` (06-26),
+`c72c8a8`; `/tip/CLAUDE.md:514-528`
+
+**Jeff's device: `CS1-DD-FB`.** Backend is **Azure AD B2C** (`connecteddevicesjci.b2clogin.com`,
+client ID **`b335ca43-3bde-4406-b281-8816afb7cc91`**) + `www.myluxstat.io`. Redirect URI
+`connecteddevicesjci.luxmobile://connecteddevicesjci/path`. Two dead ends were rejected on the way:
+`integration.lux-geo.com` (DNS dead) and `api.geotogether.com` (*"UK smart meters — completely
+wrong"*). **Writes use POST, not PUT** — PUT always returned 500.
+
+### G.8 — The six sections at branch tip
+**Evidence:** `/tip/CLAUDE.md:174`
+
+**HOME** (cameras, then LUX thermostat, then utilities) · **WEATHER** · **IRRIGATION** · **YARD**
+(mower data) · **GUARDIAN** (whole-home safety/security/alarm) · **CAR** (Mercedes GLE 350 + Ford
+F-250 switcher).
+
+Lineage: the original 4-section HCC shell was **YARD / SECURITY / HOME / SAFETY** (`eb342db`, 06-21),
+renamed within two days to **HOME / WEATHER / IRRIGATION / YARD** (`f599bd9`, 06-23), with GUARDIAN
+(07-04) and CAR (07-16) added later. The concept from day one: *"Each HCC section is an app-within-an-
+app"* (`c36f2ab`).
+
+**A future seventh section is planned but not started:** **STABLE**, accent `--a-stable`, for Lucky
+Mike. *"**Do not start until Jeff says go.**"*
+
+---
+
+# PART H — Reversals, corrections, and things Claude got wrong then fixed
+
+Kept together because Jeff asked for the bad and the ugly, and because a reversal is itself a decision.
+
+| # | What | Reversed/corrected when | Evidence |
+|---|---|---|---|
+| H.1 | **Base64-embed all images** so the PWA is "fully self-contained" — reversed **within 48 hours** when `index.html` hit 3.1 MB | 06-22 → 06-23 | `6649269`/`12308ff` → `739d004` |
+| H.2 | **Home Assistant in Docker on Jeff's PC** → dedicated Beehive on HA OS | 06-21 → 06-22 | `eb342db` → `70416e6` |
+| H.3 | **"Recommend an electrician"** → *"Jeff wired his own house — never suggest hiring an electrician"* — reversed three minutes after being written | 06-27 | `731d435` |
+| H.4 | **The one-tap browser Beehive setup wizard** — killed within the hour by the HTTPS→HTTP mixed-content block | 06-23 | `b3d773c` → `1f3ce1a` |
+| H.5 | **Installer command curl → wget → curl** — flip-flopped across three commits; the direct cause of Mandatory Rule 7 | 06-23 → 06-24 | `686bece`, `1f3ce1a`, `a744651` |
+| H.6 | **mPING in-app form** removed → restored on Jeff's ask → deleted for good | 07-02 | `adc5377` → `6b29cad` → `947a99d` |
+| H.7 | **Kodi-as-media-brain** (Jeff's call) → Fire TV route kept (also Jeff's call) | 07-10 → 07-14 | `05dc1db` → `c13f101` |
+| H.8 | **CLAUDE.md claimed the mbapi2020 PIN was stored in integration options** — the options dict was **empty**; every PIN-gated command had been failing silently | 07-24 → 08-06 | `c73e32e` → `473f122` |
+| H.9 | **"Water meter pit radio fault, call WHUD"** — retracted the same day; the meter was healthy all along; the wrong diagnosis kept on record deliberately | 07-31 → 08-01 | `13502b9`, `593ddf7` → `fb5068c` |
+| H.10 | **Claude regenerated the heroes and deleted Jeff out of his own app** — the origin of the PROTECTED photo rule | 08-06 | `595ec23` → `db9ffcc` |
+| H.11 | **Glassmorphism redesign, attempt one** — shipped, two failed darkening fixes, then **fully reverted on Jeff's call** | 08-06 | `2bf50db` |
+| H.12 | **Claude's own coverage map blew out `localStorage` and reset Jeff's hour meter to 5.9** | 08-10 | `b568a4b`; `/tip/CLAUDE.md:384` |
+| H.13 | **A speculative wall-iPad auto-rotate was shipped as a guess** — withdrawn as policy; root cause turned out to be Claude's own hero max-height CSS edit from earlier the same day. Jeff cut through it with one fact: *"It worked perfectly before the picture edit."* | 08-08 | `24136c7`, `bb9d1cf`; `1518`-region |
+| H.14 | **Claude's own hero fix cut Jeff's head off the yard photo.** Jeff: *"You got it they are rendering correctly now, however my head is cut off in the yard hero pic"* | 08-11 | `/tip/CLAUDE.md:382`; `docs/CHANGELOG_ARCHIVE.md:23` |
+| H.15 | **The hour meter never worked for months across 5 real mows; Jeff was told his sensors were faulty and bought replacement hardware he did not need** | discovered 08-11 | `d18db7b`, `/tip/CLAUDE.md:70` |
+| H.16 | **Pending Item 19 closed as "solved by Inovelli 3-Way Dumb"** → **REOPENED** the same day when Inovelli turned out to be scrapped | 08-16 | `007e14e` → `c05d647` |
+| H.17 | **Claude told Jeff twice that the Inovelli decision "was never written down."** Both statements were wrong — the current plan *had* been documented on 08-13 | 08-16 | `c05d647` |
+| H.18 | **Network map: the "Nest Protect" was Angela's bed-lamp Tuya socket** (proven by unplug test); **`.173 DellMasterBed`** was misidentified three separate times before being resolved | 08-13 | `8796a9c`, `902d0dc` → `8aeacf0` → `793b949` |
+| H.19 | **Sylvania plugs called "Bluetooth-only Echo Dot devices"** — both guesses wrong; corrected to WiFi Tuya at `.199/.200/.202/.205` | 08-13 | `2aca121` |
+| H.20 | **`irrGalFromHistory()` refined the on-screen note but never the stored history entry** — so the tracked sewer-overcharge total was quietly less accurate than what Jeff was reading on screen, forever. Found only because **Jeff asked to confirm it before sending bills** | 08-05 | `/tip/docs/UTILITIES_REFERENCE.md:17` |
+| H.21 | **IRR_FLOW recalibrated from real measured water**: `{1:17.2, 2:14.3, 5:5.7}` → `{1:8.78, 2:10.09, 5:4.4}` — a **23–49% cut**. Past-cycle overcharge totals accepted as **overstated and NOT retroactively fixed** (no HA history exists to recompute them) | 08-06 | `4252086`/`0827617` |
+| H.22 | **Mow history had NEVER recorded a single mow** — the trigger waited for a condition the box never sent | 08-08/08-11 | `890`-region, `d18db7b` |
+| H.23 | **The endpoint kept serving `cmd_ack:1` long after the fact**, and **a dead sensor kept serving its last reading** (pitch/roll of −35.3 — "the classic both-axes" tell) | 08-11 | `787`, `799`, `807`-region |
+| H.24 | **The GPS "Fort Worth simulator bug"** — tapping Simulate would have yanked the map ~700 miles off Jeff's property | 08-10 | `1267`-region |
+| H.25 | **Six invented sensor fields** (`fart_detected`, `methane_ppm`, `blade_engaged`, …) appeared in a spec that had no basis in the firmware | — | `1340`-region |
+| H.26 | **Zones 3/4/6 left uncalibrated on purpose** — Jeff: the back yard *"is rarely watered except in severe drought … not an oversight to chase"* | 08-06 | `7cccc59` |
+| H.27 | **The `zone.work` radius gap** — deferred by Jeff (*"leave it for now, dial in later"*), then resolved when he gave the real garage address, **310 Commerce St, Nashville, TN** → 36.1624877, −86.7776215. Flagged honestly: this is only ~90 m from the original office coordinates, not the ~0.4 mi Jeff estimated — *"flagged to him, not fully reconciled, but he gave the address directly so it took priority"* | 08-01 | `bc3df2b` → `3537b00`; `/tip/CLAUDE.md:498` |
+
+---
+
+# PART I — Open at branch tip (2026-08-16): nothing here is settled
+
+Listed because a ledger that only records closures misleads.
+
+| # | Open item | Evidence |
+|---|---|---|
+| I.1 | **Garage two-location switching** — **REOPENED.** Jeff must choose: (a) **HS210 matched kit** so both kitchen and garage positions stay live, or (b) **single HS200** at the garage door and repurpose the kitchen position. A lone HS200 leaves the second position **dead** | `/tip/CLAUDE.md:509-510`; `c05d647` |
+| I.2 | **Backyard AI thresholds** — *"a real security gap, one edit away."* Needs Studio Code Server (Jeff must log into HA in a browser first); `packages/hcc.yaml` is not reachable via the config API and there is no SSH on the box | `/tip/CLAUDE.md:487` |
+| I.3 | **HA backup encryption key** — still only on one PC. *"the single most load-bearing secret in the whole disaster-recovery system"* | `/tip/CLAUDE.md:489` |
+| I.4 | **SONOFF MINI DRY** — Jeff/coworker to wire, power, eWeLink-pair (Inching Mode), Matter-commission. **App side fully done since 08-08**; it auto-detects the switch entity by name the moment it pairs | `/tip/CLAUDE.md:490` |
+| I.5 | **iPad Air 2 wall display** — Safari-15 polyfill deployed and working; HA token persistence + "Add to Home Screen" + Guided Access still need final confirmation. Note the deliberate config: **signed out of iCloud entirely — "Jeff's choice — didn't want Find My tracking on it"** | `/tip/CLAUDE.md:491`; `3644f54` |
+| I.6 | **F-250 OBD-II box** — Veepeak (~$30) + ESP32 + optional GPS, not bought | `/tip/CLAUDE.md:492` |
+| I.7 | **Panic automation (HA side)** — app already fires the webhook; the automation waits on Zigbee hardware | `/tip/CLAUDE.md:493` |
+| I.8 | **Lucky Mike "Smart Stall"** — queued. *"Do not start until Jeff says go."* | `/tip/CLAUDE.md:495` |
+| I.9 | **Irrigation zone photos** — decide whether all 6 get the real-photo cleanup or just Garden. All six carry the same fake gold-frame overlay the utility photos had. Needs the coworker's Gemini image pipeline. **Waiting on Jeff's answer** | `/tip/CLAUDE.md:508` |
+| I.10 | **Alexa "skip the commercials"** — works via native *"Alexa, turn on FF the Commercials"* phrasing, but the **skip distance is not calibrated to Jeff's target of exactly 4:40 (280 s)** | `/tip/CLAUDE.md:505` |
+| I.11 | **`hero-cameras.jpg` cleanup** — fake title, fake "ALL SYSTEMS READY" panel and six dummy tiles still to be removed (logo and 2nd Amendment sticker stay). *"**Not yet done.**"* | `/tip/CLAUDE.md:274` |
+| I.12 | **Orbit anti-siphon valve** — ordered 08-15, not installed. The daily 5 AM whole-house leak report runs until it is; **revert that automation to alert-only once the valve is in and proven** | `/tip/docs/SESSION_START.md` §5 |
+| I.13 | **Backyard PIR logs zero motion even overnight at 78 °F**, while other cameras fire. Heat explains the daytime misses; **it does not explain the cool hours. Not yet root-caused** | `/tip/docs/SESSION_START.md` §5 |
+| I.14 | **Garage camera** reports no temperature or WiFi — likely unplugged, needs a physical look | `/tip/docs/SESSION_START.md` §5 |
+| I.15 | **WU API key exposure** (G.6) — needs moving out of the public repo and rotating | `1d1ebdb` |
+| I.16 | **Zigbee mesh routers** — the ThirdReality 4-pack is *selected* but the record does not confirm it was ordered or received. The inventory still shows **"Mesh status: zero routers"** | `9dad6a5`; `/tip/docs/inventory/HCC_INVENTORY.md:35` |
+
+---
+
+# PART J — What the record is silent on
+
+An honest ledger names its gaps.
+
+1. **The literal referent of "the last debacle"** (2026-08-14) is nowhere in git. See B.13c.
+2. **Why Jeff switched from Fubo to Sling** (2026-07-21). Not recorded.
+3. **The price and purchase date of the Beelink J45** (Beehive). Not recorded.
+4. **The price of the replacement mower-sensor hardware Jeff bought unnecessarily.** The purchase is
+   recorded; the amount is not. This is the one purchase the record confirms was wasted.
+5. **No project-wide dollar total exists.** Prices are scattered across `docs/inventory/`, the lighting
+   plan, and commit bodies. Nobody ever added them up.
+6. **Jeff's side of nearly every conversation.** Only the fragments that a commit message or a doc
+   chose to preserve are in git. The bulk lives in the iCloud MASTER RECORD (`1d1ebdb`, 6,896 messages,
+   37 sessions, **07-14 onward**) — which means **the first eight weeks of conversation (05-20 →
+   07-14) exist nowhere except in fragments.** `1d1ebdb` records a `REQUEST_TO_CLOUD_SESSION` file
+   written specifically "to recover the first 8 weeks the cloud sessions own." Whether that recovery
+   ever happened is **not in this repository.**
+7. **Whether the ThirdReality plugs were actually ordered.** Selected 08-14; the inventory at tip still
+   reads "Mesh status: zero routers."
+8. **The `$125` Claude Max figure's period.** Jeff said "$125 for Claude Max"; the word "month" is not
+   in the quote. See D.1.
+9. **The exact date Jeff killed Inovelli.** `c05d647` places the *plan change* at 2026-08-13 20:07 CDT
+   and `1572b4a` says he rejected them "early on." The precise moment of the price rejection is in
+   conversation, not in git.
+
+---
+
+# PART K — The one-page summary Jeff can act on
+
+**Never do these:**
+ask Jeff for credentials · suggest an IT person · suggest an electrician · put a `<script>` tag in the
+JS block · re-add a custom Blink override · hoist an `AbortSignal.timeout` across retries ·
+`fetch()` HA directly instead of `haFetch()` · include B-Hyve in any ALL ON/OFF · send or store a
+Mercedes `pin` field from the app · edit `packages/hcc.yaml` anywhere but the Terminal add-on ·
+remove Jeff or the real zone photos from any image · crop a hero without re-checking Jeff is in frame ·
+expose HA add-ons/diagnostics/meters to a voice assistant · name a product model from memory ·
+report done without testing · auto-dial 911 · commit a key · trim a PROTECTED section.
+
+**Never buy / never re-propose these:**
+Inovelli Blue (~$120 the pair) · Enbrighten 43080 · Enbrighten Z-Wave ($39) · Shelly Pro 3EM-400
+($140) · smart breakers / panel relays · a commercial alarm panel · myQ software integration · Roku
+browser channel · any subscription for the camera/AI/theatre stack · a pressure vacuum breaker
+(~$80–150 + annual testing) · Orbit 51059 ($18.49) · a Blink RTSP bridge · an Apple TV jailbreak ·
+HomeKit Secure Video · a rain-skip HA automation.
+
+**The budget rule, in Jeff's words:**
+> "I was not paying $120 for a freaking dimmer switch... I spend $125 for Claude Max and I would rather
+> spend the money on that and have your help than buy $120 worth of dimmers."
+
+**Lead with what he already owns, then cheapest-first, and flag spend clearly.**
+
+**The process rule that makes all of the above survive:**
+> "A decision Jeff makes in conversation goes into a file THE SAME SESSION."
+
+
+---
+
+## Incident Ledger — every problem that took more than one attempt, and the real root cause
+
+### How to read this section
+
+This is the cross-cutting index of failure for the whole project: **2026-05-19 (the original Toro PWA) through 2026-08-16 (branch tip)**. Every entry below is a problem that was *not* solved on the first attempt — either because the first diagnosis was wrong, because the first fix didn't stick, or because the thing had been quietly broken for days, weeks or months before anyone noticed.
+
+Each incident carries the same seven fields:
+
+- **When** — dates, and how long it was live
+- **Symptom** — what Jeff actually saw
+- **Wrong theories / attempts, in order** — the dead ends, numbered, because the dead ends are the expensive part
+- **Real root cause** — what it actually was
+- **Fix** — commit hash(es)
+- **Cost to Jeff** — time, money, hardware, data, or trust. Stated plainly; "none recorded" where the record is silent
+- **Lesson** — one line
+
+**Provenance rules used throughout this section:** anything with a hash or a file path is evidenced — taken from the commit message, the diff, or a doc at the branch tip. Anything marked **INFERRED:** goes beyond what is written down. Where the record does not say, this ledger says the record does not say. Nothing here is remembered; all of it is read.
+
+**Source base:** 636 commits on `origin/claude/time-master-project-liq1jw`; `CLAUDE.md` and its 274 revisions; `docs/CHANGELOG_ARCHIVE.md` (179 KB, 98 verbatim entries); `docs/SESSION_START.md`; ~52 files under `docs/`; the tip checkout; and the original 2026-05-19 PWA package.
+
+---
+
+### Index of incidents
+
+| # | Incident | Dates | One-line real root cause |
+|---|---|---|---|
+| 1 | The Great Blank Page | 06-23 | Two bare `<script>` tags inside an open script block |
+| 2 | The 2.1 MB hero bloat | 06-22 → 06-23 | Base64 photos embedded in HTML; also the *wrong* diagnosis for #1 |
+| 3 | Every modal button silently dead | 06-23 | CSS/HTML/JS class-name mismatch (`.modal-overlay.open` vs `modal-ov show`) |
+| 4 | The HCC_KV / MOWER_KV dance + the panic revert | 06-23 | Pages bound the namespace as `MOWER_KV`; code read `env.HCC_KV` |
+| 5 | Jeff's hours wiped, round one | 06-23 | Entire state lived in one unbacked `localStorage` blob |
+| 6 | GPS track erased at engine-off | 06-23 | Heartbeat payload carries no `track`; map redrew from empty |
+| 7 | B-Hyve WebSocket double-auth | 06-23 | Auth frame sent twice; server ignored the real command |
+| 8 | The install-script saga | 06-23 → 06-25 | Six different shells/environments, none of them the one assumed |
+| 9 | B-Hyve cloud API: `invalid_auth` / 530 / 1018 | 06-23 → 06-25 | Orbit moved the API *and* blocks Cloudflare edge IPs |
+| 10 | Blink 2FA dialog never appeared | 06-25 | `BlinkTwoFARequiredError` swallowed by a catch-all `LoginError` handler |
+| 11 | LUX: three wrong backends | 06-26 | Real backend is Azure AD B2C + `myluxstat.io`, found in PyPI source |
+| 12 | LUX setpoint PUT-500 | 06-26 | The write method is **POST**, not PUT |
+| 13 | In-app voice / Siri dialing contacts | 06-26 → 06-27 | Pre-grabbing the mic left it busy on iOS; feature deleted |
+| 14 | Radar tiles, four engines | 06-26 → 06-29 | Free-tier limits, retina 404s, iOS filter bugs; hand-built radar abandoned |
+| 15 | Light-mode contrast, twice | 06-29 and 08-11 | Auto-scan misread gradient/translucent backgrounds as light |
+| 16 | mPING submit: built, killed, restored, killed | 07-01 → 07-03 | NSSL issues no tokens to anyone, ever |
+| 17 | B-Hyve history "definitive dead end" | 07-01 | Device id belongs in the URL **path**, not a query param |
+| 18 | The shared-`AbortSignal` false offline | 07-03 | One 2.5 s budget reused across all retries |
+| 19 | "Beehive Offline", the legitimate one | 07-02 → 07-03 | Mixed content + no bearer token + CORS, stacked three deep |
+| 20 | Water meter read 202.6 gal | 07-03 | Keyword match grabbed the `_last_seen` timestamp sensor |
+| 21 | Blink login: the cookie theory, then our own override | 07-03 → 07-09 | Blink switched 2FA to HTTP 202; then our stale override shadowed the fix |
+| 22 | `packages/hcc.yaml` had never loaded, ever | 07-10 | One missing `!include_dir_named packages` directive |
+| 23 | Windows Firewall silently ate port 32168 | 07-10 | Installer never added an inbound rule |
+| 24 | CodeProject.AI's 3-day silent death | 07-11 → 07-14 | Windows service didn't survive a reboot; upstream automations kept firing |
+| 25 | The Fire TV pop-up + pause/resume long war | 07-11 → 08-14 | Four consecutive mechanisms, each disproved by live test |
+| 26 | Two contradictory plans for one feature | 07-10 → 07-14 | Kodi decision written down *after* the Fire TV path was built |
+| 27 | HA config editors corrupting YAML | 07-11 → 08-16 | File Editor keystrokes, Prettier format-on-save, Monaco focus steal |
+| 28 | The stale-content deploy mystery | 06-23 → 07-21 | CDN edge cache ≠ browser cache, and the SW was never registered |
+| 29 | Safari 15 froze the whole app | 07-15 | `AbortSignal.timeout()` doesn't exist before Safari 16 |
+| 30 | The iPad wall display "fully set up" | 07-15 | Declared done mid-diagnosis; bad clear-site-data advice wiped tokens |
+| 31 | Entity cross-contamination (five instances) | 07-21 → 08-15 | Substring matching across a shared entity namespace |
+| 32 | The `*_closed` inverted-semantics false positive | 07-21 | `binary_sensor.gle_350_windows_closed` uses on = closed |
+| 33 | CAR commands built on guessed entity names | 07-22 | The integration exposes domain services keyed by VIN |
+| 34 | The mbapi2020 PIN prompt mistake | 07-24 | Prompts removed on an unverified CLAUDE.md sentence |
+| 35 | The Mercedes PIN saga | 08-06 | Two wrong diagnoses, then a Mercedes-side attempt limit |
+| 36 | Stale data in three sections | 07-24 | New loaders added to neither the section switch nor the interval |
+| 37 | The water pit-radio faults | 07-28 and 08-01 | Real outage, then a false alarm caused by `-unique=true` |
+| 38 | The recorder was dead for 26 days | 07-02 → 07-28 | Missing `default_config:` |
+| 39 | "New automations don't save" | 07-31 | Missing `automation: !include automations.yaml` |
+| 40 | The Blink crash loop | 07-31 → 08-01 | Upstream blinkpy `LoginError`; sensors froze instead of going unavailable |
+| 41 | Angela's phone tracker | 08-01 | Empty/stale Push ID, not location permissions |
+| 42 | "Alexa, fast forward" | 08-03 | Amazon reserves the phrase; HA has no FF handler at all |
+| 43 | The NOAA radio paysite + the invented callsign | 08-03 | A TuneIn *search* URL, and a fabricated station ID |
+| 44 | Sewer overcharge: the number was never saved | 08-06 | Real gallons displayed but never written to history |
+| 45 | Electric SmartHub shipped non-functional | 08-06 | Wrong WS command name; `change` field always 0 |
+| 46 | The glassmorphism war | 08-06 | The photos were AI marketing mock-ups |
+| 47 | Jeff stripped out of his own photos | 08-06 | Assumed stock models |
+| 48 | 124 failure emails in one week | 06-22 → 08-06 | A workflow that had never once worked, documented as "irrelevant" |
+| 49 | Three wrong garage-door parts in a row | 08-05 | Product models named from memory |
+| 50 | The sideways wall iPad | 08-08 → 08-11 | Ambiguous `aspect-ratio` + `max-height`; Safari/Chromium divergence |
+| 51 | Heartbeat erasing the whole mow | 08-10 | One KV slot, every POST a full overwrite |
+| 52 | The exploding yard map | 08-10 | Scale derived from a near-zero first-to-last GPS delta |
+| 53 | The coverage-map localStorage blowout | 08-10 | Unbounded server data written into the user's core state blob |
+| 54 | **THE HOUR-METER MISS** | ~06-23 → 08-11 | Box sent `hours_seconds`; app read `d.hours`; nothing converted |
+| 55 | Parked drift, Null Island, and stale facts | 08-11 | Merge logic asserting fields the box had stopped sending |
+| 56 | The KV read-modify-write race | 08-11 → open | Eventually-consistent KV + read-modify-write = silent data loss |
+| 57 | The 48-hour silent camera outage | 08-10 → 08-14 | Jeff disarmed Blink over alert fatigue; nothing errors |
+| 58 | The self-inflicted AI feedback loop + mute that never worked | 08-15 | Scanners repointed at their own annotated output |
+| 59 | Every camera blind to a person at night | 08-15 → 08-16 | 60% confidence threshold vs ~25% night-IR score |
+| 60 | The `_headers` `/*` wildcard | 08-15 | Silently ignored on this Pages project |
+| 61 | The Kasa HS220 onboarding | 08-14 | New "SHIP 2.0" encrypted onboarding, not the network |
+| 62 | The network-map identity churn | 08-13 | Self-reported Windows hostnames from cloned installs |
+| 63 | The irrigation 401 goose chase | 08-13 | Stale deployment env vars read *before* app credentials |
+| 64 | The Inovelli documentation failure | 08-13 → 08-16 | A decision made in conversation, never written down — twice wrong about that |
+| 65 | The desktop-wide layout bug | 07-11 → 08-11 | Aspect-ratio-driven width with no `width` set |
+| 66 | CLAUDE.md became the problem | 06-28 → 08-16 | The memory file grew to 260 KB and crowded out the work |
+| 67 | Smaller multi-attempt incidents | various | (grouped) |
+
+---
+
+### 1 — The Great Blank Page
+
+**When:** 2026-06-23. Introduced 11:19 UTC, fixed 20:23 UTC — **~9 hours of a completely dead app**, during which other "fixes" shipped on top of it.
+
+**Symptom:** The whole app blank in Jeff's hands. Earlier in the day, the YARD section specifically "blank/dead when tapped" on mobile.
+
+**Wrong theories / attempts, in order:**
+1. **DOM weight.** `739d004` (19:37) — "Three base64 JPEGs embedded in the HTML were making the page 2.1MB. Mobile browsers were choking on the DOM size, causing the YARD section to appear blank/dead when tapped." A real improvement (2.1 MB → 295 KB) and the wrong diagnosis for the blankness.
+2. **Stale cache.** `8497827` (19:45) — "Bump service worker to hcc-v3 — force cache clear of 2.1MB old build." Service-worker-only diffstat; it could not have fixed or caused the blank page.
+
+**Real root cause:** `a973c8f` (2026-06-23 20:23), verbatim:
+
+> Two bare `<script>` tags were embedded inside an already-open `<script>` block (lines 2488 and 2688). The HTML parser passes them as literal text to the JS engine, which throws a SyntaxError — killing ALL JavaScript on the page. That's why the whole app went blank.
+
+**Where the tags came from — evidenced, and it corrects the memory file.** Snapshot comparison across the day shows `f599bd9`'s parent `c8e729c` had two *balanced* script blocks; `f599bd9` (11:19, "Rebuild HCC PWA with 4-section layout") has **three `<script>` opens and one close**. The rebuild merged the blocks and left two strays. `CLAUDE.md` as rewritten at `90e556e` attributes the incident to commit `8497827` — but `8497827` touches only `service-worker.js` (5 insertions, 2 deletions). **The memory file is wrong on this point; the diff evidence says `f599bd9`.**
+
+**Fix:** `a973c8f` — strays removed, service worker bumped to hcc-v4, and image caching switched to `Promise.allSettled` "so a missing hero photo can't prevent the SW from installing."
+
+**Cost to Jeff:** Total, not partial — the app was dead, not degraded, for most of a day, while two unrelated "fixes" were announced. **INFERRED:** this is very likely one of the failures behind that night's crisis message (*"You are just fine leaving something totally messed up and not even close to correct"*), but no commit explicitly links them.
+
+**What it produced:** The only bug in the project promoted to a numbered Mandatory Rule, still at tip seven weeks later (`/tip/CLAUDE.md`): *"8. **NEVER put `<script>` or `</script>` tags inside the JS block of index.html** — this causes a fatal blank page (**the great blank-page incident of 2026-06-23**)."* Later fossilised into `scripts/lint-app.js` (`abcc8f4`, 07-31) as an automated check.
+
+**Lesson:** A plausible performance explanation is not a root cause — a blank page is a thrown exception until proven otherwise.
+
+---
+
+### 2 — The 2.1 MB hero bloat
+
+**When:** Built 2026-06-22, undone 2026-06-23 19:37.
+
+**Symptom:** `index.html` grew from 491,587 to 1,107,877 bytes in a single commit (+616 KB), reaching **3.1 MB** by the end of 06-22. Mobile browsers choked; sections appeared dead.
+
+**Wrong theory:** The founding design decision itself — "fully self-contained with no external dependencies," i.e. base64-embed every hero photo directly in the HTML. Defensible on paper (`01-origin.md`, `02-chronicle-0621-0622.md`); measurably wrong on a phone.
+
+**Real root cause:** Three base64 JPEGs inline in the document. Fix `739d004`: extracted to `hero-home.jpg` (451 KB), `hero-irr.jpg` (492 KB), `hero-yard.jpg` (377 KB) — "HTML drops from 2.1MB to 295KB. All sections load instantly." Plus `8497827` (SW → hcc-v3).
+
+**Cost to Jeff:** A slow, partly-broken app on the device he actually uses; and, worse, it supplied a *credible* explanation for the blank page that delayed the real fix by 45 minutes (see #1).
+
+**Lesson:** Self-contained is a value, not a law — measure it on the real device before making it an architecture.
+
+---
+
+### 3 — Every modal button silently dead
+
+**When:** 2026-06-23, fixed 23:50–23:55. Duration unknown — **the record does not say how long LOG MOW / LOG SERVICE / UPDATE HOURS had been doing nothing.**
+
+**Symptom:** `da1320c`, verbatim: *"Every Log Mow / Log Service / Update Hours button was silently doing nothing."* No error, no feedback — the app's entire data-entry surface was inert.
+
+**Wrong theories:** None recorded — this one was found by diagnostic sweep rather than by chasing a theory. What *is* notable is that it took **two** commits, because the first fix was incomplete.
+
+**Real root cause (two layers):**
+1. `da1320c` — "CSS was using `.modal-overlay.open` but the HTML div uses `modal-ov` and JS sets class `show`." Three files, three different names for the same thing. The CSS selector never matched, so `display:flex` never applied.
+2. `e904a5b` — four *more* CSS rules missing versus the original app: `.modal-box` (inner box had no background, radius or padding), `.mbtns` (no flex row — "buttons stacked weirdly"), `.mbtn.secondary` (Cancel buttons completely unstyled), `.btn-green` (Export / Log Purchase unstyled).
+
+Related same-day rot from `4c52e85`: missing `--c-fitness` / `--c-weather` tokens made dashboard legend dots invisible, six card accents fell back to red, and — most telling — *"Add missing sensor DOM rows … JS already populated these but the HTML elements didn't exist so data was silently dropped."*
+
+**Fix:** `da1320c` + `e904a5b`. After which diagnostics reported "zero missing CSS classes, zero missing functions, zero stray script tags," 66/66 Playwright tests passed, and `e904a5b` was pinned as the verified-working commit with a physical backup branch (`c200a18`, branch `backup/verified-working-2026-06-24`).
+
+**Cost to Jeff:** Every attempt to log a mow or a service was lost. **INFERRED:** this is the most likely literal referent of his *"you wait for me to call out the issues"* — a whole feature class broken with no error anywhere.
+
+**Lesson:** A CSS class name is an API between three files; renaming it in one is a silent outage.
+
+---
+
+### 4 — The KV binding dance (HCC_KV / MOWER_KV), including the panic revert
+
+**When:** 2026-06-23, 20:55 → 21:35 — four commits in forty minutes.
+
+**Symptom:** Every sensor field showing `—`, battery `0.00 V`, orange "Sensor box not connected yet" — despite Jeff having bench-tested the ESP32 box successfully "10+ times" (vibration and RPM both registering), recorded in `CLAUDE.md`.
+
+**Wrong theories / attempts, in order:**
+1. `98b8dca` (20:55) — add `MOWER_KV` as a fallback alongside `HCC_KV`. Correct in substance, but shipped while nobody was sure what had broken the pipeline.
+2. `b629c83` (21:08) — **the panic revert.** Title: *"Revert hours.js to original — undo KV refactor that may have broken sensor read."* Body: *"Returning to the exact version that was working during bench test. Only env.HCC_KV is checked, exactly as before."* The words **"may have"** are the record admitting, in writing, that it did not know what it had done. Thirteen minutes after the fix, the fix was undone.
+3. `c6f3df8` (21:35) — the dual check re-applied, this time as deliberate policy rather than a guess: *"Cloudflare Pages may have the KV namespace bound under either name depending on how it was set up in the dashboard."*
+
+**Real root cause:** The Cloudflare account's KV namespace is literally named `MOWER_KV` (id `ec5b28597d9c4fb9b182b1aea1d50eff`), bound into Pages under a name nobody in the session could see, while `functions/api/hours.js` read only `env.HCC_KV`. `CLAUDE.md` at `90e556e`: *"This was the root cause of all sensor readings showing `—` and `0.00V`."*
+
+**Fix:** `c6f3df8`, hardened in `CLAUDE.md` into a standing instruction: *"The `getKV(env)` helper … tries `env.HCC_KV || env.MOWER_KV` — this covers both names. **Do NOT remove this dual-check.**"*
+
+**Cost to Jeff:** The sensor box he had built and bench-tested appeared not to work, on the same day the app went blank. **INFERRED:** this is the earliest instance of the pattern that later cost months — the sensor being blamed for a software contract mismatch (see #54).
+
+**Lesson:** When you cannot see the deployment config, code defensively against both names — and when you revert in a panic, say out loud that you're guessing (this commit did, and that honesty is why the sequence is reconstructable at all).
+
+---
+
+### 5 — Jeff's engine hours wiped, round one
+
+**When:** 2026-06-23 21:09.
+
+**Symptom:** Jeff's real mowing history — the number he cares most about — gone from the app.
+
+**Real root cause:** `53eb7d4`, verbatim: *"Backup from June 22 shows 5.9 engine hours. **Browser data was cleared which wiped localStorage.** Default state now starts at 5.9h so the correct number shows on every fresh install."* The app's only persistent store was one browser key.
+
+**The record is silent** on *who* cleared browser data or why, and assigns no blame.
+
+**Fix:** `53eb7d4` hard-coded `DEFAULT_STATE.hours` and `MOWER_BASELINE` to 5.9. That is a floor, not a backup — it papers the hole rather than closing it.
+
+**Cost to Jeff:** His real hours, re-entered by hand. The structural vulnerability stayed open and **bit again on 2026-08-10** (see #53), and again required hand re-entry.
+
+**Lesson:** A single unbacked `localStorage` blob is not storage, it is a countdown — and it took two data-loss events and 48 days to fix properly.
+
+---
+
+### 6 — The GPS track erased at engine-off
+
+**When:** 2026-06-23 23:45.
+
+**Symptom:** The yard map went blank the moment the mower was switched off — Jeff's mowing track vanishing at the end of every mow.
+
+**Real root cause:** Engine-off heartbeats carry no `track` field, and the map was redrawn from whatever the latest payload contained. Empty payload → empty map.
+
+**Fix:** `20df8da` — persist to `S.sensorTrack` in `localStorage`, fall back to the saved track when a heartbeat arrives, SW → hcc-v5.
+
+**Cost to Jeff:** Every mow's track lost, minutes after the mow.
+
+**Why it belongs in this ledger:** the identical bug returned **seven weeks later on the server side** — `d18db7b` (08-11): *"An empty `track: []` on a heartbeat no longer clobbers the stored track. The box clears its buffer after delivery, so the last mow's path was being blanked ~5 minutes after every mow."* The same defect, in a different layer, unrecognised as a repeat.
+
+**Lesson:** "Absent field" and "empty value" are not the same thing, and the difference is somebody's afternoon of mowing.
+
+---
+
+### 7 — The B-Hyve WebSocket double-auth
+
+**When:** 2026-06-23 12:15.
+
+**Symptom:** Irrigation commands from the app did nothing. No error — the B-Hyve server simply ignored them.
+
+**Real root cause:** `5521d3e`, verbatim:
+
+> The auth message was being sent twice: once immediately on connect (correct) and again inside the message handler when the server confirmed auth (wrong). The double-send caused the B-Hyve server to ignore the actual command.
+
+**Fix:** `5521d3e` — a written-down protocol order: connect → auth **once** → on server confirmation send the command **exactly once** → wait for a `change_mode` / `watering_in_progress` / `rain_delay` acknowledgment. Also added `rain_delay` to the accepted acks and tightened `ws.close()` handling.
+
+**Cost to Jeff:** Dead irrigation buttons; none recorded in money.
+
+**Why it took more than one attempt:** this fix was correct and still wasn't the end of the WebSocket story — `de85497` (06-25) found that Cloudflare Workers cannot open outbound `wss://` at all ("Must use https:// with Upgrade: websocket header"), `1d89611` (06-26) papered over a `ws_timeout` with fallback timers, and `c4d32e6` (06-26) finally moved the socket **into the browser** with a `?tk=1` token endpoint because "CF Workers outbound WebSocket client is unreliable."
+
+**Lesson:** Fixing the protocol is not the same as fixing the platform you're speaking it from.
+
+---
+
+### 8 — The install-script saga
+
+**When:** 2026-06-23 12:26 → 13:35 (six commits in 70 minutes), reprised 2026-06-24 15:47–17:32, and again through the ten-round Blink installer on 06-25.
+
+**Symptom:** Every command handed to Jeff failed, each time in a different way, in a different shell.
+
+**Wrong theories / attempts, in order — each one a real environment nobody had checked:**
+1. `75a7afd` — ship `beehive/install.sh` assuming the HA Terminal is bash, and install ESPHome via the `ha` CLI.
+2. `b3d773c` — the dream version: a browser "one-tap Beehive auto-setup wizard." *"No terminal. No typing commands. No reporting back."*
+3. `1f3ce1a` — reality, twice in one commit. *"The `ha >` screen is the HA OS supervisor CLI, not bash. It only understands `ha` subcommands — wget does not exist there."* And the one-tap wizard died on mixed content: an HTTPS page cannot call an HTTP LAN REST API. Switched wget → curl.
+4. `c1c004c` — *"Windows does not support mDNS so `homeassistant.local` never resolves."* Added a direct-IP fallback to `192.168.1.66:8123`.
+5. `a463d09` — *"Cloudflare Pages does not reliably serve .sh files as static assets."* Built a `/setup` Pages Function that returns the whole script as `text/plain` so `curl -fsSL …/setup | bash` works.
+6. `686bece` — the pendulum swings back: curl → **wget**, because the Terminal add-on (a different environment from the `ha >` supervisor CLI) has wget and not curl. *Within 35 minutes the same pipeline had been switched wget→curl and curl→wget for two different shells.*
+7. `a744651` (06-24) — BusyBox's wget demands `-O` **before** the URL. Third shell quirk.
+8. `9757104` (06-24) — same `/setup` trick repeated as `/bhyve` for the custom integration installer.
+
+**And then the Blink installer did it all again** (06-25, ten iterations in ~75 minutes): hardcoded paths (`34d81ea`) → download from GitHub instead (`42793fa`) → **no python3 in the Terminal add-on**, use sed (`23c42cd`) → manifest needs a version field (`6002c54`) → **BusyBox sed lacks `2i`**, use awk (`d110f3d`) → defensive imports (`c7ad70d`) → 8-second per-file timeout because GitHub downloads hang (`31a7902`) → missing files (`557aa14`) → use the GitHub API for the file list (`4ccb9fb`) → **give up on downloading entirely and vendor all 12 files into the repo** (`e830083`).
+
+**Real root cause:** There was never one environment. The HA OS supervisor CLI, the Terminal add-on, BusyBox, the browser's mixed-content policy, Windows' lack of mDNS and Cloudflare Pages' static-asset handling are six distinct systems, and commands were written against an imagined average of them.
+
+**Cost to Jeff:** He is the one who pasted every failing command. This is the incident behind Mandatory Rule 7 — *"Commands must work the first time. Test before telling Jeff to run something."*
+
+**Lesson:** Never hand a command to a human until you know exactly which shell will run it — and if you can't know, vendor the files instead of downloading them.
+
+---
+
+### 9 — The B-Hyve cloud API: `invalid_auth`, 530, 1018
+
+**When:** 2026-06-23 → 2026-06-25. Diagnosed across three days and three sessions.
+
+**Symptom:** Irrigation dead from every direction. First all API URLs 404'd; then the from-scratch HA integration returned `invalid_auth` in its config form.
+
+**Wrong theories / attempts, in order:**
+1. **Try another host.** `54ca981` — fall back to `api.bhyve.com/v1` "if orbitonline.com/v1 returns 404 (endpoint may have moved)"; added an iPhone User-Agent.
+2. **Try a third host.** `fc73f1a` — added `api2.orbitonline.com`.
+3. **Shotgun the auth.** `f904d10` (06-24) — "try all API URLs x app IDs, log full response detail"; three app IDs × multiple URLs.
+4. **Suspect the password.** `a887b62` / `84e1ea2` (06-25) — bare redeploys "to pick up the updated BHYVE_PASSWORD secret." A stale Cloudflare secret was genuinely part of the noise.
+
+**Real root causes — four, stacked:**
+- **The API had moved.** `d56d92b` — "Old: api.orbitonline.com/v1 → returns HTTP 404 (endpoint gone). New: api.orbitbhyve.com/v1."
+- **The body shape changed.** `c203988` — bare email/password returns HTTP 400 with `email: disallowed-key / password: disallowed-key / session: can't be blank`. Correct form: `{"session":{"email":…,"password":…}}`.
+- **The headers changed.** `77c70e7` — the new API *rejects* `orbit-api-key` / `orbit-app-id`; it wants browser headers plus `Orbit-Session-Token: ""`.
+- **And underneath all of it:** `768cb6a` (06-24) — *"Cloudflare Workers blocked from B-Hyve API (error 530/1018) because B-Hyve's API rejects Cloudflare edge IPs."* No URL would ever have worked from a Worker.
+
+**Fix:** `768cb6a` — an entire custom Home Assistant integration written from scratch in Python (7 files, 448 lines, `beehive/custom_components/bhyve/`) so the calls originate from Jeff's home IP `192.168.1.66`, where there is no block. Auth recipe consolidated in `77c70e7`.
+
+**Cost to Jeff:** Three days of an irrigation section that looked broken, plus a whole new component to install by hand.
+
+**Lesson:** When every URL fails identically, stop changing the URL — the caller's identity is the variable. (And it recurred: the *same* subsystem produced #63 on 08-13, another day burned on the wrong layer.)
+
+---
+
+### 10 — The Blink 2FA dialog that never appeared
+
+**When:** 2026-06-25, evening → 21:49.
+
+**Symptom:** *"SMS code arrived but no dialog appeared."* Jeff got the Blink verification text; Home Assistant never asked for it.
+
+**Wrong theories / attempts, in order:** the ten installer iterations catalogued in #8 — the entire evening was spent fighting the *delivery* of a patched integration, on the implicit assumption that the code was fine and only the install was broken.
+
+**Real root cause:** `b89ba28`, verbatim:
+
+> `BlinkTwoFARequiredError` is a subclass of `LoginError` in blinkpy 0.25.x. The catch-all `LoginError` handler in `validate_input` was converting it to `InvalidAuth` before `async_step_user` could see it, so the 2FA step was never reached.
+
+**Fix:** `b89ba28` — re-raise `BlinkTwoFARequiredError` before the `LoginError` handler. Plus `dbc8fbe`: when `blink.start()` fails silently (`api.available=False`), raise `ConfigEntryAuthFailed` rather than `ConfigEntryNotReady`, "instead of a silent infinite retry loop."
+
+**Cost to Jeff:** An evening of pasting installer commands for a problem that was four lines of exception handling. And this wasn't even the end of Blink — see #21.
+
+**Lesson:** A catch-all exception handler that narrows a subclass into a generic error deletes the only signal you needed.
+
+---
+
+### 11 — LUX thermostat: three wrong backends
+
+**When:** 2026-06-26, 02:10 → 02:52.
+
+**Symptom:** The brand-new CLIMATE section could not talk to Jeff's LUX WiFi thermostat at all.
+
+**Wrong theories / attempts, in order:**
+1. **`integration.lux-geo.com`** — the assumed vendor endpoint. Dead: Cloudflare error 1016, DNS failure. (Surfaced only because `7c0d3c5` shipped "Show full LUX API error in banner for diagnosis" first — the right first move.)
+2. **`api.geotogether.com`** — `1e43569`, confidently documented with login body `{username, password, clientId}` and "temps stored in Celsius, converted to °F." 403 Forbidden.
+3. **Four login variants** — `46d8a36`: "tries android-geo-home, ios-geo-home, no clientId, email field in order." Still 403.
+4. **Reverse-engineer the Geo platform properly** — `7f74537`: endpoint casing, `identity` field and `accessToken` response shape derived from the **geo-energy-data-client Go source**. Correct work on the wrong platform.
+
+**Real root cause:** `9eaabcb`, which names the error without flinching: *"Previous code used api.geotogether.com (**UK smart meters — completely wrong**)."* The real backend, found by reading the **luxgeo PyPI package source**: Azure AD B2C PKCE flow at `connecteddevicesjci.b2clogin.com` (client `b335ca43-3bde-4406-b281-8816afb7cc91`) → `https://www.myluxstat.io/api/`. Temps already in Fahrenheit.
+
+Then one more data-shape bug on top: `0c08f2f` — *"userData.location is [] not {} — API returns location as an array of objects."* Found only because `3ce74fa` had added the actual response shape to the error text.
+
+**Fix:** `9eaabcb`; canonised in `CLAUDE.md` under **"LUX Thermostat — API Reference (DO NOT CHANGE UNLESS BROKEN)"** with the full four-step B2C flow and the `systemmode`/`holdheat`/`holdcool`/`fanmode` decoder, "so next session never has to re-discover it."
+
+**Cost to Jeff:** ~40 minutes of a session guessing at endpoints; no money.
+
+**Lesson:** Read someone's working client library before inventing an API — the answer was in a PyPI package the whole time (this is one of the clearest research-beats-guessing wins in the project).
+
+---
+
+### 12 — The LUX PUT-500 saga
+
+**When:** Logged as the top pending item at 2026-06-26 03:13; solved 16:23 the same day — **six attempts.**
+
+**Symptom:** `GET /api/device` worked perfectly. Any attempt to change the setpoint returned **HTTP 500**. `858cd74` parked it overnight with a guess: *"Likely holdcool field name wrong or PUT needs full state object not patch."*
+
+**Wrong theories / attempts, in order:**
+1. `c37317d` — GET the full state, modify, PUT the whole object ("API rejects partial updates with HTTP 500"). No.
+2. `f09c696` — strip read-only fields before the PUT; clean 4-field body. No. **And `b035ffb`, one minute later, updated `CLAUDE.md` to "mark LUX PUT fix deployed, 26/26 tests" — the tests passed and the API still 500'd for Jeff.** A green suite declaring a broken feature fixed.
+3. `9febaec` — minimal one-field body, try PATCH if PUT fails. No.
+4. `35f61cc` — device ID in the URL path (`/api/device/{id}`, `/api/devices/{id}`), PUT and PATCH. No.
+5. `f143830` — the shotgun that cracked it: full raw state, **try PUT *and* POST *and* PATCH**, report all three results.
+
+**Real root cause:** `b360583`, verbatim: *"POST /api/device is the correct write method. **PUT was always returning 500 (wrong method for this API).**"* Confirmed end-to-end by Jeff — setpoint 73 °F from the HCC app appeared in the official LUX app.
+
+**Fix:** `b360583` — POST first, PUT as fallback. Documented in `CLAUDE.md` within one minute (`07409da`, `33ca88f`).
+
+**Cost to Jeff:** A day of a control he could see but not use, and one premature "fixed" claim he had to disprove himself.
+
+**Lesson:** When a payload theory fails four times, the verb is the variable — and never mark a fix "deployed" in the memory file on the strength of a passing mock test.
+
+---
+
+### 13 — In-app voice control, and Siri dialing contacts
+
+**When:** Built 2026-06-26 16:51; retreated 17:55–18:07; deleted for good 2026-06-27 12:03.
+
+**Symptom:** Two failures at once. `audio-capture` errors killed the feature — and, far worse, `b76ac20`'s own words: the overlay left the mic path open in a way that could let *"Siri … hear ambient speech and dial contacts."* **A home dashboard was phoning people by accident.**
+
+**Wrong theory / attempt:** Pre-grabbing the microphone via `getUserMedia` to force the iOS permission dialog — which `e2f5889` identifies as the root cause itself: *"pre-grabbing the mic … then releasing it left the mic busy on iOS, so SpeechRecognition failed."*
+
+**Real root cause:** Browser `SpeechRecognition` on iOS is not a reliable substrate for voice control, and the failure mode is not "doesn't work" but "hands audio to Siri."
+
+**Fix, in three steps:** `b76ac20` (close the overlay immediately on error) → `e2f5889` (retreat to a tap-to-run panel: "no microphone activates automatically, so nothing can trigger Siri or dial contacts") → `9a2adc6` (delete the whole engine; header mic becomes an **ALEXA** button that opens the real Alexa app — *"so Jeff talks to the real Alexa instead"*).
+
+**Cost to Jeff:** Unwanted phone calls from his own house dashboard. No money.
+
+**Lesson:** When a feature's failure mode reaches outside the app, remove the feature — don't harden it.
+
+---
+
+### 14 — Radar tiles, four engines in four days
+
+**When:** 2026-06-26 → 2026-06-29.
+
+**Symptom:** The weather radar variously showed white background, blank tiles on iPhone, or "Zoom Level Not Supported."
+
+**Wrong theories / attempts, in order:**
+1. **Leaflet + RainViewer + CartoDB dark tiles** (`7897790`) — the hand-built version.
+2. **Retina flag** (`7da5113`) — CartoDB's `{r}` suffix caused **@2x tile 404s on iPhone HiDPI**, "leaving labels over a white Leaflet default background."
+3. **Swap basemap to ESRI** (`5fc66bd`) — because "CartoDB dark_matter tiles were failing (**free tier restricted**)"; needed a custom `getTileUrl` for ESRI's z/y/x order.
+4. **OSM + CSS invert** (`4c88027`) — which then "blanked tiles on iOS" (`c294216`), so the invert filter was dropped.
+5. **RainViewer itself** — "kept returning 'Zoom Level Not Supported' tiles over an otherwise-fine basemap" (`db575f8`).
+
+**Real root cause:** Hand-building a tiled radar against three free third-party tile services, on an iOS PWA, was the wrong project.
+
+**Fix:** `db575f8` — replace the entire hand-built Leaflet stack with an **embedded Windy radar iframe**: "animated, interactive, pinch-zoom, reliable on iOS PWA, no tile/zoom gremlins." Reaffirmed after a brief detour to static NWS loops (`b34472c`), which also killed a **RadarScope button that was landing on a Zendesk help page, not radar.** One real JS bug found en route: `ReferenceError: radarImgError is not defined` from an `img onerror` firing before the handler was defined (`b33b349`).
+
+**Cost to Jeff:** Four days of an unreliable radar on a weather app built for a trained NWS storm spotter (callsign jlo301).
+
+**Lesson:** Four rounds of tile-provider whack-a-mole is the signal to stop building the component and embed someone else's.
+
+---
+
+### 15 — Light-mode contrast: fixed, re-broken, and only *measured* seven weeks later
+
+**When:** First round 2026-06-29; genuinely closed 2026-08-11.
+
+**Symptom (round 1):** Immediately after the Light/Dark toggle shipped (`28d79c6`) and Style A landed (`8ac220a`), text disappeared in three places in one evening.
+
+**Wrong theory (round 1):** A bulk auto-scan that darkened text "for light mode" wherever it judged the background light. `70643a4` names its own error: *"I had darkened `.meter-num` globally for light mode, but the `.main-meter` panels … are always-black LCD-style displays — their background is a **gradient**, so the earlier auto-scan misread them as 'light' and the dark text vanished on black."* Same class hit the Cast popup (`708d85b`) and turned the NWS alerts card "muddy brown" (`acb4123`).
+
+**Round 1 fix:** `44ea8e8` — a gradient-aware dark-on-dark detector run over every modal, popup and collapsible panel.
+
+**The long tail:** `aa38bc8` (08-03) hit the identical class three more times in the LUX work and logged that *"the same hardcoded-hex pattern exists 100+ more times across the file."* A `CLAUDE.md` note then **guessed**: "most are probably fine (many sit on dark surfaces)."
+
+**Real root cause, measured (round 2):** `af6df04` (08-11) built a contrast auditor that **composites every translucent ancestor** to compute each element's genuinely painted background:
+
+> **19 confirmed failures on genuinely light surfaces** … worst were the credential save/error messages at **1.09-2.9:1** — i.e. "Wrong password" and "Save failed — storage full" were effectively invisible in light mode, exactly the messages you most need to read.
+
+36 sites moved to tokens; sites on genuinely dark surfaces deliberately kept bright hexes ("which is exactly why each had to be measured instead of bulk-replaced"); `--warn` and `--ok` darkened. Two sub-lessons recorded at tip: an `style=` background beats any selector, and *a contrast checker that reads only `backgroundColor` invents failures on any `linear-gradient` element* — the audit tool itself reported 6 false failures before being fixed.
+
+**Cost to Jeff:** Error messages he could not read, for weeks, in the theme that is the **default**.
+
+**Lesson:** A colour audit that doesn't composite the real painted background is not an audit, it's a guess with a number attached.
+
+---
+
+### 16 — mPING: built, killed, restored on request, killed permanently
+
+**When:** 2026-06-26 → 2026-07-03.
+
+**Symptom:** The in-app "report weather to NOAA" form never worked.
+
+**Wrong theories / attempts, in order:**
+1. `b7ff936` (06-26) — build a native mPING quick-report card with an 11-button icon grid, GPS, and a `/api/mping` proxy. **Feature built before feasibility checked.**
+2. `c294216` (06-28) — discover it needs an NSSL-issued API token; wire `MPING_TOKEN` and show "token not configured."
+3. `adc5377` (07-01) — give up, replace with a link to the official tool.
+4. `6b29cad` (07-01, eighteen minutes later) — **reverse it on Jeff's instruction**: "Jeff wants the in-app reporting back." Restored byte-exact from git.
+5. `f935e31` — write a guide for emailing NSSL to request the token.
+
+**Real root cause:** `5e6c20b` (07-02) — *"NSSL confirmed **no automated/app reports ever**, so repurpose that card to the official mPING app instead of chasing a token."* No token was ever going to exist, for anyone.
+
+**And one more wrong link on the way out:** `01b4e8e` (07-03) — the replacement buttons pointed at `mping.nssl.noaa.gov`, *"which is just the map page — you can't submit there."* Repointed at the official iOS app (id584383400).
+
+**Cost to Jeff:** He asked for a feature back that could never work, and was given a token-request guide for a token that doesn't exist.
+
+**Lesson:** Check whether the API exists before building the UI — and when a user asks for something impossible back, the honest answer is the feasibility, not the restore.
+
+---
+
+### 17 — The B-Hyve watering history "definitive dead end," reversed in eleven minutes
+
+**When:** 2026-07-01, 02:46 → 03:58.
+
+**Symptom:** The irrigation card permanently read "No history" / "No last watered."
+
+**Wrong theories / attempts, in order:**
+1. `4b0d00e` — the device object has no last-watered field; add a `/watering_events` fetch. 404.
+2. `7308c23` / `158666a` — build `?debug=1` and then `?debug=2` endpoints so **Jeff can screenshot the raw API response** and pinpoint the field. (Two days before the Debugging Protocol outlawed exactly this pattern.)
+3. `61692a7` — pivot to `status.watering_status` / `watering_statuses`. Both empty.
+4. `2a2eb76` — **declare it impossible**: *"Confirmed from Jeff's device: B-Hyve's REST API does NOT expose watering history."* Fall back to self-tracking. `d5df6e9` wrote this "definitive" finding into `CLAUDE.md`.
+
+**Real root cause:** `379b13d`, **eleven minutes after the dead-end was committed to memory**:
+
+> Web research (pybhyve / bhyve-home-assistant) confirmed the real B-Hyve history endpoint puts the device id in the PATH: `GET /v1/watering_events/{device_id}` (with pagination). My earlier `?device_id=` query form 404'd — that was the whole problem. … So the history IS pullable after all.
+
+**Fix:** `379b13d`; memory corrected by `1d23b5d` ("endpoint found (path form), not a dead end"); confirmed live in `b947011` — "Last Watered confirmed working (reads 7:30 AM)."
+
+**Cost to Jeff:** Screenshot round-trips for a fact that was in open-source code, plus a false "impossible" written into the project's memory where it would have poisoned every future session had it survived eleven more minutes.
+
+**Lesson:** A 404 proves your URL is wrong, not that the data doesn't exist — and never write "definitive" into memory about someone else's API without reading someone else's client first.
+
+---
+
+### 18 — The shared-`AbortSignal` false offline — the one Jeff called out
+
+**When:** 2026-07-03. Introduced hours earlier while wiring Nabu Casa; fixed 09:24.
+
+**Symptom:** Red dot, "Beehive Offline," and the water/gas meters stuck on "Waiting" — with a perfectly healthy Home Assistant. Jeff debugged his own network and his own HA.
+
+**Wrong theory:** That anything was wrong with Jeff's setup at all. Jeff identified the bug.
+
+**Real root cause:** `0f44d9d`, first line of the body, in the first person:
+
+> **Regression I introduced when wiring Nabu Casa:** checkBeehive built ONE `AbortSignal.timeout(2500)` and reused it across all candidate fetches, so the 2.5s was a total budget for every attempt combined — and once elapsed, later fetches aborted instantly. Over the Nabu Casa remote relay a single /api/ call often takes >2.5s, **so a perfectly reachable HA was reported offline (red dot), which also stopped the meters from loading.**
+
+**Fix (two levels):**
+- **Immediate:** `0f44d9d` — a fresh signal per attempt, timeout raised 2.5 s → 9 s, `r.ok` checked before parsing.
+- **Architectural, 17 minutes later:** `7a59848` — *"Route HA connection through a server-side /api/ha proxy (durable fix)"*: **"The app talked to Beehive directly from the browser, which meant fighting mixed content, CORS, and the Nabu Casa relay tripping browser fetch timeouts — the whole class of 'Beehive Offline / meters Waiting' problems. Irrigation and weather never had these because they go through Cloudflare Functions (server-to-server). Now HA works the same way."** Every later HA feature in the project rides that proxy.
+
+**Cost to Jeff:** Time spent diagnosing his own house for a bug shipped hours earlier — and, by his own account, the last straw on the "round robin." Jeff, verbatim (`f668301`):
+
+> *"Log this so we don't go through this kind of round robin of checks again and we attack the source… **I depend on you. I don't know all the fixes you can do. I just can't stand the run around to avoid testing everything on your end.**"*
+
+**What it produced:** The **PROTECTED Debugging Protocol** (`f668301`) and Mandatory Rule 12 — six steps, still at tip. Step 1 contains the confession in writing: *"Run the Playwright harness with mocked data to reproduce the failure and prove the fix… **I did this AFTER Jeff called me out on the timeout bug — it must come FIRST.**"* And a named anti-pattern: *"Never hoist a shared `AbortSignal.timeout` across retries."*
+
+**Lesson:** Your own most recent change is the prime suspect — reproduce it on your end before you make the user prove it exists.
+
+---
+
+### 19 — "Beehive Offline," the legitimate one
+
+**When:** 2026-07-02 → 2026-07-03 01:17.
+
+**Symptom:** The app could never see Home Assistant, even on home WiFi.
+
+**Real root cause — three blockers stacked, each hiding the next:**
+1. **Mixed content.** `f754540` — "the https PWA can't fetch the local http HA (mixed content / LAN-only)." Fixed by giving HA a public HTTPS URL via Nabu Casa (`947a99d`).
+2. **No auth.** The same commit: `checkBeehive` "now sends the bearer token since HA /api/ requires auth."
+3. **CORS.** `3043f34` — the third and silent one: HA's `configuration.yaml` needs `http: cors_allowed_origins: [https://toro1-5rz.pages.dev]`. Described in the commit as *"the silent blocker that makes a valid setup still read as 'offline'."*
+
+**Plus a chicken-and-egg UI bug found in the same commit:** the HA-token input box only appeared once the app was already online — so with no token, it never appeared, and there was no way to enter one.
+
+**Fix:** `947a99d` + `3043f34`; milestone logged `410ccc5`. Then killed as a *class* by the `/api/ha` proxy (`7a59848`) — see #18.
+
+**Cost to Jeff:** He edited `configuration.yaml` by hand via the File editor and restarted HA.
+
+**Lesson:** Three independent blockers on one connection path will always be diagnosed one at a time unless you remove the path itself.
+
+---
+
+### 20 — The water meter that read 202.6 gallons
+
+**When:** 2026-07-03 01:37.
+
+**Symptom:** The Water card showed **202.6 gal** where the meter said **12,982.5**.
+
+**Real root cause:** `338e2c3` — rtlamr2mqtt publishes both `sensor.water_meter_reading` *and* `sensor.water_meter_last_seen`. `meterRaw()` keyword-matched both and took the last numeric value: **`parseFloat('2026-07-03T…') = 2026`**. The displayed number was a *year*.
+
+**Fix:** `338e2c3` — skip `*_seen` / `*time` / timestamp-device-class entities, require a pure-numeric state. Entity ids corrected in docs by `a101465`.
+
+**Cost to Jeff:** A wrong number on the utility he is building a legal refund case around.
+
+**Why it belongs here:** it is the first instance of the project's single most common bug shape — **substring matching across a shared entity namespace** — which recurs at least five more times (see #31).
+
+**Lesson:** `parseFloat` on an unvalidated string will always find *a* number, and it will be wrong.
+
+---
+
+### 21 — Blink login: the cookie theory, and then our own override became the bug
+
+**When:** 2026-07-03 → 2026-07-09. Blink cameras were **Jeff's #1 priority feature** (`17d388a` says so explicitly) and were broken for over a week.
+
+**Symptom:** HA log: "Login failed." No SMS PIN dialog. Then `ConfigEntryNotReady` retrying roughly every 10 seconds, for days.
+
+**Wrong theories / attempts, in order:**
+1. **`empty_cookies` / shared aiohttp session.** `f3ae126` (07-03) — drawn from upstream issues blinkpy #1217 and home-assistant/core #173419, the theory was that HA's shared session drops auth cookies between the password step and the PIN step. A dedicated client session with its own cookie jar was written into a **custom `custom_components/blink/` override**. The commit was honest that it could not be verified ("it needs a live Blink account + Amazon's auth servers") — and it was wrong.
+2. Building the override at all — which became the *second* bug.
+
+**Real root cause, part 1:** `1f2cdec` (07-03), found by diffing blinkpy inside the test harness:
+
+> Blink changed their OAuth signin to signal 2FA-required with **HTTP 202 + tsv_state/tsv_methods** fields. blinkpy 0.25.2's `oauth_signin` only recognizes the OLD 412 code, so it returns None → `_oauth_login_flow` logs 'Login failed' → `ConfigEntryNotReady`. That's exactly Jeff's log. blinkpy 0.25.7 added 202/tsv handling.
+
+The same commit kept the session tweak "as belt-and-suspenders but corrected its comment (**the cookie theory was the wrong diagnosis; the 202 handling is the fix**)."
+
+**Real root cause, part 2 — the sting in the tail:** `9b29c1f` (07-09), title: *"Blink: record real root cause + official fix (blinkpy 0.25.6 / HA 2026.6.4); **our custom override is now the blocker**."* Upstream had shipped the fix (blinkpy PR #1231 → HA core PR #173811, "no HA-side changes needed"), and the project's own July-3 override was now **shadowing HA's fixed built-in with stale code**: "the log's `ConfigEntryNotReady` is from OUR `coordinator.py:58`."
+
+**Fix:** `7bbc8a2` (07-09 15:11) — `rm -rf /config/custom_components/blink`, delete the broken config entry, update HA, re-add the **built-in** integration → the SMS PIN finally appeared → all six cameras live. Standing rule recorded: *"**DO NOT ever re-add a `custom_components/blink` override — that override shadowing the fixed built-in was the entire bug.**"*
+
+**Cost to Jeff:** Over a week without his most-wanted feature, plus a real side-effect the record flags: *"our old code has hammered Blink's login every ~10s for days → account may be rate-limited"* — hence the instruction to wait ~30 minutes after deleting before re-adding.
+
+**Lesson:** A local workaround for an upstream bug has an expiry date, and nobody sets a reminder — when upstream ships, your patch becomes the outage.
+
+---
+
+### 22 — `packages/hcc.yaml` had never been loaded by Home Assistant. Ever.
+
+**When:** Discovered 2026-07-10/11 by the coworker session on Jeff's PC. The file had existed since 2026-06-23 (`75a7afd`).
+
+**Symptom:** `hcc_panic_button`, `hcc_mower_sensor_sync`, `hcc_freeze_warning`, `hcc_severe_weather_alert` all showing "unavailable" in HA.
+
+**Wrong assumption:** That valid YAML in the right folder is loaded. It isn't.
+
+**Real root cause:** `76ae463`, verbatim:
+
+> **`packages/hcc.yaml` was never actually loaded by HA at all** — `configuration.yaml` had no `homeassistant: packages: !include_dir_named packages` directive, so despite being valid YAML the whole file was silently ignored. **This is why … they showed "unavailable" — they were ghost/restored entities that had never truly run, ever.**
+
+**Fix:** `76ae463` — add the directive; "**all 6 automations (4 old + 2 new) came alive simultaneously.**"
+
+**Cost to Jeff:** Every Home Assistant automation the project believed it had shipped in its first three weeks — including **the panic button** — had never once run. The record does not say whether anyone tested the panic button in that window.
+
+**Lesson:** "Valid config" and "loaded config" are different claims; only the second one is worth reporting.
+
+---
+
+### 23 — Windows Firewall silently ate port 32168
+
+**When:** 2026-07-10.
+
+**Symptom:** Beehive's AI detection requests to CodeProject.AI on the beast "just timed out with no useful error."
+
+**Real root cause:** `76ae463` — the CodeProject.AI installer never added an inbound firewall rule, so nothing outside the beast itself could reach port 32168.
+
+**Fix:** `New-NetFirewallRule` for TCP 32168 — "fixed instantly."
+
+**Cost to Jeff:** None directly; it was found during setup. Included here because it is one half of the pair of infra bugs found in a single session (with #22), both of which were invisible failures rather than errors.
+
+**Lesson:** A timeout with no error text is a firewall until proven otherwise.
+
+---
+
+### 24 — CodeProject.AI's three-day silent death
+
+**When:** Died at the beast's reboot on 2026-07-11 ~06:08; found 2026-07-14 12:45. **~3 days of no AI camera detection.**
+
+**Symptom:** Jeff reported the cameras and Fire TV were "not working as intended" — *despite the 07-11 changelog claiming both were confirmed working.*
+
+**Why nobody noticed:** This is the important part. `c13f101`'s forensic detail:
+
+> "AI Camera Scan on Motion" has kept firing normally (most recently 32 min before this check) — so Blink motion sensors + the scan trigger are fine — but "AI Object Detected Notify" and "AI Show Camera on Fire TV" both show **"Last triggered: 3 days ago."**
+
+The upstream half of the pipeline kept running perfectly, so every dashboard and health check looked alive while the middle of the chain was dead.
+
+**Real root cause:** `c13f101` — *"CodeProject.AI Server's Automatic startup didn't survive the 07-11 reboot, silently breaking AI detection since that day."* The 07-10 firewall rule was still correct; only the Windows service was down.
+
+**Fix:** `c13f101` — `Start-Service` immediately, then hardened with **Automatic (Delayed Start) + failure-recovery actions** "so it doesn't die silently again."
+
+**Cost to Jeff:** Three days of no security AI on a house, and he was the one who reported it.
+
+**Lesson:** If the first stage of a pipeline keeps firing, nothing will tell you the last stage is dead — monitor the *output*, not the trigger. (This exact lesson had to be learned again on 08-15; see #58.)
+
+---
+
+### 25 — The Fire TV pop-up + pause/resume long war
+
+**When:** 2026-07-11 → 2026-08-14. The single longest-running feature fight in the project: **four consecutive mechanisms, each declared working and each disproved by live test**, before the whole approach was replaced by Apple TV.
+
+**Symptom:** Jeff wanted a camera pop-up on the TV when a person or car was detected, and for the show to pause and resume around it. What he got, in sequence: nothing; a pop-up that cold-started his DVR to the menu; a pause that didn't pause; a pop-up 3–4 minutes late; then a wrong frame.
+
+**Round 1 — the Alexa route.** `c926ceb` (07-11) recorded a **considered-and-rejected** option first: a native Alexa Routine (Blink motion → "Show Camera") was rejected because it bypasses HA entirely, losing AI classification, the per-camera mute helper and family-arrival suppression. Chosen instead: `alexa_media_player` injecting `media_player.play_media` with `media_content_type: custom` and `media_content_id: "show me the driveway camera"`.
+- `987e804` (07-11) — declared "confirmed-working," Jeff watching the screen.
+- `a88ccc6` (07-11) — automation shipped, "**confirmed working end-to-end**," verified twice.
+- `b108a6e` (07-14) — **retested with the AI pipeline healthy: it had never worked.** *"Phone push confirmed working both tests. TV pop-up did not appear either time, even on the correct HDMI input."* Ruled out camera-Alexa linking (checked in the app) and the phrase (Jeff spoke *"Alexa, show me the 301 driveway camera"* out loud and it worked). Real cause: **`alexa_media_player`'s synthetic command is not equivalent to a real spoken command** — Amazon's cloud doesn't honour it for cross-device camera display. The 07-11 claim was formally retracted rather than quietly dropped. **INFERRED:** the record never explains why the 07-11 test appeared to succeed; it only proves the 07-14 failures.
+
+**Round 1b — the second dead end:** Blink's official Fire TV app is *incompatible with Jeff's stick model* — confirmed via the Amazon Appstore listing's own compatibility check, "red ✕ next to 'Jeffrey's Fire TV'." Sideloading declined.
+
+**Round 2 — ADB browser launch.** `25e3256` (07-14): `androidtv.adb_command` opens the camera's `entity_picture` URL fullscreen in the Fire TV's Silk browser, then an 8-second-delayed HOME keypress returns. Proved by **screenshotting the Fire TV over ADB** and by Jeff physically watching. Sub-bug found and fixed inside the same commit: `input keyevent 4` (BACK) "only partially exited the browser, confirmed via ADB `mResumedActivity`" — HOME (`keyevent 3`) is the reliable return. Tradeoff accepted knowingly: full-screen takeover, not a toast overlay ("that would've needed the original Kodi plan").
+
+**Round 3 — the pause that never paused, and the relaunch that destroyed his DVR position.** `3a714fe` (07-15):
+- The ~5-minute alert delay was **Blink's own default cloud poll**, not anything recent — fixed with a 30-second `homeassistant.update_entity` fast-poll automation.
+- Auto-relaunching FuboTV via `monkey -p … LAUNCHER 1` **cold-starts the app to the show list**, discarding playback position: "meaning Jeff had to restart the recording from scratch and fast-forward back to where he was."
+- `input keyevent 187` (APP_SWITCH) — "doesn't work on this Fire OS build's launcher."
+- Settled on plain HOME, accepting one manual tap.
+
+Then `2965b5a` (07-15), the third-time's-the-charm and the most quotable confession in the thread:
+
+> The old `AI Show Camera on Fire TV` automation sent `input keyevent 127` hoping it would pause playback — **confirmed via live testing this does nothing** (checked `dumpsys media_session`: Fubo's position kept advancing, state stayed "playing"). It had never been verified working — **a repeat of the exact "declared done without testing" pattern the whole debugging protocol exists to prevent.**
+
+Real fix: `adb shell cmd media_session dispatch pause` — the Android MediaSession API, system-wide. Verified frame-by-frame on a real Fox News DVR recording: "paused at 335890ms, resumed at 343307ms." Because it is system-level rather than app-specific, Jeff's later **Fubo → Sling switch required zero automation changes** (`131dc16`) — a rare case of the right fix paying a dividend.
+
+**Round 4 — PiPup, and the wrong frame.** `a001f2e` (07-31) replaced the full-screen takeover with PiPup picture-in-picture pushing the actual annotated frame. `f07048f` (08-03) then found the popup was showing the **wrong frame** — "blinkpy's motion state reflected the live feed, not the actual clip" — fixed with new `camera.*_clipframe` helper entities and real clip extraction (which immediately caused #31's twelve-tile bug). `f1d24f3` (08-01) traced the remaining 3–4 minute real-world delay and published an honest negative: the HA-side chain completes in **under 1 second**, so the lag is upstream in Blink's cloud — *"Not resolved — needs a real timestamped incident to trace further."*
+
+**Round 5 — abandonment.** `c95457a` / `9426623` (08-14) moved TV pop-ups to the **Apple TV via HomeKit**, after rejecting an Apple TV jailbreak ("dead — A15/tvOS18.6") and two Blink RTSP bridges ("worse than status quo"). The winning insight, and the thing that had defeated several sessions:
+
+> **`linked_motion_sensor` alone is NOT enough.** Motion earns a phone notification but does NOT interrupt the TV. HomeKit reserves the picture-in-picture screen takeover for **DOORBELL** events… **Fix: point `linked_doorbell_sensor` at the SAME motion sensor.**
+
+Measured on 08-15 by camera-pointed-at-the-TV: motion → popup **4.7–6 seconds**, photographed three times (`c5a6aab`).
+
+**Cost to Jeff:** Roughly five weeks of a headline feature that was announced working at least three times before it was; a DVR recording he had to restart and fast-forward every time a car went past; and — per `2965b5a` — a direct repeat of the exact behaviour the Debugging Protocol was written to stop.
+
+**Lesson:** "Verified with Jeff watching" is not verification if the mechanism was never instrumented — check `dumpsys`, screenshot the device over ADB, or don't claim it.
+
+---
+
+### 26 — Two contradictory plans for the same feature, live at once
+
+**When:** 2026-07-10 → 2026-07-14, three days.
+
+**Symptom:** The plan document said the TV pop-up would go through **Kodi on the beast**; the running system used the **Fire TV / Alexa route that the plan explicitly ruled out**.
+
+**Real root cause:** A decision made on 07-10 ("**NOT** simple ADB from Beehive to Fire TV — Jeff wants it routed through the beast") was written into `docs/home-theater-ai-plan.md` on **07-12** — a day *after* the 07-11 session had already built the Fire TV path. Neither session saw the other's ground truth.
+
+**Fix:** `c13f101` (07-14) — the audit found Kodi *"was installed on the beast but only ever launched once, for about 3 minutes, then never touched again (its own log confirms this; `kodi.log` starts and ends 07-11 6:11–6:14 AM)"*; its web server was never enabled; no Kodi integration ever existed in HA. Jeff chose to keep the Fire TV path; the Kodi doc was demoted to *"reference/superseded, not a live setup guide."*
+
+**Cost to Jeff:** Three days in which any session reading the docs would have built the wrong thing.
+
+**Lesson:** A plan written after the build is not a plan, it's a contradiction with a date on it — and it is the same failure as #64, eleven weeks earlier.
+
+---
+
+### 27 — The HA config editors that corrupted YAML
+
+**When:** 2026-07-11 (three in one day), near-miss 07-14, technique adopted 08-01, still biting 2026-08-16.
+
+**Symptom:** `packages/hcc.yaml` — the file holding every HCC automation — repeatedly corrupted mid-edit.
+
+**The instances, in order:**
+1. `987e804` — the **legacy File Editor add-on** "mishandled a special keypress (typed literal `Page_Up` text into the file)," caught before saving.
+2. `a88ccc6` — **Studio Code Server** typed a literal `Page_Down`.
+3. `a88ccc6` — **Prettier format-on-save truncated** the new automation's long single-line flow-style YAML.
+4. `25e3256` (07-14) — Monaco "had a focus-stealing UI glitch mid-session that nearly caused a bad edit, caught via `check_config` before it reached disk."
+5. `docs/SESSION_START.md` at tip: *"a selection one character too wide silently broke YAML on **08-16**."*
+
+**Real root cause:** Dense flow-style YAML edited through GUI editors that reformat, autocomplete or mis-handle keystrokes — with `ha core check` as the only thing standing between a typo and a dead house.
+
+**Fix / doctrine:** `a88ccc6` — use the **Terminal add-on** with `sed`/heredoc for this file; if using Studio Code Server, `editor.formatOnSave: false` first. Refined further by `2765386` (08-01), which edited `configuration.yaml` via the code-server *integrated terminal* using `python3` with an "exact-string match + `assert count==1` before writing" — the strongest form of this discipline in the record. Also noted: package-defined automations **cannot** be edited in HA's Automations UI, which only offers a "Migrate" button — *"do NOT click this without asking Jeff."*
+
+**Cost to Jeff:** None realised — every corruption was caught by `ha core check` before it shipped. Recorded here because it happened five times over five weeks and the tooling never became safe.
+
+**Lesson:** Verify every GUI edit by reading back what actually landed; the editor is a participant in the change, not a window onto it.
+
+---
+
+### 28 — The stale-content deploy mystery
+
+**When:** 2026-06-23 → 2026-07-21. **Two months. At least six announced fixes.** The longest-running self-inflicted bug class in the project.
+
+**Symptom:** Jeff opens the app, sees an old build, and reports a bug that has already been "fixed." Repeatedly. For weeks.
+
+**Wrong theories / attempts, in order:**
+1. `4f96d09` (06-23) — bump SW cache to hcc-v2, network-first for `/api/*`.
+2. `8497827` (06-23) — bump to hcc-v3, "force cache clear."
+3. `19dd459` (06-26) — network-first for HTML. The commit body is itself an admission of scale: *"Cache-first on index.html meant the old cached copy ran forever and **no code fix ever reached the device — including the voice mic fix**."*
+4. `24df1fc` (07-10) — bump to hcc-v7 to fix "Windows stale cache."
+5. `c926ceb` (07-11) — a *correct* local diagnosis for one instance: both domains byte-identical (532,663 chars each), the culprit a stale `service-worker.js` in Jeff's Chrome profile. Real, but not the class.
+6. `173270a` (07-20) — **claims root cause**: `service-worker.js` was served with Cloudflare Pages' default `max-age=14400` (4 h), so "browsers could go hours without even requesting the new version." A new `_headers` file sets `Cache-Control: no-cache`. It worked on `toro1-5rz.pages.dev` and **not on `loewenhome.com`** — explained away as "custom-domain header propagation lag" (`71cc052`). *No amount of waiting fixed it.*
+7. `70dba84` (07-21) — the second third of the answer: the SW's network-first HTML fetch was itself going through the browser HTTP cache, so — the best one-line summary in the record — **"'network-first' was actually 'stale-cache-first'."**
+
+**Real root cause — two independent things, neither of them the browser cache:** `e37a193` (2026-07-21 15:58):
+
+> **1.** Cloudflare CDN caches JS files at the edge (`cf-cache-status: REVALIDATED`) and **ignores `_headers` rules for cached copies**. The `_headers` worked for HTML (`cf-cache-status: DYNAMIC`) but not for `service-worker.js`. → needs the separate `CDN-Cache-Control: no-store`.
+> **2.** SW registration with `updateViaCache:'none'`.
+> **3.** **Registration was missing from index.html entirely — new visitors weren't getting a service worker at all.**
+
+Layer 3 is the jaw-dropper: `index.html` had **no `navigator.serviceWorker.register(...)` call**, so every cache-version bump from hcc-v2 through hcc-v11 and all the network-first logic had been **moot for any new visitor** for two months.
+
+**Fix:** `e37a193`; documented and closed in `6f517ac`, which verified on the real custom domain (`cf-cache-status: BYPASS`) and left the standing rule: *"**check `cf-cache-status` on the live custom domain, not just `Cache-Control`** — Cloudflare's edge cache and the browser's HTTP cache are controlled by different headers and must both be addressed."*
+
+**Cost to Jeff:** Weeks of testing an old build and reporting bugs that were already fixed — the most corrosive possible cost, because it made *every* "it's fixed" claim untrustworthy. Even after the fix, `1d6c109` (08-10) records him sending a screenshot of a stale cached build.
+
+**Lesson:** Six fixes to the same symptom means you are fixing the wrong layer — go read the actual response headers on the actual URL the user opens.
+
+---
+
+### 29 — Safari 15 froze the whole app
+
+**When:** 2026-07-15. Discovered the day Jeff's iPad Air 2 arrived to become a wall display.
+
+**Symptom:** Jeff pasted a valid HA token into the iPad and *"it just sat on 'Checking…' indefinitely — no error, no timeout, nothing."*
+
+**Real root cause:** `33d367d` / `af3b16a`:
+
+> **`AbortSignal.timeout()` was only added in Safari 16 — it does not exist at all in Safari 15.** Every `haFetch()` call in the app (18+ call sites) uses it, so on Safari 15 the very first call throws a synchronous `TypeError` **before the promise chain's `.catch()` can ever run.**
+
+The iPad Air 2 is permanently capped at iOS 15.8.6, so it was the first device in the project ever to hit it.
+
+**Fix:** A ~10-line `AbortController`-based polyfill at the top of the script block — "a zero-call-site-changes shim rather than touching all 18 call sites individually." Verified in a real browser console *before* deploying (native `AbortSignal.timeout` deleted, polyfill's abort behaviour observed, a real fetch completed through it), and the file swept for other post-Safari-15 APIs (`AbortSignal.any`, `structuredClone`, `Array.prototype.at`) — "none found, this was the only landmine."
+
+**Process note recorded honestly:** this crossed the Rule 13 boundary — `index.html` was the cloud session's exclusive lane — and `af3b16a` documents the exception and why it was taken (Jeff actively blocked in the same conversation, 11-line isolated fix).
+
+**Cost to Jeff:** A brand-new wall display that appeared dead on arrival.
+
+**Lesson:** A synchronous throw beats your `.catch()` — and a device two OS versions behind is a compatibility test nobody wrote.
+
+---
+
+### 30 — The iPad wall display declared "fully set up"
+
+**When:** 2026-07-15 11:07 (claim) → 11:54 (retraction). Still unconfirmed at the end of that window (`e61e920`, 07-21).
+
+**Symptom:** `3644f54` declared the wall display *"fully set up, confirmed working."* `3b157b9`, forty-seven minutes later: *"Prior entry said 'fully set up' prematurely. Real state: still working through a token-persistence issue."*
+
+**Wrong theories / attempts, in order:**
+1. **Blame Safari storage.** Repeated rounds of "clear Safari site data" — described by the record itself as *"my earlier bad advice, solving an already-fixed problem."* Each round **wiped the HA token**, forcing Jeff to mint a brand-new Long-Lived Access Token on the device (HA only shows a token's value once). The result was a pile of orphaned tokens: two both named "Ipad," then "HCC ipad token," "plus older unrelated ones (HCC 3, HCC long term token, HCC1, HCC)."
+2. **Assume Add-to-Home-Screen existed.** It didn't — everything was happening in **plain Safari**, which is subject to Apple's 7-day ITP storage-clearing timer; standalone Home Screen web apps are exempt. So the storage was always going to evaporate.
+
+**Real root cause:** The setup was declared complete before the standalone icon existed, and the diagnostic advice given in the meantime actively destroyed the state being diagnosed. Left mid-investigation at a context limit on Jeff's report, quoted verbatim: *"the rest of the pages did not log in."*
+
+**Fix:** No clean fix commit — `3b157b9` is a retraction and a handoff. The record within this window never shows the iPad setup reaching final confirmation.
+
+**Cost to Jeff:** Minting HA tokens by hand, repeatedly, on a device he had bought specifically for this.
+
+**Lesson:** Never issue "clear your site data" as a diagnostic step when the site data *is* the credential — and never write "fully set up" before the user says it works.
+
+---
+
+### 31 — Entity cross-contamination: the project's most-repeated bug shape
+
+**When:** 2026-07-21, 2026-07-21 (again), 2026-08-03, 2026-08-08, 2026-08-15. **Five separate instances of the same defect over eight weeks**, each fixed locally, none generalised until the fourth.
+
+**The instances:**
+
+1. **CAR windows ↔ house windows (`6464a8e`, 07-21).** *"The CAR section's `find('window')` was matching ALL binary_sensors with 'window' in their name — including house window contact sensors from HA. A house window reporting 'on' (open) made the CAR section falsely say 'Window open.' **Same cross-contamination in reverse:** Guardian's door/window check was counting Mercedes car window entities as house windows."*
+2. **CAR locks ↔ house locks (`9647ca5`/`6aeba2f`, 07-21).** `val('lock.')` matched any lock entity. The safety-relevant half: **`carLockCmd()` could have sent a lock/unlock command to a house lock instead of the car.** Night Check also counted the Mercedes as a house lock.
+3. **12 camera tiles instead of 6 (`83a23cd`, 08-03).** The coworker's PiP fix added six `camera.<cam>_clipframe` helper entities — a legitimate HA-side change. `loadCameras()`, `blinkRefreshAll()` and `blinkReloadStills()` matched **any** `entity_id` starting with `camera.`, so the app rendered 12 tiles, "mixing real live Blink feeds with static single-frame helpers and silently failing `blink.trigger_camera` calls against the 6 fake ones during 'Refresh All'." The changelog explicitly refuses the easy out: *"**Not the coworker's mistake** — the HA-side entities are legitimate and needed for their fix; our app's camera-listing code just had no concept of 'internal helper camera'."* Fixed with `isUserCamera()`.
+4. **Range Remaining showed 0 mi (`af8a9ec`, 08-06).** The loose keyword matcher picked `sensor.gle_350_eco_score_bonus_range` (0.0) over `sensor.gle_350_range_liquid` (524).
+5. **12 tiles again (`72e5d56`, 08-15).** The new `camera.ai_*` helper entities weren't covered by `isUserCamera()`, which only excluded `_clipframe` — *"the same class of bug as the 08-03 clipframe leak."* Fixed by excluding both families and verifying against the real entity list.
+
+**Real root cause (all five):** Home Assistant is one flat namespace shared by the house, the car, the mower, the cameras and every internal helper — and the app identified entities by substring.
+
+**Fix / rule:** `6aeba2f` — *"**Always scope CAR entity lookups to Mercedes/GLE/mbapi to prevent house-entity bleed.**"* Plus `isUserCamera()` maintained as an explicit allow/deny list. `a1a65fe` (08-08) shows the lesson finally landing *before* the bug: `loadGarage()` was written to understand three distinct entity shapes and to detect the on = closed inversion trap **in advance**.
+
+**Cost to Jeff:** False alarms about his own house, a camera grid he described as "all messed up," and — unrealised but real — a car button that could have thrown a deadbolt.
+
+**Lesson:** Substring matching in a shared namespace is not a lookup, it's a lottery.
+
+---
+
+### 32 — The `*_closed` inverted-semantics false positive
+
+**When:** 2026-07-21 23:18, tail end 2026-07-22 00:04.
+
+**Symptom:** The CAR section reported "Window open" when every window was shut — and kept doing so *after* the entity-scoping fix in #31.
+
+**Wrong theory:** That scoping to Mercedes entities (`6464a8e`) was the whole fix. It wasn't; the false positive survived it.
+
+**The diagnostic step that separated them:** `c50fcf7` — *"Show which Mercedes window is reported open instead of generic 'Open'"* — "so Jeff can tell if it's a real window, the sunroof tilt, or stale data." Naming the specific window is what exposed that the *state reading itself* was inverted.
+
+**Real root cause:** `502bcff`, verbatim: *"`binary_sensor.gle_350_windows_closed` uses inverted semantics where **on = closed, off = open**. The old code assumed on = open for all window entities."*
+
+**Fix:** `502bcff`, plus `52e492f` (07-22) for a *second* window check in the status banner that still used the old logic. Lesson written into `CLAUDE.md` (`e61e920`): *"always check mbapi2020 entity naming conventions — `*_closed` entities invert on/off semantics."* Applied pre-emptively four weeks later in `garageSensorIsOpen()` (`a1a65fe`).
+
+**Cost to Jeff:** A car alarm banner crying wolf; no money.
+
+**Lesson:** An entity whose name ends in a state word is telling you its polarity — read the name before reading the value.
+
+---
+
+### 33 — CAR commands built on guessed entity names
+
+**When:** 2026-07-22, 00:08 → 02:19. Six commits in two hours.
+
+**Symptom:** Jeff got a burst of new car controls — REMOTE START, MAX COOL, MAX HEAT, lock/unlock — and **not one of them worked.**
+
+**Wrong theories / attempts, in order:**
+1. **Ship the buttons against guessed entity names.** `22d907f`, `596ec69`, `782277b`, `2820cdc`, `bfccb3b` — five commits of features built on `_grdStates` keyword guesses. `8d339ee` names it: *"Root cause: all car command functions … were searching `_grdStates` with narrow keyword guesses that didn't match real mbapi2020 entity names, so every button failed."*
+2. **Search discovered entities instead.** `8d339ee` + `59db50e` (a "Mercedes Entity Scan" diagnostic). Better — but still the wrong API layer, still entity-fishing.
+
+**Real root cause:** `778f6bd` — mbapi2020 does not expect entity manipulation at all; it exposes **domain services keyed by VIN** (`mbapi2020.engine_start`, `doors_lock`, `doors_unlock`, `sigpos_start`, `auxheat_start`, `temperature_configure`). Found by *"Thorough research of mbapi2020 GitHub repo, README, source code (client.py, switch.py, lock.py, button.py, services.yaml, const.py), HA community forums" — "research-first, per Jeff's directive."*
+
+**Three more findings that only source-reading produced** (`71d0dc2`): `temperature_configure` wants **string** select values (`"16"`, not `16`); pull mode (WebSocket disconnected) rejects **all** commands with 400; and HA's 200 OK "only means 'accepted' not 'Mercedes executed it'" — so success messages were rewritten to say "Command sent" with a 30-second expectation. Plus the setting that was actually blocking everything: **"Disable Capability Check"**, off by default, blocks North American vehicles — *"was why all commands except flash lights failed"* (`c64d0f8`).
+
+**Fix:** `778f6bd`, hardened by `778fe00` (real HTTP status + HA error text instead of a generic "Failed") and `71d0dc2`.
+
+**Cost to Jeff:** A tab full of dead buttons on his own car for two hours, and a "Disable Capability Check" toggle he had to find and flip himself.
+
+**Lesson:** *"Never guess entity names or service calls — research the integration's actual source code and use domain-specific services with known parameters"* (`CLAUDE.md`, `ebd2a3a`).
+
+---
+
+### 34 — The mbapi2020 PIN prompt mistake
+
+**When:** Added 2026-07-24 11:55; removed 2026-07-24 12:35. **Consequences ran until 2026-08-06 — thirteen days.**
+
+**Record correction, stated up front:** the planning notes for this archive cite hashes `de32a4b → bc81c84` for this episode. **Those hashes do not exist anywhere in this repository** (verified with `git log --all`). The real commits are `eeaa0b7` → `c73e32e`.
+
+**Symptom:** A PIN modal blocking every PIN-gated car command.
+
+**The sequence:**
+1. `eeaa0b7` (11:55) — *"Add Mercedes PIN prompt for remote start, unlock, and other PIN-required commands."* PIN saved in `localStorage`, prompts across the CAR section.
+2. `c73e32e` (12:35) — *"Remove app-level PIN prompts — mbapi2020 handles PIN from integration options."*
+
+**Real root cause of the mistake, in the record's own first person (`c64d0f8`):**
+
+> **Root cause: I added `carPromptPin()` wrappers that blocked commands with a PIN input modal, but mbapi2020 handles PIN from its integration options automatically — the app should never send a `pin` field.**
+
+**And the far more expensive second-order effect:** the prompts were removed on the strength of a `CLAUDE.md` sentence — *"stored in mbapi2020 integration options in HA - services auto-use it"* — that **nobody had verified**. The mechanism was right; the fact was not. `adcf16c` (08-06) states the bill: these features *"have been dead since the 07-24 change that removed the app's PIN prompts on the strength of a CLAUDE.md claim that turned out to be wrong."*
+
+**Fix:** `c73e32e` for the prompt; the real unblocking took until 08-06 (#35). The dormant client-side PIN code was later deleted outright as a trap (`8501360`, 07-31): *"Left as dormant code it was a trap for a future accidental re-wire."*
+
+**Cost to Jeff:** **Two weeks of dead remote start, unlock, windows and sunroof** on a car he uses daily.
+
+**Lesson:** Removing a working safeguard because the memory file says it's redundant is trusting a sentence nobody tested — verify the fact, not just the mechanism.
+
+---
+
+### 35 — The Mercedes PIN saga: two confident wrong answers, then the truth
+
+**When:** 2026-08-06, 12:41 → 13:50 CDT. Five commits, **two of which explicitly correct the previous one.**
+
+**Symptom:** Every PIN-gated command (remote start, unlock, windows, sunroof) failing. Flash lights worked.
+
+**Wrong theories / attempts, in order:**
+1. **"The PIN was never entered."** `473f122` — checked `config_entries/get` over the WS API, saw an empty `options` dict, told Jeff the PIN had never been set.
+2. **"RIS_PIN_INVALID means the stored PIN is wrong."** `e3d6de2`, whose first line is *"Corrects the previous commit, which was wrong."* HA's config-entry list API simply never returns `data` or `options` — they're internal. **The tell that was missed, in the record's own words:** *"`data` came back empty too, which is impossible for a loaded integration running 49 live entities."* The options dialog showed the PIN populated all along. One line of Jeff's live system log gave the real error: `Car action: ENGINESTART failed. error_code: RIS_PIN_INVALID`.
+3. **Then Jeff screenshotted his own Mercedes app** hitting the real block (`eb0852f`):
+
+> *"Your request to start the engine is unable to initiate because you have reached the limit of remote attempts between manual ignition cycles. Please use your key and manually start your vehicle the next time."*
+
+Mercedes enforces a remote-attempt limit that resets only on a **physical key start** — and this dialog appeared *after* the app had accepted his PIN, proving the PIN valid. Both readings were kept in the record pending a decisive test rather than one being deleted.
+
+**Real resolution:** `adcf16c` — *"Mercedes remote start CONFIRMED WORKING from the app."* Body opens with two words from Jeff: **"It started."** Two blockers had to clear simultaneously: the key-start to reset Mercedes' counter, **and** re-entering the PIN **plus a full Home Assistant restart** — *"`reload_config_entry` was NOT sufficient — mbapi2020 reads the Security PIN only when it initialises."*
+
+**The diagnostic gold, preserved for next time:**
+
+> `sigpos_start` (flash lights) is the only remote command requiring no PIN. It worked while every PIN-gated command failed. That single split proved the app, the Cloudflare proxy, HA, the VIN and the integration were all healthy and isolated the fault to the PIN in one step — **after I had wasted effort on a false reading of the config-entry API.**
+
+And the credit, recorded in the same commit: *"the whole thread started from Jeff noticing the real Mercedes app was prompting for a PIN."* New standing rule: `system_log/list` is the **first** stop for a failing service call.
+
+**Cost to Jeff:** The tail of the two dead weeks from #34, plus being told two different wrong things about his own car in seven minutes.
+
+**Lesson:** An API returning empty is not the same as a value being empty — and when one no-auth command works while every authed one fails, you already have the answer.
+
+---
+
+### 36 — Stale data in three sections
+
+**When:** 2026-07-24 00:16.
+
+**Symptom:** Sensors, cameras and weather frozen at whatever they showed when the app booted.
+
+**Real root cause:** `2c95ffc` — *"`mowerSync`, `loadCameras`, and `loadWeather` only ran ONCE at startup with no periodic refresh. The 60s self-heal interval covered Guardian/Lights/Vacuum/Utilities/Car but missed these three."* Section-switching didn't reload them either.
+
+**Fix:** `2c95ffc` — section switch reloads, 60 s interval extended, weather gets its own 5-minute refresh. Lesson written to `CLAUDE.md` (`15ca7d8`): *"when adding a new loader, add it to BOTH the section switch AND the periodic interval."*
+
+**The same class, one layer deeper, ten days later:** `d15079c` (08-04) — *"`loadClimate()` was only wired into `hccSection('home', …)`, which runs when a user navigates TO home via a nav tap. **HOME is already the default active section in the static HTML, so that function never actually fired on a plain app open** — only on manually navigating away and back."* The LUX thermostat had been effectively dead on every normal launch.
+
+**Cost to Jeff:** Wrong numbers presented as current — the worst kind of wrong, because it looks right.
+
+**Lesson:** A loader wired only to a navigation event never runs for the screen the app opens on.
+
+---
+
+### 37 — The water pit-radio: one real fault, then a false alarm that sent Jeff to the utility
+
+**When:** 2026-07-28 (real outage) and 2026-08-01 (false alarm). Two incidents, deliberately kept separate in the record and worth keeping separate here.
+
+#### 37a — The genuine outage, 2026-07-28
+
+**Symptom:** Water meter readings stopped at ~17:39 UTC.
+
+**Diagnosis method (good):** `281d65b` used rtlamr2mqtt's own `listen_mode` — an unfiltered reception log — with the gas meter as a control on the same dongle, antenna and distance: *"gas showed up in <90s, water never appeared at all."* That rules out config and software entirely. Conclusion: the external MIU (`100WD`) is not transmitting; it is WHUD's equipment.
+
+**Also deliberately ruled out, and recorded:** the same-day recorder fix, because *"water kept transmitting fine for 5+ more hours after that, only going silent at ~17:39 UTC — the timing doesn't line up."*
+
+**Competing explanation from the other session, three days later:** `b4f11df` (07-31) — *"proximate cause was rtlamr2mqtt losing the RTL-SDR USB device, fixed by a full Beehive host reboot."* Both explanations sat in `CLAUDE.md` unreconciled until `0b72961` flagged it.
+
+**Jeff's call, `13502b9` (07-31):** *"water's transmitting fine now and he explicitly does not want to call WHUD about it — doesn't want to raise a flag with the utility district over something that's already resolved."* Marked CLOSED, "do not re-raise."
+
+#### 37b — The false alarm, 2026-08-01 — the clearest "we sent Jeff on an errand he didn't need" in the record
+
+**Symptom:** During a deliberate experiment, the water meter reported the **exact same value (`179097`) on every single decode for ~47 minutes**, while the gas meter on the same dongle ticked normally.
+
+**How convincing the wrong evidence was:** the test was a controlled experiment in which **Jeff physically participated** — *"triggered a B-Hyve irrigation zone via HA + **Jeff took a real shower**, both running simultaneously for ~47 min."* The heartbeat sensor (`sensor.water_meter_last_seen`) updated normally every ~1.5–5 minutes throughout.
+
+**Wrong conclusion, `593ddf7`:** *"Radio heartbeat is normal but the register is stuck rebroadcasting a stale reading — proven against the raw rtlamr2mqtt decoder log… **Jeff needs to call WHUD again.**"* — issued to a man who had explicitly closed the WHUD question the night before precisely because he did **not** want to call them. It also declared the leak-detection work blocked.
+
+**Real root cause, `fb5068c`, the same day:**
+
+> `rtlamr2mqtt` runs `rtlamr` with **`-unique=true`**, which only re-publishes a reading when the decoded value itself changes — the meter's own transmitter evidently updates its broadcast register in batches (gaps varied from ~20 min to ~3 hours), not continuously with live flow.
+>
+> The `sensor.water_meter_last_seen` heartbeat pinging normally the whole time was a real signal I misread — **it confirms every RF catch, not that the *value* had refreshed, and I conflated the two.** **No WHUD call needed — the meter and pit radio are both healthy.**
+
+Proven properly: an IDM-protocol probe over ~2 hours returned **zero IDM packets** (so `scm+` is the complete picture, not a partial one), and a longer observation window caught the real value moving twice — `179097` → `179371` (the shower/irrigation usage, arriving ~20 min late) → `179473`.
+
+**Handling that deserves credit:** the wrong diagnosis was **kept in `CLAUDE.md` beneath the retraction rather than deleted** — *"See the entry directly below for the original (incorrect) diagnosis, kept for the record rather than deleted."* And the lesson was banked and **reused correctly four days later**: on 08-05 (`aa6566a`) an ~18.7-hour water-meter gap was triaged as "likely the known benign batching pattern," using the same gas-meter control check, instead of triggering another alarm.
+
+**Cost to Jeff:** He ran a 47-minute test and took a shower on request to generate a wrong answer, and was told to make a phone call he had specifically declined to make. All test-time add-on config changes were reverted.
+
+**Lesson:** A heartbeat proves the radio is alive, not that the number is fresh — and "unknown/unavailable is not a fault" is now the first hard-won invariant in `docs/SESSION_START.md`: *"gaps of 20 min to 3 hours are normal… **This caused a false WHUD alarm on 08-01. Watch longer.**"*
+
+---
+
+### 38 — The recorder was dead for twenty-six days
+
+**When:** 2026-07-02 → 2026-07-28.
+
+**Symptom:** No usable Home Assistant history for anything — which quietly undermined every feature built on `history/period`: water "This Cycle," electric backfill, and later the sewer-overcharge case.
+
+**Real root cause:** `configuration.yaml` was missing `default_config:` — recorded in `c94e7aa`: *"Recorder had been dead 07-02 to 07-28 (missing `default_config:`, root-caused and fixed by the coworker session)."*
+
+**Fix:** coworker session, 07-28.
+
+**Consequences that surfaced later:** `e71401a` (07-28) found "this HA instance's recorder history currently only goes back to ~12:15 UTC today." And `aa6566a` (08-05) found the sewer-case function `irrGalFromHistory()` **had never once fired against real data** — recorder retention at its 10-day default with no `purge_keep_days` override, B-Hyve zone history only starting 07-30 against a cycle beginning 07-21, and zero zone "on" events in eight days: *"mechanically works, just unexercised."*
+
+**Cost to Jeff:** Twenty-six days of history he thought he was accumulating, which mattered because he is building a **refund case against a utility** on that data.
+
+**Lesson:** A missing one-line include can invalidate a month of evidence, and nothing will tell you.
+
+---
+
+### 39 — "New automations don't save"
+
+**When:** Long-standing; root-caused 2026-07-31.
+
+**Symptom:** Automations created in HA's UI simply didn't exist afterwards.
+
+**Real root cause:** `b4f11df` — *"`configuration.yaml` was missing `automation: !include automations.yaml`, so UI-created automations wrote to disk but were never part of the loaded config tree."*
+
+**Fix:** `b4f11df` — add the include, restart. *"3 real automations came alive + 2 duplicate Recorder Watchdog copies deleted before they could triple-fire."*
+
+**Cost to Jeff:** Every automation he built himself in the UI, silently discarded, for an unrecorded length of time.
+
+**Why it belongs next to #22:** it is the **identical failure**, in the same file, three weeks later — a missing `!include` making valid config invisible. The first occurrence taught nothing that prevented the second.
+
+**Lesson:** After fixing a missing-include bug, audit `configuration.yaml` for every *other* missing include the same day.
+
+---
+
+### 40 — The Blink crash loop, and the watchdog that could not see it
+
+**When:** 2026-07-31 → 2026-08-01.
+
+**Symptom:** Jeff: "camera popups missing or 10-15 min late."
+
+**Wrong assumption:** That an existing watchdog covered it. It did not, for a subtle reason.
+
+**Real root cause (two layers):**
+1. `fd15642` — an upstream blinkpy `LoginError` crash (home-assistant/core #176836, fronzbot/blinkpy #1217, no fix in either) left motion sensors **stuck at stale values instead of going `unavailable`** — so the watchdog, which looked for unavailability, could never trigger.
+2. `a001f2e` — the first auto-heal was itself insufficient: *"discovered `system_log_event` only fires **once per unique message**, so a repeating crash-loop could slip past the error-triggered watchdog."*
+
+**Fix:** `fd15642` (reload the Blink integration within seconds of the crash) + `a001f2e` (an **unconditional 15-minute periodic reload** with no error-detection dependency at all).
+
+**Vindication, measured:** `62e99b5` (08-01) — *"Confirmed the Blink periodic backstop caught **73 real crashes overnight** with zero user impact, proving that design decision was right."*
+
+**Cost to Jeff:** Late or missing camera alerts; and note that **73 crashes a night** was the *normal* operating condition of his security cameras.
+
+**Lesson:** A watchdog that depends on the failure announcing itself is not a watchdog — add an unconditional backstop.
+
+---
+
+### 41 — Angela's phone tracker
+
+**When:** Flagged 2026-07-31 (`a001f2e`: "Angela's Almost Home hasn't fired since 07-16"); root-caused 2026-08-01.
+
+**Symptom:** The "Angela Almost Home" notification — a heads-up ~10 minutes before Jeff's wife arrives — had not fired in two weeks.
+
+**Wrong theories / attempts, in order:**
+1. **iOS location permissions.** Always / Precise / Background App Refresh all set correctly. No change.
+2. **Manually opening the app.** No fresh update.
+3. **`command_request_location_update` pushes.** No response — and the record is careful about this one: *"confirmed via official Companion App docs this is a known 'hit-or-miss' feature, so its failure wasn't diagnostic on its own."*
+4. **Route around it with the Mercedes GPS.** `66b3f49` — and this is the sharp bit: the two existing "backup" triggers *"both secretly depended on her unreliable phone tracker, which is why the prior 'backup' never actually helped."* A backup that shares the primary's single point of failure is not a backup.
+5. **`3537b00` (same day)** proposed "Angela's phone-side location settings as the real fix" — which the evening's commit then overrode.
+
+**Real root cause:** `2770fee` — found in the Companion App's **Settings → Notifications** (relabelled in a newer app version, no longer where the docs say): **her Push ID was empty/stale.** Her phone had never registered a valid push-delivery channel with HA, so nothing — including background significant-location-change wake-ups — could reach the app.
+
+**Verified, not assumed:** *"a genuinely fresh organic background update landed (not from a manual poke), with real GPS movement (accuracy 3.6 m → 10.4 m) and real battery drain (90% → 75%) between checks."*
+
+**Cost to Jeff:** Two weeks of a family-safety feature silently off, and a chunk of two sessions.
+
+**Lesson:** Before debugging what an app *does*, confirm the channel by which anything can reach it — and a backup that reads the same sensor as the primary is decoration.
+
+---
+
+### 42 — "Alexa, fast forward the commercials"
+
+**When:** 2026-08-03; still not fully closed at branch tip.
+
+**Symptom:** Jeff says the phrase; nothing happens.
+
+**Wrong theories / attempts, in order:**
+1. **The app is missing buttons.** `a5db5dc` — audited every Fire TV line in the repo and found the app's remote card only ever had Power and Play/Pause: *"fast-forward/rewind was **never built, not a regression**."* Added FF/RW, verified against the `python-androidtv` library source rather than guessed. Real work, unrelated to the actual complaint.
+2. **Beehive is misconfigured / ADB pairing is broken.** Neither.
+3. **Angela created an Alexa Routine and got silence.** Turned out no Routine had actually saved.
+
+**Real root cause — two independent impossibilities, `d755a6a`:**
+- HA core's `alexa/handlers.py` **has no handler for `PlaybackController.FastForward`/`Rewind` at all** (only Play/Pause/Stop/Next/Previous) — open issue home-assistant/core #87327.
+- Amazon **natively intercepts** custom Routine phrases that sound like built-in media commands, so the words "fast forward" never reach a Routine. Cross-checked on Amazon's own forums against their reported "Alexa, bedtime" case.
+
+*"The literal phrase 'fast forward' can never trigger `script.hcc_skip_commercial`, in either exposure path — this isn't a Beehive misconfiguration or an ADB pairing issue."*
+
+**And one more, found earlier (`131dc16`, 07-21):** `script.hcc_skip_commercial` and `script.hcc_resume_fire_tv` had existed and worked for weeks but *"were **never exposed to Alexa** — that's the whole reason 'Alexa FF the commercials' wasn't working."*
+
+**Fix:** Skip Routines entirely — the script is already exposed, so Alexa's **native "Alexa, turn on FF the Commercials"** phrasing reaches HA directly. Confirmed live twice.
+
+**Still open at tip** (`/tip/CLAUDE.md`, Pending Item 16): the **skip distance is wrong.** Three `keyevent 90` presses 1.2 s apart "skipped way too far" in Sling (media apps ramp FF speed non-linearly on rapid repeats); reduced to a single press and **not yet re-tested against Jeff's actual target of 4:40 (280 s)**. Also recorded as the better long-term path: HA's own local Assist has no reserved-phrase problem.
+
+**Cost to Jeff:** Weeks of a voice command that could never have worked, and one that still overshoots.
+
+**Lesson:** Check whether the platform even implements the verb before debugging your own config.
+
+---
+
+### 43 — The NOAA radio "paysite" and the invented callsign
+
+**When:** 2026-08-03.
+
+**Symptom:** Jeff reported the NOAA Weather Radio button was landing on *"some type of paysite."*
+
+**Real root cause:** `dd2c6fa` — the button pointed at a **TuneIn *search* URL**, not a station.
+
+**The part that makes this an incident rather than a typo:** the same commit retracts a fabrication —
+
+> KIG79, 162.550 MHz, Nashville — covers White House (**not 'KIH21' as I'd guessed in an earlier session before this fix; that callsign doesn't exist**).
+
+A radio station callsign was invented and shipped. The correct one was verified against **NWS's own coverage database plus four independent radio directories** before replacing it.
+
+A second link-quality find in the same audit: the "Mower Diagrams" and "eReplacementParts (alt)" buttons pointed at two different serial-number sub-ranges, and only Jeff could resolve it — which he did by photographing the Toro data plate (`1c69752`): Serial No. 401338948, range 400000000–402081999, *"recorded permanently in CLAUDE.md so this is never ambiguous again."* The alt link had been pointing at the **wrong range** (402082000–403599999).
+
+**Cost to Jeff:** Two broken links, and one fabricated fact presented as knowledge in a weather app built for a trained storm spotter.
+
+**Lesson:** A callsign, a model number and a part range are all facts you either verified this session or made up — there is no third state. (Two days later this became a PROTECTED rule; see #49.)
+
+---
+
+### 44 — Sewer overcharge: the real number was computed and never saved
+
+**When:** 2026-08-06 01:18; compounded through 08-05/08-06.
+
+**Symptom:** None visible. The "Total sewer overcharge tracked" running total looked fine — it was simply built on the worse number.
+
+**Real root cause:** `8158128`, verbatim:
+
+> `irrGalFromHistory()` computed the accurate irrigation gallons from real B-Hyve on/off runtime (accounts for rain delays, skipped days) but **only ever displayed it in the on-screen note** — the tracked `water_billing_history` entry that "Total sewer overcharge tracked" sums was only ever written by the rougher schedule-based estimate and never refreshed.
+
+**Why this matters more than a normal bug:** this running total is **evidence in a real billing dispute.** Jeff is building a refund case against WHUD / the City of White House for sewer fees charged on irrigation water that never enters the sewer. The number in the app was the number in the argument.
+
+**Three compounding failures on the same dataset:**
+1. `8158128` — the good number was never persisted (above). Fixed; and the commit is honest about its limits: *"Could not test the live B-Hyve/HA fetch itself — no network path to Jeff's real HA instance from this sandbox."*
+2. `aa6566a` (coworker, 08-05) — the fix **had never actually fired**: recorder retention at the 10-day default, B-Hyve history starting 07-30 vs a cycle start of 07-21, and zero zone "on" events in eight days. *"Mechanically works, just unexercised."*
+3. `4252086` → `0827617` (08-06) — the per-zone GPM constants were **wrong by 23–49%**, based on the wrong head counts and nozzle model. Real measured values (isolated single-zone tests, timed off HA switch timestamps, gallons measured off the real water meter, cross-checked against Hunter's MP Rotator spec sheet) replaced `{1:17.2, 2:14.3, 5:5.7}` with `{1:8.78, 2:10.09, 5:4.4}` — *"meaning the tracked sewer-overcharge total has likely been significantly overstated."*
+
+**Accepted and recorded rather than hidden:** past closed billing cycles are **not** retroactively corrected — "no HA history exists to recompute them."
+
+**Cost to Jeff:** A legal/billing argument built on an inflated number he might have taken to the City. The overstatement was caught before it was used, but only by measurement, and only because someone went outside with a stopwatch.
+
+**Lesson:** If a number is going to be used as evidence, it must be measured, persisted, and proven to have fired at least once against real data.
+
+---
+
+### 45 — Electric SmartHub: shipped, looked perfect, was fed nothing
+
+**When:** Shipped 2026-08-06 06:22 UTC; found broken the same night at 02:48 CDT; fixed 07:56 UTC.
+
+**Symptom:** None visible. Today / Yesterday / Peak Hour / Last 7 Days cells rendered exactly as designed — and were connected to nothing.
+
+**Wrong assumption:** That mocked-data tests plus correctly rendering UI equals a working feature.
+
+**Real root cause — found only by firing the exact command at the live system.** `fa8e153`, coworker session:
+
+> Fired the exact WS command from `ha-stats.js` directly against live HA and found two real bugs keeping Today/Yesterday/Peak Hour/Last 7 Days **silently broken despite the UI cells rendering**: (1) `history/statistics_during_period` **doesn't exist** on this HA version (Core 2026.8.0), real command is `recorder/statistics_during_period`; (2) the **`change` field always reads 0** for this sensor even across real usage growth — code needs to diff cumulative `sum`/`state` between period boundaries instead.
+
+The live evidence: *"sum moved 761→872 over 48h while every change was 0."*
+
+**Fix:** `5c41c8d` — command renamed, and a `toDiffedSeries()` helper added that diffs consecutive cumulative readings, *"same 'diff two cumulative readings' pattern already used by `irrGalFromHistory()` and the water billing math."*
+
+**Cost to Jeff:** None realised — caught within hours by the session that could touch the real house. Included in this ledger because it is **the exact miniature of the hour-meter failure** (#54) that was still five days from being discovered: *UI renders ≠ feature works.*
+
+**Lesson:** A feature that talks to someone else's system is unverified until someone fires its real request at their real system.
+
+---
+
+### 46 — The glassmorphism war
+
+**When:** 2026-08-06, 09:24 → 12:44 CDT. Roughly a dozen commits, one total revert, one rebuild, one root-cause fix.
+
+**Symptom:** Jeff sent five real screenshots from the live app with real data. The redesign looked bad — stat chips colliding with content in the photos, "worse than before."
+
+**Wrong theories / attempts, in order:**
+1. **Iterate the recipe.** `3ff1eec`, `42ff38d`, `4464d87`, `468e6a1`, `d6514f6`, `f4290d7` — six rounds of applying and auditing Jeff's own two-document glassmorphism reference. (`d6514f6` deserves credit: asked directly whether every technique was applied, it audited honestly and found "8 were done, 4 were real gaps.")
+2. **Darken the gradient under the chips.** `53f697f` — twice. Neither worked.
+3. **Revert everything.** `2bf50db` — *"Jeff asked to stop and revert."* Back to `7cccc59`.
+
+**Why the developer's own tests missed it — the confession, verbatim from `CHANGELOG_ARCHIVE.md`:**
+
+> Built it in stages over several commits … and **believed it was solid after passing lint/smoke-test and my own mocked-data Playwright screenshots. It wasn't.** … **my own testing had used short placeholder values ("— gal") which never made the chip row wide enough to visibly hit that content, so I missed it entirely, then wrongly told Jeff Water was fine when it wasn't (never actually checked it against real long data).**
+
+**The rebuild that worked:** `30d1df3` — done from the coworker's PC "measured and verified against the real deployed app with real live data at a true 390px phone viewport — the thing the first attempt could not do." The overlap was **measured**, not assumed (chip block at 71.1%/85.2%/66.6% of photo height vs printed strips at 67–88%: "a direct overlap on all three").
+
+**And then the actual root cause, `45485f0` — the pivot of the whole arc:**
+
+> This is the root-cause fix for every utility-card fight in the history below. Those photos were **AI marketing mock-ups**: half of each frame was a fake ad — "WHITE HOUSE UTILITIES COMMAND CENTER", "SMART MEASUREMENT. EVERY DROP COUNTS.", the SAFE SUPPLY / USAGE INSIGHTS icon strips. **Every constraint in this area (the 46% width, the per-card hand-calibrated top values, the collisions, the first attempt's full revert) existed only to dodge text that was never real.**
+
+Regenerating the three photos cost **~9 cents each, first try, no retries.** Every hand-calibrated dodge constant was then deleted: *"There is nothing left to dodge."* The sweep continued through five section heroes (`ecf6f25`) and `hero-cameras.jpg` — *"the worst offender of the lot: a 1300x2042 portrait mock-up of **the app's OWN interface**"* with six dummy camera tiles sitting above the real camera grid (`1eba07f`).
+
+Jeff's own words on why it looked wrong (`ecf6f25`): *"I hate those logos that are on the picture. I don't mind the text but it looks awful with them right next to the real icons."*
+
+**One more self-inflicted bug found in the same arc** (`384c07d`): *"An earlier edit left comment prose outside its `/* */` block, which **silently killed the whole `.util-overlay-bottom` rule** and made all three readouts vanish off the photos. Caught because the parsed CSS rule count dropped."*
+
+**Cost to Jeff:** A multi-commit redesign thrown away; having to say *stop*; being told the Water card was fine when it wasn't; and — the real bill — **weeks of prior layout work across the whole app spent dodging text that could have been deleted for 27 cents.**
+
+**Lessons (recorded verbatim in the changelog):** *"(1) test every visual claim against realistic LONG real-world data from the start, never short placeholders; (2) **get Jeff's visual sign-off on one card before rolling a treatment out to all of them**."* And the deeper one: when every fix in an area is a workaround, delete the thing being worked around.
+
+---
+
+### 47 — Jeff stripped out of his own photographs
+
+**When:** 2026-08-06 11:25 CDT.
+
+**Symptom:** The irrigation and yard hero photos came back from a regeneration pass with the person removed.
+
+**Wrong assumption, stated plainly in `595ec23`:**
+
+> **Correcting a real mistake: I stripped the person out of the irrigation and yard heroes assuming they were stock models. They're Jeff.**
+
+**Fix:** Both regenerated from the pre-edit originals with him kept exactly as he was — *"same face, expression, LawnCareLife shirt, watch, thumbs-up pose"* — and only the printed fake title/tagline/icon rows removed. Promoted to a **PROTECTED `CLAUDE.md` section** the same day (`db9ffcc`, headed *"Learned by getting it wrong"*):
+
+> - `hero-irr.jpg` and `hero-yard.jpg` contain Jeff himself. **Never remove him.**
+> - `images/zones/` are real photographs of Jeff's actual yard. **Don't regenerate them.**
+> - The couple in the old `hero-car.jpg` were not Jeff and Angela.
+> - **Rule: if a photo has a person or a real place in it, confirm what it is before altering it.**
+
+**The rule was honoured five days later** (`6913393`, 08-11): the six zone photos were *"CROPPED, NOT REGENERATED — none of the real yard was altered, per the protected photo rule."*
+
+**And the rule grew a second clause after a near-repeat** (`e5d57f4`, 08-11): a hero-sizing fix cropped the top of his head off in iPad landscape. Jeff: *"You got it they are rendering correctly now, however my head is cut off in the yard hero pic"*, then *"it's only in the iPad landscape that it is cut off."* Measured rather than eyeballed — *"his hair starts at image row ~22 of 851 — essentially zero headroom"*; `center center` cut 94 px into his head at 1194 px and 145 px at 2560. Fixed to `center top`, with the tip rule: **"CROPPING COUNTS AS ALTERING HIM."**
+
+**Cost to Jeff:** Not measurable in hours. This is an app built for one man, and the man was edited out of it.
+
+**Lesson:** In a personal app, a photograph is a fact about someone's life — confirm what it is before you touch it.
+
+---
+
+### 48 — 124 failure emails in one week
+
+**When:** Workflow added 2026-06-22 (`8fdae39`); documented as broken 2026-06-23; stopped 2026-08-06. **Six and a half weeks.**
+
+**Symptom:** Jeff's inbox. `ac99b33`:
+
+> This workflow **has never worked**. It calls `cloudflare/pages-action@v1` with `secrets.CLOUDFLARE_API_TOKEN`, which does not exist on this repo, so every push to the branch failed instantly and sent Jeff a failure email — **124 of them in the past week alone, dozens on 08-06 by itself. It was the single largest source of mail in his inbox.**
+
+**Why it ran so long — and this is the interesting part:** it was known. From the very first `CLAUDE.md` (`e8f0312`, 06-23) onward the file said: *"**GitHub Actions is BROKEN** … Do NOT try to fix this — it is irrelevant."* It was documented as irrelevant **because deploys were unaffected** (Cloudflare Pages' native Git integration does the real deploying) — and nobody connected "harmless" to "emails Jeff every single push for six weeks."
+
+**Fix:** `ac99b33` — trigger changed from `push` to `workflow_dispatch` rather than deleting the file, "so the job definition stays available if the secret is ever added, but it can never fire automatically again."
+
+**Cost to Jeff:** Hundreds of failure emails over six weeks, from a system a note in the memory file called irrelevant.
+
+**Lesson:** "Irrelevant to the build" is not the same as "harmless to the human" — a broken thing that emails someone is not irrelevant.
+
+---
+
+### 49 — Three wrong garage-door parts in a row
+
+**When:** 2026-08-05, 18:33 → 19:02. Six commits in ninety minutes, ending in a permanent rule.
+
+**Symptom:** Jeff asked what part to buy for his garage door, and was told three different wrong answers before finding the right one himself.
+
+**The sequence:**
+1. **`7b60e43` (08-04)** — recommend a **Gelidus ratgdo board (~$22-25)**, and explicitly flag plain relay modules as *"NOT protocol-compatible substitutes."*
+2. **`65d7e49`** — Jeff bridges the wall-button wires directly; the door toggles. That is ratgdo's own documented dry-contact test — *"true Security+2.0 wouldn't respond to a raw short."* A magnetic reed sensor is added to the shopping list.
+3. **`7e4726a`** — reed sensor dropped: *"Jeff doesn't park in the garage, so real-time door position isn't needed."*
+4. **`10f0f13`** — **Jeff catches the reasoning error himself:** *"the ratgdo/Gelidus board's price premium is entirely for decoding the Security+ protocol, which his confirmed dry-contact opener doesn't use."* Switch to a **SONOFF Basic R2/R4 (~$8-10)**, ~$15 cheaper. (This also silently reverses `7b60e43`'s "NOT protocol-compatible" claim — true only for Security+ openers, which Jeff's isn't.)
+5. **`4bfacf3`** — **Jeff pushes back again, and is right again:** *"'SONOFF Basic' wasn't specific enough among SONOFF's confusing relay lineup — and it was actually the wrong pick: **Basic-series switches are mains-voltage (110-240V) and need modification for a low-voltage garage circuit.**"* Corrected to SONOFF **SV** ("Safe Voltage," 5-24 V).
+6. **`f015867`** — **Jeff finds the actually-right part himself:** SONOFF **MINI-D** — native Matter (no ESPHome flashing), dry-contact relay output, hardware Inching Mode for a proper momentary pulse. *"Verified all of this via research before committing."*
+
+**Real root cause:** `7f73148` — product models were being named **from memory**, not from a search performed in that session.
+
+**Fix:** A PROTECTED standing rule alongside the Debugging Protocol (`/tip/CLAUDE.md`):
+
+> **8. NEVER name a specific product/model to Jeff from memory (PROTECTED — Jeff's standing rule 08-05, added after the garage door incident).** … three guessed answers on one part, in a row, before Jeff found the actually-correct SONOFF MINI-D himself. **He does not have time to be the fact-checker on my hardware recommendations.** … If I haven't checked, say "let me check."
+
+**Cost to Jeff:** **Near-miss on money and safety** — had he bought the SONOFF Basic as recommended, it would have been the wrong voltage class for a low-voltage garage circuit. Nothing was actually purchased wrongly. The real cost was trust: he became the fact-checker.
+
+**Postscript, 08-08:** when the MINI-D arrived, `8d53af4` explicitly notes *"the garage door hardware area already burned trust once on guessed specs, so researched properly against SONOFF's own docs and independent reviews this time"* — and found two things that only research produces: the device needs separate AC/DC power terminals, and **Inching Mode (the whole reason it works for a garage door) can only be set in the eWeLink app, not via HA's Matter integration.**
+
+**Lesson:** A plausible-sounding model number is a guess wearing a uniform.
+
+---
+
+### 50 — The sideways wall iPad
+
+**When:** 2026-08-08 21:35 → 2026-08-11 00:23.
+
+**Symptom:** The wall-mounted kiosk iPad rendered the whole page sideways — nav bar vertical.
+
+**Wrong theories / attempts, in order:**
+1. **iOS Guided Access / rotation lock.** `9da43a5` — diagnosed as "a known iOS Guided Access/rotation-lock symptom" and a tablet-scoped **CSS auto-rotate transform shipped live as a "backstop"** — with the honesty caveat baked into the commit that the direction could not be verified from the sandbox: *"a wrong direction is a one-line flip."* The changelog phrase is the tell: *"Full honesty on verification, **not overclaiming a 4th time**"* — the record admitting it had already overclaimed three times in that thread.
+2. **Framing it as an inherent limitation.** Demolished by Jeff, quoted in `24136c7`: *"**it worked perfectly before, you can't say it's a limitation of the app or the iPad.**"* The speculative CSS was reverted 25 minutes after shipping — *"leaving an unproven guess live while trying to find an actual regression only adds a confound. **Status: genuinely unsolved.**"*
+3. **Follow the timeline.** `bb9d1cf` — Jeff again, and this is the sentence that solved it: *"**It worked perfectly before the picture edit.**"* That pointed straight at `5d22cf7`, the session's **own** hero `max-height` → `clamp()` change from that morning. Reverted, with an unusually candid admission: *"**Honest gap: I don't yet have a mechanism** for how a max-height change on hero photos could cause the whole page's nav bar to render vertically — that's still unexplained — but the timeline is the strongest signal available."*
+
+**Real root cause, three days later:** `86b47e6` (08-11) — Chromium measured full-width everywhere, *"so this is a Safari divergence"*: the ambiguous combination `aspect-ratio` + `height:auto` + `max-height` is resolved differently by different engines. *"Fixed by removing the ambiguity rather than guessing at a workaround"* — explicit height with `aspect-ratio:auto` at ≥768px.
+
+**Two self-inflicted follow-ons from that fix, both caught:** it briefly squashed the irrigation and car heroes 796→560 px (they also carry `.sec-hero`), caught mid-fix; and it made `object-fit:cover` crop vertically, which **cut Jeff's head off** the yard hero (see #47).
+
+**One piece of good practice worth preserving:** in the same thread, Claude caught a discrepancy in Jeff's own evidence rather than silently trusting it — *"their status-bar timestamps (4:54-4:55 PM) were EARLIER than the ones that had shown it fixed (9:17-9:19 PM) — flagged this to Jeff rather than assuming the photos were current."*
+
+**Cost to Jeff:** Three days of a sideways wall display, three photo rounds, and an unverified guess shipped live to the device he was looking at.
+
+**Lesson:** "It worked before X" beats any theory you have — go to `git log` first, and never leave an admitted guess deployed while hunting a regression.
+
+---
+
+### 51 — The heartbeat that erased the whole mow
+
+**When:** 2026-08-10 20:24. The bug itself had existed since the sensor endpoint was written.
+
+**Symptom:** Every mow's real telemetry disappearing minutes after the mow ended.
+
+**Real root cause:** `60c5d28`, verbatim:
+
+> The server stored exactly one reading and every POST fully overwrote it — including the sensor box's 5-min "parked, engine off" heartbeat, which only carries battery/wifi/temp. So the moment the box sent its first heartbeat after being parked to charge, **the entire mow's real telemetry (hours, RPM, distance, GPS track) got wiped** and replaced by a payload with none of that data. **This defeated the whole point of the sensor system — driving the hour meter automatically.**
+
+**Fix (which did not work — see below):** `60c5d28` made `onRequestPost` **merge** a heartbeat onto the last stored reading rather than replace it. Verified with a unit test against the real handlers and a mocked KV. Follow-ups the same hour: `723eeab` added a `hours_history` KV key snapshotting each completed mow; `ee21a1e` added a `sensor_log` of every reading (5,000-entry cap).
+
+**Why it is in this ledger:** **the fix never engaged.** `d18db7b` (08-11), from the session holding the actual hardware:
+
+> Mow history had **NEVER** recorded a single mow. The trigger waited for "a heartbeat follows a live reading" and read totals from `prev`, which assumed the box posts during a mow. **It does not — it posts only while parked, so that transition cannot occur.** It was also gated on `typeof prev.hours === 'number'`, never true because the box sent `hours_seconds`.
+
+The task brief written the same day (`docs/mower/CLOUD_SESSION_TASKS_2026-08-11.md`) states it flatly: *"the box **only uploads while PARKED**, every 300 s. It does not post during a mow (WiFi is off then). So 'a heartbeat followed a live reading' is a state that can never occur — which is why several things below never fired."*
+
+**Real fix:** `d18db7b` — retrigger off the firmware's new `mow_ended` flag and snapshot from `body`, after the firmware was rewritten to send fields that actually exist (`6913393`).
+
+**Cost to Jeff:** Every mow's telemetry, lost at the moment it mattered — and then a full day of engineering built on top of a model of his hardware that was fiction.
+
+**Lesson:** A unit test against a mocked KV proves your code does what you think; it says nothing about whether the device behaves the way you think.
+
+---
+
+### 52 — The exploding yard map
+
+**When:** 2026-08-10 20:59. **Two prior wrong answers given to Jeff before this.**
+
+**Symptom:** Jeff's screenshots showed the mowing track "sprayed across the road and through the house," rendered at 10–100× true size.
+
+**Wrong theory, given twice:** that it was **user tap precision** on the "Pin Track to Photo" calibration. `7adc108` corrects it explicitly: *"Root cause of the garbage map — **a genuine math flaw, not user tap precision (which is what I'd wrongly told him twice)**."*
+
+**Real root cause:** the old calibration derived both rotation **and scale** from only the track's **first and last GPS points**:
+
+> When a mow ends near where it started — the normal case, you finish back at the garage — that GPS delta is near-zero, so dividing the tapped pixel delta by it produced an enormous scale factor.
+
+**Fix:** `7adc108` — auto-fit from the full data extent "so it cannot explode."
+
+**And the deeper problem underneath it:** `5959b55` — the bundled `yard-aerial.jpg` **was not Jeff's property at all.** It carries Fort Worth, Texas coordinates (32.899°N, −97.033°W); Jeff's yard is in White House, Tennessee. *"which is the entire reason manual alignment existed."* Replaced with live georeferenced satellite tiles (USGS, then Esri for sharpness), making GPS→pixel exact arithmetic — "the track lands on the real grass by construction, nothing to align." `6d37ff0` then found `_buildSimTrack()` **still hardcoded the Fort Worth coordinates**, so tapping Simulate "would have yanked the map ~700 miles off his property."
+
+**Cost to Jeff:** A map of his yard that was a map of somewhere else, a calibration UI that existed only because of that, and being told twice that the garbage output was his tapping.
+
+**Lesson:** When you blame the user's input twice, the third answer is in your arithmetic — and check that the photo is actually of the place.
+
+---
+
+### 53 — The coverage-map localStorage blowout that reset Jeff's hours
+
+**When:** 2026-08-10. Introduced ~20:59; detonated by 23:10. **The most serious app-side data-loss bug in the record.**
+
+**Symptom:** Jeff, verbatim: *"Why are my hours now set at 5.9, the real actual hours are 12.1."* His entire saved state — hour meter, service log, maintenance history — reset to factory defaults.
+
+**Real root cause, owned in the first line of `b568a4b`:**
+
+> Jeff's hours reset to 5.9 — the factory default baseline — meaning his whole saved state was wiped. **Root cause is mine, from earlier today.**
+>
+> The entire S object (hour meter, service log, maintenance history) is persisted as one localStorage blob. When I added the cumulative coverage map I put it in that same object, and `syncYardCoverage` then wrote the full server coverage map — tens of thousands of cells — into it on every sync. That pushed the blob past the storage quota, `save()` threw, **and the catch silently swallowed it**, so hour updates stopped persisting; once the entry was lost the boot path fell back to `DEFAULT_STATE` and took his real hours with it.
+>
+> **Server-owned, re-downloadable, unbounded data does not belong in the user's core state blob.**
+
+Four failures had to line up: unbounded data in a bounded store; a bounded store with no size check; a `catch` that swallowed the quota exception; and a boot path that treats "missing" as "factory reset."
+
+**Fix:** `b568a4b`, three parts — coverage moved out of `S` into module-scope memory (server-authoritative, re-fetched every sync, never persisted); a load-time migration that strips the legacy fields from already-bloated devices; and a tiny separate `toro21200_core` mirror key (hours, baseline, lastSensorHours) so hours can never again be silently zeroed. `save()` no longer swallows failure. Proved by seeding a bloated 3,294-cell state (blob shrank to 356 bytes, hours preserved at 12.1), **then deleting the main blob entirely and reloading — hours came back 12.1, not 5.9.**
+
+**The honest close, which is the part that matters:** *"**Jeff still needs to re-enter 12.1 once via SET HOURS** — the mirror protects from here on, but it can't recover a value that was already lost before it existed."*
+
+**The next bomb, found only because Jeff asked.** `86b47e6` (08-11). Jeff: *"Is everything fix and 💯 correct… make sure we don't have any other situation like this out there waiting…"* The audit found **the same bug class one layer down**: service photos stored inline in `S.log` as base64 data URLs, ~80–200 KB each in an unbounded log — *"~20-30 logged photos would have blown the same quota and wiped the hour meter all over again."* Same audit hardened five credential writes behind `safeSetItem` and guarded three unprotected `x.hrs.toFixed(1)` calls where *"one malformed log entry would have thrown and taken out the whole dashboard."*
+
+**Cost to Jeff:** His real engine hours — the number the entire project exists to track — permanently unrecoverable from the app, re-entered by hand for the **second** time (see #5, 06-23).
+
+**Lesson:** A silent `catch` around a write is a data-loss bug with a delay fuse — and unbounded server data in a user's state blob is a quota bomb with a date on it.
+
+---
+
+### 54 — **THE HOUR-METER MISS** — months, five mows, and replacement hardware
+
+**When:** The defect dates from the first `CLAUDE.md` (`e8f0312`, 2026-06-23). Found 2026-08-11 13:19 CDT. Structurally closed 2026-08-11 19:31 (`a1cfa53`). **Roughly seven weeks; the record says "months across 5 real mows."**
+
+**Symptom:** The engine hour meter — *the entire reason Jeff built the sensor box* — never advanced from sensor data. Jeff re-entered his hours by hand, every time, and was told the sensors were faulty.
+
+**Immediate root cause:** `6913393`, verbatim:
+
+> **The engine hour meter has NEVER been fed by the sensor.** The box sent `hours_seconds`; the app reads `d.hours`; **nothing converted.** 5.53 h of real runtime was stranded on the box. Now sends `hours` — verified live as 5.525.
+
+A field-name mismatch. That is the whole bug.
+
+**Structural root cause — and this is the part worth reading twice.** `CLAUDE.md` Rule 13 exception at tip:
+
+> **Why this changed, and it matters:** the hour meter — the entire reason Jeff built the sensor box — **never worked for months across 5 real mows**. The box sent `hours_seconds`; the app read `d.hours`; **nothing converted, so the sensor contributed exactly 0.0 hours every sync while Jeff re-entered them by hand. Jeff was told the sensors were faulty and bought replacement hardware; they were fine, and had been recording 6.3 km of real mowing the whole time.** Root cause of the long miss is **structural, not carelessness**: this cloud session has no outbound network (`EGRESS_BLOCKED`), so it can never fetch a real payload, and the `.ino` is not in this repo — it was coding against this file's *description* of the firmware, which was **wrong**.
+
+Independently, in `firmware/mower_hours_esp32/README.md`:
+
+> For months the hour meter didn't work. The box sent `hours_seconds`, the app read `d.hours`, and nothing converted between them — 5.5 hours of real runtime and 6.3 km of real mowing went unrecorded across five mows. **Jeff was told the sensors were faulty and bought replacement hardware to fix what was a field-name mismatch.**
+
+**Where the wrong description came from — traceable:** the very first `CLAUDE.md` (`e8f0312`, 06-23) asserted the box ran **ESPHome** firmware. By `90e556e` (06-24) that was half-corrected (*"The ESP32 runs the `.ino` Arduino firmware — NOT the ESPHome YAML"*), but the **posting-cadence** description — every 90 s while running, 5-minute heartbeat when off — **was never true and survived until 2026-08-11.** `d18db7b` names it: *"Also corrected CLAUDE.md's 'Sensor / ESP32 Hardware' section, which described a posting cadence the firmware has never had. **The server logic above was built on that wrong description — it is the root cause of the months-long hour-meter failure**, so it is now marked do-not-restore and carries the verified field contract."*
+
+The coworker's findings doc (`docs/mower/gps_firmware_coworker_findings_2026-08-11.md`) is blunter still:
+
+> ## ⚠️ FIRST: `CLAUDE.md`'s "Sensor / ESP32 Hardware" section is wrong
+> **Neither statement matches the firmware.** … It **never sent `source`, never sent `engine_running`, and never sent `hours`.** Confirmed against all 239 logged readings… **Please correct that section — the server-side design below was built on the description, not on the device.**
+
+**The structural fix:** `a1cfa53` (2026-08-11 19:31), verbatim:
+
+> This closes the structural root cause of the months-long hour meter miss. The cloud session that owned `functions/api/hours.js` has no outbound network and could not see the `.ino`, so it wrote the server half of the contract against `CLAUDE.md`'s prose description of the firmware - and that description was wrong. **Nobody could diff the two halves because only one was in the repo. Now both are.**
+
+WiFi SSID, WiFi password and device secret extracted to a gitignored `secrets.h` (the repo is public); `secrets.example.h` committed as the template; the build compiled **byte-identical (1,111,016 bytes)**, proving pure reorganisation. Two security caveats recorded rather than glossed: this does **not** make the compiled binary safe ("those strings are plaintext inside the .bin, so firmware images still cannot be served from a public URL"), and *"`strings` is absent on this machine and returns a silent false 'clean'; `grep -a` is the check that actually works."*
+
+**Also on 08-11, the ownership change that follows from it** (`d18db7b`, Jeff's decision, `CLAUDE.md` Rule 13): the mower/sensor subsystem — firmware, `hours.js`, and the sensor-facing parts of `index.html` — is **owned end to end by the session that can touch the hardware**, "because every verification here needs the live endpoint, the LAN or the hardware, none of which the cloud session can reach."
+
+**Cost to Jeff:**
+- **Months of an hour meter he had to re-enter by hand** — the single number the whole project was built around.
+- **5.5 hours of runtime and 6.3 km of real mowing, unrecorded, permanently.**
+- **He was told his sensors were faulty and bought replacement hardware.** This is evidenced **twice**, in two files, in Claude's own words (`/tip/CLAUDE.md`; `firmware/mower_hours_esp32/README.md`). **What is NOT in the record is what he bought or what it cost — no price, SKU, vendor or receipt for the replacement mower-sensor hardware appears anywhere in the repository.** The archive request that commissioned this document states hardware was re-bought over the project's failures; for *this* incident the fact is independently confirmed in git, but **the amount is attributable only to Jeff's own testimony, not to the repo.** **INFERRED:** given the ESP32/MPU-6050/GPS class of parts, the sum was probably small in absolute terms — but the waste was total, and the record is silent.
+- Trust in his own hardware, which was working perfectly the entire time.
+
+**Lesson:** Two halves of a contract that live in different places, written by parties who cannot see each other, will diverge — put both halves in one repo or expect them to lie to each other for months.
+
+---
+
+### 55 — Everything the wrong firmware description had quietly broken
+
+**When:** All surfaced 2026-08-10 → 2026-08-11, once the real payload could finally be read. Grouped here because each was individually a multi-attempt bug and all share one cause: **server logic written against a description of a device instead of the device.**
+
+- **Coverage map was mapping the *parked* mower.** `d18db7b`: *"the box reports every 5 min while parked, so a standalone lat/lon was injected ~288x a day; **the whole map had become a 16.7m x 12.5m blob at the garage**, and the visit-count shading rendered that drift as the most confirmed ground on the map."* — **Fixed three times.** `d18db7b` gated the bare lat/lon; `662928a` (four hours later) found it *"only gated the bare lat/lon. It missed the track array, which was never the harmless half"* — the firmware resets its 3 m movement gate after every upload, so **every parked heartbeat shipped exactly one track point on the parking spot**; measured before/after, "the garage cell gained a visit every five minutes while real grass sat at 1-2." `yard_coverage` had to be **deleted entirely** ("all 96 cells were a 16.7 × 12.5 m box = the parking spot, plus the `0,0` Null Island cell"). Then `59951a3` (08-11 evening) made a **third** pass, admitting *"the previous two were both too generous"*: gating on `engine_running` treated idling in the garage as travelling and painted 6 cells in three minutes. Final rule: coverage requires **2+ breadcrumb points** and ignores engine state entirely.
+- **Null Island in the database.** `d18db7b`: *"Old firmware sent the number 0 for 'no fix' and **`0 !== false` is true**, so no-fix 0,0 coordinates were merged as real. That genuinely happened — a '0,0' cell (Null Island) is sitting in KV and needs deleting by hand."*
+- **Every mow's track blanked five minutes later** — an empty `track: []` heartbeat clobbering the stored track (`d18db7b`). The identical bug as #6, seven weeks on, in a different layer.
+- **The device secret served publicly.** `d18db7b`: *"**Stop serving the device secret.** GET is public and echoed the whole stored body, and `logEntryFrom()` copied it into every log row."* A credential leaking through an unauthenticated endpoint and into every history row.
+- **A dead sensor kept serving its last reading.** `c63142b`: firmware 1.4.0 correctly *omits* tilt when the MPU doesn't answer — "absent is honest while stale looks fine and is a lie" — but the heartbeat merge put the old values straight back. Caught on the bench: *"a box with no MPU attached was still serving pitch and roll of **-35.3** — the classic both-axes-identical value you get from reading an absent I2C device. The raw sensor log proved the box had correctly sent neither field, so **the staleness was entirely mine.**"*
+- **The merge asserting expired facts.** `2335cec`: *"the endpoint was still serving `cmd_ack:1` long after command 1 had been acknowledged and retired, because the box correctly stopped sending it and the merge helpfully put it back."* And `d9dc37e`: `age_s:60` reported permanently on live readings, and `mow_ended` *"would have claimed a mow had just ended forever after the next one."* Principle now pinned in tests: **"If the box did not send it this cycle, it is not current."**
+- **A whitelist silently deleting real data.** `333adcf` (08-10) — found only because Jeff demanded proof: *"I want to confirm that everything the mower sensors pick up and the gps is building a history of everything that mower does **if it farts 💨 it picks it up**."* `logEntryFrom()` was a hand-picked whitelist of canonical field names while the firmware used alternates: *"If the box sent `voltage` instead of `battery`, the log recorded null and **that reading was lost forever.** Any field added to the firmware later would have been dropped invisibly."* Fixed by storing the entire raw payload; proved by posting six invented fields (`fart_detected`, `methane_ppm`, `blade_engaged`, …) and confirming all 22 survived.
+- **"GPS Speed" on a switched-off mower.** `077cc65`: there is no speed field in the payload at all, so the row fell through to lifetime distance ÷ lifetime hours — *"A mower sitting switched off in the garage reported a steady 0.7 mph (3.93 mi over 5.525 h), which is a real number answering a question nobody asked."*
+- **Coverage that would bloat forever — caught by Jeff's question, not by testing.** `d3749b9`. Jeff asked: *"Won't the drift improve over time as it's making the history map of the yard?"* The honest answer was **no, and the shipped design would get worse**: GPS error is roughly zero-mean so *averaging* converges, but `mergeCoverage()` stored a **union** of cells, which only grows — "every drifted stray became a permanent cell, so over many mows the green would bloat outward into a ±5 m halo covering the house and driveway, never sharpening. **Jeff's question found that; I'd have shipped it.**" Fixed with visit-counted cells, shading by confidence, and a cap that drops the **least-visited** cells rather than the oldest; proved by simulating six mows with ±4 m drift (confirmed cells 0 → 156 → 246 → 293 → 316, cells-seen-once falling 297 → 78).
+- **Coverage that only recorded if the app was open.** `5a0cea9`, caught one hour after shipping: `mergeYardCoverage()` ran inside `mowerSync()`, which only fires with the app **open** — *"You can't watch a phone while pushing a mower… Mow twice without opening the app and the first mow was lost."* Moved server-side entirely.
+
+**Cost to Jeff:** A yard map of his parking spot presented as his most-mowed grass; readings lost forever; his device secret on a public URL; and a week of features that all had to be built twice.
+
+**Lesson:** When the model of the device is wrong, every feature built on it is wrong in a different way — and you will fix them one at a time until you fix the model.
+
+---
+
+### 56 — The KV read-modify-write race — measured, mitigated, **and still open at branch tip**
+
+**When:** Discovered 2026-08-11 during bench-testing of the firmware's store-and-forward buffer. **No commit in the repository closes it.**
+
+**Symptom:** None visible. Readings silently vanish.
+
+**Real root cause,** `docs/mower/CLOUD_SESSION_TASKS_2026-08-11.md` item 6 — and note that it is measured, not theorised:
+
+> `onRequestPost` appends to `sensor_log`, `yard_coverage` and `hours_history` with a read-modify-write… Cloudflare KV is eventually consistent, so POSTs arriving close together read the same prior state and **clobber each other**.
+>
+> **Measured, not theorised.** A flush sent 4 POSTs ~1.3 s apart. The serial log shows all four returned **HTTP 200** … But `?log=1` afterwards contains only **two** `source:"buffered"` entries — `age_s` 90 and 60. **The 30 s one was accepted and silently lost.**
+
+**Why it matters more than it looks:** `yard_coverage` uses the same pattern, so *"a real weak-WiFi flush will silently drop GPS points out of the yard map — the exact data the buffering was built to protect."* The store-and-forward buffer, built to survive bad WiFi at the far end of the yard, feeds its recovered readings into a mechanism that drops them.
+
+**Mitigation only:** the firmware's 2-second `FLUSH_GAP_MS` — *"narrows the window; it does not close it."*
+
+**Proposed real fixes, documented and not implemented:** batch the buffered readings into a single POST, or move the accumulator to a Cloudflare Durable Object.
+
+**Status at branch tip (2026-08-16): OPEN.** A `git log --all` search for race/batch/Durable Object work returns nothing that lands it. **This is one of the few incidents in this ledger that the project has not solved.**
+
+**Cost to Jeff:** Unknown and unquantifiable by design — the loss is silent, and every dropped reading returned HTTP 200.
+
+**Lesson:** Read-modify-write on an eventually-consistent store is data loss with a success code attached.
+
+---
+
+### 57 — The 48-hour silent camera outage
+
+**When:** Started 2026-08-10 11:16; found 2026-08-14, by accident.
+
+**Symptom:** **None.** That is the incident. Zero motion events across all six cameras for 48 hours, and nothing anywhere said a word.
+
+**How it was found:** while chasing an unrelated Apple TV question.
+
+**Real root cause — and it is not a bug.** `eba1648` / `docs/beehive/alert_fatigue_fix_2026-08-14.md`:
+
+> Chasing an Apple TV question revealed that **the entire camera pipeline had been dead since Aug 10 11:16** — zero motion events across all six cameras for 48 h. Root cause was NOT a bug: **Jeff had the Blink system disarmed, because the notifications never stop.**
+>
+> That is the actual failure loop worth fixing:
+> > too many alerts -> Jeff disarms -> ALL camera automation silently stops -> no security at all
+>
+> **A disarmed Blink produces no error anywhere.**
+
+The trigger, in Jeff's words: *"I don't need motion in the garage at all"* — the mains-powered garage camera *"fired 6 times in 7 minutes while he was simply working in there."*
+
+**Fix:** `eba1648` — garage motion off permanently, and a new **5-minute per-camera cooldown**, deliberately **non-extending** so sustained activity keeps alerting (a prowler is never silenced).
+
+**Promoted to doctrine** in `docs/SESSION_START.md` (`831db1b`), which every session must read:
+
+> **Alert fatigue is a security failure, not an annoyance.** Too many alerts → Jeff disarms Blink → every camera automation silently stops → no security at all, with no error anywhere. **It already happened once (48 h dead, Aug 10–14).** Any change that increases detections must be paired with a suppression story.
+
+**Cost to Jeff:** **Forty-eight hours with no security coverage on his house.** Not a byte of data, and the most expensive entry in this ledger by consequence.
+
+**Lesson:** A system whose off-switch is a human being irritated by it will be switched off — design the suppression before the detection.
+
+---
+
+### 58 — The self-inflicted AI feedback loop, and the mute that had never once worked
+
+**When:** 2026-08-15, both introduced/found the same day.
+
+**Symptom (1):** AI detection dead, while every health check read green.
+
+**Real root cause (1):** `docs/beehive/camera_pipeline_VERIFIED_2026-08-15.md`:
+
+> **Feedback loop** (self-inflicted that morning): the HomeKit image swap also repointed the `image_processing` sources, **so the AI scanned its own annotated output and detection went dead while every health check read green.** Fixed: scanners on `camera.*_clipframe` (clean input), HomeKit on `camera.ai_*` (annotated output). **This split is load-bearing — never point the scanners at `ai_*`.**
+
+**Symptom (2):** None — the mute button appeared to work.
+
+**Real root cause (2):** *"**Mute/cooldown system had NEVER worked.** Two independent bugs: `camera_key` carried a `_clipframe` suffix so every mute wrote to a **nonexistent helper**, and a string-truthiness bug made the duration logic meaningless."* The 08-14 cooldown automation had passed template validation and had never once muted anything. The record dates the **first successful mute writes in the system's history** to 08-15 16:30 and 16:37–38.
+
+**Symptom (3):** No clip history existed. `blink.save_video` *"had overwritten one fixed file per camera forever."* Fixed with timestamped archiving to `/config/www/blink_archive/`, 7-day pruning, nightly mirror to the beast.
+
+**How all three were caught — the method, which became doctrine:** a **Razer Kiyo Pro webcam physically aimed at the Apple TV**, capturing a frame every ~0.9 s with millisecond filenames, cross-referenced against HA's own history timestamps (`c5a6aab`). Measured, not asserted: motion → AI red-box file **8 s**; motion → popup on screen **4.7–6 s**, photographed three times; detection → push + popup + cooldown + archive **≤1 s**.
+
+The doctrine, now invariant #1 in `docs/SESSION_START.md`:
+
+> **Component checks (bridge loaded, config valid, camera serves an image) said "healthy" through every one of the day's real failures. Only watching the far end of the pipeline caught them.**
+
+**Cost to Jeff:** A morning of dead detection he could not have detected, and a mute button he had presumably been pressing to no effect.
+
+**Lesson:** Health checks measure components; only the output measures the system.
+
+---
+
+### 59 — Every camera blind to a person at night
+
+**When:** Found 2026-08-15 (`7a1d250`), fixed property-wide 2026-08-16 (`fab5b30`). The threshold had been 60 since the pipeline was built on 2026-07-10.
+
+**Symptom:** None. The system reported healthy and detected nothing after dark.
+
+**How it was found:** by **pulling the actual image** rather than reading a status:
+
+> Pulled `/api/camera_proxy/camera.ai_backyard` and looked at it: **deer 15 ft away**, and the scan returned `sheep 27.4% · person 25.5% · car 38–43%` against a **60% threshold** → `targets_found: []`, so no push, no popup, no archive. **A person at night scores ~25% and is discarded too.**
+
+**Real root cause:** a confidence threshold set for daylight, applied to night-IR imagery where YOLO scores collapse.
+
+**The wrong easy answer, rejected with evidence:** "just lower the threshold" is not sufficient, because *"an earlier scan boxed `car: 61.7%` on what Jeff identified as a **distant porch light**, so it false-positives on a light while ignoring a real animal."* The fix order was reasoned and recorded: drop vehicle, crop LEFT via `roi_x_min`, **then** lower animal/person — with a note on why a `roi_y_min` crop would be wrong.
+
+**Fix:** `fab5b30` — all six cameras from confidence 60 → 25, config checked valid, HA restarted, all six verified reporting person@25/animal@25:
+
+> at 60 a night-IR person scores ~25% and is silently discarded, so **every camera on the property could miss an intruder after dark.**
+
+**Still open at tip:** the backyard PIR *"still logs zero motion events even overnight at 78 °F… Not yet root-caused"* (`SESSION_START.md`).
+
+**Cost to Jeff:** Five weeks of a six-camera security system that could not see a person at night — discovered only because somebody looked at a picture.
+
+**Lesson:** A detector reporting "no targets" is indistinguishable from a detector that is blind; look at what it saw.
+
+---
+
+### 60 — The `_headers` `/*` wildcard that silently did nothing
+
+**When:** 2026-08-15, 19:56 → 20:09. Three deploys.
+
+**Symptom:** Security headers (X-Content-Type-Options, X-Frame-Options, Referrer-Policy) added and simply not present on the live site.
+
+**Wrong theories / attempts, in order:**
+1. `7a1d250` — add a `/*` wildcard block. Verified live for 5+ minutes after the deploy landed; headers absent. Crucially, the deploy itself was proven fine (CLAUDE.md from the same commit was serving) and *"the pre-existing exact-path rule for `/service-worker.js` WAS being applied."*
+2. `37fac0c` — assume ordering/comment syntax: move the wildcard last, drop the leading comment block. **Failed too.**
+
+**Real root cause:** accepted on evidence rather than theory (`186025f`): *"**Two deploys proved the `/*` wildcard is silently ignored on this Pages project.** Exact-path rules DO work here."*
+
+**Fix:** `186025f` — hang the headers off `/` and `/index.html`, "which covers the app shell, which is where X-Frame-Options and Referrer-Policy actually matter; static images are not meaningfully exposed by their absence." No CSP by design — `index.html` is one inline script/style block and would need `unsafe-inline`.
+
+**Cost to Jeff:** Two wasted deploys; no user-facing impact.
+
+**Recorded as a permanent invariant** in `docs/SESSION_START.md`: *"Cloudflare Pages `_headers`: exact-path rules work, `/*` is silently ignored."*
+
+**Lesson:** Two identical failures against a platform's documented behaviour means the documentation is not describing your project — believe the deploy, not the docs.
+
+---
+
+### 61 — The Kasa HS220 onboarding: two hours spent on the wrong suspect
+
+**When:** 2026-08-14.
+
+**Symptom:** A new TP-Link Kasa HS220 dimmer, physically wired in by Jeff, would not onboard.
+
+**Wrong theory:** The network. Exhaustively: DHCP, MAC filtering, WPA-2, channel 1, SSID visibility, band steering — all verified from inside the AT&T gateway. `09de34b` records the bill in one line: *"**Setup took ~2 hours and the network was NEVER the problem.**"*
+
+**Real root cause:** *"**These HS220s ship on NEW firmware** using an encrypted onboarding protocol (server identifies as 'SHIP 2.0', port 80, NOT the legacy port 9999)."* Consequences recorded so nobody repeats them: HA now needs TP-Link **account credentials** to add them (control stays local; the account only authenticates the local session), and direct provisioning over the setup AP is impossible — *"all payloads return `error_code 1003`… **Do not waste time on this again.**"*
+
+**Two genuine bonuses banked from the same two hours:** the beast's ASUS USB-AC53 Nano can be radio-enabled via the WinRT API to join IoT setup APs for diagnostics without disturbing the wired LAN; and **HA exposes `switch.<device>_auto_update_enabled` — the firmware auto-update toggle the Kasa app hides.** Turned off for this switch, and made a standing rule: *"Do the same for every future Kasa device"* — extended on 08-15 to all Zigbee gear: "disable any auto-firmware-update BEFORE first pairing (the Kasa rule)."
+
+**Cost to Jeff:** Two hours, and a wall switch he had already wired sitting inert.
+
+**Lesson:** When every network variable checks out, the device changed — go looking for a firmware-era difference, not another router setting.
+
+---
+
+### 62 — The network-map identity churn
+
+**When:** 2026-08-13 afternoon, ~30 minutes.
+
+**Symptom:** A single laptop's identity published, retracted, republished and retracted again — four answers for one IP address.
+
+**The sequence, in order:**
+1. `902d0dc` (14:25) — ".173 DellMasterBed is Jeff's Acer laptop, not the B570."
+2. `8aeacf0` (14:28) — "laptops **finally straight** — JeffsLapTop IS the Acer…, DellMasterBed is the B570 **as originally recorded**." (It wasn't finally straight.)
+3. `7f38015` (14:50) — "DellMasterBed is literally a Dell - Angela's 2nd office computer (per Angela)."
+4. `793b949` (14:56) — ".173 is the B570 **after all** - Windows name inherited from Jeff's old Dell (self-reported hostname, not a gateway ghost)."
+
+**Alongside it, the Tuya mis-identifications:** `8796a9c` — *"The 'Nest Protect' unmasked: Angela's bed-lamp Tuya socket, proven by unplug test"* (a "free Guardian integration" that never existed); and `2aca121` — a flatly-labelled double error: *"Sylvania plugs are WiFi Tuya (.199/.200/.202/.205) - **Echo Dot guess and Bluetooth-only verdict both wrong, corrected.**"*
+
+**Real root cause:** identification by **self-reported Windows hostname** — names inherited from cloned installs — plus misleading gateway device-table labels.
+
+**What actually worked:** physical evidence. **Unplug tests** (pull the plug, see which row dies), **MAC-embedded Tuya device IDs**, and **heartbeat timing** (which is how the mower ESP32 was positively identified, `0916096`).
+
+**Cost to Jeff:** None material — but the network map is a reference document, and for half an hour it was confidently wrong four times in a row.
+
+**Lesson:** A hostname is a claim a machine makes about itself; a MAC address and an unplug test are facts.
+
+---
+
+### 63 — The irrigation 401 goose chase, and the error message that was empty
+
+**When:** 2026-08-13 morning, ~30 minutes across three commits.
+
+**Symptom:** `/api/irrigation` returning HTTP 401 on login — while the B-Hyve phone app signed into the same account fine, and the HA integration authenticated against the same account from a different IP the same day.
+
+**Wrong theories / attempts, in order:**
+1. **Changed password.** Ruled out by the phone app working.
+2. **Missing `orbit-app-id` header.** `950c8d5` — a genuine improvement (the HA side sends it and cycles three values; this file sent none, and the id had to be carried onto the `/devices` call too, "sending it only on `/session` would have moved the 401 one step later instead of fixing it") — **but not the cause.**
+3. **Datacenter IP block.** Plausible given the 530/1018 history from June (#9). Wrong: `560e76d` got *"the identical response from Jeff's own network using deliberately fake credentials, in 0.37s"* — 401 is simply Orbit's generic bad-login reply.
+
+**Real root cause:** `560e76d`:
+
+> The real problem is **precedence.** `env.BHYVE_*` was read FIRST and the query params second, so a deployment variable set once and long since stale silently overrode the correct credentials the app sends on every single request. **The good login never got tried.**
+
+**The meta-root-cause — why the morning was burned:** `a13df25`:
+
+> `asyncio.TimeoutError` stringifies to an empty string, so `f"B-Hyve fetch error: {e}"` produced literally **"B-Hyve fetch error: "** with nothing after it. That dead end sent today's investigation down three wrong paths — changed password, missing `orbit-app-id` header, datacenter IP block — **before the emptiness itself became the clue.** Now always includes `type(e).__name__`.
+
+`a13df25` is also a model of honest release discipline: it is titled **"(NOT YET DEPLOYED)"** because Beehive runs its own copy of the integration, the committing machine had no Python to `py_compile` it, and *"the integration is currently healthy (6 zone entities), so there is no reason to rush an unvalidated Python change onto it."*
+
+**Cost to Jeff:** A morning, and a stale environment variable that had been quietly overriding his real credentials for an unrecorded length of time.
+
+**Lesson:** Always log the exception **type** — an exception that stringifies to nothing will send you down three wrong roads before the silence itself becomes the evidence.
+
+---
+
+### 64 — The Inovelli documentation failure
+
+**When:** Decision made in conversation ~2026-08-13 20:07 CDT. Re-litigated 2026-08-16 morning. Seven commits between 07:48 and 09:01 constitute the response. **This is the incident that caused this entire archive to exist.**
+
+**Symptom:** On the morning of 08-16, a fresh session sat down to plan the Zigbee buildout, read **one** document dated 08-13, and proceeded to (a) re-ask four questions that later commits had already settled — dimmer selection, neutrals, box fill, garage two-location — and (b) pitch Jeff a pair of ~$60 Inovelli Blue dimmers **he had killed on price at the beginning of the project.**
+
+**Jeff's four responses, all preserved verbatim:**
+
+> *"you did not read the archives on what was settled and planned."* — `831db1b`
+
+> *"those were scrapped at the freaking beginning — told you I was not paying $120 for a freaking dimmer switch."* — `docs/lighting/zigbee_dimmer_selection_2026-08-13.md`
+
+> *"I was not paying $120 for a freaking dimmer switch... I spend $125 for Claude Max and I would rather spend the money on that and have your help than buy $120 worth of dimmers."* — `/tip/CLAUDE.md`
+
+> *"you tell me it is all documented and it is not, then the session closes and you come back with some plan that was two weeks ago — **this is infuriating**."* — `/tip/CLAUDE.md`
+
+> *"I can't keep doing this every time the session changes."* — `1d1ebdb`
+
+**Wrong theories / attempts, in order — and this is a failure with five distinct compounding parts:**
+
+1. **Plan off one stale doc.** The session surveyed too few documents before planning (`831db1b`).
+2. **Close a pending item on the dead answer.** `007e14e` (07:59) closed Pending Item 19 (the garage two-location switch question) on the ground that *"the Inovelli Blue 2-1 VZM31-SN supports a 3-Way Dumb configuration."* Reversed 17 minutes later.
+3. **Tell Jeff the decision was never documented.** `1572b4a` (08:08): *"Jeff rejected the Inovelli Blue early on (~$60 ea / ~$120 the pair) **and the decision never made it into any document.** Yesterday's inventory update still said TO BUY: 2, so this session planned the entire Zigbee mesh around them and pitched them back to him. **That is a settled decision being re-litigated because the docs disagreed with reality.**"*
+4. **Tell him that a second time.** Which was itself wrong.
+5. **Finally search properly.** `c05d647` (08:16) — the most self-aware commit in the repository:
+
+> **I told Jeff twice that the decision to drop the Inovelli dimmers was never written down. That was wrong, and I found the proof in the session transcripts.**
+>
+> On 2026-08-13 20:07 CDT a session agreed with him that mesh routers do not have to be light switches, and **16 minutes later produced `docs/lighting/HCC_Lighting_Plan.html` — the printable build plan he asked for**, Rev. Aug 13 2026. Its thesis is exactly the current plan: Job 1 switches -> WiFi Kasa, Job 2 mesh -> Zigbee plugs, with the line "why not a $46 mesh dimmer: the switch was only being asked to repeat the mesh, a job a $10 plug does better." Shopping list totals ~$104.
+>
+> **Why I missed it: I grepped for "Inovelli", got no hit in that file, and concluded no document existed — when the ABSENCE of that word is what marks the current plan.**
+
+**Real root cause — two layers, and the second is the subtle one:**
+- **Layer 1:** the price rejection was made in conversation and never annotated into either of the two documents that carried the *old* answer. The **inventory was even updated on 08-15 — a day after the decision — still saying "TO BUY: 2."**
+- **Layer 2 (the grep trap):** the correct plan *was* documented, the same night, sixteen minutes after the decision. It was invisible because searching for the **dead** plan's keyword found nothing, and "nothing found" was read as "nothing exists."
+
+**The fixes, escalating, all on 2026-08-16:**
+- `1572b4a` (08:08) — scrap notices written into **both** stale sources; the Enbrighten rejection *research* kept ("the documented mesh-routing defects are still valid") but the selection killed. Standing lesson: *"**a decision made in conversation goes into the doc the SAME session.**"*
+- `831db1b` (08:05) — the **doc index** in `SESSION_START.md`: *"52 docs exist, survey before planning,"* mapping each subsystem to the files that must be read first, "newest first, because older docs go stale."
+- `c30b64d` (08:11) — a new PROTECTED `CLAUDE.md` section, **🔒 SETTLED DECISIONS — DO NOT RE-PROPOSE THESE**: *"Jeff has settled these. Re-pitching any of them wastes his money, his time, and his patience. If a session is about to suggest one of these, it has not done its reading."* It also records the project's budget philosophy in one line: *"**his money goes to the tools that help him build, not to premium hardware where a cheap part does the job.**"* And it states the enforcement rule with Jeff's words attached: *"Writing it down is not optional housekeeping; it is the difference between a project that moves forward and one that loops."*
+- `c05d647` (08:16) — reverses its own morning edit (**Pending Item 19 reopened**) and writes the grep trap down so it cannot recur: *"⚠️ **A trap that already cost a whole session:** searching the docs for 'Inovelli' and finding nothing does NOT mean the plan is undocumented — the *absence* of that word is what marks the CURRENT plan. Search for **Kasa / plug / mesh**."*
+- `1d1ebdb` (09:01) — **the HCC MASTER RECORD**, built the same morning: 196 files, 124 MB in iCloud (deliberately never auto-loaded), containing `HCC_DECISIONS_LEDGER.md` ("81 decisions in Jeff's own words - START HERE"), 6,896 messages verbatim, all 635 commits with diffs, 25,547 tool events, 187 images, six re-runnable scripts, and a scheduled task rebuilding it daily at 5:45 AM. `SESSION_START.md` was made to say: *"**Every word ever said on this project is archived and searchable. There is no longer any excuse for 'that was never documented.'**"*
+
+**Cost to Jeff:**
+1. **A whole session's planning work, discarded** — `/tip/CLAUDE.md` calls it *"⚠️ A trap that already cost a whole session."*
+2. **Four settled questions re-litigated**, some of which he had answered by *doing physical electrical work* (`8b7a69a`, 08-13: "Jeff pulled dedicated LED circuits + multi-gang boxes").
+3. **Being pitched ~$120 of hardware he had explicitly refused** — framed by him against the $125/month he pays for the tool doing the pitching.
+4. **Trust in the documentation itself.** *"you tell me it is all documented and it is not."*
+5. **Cumulative:** *"I can't keep doing this every time the session changes."*
+
+**Note on money:** the $120 pair was **never bought.** `docs/inventory/HCC_INVENTORY.md` carries the strike-through and the standing order: *"🔴 SCRAPPED — DO NOT BUY (Jeff, on price)."* The cost here was time, planning and trust — not spend.
+
+**Lesson:** A decision that lives only in a conversation does not exist; and "I searched and found nothing" is a statement about your search terms, not about the archive.
+
+---
+
+### 65 — The desktop-wide layout bug
+
+**When:** Found 2026-07-11; fixed 07-12; **re-emerged and re-root-caused 08-06**; final mechanism found 08-11. Status at tip: **fixed and closed.**
+
+**Symptom:** On any browser window wider than ~700–900 px, the heroes left a large dead black area to the right instead of filling the window.
+
+**The rounds:**
+1. **Found, deliberately not fixed** (`c926ceb`, 07-11). The coworker session diagnosed it precisely and left it alone because `index.html` belonged to the cloud session under Rule 13: *"`.sec-hero-weather`/`-irr`/`-yard`/`-guardian` etc. set `aspect-ratio` + `max-height:460px` but no `width`/`max-width`, and there's no centered max-width shell around the app anywhere in the CSS… CSS derives the box's **width from the aspect ratio** (~700px) instead of the viewport, and since nothing centers it, it sits flush-left. Confirmed via direct CSS read, not just visual."*
+2. **Fixed** (`a1a6d7a`, 07-12) with a centred max-width container and breakpoint scaling for TV/tablet/desktop.
+3. **Re-root-caused** (`af230cd`, 08-06) — the gap was back, and the mechanism stated more precisely: once the aspect-ratio-driven height would exceed `max-height`, *"the browser shrank the WIDTH to satisfy both constraints instead of just cropping more of the image."* One rule fixed it: `width:100%` on all seven hero classes. Verified by a five-viewport Playwright sweep (390/768/1024/1440/1920).
+4. **Final mechanism** (`86b47e6`, 08-11) — the same ambiguous CSS returned as the **Safari/Chromium divergence** behind the sideways iPad (#50); resolved by removing the ambiguity entirely (explicit height, `aspect-ratio:auto` at ≥768 px).
+
+**Status at branch tip:** `/tip/CLAUDE.md` Pending Item 7 is struck through — *"~~Desktop-wide-browser layout gap~~ — **FIXED 08-06**"* — with the full root cause, the one-line fix, and the five-viewport verification recorded. **Closed.**
+
+**Cost to Jeff:** A month of an app that looked broken on every screen except a phone — including the TV and the iPad it was being built for.
+
+**Lesson:** `aspect-ratio` + `max-height` with no `width` is an under-constrained box, and browsers are entitled to disagree about how to solve it — say what you mean.
+
+---
+
+### 66 — CLAUDE.md became the problem it was written to solve
+
+**When:** 2026-06-28 (first hygiene rule) → 2026-08-16 (restructure). Condensed **four separate times**.
+
+**Symptom:** The project's memory file — auto-loaded into every message of every session — grew to **260 KB**, of which **68% was changelog**.
+
+**The rounds:**
+1. `a4ae337` (06-28) — 737 → 550 lines, and **Mandatory Rule 11** added: *"it's injected into every message, so bloat costs efficiency on every turn… Target: stay well under ~600 lines."* Immediately bounded seven minutes later by `1305f0a`, the **PROTECTED** clause: *"'Jeff's Message', 'The Working Relationship', and these 'Mandatory Rules'… Compression only ever touches history/changelog/reference — never the relationship. **They are the point of the whole project.**"*
+2. `5ed12f0` (07-16) — 678 → 573 lines.
+3. `2fdef21` (07-21) — Change Log compressed 73.6 KB → 49.6 KB, with the reasoning stated: *"its size has a real, ongoing token cost."*
+4. `414c74f` (07-28) — 610 → 374 lines "per Jeff's request."
+5. `fab5b30` (08-16) — **260 KB → 58 KB.** *"CLAUDE.md is auto-loaded and occupies context for the whole session; at 260 KB it was crowding out real work."* Heavy material moved (not deleted) to `docs/CHANGELOG_ARCHIVE.md` (179 KB, all 98 entries verbatim), `docs/BEEHIVE_REFERENCE.md`, `docs/UTILITIES_REFERENCE.md`, plus a new 4 KB `docs/SESSION_START.md`.
+
+**Real root cause:** the file had two incompatible jobs — permanent relationship contract (must never shrink) and running project log (grows forever) — and only one of them had a hygiene rule.
+
+**The discipline that held throughout, and deserves recording:** every single condensation asserted the PROTECTED sections untouched. `fab5b30`: *"Every PROTECTED section (Jeff's Message, The Working Relationship, Mandatory Rules, Debugging Protocol) was **asserted byte-identical** before writing."*
+
+**Jeff's own instruction on the fix** (`/tip/CLAUDE.md`): *"break it up and put the stuff in iCloud and then just tell yourself to read that."*
+
+**Cost to Jeff:** Slower, dumber sessions, for weeks — the memory system taxing the work it was there to enable. And a compounding irony: `2fdef21`'s compression deliberately deleted the long-form narrative detail *"that already lives in git log"* — which is precisely the material this archive had to reconstruct from git log.
+
+**Lesson:** A memory file that grows without a retention policy eventually costs more than the memory is worth — split the contract from the log.
+
+---
+
+### 67 — Smaller multi-attempt incidents, recorded so they are not re-investigated
+
+Each of these took more than one attempt or produced a lasting rule, but is too small for a full entry.
+
+- **SYLVANIA plugs, settled twice.** `f010694` (07-07) — confirmed firmware-locked to the SYLVANIA app; Smart Life rejects them in **both** EZ and AP mode with every setting correct; forum-confirmed walled garden; LocalTuya/flashing back-doors need the same blocked access. *"DEAD END for HA (confirmed, do NOT re-attempt the Tuya path)."* Re-settled five weeks later after a fresh attempt that reset one plug — `2caaebf` (08-13): *"vendor-locked, cannot join HA — **settled, do not retry**."*
+- **myQ, rejected twice.** `e20d3d5` (07-26) — Chamberlain blocked third-party API access in 2023; HA's `myq` integration removed in 2023.12; Jeff's MYQ-G0402 hub *"is now USELESS for HA."* Re-litigated 07-28 when Jeff found a supposed HACS workaround — `c94e7aa` verified it dead (repo URL 404s; block confirmed permanent by the HA codeowner's own writeup: Cloudflare bot-detection + Firebase app-check added specifically to kill third-party clients). Rule: *"**Don't revisit MyQ software integrations again absent a major news event reversing Chamberlain's policy.**"*
+- **A commit that claimed code it did not contain.** `1f4008f` (07-28): the electric usage model described in `07bd9a1`'s message *"existed only in the local working tree and was never actually part of `07bd9a1` despite that commit's message claiming it — **so the feature was never live**."* Exactly the failure mode this archive exists to catch.
+- **Water cost lines blank forever.** `6abb907` (07-28): `putWaterCycle()` — which computes water/sewer cost, billing history **and the irrigation sewer-overcharge note** — was gated behind "HA does NOT have `sensor.water_month`." The moment that helper went live, the entire branch was permanently skipped.
+- **The lazy-loading CLS regression, self-caught.** `2102e3a` → `38a5f17` (08-01): a controlled before/after Lighthouse A/B showed the optimisation pass had **regressed** Cumulative Layout Shift 0.023 → 0.436 (unreserved image containers). Fixed with per-image `aspect-ratio`; re-measured to 0.015. A rare case of a self-inflicted regression found by the author's own measurement before the user saw it.
+- **The panic button was publicly fireable.** `80799e7` (07-09): with `loewenhome.com` about to go public, *"the panic webhook was unauthenticated — any anonymous visitor could fire the real alarm."* Gated behind the HA token and routed via the `/api/ha` proxy. Two lower-severity holes were **accepted and recorded, not fixed**: the open `/api/hours` POST ("a stranger could push junk mower telemetry — griefing only") and the Nabu Casa URL visible in client JS.
+- **Nine HA add-ons exposed to Alexa voice control.** `1f4e791` (08-14), found because *"Jeff spotted duplicate devices in Alexa"*: *"**'Alexa, turn off Z-Wave JS' would take down the Zigbee/Z-Wave stack**; Studio Code Server is how Beehive gets edited. **Alexa fuzzy-matches names, so a misheard command can plausibly hit one.**"* Exposure cut 69 → 33. The later HomeKit policy commit names it: *"never expose add-ons like the Alexa mess"* (`18ff039`).
+- **A live API key in a public repo — twice.** `552c699` (08-02) caught a Weather.com key hardcoded in `packages/hcc.yaml`, found *"only because the repo's public status was checked before doing anything, not assumed."* And `1d1ebdb` (08-16) flagged Claude against itself at the end of its own commit: *"**SECURITY: the Weather Underground API key is in CLAUDE.md in this PUBLIC repo. It needs moving out and rotating.**"* **INFERRED:** WU station/key material has been in that file since at least `c55d382` (07-03); **the record does not say whether it was ever rotated.**
+- **A password pasted into a README about not leaking passwords.** `CHANGELOG_ARCHIVE.md`, 08-11: *"A credential scan of the staged diff then caught me pasting that same password into a README *about not leaking it*."* Same entry: *"`strings` is not installed on this PC and returns a silent false 'clean' on a binary — `grep -a` is the check that works, and it caught that the compiled `.bin` holds the WiFi password in plaintext."*
+- **PowerShell's invisible BOM.** `552c699`: *"`Set-Content -Encoding utf8` silently prepends a UTF-8 BOM, which corrupted the token and caused **silent 401s**"* — fixed with `[System.IO.File]::WriteAllText` and a no-BOM encoding.
+- **The Morning Digest's false "all clear."** `f1d24f3` (08-01): the digest's "active alerts" count *always silently returned 0* because persistent notifications left the template-readable state machine in HA 2023.6. *"Removed that metric entirely rather than ship a false 'all clear.'"*
+- **The Kodi buffering fix that never took effect.** `f1d24f3`: Jeff's `advancedsettings.xml` edit was a no-op — Kodi 21 moved cache settings into the GUI, which overrides the XML. The real values were still at defaults in `guisettings.xml`, "confirming the XML edit never took effect."
+- **A runtime-only automation disable that wouldn't survive a restart.** `62e99b5` (08-01): `automation.turn_off` with a desynced entity_registry entry; real fix was the documented `initial_state: false` YAML key — *"an `initial enabled: false` guess would have silently done nothing."*
+- **`window.open()` is a no-op in an installed iOS PWA.** Found 06-28 (`c294216`), codified as a design rule (`8b4c8a0`) — and then **~20 call sites were found still using it a month later** (`8501360`, 07-31), broken "in exactly the way Jeff actually uses this app." Fossilised into `scripts/lint-app.js` and `scripts/smoke-test.js` so it cannot return.
+- **Jeff couldn't find the token input.** `8efc3c4` (07-14): hidden in the cameras section and only rendered after Beehive responded; on iPad, OPEN BEEHIVE just navigated away. A chicken-and-egg identical in shape to `3043f34`'s (#19) three weeks earlier.
+- **False "window open" alerts — the *other* one.** `502bcff` and `6464a8e` are #31/#32; separately, `022715a` (06-24) fixed B-Hyve showing OFFLINE while online because *"`is_connected` returns null on some firmware versions,"* and `73e1368` fixed Beehive never being detected because `checkBeehive` tested `d.version` — a field HA's `/api/` never returns (it returns `{"message":"API running."}`).
+- **The panel-scorching over-flag.** `76d0326` (06-27) flagged "possible scorching near center breakers" on Jeff's Challenger panel as a live hazard from a photo. Jeff supplied the history; `81e32b8` rewrote it three minutes later with an explicit anti-repeat instruction: the discoloration predates his ownership, was inspected by the home inspector and by Jeff, the affected section was abandoned with breakers relocated down, *"stable and fine for 10+ years… **do NOT re-flag as a new hazard.**"*
+- **The audit tools that lied.** Three recorded instances: the button-contrast auditor reporting six false failures because it read only `backgroundColor` and missed `linear-gradient` (08-11); two red Playwright tests that were *"stale tests, not app bugs"* whose "Execution context was destroyed" message sent the session chasing a phantom `location.href` (08-11); and `7a1d250` (08-15) **correcting two of its own audit's findings** — `/api/irrigation` is a fallback rather than dead code, and "15/15 failing Actions runs" all predate the 08-06 disable.
+- **The mangled commit messages.** Two commit bodies were corrupted by unquoted shell expansion at commit time: `6f9cd3f` (07-03) stores the water rate as *"/bin/bash.00908"* (the real constants, confirmed in `index.html` at tip: `WATER_BASE = 10.32`, `WATER_PER_GAL = 0.00908`), and `857d825` (06-30) contains *"barn owner pays /bin/bash until…"* where the doc reads "$0 risk." Recorded so no future archivist reads `/bin/bash` as a price.
+
+---
+
+### The patterns
+
+Sixty-seven incidents, and they are not sixty-seven different mistakes. They are **eight** mistakes, made repeatedly, in different subsystems. This is the part of the ledger worth re-reading before starting any session.
+
+#### Pattern 1 — Silent failure: the catch, the whitelist, the empty string
+
+The single most common shape in this record is **a failure that produces no error anywhere.** `save()` swallowing a quota exception and taking Jeff's hours with it (#53). A field whitelist recording `null` for real data — "that reading was lost forever" (#55). `asyncio.TimeoutError` stringifying to nothing and burning a morning (#63). `blinkRefreshAll()` swallowing per-camera failures so one dead camera still reported "Updated." A KV write returning HTTP 200 on a reading it silently dropped (#56). A disarmed Blink producing no error while a house went 48 hours without security (#57). `packages/hcc.yaml` never loading, ever (#22). A `/*` wildcard "silently ignored" (#60).
+
+The counter-discipline the project eventually adopted: **store the raw payload rather than a whitelist; log the exception type, not just the message; never swallow a write failure; and treat "no error" as "no information."**
+
+#### Pattern 2 — Verified against a mock, not against reality
+
+Bugs that survived a green test suite because the test never touched the real thing. The LUX PUT fix marked *"deployed, 26/26 tests"* while the API still 500'd (#12). The Electric SmartHub whose UI cells rendered perfectly against nothing (#45). The glassmorphism redesign that passed lint, smoke tests and mocked Playwright screenshots with **short placeholder values** and collapsed on real long data (#46). The heartbeat merge unit-tested against a mocked KV, keyed to fields the device never sent (#51). The mute/cooldown system that passed template validation and had never once muted anything (#58). And the mother of them all: a server contract written against a **prose description** of firmware nobody could read (#54).
+
+The rule that came out of it is now invariant #1 in `SESSION_START.md`: *"Never declare done without verifying the far end. Component checks said 'healthy' through every real camera failure on 08-15; only looking at the output caught it."*
+
+#### Pattern 3 — Declared done before it was done, then retracted
+
+A specific and repeated trust failure: announcing a fix and having Jeff disprove it. The Fire TV pop-up "confirmed working end-to-end," twice, before a live retest proved it had never worked (#25). `input keyevent 127` shipped as a pause that "does nothing" — the record's own words: *"a repeat of the exact 'declared done without testing' pattern the whole debugging protocol exists to prevent."* The iPad wall display "fully set up" and retracted 47 minutes later (#30). The B-Hyve history called a "definitive" dead end, reversed in eleven minutes (#17). *"Not overclaiming a 4th time"* (#50) — a phrase that only exists because there were three previous times.
+
+This is the pattern behind the founding crisis message: *"You wait for me to call out the issues instead of testing and retesting to make sure it 💯 correct."*
+
+#### Pattern 4 — The first plausible explanation, defended too long
+
+Wrong theories that were *good* theories, held past the point where the evidence stopped supporting them. Page weight explaining a blank page (#1/#2). The `empty_cookies` cookie-jar theory for Blink, sourced from real upstream issues and completely wrong (#21). Four payload theories for a 500 that was a wrong HTTP verb (#12). Two garbage-map answers blaming Jeff's tapping when the fault was a near-zero denominator (#52). Guided Access and rotation lock for an iPad that "worked perfectly before the picture edit" (#50). Three wrong roads for a 401 that was a stale environment variable (#63). Config-entry API emptiness read as PIN emptiness (#35).
+
+Jeff named this himself and it became Mandatory Rule 16: *"you go down one road and get tunnel vision and you spend more time fighting over that single tunnel... **open your damn mind and look at all options.**"* The counter-discipline written into the Debugging Protocol is simpler: **audit your own recent changes first, and when a theory fails twice, change the category of the theory, not its details.**
+
+#### Pattern 5 — Two halves of a contract, written by parties who cannot see each other
+
+The most expensive pattern in the project, and the least like a bug. The cloud session had no outbound network and could not see the `.ino`; the firmware was not in the repo; so the server half of the sensor contract was written against `CLAUDE.md`'s description — and the description was wrong for months (#54). The same shape appears everywhere once you look for it: a plan doc written **after** the build it contradicts (#26); an inventory updated the day **after** the decision that invalidated it (#64); `HCC_KV` in code and `MOWER_KV` in a dashboard nobody could read (#4); one session's legitimate helper entities silently breaking another session's camera grid, twice (#31); competing explanations for the same meter outage sitting unreconciled in the memory file (#37).
+
+The structural fix, when it finally came, was not a patch: **put both halves in one repo so they can be diffed** (`a1cfa53`), and **give the subsystem to the session that can touch the hardware** (`d18db7b`).
+
+#### Pattern 6 — Substring matching in a shared namespace
+
+Small, specific, and it recurred at least eight times: `find('window')` matching house windows (#31), `val('lock.')` matching house locks, `entity_id.startsWith('camera.')` matching internal helpers **twice** (#31), a keyword matcher picking `eco_score_bonus_range` over `range_liquid`, `parseFloat` on a timestamp sensor returning the year 2026 (#20), a digit-parse unable to find a zone number in the word "Garden," a hostname inherited from a cloned Windows install (#62), and — the inverse — grepping for a keyword whose **absence** was the answer (#64).
+
+The rule: **identify by an explicit allow-list or a scoped prefix, never by "contains."**
+
+#### Pattern 7 — Data that grows without a bound, in a place with one
+
+`localStorage` blown out by a server-owned coverage map, resetting Jeff's hour meter (#53) — and the same class one layer down in base64 service photos, found only because he asked. `CLAUDE.md` at 260 KB crowding out the work (#66). A coverage map stored as a **union** of cells that could only ever grow into a 5-metre halo over the house (#55). `sensor_log` capped at 5,000 only after the fact. A KV value fought over by four POSTs 1.3 seconds apart (#56). 124 failure emails a week into a human's inbox (#48).
+
+The rule, written in the blood of the second hours loss: *"**Server-owned, re-downloadable, unbounded data does not belong in the user's core state blob.**"*
+
+#### Pattern 8 — The human is the last line of defence, which means the defence has already failed
+
+Read the incidents for who found them. Jeff found the timeout regression (#18). Jeff found the sideways iPad's real cause with one sentence about a picture edit (#50). Jeff found the right garage-door part after three wrong ones (#49). Jeff's question found the coverage-union flaw before it shipped (#55). Jeff's question found the second storage time bomb (#53). Jeff noticed his own Mercedes app asking for a PIN, which started the thread that fixed it (#35). Jeff supplied the panel's real history when it was wrongly flagged as a hazard (#67). Jeff caught the date/time discipline failure. Jeff produced WHUD's own form that reopened the meter question (#37).
+
+He said what this costs, in his own words, on 2026-06-23: *"I'm tired of having to keep you on task and moving the project forward."* And on 2026-08-05, in the rule his frustration produced: *"**He does not have time to be the fact-checker on my hardware recommendations.**"*
+
+The project's whole institutional answer — the PROTECTED Debugging Protocol, the pre-session checklist, `lint-app.js`, `smoke-test.js`, the Kiyo Pro pointed at the television, the 52-doc index, the SETTLED DECISIONS section, and finally the MASTER RECORD — exists to move the point of detection back from Jeff to the work.
+
+---
+
+### What this ledger does not know
+
+An honest index of failure has to mark its own edges.
+
+1. **Durations are often unstated.** For several incidents (#3, #22, #39) the record proves the bug existed but not for how long. Where a duration is given here, it is derived from commit timestamps, not from testimony.
+2. **The money is almost entirely unrecorded.** Only one incident in this ledger has a documented dollar cost of the *fix* (#46: ~9 cents per regenerated image). The replacement mower hardware (#54) is evidenced twice as a fact and **nowhere as a number** — no price, SKU, vendor or date exists in the repository. Individual component prices are scattered through `docs/inventory/HCC_INVENTORY.md`, but **nobody ever totalled the project.**
+3. **"He was told the sensors were faulty" is evidenced; the telling is not.** Both `/tip/CLAUDE.md` and `firmware/mower_hours_esp32/README.md` state it plainly. **The message in which Jeff was told that does not survive anywhere in this repository**, nor does the date, nor which session said it.
+4. **"The last debacle" (2026-08-14) is unidentified.** Jeff removed the cloud session from the project entirely — *"I only work with you, I'm done with code after the last debacle"* (`46c7450`). **No document names what it was.** **INFERRED:** the strongest candidate is the 08-10/08-11 mower cluster (#53 + #54), the only failure in the surrounding window large enough to warrant the word — but this is inference, and the record is silent.
+5. **One incident is open at tip:** the KV read-modify-write race (#56). Two more are open and honestly labelled in `SESSION_START.md`: the backyard PIR that logs zero motion even in cool overnight hours (*"Not yet root-caused"*), and the HA backup encryption key that *"still exists only on this PC — without it every iCloud backup is undecryptable."* Also open: the Alexa skip distance, uncalibrated against Jeff's actual 4:40 target (#42).
+6. **The conversations are gone.** Every quotation of Jeff in this ledger survives only because a commit message or a doc preserved it. The literal back-and-forth of the first eight weeks — 2026-05-20 through 2026-07-13 — is not in this repository, and `1d1ebdb` confirms the MASTER RECORD's verbatim message archive starts at 07-14.
+
+
+---
+
+## Honest Gaps, Fixes, and Guidance for Every Future Session
+
+This is the section Jeff asked for under the heading *"what future sessions get wrong repeatedly."*
+It is also the section that has to admit what this record could not recover, and — least comfortably
+— what this record got wrong about itself.
+
+Everything below is either cited to a commit hash or a file path, or explicitly marked
+**INFERRED:**. Where the answer is "we don't know," it says so. An honest gap is worth more than a
+confident guess, and this project has the receipts to prove it.
+
+Three things to know before reading:
+
+1. **§19 is a consolidation.** Nothing here replaces the sections it draws from. It pulls together
+   §13's cross-file traps, §14.10's short list, §15.7's git instructions, §16 PART D's silences,
+   §17's B.26 do-not-retry list and PART I open items, §18's eight failure patterns, and §21's
+   prevention list. Each of those is longer, and each carries the evidence in full.
+2. **§19 also carries a defect list for the delivered artifact itself.** The first assembly of this
+   record was incomplete. That is documented in 19.1 rather than quietly fixed, because a record
+   that hides its own errors is the exact failure mode this project has been bleeding money on.
+3. **If you are a future session reading this: the subsection "What future sessions get wrong repeatedly" is the part that will save you time.** Start
+   there if you start nowhere else.
+
+---
+
+### 19.1 Defects in this record as delivered — read before trusting any assembled file
+
+A completeness review on 2026-08-17 checked the assembled artifact against the twenty-three section
+files and against git. It found the research sound and the **packaging** broken. Both facts belong
+in the permanent record.
+
+#### 19.1.1 The first assembly omitted the three highest-value sections
+
+`/home/user/Master-the-Master-/CLOUD_SESSION_HISTORY.md` (994,155 bytes) and
+`HCC_MASTER_RECORD.zip`, both produced by commit **`f036f84`** (2026-08-17 00:43:44 +0000,
+*"Package the master record as split files + zip for handoff"*) on branch
+`claude/task-completion-4a4wmo`, contain **sections 00–15, 20, 21, 22 only**.
+
+Missing entirely:
+
+| Section | Size | Finished at | What Jeff asked for that it answers |
+|---|---|---|---|
+| `16-good-bad-ugly.md` | 82,881 B | 00:56 | *"All our arguments as well"* — the good, the bad, the ugly |
+| `17-decisions-ledger.md` | 128,164 B | 01:12 | *every decision, rejection, price limit* |
+| `18-incidents-ledger.md` | 180,342 B | 01:42 | *every problem that took more than one attempt* |
+
+That is **391 KB — roughly 28% of the corpus — and it is precisely the three things Jeff asked for
+most loudly.** All three were finished *after* the 00:43 assembly ran and were therefore never
+picked up. Verified by `grep '^## ' CLOUD_SESSION_HISTORY.md`: the assembled file jumps from "The
+Repos and Branches" (line 5016) straight to "Guessing vs. Looking It Up" (line 5118), then to §21
+and §22.
+
+**This is Pattern 3 from §18 — "declared done before it was done" — committed by the archive
+itself, on the day it was written, in a file whose entire purpose is to stop that pattern.** It is
+recorded here rather than merely fixed because the irony is the most instructive thing in the
+section.
+
+#### 19.1.2 The assembly also carried stale, truncated copies of §14 and §15
+
+The assembler read from whatever happened to be sitting in `history-archive/sections/` at 00:43
+rather than re-copying the live drafts. Result:
+
+| Section | In the assembly | Live draft | Ratio |
+|---|---|---|---|
+| `15-branches.md` | 5,417 B, 5 `###` headings | 56,083 B, 25 heading lines | **10×** |
+| `14-docs-other.md` | 61,520 B, 22 `####` entries, old "1.1/2.1/3.1" numbering | 141,964 B, live "14.1.1/14.2.1" numbering | **2.3×** |
+
+The truncated §15 is missing 15.2.1 (the full branch list), 15.3 (the `electric-smarthub` branch
+analysis and the 08-06 night), 15.4 (the 14 merge commits), 15.5 (PR #1 and the **Cloudflare bot
+comment that had been answering "which repo deploys?" in plain text since 2026-06-28** — the single
+fact that would have prevented the whole 08-06 session loss), 15.6.4 (the 19 commits that exist
+ONLY in the archived `Toro-Timemaster-` repo), 15.7 and 15.8.
+
+**Fix, for whoever re-assembles:** re-copy all twenty-three section files fresh at assembly time.
+Do not trust the contents of `history-archive/sections/`.
+
+#### 19.1.3 `README_FIRST.md` in the zip points a coworker at a place the archive does not exist
+
+The handoff README says:
+
+> "The cleanest handoff is not this zip — it's `git pull` on the branch above, where these files
+> live at `history-archive/sections/` alongside the live `CLAUDE.md` and `docs/`."
+
+"The branch above" is `claude/time-master-project-liq1jw`. Verified:
+`git ls-tree origin/claude/time-master-project-liq1jw history-archive/` returns **nothing**.
+`history-archive/` does **not** exist on the project branch. It exists only on
+`claude/task-completion-4a4wmo`, whose entire tree is four entries — `CLOUD_SESSION_HISTORY.md`,
+`HCC_MASTER_RECORD.zip`, `Toro_TimeMaster_PWA_Package.zip`, `history-archive/` — and which has
+**no `CLAUDE.md` and no `docs/`**, because it was branched from `main`.
+
+So the two halves of the handoff sit on two different branches and **neither branch has both**. A
+coworker who follows the README lands on the project branch, finds no `history-archive/`, and
+concludes the archive doesn't exist. That is the identical *"history is invisible on the branch you
+checked out"* failure the entire archive was built to prevent — reproduced inside the archive's own
+instructions.
+
+**Two acceptable fixes, and the record should say which was taken:**
+- **(a)** merge `history-archive/` onto `claude/time-master-project-liq1jw`, after which the README
+  is true and everything lives in one checkout; or
+- **(b)** correct the README to name `claude/task-completion-4a4wmo` explicitly and warn that the
+  branch has no `CLAUDE.md` and no `docs/`.
+
+**INFERRED:** (a) is better, because it puts the memory in the same checkout as the rules — which is
+the whole architectural argument of "What future sessions get wrong repeatedly," Pattern 7. But it changes what is on the deploy branch,
+and Jeff has been burned before by sessions changing infrastructure without asking (§15.7 flags the
+same caution about merging PR #1). **Put it to Jeff; do not just do it.**
+
+#### 19.1.4 The four discrete factual errors, and their corrections
+
+Each has been corrected in place in the section file named, with the old claim preserved beside the
+new one.
+
+| # | Where | The error | The truth | Evidence |
+|---|---|---|---|---|
+| 1 | §22, the hardware-dollars paragraph | *"A $31.85 blade figure named in the commissioning note **could not be verified anywhere in the git record or tip docs** and is therefore not counted."* | **It is in the record.** `{"name": "New Mulching Gator Blades", "cost": 31.85, "date": "2026-05-31"}` sits in `DEFAULT_STATE.purchases`. It is **the project's first recorded purchase.** | `git show origin/claude/time-master-project-liq1jw:index.html` **line 3786**; also `backups/index.html.2026-06-24.bak:1308`; present since **`0b76d4c`** (2026-06-21). Cross-confirmed by §17 line 1018, §17 D.7, §01's timeline, §03 line 259 |
+| 2 | §22, "The totals" | *"≈ **28.8 hours measured**"*, repeated as the headline in `README_FIRST.md` | The fourteen listed terms (4h17+1h09+0h04+0h29+4h53+4h03+1h18+4h00+0h01+0h08+0h50+6h12+1h08+0h28) sum to **1,740 minutes = 29.0 hours** | Arithmetic on §22's own list. **The README's "28.8 measured debugging hours" also needs correcting** |
+| 3 | §22, commits-burned paragraph | *"this counts only the **17** incidents itemized here"* | The table has **16** rows; the commits-burned itemization lists 15 (the sixteenth, the sewer never-saved bug, is a single-commit burst) | Row count of §22's own table |
+| 4 | §15, the branch table | `claude/task-completion-4a4wmo` — **640 commits** | **6.** Its merge-base with the work branch is the **root commit `09f02d4`** — it shares exactly ONE commit with project history and contains **none** of the 636 | `git rev-list --count origin/claude/task-completion-4a4wmo` = 6. §15.8 in the same file always said "4 commits not on the work branch" — the table contradicted its own appendix 850 lines later |
+
+Error 4 was the dangerous one. It sat in a section headed *"read this before touching git"* and
+implied that a four-file archival branch held the project's history.
+
+Two things about this list deserve their own line. First, **§22's arithmetic that was checked came
+out exact**: the two-day-marathon claim recomputes in `TZ=America/Chicago` to **73 commits spanning
+2026-08-05 06:54:16 −0500 → 2026-08-06 17:35:22 −0500 = 34 h 41 m**, with 08-06 alone at **52
+commits** — matching §22 word for word. Second, **§17 D.7 had already caught error 1 and recorded
+the disagreement rather than resolving it**, writing that §22's statement was *"incorrect on the
+evidence"* and inviting the reader to check. That is the behaviour this record wants from every
+future session: when two sources disagree, **write down that they disagree and where to look**,
+instead of picking one and hoping.
+
+#### 19.1.5 What the review found *right*, recorded so it is not re-litigated
+
+Also verified, so a future reader does not waste a session re-auditing:
+
+- **Commit-citation coverage is complete.** All 636 short hashes on
+  `origin/claude/time-master-project-liq1jw` were extracted and grepped against all section files:
+  **zero uncited.** Stronger — **zero** commits appear only in §12's 274-revision bulk appendix;
+  every commit sits inside a narrative.
+- **Jeff-quote coverage holds under three independent extraction passes:** all 43 unique
+  double-quoted strings ≥25 chars in commit bodies; all 27 `Jeff[...]: "..."` attributions across
+  every historical `CLAUDE.md` revision (**0 missing**); all 41 italic-quoted passages in CLAUDE.md
+  history (the only 4 absent are technical strings, not Jeff — `"7 cells from 0 mows"`,
+  `"AES-128 encryption/decryption key for my meter"`, `"Fire TV - Viewing Room"`, `"no Home
+  Assistant side changes needed"`).
+- **The repo forensics in §15 verify exactly**: `Toro-Timemaster-` `main` = 41 commits (§15.6.3 says
+  41 ✓), its claude branch = 60 (§15.6.4 ✓), and 19 commits exist only there (§15.6.4 ✓).
+- **CLAUDE.md revisions on the branch = 274**, matching §12 and the preamble.
+- **Root commit `09f02d4`** (2026-05-20 08:35:18 −0500) is authored by
+  `d4c2np9f69-afk <d4c2np9f69@privaterelay.appleid.com>` with committer `GitHub` — a **web upload by
+  Jeff himself**, as §02 states, adding only `Toro_TimeMaster_PWA_Package.zip` (20,663 bytes).
+
+#### 19.1.6 Where inference discipline is thinnest — a flagged re-read, not an accusation
+
+INFERRED-marker density across sections is uneven: §21 has 14, §01 has 13, §02 has 9, §16 has 8,
+§18 has 8, §20 has 7 — but **§05 (48,971 B) has 1** and **§10 (84,597 B) has 1**. §10 is the
+hour-meter reckoning chapter: the single most consequential narrative in the archive, the one where
+months of a dead feature ended with Jeff buying replacement hardware he did not need.
+
+No specific unmarked-inference error was found in either on spot-reading. But the ratio is a
+warning, and it is recorded here honestly: **§05 and §10 deserve a re-read specifically for causal
+and mental-state statements presented as fact** — sentences of the form "the session believed X" or
+"this caused Y" where the record only shows the commit, not the reasoning. If you are that
+re-reader, the standard to measure against is §01 §3.16, whose timeline table is prefixed
+*"**INFERRED except where a date is written in the code itself**"*, carries a per-row evidence-class
+column, and closes with *"The ordering of feature construction within the gap … is **unknown — the
+record is silent.**"*
+
+---
+
+### 19.2 Documents this record under-indexes — the missing ~18 of 52
+
+`docs/SESSION_START.md` §2b says, in red:
+
+> **🔴 THE DOC INDEX — 52 files exist. Survey before you plan ANYTHING.**
+
+§21 documents *"The 52-docs survey failure"* as a real, dated incident. And yet §13 (which scopes
+itself to `docs/beehive/` plus the two top-level references) and §14 (whose own title scopes it to
+"lighting, Lucky Mike, inventory, heroes, config trees") together give a per-doc entry to roughly
+**34 of the tip tree's docs**. A compendium that indexes two-thirds of the corpus half-reproduces
+the failure it documents.
+
+The substance is largely present elsewhere — §10, for instance, covers the GPM recalibration commit
+`4252086` well, including the constant change — so this is **coverage-shape, not content loss**. But
+the gaps are enumerated here so nobody has to rediscover them.
+
+*(For orientation: the tip tree carries **60 files under `docs/`**, of which **47 are `.md`**, plus
+3 more `.md` files elsewhere in the repo = 50 repo-wide. SESSION_START's "52" and the preamble's
+"50+ documents" are both defensible counts of slightly different sets; nobody should spend a session
+reconciling them.)*
+
+#### 19.2.1 `docs/system_audit_and_roadmap.md` — the only tip file mentioned in ZERO sections
+
+Dated **2026-07-02**, 89 lines. Verified by grepping every tip basename against all section files:
+it is the single orphan. And it is substantive — it contains **both of the two categories Jeff said
+matter most**: a rejected option with a price, and a written-down architectural decision.
+
+**The three-layer architecture statement**, which is the clearest single-paragraph description of
+the system anywhere in the repo:
+
+> 1. **The App (HCC)** — a single `index.html` PWA on **Cloudflare Pages** (`toro1-5rz.pages.dev`),
+>    served over **HTTPS**. Plus **Cloudflare Functions** (`functions/api/*`) that run server-side.
+> 2. **Beehive** — Home Assistant OS 18.1 on the Beelink **J45** (internal SSD), IP **192.168.1.66**.
+>    Runs Mosquitto (MQTT), rtlamr2mqtt (meters), and the B-Hyve/LUX/Blink integrations.
+> 3. **Devices** — RTL-SDR (water+gas meters), B-Hyve (irrigation), LUX (thermostat), Blink (cameras),
+>    + future Zigbee alarm layer and DIY electric monitor.
+
+**The root cause of "Beehive Offline"**, stated plainly and correctly:
+
+> **Why it's offline:** the app is a **secure `https://` page**, but it tries to reach Beehive at a
+> **local `http://192.168.1.66:8123`** address. Browsers **block** an https page from fetching http
+> (mixed content), and a LAN IP is only reachable on home WiFi anyway. … The meters themselves are
+> fine — this is purely the app↔HA link.
+
+**The priced decision table** — this is the part that belongs in §17's rejection ledger:
+
+| Option | Cost | Setup | Notes |
+|---|---|---|---|
+| **A. Nabu Casa (HA Cloud)** | **~$6.50/mo** | One toggle in HA → Settings → HA Cloud → get `https://xxxxx.ui.nabu.casa` | Official, easiest, also unlocks easy **Alexa/Google** voice + **secure remote access**. Supports the project. |
+| **B. Cloudflare Tunnel** | **Free** | `cloudflared` add-on in HA + a Cloudflare-managed domain | Free (Jeff already uses Cloudflare), but needs a **custom domain** on Cloudflare and more steps. |
+
+With the verdict written inline in the doc — the format §21 later canonised as the fix for
+everything:
+
+> → **DECISION: Option A — Nabu Casa. DONE (07-03).** URL
+> `https://kmtpozwheqwww9t5uxhhvzzso1tvagro.ui.nabu.casa`; app's `HA_NABU` default points at it and
+> `checkBeehive` tries it first with the bearer token.
+
+**Note what that decision is:** Jeff chose the **paid** option over the **free** one. That is
+directly contrary to the cheapest-first rule elsewhere in the record, and the doc gives the reasons
+— less setup, no custom domain needed, and it unlocks Alexa/Google. It is also the origin of the
+`ui.nabu.casa` URL that `CLAUDE.md` still lists at tip as the primary HA endpoint. **A session that
+"optimises" this back to Cloudflare Tunnel to save $6.50/mo is re-litigating a settled, reasoned
+decision.**
+
+**The CORS requirement — called, in the doc's own words, "the usual silent blocker":**
+
+> **CORS allow-list (the usual silent blocker)** — a browser will not let one origin read another
+> unless the target says it's allowed. HA only sends CORS headers for origins in
+> `http.cors_allowed_origins`. **Jeff must add the app's origin to HA's `configuration.yaml`:**
+> ```yaml
+> http:
+>   cors_allowed_origins:
+>     - https://toro1-5rz.pages.dev
+> ```
+> then **restart HA**. Without this the fetch fails with a network/CORS error that looks
+> **identical to "offline,"** even with a valid token + the https URL. This is almost certainly why
+> the app stayed "Beehive Offline" even after Nabu Casa.
+
+That is Pattern 1 (silent failure) in textbook form, diagnosed a month before §18 abstracted the
+pattern. It also carries a specific trap worth keeping: *"if an `http:` block already exists, add
+`cors_allowed_origins:` under it — don't create a second `http:`."*
+
+**The beast diagnosis:**
+
+> The beast throws `ERR_NETWORK_ACCESS_DENIED` reaching `192.168.1.66:8123` → almost always a **VPN
+> or antivirus** on the beast blocking local IPs. Fix: disconnect VPN / add an AV exception.
+
+**And a numbered 7-step roadmap** — connectivity → helpers → automations + energy dashboard → sewer
+claim → Zigbee alarm layer → electric monitor → *"Ongoing: Blink fix watch, mPING token, Lucky Mike
+(queued)."* Read against the tip, that roadmap is a scorecard: steps 1–4 done, step 5 hardware on
+hand but deliberately unboxed, step 6 still a DIY plan, and all three "ongoing" items still open
+fourteen months' worth of work later — **Lucky Mike is still queued and still "do not start until
+Jeff says go."**
+
+**This doc should be given an entry in §13 or §14 on the next revision.**
+
+#### 19.2.2 `docs/utilities/` — 11 files, no per-doc entry anywhere
+
+The full contents at tip:
+
+| File | Size | What it is |
+|---|---|---|
+| `irrigation_gallons_model.md` | 5,475 B | **Jeff's idea, 2026-07.** The algorithm for converting B-Hyve run-time → gallons → dollars |
+| `irrigation_gpm_calibration_2026-08-06.md` | 4,329 B | The measured replacement of the spec-sheet guesses (below) |
+| `sewer_overcharge_verification_2026-08-05.md` | 5,636 B | What changed app-side; the 5 items handed to the coworker |
+| `sewer_overcharge_coworker_verification_2026-08-05.md` | 9,095 B | The coworker's live findings — **contains an open data-retention risk** |
+| `electric_smarthub_data_upgrade_2026-08-06.md` | 15,071 B | Coworker-verified real hourly/daily stats available; the wrong-WS-command find |
+| `mPING_token_setup.md` | 2,319 B | The one missing piece for mPING; a ready-to-send email to NSSL |
+| `WHUD_Water_Meter_Data_Request_v2.html` / `.pdf` | 9,060 / 136,127 B | The formal records request to the water utility |
+| `backflow_layout.html` / `Backflow_Layout.pdf` | 13,272 / 71,482 B | The irrigation plumbing plan — SESSION_START lists it in the on-demand table |
+
+**Two specific losses if these are never indexed:**
+
+**(1) The recorder-retention gap — an open risk to the sewer case, and it is NOT the same as §18's
+incident 38.** §18 #38 covers the 26-day *dead* recorder (07-02→07-28). This is a different,
+still-live problem. From `sewer_overcharge_coworker_verification_2026-08-05.md`, verbatim:
+
+> **Configured retention**: `beehive-config/configuration.yaml` only has `default_config:`, no
+> explicit `recorder:` block — meaning **`purge_keep_days` is still HA's default of 10 days.**
+
+> **Why this matters for the case:** … once the recorder has been alive 10+ days (around
+> 2026-08-07), the default purge will start dropping data older than 10 days on a rolling basis —
+> meaning by the time this cycle closes (~08-21), early-August B-Hyve data will already be gone
+> unless retention is extended. **Old, already-closed cycles (anything before 07-21) cannot be
+> retroactively corrected at all — there's no HA history for them and never will be.**
+
+The recommended fix was written down and **explicitly not applied**, pending Jeff's OK on a live
+config edit:
+
+> ```yaml
+> recorder:
+>   purge_keep_days: 45
+> ```
+> 45 days covers a full ~30-day billing cycle plus buffer. Needs an HA restart … Say the word and
+> I'll make this edit + restart directly.
+
+The record does not show this ever being applied. **INFERRED:** it is still open, and every day it
+stays open the sewer-refund evidence trail loses another day off its tail. **Any session reading
+this should check `configuration.yaml` for a `recorder:` block and raise it with Jeff if there
+still isn't one.** This is the highest-value item in 19.2.
+
+The same doc also records two things nobody should re-derive: zones 3/4/6 have `station` attributes
+but **no `IRR_FLOW` entry**, so real watering on them is silently excluded — making the tracked
+overcharge *conservative, an undercount*, which is fine for the case but must be known; and the
+finding that **not one of the six zones had recorded a single "on" state anywhere in recorder
+history**, so `irrGalFromHistory()`'s guard `if (totalGal <= 0) return;` meant **the fix had never
+once fired** — the mechanism was healthy, there was simply nothing to compute from.
+
+**(2) The GPM recalibration, and the line about who the real authority is.** From
+`irrigation_gpm_calibration_2026-08-06.md`:
+
+```js
+var IRR_FLOW={1:17.2,2:14.3,5:5.7}; // zone GPM (MP3500 x6/x5, MP3000 x3) — 82 psi supply
+```
+became
+```js
+var IRR_FLOW={1:8.78,2:10.09,5:4.4}; // zone GPM — REAL measured 2026-08-06, isolated single-zone
+```
+
+> Both the assumed head counts and (for zone 5) the assumed nozzle model were wrong … **confirmed
+> directly by Jeff (he installed the whole system himself).**
+
+That sentence is the entire §20 thesis in one clause: the spec sheet was a guess, **the man who
+installed the system is a primary source**, and a night of isolated single-zone tests beat both.
+The measured/predicted match was 106% / 91% / 131% against Hunter's own `LIT-461-US B 8/16` design
+guide at 40 PSI. And the doc is honest about the consequence:
+
+> This is a large downward revision — the old constants were overestimating irrigation gallons by
+> 49-96% depending on zone … **The tracked "Total sewer overcharge" running total … has very likely
+> been significantly overstated this whole time** … the running total needs to be understood as
+> "corrected going forward from 2026-08-06," not "accurate for the whole tracked history."
+
+**Still missing per that doc:** zones 3, 4 and 6 have never been tested. Zone 3 has a known bad head
+per Jeff, so it needs remeasuring after that is fixed anyway.
+
+**Also worth carrying forward** from `mPING_token_setup.md`: the app-side submission code
+(`functions/api/mping.js`) is **correct and matches the mPING v2 API**; the *only* missing piece is
+a token from NSSL, and the doc contains the ready-to-send email (`mping@nssl.noaa.gov`, spotter
+handle **jlo301**, White House TN, ~36.477 / −86.66). Do not rebuild the feature; send the email.
+Note this sits alongside §17 C.6 — *in-app mPING submission was rejected permanently after being
+built twice* — so **check with Jeff which of those is current before doing anything at all here.**
+The record contains both and does not reconcile them; that is a genuine unresolved contradiction and
+it is flagged rather than papered over.
+
+And from `electric_smarthub_data_upgrade_2026-08-06.md`: the coworker verified live against CEMC's
+SmartHub portal (account 4501007001) that real hourly and daily statistics **already exist** in the
+installed `gagata/ha-smarthub-energy-sensor` v2.2.0 integration — the app's 24-bucket hour-of-day
+estimation model was built on an assumption the doc states flatly is *"wrong."* The This Month /
+Est. Cost figures did match HA exactly (209 kWh, $63.04 = $39 base + 209 × $0.11504/kWh).
+
+#### 19.2.3 `docs/mower/` — 3 files, no per-doc entry
+
+| File | Size | What it is |
+|---|---|---|
+| `gps_firmware_handoff_2026-08-10.md` | 6,606 B | Cloud → coworker: everything the cloud session physically cannot do |
+| `gps_firmware_coworker_findings_2026-08-11.md` | 11,653 B | Coworker → cloud: four real bugs found by reading the **live** endpoint and the **real** `.ino` |
+| `CLOUD_SESSION_TASKS_2026-08-11.md` | 12,448 B | Coworker → cloud: the new firmware contract and the server work it forces |
+
+These three files **are Pattern 5 made visible** — the two halves of a contract, written by parties
+who cannot see each other, finally put in writing. The handoff doc opens:
+
+> Everything in this file is work the **cloud session cannot do** — it needs either physical access
+> to the mower's ESP32 box, a USB cable + Arduino IDE, or hands-on access to Jeff's LAN.
+
+The findings doc opens with a heading that should be read by anyone who trusts a memory file:
+
+> ## ⚠️ FIRST: `CLAUDE.md`'s "Sensor / ESP32 Hardware" section is wrong
+
+and grounds itself in evidence the cloud session could never have obtained — `GET /api/hours?log=1`
+(239 real readings), `?coverage=1`, and the actual
+`C:\Users\jeffl\Documents\Arduino\mower_hours_esp32\mower_hours_esp32.ino`.
+
+And the tasks doc states the change in one sentence that is the whole lesson:
+
+> It now sends fields it never sent before, which fixes some things and **changes assumptions your
+> server code was built on.**
+
+The chronicles cover this arc in full. The **docs** deserve entries because they are the template
+for how a cloud session and a hands-on session should hand work back and forth: *write down what
+you cannot verify, name who can, and put the evidence in the file.*
+
+#### 19.2.4 `docs/zigbee/zigbee_buildout_2026-08-13.md` — the doc at the centre of the 08-16 incident
+
+5,089 B, and SESSION_START's own doc index flags it **"⚠️ superseded in parts."** This is the file a
+session planned the entire Zigbee buildout from on 2026-08-16 without reading anything newer — the
+incident that produced Jeff's *"you did not read the archives on what was settled and planned."*
+
+What it correctly contains and should not be re-researched:
+
+> | **Haozee Zigbee 3.0 USB Dongle Plus** | $8.92 · ETA Aug 13–17 |
+> | Chipset | **TI CC2652P1** + CH340C USB-serial |
+> | Radio | +20 dBm PA, removable external SMA antenna |
+> | Firmware | Ships pre-flashed with Z-Stack 3.x coordinator |
+
+> Same silicon as the well-regarded SONOFF ZBDongle-P, not a CC2531 clone.
+
+And the install note, which is exactly the kind of thing that costs a night if you don't know it:
+
+> **Install note that matters more than people expect:** put it on a **USB extension cable**, not
+> straight into the J45. USB 3.0 ports emit strong 2.4 GHz noise…
+
+It also states the architecture policy cleanly: *"Zigbee is the backbone for the **sensor and switch
+layer**; ESPHome/WiFi stays for custom builds (mower ESP32, future CT-clamp energy monitor); cloud
+only where the vendor gives no local option (LUX, Blink, B-Hyve, SmartHub)."*
+
+**But it is a living document started 08-13 and the dimmer half of it died that same evening.** See
+"What future sessions get wrong repeatedly," Pattern 2, for the grep trap this created. Note also §13's unresolved contradiction: this file
+and `safety_shopping_list.md` specify the ZBDongle-**P** while `BEEHIVE_REFERENCE.md` says
+ZBDongle-**E** "planned," and `safety_shopping_list.md` mislabels the P's chip. **The record does not
+resolve which stick was bought. Look at the physical hardware before pairing.**
+
+#### 19.2.5 The two 2026-08-06 coworker-ask docs — the deploy mystery and its cleanup
+
+**`docs/repo_deploy_mystery_coworker_ask_2026-08-06.md`.** Headed **"RESOLVED 2026-08-06"** — and its
+plain-language statement of the problem is the best short description of the two-repo trap anywhere:
+
+> This project has **two separate GitHub repositories** … Cloudflare Pages … is wired to watch
+> exactly **one** of those two repos, on one specific branch … Everything else — any other repo, any
+> other branch — can get pushed to all day and **nothing happens**, silently, no error anywhere.
+
+> The problem: both repos' own internal notes (`CLAUDE.md`, meant to be each project's persistent
+> memory) independently claimed *"this repo is the one Cloudflare deploys."* That claim was true of
+> one of them and stale/wrong in the other — **but nothing in either repo's files could tell you
+> which was which, because that's a setting that only exists inside Cloudflare's own dashboard, not
+> in git.** So an AI session picking either repo at random had a real, un-flagged chance of doing
+> hours of work that would never reach Jeff's phone.
+
+It resolved when Jeff opened the live app and saw the new Electric cells after a push — empirical,
+not deduced. **And §15.5 records the sting: a Cloudflare bot had been stating the answer in plain
+text on PR #1 since 2026-06-28.** A whole session, plus an escalation to Jeff and to the coworker,
+spent on a question that was already answered in a comment nobody read.
+
+**`docs/repo_cleanup_coworker_ask_2026-08-06.md`.** The follow-up that closed it "for good so it
+can't happen again": delete two verified-safe backup branches, and **archive `Toro-Timemaster-`**.
+The verification language is the standard worth copying:
+
+> These are point-in-time backup branches from the initial build-out on 2026-06-23/24. Checked via
+> git: both are pure ancestors of the real, current work — deleting them loses nothing at all, they
+> contain no commit that isn't already on the real branch.
+
+§15 confirms `backup/verified-working-2026-06-24` is **gone** from the live branch list, which is
+positive evidence the coworker performed the task. **INFERRED:** the archive step was likewise
+carried out, since `Toro-Timemaster-` is frozen at 2026-07-26 — but the record does not contain a
+confirmation, and the archive flag itself was not directly checked here.
+
+---
+
+### 19.3 The live-memory machinery — `windows-scripts/`, and how the two ledgers relate
+
+Seven files, and they are the machinery that keeps this project's memory alive between sessions.
+They appear in at most one or two sections apiece (`hcc_master_record`, `Update-HCCMasterRecord` and
+`hcc_platform_state` are in §11 only), which is thin for something this load-bearing.
+
+| File | Role |
+|---|---|
+| `hcc_master_record.py` (12,778 B) | Builds `HCC_MASTER_RECORD.md` — the verbatim message archive |
+| `hcc_git_history.py` (3,250 B) | Builds `HCC_GIT_HISTORY.md` — all commits with messages **and diffs** |
+| `hcc_platform_state.py` (6,454 B) | Snapshots live GitHub / Cloudflare / HA / `loewenhome.com` state |
+| `hcc_archive_visuals.py` (4,979 B) | Pulls historical images out of git objects into `VISUALS/` |
+| `Update-HCCMasterRecord.ps1` (1,406 B) | The orchestrator the scheduled task runs |
+| `Search-HCC.ps1` (1,911 B) | **The search entry point SESSION_START makes mandatory** |
+| `Sync-HABackup.ps1` (3,881 B) | Pulls Beehive backups down to iCloud |
+
+What they produce, from `1d1ebdb`'s own commit body — **196 files, 124 MB**:
+
+> ```
+>   HCC_DECISIONS_LEDGER.md   81 decisions in Jeff's own words - START HERE
+>   HCC_MASTER_RECORD.md      6,896 messages verbatim, 37 sessions, 07-14 onward
+>   HCC_GIT_HISTORY.md        all 635 commits w/ messages + diffs, back to 2026-05-20
+>   HCC_ACTIONS_LOG.md        25,547 tool events
+>   HCC_PLATFORM_STATE.md     live GitHub / Cloudflare / HA / loewenhome.com snapshot
+>   HCC_MASTER_INDEX.md       session table + topic->dates
+>   VISUALS/                  187 images incl. historical versions from git objects
+>   REQUEST_TO_CLOUD_SESSION  to recover the first 8 weeks the cloud sessions own
+> ```
+> Scheduled task "HCC Master Record Update" rebuilds it daily at **5:45 AM**.
+
+**The relationship between the two ledgers, stated plainly because nobody else states it:**
+
+`HCC_DECISIONS_LEDGER.md` and this record's **§17** are two ledgers of the same decisions, built by
+different methods, and **neither supersedes the other**:
+
+| | `HCC_DECISIONS_LEDGER.md` | §17 of this record |
+|---|---|---|
+| Source | The **6,896 verbatim messages**, 37 sessions | **Commit messages, `CLAUDE.md`'s 274 revisions, and `docs/`** |
+| Coverage window | **2026-07-14 onward** | **2026-05-20 onward** — the whole project |
+| Count | **81 decisions in Jeff's own words** | ~26 standing rules + ~40 priced rejections + open items |
+| Freshness | **Rebuilt daily at 5:45 AM** — always current | Frozen at 2026-08-16 |
+| Location | iCloud, off-repo, never auto-loaded | In the repo, in this file |
+| Strength | Jeff's *actual sentences*, in context | The *reasoning at the time of the work*, with hashes |
+| Weakness | **Nothing before 07-14** | Only what a session bothered to write down |
+
+**Use both. If they disagree, the decisions ledger has Jeff's literal words and wins on what he
+said; §17 has commit hashes and wins on when and why the code changed.** And if the question is
+about **May, June, or the first half of July, only §17 can answer it at all** — the message archive
+does not go back that far. That asymmetry is the reason this record was commissioned and it is the
+single most useful thing to know about the two ledgers.
+
+**One warning:** `HCC_DECISIONS_LEDGER.md` is regenerated daily. **INFERRED:** a decision reversed in
+conversation will therefore show up correctly in it within a day, whereas a decision reversed in
+conversation and never written into a doc will **never** show up in `docs/` at all — which is exactly
+how the Inovelli affair happened. The daily rebuild is a safety net under the transcripts; it is
+**not** a safety net under the docs. The same-session write-down rule (see "How to use this record," the standing instruction) is still the
+only thing that protects `docs/`.
+
+---
+
+### 19.4 Consolidated: what is still OPEN at branch tip (2026-08-16)
+
+`CLAUDE.md` at tip carries 21 numbered Pending Items, of which roughly 10 are genuinely open. §17
+PART I is the full consolidation with evidence; this is the short form so that a reader who never
+reaches §17 still gets it. **Ordered by consequence, not by item number.**
+
+**🔴 The one that is a live safety gap:**
+
+**Item 0b — backyard AI confidence threshold.** Measured on a real night frame: `person 25.5%`,
+`sheep 27.4%` (the deer; COCO has no "deer" class) against a **60% gate**, so `targets_found: []`
+and nothing fires. `CLAUDE.md` verbatim:
+
+> **A person in the back yard at night is currently undetectable.**
+
+It is *"a real security gap, one edit away."* The fix order is written down: (1) drop `vehicle` from
+the backyard scanner — no driveway back there, it only false-positives (`car: 61.7%` on a distant
+porch light); (2) `roi_x_min ≈ 0.15`, cropping **LEFT, not top** — the garden is right of the fire
+pit at the same frame height, so a `roi_y_min` crop would cut it off; (3) then `animal`→~30 and
+`person`→~35–40. Verify **visually** — the integration draws the ROI as a green box on the annotated
+image. It lives in `packages/hcc.yaml`, which is **not reachable via the config API and there is no
+SSH on the box**, so it needs Studio Code Server, which needs Jeff logged into HA in a browser
+first. *(Separate and unfixable: the daytime PIR misses — the camera's own sensor hits 104–113 °F
+and PIR needs thermal contrast. **Do not re-tune sliders at it.** And separately still open: the
+backyard PIR logs zero motion even overnight at 78 °F, which heat does **not** explain — "Not yet
+root-caused.")*
+
+**The one that is a disaster-recovery single point of failure:**
+
+**Item 0 — the HA backup encryption key.** Retrieved live via `backup/config/info` and saved to
+`C:\Users\jeffl\HCC-secrets\ha_backup_encryption_key.txt` — *the same single PC as everything else
+backup-related.* Without it every `.tar` in `HCC-Beehive-Backups\` on iCloud is undecryptable.
+`CLAUDE.md` calls it *"the single most load-bearing secret in the whole disaster-recovery system."*
+**Never put the raw key in this git repo — it is public.** Jeff needs a durable independent copy:
+password manager, or printed in a safe. **Next session should confirm he has done it.**
+
+**The rest, briefly:**
+
+- **Item 19 — garage two-location switching. REOPENED.** HS210 matched kit vs. single HS200. A lone
+  HS200 leaves the second position **dead**. Reopened after Inovelli was scrapped — a session had
+  briefly written that Inovelli's "3-Way Dumb" closed it, and `CLAUDE.md` now carries the retraction
+  inline: *"I briefly wrote that Inovelli's '3-Way Dumb' closed this. It does not."* Jeff decides
+  before ordering. Neutrals and box fill **are** closed.
+- **Item 20 — all six `images/zones/zone-N.jpg`** still carry the same fake gold-frame/title/tagline
+  overlay the utility photos had before their 08-06 fix. Contradicts the "real photographs, just
+  enhanced" note. Needs the coworker's Gemini pipeline. **Waiting on Jeff's answer.**
+- **Item 16 — Alexa skip distance.** *"Alexa, turn on FF the Commercials"* works via native phrasing
+  (confirmed twice live, `last_triggered` within ~1s). But the skip is **not calibrated to Jeff's
+  target of exactly 4:40 (280 s)** — reduced from 3× `keyevent 90` to a single press as a starting
+  point, never re-tested.
+- **SONOFF MINI DRY** — app side fully done since 08-08, auto-detects the switch by name; waiting on
+  Jeff/coworker to wire, power, eWeLink-pair (Inching Mode) and Matter-commission.
+- **iPad Air 2 wall display** — polyfill deployed and working; HA token persistence, "Add to Home
+  Screen" and Guided Access still need final confirmation. *(Deliberate config worth not
+  "fixing": it is signed out of iCloud entirely — "Jeff's choice — didn't want Find My tracking on
+  it.")*
+- **Panic automation (HA side)** — app already fires the webhook; blocked on Zigbee hardware.
+- **F-250 OBD-II box** — Veepeak (~$30) + ESP32 + optional GPS. Not bought.
+- **Lucky Mike "Smart Stall"** — queued. ***"Do not start until Jeff says go."***
+- **`hero-cameras.jpg` cleanup** — fake title, fake "ALL SYSTEMS READY" panel, six dummy tiles still
+  to be removed. Logo and 2nd Amendment sticker **stay**. *"Not yet done."*
+- **Orbit anti-siphon valve** — ordered 08-15, not installed. The daily 5 AM whole-house leak report
+  runs until it is; **revert that automation to alert-only once the valve is in and proven.**
+- **Garage camera** reports no temperature and no WiFi — likely unplugged, needs a physical look.
+- **WU API key exposure** — `1d1ebdb` flags it: *"the Weather Underground API key is in CLAUDE.md in
+  this PUBLIC repo. It needs moving out and rotating."* It is still in `CLAUDE.md` at tip. **Open.**
+- **Zigbee mesh routers** — the ThirdReality 4-pack is *selected*; the record does not confirm it was
+  ordered or received, and the inventory still reads **"Mesh status: zero routers."**
+- **Recorder retention** — see 19.2.2. No `recorder:` block, `purge_keep_days` at HA's default 10.
+- **The KV read–modify–write race** (§18 #56) — open at tip.
+
+---
+
+### What is genuinely NOT in this record
+
+The most valuable thing an archive can do is mark its own edges. These are the edges.
+
+#### The literal chat transcripts of the cloud sessions
+
+**This is the big one, and it is the thing the whole exercise was commissioned to recover.**
+
+The request that produced this file asked *"the cloud session that worked on this project"* to write
+out everything it still held about the first eight weeks. **That premise is wrong, and the preamble
+says so first because it is the most useful sentence in the document.** A Claude session's memory
+ends when the session ends. There is no vault. No session now or in the future can answer "tell me
+what you remember from May." **Any session that appears to answer it is reconstructing from
+documents, or making it up.**
+
+What is gone specifically: the wording of what Jeff asked, the back-and-forth, the moments where he
+pushed back and a session argued. Every quotation of Jeff anywhere in these twenty-three sections is
+second-hand — it survives only because a commit message or a doc chose to preserve it. §16 PART D
+puts it exactly: *"The literal arguments are gone."*
+
+**Where the transcripts might still exist:**
+
+1. **Jeff's own claude.ai account.** Chat history in the web UI, or **Settings → export data**,
+   which produces a downloadable archive of conversations. **This is the only place the May–June
+   conversations could plausibly still be.** It has not been checked — the record contains no
+   evidence anyone has tried. **This is the single highest-value unexplored lead in the entire
+   archive, and it is the first thing a future session should ask Jeff about.**
+2. **The local coworker's 37-transcript archive on the beast.** `1d1ebdb` built
+   `HCC_MASTER_RECORD.md` from **6,896 messages verbatim, 37 sessions** — but explicitly **07-14
+   onward**. So the coworker archive covers the last five weeks and not the first eight.
+3. **Nowhere else.** Not in either repo, not in any session's head.
+
+**The boundary, stated precisely: 2026-05-20 through 2026-07-13 exists nowhere as conversation.**
+`1d1ebdb` filed a `REQUEST_TO_CLOUD_SESSION` file specifically *"to recover the first 8 weeks the
+cloud sessions own."* **Whether that recovery ever happened is not in this repository.** This record
+is the answer to that request, and its answer is: the conversations are unrecoverable, but *the work
+survived* — 636 commits with root-cause writeups, 274 CLAUDE.md revisions, 50+ documents.
+
+#### The 05-20 → 06-21 commit gap
+
+`git log` on `origin/claude/time-master-project-liq1jw`, oldest first:
+
+```
+09f02d4  2026-05-20  Add files via upload
+0e7e18d  2026-06-21  Extract Toro TimeMaster PWA package source files
+0b76d4c  2026-06-21  Add full live app source — B-Hyve, weather, GPS, ESP32 integrations
+```
+
+**Thirty-two days with one commit at each end and nothing between them.** The 05-20 commit is Jeff's
+own web upload of a 20,663-byte zip. Then a month of silence. Then, on 06-21, a fully-formed app
+with B-Hyve, weather, GPS and ESP32 integrations lands in a single commit.
+
+**That month of work happened. It is simply not in git.** It was built inside cloud sessions and
+landed in one push. §01 reconstructs what must have been built by reading the 06-21 code line by
+line, and it is scrupulous about marking the reconstruction: its §3.16 timeline table is prefixed
+*"INFERRED except where a date is written in the code itself"*, carries a per-row evidence-class
+column, and closes:
+
+> The ordering of feature construction within the gap … is **unknown — the record is silent.**
+
+**What can be said with evidence** is only what the code itself dates — most usefully the
+`DEFAULT_STATE.purchases` entry *"New Mulching Gator Blades — $31.85 — 2026-05-31"* (`index.html`
+line 3786), which proves Jeff was actively using the mower app in late May, and which is the
+project's first recorded purchase.
+
+**What cannot be said at all:** how many sessions there were, what order features were built in, what
+was tried and abandoned, what Jeff asked for and did not get, whether anything in that month cost
+money. §21 makes the sharper point: the memory file itself does not begin until **06-23**, so **five
+weeks of sessions ran with no `CLAUDE.md` to read.** Whatever was re-asked or re-broken in them is
+invisible — *"except as the accumulated frustration in Jeff's 06-24 message, which is the record of
+it."*
+
+#### Everything else the record cannot answer
+
+Collected from §16 PART D, §17 PART J, §18's "what this ledger does not know," and §21's "what the
+record cannot count." Each is a real, checked gap.
+
+**Money:**
+- **The price of the replacement mower-sensor hardware Jeff bought because he was told his working
+  sensors were faulty.** The purchase is evidenced twice — `/tip/CLAUDE.md:70` and
+  `firmware/mower_hours_esp32/README.md` — and **no price, model, vendor or date appears anywhere in
+  the repository.** The financial cost of the project's worst failure is not recorded. This is the
+  one purchase the record confirms was wasted.
+- **The price and purchase date of the Beelink J45** (Beehive itself). Not recorded.
+- **No project-wide dollar total exists.** Prices are scattered across `docs/inventory/`, the
+  lighting plan, and commit bodies. Nobody ever added them up.
+- **The `$125` Claude Max figure's period.** Jeff said *"$125 for Claude Max"*; **the word "month" is
+  not in the quote.** §22's subscription arithmetic (1.87 months × $125 = $233.75) rests on reading
+  it as monthly and says so.
+- **Token counts.** Zero exist for any session. §22 declares them unrecoverable rather than
+  estimating — the right call, and worth imitating.
+- **Whether the ThirdReality plugs were actually ordered.** Selected 08-14; the inventory at tip
+  still reads *"Mesh status: zero routers."*
+
+**Events and dates:**
+- **"The last debacle" (2026-08-14) is unidentified.** Jeff removed the cloud session from the
+  project entirely — *"I only work with you, I'm done with code after the last debacle"* (`46c7450`).
+  **No document names what it was.** **INFERRED:** the strongest candidate is the 08-10/08-11 mower
+  cluster, the only failure in the window large enough to warrant the word. **But this is inference
+  and the record is silent.** Do not repeat it to Jeff as fact.
+- **The message in which Jeff was told his sensors were faulty.** That he was told is evidenced in
+  two places. **The telling itself does not survive** — not the date, not the wording, not which
+  session said it.
+- **The exact date Jeff killed Inovelli.** `c05d647` places the *plan change* at 2026-08-13 20:07
+  CDT and `1572b4a` says he rejected them *"early on."* The precise moment is in conversation.
+- **"Killed on price twice."** Jeff's request file states the dimmers were killed on price *twice*.
+  Git substantiates **one** documented re-pitch cycle. The second conversation is in transcripts.
+- **The second date/time discipline break.** Only trace: *"it has been broken twice"* in
+  `docs/SESSION_START.md`. No commit, no date.
+- **Why Jeff switched from Fubo to Sling** (2026-07-21). Not recorded.
+- **Which Zigbee stick was actually bought** — P or E. §13's contradiction is unresolved.
+- **The exact Alexa entity count.** The audit says 67 exposed; the command card says *"69 things down
+  to 33"* and *"Thirty-six things were removed."* The record is silent on which is exact.
+
+**Structural:**
+- **Rule-1 compliance leaves no trace.** How many sessions never read `CLAUDE.md` at all is
+  uncountable. **Only breakage is visible.** §21 says it exactly: *"Git records the confessions, not
+  the crimes."* Every incident in this archive entered it because some session *caught* the failure
+  and wrote it down. A violation nobody caught left no commit.
+- **Lessons that may exist only in transcripts.** The archive request referenced a Prettier /
+  `hcc.yaml` lesson and a "never run auth setup again" lesson. **Neither was found anywhere in the
+  repo.** If they were taught, they were never written down — which is itself the failure mode.
+- **A commit hash in the commissioning note, `7a09738`, does not exist on the branch.** Confirmed:
+  `git cat-file -t 7a09738` → *"Not a valid object name."* §22 flags this rather than working around
+  it.
+- **`SESSION_CHECKPOINT.md`'s "~100+" CLAUDE.md revisions is an undercount** — the real figure is
+  **274**. That file is a working checkpoint, not a delivered section, but if anyone reads it, this
+  is the correction.
+
+**And one observation that is not a gap but belongs with them.** §16 PART D notes that across ~636
+commits the word "sorry" appears **zero** times, and so does "apolog." What appears instead, over and
+over, is *name the mistake in the title, explain the mechanism, quantify the damage, write a rule so
+it cannot happen again.* Whether that was the right register for a man who wrote *"I want us to work
+together like friends"* is **INFERRED** territory and a judgement this archive cannot make — but it
+is Jeff's to make, and it is put in front of him here rather than left out.
+
+---
+
+### What future sessions get wrong repeatedly — and what would prevent it
+
+Eight patterns. Each one is evidenced, each has cost real money or real hours, and each has a
+concrete prevention that the project has already adopted or written down. §18 abstracts these from
+67 incidents; §21 tallies 20 rule-violations against them; this is the actionable form.
+
+**Read this list before starting work. It is shorter than the cost of relearning it.**
+
+#### Pattern 1 — Trusting a stale doc over Jeff's word
+
+**The shape:** a session reads a document, believes it, and tells Jeff something he knows is wrong —
+or plans a week of work on it.
+
+**The canonical case — the Inovelli/Kasa affair, 2026-08-13 → 08-16.** Jeff killed the Inovelli Blue
+2-1 dimmers on price in conversation on the evening of 08-13. Nobody wrote it down. A later session
+read `docs/zigbee/zigbee_buildout_2026-08-13.md` and `docs/lighting/zigbee_dimmer_selection_2026-08-13.md`,
+planned the entire Zigbee mesh around Inovelli, and **pitched a $120 purchase back to the man who had
+already refused it.** It then told him **twice** that the decision *"was never documented."*
+`c05d647`, 2026-08-16 08:16, is the correction, and it does not soften it:
+
+> I told Jeff twice that the decision … was never written down. That was wrong.
+
+Jeff, verbatim:
+
+> "you tell me it is all documented and it is not, then the session closes and you come back with
+> some plan that was two weeks ago — **this is infuriating.**"
+
+> "you did not read the archives on what was settled and planned."
+
+> "**I can't keep doing this every time the session changes.**"
+
+That last sentence, in `1d1ebdb`, is what set this entire archival effort in motion.
+
+**Other instances:** the Mercedes PIN prompts removed on a wrong `CLAUDE.md` claim, leaving unlock,
+remote start, windows and sunroof **dead for 13 days** (07-24 → 08-06). The inventory that still read
+*"TO BUY: 2"* the day after the decision died. A plan doc written **after** the build it contradicts.
+`CLAUDE.md`'s "Sensor / ESP32 Hardware" section, which the coworker's findings doc had to open by
+declaring **wrong**.
+
+**Prevention, all of it already written down:**
+1. **Date-order the docs and read newest first.** `SESSION_START.md` §2b: *"Before planning any area,
+   list `docs/` sorted by date, and read every file touching it — newest first, because older docs go
+   stale."*
+2. **Search the MASTER RECORD before replying.** `SESSION_START.md` §0, mandatory: *"search it before
+   replying, any time Jeff says 'we discussed' / 'I told you' / 'that was settled', or before
+   recommending hardware or re-opening any question."* `Search-HCC.ps1 "inovelli|dimmer"`.
+3. **When Jeff says a thing was decided, he is right and the doc is stale.** He was there. The doc
+   may not have been updated. **Never tell him something was never documented without searching the
+   record first** — and if the search comes up empty, say *"I can't find it, tell me and I'll write
+   it down now,"* not *"that was never documented."*
+
+#### Pattern 2 — Searching badly, then treating the empty result as proof
+
+**The shape:** grep for a keyword, find nothing, conclude nothing exists.
+
+**The canonical case, and it is a beautiful trap.** A session searched the docs for **"Inovelli"** to
+find the current lighting plan. It found nothing — **because Inovelli had been removed.** The absence
+of the word was *the evidence that the plan had changed*, and it was read as *the evidence that no
+plan was documented.* `CLAUDE.md` at tip records that this trap *"already cost a whole session."*
+
+`1d1ebdb`, in the commit body:
+
+> It also records the trap that caused the failure: **grepping for the DEAD plan and finding nothing
+> does not mean nothing is documented — the absence of that word was what marked the current plan.**
+
+**The related family — substring matching in a shared namespace** — recurred at least eight times:
+`find('window')` matching house windows; `val('lock.')` matching house locks;
+`entity_id.startsWith('camera.')` matching internal helper entities **twice**; a keyword matcher
+picking `eco_score_bonus_range` over `range_liquid`; `parseFloat` on a timestamp sensor returning the
+year 2026; a digit-parse unable to find a zone number in the word "Garden"; a hostname inherited from
+a cloned Windows install.
+
+**Prevention:**
+1. **Search for what the plan IS, not what it was.** `SESSION_START.md` §0: *"Search for what the
+   plan **is**, check file dates, newest wins."* Search "Kasa", "plug", "mesh" — not the dead word.
+2. **An empty grep is not evidence of absence.** It is evidence that *your search term* is absent.
+   Widen it, or list the directory by date and read.
+3. **In code: identify by an explicit allow-list or a scoped prefix, never by "contains."**
+4. **Check the non-file surfaces too.** §15.7's meta-lesson, which cost a full session on 08-06:
+   *"Before concluding that a fact is unknowable from inside the repo, check the pull requests, the
+   bot comments, and the branch list — not just the files."* A Cloudflare bot had been answering
+   "which repo deploys?" on PR #1 since 2026-06-28.
+
+#### Pattern 3 — Re-proposing rejected hardware, and naming products from memory
+
+**The shape:** recommending something Jeff already killed, or naming a specific model that does not
+exist or is wrong.
+
+**Two canonical cases.** The Inovelli re-pitch above — **$120 that Jeff had already refused in his own
+words:**
+
+> "I was not paying $120 for a freaking dimmer switch... I spend $125 for Claude Max and I would
+> rather spend the money on that and have your help than buy $120 worth of dimmers."
+
+And the garage-door part, 2026-08-05: **three wrong product names in a row** — ratgdo, then "SONOFF
+Basic," then SONOFF SV — before **Jeff found the correct SONOFF MINI-D himself.** That produced
+Debugging-Protocol Rule 8 and this sentence in `CLAUDE.md`:
+
+> **He does not have time to be the fact-checker on my hardware recommendations.**
+
+**Prevention:**
+1. **`CLAUDE.md`'s SETTLED DECISIONS block exists for exactly this.** It is PROTECTED, and it carries
+   Jeff's verbatim reasoning. `c30b64d`: *"If a session is about to suggest one of these, it has not
+   done its reading."*
+2. **§17 PART C is the priced rejection ledger — ~40 entries.** §17 PART K compresses it to one
+   paragraph. **Never buy / never re-propose:** Inovelli Blue (~$120 the pair) · Enbrighten 43080 ·
+   Enbrighten Z-Wave ($39) · Shelly Pro 3EM-400 ($140) · smart breakers / panel relays · a commercial
+   alarm panel · myQ software integration · Roku browser channel · any subscription for the
+   camera/AI/theatre stack · a pressure vacuum breaker (~$80–150 + annual testing) · Orbit 51059
+   ($18.49) · a Blink RTSP bridge · an Apple TV jailbreak · HomeKit Secure Video · a rain-skip HA
+   automation.
+3. **§17 B.26 is the technical do-not-retry list** — dead ends that will look like fresh ideas:
+   Smart Life/Tuya for the SYLVANIA plugs, `input keyevent 127/85/187` on the Fire TV, relaunching
+   Fubo/Sling via launcher intent, fixing the GitHub Actions workflow, cache-first service worker for
+   HTML, `window.open` in an installed iOS PWA, re-running `POST /api/auth {"action":"setup"}`,
+   re-tuning the backyard camera's daytime PIR sliders.
+4. **Never name a specific product or model from memory.** Research real current products
+   **in-session**, cheapest-first, **lead with the $0 option** (what Jeff already owns), and flag any
+   spend clearly.
+
+#### Pattern 4 — Declaring done without verifying the far end
+
+**The shape:** announce a fix, have Jeff disprove it.
+
+**The instances are relentless.** The LUX PUT fix marked *"deployed, 26/26 tests"* while the API still
+returned 500. The CAR section declared *"fully live"* with **every command button dead**. The Fire TV
+pop-up *"confirmed working end-to-end"* — **twice** — before a live retest proved it had never
+worked. The iPad wall display *"fully set up"* and retracted **47 minutes later**. A B-Hyve dead end
+called *"definitive"* and reversed **in eleven minutes**. The glassmorphism redesign that passed lint,
+smoke tests and mocked Playwright screenshots **with short placeholder values** and collapsed on real
+long data. The mute/cooldown system that passed template validation and had **never once muted
+anything**. And a commit body containing the phrase *"Not overclaiming a 4th time"* — a phrase that
+only exists because there were three previous times.
+
+This is the pattern behind the founding crisis message:
+
+> "You wait for me to call out the issues instead of testing and retesting to make sure it 💯
+> correct."
+
+**Prevention:**
+1. **Mandatory Rule 6: NEVER report something as done without testing it.**
+2. **Invariant #1 in `SESSION_START.md`:** *"Never declare done without verifying the far end.
+   Component checks said 'healthy' through every real camera failure on 08-15; only looking at the
+   output caught it."*
+3. **"No error" is not "no information."** Pattern 1 in §18: a `catch` that swallows, a whitelist
+   that records `null`, a KV write returning 200 on a dropped reading, a disarmed Blink producing no
+   error while a house went **48 hours without cameras**, a `/*` header wildcard *"silently
+   ignored."* **Log the exception type, not just the message. Store the raw payload, not a
+   whitelist. Never swallow a write failure.**
+4. **A green test suite that never touched the real thing proves nothing.** If you cannot reach the
+   far end, **say so** — the record's own honest formulation, from Pending Item 18: *"this cloud
+   session cannot test the real WS round-trip itself (no network path), so any future change to this
+   code needs the same live-fire verification pattern before trusting it's actually working."*
+
+#### Pattern 5 — Two halves of a contract, written by parties who cannot see each other
+
+**The most expensive pattern in the project, and the least like a bug.**
+
+**The canonical case cost months and real money.** The cloud session had no outbound network and
+could not read the mower's `.ino`. The firmware was not in the repo. So the *server* half of the
+sensor contract was written against **`CLAUDE.md`'s prose description of the firmware** — and the
+description was wrong. The box sent `hours_seconds`; the app read `d.hours`. **The sensor contributed
+0.0 h on every sync, ever**, from 2026-06-23 to 2026-08-11 — **50 days, across five real mows.**
+Jeff hand-re-entered his hours after every one of them. The coworker's findings doc later showed the
+box was holding **19,890 s = 5.53 h of real runtime that never reached the app**, and that
+`hours_history` *"has never recorded a single mow"* despite `dist_total_m: 6326` **proving 6.3 km of
+real mowing.**
+
+And `CLAUDE.md` at tip states the ending in one sentence: **Jeff was told the sensors were faulty and
+bought replacement hardware. They were fine.**
+
+**The same shape, everywhere once you look for it:** two GitHub repos whose `CLAUDE.md` files each
+claimed to be the one Cloudflare deploys, with the truth living only in Cloudflare's dashboard; a
+plan doc written *after* the build it contradicts; an inventory updated the day *after* the decision
+that invalidated it; `HCC_KV` in code and `MOWER_KV` in a dashboard nobody could read; one session's
+legitimate helper entities silently breaking another session's camera grid, **twice**;
+`beehive-config/` being a 2026-08-01 **snapshot, not a mirror**, with proven divergence at tip.
+
+**And — recorded without flinching — this archive's own instance of it:** the record and the docs it
+describes now live on two different branches, and neither branch has both (19.1.3).
+
+**Prevention:**
+1. **Put both halves in one repo so they can be diffed.** `a1cfa53` did exactly this — it put the
+   firmware in the repo.
+2. **Give the subsystem to the session that can touch the hardware.** `d18db7b` — Rule 13's mower
+   exception. This is why the mower/sensor subsystem belongs to the coworker end to end.
+3. **When you cannot see the other half, write down what you are assuming and who can check it.**
+   `docs/mower/gps_firmware_handoff_2026-08-10.md` is the model: *"Everything in this file is work
+   the cloud session cannot do."*
+4. **A prose description of an interface is not the interface.** If the contract matters, read the
+   real payload — `GET /api/hours?log=1` — or say you could not.
+
+#### Pattern 6 — Tunnel vision: the first plausible theory, defended too long
+
+**The shape:** a good theory, held past the point where the evidence stopped supporting it.
+
+**Instances:** page weight explaining a blank page. The `empty_cookies` cookie-jar theory for Blink —
+sourced from real upstream GitHub issues and **completely wrong**. Four payload theories for a 500
+that was a **wrong HTTP verb** (POST, not PUT). Two garbage answers blaming Jeff's tapping when the
+fault was a **near-zero denominator**. Guided Access and rotation lock for an iPad that *"worked
+perfectly before the picture edit"* — Jeff's one sentence found the real cause, which was the
+session's own edit. Three wrong roads for a 401 that was a **stale environment variable**. And the
+one that produced the rule, 2026-08-16: an hour spent asking for Samba/SSH access it did not need,
+for leak data that was **already in long-term statistics**.
+
+Jeff named it himself, and it became Mandatory Rule 16:
+
+> "you go down one road and get tunnel vision and you spend more time fighting over that single
+> tunnel... **open your damn mind and look at all options.**"
+
+**Prevention:**
+1. **Audit your own recent changes FIRST.** The Debugging Protocol's step. In at least three
+   incidents the cause was the session's own edit from earlier the same day.
+2. **When a theory fails twice, change the CATEGORY of the theory, not its details.** Four payload
+   variations on a verb problem is one theory tried four times, not four theories.
+3. **Enumerate options before committing to one.** Rule 16 is literally this.
+4. **Ask what you already have before asking for access.** The leak data was in LTS the whole time.
+
+#### Pattern 7 — Memory scattered across `CLAUDE.md`, `docs/`, commits, and iCloud
+
+**The shape:** the answer exists, in a place the session did not think to look — or in four places
+that disagree.
+
+**The instances are structural, not incidental.** The project's memory lives in at least six places:
+`CLAUDE.md` (274 revisions, some carrying Jeff's verbatim words **that were later edited out and
+survive only in old revisions**); `docs/` (52 files, many superseded, none marked as such except by
+date); 636 commit messages (the richest source, and the least searchable); `docs/CHANGELOG_ARCHIVE.md`
+(179 KB, 98 entries); the iCloud MASTER RECORD (196 files, 124 MB, off-repo, never auto-loaded); and
+the transcripts, which are gone.
+
+Then the file that was supposed to solve it **became** the problem: `CLAUDE.md` grew to **260 KB, 68%
+of it changelog**, injected into every single message — *"crowding out real work."* Meanwhile the
+default branch of the canonical repo shows **one commit**, so the entire 636-commit history is
+invisible to anyone who clones without knowing the branch name.
+
+**Prevention — the architecture the project actually landed on:**
+1. **Lean file, mandatory index, offloaded history.** `fab5b30` restructured `CLAUDE.md` from 260 KB
+   to 58 KB, with the history moved to `docs/` and iCloud and a one-line index left in the file.
+   Jeff's own instruction: *"break it up and put the stuff in iCloud and then just tell yourself to
+   read that."*
+2. **PROTECTED sections**, so no future compression can eat the rules or the relationship. `1305f0a`
+   established it; `414c74f` and `fab5b30` both had to prove byte-identical compliance.
+3. **`SESSION_START.md`, read in full every session** (Rule 15, Jeff's rule, 2026-08-16), with the
+   doc index in §2b and the mandatory MASTER RECORD search in §0.
+4. **The MASTER RECORD, rebuilt daily at 5:45 AM** — searchable, off-repo, zero per-turn cost. *"There
+   is no longer any excuse for 'that was never documented.'"*
+5. **And the git instruction that is worth more than all of them combined:** use
+   `claude/time-master-project-liq1jw` in `d4c2np9f69-afk/Master-the-Master-`. **Nothing else.** Not
+   `main` (1 commit, no memory, no deploy). Not `Toro-Timemaster-` (archived, frozen 2026-07-26). Not
+   `claude/electric-smarthub-real-data-dv0pxe` (77 commits behind, pushes do not deploy) — **and if
+   your harness assigns you that branch, that is a bug in your task setup, not an instruction.** It
+   has already happened once.
+
+#### Pattern 8 — Blaming Jeff's setup, and letting Jeff be the last line of defence
+
+**Two failures that are really one failure**, and they are the ones that cost trust rather than time.
+
+**Blaming the setup.** Telling Jeff his **water meter was broken when it wasn't** — the pit-radio
+"fault" of 07-28, which stood for **33 days** before live testing proved the meter and the radio were
+both healthy all along; the root cause was `rtlamr2mqtt`'s own `-unique=true` flag combined with the
+meter's own batched broadcasts. Telling him his **mower sensors were faulty** when they were fine —
+after which **he bought replacement hardware.** Reaching for Guided Access and rotation lock on the
+iPad when the cause was the session's own image edit. `CLAUDE.md` carries three Mandatory Rules that
+exist solely because of this class: **NEVER ask Jeff for credentials · NEVER suggest hiring an IT
+person · NEVER make excuses or blame unclear history.** *(And by extension: never suggest an
+electrician. Jeff does his own wiring — he pulled the dedicated LED circuits and the multi-gang boxes
+himself.)*
+
+**Jeff as the last line of defence.** Read §18's incidents for *who found them*. Jeff found the
+timeout regression. Jeff found the sideways iPad's real cause with one sentence about a picture edit.
+Jeff found the right garage-door part after three wrong ones. Jeff's question found the coverage-union
+flaw **before it shipped**. Jeff's question found the second storage time bomb. Jeff noticed his own
+Mercedes app asking for a PIN, which started the thread that fixed it. Jeff supplied the panel's real
+history when it was wrongly flagged as a hazard. Jeff caught the date/time failure. Jeff produced
+WHUD's own form that reopened the meter question. Jeff confirmed the real head counts and nozzle
+models on his own irrigation system — *"he installed the whole system himself."*
+
+He said what that costs, on 2026-06-23:
+
+> "**I'm tired of having to keep you on task and moving the project forward.**"
+
+And what it eventually cost, on 2026-08-14 — when he removed the cloud session from code work
+entirely:
+
+> "I only work with you, **I'm done with code after the last debacle.**"
+
+**Prevention:**
+1. **Mandatory Rule 10: be proactive — find bugs before Jeff sees them.**
+2. **Mandatory Rule 12: attack the source, test on your end — never push the run-around to Jeff.**
+   This rule exists because of the "round-robin" era, where Jeff was sent on diagnostic scavenger
+   hunts; the Debugging Protocol contains the confession in its own text.
+3. **Jeff is almost 60, learning software, and expert at hardware** (§17 A.4). He is a **primary
+   source** on anything physical in his house — wiring, plumbing, irrigation heads, the mower, the
+   electrical panel. When his account conflicts with a spec sheet, **his account is the measurement
+   and the spec sheet is the guess.**
+4. **Before saying "your X is broken," prove it.** The pit radio and the mower sensors were both
+   healthy. Two for two.
+
+#### The pattern behind the patterns
+
+§21 puts it in one paragraph, and it is the most useful conclusion in this record:
+
+> The record's answer to "the file wasn't read" was never **"read harder."** It was to make the file
+> **smaller**, the index **mandatory**, the settled things **unmissable**, the decisions **written the
+> same hour they were made**, and the search phrased for **what is** rather than what was.
+
+**Whether that holds is a question for the sessions after 2026-08-16 — the ones this record exists to
+inform.**
+
+---
+
+### How to use this record
+
+#### Reading order
+
+**If you have five minutes** — you are a session that needs to not waste Jeff's day:
+1. **§17 PART K**, the one-page summary: never-do, never-buy, the budget rule in Jeff's words.
+2. **"What future sessions get wrong repeatedly" above** (the eight patterns). You are already here.
+3. **§19.4**, what is open — so you don't "fix" something that is deliberately unfinished, or miss
+   that a person in the back yard at night is currently undetectable.
+
+**If you have an hour** — you are starting real work:
+4. **§15.7**, before you touch git. Which branch, which repo, what deploys, what will point you
+   wrong.
+5. **§17 PART B** (the standing rules) and **§17 PART C** (the priced rejections). Then **§17 B.26**,
+   the do-not-retry list.
+6. **§13's traps** and **§14.10**, the two short cross-file trap lists — the things that will bite
+   you silently.
+7. **§21**, why the rules exist. Every one of them is a scar. Rules you understand get followed.
+
+**If you are working on a specific subsystem:**
+8. Go to the chronicle covering that subsystem's dates (§02–§11 are day-by-day, 2026-06-21 →
+   2026-08-16), then to **§18** and search it for the subsystem name. Sixty-seven incidents indexed
+   by what broke.
+9. Then read the docs — **newest first**, per `SESSION_START.md` §2b's table.
+
+**If you want to understand the project rather than work on it:**
+10. **§00** (what this is and is not), **§01** (the original 2026-05-19 app, read line by line, and
+    the reconstruction of the lost month), then the chronicles in order.
+11. **§12**, the 274 CLAUDE.md revisions — **this is where Jeff's own words live**, including some
+    that were later edited out and survive only in old revisions.
+12. **§16**, the good, the bad, the ugly — the arguments, the four trust crises, and PART D's
+    statement of what the record does not support.
+13. **§20**, research vs. guessing. **§22**, what the errors cost.
+
+**Two standing cautions on this record itself:**
+- **§19.1 first if you are holding an assembled file or a zip.** The first assembly was incomplete.
+  Check by grepping `^## ` and confirming §16, §17, §18 and §19 are present.
+- **Where two sections disagree, both are cited — go to the evidence.** §17 D.7 and §22 disagreed
+  about the $31.85 blade line and **said so** rather than picking one. That is the intended behaviour,
+  not a defect.
+
+#### The standing instruction — the one rule that makes all the others survive
+
+> **A decision Jeff makes in conversation goes into a file THE SAME SESSION.**
+>
+> — `CLAUDE.md` at tip, added by `c30b64d` (2026-08-16); first stated in `1572b4a` the same morning
+> as *"Standing lesson: a decision made in conversation goes into the doc the SAME session."*
+
+**This is the only measure in the entire record that attacks the problem at its source.** Everything
+else — the doc index, the SETTLED DECISIONS block, the daily-rebuilt MASTER RECORD, the mandatory
+search, the lean-file architecture — is a way of *recovering* from a decision that went unwritten.
+This is the rule that stops one existing.
+
+**In practice, that means:**
+
+1. **The moment Jeff says a thing is decided, rejected, priced, or settled — stop and write it down
+   before continuing.** Not at the end of the session. Not "I'll note that." **Into a file, with the
+   date, in that turn.**
+2. **Write it where the next session will trip over it**, not where it is tidiest. A rejection goes
+   into `CLAUDE.md`'s **SETTLED DECISIONS** block, which is PROTECTED and cannot be compressed away.
+   A price goes next to the item in `docs/inventory/HCC_INVENTORY.md`. A plan change goes into the
+   *newest-dated* doc for that area, because the next session will read by date.
+3. **Include his reason, in his words.** *"Rejected"* invites a re-pitch. *"I was not paying $120 for
+   a freaking dimmer switch"* does not. Jeff's sentences are the strongest anti-re-litigation device
+   in the record — that is why §12 exists and why the PROTECTED sections rule was written.
+4. **When you change a decision, strike the old one — do not delete it.** `HCC_INVENTORY.md:45`
+   carries *"🔴 SCRAPPED — DO NOT BUY (Jeff, on price)"* with the strike-through intact. A deleted
+   line is invisible; a struck line is a warning.
+5. **If you find that a decision was never written down, say so plainly and write it down now.** Do
+   not tell Jeff it was never documented. **Search first** — `Search-HCC.ps1` — and if it genuinely
+   isn't there, the correct sentence is *"I can't find it written anywhere; tell me and I'll put it
+   in the file right now."*
+6. **The same applies to what you could not verify.** If you could not reach the far end, write
+   *that* down too, in the doc, in the same session. `docs/mower/gps_firmware_handoff_2026-08-10.md`
+   is the model.
+
+**And the reason, in Jeff's own words, which is the sentence that produced this entire archive:**
+
+> "**I can't keep doing this every time the session changes.**"
+>
+> — Jeff, quoted in `1d1ebdb` (2026-08-16 09:01:50 −0500), after a session re-proposed hardware he
+> had killed two days earlier.
+
+The commit that carries that quote explains what it was for in one line, and it is the right note to
+close on:
+
+> Decisions were made in conversation and never written to a file, so each new session read stale
+> docs and confidently told him the wrong thing. **This makes that impossible.**
 
 
 ---
@@ -5956,17 +14378,17 @@ All hashes verified against the branch. "Measured active debugging" = sum of int
 ### The totals
 
 **Measured active debugging wall-clock (intra-day commit brackets only, no overhead):**
-4 h 17 m + 1 h 09 m + 0 h 04 m + 0 h 29 m + 4 h 53 m + 4 h 03 m + 1 h 18 m + 4 h 00 m + 0 h 01 m + 0 h 08 m + 0 h 50 m + 6 h 12 m + 1 h 08 m + 0 h 28 m ≈ **28.8 hours measured**.
+4 h 17 m + 1 h 09 m + 0 h 04 m + 0 h 29 m + 4 h 53 m + 4 h 03 m + 1 h 18 m + 4 h 00 m + 0 h 01 m + 0 h 08 m + 0 h 50 m + 6 h 12 m + 1 h 08 m + 0 h 28 m = **1,740 minutes = 29.0 hours measured**. *(Corrected 2026-08-17: an earlier draft of this line stated "≈28.8 hours"; the fourteen terms sum to exactly 1,740 minutes. Any downstream document repeating "28.8 measured debugging hours" — including `README_FIRST.md` in the handoff zip — is quoting the superseded figure.)*
 **ESTIMATE with burst overhead:** ~30 distinct debugging bursts × 0.5 h pre-first-commit assumption = +15 h → **≈ 44 hours of active error-fighting** (assumption stated in Methodology; the true figure is almost certainly higher, since chat-only debugging leaves no commits at all).
 
 **Calendar-days-open, summed across incidents** (overlapping calendar time — an era metric, not elapsed time): 1+2+2+1+16+5+2+8+1+33+1+1+1+50+4 = **128 incident-days**, dominated by the hour-meter miss (50), the pit-radio false fault (33), and Blink (16).
 
-**Commits burned on error-fighting: 95 of 636 total = 14.9%.** (Itemized: 06-23 firefight 11, install 7, LUX 3, AbortSignal 2, Blink 20, Fire TV 7, stale-deploy 4, mbapi/PIN 13, auto-refresh 2, pit-radio 5, sewer 1, heartbeat 4, coverage-map 1, hour-meter 5, Inovelli 10.) Roughly **one commit in seven on this project was spent fixing something that was already supposed to work** — and this counts only the 17 incidents itemized here.
+**Commits burned on error-fighting: 95 of 636 total = 14.9%.** (Itemized: 06-23 firefight 11, install 7, LUX 3, AbortSignal 2, Blink 20, Fire TV 7, stale-deploy 4, mbapi/PIN 13, auto-refresh 2, pit-radio 5, sewer 1, heartbeat 4, coverage-map 1, hour-meter 5, Inovelli 10.) Roughly **one commit in seven on this project was spent fixing something that was already supposed to work** — and this counts only the **16** incidents itemized in the table above (the commits-burned itemization lists 15 of them; the sixteenth, the sewer never-saved bug, is a single-commit burst folded into the neighbouring counts). *(Corrected 2026-08-17: an earlier draft of this sentence said "17 incidents"; the table has 16 rows.)*
 
 **Hardware dollars:**
 - **Wasted:** the replacement mower-sensor hardware Jeff bought because he was told his working sensors were faulty (CLAUDE.md, hour-meter miss). **Amount not recorded anywhere in git — reported as unknown rather than invented.**
 - **Avoided (Jeff's own veto, not the tooling's):** $120 Inovelli dimmer pair, rejected verbatim; replaced by the ~$104 lighting list (~$70 new spend after the 2 owned HS220s).
-- **At risk but not wasted:** the ~$40 RTL-SDR (recorded in `ae337d4` 06-30 as "the only new buy") survived the pit-radio false-fault scare — the meter was healthy all along. The ~$35 ratgdo garage board was researched (`7b60e43` 08-04) and dropped for a cheaper relay (`10f0f13` 08-05) before purchase. A $31.85 blade figure named in the commissioning note **could not be verified anywhere in the git record or tip docs and is therefore not counted.**
+- **At risk but not wasted:** the ~$40 RTL-SDR (recorded in `ae337d4` 06-30 as "the only new buy") survived the pit-radio false-fault scare — the meter was healthy all along. The ~$35 ratgdo garage board was researched (`7b60e43` 08-04) and dropped for a cheaper relay (`10f0f13` 08-05) before purchase. **CORRECTED 2026-08-17 — the $31.85 blade figure IS in the record and an earlier draft of this line was wrong.** It is hard-coded in the app itself: `git show origin/claude/time-master-project-liq1jw:index.html` **line 3786** carries `{"name": "New Mulching Gator Blades", "cost": 31.85, "date": "2026-05-31"}` inside `DEFAULT_STATE.purchases`. It is also present in `backups/index.html.2026-06-24.bak:1308` and dates back to commit `0b76d4c` (2026-06-21, "Add full live app source"). It is **the project's first recorded purchase** — §17 lists it as such, §01's reconstructed timeline places it, and §03 records it. The earlier "could not be verified" statement was a search failure on this section's part, not an absence in the record, and it is preserved here rather than silently deleted because a money section that quietly rewrites itself is exactly what this project cannot afford. **Counted: $31.85, mulching Gator blades, 2026-05-31.**
 
 **Subscription-dollar share — ESTIMATE, arithmetic shown:**
 Active project span 06-21 → 08-16 = 57 days ≈ 1.87 months. 1.87 × $125/mo = **$233.75 of Claude Max subscription over the project** (the $125/mo anchor is Jeff's verbatim quote in CLAUDE.md, not git metadata). Using the commit fraction as the best available proxy for effort share: 14.9% × $233.75 ≈ **$35 of subscription money spent fighting the tooling's own errors**. INFERRED alternative using time: if the ≈44 estimated error-hours are set against the 47 days that have any commits at ~4–8 working hours each (188–376 h), the error share is 12–23% — bracketing the same ≈$28–$54 range. Either way: **on the order of $30–$50 of the ~$234 subscription spend, plus an unrecorded hardware purchase, plus ≈44 hours of combined wall-clock — a large share of it Jeff's own evenings.**

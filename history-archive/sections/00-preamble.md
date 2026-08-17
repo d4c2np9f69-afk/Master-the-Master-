@@ -89,30 +89,39 @@ not recoverable and inventing them would defeat the purpose of the exercise.
 | Times research/forums solved what guessing burned time on | §20 |
 | Times the .md rules weren't followed and it went sideways | §21 |
 | Time and money the errors cost | §22 |
-| What future sessions get wrong repeatedly | §19 |
+| What future sessions get wrong repeatedly | **§19** — written, and the place to start if you only read one section. It consolidates §13's traps, §14.10, §15.7, §16 PART D, §17 B.26 + PART I, §18's eight patterns and §21's prevention list. |
 | Where the history actually lives | §15 |
 
 ---
 
 ## ⚠️ Status of this compilation
 
-**This is a complete and usable record, but not yet the final one.** Compilation was interrupted
-twice by usage limits. Present and complete: sections 1–15 and 20–22 — roughly 1 MB of material,
-covering the entire project timeline day by day from 2026-05-19 to 2026-08-16, plus the memory
-file's full history, the document compendiums, the repo map, and the three sections Jeff added
-mid-run.
+**All twenty-three parts (§00 and §01–§22) are written.** Compilation was interrupted twice by
+usage limits, and an earlier version of this very status block — which said §16 through §19 were
+"still to be compiled" and described them as "consolidations and indexes of material that is, in
+substance, already below" — was **wrong on both counts and has been replaced**. It is quoted here
+rather than deleted, because a status block that silently rewrites itself is the same defect this
+record exists to end.
 
-**Still to be compiled** (the mining agents were interrupted; the source material for all of them
-is in the repo and the method is recorded in `history-archive/SESSION_CHECKPOINT.md`):
+Three of those four sections are **not** indexes and contain substantial unique material:
 
-- **§16 — The Good, the Bad, and the Ugly:** the arguments and corrections, hunted across every
-  commit message. *Much of this material already appears inside the chronicles and in §21.*
-- **§17 — Master decisions ledger:** every decision, rejection, and price in one table.
-- **§18 — Incident ledger:** every multi-attempt problem in one table. *Each incident is already
-  told in full in its chronicle; this would be the cross-cutting index.*
-- **§19 — Gaps and guidance:** what the record cannot answer, and what future sessions get wrong.
+- **§16 — The Good, the Bad, and the Ugly (~83 KB).** Thirty-two admitted failures with mechanism
+  and cost, six named trust crises reproduced with the PROTECTED CLAUDE.md blocks quoted in full,
+  and PART D, an explicit statement of what the record does **not** support.
+- **§17 — Master decisions ledger (~128 KB).** ~26 standing rules, ~40 rejected options **with
+  their prices**, PART D's price ledger, PART I's "open at branch tip — nothing here is settled,"
+  and D.7's honest disagreement with §22 over the $31.85 blade line.
+- **§18 — Incident ledger (~180 KB).** Sixty-seven numbered multi-attempt incidents plus an
+  abstraction of the **eight recurring failure patterns** behind them.
+- **§19 — Gaps and guidance.** The consolidation: what the record genuinely cannot answer, the
+  eight things future sessions get wrong repeatedly with a concrete prevention for each, and the
+  reading order. **It also carries the defect list for the delivered artifact — read it before
+  trusting any assembled file or zip**, because the first assembly (commit `f036f84`,
+  2026-08-17 00:43) omitted §16/§17/§18 entirely and carried truncated copies of §14 and §15.
 
-Those four are consolidations and indexes of material that is, in substance, already below. When
-they are compiled they will be added and this file replaced in place.
+**If you are holding an assembled `CLOUD_SESSION_HISTORY.md` or `HCC_MASTER_RECORD.zip` and it
+does not contain all of §16, §17, §18 and §19, it is the defective first assembly.** Check by
+grepping for `^## ` and confirming the section list runs unbroken. The authoritative copies are
+the twenty-three individual section files.
 
 ---

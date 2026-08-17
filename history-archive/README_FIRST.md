@@ -43,13 +43,19 @@ Provenance markers used throughout:
 | 12 | `12-claude-md-evolution.md` | All 274 CLAUDE.md revisions + **every verbatim Jeff quote**, including ones later edited out. |
 | 13–14 | `13-docs-beehive.md`, `14-docs-other.md` | Every document in the repo, summarized with its decisions and prices. |
 | 15 | `15-branches.md` | The repo/branch map. **Read this before touching git.** |
+| 16 | `16-good-bad-ugly.md` | The arguments. 32 admitted failures, 6 named trust crises, and what the record does *not* support. |
+| 17 | `17-decisions-ledger.md` | ~26 standing rules, ~40 rejected options **with prices**, and what is still open. |
+| 18 | `18-incidents-ledger.md` | 67 numbered multi-attempt incidents + the 8 recurring failure patterns behind them. |
+| 19 | `19-gaps-and-guidance.md` | **If you read one section, read this.** What the record can't answer, and the 8 things sessions get wrong with a fix for each. |
 | 20 | `20-research-vs-guessing.md` | Every time a forum/source-code lookup ended a guessing spiral. |
 | 21 | `21-md-not-read.md` | Every time a CLAUDE.md rule wasn't followed and it cost something. |
 | 22 | `22-cost-accounting.md` | The bill: 28.8 measured debugging hours, 128 incident-days, 14.9% of commits. |
 
-Sections 16–19 (the arguments; consolidated decision and incident ledgers; gaps and guidance)
-were still compiling when this package was cut. Their substance is already told inside the
-chronicles above.
+**All 23 parts (§00 and §01–§22) are complete in this package** — 235,047 words.
+
+⚠️ **If you are holding an earlier copy:** the first assembly (2026-08-17 00:43) was defective —
+it was cut before §16–§19 existed and carried truncated copies of §14 and §15. Check any copy by
+confirming §16, §17, §18 and §19 are present. §19 documents this defect itself.
 
 ## The key incidents, and where they're told in full
 
