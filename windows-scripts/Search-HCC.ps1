@@ -14,10 +14,17 @@
 #>
 param(
     [Parameter(Mandatory = $true, Position = 0)][string]$Pattern,
-    [int]$Context = 4,
+    [int]$Context = 2,          # was 4 - halves output for the same information
+    [int]$Max = 8,              # hits per tier. Keeps a search ~1-2k tokens, not 16k.
     [switch]$DecisionsOnly,
-    [switch]$IncludeActions
+    [switch]$IncludeActions,
+    [switch]$Full               # lift the caps when you genuinely need everything
 )
+if ($Full) { $Max = 200; $Context = 4 }
+
+# Cost discipline: an unbounded search returned ~16,000 tokens on 2026-08-16, which is
+# more than the entire CLAUDE.md it was built to keep small. A tool that is expensive to
+# run does not get run. Capped output + a hit count tells you whether to narrow instead.
 
 $root  = "C:\Users\jeffl\iCloudDrive\HCC-Archive\MASTER-RECORD"
 $rec   = Join-Path $root "HCC_MASTER_RECORD.md"
@@ -39,8 +46,9 @@ if ($DecisionsOnly) { return }
 
 Write-Host "`n=== CONVERSATION matching '$Pattern' ===" -ForegroundColor Cyan
 $m = Select-String -Path $rec -Pattern $Pattern -Context $Context, $Context
+    $mTotal = @($m).Count; $m = @($m) | Select-Object -First $Max
 if ($m) {
-    Write-Host "  $($m.Count) hits`n"
+    Write-Host "  $mTotal hits (showing $(@($m).Count))`n"
     $m | ForEach-Object {
         $_.Context.PreContext | ForEach-Object { "    $_" }
         Write-Host "  > $($_.Line)" -ForegroundColor Green
@@ -54,7 +62,7 @@ if (Test-Path $cloud) {
     $h = Select-String -Path (Join-Path $cloud "sections\*.md") -Pattern $Pattern -Context 2, 2
     if ($h) {
         Write-Host "  $($h.Count) hits across the chronicles`n"
-        $h | Select-Object -First 25 | ForEach-Object {
+        $h | Select-Object -First $Max | ForEach-Object {
             Write-Host "  [$([IO.Path]::GetFileNameWithoutExtension($_.Path))]" -ForegroundColor DarkYellow
             $_.Context.PreContext | ForEach-Object { "    $_" }
             Write-Host "  > $($_.Line)" -ForegroundColor Green
@@ -75,4 +83,5 @@ if ($IncludeActions) {
     Select-String -Path $git -Pattern $Pattern | Select-Object -First 30 |
         ForEach-Object { "  $($_.Line)" }
 }
+
 
