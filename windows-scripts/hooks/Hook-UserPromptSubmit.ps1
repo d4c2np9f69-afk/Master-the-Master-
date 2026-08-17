@@ -34,9 +34,24 @@ $fire = @()
 if ($prompt -imatch $claimPast) { $fire += 'PAST' }
 if ($prompt -imatch $spend)     { $fire += 'SPEND' }
 
-if ($fire.Count -eq 0) { exit 0 }
+# ALWAYS inject the real clock (Rule 14, broken 3 times as prose - now mechanical).
+# Any day/date/time written in a reply must come from THIS stamp, never from narrative flow.
+$clock = Get-Date -Format 'dddd yyyy-MM-dd h:mm tt'
+$clockLine = "REAL CLOCK RIGHT NOW: $clock Central. Any 'today/tonight/[weekday]' in your reply MUST match this stamp."
+
+if ($fire.Count -eq 0) {
+  $out = @{
+    hookSpecificOutput = @{
+      hookEventName    = 'UserPromptSubmit'
+      additionalContext = $clockLine
+    }
+  } | ConvertTo-Json -Depth 5 -Compress
+  Write-Output $out
+  exit 0
+}
 
 $msg = @()
+$msg += $clockLine
 $msg += "=========================================================================="
 $msg += " HCC ENFORCEMENT HOOK FIRED - THIS IS A HARD STOP, NOT A SUGGESTION"
 $msg += "=========================================================================="
