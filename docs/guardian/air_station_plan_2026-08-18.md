@@ -26,7 +26,7 @@ product does this** (smoke+CO combos exist ~$50; nothing adds radon/gas/hub). So
 
 | Part | Role | Price | Note |
 |---|---|---|---|
-| **ESP32 DevKit V1, 30-pin** | brain | ~$3–5 AliExpress | ⚠️ NOT YET ORDERED — the $2.39 board ordered 08-18 is only the screw-terminal carrier; the DevKit slots into it. Must be 30-pin to match. |
+| **ESP32 (Jeff's spare)** | brain | **$0 — ON HAND (Jeff, 08-18)** | If 30-pin it slots into the ordered terminal carrier; if 38-pin, wire via the ordered Dupont jumpers. Nothing to buy. |
 | **Plantower PMS5003** | laser particulate PM1/2.5/10 — early smoke + AQI | ~$13–15 ([AliExpress](https://www.aliexpress.com/item/1005001573069933.html)) | ESPHome native `pmsx003`; 2026.1 added AQI calc |
 | **Winsen MH-Z19B** | NDIR CO₂ | ~$12–18 ([Amazon](https://www.amazon.com/MH-Z19-MH-Z19B-Sensor-Dioxide-0-5000ppm/dp/B09L572ZSD)) | ESPHome native `mhz19` (Z19C US price $29 — buy B on Ali/Amazon) |
 | **Winsen ZE07-CO** | electrochemical CO (data-grade) | ~$10–15 ([AliExpress](https://www.aliexpress.com/i/4000070255816.html)) | UART; UL CO stays the hardwired layer's job |
