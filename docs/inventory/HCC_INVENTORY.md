@@ -207,3 +207,21 @@ alert batch.
 
 (Zigbee arrival 2026-08-15 is logged in the **Zigbee layer** table at the top of this file —
 all rows promoted to ON HAND, photo-confirmed, not unboxed per Jeff's order.)
+
+## AliExpress haul — ORDERED 2026-08-18 (delivery ~Aug 25–30)
+| Item | Price | Purpose |
+|---|---|---|
+| Tuya Zigbee USB signal repeater ×2 | $4.48 ea ($9.84) | Mesh routers — front window (mailbox) + midpoint. ⚠️ Only 2 ordered (plan said 4) — judge coverage when installed, reorder if needed |
+| Tuya Zigbee Alarm SIREN (Zigbee version) | $14.59 | **The Guardian panic-alarm siren** — unblocks Pending Item 4 |
+| Zigbee 3.0 door/window sensor (RightSitu, 1pc) | $2.59 | 8th door sensor |
+| 16A/20A WiFi mini smart switch module 2-way | $3.39 | spare/project relay |
+| Tuya WiFi smart plug US 10A | $5.19 | general |
+| ELM327 OBD2 Bluetooth V2.1 mini | $2.59 | **F-250 OBD project (Pending Item 3) — replaces the ~$30 Veepeak idea at 1/10 price** |
+| ESP32 30-pin expansion/terminal board | $2.39 | DIY bench — Guardian Air Station candidate |
+| 20-pin Dupont jumpers 10cm M-F | $1.39 | DIY bench |
+| T-type 2-pin wire connectors 10pcs | $1.39 | DIY bench |
+| Wire welding clamp | $0.99 | DIY bench |
+| Soldering cleaning ball | $1.39 | DIY bench |
+| 6-in-1 car charger 3.1A dual USB-C | $1.99 | truck |
+
+**Total haul ≈ $47.** DIY-bench buildout + Guardian siren + mesh routers + F-250 OBD reader.
