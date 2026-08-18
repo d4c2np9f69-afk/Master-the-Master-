@@ -1,0 +1,51 @@
+<!doctype html><html><head><meta charset="utf-8"><title>HCC Family Login Reset</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{font:16px system-ui;max-width:420px;margin:60px auto;padding:0 20px;color:#222}
+h2{margin-bottom:4px} .sub{color:#666;margin-top:0;margin-bottom:24px;font-size:14px}
+input{width:100%;padding:12px;font-size:16px;box-sizing:border-box;margin-bottom:12px;border:1px solid #ccc;border-radius:8px}
+button{width:100%;padding:14px;font-size:17px;background:#1a73e8;color:#fff;border:none;border-radius:8px}
+button:disabled{background:#999}
+#result{margin-top:16px;padding:12px;border-radius:8px;display:none;white-space:pre-wrap;font-size:15px}
+.ok{background:#e6f4ea;color:#1e7e34;display:block!important}
+.err{background:#fce8e6;color:#c5221f;display:block!important}
+</style></head><body>
+<h2>Set a new HCC password</h2>
+<p class="sub">Type a new password twice and tap the button. This page talks straight to loewenhome.com — nothing is stored anywhere else.</p>
+<input type="password" id="pw" placeholder="New password" autocomplete="new-password">
+<input type="password" id="pw2" placeholder="Confirm new password" autocomplete="new-password">
+<button id="btn" onclick="doSetup()">Set new password</button>
+<div id="result"></div>
+<script>
+async function doSetup(){
+  const pw = document.getElementById('pw').value;
+  const pw2 = document.getElementById('pw2').value;
+  const result = document.getElementById('result');
+  const btn = document.getElementById('btn');
+  result.className=''; result.style.display='none';
+  if(!pw || pw.length < 4){ result.className='err'; result.textContent='Enter a password (4+ characters).'; return; }
+  if(pw !== pw2){ result.className='err'; result.textContent='Passwords do not match.'; return; }
+  btn.disabled = true; btn.textContent = 'Setting...';
+  try{
+    const r = await fetch('/api/auth', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({action:'setup', password: pw})
+    });
+    const j = await r.json();
+    if(r.ok && !j.error){
+      result.className='ok';
+      result.textContent = 'Success! New password is set. Go to loewenhome.com and log in.';
+    } else if(j.error === 'already_setup'){
+      result.className='err';
+      result.textContent = 'A password already exists server-side. Tell Claude to clear it again, wait 60 seconds, retry.';
+    } else {
+      result.className='err';
+      result.textContent = 'Error: ' + (j.error || r.status);
+    }
+  }catch(e){
+    result.className='err'; result.textContent = 'Network error: ' + e.message;
+  }
+  btn.disabled = false; btn.textContent = 'Set new password';
+}
+</script>
+</body></html>

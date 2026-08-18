@@ -29,18 +29,44 @@ export async function onRequestPost({ request, env }) {
     return new Response(JSON.stringify({ error: 'kv_unavailable' }), { status: 500, headers: cors });
   }
 
-  // One-time setup: store the password hash + HA token
+  // Bootstrap-only: pre-stage the HA token in KV before setup runs, so a
+  // public-facing setup page never has to carry it. Locked out once a
+  // password already exists.
+  if (body.action === 'stage_token') {
+    if (!body.ha_token) {
+      return new Response(JSON.stringify({ error: 'ha_token required' }), { status: 400, headers: cors });
+    }
+    const existing = await kv.get('auth_hash');
+    if (existing) {
+      return new Response(JSON.stringify({ error: 'already_setup' }), { status: 403, headers: cors });
+    }
+    await kv.put('setup_ha_token', body.ha_token);
+    return new Response(JSON.stringify({ ok: true }), { headers: cors });
+  }
+
+  // One-time setup: store the password hash + HA token.
+  // ha_token may come in the request body, OR (so it never has to appear in a
+  // public page or a client) be pre-staged in KV under 'setup_ha_token' —
+  // consumed once and deleted.
   if (body.action === 'setup') {
-    if (!body.password || !body.ha_token) {
-      return new Response(JSON.stringify({ error: 'password and ha_token required' }), { status: 400, headers: cors });
+    if (!body.password) {
+      return new Response(JSON.stringify({ error: 'password required' }), { status: 400, headers: cors });
     }
     const existing = await kv.get('auth_hash');
     if (existing) {
       return new Response(JSON.stringify({ error: 'already_setup', hint: 'delete auth_hash from KV to reset' }), { status: 403, headers: cors });
     }
+    let ha_token = body.ha_token;
+    if (!ha_token) {
+      ha_token = await kv.get('setup_ha_token');
+      if (ha_token) await kv.delete('setup_ha_token');
+    }
+    if (!ha_token) {
+      return new Response(JSON.stringify({ error: 'ha_token required (or stage it in KV as setup_ha_token)' }), { status: 400, headers: cors });
+    }
     const hash = await sha256(body.password);
     await kv.put('auth_hash', hash);
-    await kv.put('auth_ha_token', body.ha_token);
+    await kv.put('auth_ha_token', ha_token);
     return new Response(JSON.stringify({ ok: true }), { headers: cors });
   }
 
