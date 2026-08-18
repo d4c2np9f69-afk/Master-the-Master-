@@ -225,3 +225,15 @@ all rows promoted to ON HAND, photo-confirmed, not unboxed per Jeff's order.)
 | 6-in-1 car charger 3.1A dual USB-C | $1.99 | truck |
 
 **Total haul ≈ $47.** DIY-bench buildout + Guardian siren + mesh routers + F-250 OBD reader.
+
+## Next order — planned 2026-08-18 (one AliExpress cart + one store run)
+| Item | Qty | Est. | For |
+|---|---|---|---|
+| PMS5003 + MH-Z19B + ZE07-CO + MQ-4 + BME280 | 1 ea | ~$40–50 | Guardian Air Station (see docs/guardian/air_station_plan_2026-08-18.md; brain = Jeff's spare ESP32, $0) |
+| Zigbee leak pucks | 3 | ~$15 | master vanity ×2 + dishwasher (Jeff 08-18). Irrigation-box puck DECLINED — meter LTS covers irrigation, box too damp for electronics |
+| Kidde SM120X relay (store) | 1 | $18.99 | wired-alarm interconnect → air station GPIO |
+| 3M VHB tape roll (store) | 1 | ~$10 | re-mount door sensors (front door fell 2:12 AM 08-18 — stock adhesive fails on 2×AA weight); body-on-door, magnet-on-molding |
+| Radon test kit (store) | 1 | ~$15 | measure BEFORE any $97 RD200 buy |
+
+**Probe-style leak sensor assignments (Jeff 08-18): water heater drip pan + washing machine.**
+(HVAC pan not needed — package unit, everything outside.)
