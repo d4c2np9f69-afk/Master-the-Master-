@@ -22,6 +22,7 @@ decisions about his own house.
 | # | Item | Owner | Age | Notes |
 |---|---|---|---|---|
 | 1 | **Rotate the Weather Underground API key.** Removed from all 3 repo locations 08-19, but it is in PUBLIC git history since ≥08-16 and cannot be un-published. | **JEFF** | flagged 08-16, **3 days** | wunderground.com → Member Settings → My Profile → API Keys. Then paste into Cloudflare as `WU_API_KEY` and I delete the fallback in `weather.js`. |
+| 28 | 🔴 **A camera-pipeline exposure was found and verified 2026-08-20. Details are deliberately NOT in this public repo.** The write-up lives at `HCC-secrets/SECURITY_camera_stills_public_2026-08-20.md`, outside the repo, because this repo is **public** and the finding is still unpatched — publishing the method would make it worse. Read that file before touching the camera pipeline. | **CLAUDE fixes, JEFF decides when** | found 08-20 | Two halves: one config change I can make (with a documented trap that would break the 08-15-verified pipeline if rushed), and one rotation only Jeff can do. **Do not paste the details back into this repo.** |
 | 2 | **HA backup encryption key exists on ONE PC.** Without it every `.tar` in iCloud is undecryptable — "the single most load-bearing secret in the whole disaster-recovery system". | **JEFF** | 08-02, **17 days** | Bitwarden now exists. This is a 2-minute Secure Note. |
 | 3 | **Bitwarden duplicates** — four `idm.xfinity.com`, one a typo account `jeff.lewen@comcast.net`. Makes the vault ask you to choose at login. | CLAUDE *(needs one unlock)* | 08-19 | The plan says **"Do this first next session."** |
 | 4 | **Full-disk encryption OFF on both drives.** TPM ready but Secure Boot is OFF and Device Encryption requires it. | **JEFF** | 08-19 | BIOS trip on reboot. |
@@ -74,7 +75,7 @@ bedroom dimmer for an hour on 08-19** · B-Hyve · LUX · Blink · Amazon · Sma
 
 ## Honest scoreboard — 2026-08-20 00:22
 
-**27 tracked · 9 closed · 18 open.**
+**28 tracked · 9 closed · 19 open.** *(#28 found tonight — a P1 nobody had ever looked for.)*
 
 Of the 18 open: **11 are Jeff's** (hands, credentials, purchases, decisions) and **2 are mine with
 nothing blocking them** — #16 (waits on #11) and #20 (minification, explicitly out of scope).
