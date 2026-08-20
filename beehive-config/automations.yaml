@@ -213,12 +213,13 @@
   mode: single
 - id: hcc_morning_digest
   alias: HCC — Morning Digest
-  description: 'Daily 7am summary of weather, vacuum, car, and utility status -- automates
-    the manual health-check Jeff used to ask for by hand. Dropped the active-notification
-    count 08-02: confirmed via live test that states.persistent_notification has been
-    unreadable from templates since HA 2023.6 (notifications were removed from the
-    state machine) -- it was silently always reporting zero, which is worse than not
-    reporting it.'
+  description: 'Daily 7am summary. REBUILT 2026-08-16: the water content was previously
+    only ''Water/Gas reporting: OK/check needed'' - a health check, not a report -
+    so Jeff never actually got water numbers. Now reports month-to-date water/gas
+    plus overnight use since the 1 AM baseline, and reads PERSISTENT values (sensor.water_month,
+    input_text.hcc_water_1am) because sensor.water_gallons is legitimately ''unavailable''
+    much of the time: the Itron ERT-SCM+ pit radio + rtlamr -unique=true only republish
+    when the value CHANGES. Never treat that as a fault.'
   triggers:
   - trigger: time
     at: 07:00:00
@@ -236,21 +237,33 @@
       blink_heals_recent: '{{ ''yes'' if (state_attr(''automation.hcc_blink_auto_heal'',''last_triggered'')
         is not none and (as_timestamp(now()) - as_timestamp(state_attr(''automation.hcc_blink_auto_heal'',''last_triggered'')))
         < 86400) else ''no'' }}'
-      digest_message: '{{ weather_cond | replace(''-'', '' '') | title }}, {{ weather_temp
-        }}°F today.
-
-        Vacuum: {{ ''offline ⚠️'' if vacuum_state in [''unavailable'',''unknown'']
-        else vacuum_state }}.
-
-        Car: {{ car_fuel }}% fuel, {{ ''unlocked ⚠️'' if car_lock == ''unlocked''
-        else ''locked'' }}, {{ car_odo | round(0) }} mi.
-
-        Water/Gas reporting: {{ ''OK'' if water_state not in [''unavailable'',''unknown'',none]
-        and gas_state not in [''unavailable'',''unknown'',none] else ''check needed
-        ⚠️'' }}.
-
-        {% if blink_heals_recent == ''yes'' %}Blink self-healed a crash in the last
-        24h (handled automatically, no action needed).{% endif %}'
+      digest_message: "{{ weather_cond | replace('-', ' ') | title }}, {{ weather_temp
+        }}°F today.\n\n\U0001F4A7 WATER — {{ water_month }} gal this month{% if water_overnight
+        is not none %}, {{ water_overnight }} gal since 1 AM{% if water_overnight
+        | float(0) > 3.5 %} ⚠️ HIGH — a flush is 1.2, ice is 0.1, this looks like
+        a running toilet or a leak{% else %} (normal — quiet overnight){% endif %}{%
+        else %}\n   Overnight figure unavailable — the SCM+ pit radio only reports
+        when the reading changes, so it is simply between broadcasts (not a fault).{%
+        endif %}\n\U0001F525 GAS — {{ gas_month }} CCF this month, est. ${{ gas_cost
+        }}.\n\nVacuum: {{ 'offline ⚠️' if vacuum_state in ['unavailable','unknown']
+        else vacuum_state }}.\nCar: {{ car_fuel }}% fuel, {{ 'unlocked ⚠️' if car_lock
+        == 'unlocked' else 'locked' }}, {{ car_odo | round(0) }} mi.\nMeters last
+        heard: water {{ water_age }}, gas {{ gas_age }}.\n{% if blink_heals_recent
+        == 'yes' %}Blink self-healed a crash in the last 24h (handled automatically,
+        no action needed).{% endif %}"
+      water_month: '{{ states(''sensor.water_month'') }}'
+      gas_month: '{{ states(''sensor.gas_month'') }}'
+      gas_cost: '{{ states(''sensor.gas_cost'') }}'
+      water_overnight: '{% set c = states(''sensor.water_gallons'') %}{% set b = states(''input_text.hcc_water_1am'')
+        %}{% if c not in [''unavailable'',''unknown''] and b not in [''unavailable'',''unknown'','''']
+        %}{{ ((c | float(0)) - (b | float(0))) | round(1) }}{% else %}{{ none }}{%
+        endif %}'
+      water_age: '{% set t = states(''sensor.water_meter_last_seen'') %}{% if t not
+        in [''unavailable'',''unknown''] %}{{ ((as_timestamp(now()) - as_timestamp(t))
+        / 60) | round(0) }} min ago{% else %}not since restart{% endif %}'
+      gas_age: '{% set t = states(''sensor.gas_meter_last_seen'') %}{% if t not in
+        [''unavailable'',''unknown''] %}{{ ((as_timestamp(now()) - as_timestamp(t))
+        / 60) | round(0) }} min ago{% else %}not since restart{% endif %}'
   - action: notify.mobile_app_jeffs_iphone
     data:
       title: ☀️ HCC Morning Digest
@@ -261,3 +274,295 @@
       message: '{{ digest_message }}'
       notification_id: hcc_morning_digest
   mode: single
+- id: hcc_ai_alert_cooldown
+  alias: HCC - AI Alert Cooldown
+  description: 'Rebuilt 2026-08-15: camera_key now strips _clipframe (mutes were writing
+    to nonexistent helpers), and mute_minutes computes booleans inline (the old string-truthiness
+    bug made every mute 30 min).'
+  triggers:
+  - event_type: codeproject_ai.object_detected
+    platform: event
+  conditions: []
+  actions:
+  - variables:
+      mute_minutes: '{{ 30 if ((is_state(''person.jeff_loewen'',''home'') or is_state(''person.angela_loewen'',''home''))
+        and (trigger.event.data.entity_id.split(''.'')[1] | replace(''codeproject_ai_object_'','''')
+        | replace(''_clipframe'','''')) in [''301_backyard'',''back_left'']) else
+        5 }}'
+      camera_key: '{{ trigger.event.data.entity_id.split(''.'')[1] | replace(''codeproject_ai_object_'','''')
+        | replace(''_clipframe'','''') }}'
+  - delay: 00:00:05
+  - condition: template
+    value_template: '{{ states(''input_datetime.hcc_ai_mute_'' ~ camera_key) in [''unknown'',''unavailable'',''none'']
+      or (states(''input_datetime.hcc_ai_mute_'' ~ camera_key) | as_datetime | as_local)
+      < now() }}'
+  - data:
+      datetime: '{{ (now() + timedelta(minutes = mute_minutes | int)).strftime(''%Y-%m-%d
+        %H:%M:%S'') }}'
+    target:
+      entity_id: input_datetime.hcc_ai_mute_{{ camera_key }}
+    action: input_datetime.set_datetime
+  max: 20
+  mode: parallel
+- id: hcc_night_mode_lights
+  alias: HCC - Night Mode Lights
+  description: Night Mode helper drives the living room cans. On = 10% (Jeff's chosen
+    night level), Off = full.
+  triggers:
+  - to: 'on'
+    platform: state
+    id: night
+    entity_id: input_boolean.night_mode
+  - to: 'off'
+    platform: state
+    id: full
+    entity_id: input_boolean.night_mode
+  actions:
+  - choose:
+    - sequence:
+      - target:
+          entity_id: light.livingroom_cans
+        data:
+          brightness: 26
+          transition: 2
+        action: light.turn_on
+      conditions:
+      - condition: trigger
+        id: night
+    - sequence:
+      - target:
+          entity_id: light.livingroom_cans
+        data:
+          brightness: 255
+          transition: 2
+        action: light.turn_on
+      conditions:
+      - condition: trigger
+        id: full
+  mode: single
+- id: hcc_clip_pipeline_watchdog
+  alias: HCC - Clip Pipeline Watchdog
+  description: Motion fired but the AI scanner did not update within 2 min = Blink
+    clip never arrived or ffmpeg extract failed (USB drive full/dead, sync module
+    down). Names the real cause instead of looking like lag.
+  triggers:
+  - to: 'on'
+    platform: state
+    entity_id:
+    - binary_sensor.301_driveway_motion
+    - binary_sensor.301_front_doorbell_motion
+    - binary_sensor.front_right_motion
+    - binary_sensor.back_left_motion
+    - binary_sensor.301_backyard_motion
+  conditions:
+  - condition: template
+    value_template: '{{ state_attr(''automation.hcc_clip_pipeline_watchdog'',''last_triggered'')
+      is none or (now() - state_attr(''automation.hcc_clip_pipeline_watchdog'',''last_triggered'')).total_seconds()
+      > 21600 }}'
+  actions:
+  - variables:
+      cam_key: '{{ trigger.entity_id.split(''.'')[1] | replace(''_motion'','''') }}'
+  - delay: 00:02:00
+  - condition: template
+    value_template: '{{ (now() - states[''image_processing.codeproject_ai_object_''
+      ~ cam_key ~ ''_clipframe''].last_updated).total_seconds() > 130 }}'
+  - data:
+      message: '{{ cam_key | replace(''301_'','''') | replace(''_'','' '') | title
+        }}: motion fired but no clip was processed in 2 min. Check the sync module
+        USB drive.'
+      title: ?? Camera pipeline stalled
+    action: notify.mobile_app_jeffs_iphone
+  max: 6
+  mode: parallel
+- id: hcc_water_overnight_baseline
+  alias: HCC - Overnight Water Baseline (1 AM)
+  description: Stores the meter reading at 1 AM so the 5 AM check can judge quiet-hours
+    use against the known signatures (flush 1.2 gal, ice ~0.1).
+  triggers:
+  - at: 01:00:00
+    platform: time
+  conditions: []
+  actions:
+  - data:
+      value: '{{ states(''sensor.water_gallons'') }}'
+    target:
+      entity_id: input_text.hcc_water_1am
+    action: input_text.set_value
+  mode: single
+- id: hcc_water_overnight_check
+  alias: HCC - Overnight Water Check (5 AM)
+  description: 'Daily WHOLE-HOUSE overnight leak report, 5 AM. Irrigation supply is
+    physically OFF at the wall (that WAS the leak: LTS shows 6-15 gal/night Aug 1-13,
+    dropping to 1.3 the night Jeff closed it). Decomposes the number using Jeff''s
+    characterised signatures: toilet fill 1.28 gal, icemakers ~0.1 x2 fridges. ~1.3
+    gal = clean. Alarm 3.5. Runs daily until the Orbit anti-siphon valve is installed,
+    then revert to alert-only.'
+  triggers:
+  - at: 05:00:00
+    platform: time
+  conditions: []
+  actions:
+  - action: notify.mobile_app_jeffs_iphone
+    data:
+      title: "\U0001F4A7 Overnight Leak Watch — 1 to 5 AM"
+      message: '{% set b = states(''input_text.hcc_water_1am'') %}{% set c = states(''sensor.water_gallons'')
+        %}{% if c not in [''unavailable'',''unknown''] and b not in [''unavailable'',''unknown'','''']
+        %}{% set used = ((c | float(0)) - (b | float(0))) | round(2) %}{% set flushes
+        = (used / 1.28) | round(0, ''floor'') | int %}{% set rest = (used - (flushes
+        * 1.28)) | round(2) %}{% if used > 3.5 %}⚠️ {{ used }} gal, 1-5 AM — HIGH.
+        Irrigation is shut off, so this is INSIDE the house: toilet, water heater
+        or a supply line. Baseline normal is ~1.3 (one 1.28 fill + ice).{% else %}✅
+        {{ used }} gal, 1-5 AM — normal. That''s about {{ flushes }} toilet fill{{
+        ''s'' if flushes != 1 else '''' }} (1.28 ea) + {{ rest }} gal ice/misc. No
+        house-side leak.{% endif %}{% else %}ℹ️ No figure — the SCM+ pit radio only
+        republishes when the reading changes, so it''s between broadcasts. Not a fault.
+        Baseline held at {{ b }}.{% endif %}'
+  - action: persistent_notification.create
+    data:
+      title: "\U0001F4A7 Overnight Leak Watch — 1 to 5 AM"
+      message: '{% set b = states(''input_text.hcc_water_1am'') %}{% set c = states(''sensor.water_gallons'')
+        %}{% if c not in [''unavailable'',''unknown''] and b not in [''unavailable'',''unknown'','''']
+        %}{% set used = ((c | float(0)) - (b | float(0))) | round(2) %}{% set flushes
+        = (used / 1.28) | round(0, ''floor'') | int %}{% set rest = (used - (flushes
+        * 1.28)) | round(2) %}{% if used > 3.5 %}⚠️ {{ used }} gal, 1-5 AM — HIGH.
+        Irrigation is shut off, so this is INSIDE the house: toilet, water heater
+        or a supply line. Baseline normal is ~1.3 (one 1.28 fill + ice).{% else %}✅
+        {{ used }} gal, 1-5 AM — normal. That''s about {{ flushes }} toilet fill{{
+        ''s'' if flushes != 1 else '''' }} (1.28 ea) + {{ rest }} gal ice/misc. No
+        house-side leak.{% endif %}{% else %}ℹ️ No figure — the SCM+ pit radio only
+        republishes when the reading changes, so it''s between broadcasts. Not a fault.
+        Baseline held at {{ b }}.{% endif %}'
+      notification_id: hcc_overnight_water
+  mode: single
+- id: hcc_avb_spring_reminder
+  alias: HCC - Spring Valve Reminder
+  description: The $18 anti-siphon valve fails SILENTLY (stiff poppet looks fine).
+    Swap on a schedule instead of trusting it - Jeff's replace-yearly strategy, 2026-08-15.
+  triggers:
+  - at: 09:00:00
+    platform: time
+  conditions:
+  - condition: template
+    value_template: '{{ now().month == 4 and now().day == 1 }}'
+  actions:
+  - data:
+      message: Replace the $18 anti-siphon valve (they fail silently) and re-run the
+        quiet-hours leak check after repressurizing.
+      title: ?? Spring irrigation startup
+    action: notify.mobile_app_jeffs_iphone
+  - data:
+      message: 1) New AVB on the wall stub (dome up, arrows out). 2) Quiet-hours leak
+        check with irrigation ON.
+      title: Spring irrigation checklist
+    action: persistent_notification.create
+  mode: single
+- id: hcc_clip_archive
+  alias: HCC - Clip Archive
+  description: Every AI detection archives its clip to /config/www/blink_archive (timestamped)
+    so the fixed-name overwrite stops destroying history. Beast pulls nightly to D:.
+    2026-08-15.
+  triggers:
+  - event_type: codeproject_ai.object_detected
+    platform: event
+  conditions: []
+  actions:
+  - data:
+      cam: '{{ trigger.event.data.entity_id.split(''.'')[1] | replace(''codeproject_ai_object_'','''')
+        | replace(''_clipframe'','''') }}'
+    action: shell_command.archive_clip
+  max: 10
+  mode: queued
+- id: hcc_clip_archive_prune
+  alias: HCC - Clip Archive Prune
+  description: 'Keeps the Beehive-side archive to 7 days; the long-term copy lives
+    on the beast D: drive.'
+  triggers:
+  - at: 03:30:00
+    platform: time
+  conditions: []
+  actions:
+  - action: shell_command.prune_archive
+  mode: single
+- id: hcc_zigbee_pairing_mode
+  alias: HCC - Zigbee Pairing Mode (TEMPORARY - installing sensors 08-17)
+  description: Keeps Zigbee permit-join open by re-enabling it whenever the 254s window
+    expires. DISABLE when sensor installation is done - do not leave the network permanently
+    joinable.
+  triggers:
+  - trigger: state
+    entity_id: switch.zigbee2mqtt_bridge_permit_join
+    to: 'off'
+    for:
+      seconds: 5
+  conditions: []
+  actions:
+  - action: switch.turn_on
+    target:
+      entity_id: switch.zigbee2mqtt_bridge_permit_join
+  mode: single
+- id: hcc_water_leak_alarm
+  alias: HCC - WATER LEAK ALARM (all Zigbee leak sensors)
+  description: 'Life-safety: fires on ANY leak sensor going wet. Add each new leak
+    sensor entity to the trigger list as it is paired. No throttle by design.'
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.guest_bath_leak_water_leak
+    - binary_sensor.kitchen_refrigerator_leak_water_leak
+    - binary_sensor.kitchen_sink_leak_water_leak
+    to: 'on'
+  conditions: []
+  actions:
+  - action: notify.jeffs_iphone
+    data:
+      title: "\U0001F4A7 WATER LEAK DETECTED"
+      message: '{{ trigger.to_state.attributes.friendly_name | replace('' Water leak'','''')
+        }} is reporting WATER. Go look now.'
+      data:
+        push:
+          interruption-level: time-sensitive
+  - action: persistent_notification.create
+    data:
+      title: "\U0001F4A7 WATER LEAK"
+      message: '{{ trigger.to_state.attributes.friendly_name }} went WET at {{ now().strftime(''%I:%M
+        %p'') }}. Clears itself when dry.'
+      notification_id: hcc_leak_{{ trigger.entity_id }}
+  mode: parallel
+  max: 10
+- id: hcc_low_battery_alert
+  alias: HCC - LOW BATTERY ALERT (all cameras + Zigbee sensors)
+  description: Fires the moment any camera or Zigbee sensor's battery flag goes low.
+    Garage camera excluded (Blink Mini, wired, no battery - the flag there is a permanent
+    false positive). Add new door/leak sensors here as they're paired.
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.301_driveway_battery
+    - binary_sensor.front_right_battery
+    - binary_sensor.back_left_battery
+    - binary_sensor.301_backyard_battery
+    - binary_sensor.301_front_doorbell_battery
+    - binary_sensor.back_deck_door_battery_low
+    - binary_sensor.mailbox_battery_low
+    - binary_sensor.front_door_battery_low
+    - binary_sensor.guest_bath_leak_battery_low
+    - binary_sensor.kitchen_refrigerator_leak_battery_low
+    - binary_sensor.kitchen_sink_leak_battery_low
+    to: 'on'
+  conditions: []
+  actions:
+  - action: notify.jeffs_iphone
+    data:
+      title: "\U0001F50B Battery Low"
+      message: '{{ trigger.to_state.attributes.friendly_name }} needs new batteries.'
+      data:
+        push:
+          interruption-level: active
+  - action: persistent_notification.create
+    data:
+      title: "\U0001F50B Battery Low"
+      message: '{{ trigger.to_state.attributes.friendly_name }} flagged low at {{
+        now().strftime(''%I:%M %p %m/%d'') }}.'
+      notification_id: hcc_battery_{{ trigger.entity_id }}
+  mode: parallel
+  max: 10

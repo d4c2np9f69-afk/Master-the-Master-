@@ -42,7 +42,7 @@ decisions about his own house.
 
 | # | Item | Owner | Age | Notes |
 |---|---|---|---|---|
-| 12 | **`beehive-config/` is a STALE SNAPSHOT, not a mirror.** Cost an hour on 08-19 — grepping it for the AI scanner returned nothing, because the scanners live in `configuration.yaml`. | **CLAUDE** | 08-01, **18 days** | Re-pull from live HA. Every session that greps it gets lied to. |
+| 12 | ~~**`beehive-config/` is a STALE SNAPSHOT, not a mirror**~~ — **✅ CLOSED 2026-08-19.** Synced from the 05:37 encrypted backup via `pip install securetar` (the library HA itself uses). configuration.yaml 3,170→7,007 · automations.yaml 10,533→24,096 · hcc.yaml 22,608→23,263 · `codeproject_ai_object` refs **0→20**. Backup copy verified byte-identical to a live code-server fetch. Re-sync recipe in `beehive-config/README.md`. | ✅ closed 08-19 | — | Was 18 days stale and cost an hour that night. |
 | 13 | **Dead `Blink Fast Motion Poll` block still in `packages/hcc.yaml` 502-517.** Disabled, harmless, present. | CLAUDE *(classifier-blocked)* | 08-19 | §17 PART K: hcc.yaml only via the Terminal add-on, and that path is blocked. |
 | 14 | **`recorder: purge_keep_days: 45` not set.** Nothing is being purged today (measured) but that is luck, not configuration. | **CLAUDE** | 08-19 | `configuration.yaml`. |
 | 15 | **`blinkpy` manifest errors ~4/hr** (`Manifest stale 2102` / `System is busy 307`). **Not root-caused.** | **CLAUDE** | 08-18 | Rate fell 15→4/hr on 08-19 but the drop preceded my change — do not claim credit. |
@@ -72,12 +72,12 @@ bedroom dimmer for an hour on 08-19** · B-Hyve · LUX · Blink · Amazon · Sma
 
 ---
 
-## Honest scoreboard — 2026-08-19 23:20
+## Honest scoreboard — 2026-08-19 23:47
 
-**27 tracked · 4 closed · 23 open.**
+**27 tracked · 5 closed · 22 open.** *(#12 closed 23:47 — beehive-config actually synced.)*
 
-Of the 23 open: **11 are Jeff's** (hands, credentials, purchases, decisions) and **7 are mine with
-nothing blocking them** — #12, #14, #15, #16, #18, #20, plus #13 pending a permission rule.
+Of the 22 open: **11 are Jeff's** (hands, credentials, purchases, decisions) and **6 are mine with
+nothing blocking them** — #14, #15, #16, #18, #20, plus #13 pending a permission rule.
 
 **Oldest open item: 29 days.**
 

@@ -126,48 +126,68 @@ automation:
           title: "⛈ Severe Weather"
           message: "Conditions: {{ states('weather.home') | title }}"
           notification_id: hcc_weather_severe
-  - {
-      id: bd1bcc46-b3b1-484b-9405-117d470cd263,
-      alias: "AI Camera Scan on Motion",
-      description: "Scans the triggered Blink camera with CodeProject.AI object detection",
-      mode: parallel,
-      max: 10,
-      trigger:
-        [
-          {
-            platform: state,
-            entity_id:
-              [
-                binary_sensor.301_backyard_motion,
-                binary_sensor.301_driveway_motion,
-                binary_sensor.301_front_doorbell_motion,
-                binary_sensor.front_right_motion,
-                binary_sensor.back_left_motion,
-                binary_sensor.garage_motion,
-              ],
-            to: "on",
-          },
-        ],
-      condition: [],
-      action:
-        [
-          {
-            variables:
-              {
-                scan_entity: "{% set map = {'binary_sensor.301_backyard_motion': 'image_processing.codeproject_ai_object_301_backyard', 'binary_sensor.301_driveway_motion': 'image_processing.codeproject_ai_object_301_driveway', 'binary_sensor.301_front_doorbell_motion': 'image_processing.codeproject_ai_object_301_front_doorbell', 'binary_sensor.front_right_motion': 'image_processing.codeproject_ai_object_front_right', 'binary_sensor.back_left_motion': 'image_processing.codeproject_ai_object_back_left', 'binary_sensor.garage_motion': 'image_processing.codeproject_ai_object_garage'} %}{{ map[trigger.entity_id] }}",
-              },
-          },
-          {
-            service: image_processing.scan,
-            target: { entity_id: "{{ scan_entity }}" },
-          },
-        ],
-    }
+  - id: bd1bcc46-b3b1-484b-9405-117d470cd263
+    alias: "AI Camera Scan on Motion"
+    description: "On real Blink motion: waits for the actual recorded clip, downloads it, extracts the exact frame, then scans that frame with CodeProject.AI"
+    mode: parallel
+    max: 10
+    trigger:
+      - platform: state
+        entity_id:
+          - binary_sensor.301_backyard_motion
+          - binary_sensor.301_driveway_motion
+          - binary_sensor.301_front_doorbell_motion
+          - binary_sensor.front_right_motion
+          - binary_sensor.back_left_motion
+          - binary_sensor.garage_motion
+        to: "on"
+    condition: []
+    action:
+      - variables:
+          cam_map:
+            binary_sensor.301_backyard_motion: "301_backyard"
+            binary_sensor.301_driveway_motion: "301_driveway"
+            binary_sensor.301_front_doorbell_motion: "301_front_doorbell"
+            binary_sensor.front_right_motion: "front_right"
+            binary_sensor.back_left_motion: "back_left"
+            binary_sensor.garage_motion: "garage"
+          cam: "{{ cam_map[trigger.entity_id] }}"
+          camera_entity: "camera.{{ cam }}"
+          clipframe_entity: "camera.{{ cam }}_clipframe"
+          scan_entity: "image_processing.codeproject_ai_object_{{ cam }}_clipframe"
+          last_record_before: "{{ state_attr('camera.' ~ cam, 'last_record') }}"
+      - repeat:
+          while:
+            - condition: template
+              value_template: "{{ state_attr(camera_entity, 'last_record') == last_record_before }}"
+            - condition: template
+              value_template: "{{ repeat.index <= 10 }}"
+          sequence:
+            - service: homeassistant.update_entity
+              target:
+                entity_id: "{{ camera_entity }}"
+            - delay: "00:00:03"
+      - service: blink.save_video
+        target:
+          entity_id: "{{ camera_entity }}"
+        data:
+          filename: "/config/www/blink_clips/{{ cam }}.mp4"
+      - delay: "00:00:02"
+      - service: shell_command.extract_clip_frame
+        data:
+          cam: "{{ cam }}"
+      - delay: "00:00:01"
+      - service: homeassistant.update_entity
+        target:
+          entity_id: "{{ clipframe_entity }}"
+      - delay: "00:00:01"
+      - service: image_processing.scan
+        target:
+          entity_id: "{{ scan_entity }}"
   - {
       alias: "AI Object Detected Notify",
       description: "Notifies and fires an event when CodeProject.AI detects a person, vehicle, or animal",
-      mode: queued,
-      max: 20,
+      mode: single,
       trigger:
         [{ platform: event, event_type: codeproject_ai.object_detected }],
       condition: [],
@@ -176,8 +196,8 @@ automation:
           {
             variables:
               {
-                camera_key: "{{ trigger.event.data.entity_id.split('.')[1] | replace('codeproject_ai_object_', '') }}",
-                camera_name: "{{ trigger.event.data.entity_id.split('.')[1] | replace('codeproject_ai_object_301_', '') | replace('_', ' ') | title }}",
+                camera_key: "{{ trigger.event.data.entity_id.split('.')[1] | replace('codeproject_ai_object_', '') | replace('_clipframe','') }}",
+                camera_name: "{{ trigger.event.data.entity_id.split('.')[1] | replace('codeproject_ai_object_', '') | replace('_clipframe', '') | replace('301_', '') | replace('_', ' ') | title }}",
                 obj_name: "{{ trigger.event.data.name }}",
                 obj_type: "{{ trigger.event.data.object_type }}",
                 obj_confidence: "{{ trigger.event.data.confidence }}",
@@ -216,18 +236,16 @@ automation:
                         service: notify.mobile_app_jeffs_iphone,
                         data:
                           {
-                            title: "🚨 Person detected",
+                            title: "👤 Person at",
                             message: "{{ camera_name }} — person detected",
                             data:
                               {
                                 push:
                                   {
-                                    interruption-level: critical,
+                                    interruption-level: time-sensitive,
                                     sound:
                                       {
                                         name: default,
-                                        critical: 1,
-                                        volume: 1.0,
                                       },
                                   },
                                 tag: "ai-person-{{ camera_name }}",
@@ -358,7 +376,7 @@ automation:
         [{ platform: event, event_type: codeproject_ai.object_detected }],
       variables:
         {
-          camera_key: "{{ trigger.event.data.entity_id.split('.')[1] | replace('codeproject_ai_object_', '') }}",
+          camera_key: "{{ trigger.event.data.entity_id.split('.')[1] | replace('codeproject_ai_object_', '') | replace('_clipframe','') }}",
         },
       condition:
         [
@@ -520,13 +538,10 @@ script:
     alias: "HCC — Skip Commercial Break"
     icon: mdi:fast-forward
     sequence:
-      - repeat:
-          count: 3
-          sequence:
-            - service: androidtv.adb_command
-              target: { entity_id: media_player.fire_tv_viewing_room }
-              data: { command: "input keyevent 90" }
-            - delay: { milliseconds: 1200 }
+      - service: androidtv.adb_command
+        target: { entity_id: media_player.fire_tv_viewing_room }
+        data: { command: "input keyevent 90" }
+      - delay: { milliseconds: 1200 }
       - service: androidtv.adb_command
         target: { entity_id: media_player.fire_tv_viewing_room }
         data: { command: "input keyevent 126" }
