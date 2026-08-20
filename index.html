@@ -6620,6 +6620,23 @@ setInterval(loadAlerts, 5*60*1000);
     // honest definition of "as sharp as this source gets" — going further is
     // upscaling, not more information.
     var scale=tileMpp/need;
+    // 2026-08-19: with only 2 GPS points the fit span collapses to the 30 m floor
+    // above, which asks for roughly z22. Esri tops out at z19 over White House TN and
+    // USGS at z18, so every tile was being blown up 8-10x into an unreadable smear —
+    // Jeff's screenshot showed a blurred grey-green wash with the coverage dots
+    // floating on it. Fixing the tiles (the placeholder detector) only changed WHICH
+    // useless picture was drawn; the framing was the real fault.
+    // So on the DEFAULT view, never magnify tiles more than MAX_AUTO_UPSCALE: pull the
+    // camera back to what the imagery can actually resolve. A slightly wider yard that
+    // is legible beats a 10 m crop that is not.
+    // Deliberately gated on the user not having zoomed — the +/- buttons stay fully
+    // decoupled as the comment above intends, so "+ In" still works past native detail
+    // for anyone who wants it. This only fixes what Jeff sees when he opens the card.
+    var MAX_AUTO_UPSCALE = 2;
+    if ((_mapView.zoom || 1) <= 1 && scale > MAX_AUTO_UPSCALE) {
+      need = tileMpp / MAX_AUTO_UPSCALE;   // keeps the scale bar honest
+      scale = MAX_AUTO_UPSCALE;
+    }
     var cwx=_lonToWorldX(cLon,z), cwy=_latToWorldY(cLat,z);
     var ox=rect.x+rect.w/2-(_mapView.panX||0)*rect.w;
     var oy=rect.y+rect.h/2-(_mapView.panY||0)*rect.h;
