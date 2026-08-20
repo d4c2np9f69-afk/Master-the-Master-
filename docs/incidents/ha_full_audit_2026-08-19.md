@@ -111,3 +111,66 @@ setup card and scrolling to it — and that scroll was bug #1 above. Recovery wa
   `mower-ctrl` "endpoints" do not exist — I invented those paths; `/api/auth` is POST-only so a
   GET correctly falls through to index.html; a "leaked JS comment" was `<SCRIPT>` text content,
   never rendered; "suspicious text" hits were a regex matching **mai-nan-ce**.
+
+
+---
+
+# LATE SESSION — the two Jeff caught from screenshots (2026-08-19 22:00-23:00)
+
+## 1. Lights & Plugs listed 54 entities; 9 were lights. ALL ON was dangerous.
+
+Jeff's screenshot: "6 of 43 on", with rows like *Kitchen Dining Room Cans Auto-update
+enabled*, *Livingroom Cans LED*, Alexa shuffle/repeat, Zigbee2MQTT permit join.
+
+The filter kept every `switch.*` that was not irrigation or a vacuum setting. **Pressing
+ALL ON would have re-enabled Kasa auto-firmware-update on all three HS220 dimmers — the
+documented ONE-WAY DOOR — opened the Zigbee network via `permit_join`, switched on the
+GLE's auxiliary heating, and toggled all six Blink camera motion-detection switches
+including the garage one Jeff deliberately turned off.**
+
+Fixed with two scoped rules, verified against the live entity list BEFORE writing:
+`LIGHT_CONFIG_SUFFIX` anchored to the END of the entity_id (so `switch.shed_led` is
+safe), plus dropping `device_class === 'switch'` (HA's generic non-outlet toggle — real
+plugs are `outlet`, a plain wall switch like the HS210 has none).
+**54 -> 9. Confirmed live: "0 of 9 on", all real, 0 JS errors.**
+
+**CORRECTION I made mid-investigation:** I first said ALL ON would fire the sprinklers.
+**It would not** — `lightIsIrrigation` already catches them via the `zone_name` /
+`is_watering` ATTRIBUTES. That alarm came from my own crude entity-id approximation of
+the filter instead of reading the filter. Caught within the minute, but I said it.
+
+## 2. The yard map: fixing the tiles was not fixing the map
+
+Jeff: *"Nobody can see that. What good does it do if it looks like that?"*
+
+Last night's placeholder-detector fix was correct and **insufficient**. It stopped Esri's
+grey "Map data not yet available" tiles being drawn as if real — but only changed WHICH
+unusable picture appeared. The result was a blurred grey-green wash.
+
+**The real fault was FRAMING.** With `2 GPS points this mow` the fit span collapses to the
+hard 30 m floor (`spanY = Math.max(30, ...)`). 30 m across ~900 px is ~0.033 m/px, i.e.
+about **zoom 22**. Esri tops out at **z19** over White House TN and USGS at z18, so
+`scale = tileMpp/need` came out at **8-10x** and every tile was magnified into mush. The
+caption even admitted "zoomed past native detail" while still drawing it.
+
+**Fix:** on the DEFAULT view only, cap magnification at `MAX_AUTO_UPSCALE = 2` and pull
+the camera back to what the source can resolve, updating `need` so the scale bar stays
+honest. Gated on `(_mapView.zoom || 1) <= 1` so the +/- buttons stay decoupled as the
+original comment intends. **Verified by LOOKING at it**: houses, driveway, parked cars,
+tree shadows and the coverage blob all legible.
+
+## 3. The device that matters was on a cached build
+
+Jeff's phone was still rendering the pre-fix map — its caption read "Imagery: Esri World
+Imagery" instead of the post-fix "zoomed past native detail". **A fix deployed hours
+earlier had never reached the only screen he uses.** Service worker bumped
+**hcc-v78 -> v79 -> v80**. **Standing lesson: after any index.html fix, bump
+`CACHE_NAME` in `service-worker.js` or the PWA keeps serving the old build.**
+
+## Method note
+
+Both of these were found by **Jeff sending a screenshot**, not by me. The lights card had
+been wrong since the Kasa/Alexa entities appeared; the map looked "fixed" to me because I
+checked a pixel-variance number instead of looking at the picture. §19 Pattern 4 says
+*"only looking at the output caught it."* A canvas variance of 236 said REAL IMAGERY
+while the screen showed an unreadable smear.
