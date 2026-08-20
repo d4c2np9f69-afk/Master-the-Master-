@@ -120,6 +120,35 @@ TouchSmart 520
 
 ---
 
+## 🔴 BLINK CAMERA HARDWARE — READ BEFORE REPORTING A CAMERA "FAULT" (added 2026-08-19)
+
+**Models, straight from HA's device registry — not inferred:**
+
+| camera | model | power | battery entity |
+|---|---|---|---|
+| **Garage** | **`mini`** | **MAINS / USB — NO BATTERY AT ALL** | phantom, DISABLED 08-19 |
+| 301 Front Doorbell | `doorbell` | battery | real |
+| 301 Driveway · Front Right · Back Left · 301 Backyard | Blink Outdoor | battery | real |
+
+**⚠️ `binary_sensor.garage_battery` WAS A LIE AND IS NOW DISABLED.** Blink's API returns a battery
+field for every camera and blinkpy creates the entity regardless of hardware, so on the mains-powered
+Mini it sat permanently at `on` = LOW. On 2026-08-19 a session reported that to Jeff as a genuine
+"LOW battery — needs new batteries" finding. **It has no batteries.** Jeff had to explain this again:
+*"It is plugged in, that Mini camera doesn't even have a battery."* Disabling the entity stops it
+lying to any future session and stops it feeding the low-battery alert automation.
+
+**⚠️ THE GARAGE CAMERA BEING DISARMED IS NOT A FAULT — IT IS JEFF'S DECISION.**
+`eba1648` / `docs/beehive/alert_fatigue_fix_2026-08-14.md`, 2026-08-14, verbatim:
+*"Garage motion detection turned OFF permanently. Jeff: **'I don't need motion in the garage at
+all'** — the camera is **mains-powered** so it ran constantly and fired 6 times in 7 minutes while
+he was simply working in there."*
+**Do not "fix" it. Do not call it a security gap. Do not try `switch.turn_on`** (attempted 08-19,
+returned HTTP 200, correctly stayed `off`).
+
+**INFERRED, not proven:** Garage (`mini`) and Front Doorbell (`doorbell`) are the only two
+non-Outdoor models and the only two reporting `temp`/`wifi` as `unknown`. Different hardware
+probably reports different telemetry — so `unknown` there is likely normal, not a fault.
+
 ## Rules for maintaining this
 
 1. **Log at order time**, not arrival — ORDERED with ETA, promote to ON HAND when
