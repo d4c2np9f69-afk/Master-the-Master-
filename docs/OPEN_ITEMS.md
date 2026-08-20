@@ -49,7 +49,7 @@ decisions about his own house.
 | 16 | **`hcc_zigbee_pairing_mode_temporary_..._08_17`** — a "temporary" automation still sitting there, disabled. | **CLAUDE** | 08-17 | Delete once #11 is done. |
 | 17 | ~~No disk/CPU/memory visibility on Beehive~~ — System Monitor added 08-19. 94.3 GiB free, CPU 24 %, 120 °F. | ✅ closed 08-19 | — | |
 | 18 | ~~**`hero-cameras.jpg` fake title / ALL SYSTEMS READY panel / six dummy tiles**~~ — **✅ WAS ALREADY DONE 2026-08-06**, commit `1eba07f`. Verified by opening the image 08-19: all three fake elements gone; Blink logo and 2nd Amendment sticker still present per Jeff's explicit call; file is the regenerated 1300×970 landscape banner. **The item sat open for 13 days after it was closed.** | ✅ closed 08-06 | — | Third stale open item found 08-19, after the recorder purge alarm and the backyard AI thresholds. |
-| 19 | **Irrigation zone photos — THE DOCS CONTRADICT EACH OTHER. Do not touch until Jeff rules.** `CLAUDE.md`'s PROTECTED photo section says `images/zones/` are **"REAL PHOTOGRAPHS OF JEFF'S ACTUAL YARD… Do not regenerate or replace these."** Pending Item 20 says all six carry a fake gold-frame/title/tagline overlay that "needs correcting either way". Both can be true — strip the printed overlay, never regenerate the photo — but that exact ambiguity is what **deleted Jeff out of his own app on 08-06**. | **JEFF rules first** | 08-08, **11 days** | Question for Jeff: strip the overlays in place, or leave them alone? |
+| 19 | ~~**Irrigation zone photos — docs contradict each other**~~ — **✅ ALREADY CLEAN. All six opened and looked at 2026-08-20: NO gold frame, NO title, NO tagline on any of them.** `git log --follow` → commit `6913393`, **2026-08-11**, *"Mower sensor: fix the hour meter at the source; **clean the zone photos**"*. Written 08-08, done 08-11, left open 9 more days. **The contradiction dissolves:** CLAUDE.md's *"REAL PHOTOGRAPHS OF JEFF'S ACTUAL YARD… do not regenerate or replace these"* is the operative note; the "fake overlay" note was simply out of date. **Jeff does not need to rule on anything — there is nothing to strip, and these must NOT be touched.** | ✅ closed 08-11 | — | **Why it stayed open: the fix rode along inside a commit whose subject was about the mower hour meter.** Closing a tracked item has to be visible in the commit subject or in this file, or it stays "open" forever. |
 | 20 | **Lighthouse JS/CSS minification** — unused-js ~235 KiB, unminified-js ~71 KiB. | **CLAUDE** | 07-31 | Explicitly out of scope; needs restructuring. |
 
 ## 🔵 P4 — DECISIONS ONLY JEFF CAN MAKE
@@ -74,19 +74,26 @@ bedroom dimmer for an hour on 08-19** · B-Hyve · LUX · Blink · Amazon · Sma
 
 ## Honest scoreboard — 2026-08-20 00:22
 
-**27 tracked · 8 closed · 19 open.** *(#12 synced; #18 done since 08-06; #15 root-caused; #14 already set.)*
+**27 tracked · 9 closed · 18 open.**
 
-Of the 19 open: **12 are Jeff's** (hands, credentials, purchases, decisions) and **2 are mine with
+Of the 18 open: **11 are Jeff's** (hands, credentials, purchases, decisions) and **2 are mine with
 nothing blocking them** — #16 (waits on #11) and #20 (minification, explicitly out of scope).
 #13 is blocked by a RULE, not a capability.
 
-**FOUR of tonight's "open" items were already done** — the recorder purge alarm, the backyard AI
-thresholds, `hero-cameras.jpg` (closed 13 days), and `recorder: purge_keep_days` (already set).
-**Checking before working was worth more than working.**
+## 🔎 FIVE of tonight's "open" items were ALREADY DONE
 
-**Three of tonight's "open" items turned out to be already done** (recorder purge alarm, backyard AI
-thresholds, hero-cameras.jpg — the last one closed 13 days ago). Checking before working is worth
-as much as working.
+| item | actually done | sat open |
+|---|---|---|
+| recorder "purged daily" alarm (0c) | never a problem — measured | weeks, as an EMERGENCY |
+| backyard AI thresholds (0b) | before 08-19 | flagged as a live safety gap |
+| `hero-cameras.jpg` (#18) | 08-06, commit `1eba07f` | 13 days |
+| `recorder: purge_keep_days` (#14) | already in `configuration.yaml` | + I re-recommended it hours earlier |
+| irrigation zone photos (#19) | 08-11, commit `6913393` | 9 days |
+
+**That is the real answer to "why does shit sit."** Not blocked, not waiting on Jeff — *already
+fixed and never struck off*. Two of the five were closed inside commits whose subject line was
+about something else entirely, which is exactly how they stayed invisible.
+**Checking before working was worth more than working tonight.**
 
 **Oldest open item: 29 days.**
 
