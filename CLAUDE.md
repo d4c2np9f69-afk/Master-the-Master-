@@ -115,7 +115,32 @@ a session re-proposed the Inovelli dimmers he had already killed Ã¢â‚¬â�
 - **Ã¢ÂÅ’ Enbrighten 43080 Ã¢â‚¬â€ rejected** (Z2M documents that it stops relaying for child devices).
 - **Ã¢ÂÅ’ Enbrighten Z-Wave Ã¢â‚¬â€ rejected** (wrong radio; would need a second stick and ecosystem).
 
-### Ã°Å¸Â§Â¯ Other settled calls
+### 🧹 HA ENTITY HYGIENE — Jeff's rule, 2026-08-19 (SETTLED)
+
+> **"If it's not a physical device that turns on and off, or we didn't put it in, it's got to go."**
+> — Jeff, verbatim, 2026-08-19
+
+Applies to what is allowed to EXIST in Home Assistant, not just what the app shows. Hiding
+clutter in the UI is not compliance; the entity should be disabled in HA.
+
+**Actioned 2026-08-19:** disabled **29** Alexa Media Player setting switches
+(`*_shuffle`, `*_repeat`, `*_do_not_disturb`) across real Echos, the two PC Alexa apps and
+the virtual groups (all_devices / everywhere / holiday / clean_up / this_device). None were
+physical devices; none were referenced by any automation, script or the app.
+**Entities 446 -> 426; "unavailable" ghosts 63 -> 38.**
+
+**Deliberately KEPT, and why:**
+- `switch.sharky_do_not_disturb` — a setting on a physical device we did install; the app's
+  vacuum card uses that family.
+- Alexa `media_player.*` group targets (`everywhere`, `holiday`, …) — these are how
+  whole-house **TTS announcements** are addressed. Removing them would break announce.
+
+**What triggered it:** the GUARDIAN "Lights & Plugs" card was listing **54** entities of which
+**9** were lights or plugs, so every Kasa light appeared three times (itself, its Auto-update
+toggle, its LED toggle) — which is what Jeff saw as "double entries". App-side filter fixed
+separately; this rule is the HA-side half.
+
+### 🧯 Other settled calls
 - **Sylvania WiFi plugs are vendor-locked and CANNOT join HA.** Settled Ã¢â‚¬â€ do not retry Smart Life.
 - **Garage 2-location switch:** the old HS200-vs-HS210 question is dead; solved by config, not by
   buying a premium switch.
