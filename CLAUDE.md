@@ -379,28 +379,39 @@ Lets Jeff/family log in with just a shared password instead of pasting an HA tok
 
 ---
 
-## Testing Ã¢â‚¬â€ Playwright Diagnostic
+## Testing — RUN THESE. They work on THIS PC. (corrected 2026-08-19)
 
-Always run before reporting anything as done.
+**Two commands, both from the repo root. Run before reporting ANY app change as done.**
 
 ```bash
-cd /home/user/Master-the-Master-
-node -e "
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
-(async () => {
-  const browser = await chromium.launch({
-    executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
-    args: ['--no-sandbox','--disable-setuid-sandbox']
-  });
-  const page = await browser.newPage();
-  await page.goto('file:///home/user/Master-the-Master-/index.html');
-  // test nav, modals, tabs...
-  await browser.close();
-})();
-"
+node scripts/lint-app.js     # guardrail lint  — pure Node, NO dependencies
+node scripts/smoke-test.js   # full UI smoke   — Playwright, already installed here
 ```
 
-Expected: all tests passing. If any fail, fix them before doing anything else.
+Exit code 0 = clean. `lint-app.js` catches the exact anti-patterns that caused real
+production bugs: `window.open()` (dead in an installed iOS PWA — ~20 dead buttons, 07-31),
+raw `fetch(base+…)` bypassing `haFetch()` (the whole "Beehive Offline" bug class), a
+`<script>` tag inside the JS block (the great blank-page incident, 06-23), and unguarded
+`JSON.parse`. `smoke-test.js` walks every nav section, every YARD/CAR tab, all 11 Guardian
+chips, all 4 modals, and verifies every external link has a real href.
+
+**Verified working on this PC 2026-08-19 23:33:** lint clean; smoke passed with
+**374 external links / 0 bad, 0 page errors**. Node **v24.19.0**, Playwright resolvable
+from the repo.
+
+### Why this section was rewritten
+
+The old version gave a hand-rolled `node -e` one-liner using **the cloud session's Linux
+paths** — `cd /home/user/Master-the-Master-`,
+`require('/opt/node22/lib/node_modules/playwright')`,
+`executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'`. None of those exist
+on this machine. **Since single-session mode (2026-08-14) this Windows PC owns app code**, so
+the gate that says "always run before reporting anything as done" was documented in a form
+that could only fail here — and therefore never ran.
+
+On 2026-08-19 `index.html` was edited **six times and pushed live** before anyone ran either
+script. Both passed, but that was luck. **Do not skip them again.**
+*(A memory note also claimed "no Node on this PC". That was false and is corrected.)*
 
 ---
 
