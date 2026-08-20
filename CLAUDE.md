@@ -384,8 +384,9 @@ Lets Jeff/family log in with just a shared password instead of pasting an HA tok
 **Two commands, both from the repo root. Run before reporting ANY app change as done.**
 
 ```bash
-node scripts/lint-app.js     # guardrail lint  — pure Node, NO dependencies
-node scripts/smoke-test.js   # full UI smoke   — Playwright, already installed here
+node scripts/lint-app.js         # guardrail lint  — pure Node, NO dependencies
+node scripts/smoke-test.js       # full UI smoke   — Playwright, already installed here
+node scripts/image-fit-audit.js  # every photo, every device Jeff named
 ```
 
 Exit code 0 = clean. `lint-app.js` catches the exact anti-patterns that caused real
@@ -398,6 +399,26 @@ chips, all 4 modals, and verifies every external link has a real href.
 **Verified working on this PC 2026-08-19 23:33:** lint clean; smoke passed with
 **374 external links / 0 bad, 0 page errors**. Node **v24.19.0**, Playwright resolvable
 from the repo.
+
+### `image-fit-audit.js` — Jeff's rule, 2026-08-20
+> *"if you edit the pic make sure they fit all devices when you finish Web, TV, iPad,
+> computer and iPhone both landscape and portrait."*
+
+It does not take screenshots and eyeball them. For every `<img>` at **14 device sizes x 6
+sections** it computes the exact rectangle of the source photograph that survives the
+`object-fit`/`object-position` crop, and fails the build on four things that have each
+already shipped as a real bug: **HEAD-CROP** (the top of `hero-yard.jpg` is cut — Jeff's
+hair starts at source row 22 of 851; this shipped 08-11), **LETTERBOX** (blank bars beside
+a photo — the 08-06 desktop gap), **OVERCROP** (over half the photo thrown away), and
+**OVERFLOW** (page scrolls sideways). Baseline 2026-08-20: **216 renders, PASS.**
+
+### 📺 JEFF'S ACTUAL SCREEN — measured, stop guessing at it
+The beast PC drives a **60-inch Vizio** (EDID panel 133 x 75 cm, `VIZ` vendor ID),
+1920x1080 native, **Windows at 125% scaling** — so his browser reports **1536 x 864 CSS
+pixels**. **His "computer" and his "TV" are the same physical display.** Every earlier
+responsive test jumped 1440 -> 1920 and skipped the one width he actually looks at. It is
+now the first entry in the audit matrix. A 4K/3840 viewport is NOT one of his devices —
+do not treat a finding that only appears there as urgent.
 
 ### Why this section was rewritten
 

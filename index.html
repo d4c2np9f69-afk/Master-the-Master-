@@ -1803,7 +1803,7 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
      entirely, so every engine computes the same box. The resulting box is identical
      to what the cap already produced, so the %-positioned overlays don't move. */
   .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-yard,.sec-hero-guardian{
-    aspect-ratio:auto;height:1000px;max-height:none;width:100%;min-width:100%
+    aspect-ratio:auto;height:1060px;max-height:none;width:100%;min-width:100%
   }
   /* irr + car stay aspect-driven and uncapped on purpose: their readouts are placed
      by percentage of the container, so a fixed height would shift them off the photo.
@@ -1821,6 +1821,24 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
   .spec-list .sk,.spec-list .sv{font-size:17px}
   .modal-box{max-width:900px}
   .btn-full{font-size:16px;padding:18px}
+}
+/* ── 4K / very wide: the top rung the hero height ladder was missing ─────────
+   The ladder went 560 (768+) -> 680 (1200+) -> 800 (1920+) -> 1000 (2560+) and
+   then stopped, so every width from 2560 to 3840+ shared the same 1000px box.
+   At 3840 that is a 3.8:1 letterbox slot: `scripts/image-fit-audit.js` measured
+   only 33-40% of each hero photograph surviving the crop (home-dusk 33%,
+   weather 34%, guardian 35%, yard 40%). The heroes read as thin strips.
+   1600px restores the same ~53% the other breakpoints hold, and keeps the hero
+   at ~74% of viewport height — the proportion this design already uses at every
+   other width. Same fixed-height/no-aspect-ratio form as the rungs below it, so
+   the Safari width-shrinking ambiguity documented there stays closed. */
+@media(min-width:3200px){
+  .house-hero,.sec-hero,.sec-hero-weather,.sec-hero-yard,.sec-hero-guardian{
+    aspect-ratio:auto;height:1600px;max-height:none;width:100%;min-width:100%
+  }
+  .sec-hero-irr,.sec-hero-car{height:auto;max-height:none;width:100%;min-width:100%}
+  .sec-hero-irr{aspect-ratio:1320/864}
+  .sec-hero-car{aspect-ratio:1320/880}
 }
 </style>
 </head>
