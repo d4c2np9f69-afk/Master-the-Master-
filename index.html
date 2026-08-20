@@ -2695,6 +2695,16 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <div class="wx-card"><div class="wx-lbl">Air Quality</div><div class="wx-val" id="wxAir">--</div></div>
       <div class="wx-card"><div class="wx-lbl">Lightning</div><div class="wx-val" id="wxLightning">--</div></div>
       <div class="wx-card"><div class="wx-lbl">Hail</div><div class="wx-val" id="wxHail">--</div></div>
+      <div class="wx-card"><div class="wx-lbl">Nearest Fire</div><div class="wx-val" id="wxFire">--</div></div>
+    </div>
+    <!-- 24-hour AQI from the nearest EPA monitor. Added 2026-08-20 -- the keyless AirNow
+         site feed returns a full 24-hour hourly series, so the chart costs nothing extra. -->
+    <div id="aqiChartWrap" style="display:none;margin-top:12px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+        <div style="font-size:10px;font-weight:700;color:var(--dim);letter-spacing:1.2px;text-transform:uppercase">Air Quality &mdash; last 24 h</div>
+        <div id="aqiChartSrc" style="font-size:10px;color:var(--muted)"></div>
+      </div>
+      <div id="aqiChart" style="width:100%;overflow-x:auto"></div>
     </div>
     <button class="btn-full btn-gray" style="margin-top:10px" onclick="loadWeather()">&#128260; Refresh Conditions</button>
   </div>
@@ -4565,8 +4575,80 @@ function loadAirQuality(){
         (d.reportingArea?'\n'+d.reportingArea:'')+
         '\nSource: '+(d.source||'')+
         (d.measured?'':'\n~ = modelled, not measured');
+      renderAqiChart(d);
     })
     .catch(function(){ clearTimeout(t); setc('wxAir','--',''); });
+}
+
+// 24-hour AQI chart. Hand-rolled SVG on purpose — this app is one file with no build
+// step and no external scripts, so a charting library is not an option. EPA band colors.
+function renderAqiChart(d){
+  var wrap=document.getElementById('aqiChartWrap'), host=document.getElementById('aqiChart');
+  if(!wrap||!host) return;
+  var pts=(d&&d.series)||[], hrs=(d&&d.hours)||[];
+  var have=pts.filter(function(v){ return v!=null; });
+  if(have.length<2){ wrap.style.display='none'; return; }
+  function bandColor(v){
+    return v<=50?'#22c55e':v<=100?'#eab308':v<=150?'#f97316':v<=200?'#ef4444':v<=300?'#a855f7':'#7f1d1d';
+  }
+  var n=pts.length, W=Math.max(320,n*22), H=110, PAD=22, top=8;
+  var max=Math.max(100,Math.ceil(Math.max.apply(null,have)/25)*25);
+  var bw=(W-PAD-6)/n;
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" width="100%" height="'+H+'" preserveAspectRatio="none" role="img" aria-label="24 hour air quality index">';
+  // 50 / 100 reference lines — the GOOD and MODERATE thresholds
+  [50,100].forEach(function(y){
+    if(y>max) return;
+    var py=top+(H-top-PAD)*(1-y/max);
+    svg+='<line x1="'+PAD+'" y1="'+py.toFixed(1)+'" x2="'+W+'" y2="'+py.toFixed(1)+'" stroke="currentColor" stroke-opacity=".18" stroke-dasharray="3 3"/>';
+    svg+='<text x="2" y="'+(py+3).toFixed(1)+'" font-size="9" fill="currentColor" fill-opacity=".5">'+y+'</text>';
+  });
+  for(var i=0;i<n;i++){
+    var v=pts[i];
+    if(v==null) continue;
+    var h=(H-top-PAD)*(v/max), x=PAD+i*bw, y=H-PAD-h;
+    svg+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+Math.max(2,bw-2).toFixed(1)+'" height="'+Math.max(1,h).toFixed(1)+
+         '" rx="1.5" fill="'+bandColor(v)+'"><title>'+v+' AQI</title></rect>';
+  }
+  // hour labels every 6 bars, in LOCAL time
+  var off=(d.utcOffset==null?-5:d.utcOffset);
+  for(var j=0;j<n;j+=6){
+    var lbl='';
+    if(hrs[j]){
+      var t=hrs[j].indexOf('T')>=0?hrs[j]:hrs[j].replace(' ','T');
+      var dt=new Date(t+(/[Zz]$/.test(t)?'':(d.measured?'Z':'')));
+      if(!isNaN(dt)) lbl=dt.toLocaleTimeString('en-US',{hour:'numeric',hour12:true,timeZone:'America/Chicago'}).replace(' ','');
+    }
+    if(lbl) svg+='<text x="'+(PAD+j*bw).toFixed(1)+'" y="'+(H-6)+'" font-size="9" fill="currentColor" fill-opacity=".55">'+lbl+'</text>';
+  }
+  svg+='</svg>';
+  host.innerHTML=svg;
+  host.style.color='var(--muted)';
+  var src=document.getElementById('aqiChartSrc');
+  if(src) src.textContent=d.measured?((d.site||'EPA monitor')+' · '+(d.siteMi!=null?d.siteMi+' mi':'')):'modelled';
+  wrap.style.display='';
+}
+
+// NEAREST FIRE — NIFC/WFIGS incident locations, sorted by real distance from the house.
+// Jeff, 2026-08-20: "just get all data as close to me as you can."
+// WF = wildfire, RX = prescribed burn. Reported separately on purpose: nearly every
+// incident near Tennessee is a planned burn, and calling those "fires" would cry wolf.
+function loadFire(){
+  function setc(id,val,color){ var e=document.getElementById(id); if(e){ e.innerHTML=val; e.style.color=color||''; } }
+  var COLORS={ bad:'#ff6262', warn:'#ffd24a', ok:'#22c55e' };
+  var ctrl=new AbortController();
+  var t=setTimeout(function(){ ctrl.abort(); },15000);
+  fetch('/api/fire',{signal:ctrl.signal,cache:'no-store'})
+    .then(function(r){ clearTimeout(t); if(!r.ok) throw new Error('fire '+r.status); return r.json(); })
+    .then(function(d){
+      if(!d||!d.status) throw new Error('shape');
+      setc('wxFire',d.status,COLORS[d.level]||'#ffd24a');
+      var e=document.getElementById('wxFire');
+      if(e) e.title=(d.detail||'')+
+        (d.counts?'\n'+d.counts.wildfire+' wildfire(s), '+d.counts.prescribed+' prescribed burn(s) within ~350 mi':'')+
+        (d.nearest&&d.nearest.mi!=null?'\nNearest incident of any kind: '+d.nearest.mi+' mi':'')+
+        '\nSource: '+(d.source||'');
+    })
+    .catch(function(){ clearTimeout(t); setc('wxFire','--',''); });
 }
 
 // LIGHTNING — OBSERVED, not forecast.
@@ -4696,6 +4778,7 @@ function loadWeather(){
   // that coupling is exactly what left these tiles empty before.
   loadLightning();
   loadAirQuality();
+  loadFire();
   // Server-side proxy (was a direct browser call to api.open-meteo.com that flaked out and
   // left Rain Risk / Soil Temp / Dew on Grass / Rain 24-48h / Lightning blank).
   fetch('/api/mowconditions',{signal:ctrl.signal,cache:'no-store'})
@@ -6377,7 +6460,7 @@ renderAll();
 (function(){
   function set(id,txt){var e=document.getElementById(id); if(e) e.textContent=txt;}
   set('wxRainNext','Checking'); set('wxHeatStress','Checking'); set('wxLightning','Checking');
-  set('wxSoilMoist','Checking'); set('wxRain90','Checking'); set('wxAir','Checking'); set('wxHail','Checking');
+  set('wxSoilMoist','Checking'); set('wxRain90','Checking'); set('wxAir','Checking'); set('wxHail','Checking'); set('wxFire','Checking');
 })();
 loadWeather();
 loadIrrigation();
