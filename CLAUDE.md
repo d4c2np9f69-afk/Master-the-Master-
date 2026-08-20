@@ -640,7 +640,7 @@ Read it when you touch this area. Moved 2026-08-16 07:46 (11 KB).
 - **Email:** jeff.loewen@comcast.net
 - **Cloudflare account:** credentials already configured Ã¢â‚¬â€ never ask for them
 - **Home Assistant instance:** "Beehive" Ã¢â‚¬â€ local `homeassistant.local`/`192.168.1.66`; remote (primary) `https://kmtpozwheqwww9t5uxhhvzzso1tvagro.ui.nabu.casa`
-- **Weather Underground PWS:** station `KTNWHITE21`, API key `0e87ee079c0147a787ee079c01d7a75d`
+- **Weather Underground PWS:** station `KTNWHITE21`, API key **moved out of this public repo 2026-08-19 -> `HCC-secrets/weather_underground_api_key.txt`. It was public from at least 08-16 and is still in git history, so it MUST be rotated at wunderground.com - removing it from this file is not enough.**
 - **Mower:** Toro TimeMaster 21200, **Serial No. 401338948** (confirmed 08-03 via data-plate photo) Ã¢â‚¬â€ falls in the `400000000-402081999` production range, so PartsTree's `21200-toro-30-timemaster-walk-behind-mower-sn-400000000-402081999` and eReplacementParts' `toro-21200-400000000402081999-...` are the correct parts-diagram links for his actual mower (not the `402082000-403599999` range).
 - **Jeff wired his own house** Ã¢â‚¬â€ skilled and comfortable in the breaker panel. Never suggest hiring an electrician; talk to him as a capable peer on electrical/hardware.
 - **Jeff is almost 60 and learning** the software/AI side Ã¢â‚¬â€ be patient and clear there, never condescending. On hands-on hardware/electrical/firmware he is experienced. Make it enjoyable.

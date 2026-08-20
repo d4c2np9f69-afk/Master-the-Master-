@@ -185,7 +185,7 @@ rest:
 ```
 Creates `sensor.backyard_temperature`, `_feels_like`, `_humidity`, `_wind` — real backyard data.
 (Alternative if you prefer clicking to YAML: install a "Weather Underground PWS" custom integration
-via HACS with key `0e87ee079c0147a787ee079c01d7a75d` + station `KTNWHITE21`.)
+via HACS with key **removed from this public repo 2026-08-19 — see `HCC-secrets/weather_underground_api_key.txt`; it was public and MUST be rotated** + station `KTNWHITE21`.)
 
 ### 7b. Expose the weather sensors to Alexa
 1. HA → **Settings → Voice assistants → Expose** → add: **Backyard Temperature**, **Humidity**,

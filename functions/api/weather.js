@@ -1,8 +1,20 @@
 // /api/weather — proxies Weather Underground PWS KTNWHITE21 real-station data
 // Falls back to Open-Meteo grid if WU is unavailable
-export async function onRequestGet() {
-  const WU_KEY = '0e87ee079c0147a787ee079c01d7a75d';
-  const WU_STATION = 'KTNWHITE21';
+export async function onRequestGet({ env } = {}) {
+  // 2026-08-19: this key was HARDCODED here and also sat in CLAUDE.md in a PUBLIC
+  // repo. Flagged as exposed on 08-16 and still exposed three days later. Prefer the
+  // Cloudflare Pages env var so rotation is ONE edit in one place instead of hunting
+  // three files.
+  //
+  // The literal below is a deliberate TEMPORARY fallback so the weather card does not
+  // go dark before the env var exists — it is NOT a secret any more: it has been
+  // public in git history since at least 08-16 and cannot be un-published.
+  //
+  // TO FINISH (Jeff): rotate at wunderground.com -> Member Settings -> My Profile ->
+  // API Keys, put the NEW key in Cloudflare Pages as WU_API_KEY, then DELETE the
+  // fallback below. Details: HCC-secrets/weather_underground_api_key.txt
+  const WU_KEY = (env && env.WU_API_KEY) || '0e87ee079c0147a787ee079c01d7a75d';
+  const WU_STATION = (env && env.WU_STATION) || 'KTNWHITE21';
 
   // Cardinal direction lookup (16-point compass)
   const DIRS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
