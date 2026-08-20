@@ -6500,6 +6500,33 @@ setInterval(loadAlerts, 5*60*1000);
     return 156543.03392*Math.cos(lat*Math.PI/180)/Math.pow(2,z);
   }
 
+  // Esri/USGS do NOT 404 above their imagery ceiling — they return HTTP 200 with a
+  // near-uniform light-grey "Map data not yet available" placeholder. So img.onload
+  // fires, the failure counter below never increments, the dead-zoom step-down never
+  // runs, and the placeholder gets DRAWN and labelled as real satellite imagery.
+  // That is exactly what the yard map was showing on 2026-08-19.
+  // Measured at Jeff's coords (36.4675,-86.6519), 16x16 downsample, all HTTP 200:
+  //   z17 range 118 mean 68 | z18 range 134 mean 81 | z19 range 130 mean 82  <- real
+  //   z20 range 15  mean 205 | z21 range 15  mean 205                        <- blank
+  // Downsampling averages the sparse placeholder text away, so the gap is huge and
+  // the threshold below sits nowhere near real imagery. Fails OPEN (returns false)
+  // on a tainted canvas so a CORS change can never blank the map.
+  function _isBlankTile(img){
+    try{
+      var c=document.createElement('canvas'); c.width=c.height=16;
+      var g=c.getContext('2d',{willReadFrequently:true});
+      g.drawImage(img,0,0,16,16);
+      var d=g.getImageData(0,0,16,16).data;
+      var mn=255,mx=0,sum=0,n=0;
+      for(var i=0;i<d.length;i+=4){
+        var v=(d[i]+d[i+1]+d[i+2])/3;
+        if(v<mn)mn=v; if(v>mx)mx=v; sum+=v; n++;
+      }
+      var mean=sum/n;
+      return (mx-mn)<40 && mean>170 && mean<235;
+    }catch(e){ return false; }
+  }
+
   function _getTile(z,x,y,onLoad){
     var key=_tileSourceKey()+'/'+z+'/'+x+'/'+y;
     if(_tileCache[key]) return _tileCache[key];
@@ -6507,7 +6534,12 @@ setInterval(loadAlerts, 5*60*1000);
     _tilePending[key]=1;
     var img=new Image();
     img.crossOrigin='anonymous';
-    img.onload=function(){ _tileCache[key]=img; delete _tilePending[key]; if(onLoad) onLoad(); };
+    img.onload=function(){
+      // Treat a placeholder tile exactly like a 404 so the existing dead-zoom
+      // step-down (below) drops to the sharpest level that really has imagery.
+      _tileCache[key]=_isBlankTile(img)?'ERR':img;
+      delete _tilePending[key]; if(onLoad) onLoad();
+    };
     img.onerror=function(){ delete _tilePending[key]; _tileCache[key]='ERR'; if(onLoad) onLoad(); };
     img.src=_tileSource().url.replace('{z}',z).replace('{x}',x).replace('{y}',y);
     return null;
