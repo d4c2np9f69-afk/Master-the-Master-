@@ -19,7 +19,17 @@ const LOGIN_HEADERS = {
 // Kept as a list, in the same order the HA side uses, because Orbit has retired
 // individual app ids before. If all three are rejected the error reports what each
 // one actually returned rather than a bare "login failed".
+// 2026-08-19: `null` FIRST — meaning send NO orbit-app-id at all, exactly like
+// pybhyve, the library HA's working B-Hyve integration uses. The note above says
+// this file "never sent one and started getting HTTP 401", so a header was added to
+// fix it. That 401 was the STALE PASSWORD, not a missing header — proven when Jeff
+// updated BHYVE_PASSWORD in Cloudflare and the 401 turned into "HTTP 200 with the
+// full account payload but no session token" on all three app-ids. pybhyve sends no
+// orbit-app-id and gets a token from this same account, so the header is now the
+// prime suspect for Orbit withholding it. Kept the three ids as fallbacks rather
+// than deleting them, since a wrong guess here costs irrigation.
 const APP_IDS = [
+  null,
   'Orbit Support Dashboard',
   'com.orbitbhyve.ios',
   'com.orbit.orbitbhyve',
@@ -28,24 +38,25 @@ const APP_IDS = [
 async function bhyveLogin(email, password) {
   const attempts = [];
   for (const appId of APP_IDS) {
+    const label = appId === null ? 'no-app-id (pybhyve shape)' : appId;
     let r, body = '';
     try {
       r = await fetch(`${API_BASE}/session`, {
         method: 'POST',
-        headers: { ...LOGIN_HEADERS, 'orbit-app-id': appId },
+        headers: appId === null ? { ...LOGIN_HEADERS } : { ...LOGIN_HEADERS, 'orbit-app-id': appId },
         body: JSON.stringify({ session: { email, password } }),
         signal: AbortSignal.timeout(15000),
       });
       body = await r.text().catch(() => '');
     } catch (e) {
-      attempts.push(`${appId}: ${e.name || 'network error'}`);
+      attempts.push(`${label}: ${e.name || 'network error'}`);
       continue;
     }
-    if (!r.ok) { attempts.push(`${appId}: HTTP ${r.status} — ${body.slice(0, 60)}`); continue; }
+    if (!r.ok) { attempts.push(`${label}: HTTP ${r.status} — ${body.slice(0, 60)}`); continue; }
 
     let data;
     try { data = JSON.parse(body); }
-    catch (_) { attempts.push(`${appId}: 200 but not JSON`); continue; }
+    catch (_) { attempts.push(`${label}: 200 but not JSON`); continue; }
 
     const token = data.orbit_session_token || data.token || data.session_token || data.access_token;
     const userId = data.user_id || data.id || data.userId;
@@ -60,7 +71,7 @@ async function bhyveLogin(email, password) {
     // indistinguishable from a wrong password, which is what sent a session chasing
     // a stale credential for hours.
     attempts.push(
-      `${appId}: 200 but no token — require_password_change=${JSON.stringify(data.require_password_change)}` +
+      `${label}: 200 but no token — require_password_change=${JSON.stringify(data.require_password_change)}` +
       ` — keys: ${Object.keys(data).join(',')}`
     );
   }
