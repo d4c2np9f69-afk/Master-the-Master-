@@ -1963,6 +1963,16 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         <div class="wx-hero-cell"><div class="wx-hero-lbl">UV Index</div><div class="wx-hero-val" id="wxUV">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Pressure</div><div class="wx-hero-val" id="wxPressure">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Rain Rate</div><div class="wx-hero-val" id="wxRainRate">--</div></div>
+        <!-- THIRD ROW, added 2026-08-20. Jeff: "in the hero pic another whole row of data
+             would fit if it's a single reading and doesn't have a chart or map with it."
+             So: four single values only. Rain Today and Gust were already being fetched
+             from his own station and thrown away (precipTotal, windGust); Air Quality and
+             Lightning are the two new live readings. Nothing here needs a chart or a map
+             to make sense — the AQI chart and the strike map stay down in the YARD card. -->
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Rain Today</div><div class="wx-hero-val" id="wxHeroRainToday">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Gust</div><div class="wx-hero-val" id="wxHeroGust">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Air Quality</div><div class="wx-hero-val" id="wxHeroAir">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Lightning</div><div class="wx-hero-val" id="wxHeroLtg">--</div></div>
       </div>
     </div>
   </div>
@@ -4627,6 +4637,7 @@ function exportCart(){
 // null for White House on 2026-08-20) and every US source wants a card on file.
 function loadAirQuality(){
   function setc(id,val,color){ var e=document.getElementById(id); if(e){ e.innerHTML=val; e.style.color=color||''; } }
+  // The hero cell mirrors the tile — same value, same color, one source of truth.
   var COLORS={ bad:'#ff6262', warn:'#ffd24a', ok:'#22c55e' };
   var ctrl=new AbortController();
   var t=setTimeout(function(){ ctrl.abort(); },12000);
@@ -4638,7 +4649,9 @@ function loadAirQuality(){
       // AirNow read 51 MODERATE for 37188 while the Open-Meteo model read 31 GOOD for
       // the same hour and place. The tile must not present those as the same kind of
       // fact, so the modelled tier gets a "~".
-      setc('wxAir',d.label+(d.measured?'':' <span style="font-size:11px;opacity:.6">~</span>'),COLORS[d.level]||'#ffd24a');
+      var aqTxt=d.label+(d.measured?'':' <span style="font-size:11px;opacity:.6">~</span>');
+      setc('wxAir',aqTxt,COLORS[d.level]||'var(--warn)');
+      setc('wxHeroAir',(d.aqi!=null?d.aqi+' ':'')+d.label,COLORS[d.level]||'var(--warn)');
       var e=document.getElementById('wxAir');
       if(e) e.title='US AQI '+d.aqi+(d.dominant?' ('+d.dominant+')':'')+
         (d.pm2_5!=null?'  ·  PM2.5 '+d.pm2_5:'')+
@@ -4649,7 +4662,7 @@ function loadAirQuality(){
         (d.measured?'':'\n~ = modelled, not measured');
       renderAqiChart(d);
     })
-    .catch(function(){ clearTimeout(t); setc('wxAir','--',''); });
+    .catch(function(){ clearTimeout(t); setc('wxAir','--',''); setc('wxHeroAir','--',''); });
 }
 
 // 24-hour AQI chart. Hand-rolled SVG on purpose — this app is one file with no build
@@ -4734,6 +4747,8 @@ var _wxLtgForecast = null;
 var LTG_STALE_MIN = 45;   // no strike in this long = not "happening now"
 function loadLightning(){
   function setc(id,val,color){ var e=document.getElementById(id); if(e){ e.innerHTML=val; e.style.color=color||''; } }
+  // Mirror every lightning verdict onto the hero cell as well.
+  function setLtg(val,color){ setc('wxLightning',val,color); setc('wxHeroLtg',val,color); }
   function tip(txt){ var e=document.getElementById('wxLightning'); if(e) e.title=txt; }
   var COLORS={ bad:'#ff6262', warn:'#ffd24a', ok:'#22c55e' };
   var CARD=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
@@ -4780,7 +4795,7 @@ function loadLightning(){
         if(!d||!d.live) throw new Error('blitzortung not present');
         var fresh=(d.strikes||[]).filter(function(x){ return x[1]<=LTG_STALE_MIN; });
         if(!fresh.length){
-          setc('wxLightning','NONE',COLORS.ok);
+          setLtg('NONE',COLORS.ok);
           tip('No strikes detected in the last '+LTG_STALE_MIN+' minutes'+
               '\nSource: Blitzortung.org strike network, via Beehive');
           return true;
@@ -4790,7 +4805,7 @@ function loadLightning(){
         var dir=CARD[Math.round(bearingTo(n[2],n[3])/22.5)%16];
         var within15=fresh.filter(function(x){ return x[0]<=15; }).length;
         var lvl = mi<=15 ? 'bad' : mi<=30 ? 'warn' : 'ok';
-        setc('wxLightning',(mi<10?mi.toFixed(1):Math.round(mi))+' mi '+dir,COLORS[lvl]);
+        setLtg((mi<10?mi.toFixed(1):Math.round(mi))+' mi '+dir,COLORS[lvl]);
         tip('NEAREST strike '+mi.toFixed(1)+' mi '+dir+', '+(age<1?'just now':age+' min ago')+
             '\n'+fresh.length+' strikes in the last '+LTG_STALE_MIN+' min, '+within15+' within 15 mi'+
             (mi<=6?'\n⚠ Inside 6 miles — NWS 30-30 rule: stay indoors':'')+
@@ -4824,7 +4839,7 @@ function loadLightning(){
       if(!d||!d.status) throw new Error('metar unavailable');
       var txt=d.status;
       if((d.status==='CLOSE'||d.status==='NEARBY') && d.nearestMi!=null) txt=d.status+' &middot; '+d.nearestMi+' mi';
-      setc('wxLightning',txt,COLORS[d.level]||'#ffd24a');
+      setLtg(txt,COLORS[d.level]||'var(--warn)');
       tip((d.detail||'')+(d.alert?'\n'+d.alert.event+' in force':'')+'\nSource: '+(d.source||''));
       return true;
     });
@@ -4832,8 +4847,8 @@ function loadLightning(){
 
   // TIER 3 — the forecast, clearly labelled so it can never again be read as fact.
   function viaForecast(){
-    if(_wxLtgForecast){ setc('wxLightning',_wxLtgForecast[0],_wxLtgForecast[1]); tip('Model forecast only — no live observation reachable'); }
-    else { setc('wxLightning','NO DATA','var(--warn)'); tip('No lightning source reachable'); }
+    if(_wxLtgForecast){ setLtg(_wxLtgForecast[0],_wxLtgForecast[1]); tip('Model forecast only — no live observation reachable'); }
+    else { setLtg('NO DATA','var(--warn)'); tip('No lightning source reachable'); }
   }
 
   viaBlitzortung().catch(function(){ return viaMetar(); }).catch(viaForecast);
@@ -5024,8 +5039,15 @@ function loadStation(){
       }
       // Rain rate (current in/hr)
       if(s.precipRate!=null){
-        var rr=s.precipRate, rrC=rr===0?'#22c55e':rr<0.1?'#ffd24a':'#ff6262';
+        var rr=s.precipRate, rrC=rr===0?'var(--ok)':rr<0.1?'var(--warn)':'var(--bad)';
         setc('wxRainRate', rr===0?'None':rr+' in/hr', rrC);
+      }
+      // Hero row 3 — Jeff's station was already reporting these and the app was
+      // discarding both. precipTotal is today's rain at HIS gauge, not a forecast.
+      if(s.precipTotal!=null) set('wxHeroRainToday', s.precipTotal.toFixed(2)+'"');
+      if(s.windGust!=null){
+        var g=Math.round(s.windGust);
+        set('wxHeroGust', g===0?'Calm':g+' mph');
       }
       // Station note
       var note=document.getElementById('wxStationNote');
