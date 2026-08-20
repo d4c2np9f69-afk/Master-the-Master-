@@ -68,15 +68,15 @@ function minutely(amt, prob) {
 const CASES = [
   {
     name: 'root-zone soil moisture 0.173 -> 17% DRY (amber)',
-    soil: 0.173, surf: 0.314, rain: [0.0, 10], aq: { ok: true, aqi: 33, label: 'GOOD', level: 'ok', pm2_5: 4.9 },
+    soil: 0.173, surf: 0.314, rain: [0.0, 10], aq: { ok: true, aqi: 33, label: 'GOOD', level: 'ok', pm2_5: 4.9, measured: true },
     ltg: { ok: true, status: 'NONE', level: 'ok', hail: false, detail: 'quiet' },
     expect: { wxSoilMoist: '17%', wxAir: 'GOOD', wxHail: 'NONE' },
   },
   {
     name: 'saturated soil 0.44 -> 44%, and hail REPORTED',
-    soil: 0.44, surf: 0.45, rain: [0.08, 90], aq: { ok: true, aqi: 165, label: 'UNHEALTHY', level: 'bad', pm2_5: 88 },
+    soil: 0.44, surf: 0.45, rain: [0.08, 90], aq: { ok: true, aqi: 165, label: 'UNHEALTHY', level: 'bad', pm2_5: 88, measured: false },
     ltg: { ok: true, status: 'OVERHEAD', level: 'bad', hail: true, detail: 'TS overhead' },
-    expect: { wxSoilMoist: '44%', wxAir: 'UNHEALTHY', wxHail: 'REPORTED', wxLightning: 'OVERHEAD' },
+    expect: { wxSoilMoist: '44%', wxAir: 'UNHEALTHY ~', wxHail: 'REPORTED', wxLightning: 'OVERHEAD' },
   },
   {
     name: 'rain nowcast 0.06" at 90% shows both numbers',

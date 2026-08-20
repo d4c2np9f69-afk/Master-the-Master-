@@ -4552,13 +4552,19 @@ function loadAirQuality(){
     .then(function(r){ clearTimeout(t); if(!r.ok) throw new Error('aq '+r.status); return r.json(); })
     .then(function(d){
       if(!d||!d.ok||d.aqi==null) throw new Error('shape');
-      setc('wxAir',d.label,COLORS[d.level]||'#ffd24a');
+      // Mark the value when it is MODELLED rather than measured. On 2026-08-20 EPA
+      // AirNow read 51 MODERATE for 37188 while the Open-Meteo model read 31 GOOD for
+      // the same hour and place. The tile must not present those as the same kind of
+      // fact, so the modelled tier gets a "~".
+      setc('wxAir',d.label+(d.measured?'':' <span style="font-size:11px;opacity:.6">~</span>'),COLORS[d.level]||'#ffd24a');
       var e=document.getElementById('wxAir');
-      if(e) e.title='US AQI '+d.aqi+
-        (d.pm2_5!=null?'  ·  PM2.5 '+d.pm2_5+' µg/m³':'')+
+      if(e) e.title='US AQI '+d.aqi+(d.dominant?' ('+d.dominant+')':'')+
+        (d.pm2_5!=null?'  ·  PM2.5 '+d.pm2_5:'')+
         (d.pm10!=null?'  ·  PM10 '+d.pm10:'')+
         (d.ozone!=null?'  ·  Ozone '+d.ozone:'')+
-        '\nSource: '+(d.source||'');
+        (d.reportingArea?'\n'+d.reportingArea:'')+
+        '\nSource: '+(d.source||'')+
+        (d.measured?'':'\n~ = modelled, not measured');
     })
     .catch(function(){ clearTimeout(t); setc('wxAir','--',''); });
 }
