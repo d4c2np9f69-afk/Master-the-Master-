@@ -164,7 +164,49 @@ more than the 20/18/8 min representative times recorded in `docs/utilities/irrig
 **Not yet checked against what B-Hyve actually runs.** Do not tell Jeff he is under-watering until
 the real run history has been summed — the app already has it via `irrGalFromHistory()`.
 
-## Known open item
+## ✅ DEPLOYED AND VERIFIED LIVE — 2026-08-20 10:47 AM CT
+
+Commit `e3a83ee`, pushed to `claude/time-master-project-liq1jw`, live on Cloudflare Pages ~45 s
+later. Read back from `https://toro1-5rz.pages.dev/api/watering`, not assumed:
+
+```
+verdict     PUT DOWN 0.88"
+target      1.17 in    behind 1.03 in    putDown 0.88 in
+ahead       next week needs 1.05 in, 1.20 in of rain forecast
+Z1 51 min x 3/wk (0.461 in/hr)   Z2 59 min x 3/wk (0.397)   Z5 50 min x 3/wk (0.473)
+Z3/Z4/Z6    not calibrated, each with its reason
+rainSource  Open-Meteo model (no station key configured)     <-- SEE BELOW
+```
+
+Every piece of the design is confirmed working end to end: the two windows, the forward
+subtraction, the per-zone rates matching the unit tests exactly, and the uncalibrated zones
+refusing to guess.
+
+## 🔴 CONFIRMED GAP — `WU_API_KEY` is not set in Cloudflare Pages
+
+**No longer a suspicion. The live endpoint says so out loud:
+`rainSource: "Open-Meteo model (no station key configured)"`.** Cross-checked against the
+recorded Pages variable list in `HCC-secrets/HCC_ACCESS.md` (verified 2026-08-19):
+`BHYVE_EMAIL`, `BHYVE_PASSWORD`, `CONTROL_PIN`, `DEVICE_SECRET`, `LUX_EMAIL`, `LUX_PASSWORD`
+— **no `WU_API_KEY`.**
+
+**Why it matters:** the rain Jeff got is the entire left-hand side of his equation, and it is
+currently coming from a *model* rather than his own gauge at KTNWHITE21. The model put only
+**0.14 in** in the last seven completed days and **0.82 in** for today — Jeff described today's
+storm as much bigger. His gauge is the authority and it is not being read.
+
+**How to fix it:** add `WU_API_KEY` in the Pages project (`toro1`) → Settings → Variables and
+secrets, value from `HCC-secrets/weather_underground_api_key.txt`, **then REDEPLOY** (Cloudflare
+requires a redeploy for a new binding to take effect). There is **no API token and no wrangler
+login on this PC** — dashboard access exists only through Jeff's signed-in Chrome session.
+
+⚠️ **That key is compromised.** It sat in the public repo from at least 08-16 and is still in
+git history, and `functions/api/weather.js` *still* carries it as a hardcoded literal fallback.
+Setting it as a Pages variable makes the gauge work but does **not** close the exposure —
+rotating it at wunderground.com is a separate job that needs Jeff, and once rotated the literal
+in `weather.js` must be deleted.
+
+## Known open item (original note, now confirmed above)
 
 `functions/api/watering.js` reads `env.WU_API_KEY` with **no fallback**, unlike `weather.js` which
 still carries an exposed literal key. If `WU_API_KEY` is not set in Cloudflare Pages, the card
