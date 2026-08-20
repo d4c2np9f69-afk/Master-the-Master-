@@ -4541,26 +4541,66 @@ function exportCart(){
 // striking over the house. If this call fails the card falls back to the forecast,
 // but prefixed "FCST:" so a prediction can never again be mistaken for an observation.
 var _wxLtgForecast = null;
+var LTG_STALE_MIN = 45;   // no strike in this long = not "happening now"
 function loadLightning(){
   function setc(id,val,color){ var e=document.getElementById(id); if(e){ e.innerHTML=val; e.style.color=color||''; } }
+  function tip(txt){ var e=document.getElementById('wxLightning'); if(e) e.title=txt; }
   var COLORS={ bad:'#ff6262', warn:'#ffd24a', ok:'#22c55e' };
-  var ctrl=new AbortController();
-  var t=setTimeout(function(){ ctrl.abort(); },12000);
-  fetch('/api/lightning',{signal:ctrl.signal,cache:'no-store'})
-    .then(function(r){ clearTimeout(t); if(!r.ok) throw new Error('lightning '+r.status); return r.json(); })
-    .then(function(d){
-      if(!d||!d.status) throw new Error('shape');
-      var txt=d.status;
-      if((d.status==='CLOSE'||d.status==='NEARBY') && d.nearestMi!=null) txt=d.status+' &middot; '+d.nearestMi+' mi';
-      setc('wxLightning',txt,COLORS[d.level]||'#ffd24a');
-      var el=document.getElementById('wxLightning');
-      if(el) el.title=(d.detail||'')+(d.alert?'\n'+d.alert.event+' in force':'')+'\nSource: '+(d.source||'');
-    })
-    .catch(function(){
-      clearTimeout(t);
-      if(_wxLtgForecast) setc('wxLightning',_wxLtgForecast[0],_wxLtgForecast[1]);
-      else setc('wxLightning','NO DATA','#ffd24a');
+  var CARD=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+
+  // TIER 1 — Blitzortung via Beehive. Individual strikes geolocated by a worldwide
+  // VLF network, so the distance is measured FROM THE HOUSE. Jeff, 2026-08-20:
+  // "any reading coming from Nashville is 30 miles away so closer readings would be
+  // more accurate if we can find them." This is that. Delay is a few seconds.
+  function viaBlitzortung(){
+    if(typeof haFetch!=='function') return Promise.reject(new Error('no haFetch'));
+    return Promise.all([
+      haFetch('/api/states/sensor.home_lightning_distance').then(function(r){ if(!r.ok) throw new Error('ha '+r.status); return r.json(); }),
+      haFetch('/api/states/sensor.home_lightning_azimuth').then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; })
+    ]).then(function(res){
+      var s=res[0], az=res[1];
+      var mi=parseFloat(s&&s.state);
+      if(!isFinite(mi)) throw new Error('no strike yet');
+      // The sensor HOLDS its last value forever — it only changes when a new strike
+      // lands. Freshness has to come from last_changed or a week-old strike reads live.
+      var ageMin=(Date.now()-new Date(s.last_changed).getTime())/60000;
+      if(!(ageMin<LTG_STALE_MIN)) throw new Error('stale '+Math.round(ageMin)+'m');
+      var deg=parseFloat(az&&az.state);
+      var dir=isFinite(deg)?CARD[Math.round(deg/22.5)%16]:'';
+      var lvl = mi<=10 ? 'bad' : mi<=30 ? 'bad' : mi<=60 ? 'warn' : 'ok';
+      var txt = mi<=10 ? 'OVERHEAD' : (mi<10?mi.toFixed(1):Math.round(mi))+' mi'+(dir?' '+dir:'');
+      setc('wxLightning',txt,COLORS[lvl]);
+      tip('Nearest strike '+mi.toFixed(1)+' mi'+(dir?' to the '+dir:'')+
+          ', '+(ageMin<1?'just now':Math.round(ageMin)+' min ago')+
+          '\nSource: Blitzortung.org strike network, via Beehive');
+      return true;
     });
+  }
+
+  // TIER 2 — NOAA/FAA METAR + NWS alerts. Real observations, but the nearest field
+  // that reports thunderstorms is 25 mi away, so this is area-level, not yard-level.
+  function viaMetar(){
+    var ctrl=new AbortController();
+    var t=setTimeout(function(){ ctrl.abort(); },12000);
+    return fetch('/api/lightning',{signal:ctrl.signal,cache:'no-store'})
+      .then(function(r){ clearTimeout(t); if(!r.ok) throw new Error('lightning '+r.status); return r.json(); })
+      .then(function(d){
+        if(!d||!d.status) throw new Error('shape');
+        var txt=d.status;
+        if((d.status==='CLOSE'||d.status==='NEARBY') && d.nearestMi!=null) txt=d.status+' &middot; '+d.nearestMi+' mi';
+        setc('wxLightning',txt,COLORS[d.level]||'#ffd24a');
+        tip((d.detail||'')+(d.alert?'\n'+d.alert.event+' in force':'')+'\nSource: '+(d.source||''));
+        return true;
+      });
+  }
+
+  // TIER 3 — the forecast, clearly labelled so it can never again be read as fact.
+  function viaForecast(){
+    if(_wxLtgForecast){ setc('wxLightning',_wxLtgForecast[0],_wxLtgForecast[1]); tip('Model forecast only — no live observation reachable'); }
+    else { setc('wxLightning','NO DATA','#ffd24a'); tip('No lightning source reachable'); }
+  }
+
+  viaBlitzortung().catch(function(){ return viaMetar(); }).catch(viaForecast);
 }
 
 // WEATHER
