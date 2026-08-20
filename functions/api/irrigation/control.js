@@ -44,7 +44,9 @@ async function getTimerDevice(userId, token) {
   );
 }
 
-async function sendWsCommand(token, message) {
+// `frames` (optional array) collects every inbound frame verbatim so a caller can prove
+// what Orbit actually said instead of trusting an optimistic resolve. See ?debug=1.
+async function sendWsCommand(token, message, frames) {
   // Cloudflare Workers requires https:// (not wss://) for outbound WebSocket upgrades
   const wsResp = await fetch(`${API_BASE}/events`, {
     headers: {
@@ -70,11 +72,14 @@ async function sendWsCommand(token, message) {
       commandSent = true;
       ws.send(JSON.stringify(message));
       // Resolve optimistically 3s after sending if no confirmation event arrives
+      // NOT a success. The command left here, but Orbit never confirmed it. Reporting
+      // ok:true for this is how a completely dead control path kept looking healthy.
       setTimeout(() => {
         if (!settled) {
           settled = true;
           try { ws.close(); } catch (_) {}
-          resolve({ ok: true, event: 'sent' });
+          resolve({ ok: false, event: 'unconfirmed',
+                    error: 'sent_but_not_confirmed_by_bhyve' });
         }
       }, 3000);
     }
@@ -84,13 +89,15 @@ async function sendWsCommand(token, message) {
         settled = true;
         try { ws.close(); } catch (_) {}
         // If command was already sent, treat as success — B-Hyve may have processed it
-        if (commandSent) resolve({ ok: true, event: 'sent' });
+        if (commandSent) resolve({ ok: false, event: 'unconfirmed',
+                                   error: 'sent_but_not_confirmed_by_bhyve' });
         else reject(new Error('ws_timeout'));
       }
     }, 9000);
 
     ws.addEventListener('message', (evt) => {
       try {
+        if (frames) frames.push(String(evt.data).slice(0, 400));
         const msg = JSON.parse(evt.data);
 
         if (!commandSent && (msg.event === 'app_connection' || msg.status === 'connected')) {
@@ -182,7 +189,13 @@ export async function onRequestPost({ request, env }) {
       return Response.json({ ok: false, error: 'unknown_action: ' + action }, { status: 400 });
     }
 
-    const result = await sendWsCommand(token, message);
+    const url = new URL(request.url);
+    const frames = [];
+    const result = await sendWsCommand(token, message, frames);
+    if (url.searchParams.get('debug') === '1') {
+      result._frames = frames;
+      result._sent = message;
+    }
     return Response.json(result);
 
   } catch (e) {
