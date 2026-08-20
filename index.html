@@ -1274,6 +1274,31 @@ html.light .mapadj-btn{background:rgba(255,255,255,.10);border-color:rgba(255,25
    already existed are title= attributes, which only appear on hover — useless on
    the iPhone and the iPad, and he reads this on both. Everything here works with
    no mouse. All colors come from tokens so light mode cannot wash the text out. */
+/* ── Smart Watering (2026-08-20) ─────────────────────────────────────────── */
+.sw-verdict{font-size:26px;font-weight:800;line-height:1.1;margin-bottom:4px}
+.sw-detail{font-size:11px;color:var(--text);opacity:.85;line-height:1.5;margin-bottom:12px}
+.sw-bal{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.sw-win-lbl{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--text);opacity:.7;margin:0 0 5px}
+.sw-runoff{font-size:10px;color:var(--warn);line-height:1.45;margin:-6px 0 12px}
+.sw-bal-cell{background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:9px 8px;text-align:center;min-width:0}
+.sw-bal-lbl{font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text);opacity:.7}
+.sw-bal-val{font-size:19px;font-weight:800;margin-top:3px;font-variant-numeric:tabular-nums}
+.sw-zones{display:flex;flex-direction:column;gap:6px}
+.sw-zone{display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--border2);
+  border-radius:9px;padding:8px 11px;font-size:12px}
+.sw-zone-name{font-weight:700;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sw-zone-run{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sw-zone-sub{font-size:10px;color:var(--text);opacity:.65;white-space:nowrap}
+.sw-zone.uncal .sw-zone-run{font-weight:600;opacity:.7;font-size:11px}
+/* Phone (390px is Jeff's iPhone): the one-line row squeezed zone names down to "Z1 Fron…"
+   and dropped Z6's name entirely. The NAME is the first thing you need, so below 520px the
+   row stacks instead of truncating. Caught by rendering it, not by reading the CSS. */
+@media (max-width:520px){
+  .sw-zone{flex-wrap:wrap;row-gap:2px}
+  .sw-zone-name{flex:1 1 100%;overflow:visible;white-space:normal;text-overflow:clip}
+  .sw-zone-run{flex:0 0 auto}
+  .sw-zone-sub{flex:1 1 100%;white-space:normal}
+}
 .aqi-scale{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:10px;color:var(--text)}
 .aqi-scale span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
 .aqi-scale i{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
@@ -2619,6 +2644,38 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       </ul>
       <div class="wx-note">B-Hyve automatically skips watering when rain is forecasted by your KTNWHITE21 weather station &bull; Smart zones adjust runtime based on soil moisture &amp; ET</div>
       <div class="wx-note" id="wxDroughtNote" style="margin-top:6px">U.S. Drought Monitor &bull; Robertson County &bull; KTNWHITE21 rainfall</div>
+    </div>
+
+    <!-- SMART WATERING — 2026-08-20. Jeff: "put in how long I need to run each zone to
+         hit the 1 to 1.5 number like smart watering... Comparing the rain we got to the
+         irrigation Time needed to hit the target number."
+         All numbers come from /api/watering; nothing is computed twice. -->
+    <div class="card cat-wx" id="irrSmartCard">
+      <div class="card-title">&#128167; Smart Watering &bull; This Week</div>
+      <div class="sw-verdict" id="swVerdict">Checking&hellip;</div>
+      <div class="sw-detail" id="swDetail"></div>
+      <!-- The comparison Jeff asked for, side by side: lost vs got vs owed -->
+      <!-- BEHIND: the rolling 7 completed days — where the lawn actually stands. -->
+      <div class="sw-win-lbl">Last 7 days</div>
+      <div class="sw-bal">
+        <div class="sw-bal-cell"><div class="sw-bal-lbl">Target</div><div class="sw-bal-val" id="swNeed">--</div></div>
+        <div class="sw-bal-cell"><div class="sw-bal-lbl">Rain banked</div><div class="sw-bal-val" id="swRain">--</div></div>
+        <div class="sw-bal-cell"><div class="sw-bal-lbl">Behind</div><div class="sw-bal-val" id="swDeficit">--</div></div>
+      </div>
+      <div class="sw-runoff" id="swRunoff"></div>
+      <!-- AHEAD: Jeff's ask, 08-20 — don't water an inch in the day before a storm. -->
+      <div class="sw-win-lbl" id="swAheadLbl" style="display:none">Next 7 days &mdash; forecast</div>
+      <div class="sw-bal" id="swAheadRow" style="display:none">
+        <div class="sw-bal-cell"><div class="sw-bal-lbl">Will need</div><div class="sw-bal-val" id="swFwdNeed">--</div></div>
+        <div class="sw-bal-cell"><div class="sw-bal-lbl">Rain coming</div><div class="sw-bal-val" id="swFwdRain">--</div></div>
+        <div class="sw-bal-cell"><div class="sw-bal-lbl">Put down</div><div class="sw-bal-val" id="swPutDown">--</div></div>
+      </div>
+      <div class="sw-zones" id="swZones"></div>
+      <div class="wx-note" id="swSource" style="margin-top:8px"></div>
+      <details class="wx-legend" style="margin-top:10px">
+        <summary>How this is worked out</summary>
+        <div class="wx-legend-note" style="border-top:none" id="swAssumptions"></div>
+      </details>
     </div>
 
     <!-- ZONES PREVIEW — shown until B-Hyve connects and populates irrZones -->
@@ -4633,6 +4690,99 @@ function exportCart(){
   a.download='toro-parts-list.txt'; a.click();
 }
 
+// SMART WATERING — compares what the turf lost (ET) against the rain it actually got,
+// and turns the shortfall into per-zone run times. All arithmetic lives server-side in
+// /api/watering (unit-tested in scripts/watering-test.mjs); this only renders it, so the
+// number on screen and the number under test can never drift apart.
+function loadWatering(){
+  var COLORS={ bad:'var(--bad)', warn:'var(--warn)', ok:'var(--ok)' };
+  function set(id,txt,color){ var e=document.getElementById(id); if(e){ e.innerHTML=txt; if(color) e.style.color=color; } }
+  var ctrl=new AbortController();
+  var t=setTimeout(function(){ ctrl.abort(); },15000);
+  fetch('/api/watering',{signal:ctrl.signal,cache:'no-store'})
+    .then(function(r){ clearTimeout(t); if(!r.ok) throw new Error('watering '+r.status); return r.json(); })
+    .then(function(d){
+      if(!d||!d.ok) throw new Error('shape');
+      var col=COLORS[d.level]||'var(--warn)';
+      set('swVerdict',d.verdict,col);
+      set('swDetail',d.detail||'');
+      set('swNeed',d.targetIn.toFixed(2)+'"','var(--text)');
+      set('swRain',d.rainIn.toFixed(2)+'"','var(--info)');
+      set('swDeficit',d.deficitIn>0?d.deficitIn.toFixed(2)+'"':'0.00"',
+        d.deficitIn>0?'var(--warn)':'var(--ok)');
+
+      // What fell versus what the root zone could actually hold. Jeff's catch, 08-20:
+      // a lump-sum storm is not the same as the same rain spread over a week.
+      var b=d.behind||{};
+      set('swRunoff', b.rainLostIn>0
+        ? '&#9888; '+b.rainRawIn.toFixed(2)+'&quot; fell, but turf roots only bank about '+
+          d.assumptions.rootZoneCapIn.toFixed(2)+'&quot; a day &mdash; '+b.rainLostIn.toFixed(2)+
+          '&quot; ran off or drained past them.'
+        : '');
+
+      // Forward week — only shown when there is real forecast data behind it.
+      var ah=d.ahead, showFwd=!!ah;
+      ['swAheadLbl','swAheadRow'].forEach(function(id){
+        var e=document.getElementById(id); if(e) e.style.display=showFwd?'':'none';
+      });
+      if(showFwd){
+        set('swFwdNeed',ah.targetIn.toFixed(2)+'"','var(--text)');
+        set('swFwdRain',ah.forecastRainIn.toFixed(2)+'"','var(--info)');
+        set('swPutDown',ah.putDownIn>0?ah.putDownIn.toFixed(2)+'"':'0.00"',
+          ah.putDownIn>0?col:'var(--ok)');
+      }
+
+      var html='';
+      (d.zones||[]).forEach(function(z){
+        if(!z.calibrated){
+          html+='<div class="sw-zone uncal"><span class="sw-zone-name">Z'+z.id+' '+z.name+'</span>'+
+                '<span class="sw-zone-run">not calibrated</span>'+
+                '<span class="sw-zone-sub">'+(z.reason||'')+'</span></div>';
+          return;
+        }
+        var run = z.minutesPerDay>0
+          ? z.minutesPerDay+' min &times; '+d.daysPerWeek+'/wk'
+          : 'no run needed';
+        html+='<div class="sw-zone"><span class="sw-zone-name">Z'+z.id+' '+z.name+'</span>'+
+              '<span class="sw-zone-run" style="color:'+(z.minutesPerDay>0?col:'var(--ok)')+'">'+run+'</span>'+
+              '<span class="sw-zone-sub">'+z.gpm+' gpm &bull; '+z.inPerHr.toFixed(2)+'&quot;/hr'+
+              (z.gallonsWeek?' &bull; '+z.gallonsWeek+' gal':'')+'</span></div>';
+      });
+      var zc=document.getElementById('swZones'); if(zc) zc.innerHTML=html;
+
+      set('swSource','Rain from '+(d.rainSource||'--')+' &bull; target '+
+        d.targetBand.minIn.toFixed(1)+'&ndash;'+d.targetBand.maxIn.toFixed(1)+'&quot;/week &bull; '+d.et.says);
+
+      var a=d.assumptions;
+      set('swAssumptions',
+        '<b>The target is yours</b> &mdash; '+a.targetSource+'. Where inside that range this '+
+        'particular week lands is set by ET&#8320;, the water the grass measurably gave up to sun, '+
+        'heat and wind: '+d.et.et0In.toFixed(2)+'&quot; this week, times a '+a.cropCoefficient+
+        ' crop coefficient for '+a.turfType+' = '+d.et.demandIn.toFixed(2)+'&quot; of real demand. '+
+        'A scorching week pushes the target to '+d.targetBand.maxIn.toFixed(1)+'&quot;, a mild one '+
+        'down to '+d.targetBand.minIn.toFixed(1)+'&quot;. <b>It never goes outside your range.</b>'+
+        '<br><br><b>Two windows.</b> <i>Last 7 days</i> is where the lawn stands right now. '+
+        '<i>Next 7 days</i> subtracts the rain that is forecast, so you never put an inch down '+
+        'the day before a storm. <b>Put down</b> is the number to act on: what you are behind, '+
+        'plus what next week will need, minus what the sky is about to deliver.'+
+        '<br><br><b>Why 1.70&quot; of rain is not 1.70&quot; of water.</b> '+a.rootZoneCapSource+
+        ' So a single day is only ever credited '+a.rootZoneCapIn.toFixed(2)+'&quot;, and anything '+
+        'past that is shown as run-off rather than quietly counted.'+
+        '<br><br><b>Run times</b> convert inches to minutes using each zone&rsquo;s own precipitation '+
+        'rate, then divide by '+a.distributionUniformity+' for distribution uniformity, because '+
+        'real heads never lay water down perfectly evenly. '+a.daysPerWeekNote+
+        ' <i>Rate source: '+a.precipRateSource+'</i>'+
+        '<br><br><b>This does not water anything.</b> B-Hyve still owns the schedule; this is the '+
+        'readout so you can see the number and decide.'+
+        '<br><br><b>To make this exact:</b> '+d.catchCupHint);
+    })
+    .catch(function(){
+      clearTimeout(t);
+      set('swVerdict','--','');
+      set('swDetail','Watering plan unavailable right now.');
+    });
+}
+
 // AIR QUALITY — the PWS cannot measure this at all. Free, keyless, from Open-Meteo.
 // Mowing throws particulates and wildfire-smoke days are invisible from a back porch.
 // Deliberately NOT including pollen: Open-Meteo's pollen model is Europe-only (verified
@@ -4868,6 +5018,7 @@ function loadWeather(){
   loadLightning();
   loadAirQuality();
   loadFire();
+  loadWatering();
   // Server-side proxy (was a direct browser call to api.open-meteo.com that flaked out and
   // left Rain Risk / Soil Temp / Dew on Grass / Rain 24-48h / Lightning blank).
   fetch('/api/mowconditions',{signal:ctrl.signal,cache:'no-store'})
