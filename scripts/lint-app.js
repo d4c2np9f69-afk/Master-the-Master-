@@ -51,6 +51,31 @@ if (!/var S;\s*try\s*\{\s*S\s*=\s*JSON\.parse/.test(js) && !/try\s*\{\s*S\s*=\s*
   failures.push(`The top-level "var S = JSON.parse(localStorage...)" state load is no longer wrapped in try/catch — a corrupted save would blank the whole app on boot.`);
 }
 
+// 5. THE JS MUST ACTUALLY PARSE.
+// Added 2026-08-20 after this lint passed a build whose entire <script> block was dead.
+// A tooltip string ended up containing a LITERAL NEWLINE inside single quotes:
+//     w7.title='Last 7 days: '+w.toFixed(2)+'"
+//     '+
+// which is "Invalid or unexpected token". Every handler in the app vanished —
+// hccSection, showTab, carTab, showModal, toggleTheme — and lint said "clean", because
+// every check above is a REGEX. Greps cannot tell you whether JavaScript is valid.
+// vm.Script COMPILES without executing, so this catches the whole syntax-error class —
+// the same class as the 2026-06-23 blank-page incident — for about 30 ms.
+try {
+  new (require('vm').Script)(js, { filename: 'index.html:<script>' });
+} catch (e) {
+  let where = '';
+  const m2 = String(e.stack || '').match(/index\.html:<script>:(\d+)/);
+  if (m2) {
+    const lineInJs = parseInt(m2[1], 10);
+    const htmlLine = lineOf(scriptOpenIdx, html) + lineInJs;
+    where = ` at index.html line ~${htmlLine}`;
+    const src = js.split('\n')[lineInJs - 1];
+    if (src) where += `\n      >> ${src.trim().slice(0, 110)}`;
+  }
+  failures.push(`FATAL: the JS block does not parse — ${e.message}${where}\n      The entire app is blank in this state. Nothing else in this lint matters.`);
+}
+
 if (failures.length) {
   console.error(`\n✗ lint-app.js: ${failures.length} issue(s) found:\n`);
   failures.forEach(f => console.error('  - ' + f));
