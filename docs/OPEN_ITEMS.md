@@ -48,8 +48,8 @@ decisions about his own house.
 | 15 | **`blinkpy` manifest errors ~4/hr** (`Manifest stale 2102` / `System is busy 307`). **Not root-caused.** | **CLAUDE** | 08-18 | Rate fell 15→4/hr on 08-19 but the drop preceded my change — do not claim credit. |
 | 16 | **`hcc_zigbee_pairing_mode_temporary_..._08_17`** — a "temporary" automation still sitting there, disabled. | **CLAUDE** | 08-17 | Delete once #11 is done. |
 | 17 | ~~No disk/CPU/memory visibility on Beehive~~ — System Monitor added 08-19. 94.3 GiB free, CPU 24 %, 120 °F. | ✅ closed 08-19 | — | |
-| 18 | **`hero-cameras.jpg`** still has a fake title, a fake "ALL SYSTEMS READY" panel and six dummy tiles. | **CLAUDE** | I.11 | Needs the image pipeline on this PC. |
-| 19 | **Irrigation zone photos** — all 6 carry the same fake gold-frame overlay, contradicting the "real photographs" rule. | **JEFF decides**, CLAUDE does | 08-08, **11 days** | All six, or just Garden? |
+| 18 | ~~**`hero-cameras.jpg` fake title / ALL SYSTEMS READY panel / six dummy tiles**~~ — **✅ WAS ALREADY DONE 2026-08-06**, commit `1eba07f`. Verified by opening the image 08-19: all three fake elements gone; Blink logo and 2nd Amendment sticker still present per Jeff's explicit call; file is the regenerated 1300×970 landscape banner. **The item sat open for 13 days after it was closed.** | ✅ closed 08-06 | — | Third stale open item found 08-19, after the recorder purge alarm and the backyard AI thresholds. |
+| 19 | **Irrigation zone photos — THE DOCS CONTRADICT EACH OTHER. Do not touch until Jeff rules.** `CLAUDE.md`'s PROTECTED photo section says `images/zones/` are **"REAL PHOTOGRAPHS OF JEFF'S ACTUAL YARD… Do not regenerate or replace these."** Pending Item 20 says all six carry a fake gold-frame/title/tagline overlay that "needs correcting either way". Both can be true — strip the printed overlay, never regenerate the photo — but that exact ambiguity is what **deleted Jeff out of his own app on 08-06**. | **JEFF rules first** | 08-08, **11 days** | Question for Jeff: strip the overlays in place, or leave them alone? |
 | 20 | **Lighthouse JS/CSS minification** — unused-js ~235 KiB, unminified-js ~71 KiB. | **CLAUDE** | 07-31 | Explicitly out of scope; needs restructuring. |
 
 ## 🔵 P4 — DECISIONS ONLY JEFF CAN MAKE
@@ -72,12 +72,16 @@ bedroom dimmer for an hour on 08-19** · B-Hyve · LUX · Blink · Amazon · Sma
 
 ---
 
-## Honest scoreboard — 2026-08-19 23:47
+## Honest scoreboard — 2026-08-20 00:05
 
-**27 tracked · 5 closed · 22 open.** *(#12 closed 23:47 — beehive-config actually synced.)*
+**27 tracked · 6 closed · 21 open.** *(#12 synced 23:47; #18 found already-done since 08-06.)*
 
-Of the 22 open: **11 are Jeff's** (hands, credentials, purchases, decisions) and **6 are mine with
-nothing blocking them** — #14, #15, #16, #18, #20, plus #13 pending a permission rule.
+Of the 21 open: **12 are Jeff's** (hands, credentials, purchases, decisions) and **4 are mine with
+nothing blocking them** — #14, #15, #16, #20, plus #13 pending a permission rule.
+
+**Three of tonight's "open" items turned out to be already done** (recorder purge alarm, backyard AI
+thresholds, hero-cameras.jpg — the last one closed 13 days ago). Checking before working is worth
+as much as working.
 
 **Oldest open item: 29 days.**
 
