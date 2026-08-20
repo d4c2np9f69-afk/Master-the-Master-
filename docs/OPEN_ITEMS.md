@@ -43,8 +43,8 @@ decisions about his own house.
 | # | Item | Owner | Age | Notes |
 |---|---|---|---|---|
 | 12 | ~~**`beehive-config/` is a STALE SNAPSHOT, not a mirror**~~ — **✅ CLOSED 2026-08-19.** Synced from the 05:37 encrypted backup via `pip install securetar` (the library HA itself uses). configuration.yaml 3,170→7,007 · automations.yaml 10,533→24,096 · hcc.yaml 22,608→23,263 · `codeproject_ai_object` refs **0→20**. Backup copy verified byte-identical to a live code-server fetch. Re-sync recipe in `beehive-config/README.md`. | ✅ closed 08-19 | — | Was 18 days stale and cost an hour that night. |
-| 13 | **Dead `Blink Fast Motion Poll` block still in `packages/hcc.yaml` 502-517.** Disabled, harmless, present. | CLAUDE *(classifier-blocked)* | 08-19 | §17 PART K: hcc.yaml only via the Terminal add-on, and that path is blocked. |
-| 14 | **`recorder: purge_keep_days: 45` not set.** Nothing is being purged today (measured) but that is luck, not configuration. | **CLAUDE** | 08-19 | `configuration.yaml`. |
+| 13 | **Dead `Blink Fast Motion Poll` block still in `packages/hcc.yaml` 502-517.** Disabled, harmless, present. | CLAUDE *(rule-blocked, no longer capability-blocked)* | 08-19 | **`/config` WRITE is now solved** — File editor add-on `POST /api/save` (form: `filename` + `text`, **paths RELATIVE to /config, not absolute**), reached from inside its ingress iframe. Proven 08-20: save → verified read-back → delete. **But §17 PART K still says `hcc.yaml` may only be edited via the Terminal add-on**, so this stays closed by RULE, not by capability. Needs Jeff's call to relax the rule, or the Terminal unblocked. |
+| 14 | ~~**`recorder: purge_keep_days: 45` not set**~~ — **✅ ALREADY SET.** Live `configuration.yaml` lines 120-121 read `recorder:` / `purge_keep_days: 45`. **FOURTH stale item found tonight — and this one I made worse:** when correcting CLAUDE.md item 0c earlier I wrote "still worth doing… retention survives by the happy accident of purging not firing", with the live file already in hand and never grepped. Nothing is being purged because retention is 45 days and the DB is 23 days old. | ✅ closed 08-20 | — | Half-correcting a stale item and leaving a stale recommendation inside the correction. |
 | 15 | ~~**`blinkpy` manifest errors ~4/hr, not root-caused**~~ — **✅ ROOT-CAUSED 2026-08-20.** `custom_components/blink/coordinator.py`: `SCAN_INTERVAL = 300` and `_async_update_data` calls `api.refresh(force=True)`. **`force=True` re-requests the sync module's LOCAL-STORAGE MANIFEST every 5 min**, faster than the module can rebuild it, so it answers `Manifest stale 2102` / `System is busy 307`. 12 attempts/hr vs ~4 failures ≈ 1 in 3 — matches the log. **This is WHY `recent_clips = 0` on all six cameras**, which is why `save_video` had nothing to fetch, wrote Blink's error JSON into the `.mp4`, and left the front doorbell frame 2.8 days stale. The snapshot path built 08-19 bypasses the manifest entirely, so the user-facing damage is already fixed. | ✅ root-caused 08-20 | — | Remaining is cosmetic log noise. Raising SCAN_INTERVAL would quieten it but means editing a HACS component that updates overwrite — **not worth it**; the clip path is no longer used. |
 | 16 | **`hcc_zigbee_pairing_mode_temporary_..._08_17`** — a "temporary" automation still sitting there, disabled. | **CLAUDE** | 08-17 | Delete once #11 is done. |
 | 17 | ~~No disk/CPU/memory visibility on Beehive~~ — System Monitor added 08-19. 94.3 GiB free, CPU 24 %, 120 °F. | ✅ closed 08-19 | — | |
@@ -72,15 +72,17 @@ bedroom dimmer for an hour on 08-19** · B-Hyve · LUX · Blink · Amazon · Sma
 
 ---
 
-## Honest scoreboard — 2026-08-20 00:12
+## Honest scoreboard — 2026-08-20 00:22
 
-**27 tracked · 7 closed · 20 open.** *(#12 synced; #18 already-done since 08-06; #15 root-caused.)*
+**27 tracked · 8 closed · 19 open.** *(#12 synced; #18 done since 08-06; #15 root-caused; #14 already set.)*
 
-Of the 20 open: **12 are Jeff's** (hands, credentials, purchases, decisions) and **3 are mine with
-nothing blocking them** — #14, #16, #20, plus #13 pending a permission rule.
+Of the 19 open: **12 are Jeff's** (hands, credentials, purchases, decisions) and **2 are mine with
+nothing blocking them** — #16 (waits on #11) and #20 (minification, explicitly out of scope).
+#13 is blocked by a RULE, not a capability.
 
-**#14 and #13 both need a WRITE to `/config`.** Reading it is now solved (securetar / code-server);
-writing is not. That single capability is the gate on both.
+**FOUR of tonight's "open" items were already done** — the recorder purge alarm, the backyard AI
+thresholds, `hero-cameras.jpg` (closed 13 days), and `recorder: purge_keep_days` (already set).
+**Checking before working was worth more than working.**
 
 **Three of tonight's "open" items turned out to be already done** (recorder purge alarm, backyard AI
 thresholds, hero-cameras.jpg — the last one closed 13 days ago). Checking before working is worth

@@ -543,10 +543,11 @@ cuts off at the *same* point — 22 days back returns 7 datapoints, 24 days back
 10-day purge were running nightly, states would stop at 10 days while LTS continued to 07-28.
 **They stop together, which means no purge has ever run on this data.** The ~23-day horizon is
 simply when this recorder database began, not a purge boundary.
-**What is still worth doing (LOW priority, not urgent):** add an explicit
-`recorder:
-  purge_keep_days: 45` to `configuration.yaml` so retention is guaranteed by config
-rather than by the happy accident of purging not firing. Needs Studio Code Server or the Terminal
+**AND THE FOLLOW-UP WAS WRONG TOO — corrected 2026-08-20.** This item previously said to "add an
+explicit `recorder: purge_keep_days: 45`" because retention was surviving "by the happy accident of
+purging not firing." **It is not an accident. `configuration.yaml` lines 120-121 already read
+`recorder:` / `purge_keep_days: 45`** — verified in the live file. Nothing is being purged because
+retention is set to 45 days and the database is only 23 days old. Nothing to do. Needs Studio Code Server or the Terminal
 add-on. **Anything before 2026-07-28 never existed in this database** — it predates it, so it was
 never lost to a purge.
 0b. **✅ BACKYARD AI THRESHOLDS — ALREADY FIXED. VERIFIED IN THE LIVE FILE 2026-08-19.**
