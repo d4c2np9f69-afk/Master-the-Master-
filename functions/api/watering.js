@@ -192,8 +192,13 @@ export function buildPlan({ et0Days, rainDays, rain7dIn, et0Forecast, forecastRa
     }
     const pr = zonePr(z);
     const effectivePr = pr * DU;              // inches actually landing per hour
-    const minutesWeek = applyIn > 0 ? Math.round((applyIn / effectivePr) * 60) : 0;
-    const minutesPerDay = applyIn > 0 ? Math.max(1, Math.round((perDayIn / effectivePr) * 60)) : 0;
+    // Gate on NOISE_IN, not on >0. Caught live 2026-08-20: a 0.02 in shortfall printed
+    // "ESSENTIALLY COVERED · watering is optional" in the verdict while every zone still
+    // said "1 min x 3/wk", because Math.max(1, ...) floored it. Don't send Jeff outside
+    // for one minute of water.
+    const shouldRun = applyIn >= NOISE_IN;
+    const minutesWeek = shouldRun ? Math.round((applyIn / effectivePr) * 60) : 0;
+    const minutesPerDay = shouldRun ? Math.max(1, Math.round((perDayIn / effectivePr) * 60)) : 0;
     return {
       id: z.id, name: z.name, calibrated: true,
       gpm: z.gpm,
@@ -300,21 +305,30 @@ export async function onRequestGet({ env }) {
     const etUrl = 'https://api.open-meteo.com/v1/forecast'
       + '?latitude=' + LAT + '&longitude=' + LON
       + '&daily=et0_fao_evapotranspiration,precipitation_sum'
-      + '&past_days=7&forecast_days=7&timezone=America%2FChicago&precipitation_unit=inch';
+      + '&past_days=7&forecast_days=8&timezone=America%2FChicago&precipitation_unit=inch';
 
     const etRes = await fetch(etUrl, { cf: { cacheTtl: 3600 } });
     if (!etRes.ok) throw new Error('Open-Meteo ' + etRes.status);
     const et = await etRes.json();
     const daily = (et && et.daily) || {};
-    // past_days=7 + forecast_days=7 -> 14 daily entries.
-    //   [0..6]  the 7 COMPLETED days behind us (today's partial is NOT in here)
-    //   [7..13] today + the next 6, i.e. the forward week
+    // past_days=7 + forecast_days=8 -> 15 daily entries, index 7 is TODAY.
+    //
+    // ⚠️ THE WINDOWS MUST NOT OVERLAP. Caught live 2026-08-20: BEHIND used [0..6] while
+    // AHEAD used [7..13], but Weather Underground's `7day` summary returns the 7 days
+    // ENDING TODAY — so today's 1.17 in was credited in BEHIND (from the gauge) AND again
+    // in AHEAD (from the model), and the double credit made the app under-water.
+    //
+    //   [1..7]   BEHIND — the 7 days ending TODAY, matching what the gauge returns
+    //   [8..14]  AHEAD  — the next 7 days, starting TOMORROW
+    //
+    // Today's model values are a whole-day forecast while the gauge's are actual-so-far,
+    // so they can disagree slightly; the gauge wins whenever it is available.
     const allEt0 = daily.et0_fao_evapotranspiration || [];
     const allRain = daily.precipitation_sum || [];
-    const et0Days = allEt0.slice(0, 7);
-    const omRain = allRain.slice(0, 7);
-    const et0Forecast = allEt0.slice(7, 14);
-    const forecastRainDays = allRain.slice(7, 14);
+    const et0Days = allEt0.slice(1, 8);
+    const omRain = allRain.slice(1, 8);
+    const et0Forecast = allEt0.slice(8, 15);
+    const forecastRainDays = allRain.slice(8, 15);
 
     // DAILY values, not a total — the root-zone cap has to be applied day by day, or a
     // single 1.7 in storm would be credited in full. See ROOT_ZONE_IN above.

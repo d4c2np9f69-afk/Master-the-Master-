@@ -140,5 +140,31 @@ check('PR source names Hunter', /LIT-461/.test(half.assumptions.precipRateSource
 check('root-zone cap is sourced', /UMN Extension/.test(half.assumptions.rootZoneCapSource), true);
 check('target is attributed to Jeff', /1\.0-1\.5 in per week/.test(half.assumptions.targetSource), true);
 
+
+// ── 10. Two bugs the LIVE data exposed on 2026-08-20, after deploy ─────────────────
+console.log('\n  BUGS FOUND BY RUNNING IT LIVE');
+// (a) A trivial shortfall said "watering optional" in the verdict while every zone still
+//     printed "1 min x 3/wk". Zones must go quiet below the noise floor.
+const trivial = buildPlan({
+  et0Days: REAL_ET, rainDays: [0, 0, 0, 0, 0, 0, 1.17],
+  et0Forecast: [0.19,0.18,0.19,0.18,0.19,0.18,0.19], forecastRainDays: [0.82,0,0,0,0.06,0.24,0.08]
+});
+check('verdict is the soft one', trivial.verdict, 'ESSENTIALLY COVERED');
+check('and NO zone is told to run 1 min', z(trivial, 1).minutesPerDay, 0);
+check('nor for the week', z(trivial, 1).minutesWeek, 0);
+check('and no gallons', z(trivial, 1).gallonsWeek, 0);
+// A real shortfall still runs.
+const realShort = buildPlan({ et0Days: REAL_ET, rainDays: [0.1,0.1,0.1,0.1,0.05,0.05,0] });
+check('a real shortfall still produces run times', z(realShort, 1).minutesPerDay > 0, true);
+// (b) Exactly at the noise floor it should still stay quiet; just above it, run.
+// NB: 1.03 in must be SPREAD to test the noise floor — as a single day it would be
+// capped to 1.00 and the shortfall would be 0.17, not 0.14. That mistake was in the
+// first version of this test, and the code was right.
+const atFloor = buildPlan({ et0Days: REAL_ET, rainDays: [0.5, 0.53, 0, 0, 0, 0, 0] });
+check('rain was not capped', atFloor.behind.rainIn, 1.03);
+check('0.14 short stays quiet', z(atFloor, 1).minutesWeek, 0);
+const overFloor = buildPlan({ et0Days: REAL_ET, rainDays: [0.5, 0.5, 0, 0, 0, 0, 0] });
+check('0.17 short runs', z(overFloor, 1).minutesWeek > 0, true);
+
 console.log(fails === 0 ? '\n  all watering checks passed\n' : `\n  ${fails} CHECK(S) FAILED\n`);
 process.exit(fails === 0 ? 0 : 1);
