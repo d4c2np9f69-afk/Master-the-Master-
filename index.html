@@ -9318,6 +9318,11 @@ function guardianTestAlerts(){
 function haToggleSvc(service, body){
   return haFetch('/api/services/homeassistant/' + service, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 }
+// Device-config toggles that arrive as switch.* but are settings, not lights.
+// Anchored to the END of the entity_id so a plug legitimately named e.g.
+// "switch.shed_led" is not caught by a bare "contains".
+var LIGHT_CONFIG_SUFFIX = /(_auto_update_enabled|_led|_permit_join|_do_not_disturb|_shuffle|_repeat|_camera_motion_detection|_pre_entry_climate_control|_auxiliary_heating|_child_lock|_locate|_find_robot)$/;
+
 function lightIsIrrigation(s){
   var id = s.entity_id.toLowerCase(), a = s.attributes || {};
   return id.indexOf('bhyve') >= 0 || id.indexOf('orbit') >= 0 || id.indexOf('zone') >= 0
@@ -9373,7 +9378,20 @@ function loadLights(){
     }
     var devs = states.filter(function(s){
       if (s.entity_id.indexOf('light.') === 0) return true;
-      if (s.entity_id.indexOf('switch.') === 0) return !lightIsIrrigation(s) && !isVacuumSwitch(s); // plugs, not sprinklers or vacuum settings
+      if (s.entity_id.indexOf('switch.') !== 0) return false;
+      if (lightIsIrrigation(s) || isVacuumSwitch(s)) return false; // sprinklers, vacuum settings
+      // 2026-08-19: this card was showing 54 entities of which 9 were lights or plugs.
+      // Everything else was a DEVICE CONFIG toggle that happened to be a switch.*, so
+      // "ALL ON" would have re-enabled Kasa auto-firmware-update on all three dimmers
+      // (the documented one-way door), opened Zigbee pairing via permit_join, and
+      // switched on the GLE's auxiliary heating. Two scoped rules, not a substring
+      // guess — §19 Pattern 2: identify by an explicit rule, never by "contains".
+      if (LIGHT_CONFIG_SUFFIX.test(s.entity_id.toLowerCase())) return false;
+      // HA gives its generic non-outlet toggles device_class 'switch' — Alexa
+      // shuffle/repeat/DND and the Blink camera motion-detection switches all land
+      // here. Real plugs are 'outlet'; a plain wall switch (the HS210) has none.
+      if ((s.attributes || {}).device_class === 'switch') return false;
+      return true;
       return false;
     });
     window._lights = devs;
