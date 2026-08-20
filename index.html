@@ -1274,6 +1274,31 @@ html.light .mapadj-btn{background:rgba(255,255,255,.10);border-color:rgba(255,25
    already existed are title= attributes, which only appear on hover — useless on
    the iPhone and the iPad, and he reads this on both. Everything here works with
    no mouse. All colors come from tokens so light mode cannot wash the text out. */
+/* ── Kiosk / screensaver mode (2026-08-20) ──────────────────────────────────
+   Every rule is scoped to html.kiosk, which is only ever added by the kiosk
+   module when ?kiosk=1 is present. Normal use is untouched. */
+html.kiosk{overflow-x:hidden}          /* belt and braces: drift can never scroll sideways */
+html.kiosk body{transition:transform 1.2s ease-in-out;overflow-x:hidden}
+#kioskUI{position:fixed;inset:0;pointer-events:none;z-index:99999}
+#kioskBar{position:absolute;top:0;left:0;right:0;height:3px;background:rgba(255,255,255,.08)}
+#kioskProgress{height:100%;width:0;background:var(--gold);transition:width .25s linear,opacity .3s}
+#kioskChrome{position:absolute;top:12px;right:14px;display:flex;align-items:center;gap:12px;pointer-events:auto}
+#kioskPill{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--text);opacity:.75;background:rgba(0,0,0,.55);border:1px solid var(--border);
+  border-radius:999px;padding:6px 12px;white-space:nowrap;backdrop-filter:blur(6px)}
+html.light #kioskPill{background:rgba(255,255,255,.75)}
+/* Deliberately large — this is read and tapped from across a room on a 60-inch panel. */
+#kioskExit{width:52px;height:52px;border-radius:50%;font-size:23px;line-height:1;cursor:pointer;
+  background:rgba(0,0,0,.6);color:var(--text);border:1px solid var(--border);
+  font-family:inherit;display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(6px);transition:background .15s,transform .15s}
+#kioskExit:hover{background:var(--bad);color:#fff;transform:scale(1.06)}
+html.light #kioskExit{background:rgba(255,255,255,.8)}
+#kioskHint{display:none;position:absolute;top:74px;right:14px;pointer-events:auto;
+  font-size:12px;color:var(--text);background:rgba(0,0,0,.75);border:1px solid var(--border);
+  border-radius:8px;padding:8px 12px}
+html.light #kioskHint{background:rgba(255,255,255,.9)}
+
 /* ── Smart Watering (2026-08-20) ─────────────────────────────────────────── */
 .sw-verdict{font-size:26px;font-weight:800;line-height:1.1;margin-bottom:4px}
 .sw-detail{font-size:11px;color:var(--text);opacity:.85;line-height:1.5;margin-bottom:12px}
@@ -7995,6 +8020,183 @@ function hccSection(id, btn) {
   }
   window.scrollTo({top:0, behavior:'smooth'});
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════════
+   KIOSK / SCREENSAVER MODE — Jeff's request, 2026-08-20
+   "make loewenhome.com my screen saver and if you could make it rotate to a different
+    page every 1 min or so so it doesn't screen burn. But I want it to be live so I can
+    use it in that mode, and then X out to go back to the computer."
+
+   WHY THIS IS NOT A WINDOWS .scr SCREENSAVER: a real screensaver is killed by the first
+   mouse move, so it can never be "live so I can use it in that mode". This is a kiosk
+   dashboard that the PC launches when it goes idle and that Jeff closes himself.
+
+   Activated by ?kiosk=1 (or #kiosk). Does nothing at all otherwise — every guard below
+   is inside the enable check, so normal use is byte-for-byte unaffected.
+
+   Four things it has to get right:
+     ROTATE   every 60 s, through all six sections, using the app's own nav buttons.
+     YIELD    touch it and rotation stops, so it never yanks the page away mid-use.
+              It resumes on its own after 90 s of being left alone.
+     STAY LIT a Screen Wake Lock, or Windows blanks the display and the whole point of
+              a wall dashboard is lost. Re-acquired if the OS drops it.
+     DRIFT    a few pixels every cycle. Rotation is the real burn-in defence; this is
+              the belt to its braces, and it is deliberately tiny.
+   ═══════════════════════════════════════════════════════════════════════════════════ */
+(function(){
+  var KIOSK_SECTIONS = ['home','weather','irrigation','yard','guardian','car'];
+  var KIOSK_NAV      = ['snav-home','snav-weather','snav-irr','snav-yard','snav-guardian','snav-car'];
+  var DRIFT_PX = 6;        // max pixels of anti-burn-in drift, each direction
+
+  function kioskWanted(){
+    try{
+      return /(^|[?&])kiosk=1(&|$)/.test(location.search) || location.hash === '#kiosk';
+    }catch(e){ return false; }
+  }
+  if(!kioskWanted()) return;
+
+  // Seconds per section. Defaults to Jeff's "every 1 min or so"; `&rot=N` overrides it,
+  // which is both a real knob (slower on the wall panel, faster on a desk) and the only
+  // way scripts/kiosk-test.js can verify rotation without sitting there for three minutes.
+  function rotSeconds(){
+    var m = /(^|[?&])rot=(\d+)(&|$)/.exec(location.search);
+    var n = m ? parseInt(m[2], 10) : 60;
+    if(!isFinite(n) || n < 1) n = 60;
+    return Math.min(3600, n);
+  }
+  var ROTATE_MS = rotSeconds() * 1000;
+  var RESUME_MS = Math.round(ROTATE_MS * 1.5);   // 90 s at the 60 s default
+
+  var idx = 0, timer = null, paused = false, pauseTimer = null, tick = null;
+  var wakeLock = null, driftStep = 0;
+
+  // ── Screen wake lock ──────────────────────────────────────────────────────────────
+  // Without this Windows turns the panel off on its own timer and the dashboard is gone.
+  // Guarded every way: unsupported browser, rejected promise, and the OS silently
+  // releasing it when the window is hidden (which is why we re-request on visibility).
+  function acquireWakeLock(){
+    try{
+      if(!navigator.wakeLock || !navigator.wakeLock.request) return;
+      navigator.wakeLock.request('screen').then(function(wl){
+        wakeLock = wl;
+        wl.addEventListener('release', function(){ wakeLock = null; });
+      }).catch(function(){ /* denied — rotation still works, screen may sleep */ });
+    }catch(e){ /* not supported */ }
+  }
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'visible' && !wakeLock) acquireWakeLock();
+  });
+
+  // ── Anti burn-in drift ────────────────────────────────────────────────────────────
+  // Applied to <body>, never to a positioned ancestor, and capped at DRIFT_PX so it can
+  // never introduce a scrollbar. Verified at all 14 device widths by image-fit-audit.
+  // Drift is NEGATIVE-ONLY on purpose. The first version used positive offsets and pushed
+  // the page right, which put a horizontal scrollbar on every viewport — caught by
+  // kiosk-test.js before it ever shipped. Shifting left/up can only ever reveal a few
+  // pixels of page background, which is invisible; shifting right/down grows the document.
+  function drift(){
+    driftStep = (driftStep + 1) % 4;
+    var pts = [[0,0],[-DRIFT_PX,0],[-DRIFT_PX,-DRIFT_PX],[0,-DRIFT_PX]];
+    var d = pts[driftStep];
+    document.body.style.transform = 'translate(' + d[0] + 'px,' + d[1] + 'px)';
+  }
+
+  function go(i){
+    idx = (i + KIOSK_SECTIONS.length) % KIOSK_SECTIONS.length;
+    var btn = document.getElementById(KIOSK_NAV[idx]);
+    if(btn) btn.click();                     // the app's own nav path, nothing bespoke
+    drift();
+    try{ window.scrollTo({top:0}); }catch(e){ window.scrollTo(0,0); }
+  }
+
+  function startRotation(){
+    stopRotation();
+    var due = Date.now() + ROTATE_MS;
+    timer = setInterval(function(){ go(idx + 1); due = Date.now() + ROTATE_MS; }, ROTATE_MS);
+    tick = setInterval(function(){
+      var bar = document.getElementById('kioskProgress');
+      if(bar) bar.style.width = Math.max(0, Math.min(100,
+        (1 - (due - Date.now()) / ROTATE_MS) * 100)) + '%';
+    }, 250);
+  }
+  function stopRotation(){
+    if(timer){ clearInterval(timer); timer = null; }
+    if(tick){ clearInterval(tick); tick = null; }
+  }
+
+  function setPaused(on){
+    paused = on;
+    var pill = document.getElementById('kioskPill');
+    if(pill) pill.textContent = on ? 'PAUSED — you have the wheel' : 'AUTO-ROTATING';
+    var bar = document.getElementById('kioskProgress');
+    if(bar) bar.style.opacity = on ? '0' : '1';
+    if(on) stopRotation(); else startRotation();
+  }
+
+  // Any real interaction hands control to Jeff. Rotation resumes only after he has left
+  // it alone for RESUME_MS — so it can never snatch the page away while he is reading.
+  function nudge(){
+    if(!paused) setPaused(true);
+    if(pauseTimer) clearTimeout(pauseTimer);
+    pauseTimer = setTimeout(function(){ setPaused(false); }, RESUME_MS);
+  }
+
+  window.hccKioskExit = function(){
+    stopRotation();
+    if(wakeLock){ try{ wakeLock.release(); }catch(e){} wakeLock = null; }
+    document.body.style.transform = '';
+    window.close();
+    // Chrome only lets a script close a window it owns. The launcher opens this with
+    // --app=, which DOES qualify (verified on this PC 2026-08-20) — but if the page was
+    // opened as an ordinary tab instead, close() is a no-op and Jeff must not be left
+    // staring at a dead button.
+    setTimeout(function(){
+      var h = document.getElementById('kioskHint');
+      if(h){ h.style.display = 'block'; }
+    }, 500);
+  };
+
+  function build(){
+    var wrap = document.createElement('div');
+    wrap.id = 'kioskUI';
+    wrap.innerHTML =
+      '<div id="kioskBar"><div id="kioskProgress"></div></div>' +
+      '<div id="kioskChrome">' +
+        '<span id="kioskPill">AUTO-ROTATING</span>' +
+        '<button id="kioskExit" type="button" title="Close and go back to the computer" ' +
+          'aria-label="Exit dashboard">&#10005;</button>' +
+      '</div>' +
+      '<div id="kioskHint">Press <b>Alt&nbsp;+&nbsp;F4</b> to close this window.</div>';
+    document.body.appendChild(wrap);
+    document.getElementById('kioskExit').addEventListener('click', function(e){
+      e.stopPropagation(); window.hccKioskExit();
+    });
+    // The exit button must never be treated as "Jeff is browsing".
+    ['mousemove','mousedown','keydown','touchstart','wheel'].forEach(function(ev){
+      document.addEventListener(ev, function(e){
+        if(e.target && e.target.id === 'kioskExit') return;
+        nudge();
+      }, {passive:true});
+    });
+  }
+
+  function start(){
+    document.documentElement.classList.add('kiosk');
+    // A DISTINCT window title. The Windows watcher uses this to tell "the kiosk is already
+    // up" from "Jeff has the site open in a normal tab" — without it, having loewenhome.com
+    // in any tab would suppress the kiosk forever, or worse, stack duplicate windows.
+    try{ document.title = 'HCC KIOSK — Home Command Center'; }catch(e){}
+    // Hide the splash if it is still up — a kiosk has nobody to dismiss it.
+    var sp = document.getElementById('splashScreen'); if(sp) sp.style.display = 'none';
+    build();
+    acquireWakeLock();
+    go(0);
+    startRotation();
+  }
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
+})();
 
 /* ===== Swipe navigation ===== */
 (function(){
