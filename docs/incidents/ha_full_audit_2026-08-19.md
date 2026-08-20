@@ -60,3 +60,54 @@ so it was worth proving rather than trusting. Jeff to confirm the test pushes la
 3. `automation.hcc_mower_sensor_sync` has **NEVER** triggered.
 4. Leftover `hcc_zigbee_pairing_mode_temporary_installing_sensors_08_17` — disabled, kept
    deliberately in case it is wanted for the next sensor pairing.
+
+
+---
+
+# LIVE APP AUDIT — loewenhome.com, 2026-08-19 evening
+
+Jeff: *"I bet if I start digging around on the App there is a shit ton of non working buttons."*
+Audited the LIVE deployed site, not the repo. He was right that there was breakage; it was two
+real bugs, not a shit ton.
+
+## FIXED + DEPLOYED
+
+**1. `hccScroll` was called from 3 places and never defined** (`695f4d4`).
+Proven on the live site: clicking YARD -> WEATHER switched section but left `scrollY` at 0 and
+threw `Uncaught ReferenceError: hccScroll is not defined`. Same for YARD -> IRRIGATION and for
+`irrStart()`'s missing-credentials path. Added the function; verified live: scrollY 0 -> 781,
+card at viewport top, zero errors.
+
+**2. Yard map was drawing Esri's "no imagery" PLACEHOLDER as real satellite** (`5df1c69`).
+The dead-zoom step-down existed and was correct, but only counted `img.onerror`. **Esri returns
+HTTP 200 with a grey placeholder**, so onload fired, `failed` stayed 0, the step-down never ran.
+Measured at 36.4675,-86.6519 (all 200 OK): z17 range118/mean68 · z18 134/81 · **z19 130/82 (real,
+the true ceiling)** · z20 15/205 · z21 15/205 (placeholder). `zmax` was set to 20 — one level too
+high. Fix detects the placeholder by content and feeds the existing machinery. Verified live:
+canvas went range 15 -> **236**, and the caption now honestly says *"zoomed past native detail"*.
+Chose content detection over hardcoding zmax:19 because coverage varies by location.
+
+## STILL BROKEN — NEEDS JEFF (credential, cannot be done for him)
+
+**`/api/irrigation` returns 503.** B-Hyve login fails **HTTP 401 "not authorized"** against all
+three Orbit identities (Support Dashboard, com.orbitbhyve.ios, com.orbit.orbitbhyve).
+`cred_source: "env"` — it is using **`BHYVE_EMAIL`/`BHYVE_PASSWORD` from Cloudflare Pages**, which
+`HCC-secrets/HCC_ACCESS.md` **already flags as "(stale)"**. The IRRIGATION tab cannot read or
+control the sprinklers. Fix = update those two Pages env vars (or enter the B-Hyve login in the
+app's own setup card, which stores to localStorage).
+*Note the coupling:* the app's recovery path for this exact 401 is `irrStart()` revealing the
+setup card and scrolling to it — and that scroll was bug #1 above. Recovery was half-broken too.
+
+## AUDITED CLEAN (measured, not assumed)
+
+- **All 6 sections walked** on a fresh load (HOME/WEATHER/IRRIGATION/YARD/GUARDIAN/CAR), peak
+  **317 onclick elements** — **0 dead functions, 0 JS errors** after the fix.
+  *(An earlier "clean" run was contaminated by my own injected test function — re-run from a
+  fresh load to get an honest read. Watch for this.)*
+- 31 images, **0 broken**; 0 disabled buttons; 0 dead links; console clean.
+- **7 of 8 real API endpoints 200 with live data:** alerts, climate, drought, forecast, hours,
+  mowconditions, weather. `/api/ha` 401 and `/api/ha-stats` 400 are correct (auth / params).
+- **False alarms I chased and discarded rather than reporting:** `bhyve`/`lux`/`utilities`/
+  `mower-ctrl` "endpoints" do not exist — I invented those paths; `/api/auth` is POST-only so a
+  GET correctly falls through to index.html; a "leaked JS comment" was `<SCRIPT>` text content,
+  never rendered; "suspicious text" hits were a regex matching **mai-nan-ce**.
