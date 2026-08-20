@@ -184,11 +184,19 @@ export async function onRequestGet({ env, request }) {
     const activeStations = watering.stations || [];
     const activeZone = activeStations.length > 0 ? activeStations[0].station : null;
 
-    const isConnected = !!(
-      timer.is_connected || timer.connected ||
-      status.is_connected || status.connected ||
-      timer.hardware_version
-    );
+    // ⚠️ THIS WAS HARD-WIRED TO TRUE. Fixed 2026-08-20.
+    // The old expression ORed in `timer.hardware_version` — a field EVERY device record
+    // always carries — so isConnected could never be false and the app displayed
+    // "● ONLINE" continuously while the Water Hog was actually unplugged. Orbit reported
+    // is_connected:false with last_connected_at 2026-08-13; the dashboard said ONLINE for
+    // the whole week. Jeff had taken it offline because of the irrigation leak, and every
+    // control command silently went nowhere because there was no controller to receive it.
+    //
+    // Only a real boolean from Orbit counts now. If none is present the answer is UNKNOWN
+    // (null), never a cheerful true — the UI shows "CHECK APP" for that.
+    const connFlags = [timer.is_connected, timer.connected, status.is_connected, status.connected];
+    const realFlag = connFlags.find(v => typeof v === 'boolean');
+    const isConnected = realFlag === undefined ? null : realFlag;
 
     const zones = (timer.zones || []).map(z => ({
       station: z.station,
@@ -203,6 +211,7 @@ export async function onRequestGet({ env, request }) {
         id: timer.id,
         name: timer.name || 'Irrigation Controller',
         connected: isConnected,
+        last_connected: timer.last_connected_at || timer.last_connected || null,
         run_mode: status.run_mode || 'auto',
         rain_delay: status.rain_delay || 0,
         active_station: activeZone,

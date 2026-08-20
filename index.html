@@ -5381,7 +5381,7 @@ function renderBurn(){
     +'<div style="font-size:9px;color:#666;margin-top:6px">Drivers: wind, humidity, fuel moisture, heat &amp; NWS fire weather — live from your station. Always check local burn bans/permits; keep water &amp; a tool on hand.</div>';
   }
 }
-var IRR={active:null,lastWatered:null,nextStart:null,loaded:false};
+var IRR={active:null,lastWatered:null,nextStart:null,loaded:false,connected:null,lastConnected:null};
 function loadAlerts(){
   fetch('/api/alerts',{cache:'no-store'})
     .then(function(r){return r.json();})
@@ -5677,6 +5677,19 @@ function irrControl(action,opts){
   // No localStorage gate — see fetchWithCreds(). The server can mint the session token
   // from its own env credentials, so control works on a device with no saved login.
   var banner=document.getElementById('irrBanner');
+  // FAIL FAST AND SAY WHY. With the controller offline every command used to sit for ten
+  // seconds and then report a meaningless timeout, which is what "the B-Hyve commands all
+  // failed" looked like from the outside. Orbit's cloud accepts the command and simply has
+  // no controller to hand it to.
+  if(IRR.connected === false){
+    var when='';
+    if(IRR.lastConnected){ try{
+      when=' It was last seen '+new Date(IRR.lastConnected).toLocaleDateString([], {month:'short',day:'numeric'})+'.';
+    }catch(e){} }
+    if(banner){ banner.className='wx-banner wx-no';
+      banner.innerHTML='&#128688; Controller is OFFLINE &mdash; nothing to send the command to.'+when; }
+    return;
+  }
   if(banner){ banner.className='wx-banner wx-load'; banner.innerHTML='&#8987; Connecting&#8230;'; }
   // Get session token via CF Worker (handles CORS), then do WebSocket directly from browser
   fetchWithCreds('/api/irrigation',creds,'tk=1')
@@ -6173,14 +6186,40 @@ function loadIrrigationDirect(){
       var zp=document.getElementById('irrZonesCard'); if(zp) zp.style.display='none';
       function set(id,v){var e=document.getElementById(id); if(e) e.innerHTML=v;}
       set('irrDevName', dev.name||'Irrigation');
+      // OFFLINE has to be loud and dated. The old code could only ever print ONLINE
+      // (the server's connected flag was hard-wired true), so the Water Hog being
+      // unplugged since 2026-08-13 was completely invisible — and every control command
+      // went nowhere with no explanation. `connected === null` means Orbit told us
+      // nothing, which is NOT the same as online.
+      IRR.connected = dev.connected;
+      IRR.lastConnected = dev.last_connected || null;
       var conn=document.getElementById('irrConn');
-      if(conn){ conn.innerHTML = dev.connected?'&#9679; ONLINE':'&#9679; CHECK APP'; conn.style.color = dev.connected?'#22c55e':'#ffd24a'; }
+      if(conn){
+        if(dev.connected === false){
+          var since='';
+          if(dev.last_connected){ try{
+            since=' since '+new Date(dev.last_connected).toLocaleDateString([], {month:'short',day:'numeric'});
+          }catch(e){} }
+          conn.innerHTML='&#9679; OFFLINE'+since;
+          conn.style.color='var(--bad)';
+        } else if(dev.connected === true){
+          conn.innerHTML='&#9679; ONLINE'; conn.style.color='#22c55e';
+        } else {
+          conn.innerHTML='&#9679; CHECK APP'; conn.style.color='#ffd24a';
+        }
+      }
       set('irrMode', (dev.run_mode||'--').toString().toUpperCase());
       var rd=Number(dev.rain_delay)||0, rdEl=document.getElementById('irrRainDelay');
       if(rdEl){ if(rd>0){ rdEl.innerHTML=rd+' h'; rdEl.style.color='#ffd24a'; } else { rdEl.innerHTML='None'; rdEl.style.color='#22c55e'; } }
       var active=dev.active_station, banner=document.getElementById('irrBanner');
+      // "All zones idle" is TRUE of an unplugged controller too, and it reads as healthy.
+      // Offline wins over idle — that is the whole point of the 08-20 fix.
       if(banner){
-        if(active){ banner.className='wx-banner wx-go'; banner.innerHTML='💧 WATERING — Zone '+active; }
+        if(dev.connected===false){
+          banner.className='wx-banner wx-no';
+          banner.innerHTML='🚿 Controller is OFFLINE — zone controls will not reach it.';
+        }
+        else if(active){ banner.className='wx-banner wx-go'; banner.innerHTML='💧 WATERING — Zone '+active; }
         else { banner.className='wx-banner wx-go'; banner.innerHTML='✓ All zones idle'; }
       }
       var html='';
