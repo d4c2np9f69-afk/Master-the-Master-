@@ -4533,6 +4533,36 @@ function exportCart(){
   a.download='toro-parts-list.txt'; a.click();
 }
 
+// LIGHTNING — OBSERVED, not forecast.
+// /api/lightning reads NOAA/FAA METAR present weather + remarks (TS, and LTG with
+// its OHD / VC / DSNT proximity qualifier) plus NWS active alerts. Both are free,
+// keyless, official, and are measurements rather than model output.
+// Replaces a forecast-derived card that read NONE on 2026-08-20 while lightning was
+// striking over the house. If this call fails the card falls back to the forecast,
+// but prefixed "FCST:" so a prediction can never again be mistaken for an observation.
+var _wxLtgForecast = null;
+function loadLightning(){
+  function setc(id,val,color){ var e=document.getElementById(id); if(e){ e.innerHTML=val; e.style.color=color||''; } }
+  var COLORS={ bad:'#ff6262', warn:'#ffd24a', ok:'#22c55e' };
+  var ctrl=new AbortController();
+  var t=setTimeout(function(){ ctrl.abort(); },12000);
+  fetch('/api/lightning',{signal:ctrl.signal,cache:'no-store'})
+    .then(function(r){ clearTimeout(t); if(!r.ok) throw new Error('lightning '+r.status); return r.json(); })
+    .then(function(d){
+      if(!d||!d.status) throw new Error('shape');
+      var txt=d.status;
+      if((d.status==='CLOSE'||d.status==='NEARBY') && d.nearestMi!=null) txt=d.status+' &middot; '+d.nearestMi+' mi';
+      setc('wxLightning',txt,COLORS[d.level]||'#ffd24a');
+      var el=document.getElementById('wxLightning');
+      if(el) el.title=(d.detail||'')+(d.alert?'\n'+d.alert.event+' in force':'')+'\nSource: '+(d.source||'');
+    })
+    .catch(function(){
+      clearTimeout(t);
+      if(_wxLtgForecast) setc('wxLightning',_wxLtgForecast[0],_wxLtgForecast[1]);
+      else setc('wxLightning','NO DATA','#ffd24a');
+    });
+}
+
 // WEATHER
 function loadWeather(){
   var b=document.getElementById('wxBanner');
@@ -4569,9 +4599,13 @@ function loadWeather(){
       var nextProb=ppA.slice(12,48); var riskNext=nextProb.length?Math.max.apply(null,nextProb.concat([0])):0;
       var rainNext=prA.slice(12,48).reduce(function(a,b){return a+(b||0);},0);
       setc('wxRainNext',riskNext+'% / '+rainNext.toFixed(2)+'"',riskNext>60?'#ff6262':riskNext>30?'#ffd24a':'#22c55e');
-      // Lightning: NEAR-TERM thunderstorm risk, aligned to the current hour and
-      // gated by precip probability (weathercodes 95/96/99). "Any storm in 24h"
-      // read RISK almost every summer day in TN — this reports what's actually near.
+      // Lightning: this FORECAST verdict is now only a fallback. Real OBSERVED
+      // lightning comes from /api/lightning — see loadLightning() above.
+      // 2026-08-20 05:59: this block showed NONE while a thunderstorm was directly
+      // over the house with a Severe Thunderstorm Watch in force, because Open-Meteo
+      // had codes 53/63/61 (drizzle, rain, light rain) and never 95/96/99.
+      // A model is not an observation. Kept only so the card degrades instead of
+      // going blank, and it is LABELLED as a forecast when it is used.
       (function(){
         var hc=d.hourly.weathercode||[], pp=d.hourly.precipitation_probability||[], ht=d.hourly.time||[];
         var nowMs=Date.now(), idx=0;
@@ -4583,11 +4617,11 @@ function loadWeather(){
           }
           return false;
         }
-        var lt = stormIn(6) ? ['RISK','#ff6262']        // storms likely within ~6h
-               : stormIn(24) ? ['POSSIBLE','#ffd24a']    // later today/tonight
-               : ['NONE','#22c55e'];
-        setc('wxLightning',lt[0],lt[1]);
+        _wxLtgForecast = stormIn(6)  ? ['FCST: STORM','#ffd24a']
+                       : stormIn(24) ? ['FCST: LATER','#ffd24a']
+                       : null;
       })();
+      loadLightning();
       // Forecast fallbacks (the live station overrides these in loadStation)
       setc('wxFirmness',soil,soil==='FIRM'?'#22c55e':soil==='MOIST'?'#ffd24a':'#ff6262');
       var tF=Math.round(c.temperature_2m);
