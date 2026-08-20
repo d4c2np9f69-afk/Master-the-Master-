@@ -140,3 +140,50 @@ front_right and garage contribute almost nothing.**
 - `301_front_doorbell` and `garage` report `temp`/`wifi` = unknown while others report fine.
   The doorbell still produces clips, so it is not simply dead. Not root-caused.
 - `blinkpy.sync_module` manifest errors (2102 stale / 307 busy) continue at ~4/hr.
+
+
+---
+
+# CORRECTION 2 — the ANNOTATED image is the only one that counts (Jeff, 2026-08-19 21:43)
+
+Jeff: *"The instant AI motion sensor picture with the red box around the motion target are the
+only pictures that should be used! full stop. The rest are slow stale and don't even show what
+the trigger was."*
+
+**This was already his standing requirement and I had not read it.** From the record:
+
+- **`0e9a2e4`, 2026-08-14 09:22** — *"what he actually likes about the current popup is that 'it
+  fires essentially at the same time as the trigger, and it shows a RED BOX around the detected
+  object with the confidence %.'"*
+- **`05df625`, 2026-08-14 10:41** — the annotated file has a FIXED name:
+  `/config/www/ai_snapshots/codeproject_ai_object_<cam>_clipframe_latest.jpg`, overwritten every
+  detection. *"Verified... 467 KB, red box, 'person: 79.7%'. No copy step needed."*
+- **2026-07-31** — *"The current fast popup uses CodeProject.AI's own annotated still frame, which
+  is ready instantly (that's why it's sub-second)... If I make the popup wait for the video, that's
+  very likely to make the notification SLOWER."* **Never route the popup through the clip.**
+
+**My first version of the fix stopped one step short.** It wrote a fresh raw frame and never asked
+the AI to re-scan it, so nothing produced a new annotated image. The raw clipframe is the AI's
+INPUT and must never be what is displayed. **Corrected the same night**: the automation now does
+`camera.snapshot` -> 400 ms -> `image_processing.scan`.
+
+**Verified live on 301_driveway, 21:45:** annotated file moved from 10:51 AM / 318,424 bytes to
+**9:45 PM / 106,001 bytes**, AI returned `car: 90.5%`. Whole chain ~12 s, no clip, no ffmpeg,
+no subscription.
+
+## ALSO SETTLED, AND I NEARLY RE-LITIGATED IT
+
+**`eba1648`, 2026-08-14** — *"garage motion detection turned OFF permanently — Jeff: **'I don't
+need motion in the garage at all'**"*. The garage camera being disarmed is **Jeff's decision, not
+a fault.** I called it a security gap and tried to `switch.turn_on` it. It did not take. **Do not
+try again.** The **LOW battery** flag on it is still real and worth a physical check, but the
+disarmed state is correct and intended.
+
+## STILL OPEN — Jeff's own car triggers the driveway
+
+Jeff: *"or reports my own damn car in the drive."* Confirmed in the same test: the driveway
+scanner runs `targets: [person, vehicle, animal]` at `confidence: 45`, so a **permanently parked
+car scores 90.5% on every scan**. The record already identified this and never built it:
+*"presence-based suppression and per-camera object rules — driveway VEHICLE at 2 AM matters;
+back yard PERSON at 8 PM is Angela."* **Needs Jeff's call on what he actually wants to be told
+about** before changing alert behaviour.
