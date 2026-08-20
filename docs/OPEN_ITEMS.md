@@ -101,3 +101,40 @@ about something else entirely, which is exactly how they stayed invisible.
 **Those seven are the real answer to "why does shit sit."** Not blocked. Not waiting on Jeff.
 Never picked up — because each session optimised for closing whatever was in front of it and then
 writing a summary.
+
+---
+
+## 🚿 IRRIGATION CONTROLLER IS UNPLUGGED — added 2026-08-20
+
+**The Water Hog has been offline since 2026-08-13** (`last_connected_at`
+2026-08-13T18:30:52Z, confirmed live from Orbit). Jeff pulled it because of the irrigation
+leak, pending the **Orbit anti-siphon valve ordered 08-15 and still not installed**.
+
+**Nothing is broken about B-Hyve control.** Commands cannot land because there is no
+controller listening; Orbit's cloud accepts them and has nowhere to send them. Verified:
+a `rain_delay` command updated `rain_delay_overridden_at` on the CLOUD record while the
+device state never moved. HA's own maintained B-Hyve integration fails the same way, for
+the same reason — **do not read that as evidence the API is broken.**
+
+⚠️ **Do NOT re-investigate the B-Hyve WebSocket.** On 2026-08-20 it was tested from the
+browser, from Cloudflare, and from a raw Node client with app headers, across three URL
+variants — all silent, all because the controller is unplugged. That is expected behaviour.
+
+**Closed the same day — the app was hiding it.** `functions/api/irrigation/index.js`
+computed `isConnected = !!( ... || timer.hardware_version )`, and every device record has a
+hardware_version, so it could never be false. The card printed "● ONLINE" for the whole
+week. Now it shows "● OFFLINE since Aug 13", refuses commands with a reason instead of a
+ten-second hang, and `scripts/irr-offline-test.js` (12 checks) keeps it honest.
+
+**Still open, and they unblock each other:**
+- [ ] **Install the Orbit anti-siphon valve** (Jeff — hardware, ordered 08-15).
+- [ ] **Plug the controller back in** once the leak is stopped, then confirm
+      `/api/irrigation` reports `connected: true`.
+- [ ] **Then, and only then:** verify a real zone command end to end, and build the
+      back-to-back zone queue Jeff asked for on 08-20 ("run zone 1 40min, zone 2 30min,
+      zone 5 15min... they run back to back"). B-Hyve's own `change_mode` takes an ARRAY
+      of `{station, run_time}`, so the CONTROLLER sequences them — the app does not need to
+      stay open. Design is settled; it is not built because shipping control buttons that
+      cannot be tested against hardware is exactly what Jeff asked us to stop doing.
+- [ ] The per-zone duration prompt **already exists** (1-60 min, defaults to 10). It looked
+      broken only because the command behind it never landed.
