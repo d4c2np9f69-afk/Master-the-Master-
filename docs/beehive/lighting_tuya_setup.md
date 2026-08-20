@@ -1,3 +1,24 @@
+> # ⚠️ STALE — CORRECTED 2026-08-19. DO NOT FOLLOW AS WRITTEN.
+>
+> This guide is from **2026-07-04** and was overtaken by events three days later.
+>
+> - It says *"use the Tuya app he already has; no Smart Life install needed."* **Wrong.**
+>   The working link was made **2026-07-07 with the SMART LIFE app** and a generic JH-G01U
+>   "Mini Smart Socket" (Shenzhen Jiuheng).
+> - It was written for the **SYLVANIA plugs**, which turned out to be **vendor-locked and
+>   can never enter Home Assistant** (proven 07-07 and again 08-13 — Smart Life rejects them,
+>   and the Sylvania app can scan HA's QR but Tuya blocks the confirm with *"use the
+>   designated APP"*). **Settled — do not re-attempt.** See `docs/inventory/HCC_INVENTORY.md`.
+> - The example entities (`switch.giraffe_plug`, `switch.lamp_couch`, `switch.lamp_chair`,
+>   `switch.lamp_foyer`) **never existed.** What is actually on the Tuya link: Sharky
+>   (BL20 Pro vacuum), Jeff's + Angela's bed lamps, hot water circulation pump, garage fan.
+> - **The QR is ONE-TIME-USE and expires** — that warning is missing below. Fresh QR, scan
+>   once with **Smart Life's in-app scanner**, hit the blue **Confirm login** fast.
+>
+> Current procedure: `HCC-secrets/tuya_ha_usercode.txt` and
+> `docs/incidents/blink_reauth_code_storm_2026-08-19.md`.
+> Part B (the sunset/9pm automations) is still fine.
+
 # HCC — Tuya Plugs into Beehive + HA-controlled lighting
 
 Goal: get Jeff's smart **plugs** into Home Assistant (Beehive) so the

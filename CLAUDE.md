@@ -498,8 +498,44 @@ Read it when you touch this area. Moved 2026-08-16 07:46 (23 KB).
 
 ## Pending Items (Next Session Should Address These)
 
-0c. **🔴 RECORDER RETENTION — the sewer-case evidence is being PURGED DAILY (archive §19.2.2, still open).** `configuration.yaml` has no `recorder:` block, so `purge_keep_days` sits at HA's default **10 days** — every day, the oldest day of B-Hyve/water history rolls off permanently. Jeff's sewer-overcharge refund case depends on this data. Fix: add `recorder: purge_keep_days: 45` to `configuration.yaml` (Studio Code Server, needs Jeff's HA login) + one HA restart. 45 days covers a full billing cycle plus buffer. Closed cycles before 07-21 are already unrecoverable.
-0b. **Ã°Å¸â€Â´ BACKYARD AI THRESHOLDS Ã¢â‚¬â€ a real security gap, one edit away (added 08-15).** `binary_sensor`/AI chain is proven working end to end; the **60% confidence threshold** is what kills it. Measured on a real night frame: `person 25.5%`, `sheep 27.4%` (= the deer; COCO has no "deer" class), so `targets_found: []` and nothing fires. **A person in the back yard at night is currently undetectable.** Fix, in this order Ã¢â‚¬â€ (1) drop `vehicle` from the backyard scanner (no driveway back there; it only ever false-positives, e.g. `car: 61.7%` on a distant porch light), (2) `roi_x_min Ã¢â€°Ë† 0.15` Ã¢â‚¬â€ crop **LEFT, not top**: the garden is right of the fire pit at the same frame height, so a `roi_y_min` crop would cut it off, (3) then `animal`Ã¢â€ â€™~30 and `person`Ã¢â€ â€™~35Ã¢â‚¬â€œ40. Verify visually Ã¢â‚¬â€ the integration draws the ROI as a **green box** on the annotated image, so set Ã¢â€ â€™ scan Ã¢â€ â€™ pull `/api/camera_proxy/camera.ai_backyard` Ã¢â€ â€™ look Ã¢â€ â€™ adjust. Lives in `packages/hcc.yaml`: not reachable via the config API, no SSH on the box, so it needs Studio Code Server (Jeff must log in to HA in the browser first). **Daytime PIR misses are a separate, unfixable issue** Ã¢â‚¬â€ the camera's own sensor hits 104Ã¢â‚¬â€œ113 Ã‚Â°F and PIR needs thermal contrast; it should recover as temperatures drop, so do not re-tune sliders at it.
+0c. **✅ RECORDER RETENTION — THE "PURGED DAILY" ALARM WAS FALSE. MEASURED AND DISPROVEN 2026-08-19.**
+*Nothing has been purged. No data has been lost. Do NOT re-raise this as an emergency.*
+**Proof (measured live against Beehive, not inferred):** long-term statistics are never touched by
+`purge_keep_days`, and `recorder/statistics_during_period` returns **23 unbroken daily buckets for
+`sensor.water_gallons` and `sensor.gas_ccf`, oldest 2026-07-28, newest today.** The states table
+cuts off at the *same* point — 22 days back returns 7 datapoints, 24 days back returns 0. If a
+10-day purge were running nightly, states would stop at 10 days while LTS continued to 07-28.
+**They stop together, which means no purge has ever run on this data.** The ~23-day horizon is
+simply when this recorder database began, not a purge boundary.
+**What is still worth doing (LOW priority, not urgent):** add an explicit
+`recorder:
+  purge_keep_days: 45` to `configuration.yaml` so retention is guaranteed by config
+rather than by the happy accident of purging not firing. Needs Studio Code Server or the Terminal
+add-on. **Anything before 2026-07-28 never existed in this database** — it predates it, so it was
+never lost to a purge.
+0b. **✅ BACKYARD AI THRESHOLDS — ALREADY FIXED. VERIFIED IN THE LIVE FILE 2026-08-19.**
+*This item sat marked "a real security gap, one edit away" and "a person in the back yard at
+night is currently undetectable" long after the edit had actually been made. It is NOT open.*
+
+Read directly from `/config/configuration.yaml` (Studio Code Server, 08-19 8:00 PM), the
+backyard scanner at lines 40-52 already carries **all three** prescribed changes:
+- `confidence: 25` (was 60 — the value that was throwing away `person 25.5%` / `sheep 27.4%`)
+- `roi_x_min: 0.15` — the LEFT crop that removes the distant porch light which had
+  false-positived as `car: 61.7%`
+- `targets: [{ target: person }, { target: animal }]` — **`vehicle` is dropped**
+
+Contrast the driveway scanner immediately below (lines 53-64): `confidence: 45`, `vehicle`
+still present, no `roi_x_min`. The backyard is the only camera carrying the tuned config, which
+is exactly what the fix called for.
+
+**Where the scanners actually live: `configuration.yaml`, NOT `packages/hcc.yaml`.** The old
+note sent people to hcc.yaml and cost a search. Also note `beehive-config/hcc.yaml` in this repo
+is a **stale one-time snapshot** — it does not contain the scanner block at all. Always read the
+live file.
+
+**What remains for the backyard is the PIR, and it is physics, not config:** the camera's own
+sensor reads 104-113 °F in daytime and PIR needs thermal contrast. At night it triggers fine.
+Do not re-tune sliders at the daytime misses.
 
 0. **HA backup encryption key Ã¢â‚¬â€ needs a durable copy outside this one PC (Jeff's call on where).** All Beehive backups are encrypted (HA default). Retrieved the real key live via the backup config API (`backup/config/info`) and saved it to `C:\Users\jeffl\HCC-secrets\ha_backup_encryption_key.txt` Ã¢â‚¬â€ but that's the same single PC as everything else backup-related, so it's not yet truly independent. Without this key, the `.tar` archives in `HCC-Beehive-Backups\` (iCloud) are undecryptable, so it's the single most load-bearing secret in the whole disaster-recovery system. **Never put the raw key in this git repo (public).** Jeff should save a copy somewhere durable and independent of this PC Ã¢â‚¬â€ password manager, printed + physical safe, etc. Ã¢â‚¬â€ next session should confirm he's done this.
 1. **SONOFF MINI DRY** Ã¢â‚¬â€ Jeff/coworker to wire + power + eWeLink-pair (Inching Mode) + Matter-commission into HA (see Garage Door above and the setup doc). App side is fully done as of 08-08 and will auto-detect the switch entity by name the moment it's paired Ã¢â‚¬â€ no entity ID hand-off needed.
