@@ -30,6 +30,31 @@ export async function onRequestGet({ env } = {}) {
     );
     if (!r.ok) throw new Error('WU ' + r.status);
     const d = await r.json();
+
+    // 7-DAY RAIN FROM JEFF'S OWN GAUGE. Added 2026-08-20 — Jeff: "the grass requires 1"
+    // to 1.5" a week or I need to water." Daily total answers "did it rain today"; only
+    // the running week answers the question he is actually asking. This is the PWS
+    // dailysummary endpoint, so it is his rain gauge, not a model or a nearby airport.
+    // Deliberately non-fatal: a failure here must never take down current conditions.
+    let rain7d = null;
+    let rain7dDays = null;
+    try {
+      const r7 = await fetch(
+        `https://api.weather.com/v2/pws/dailysummary/7day?stationId=${WU_STATION}&format=json&units=e&apiKey=${WU_KEY}`,
+        { headers: { 'User-Agent': 'HCC-PWA/1.0 (jeff.loewen@comcast.net)' }, cf: { cacheTtl: 1800 } }
+      );
+      if (r7.ok) {
+        const d7 = await r7.json();
+        const days = d7.summaries || d7.observations || [];
+        if (days.length) {
+          rain7dDays = days.map((o) => ({
+            date: (o.obsTimeLocal || '').slice(0, 10),
+            in: (o.imperial && o.imperial.precipTotal) || 0
+          }));
+          rain7d = Math.round(rain7dDays.reduce((a, b) => a + b.in, 0) * 100) / 100;
+        }
+      }
+    } catch (e) { /* non-fatal by design */ }
     const obs = d?.observations?.[0];
     if (!obs) throw new Error('no observation');
 
@@ -45,6 +70,9 @@ export async function onRequestGet({ env } = {}) {
       humidity:       obs.humidity != null ? Math.round(obs.humidity) : null,
       precipTotal:    imp.precipTotal != null ? Math.round(imp.precipTotal * 100) / 100 : 0,
       precipRate:     imp.precipRate  != null ? Math.round(imp.precipRate  * 100) / 100 : 0,
+      // Rolling 7 days from the same gauge. Turf target is 1.0-1.5 in/week.
+      rain7d,
+      rain7dDays,
       // Wind
       windSpeed:      imp.windSpeed != null ? Math.round(imp.windSpeed) : null,
       windGust:       imp.windGust  != null ? Math.round(imp.windGust)  : null,

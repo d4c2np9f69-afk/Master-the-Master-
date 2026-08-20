@@ -1962,14 +1962,14 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Wind</div><div class="wx-hero-val" id="wxWindDir">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">UV Index</div><div class="wx-hero-val" id="wxUV">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Pressure</div><div class="wx-hero-val" id="wxPressure">--</div></div>
-        <div class="wx-hero-cell"><div class="wx-hero-lbl">Rain Rate</div><div class="wx-hero-val" id="wxRainRate">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Rain Today</div><div class="wx-hero-val" id="wxRainDay">--</div></div>
         <!-- THIRD ROW, added 2026-08-20. Jeff: "in the hero pic another whole row of data
              would fit if it's a single reading and doesn't have a chart or map with it."
              So: four single values only. Rain Today and Gust were already being fetched
              from his own station and thrown away (precipTotal, windGust); Air Quality and
              Lightning are the two new live readings. Nothing here needs a chart or a map
              to make sense — the AQI chart and the strike map stay down in the YARD card. -->
-        <div class="wx-hero-cell"><div class="wx-hero-lbl">Rain Today</div><div class="wx-hero-val" id="wxHeroRainToday">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Rain 7 Days</div><div class="wx-hero-val" id="wxHeroRain7d">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Gust</div><div class="wx-hero-val" id="wxHeroGust">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Air Quality</div><div class="wx-hero-val" id="wxHeroAir">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Lightning</div><div class="wx-hero-val" id="wxHeroLtg">--</div></div>
@@ -2774,6 +2774,8 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
         <tr><td>Dew on Grass</td><td>Whether the blades are wet</td><td>DRY</td><td>&mdash;</td><td>WET</td></tr>
         <tr><td>Rain Next 90m</td><td>Peak chance / total inches, 15-min steps</td><td>none coming</td><td>possible</td><td>likely or falling</td></tr>
         <tr><td>Rain 24&ndash;48h</td><td>Chance / inches over that window</td><td>under 30%</td><td>30&ndash;60%</td><td>over 60%</td></tr>
+        <tr><td>Rain Today <span style="opacity:.6">(hero)</span></td><td>Total at YOUR gauge, midnight to midnight</td><td colspan="3">Not a forecast &mdash; the rain that actually fell on the yard</td></tr>
+        <tr><td>Rain 7 Days <span style="opacity:.6">(hero)</span></td><td>Rolling week at your gauge vs what turf needs</td><td>1.0&ndash;1.5&quot; on target</td><td>0.75&ndash;1.0&quot; a little short</td><td>under 0.75&quot; water needed</td></tr>
         <tr><td>Heat Stress</td><td>Heat index, for you and the turf</td><td>under 80&deg;F</td><td>80&ndash;103&deg;F</td><td>over 103&deg;F</td></tr>
         <tr><td>Air Quality</td><td>EPA AQI category, worst pollutant</td><td>Good, 0&ndash;50</td><td>Moderate, 51&ndash;150</td><td>Unhealthy, 151+</td></tr>
         <tr><td>Lightning</td><td>Distance to the NEAREST strike in 30 min</td><td>over 30 mi</td><td>15&ndash;30 mi</td><td>under 15 mi</td></tr>
@@ -5037,14 +5039,31 @@ function loadStation(){
       if(s.pressure!=null){
         set('wxPressure', s.pressure+' inHg');
       }
-      // Rain rate (current in/hr)
-      if(s.precipRate!=null){
-        var rr=s.precipRate, rrC=rr===0?'var(--ok)':rr<0.1?'var(--warn)':'var(--bad)';
-        setc('wxRainRate', rr===0?'None':rr+' in/hr', rrC);
+      // RAIN TODAY, midnight to midnight, from Jeff's own gauge. Replaced "Rain Rate"
+      // on 2026-08-20 — Jeff: "rain rate needs to be changed to rain total from mid
+      // night to mid night... that is a much more helpful data point then rain rate."
+      // WU's precipTotal resets at local midnight, which is exactly the window he asked
+      // for. An in/hr figure is a snapshot; a daily total is a decision.
+      if(s.precipTotal!=null){
+        var pt=s.precipTotal;
+        setc('wxRainDay', pt.toFixed(2)+'"', pt>0?'var(--info)':'');
       }
-      // Hero row 3 — Jeff's station was already reporting these and the app was
-      // discarding both. precipTotal is today's rain at HIS gauge, not a forecast.
-      if(s.precipTotal!=null) set('wxHeroRainToday', s.precipTotal.toFixed(2)+'"');
+      // RAIN THIS WEEK vs the turf requirement. Jeff: "the grass requires 1\" to 1.5\" a
+      // week or I need to water." Daily rain says whether it rained; only the rolling
+      // week says whether the lawn is actually getting what it needs. Same gauge.
+      if(s.rain7d!=null){
+        var w=s.rain7d;
+        var wc = w<0.75 ? 'var(--bad)' : w<1.0 ? 'var(--warn)' : 'var(--ok)';
+        setc('wxHeroRain7d', w.toFixed(2)+'"', wc);
+        var w7=document.getElementById('wxHeroRain7d');
+        if(w7) w7.title='Last 7 days at KTNWHITE21: '+w.toFixed(2)+'"
+'+
+          'Turf needs 1.0-1.5" per week — '+
+          (w<0.75?'well short, water needed':w<1.0?'a little short':'on target, no watering needed')+
+          (s.rain7dDays?'
+'+s.rain7dDays.map(function(x){return x.date+'  '+x.in.toFixed(2)+'\"';}).join('
+'):'');
+      }
       if(s.windGust!=null){
         var g=Math.round(s.windGust);
         set('wxHeroGust', g===0?'Calm':g+' mph');
