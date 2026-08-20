@@ -78,11 +78,11 @@ function specFor(nozzle, arcs) {
 // Zone 6 is a raised vegetable garden — Jeff's 1-1.5 in target is for GRASS, so a runtime
 // there would be wrong even with a measured GPM.
 const ZONES = [
-  { id: 1, name: 'Front Right', gpm: 8.78,  nozzle: 'MP3500', arcs: { 90: 2, 180: 2 }, spec: specFor(MP3500, { 90: 2, 180: 2 }) },
-  { id: 2, name: 'Front Left',  gpm: 10.09, nozzle: 'MP3500', arcs: { 90: 2, 180: 3 }, spec: specFor(MP3500, { 90: 2, 180: 3 }) },
-  { id: 5, name: 'Side Bed',    gpm: 4.40,  nozzle: 'MP3000', arcs: { 90: 2, 180: 1 }, spec: specFor(MP3000, { 90: 2, 180: 1 }) },
-  { id: 3, name: 'Back Left',   gpm: null,  nozzle: 'MP3000', note: 'known bad head — fix it before measuring' },
-  { id: 4, name: 'Back Right',  gpm: null,  note: 'never flow-tested' },
+  { id: 1, name: 'Z1 Front right', gpm: 8.78,  nozzle: 'MP3500', arcs: { 90: 2, 180: 2 }, spec: specFor(MP3500, { 90: 2, 180: 2 }) },
+  { id: 2, name: 'Z2 Front Left',  gpm: 10.09, nozzle: 'MP3500', arcs: { 90: 2, 180: 3 }, spec: specFor(MP3500, { 90: 2, 180: 3 }) },
+  { id: 5, name: 'Z5 Right Side Drive',    gpm: 4.40,  nozzle: 'MP3000', arcs: { 90: 2, 180: 1 }, spec: specFor(MP3000, { 90: 2, 180: 1 }) },
+  { id: 3, name: 'Z3 Back Left',   gpm: null,  nozzle: 'MP3000', note: 'known bad head — fix it before measuring' },
+  { id: 4, name: 'Z4 Back Right',  gpm: null,  note: 'never flow-tested' },
   { id: 6, name: 'Garden',      gpm: null,  note: 'vegetable garden, not grass — different target' }
 ];
 
