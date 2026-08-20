@@ -549,7 +549,30 @@ Do not re-tune sliders at the daytime misses.
 9. ~~`zone.work` centered on the office instead of the actual parking garage~~ Ã¢â‚¬â€ **FIXED 08-01.** Jeff gave the real garage address (310 Commerce St, Nashville, TN); geocoded to 36.1624877, -86.7776215 (icon changed to `mdi:parking`), applied via `zone.reload`, confirmed live via `/api/states/zone.work`. Note: this address is only ~90m from the original office coordinates, not the ~0.4mi Jeff estimated earlier Ã¢â‚¬â€ flagged to him, not fully reconciled, but he gave the address directly so it took priority. ~~Also: Angela's phone tracker unreliability~~ Ã¢â‚¬â€ **FIXED 08-01, see Change Log** Ã¢â‚¬â€ real cause was an empty/stale Push ID in the app's own Notifications settings (not the iOS permissions, though those got fixed too along the way), confirmed via a genuine organic background update after the reset.
 10. ~~Water meter pit radio fault, call WHUD~~ Ã¢â‚¬â€ **RETRACTED same day, no call needed.** Live-tested further (IDM protocol probe + longer observation window): the meter and pit radio are both healthy. Root cause of the original "stuck" reading was `rtlamr2mqtt`'s own `-unique=true` flag only re-publishing when the decoded value changes, combined with this meter batching its own broadcast updates (every ~20 min to ~3 hours observed, not continuous) rather than any hardware fault. See 08-01 Change Log correction entry for the full trail.
 11. ~~Leak-detection automation~~ Ã¢â‚¬â€ **BOTH pieces built and live 08-01, see Change Log.** (a) `HCC Ã¢â‚¬â€ Possible Water Leak (Idle Flow)` Ã¢â‚¬â€ fast, custom automation, live. (b) `Water-Monitor` HACS integration Ã¢â‚¬â€ installed and connected, but its low-flow/tank-refill detector thresholds are still on defaults, not tuned for this meter's batched (~20min-3hr gap) reporting cadence. **Remaining follow-up, low priority:** revisit Water-Monitor's options (seed/persistence duration for the low-flow detector) once there's a few days of real data to judge whether defaults are too slow/twitchy.
-12. **Fire TV PiP popup: wrong/stale frame Ã¢â‚¬â€ FIXED and verified live 08-03, see Change Log. Real-world delay Ã¢â‚¬â€ still open, root cause identified but not fixable from HA.** The wrong-frame half is done: popup now shows the actual extracted frame from the real Blink clip, confirmed by Jeff watching the physical Fire TV on two separate live tests. The delay half: this session's automation chain itself only adds ~8 seconds (clip-ready Ã¢â€ â€™ download Ã¢â€ â€™ extract Ã¢â€ â€™ scan Ã¢â€ â€™ Fire TV trigger, measured live); the remaining lag Jeff feels is Blink's own cloud motion-detection latency before HA's binary_sensor even flips `on` Ã¢â‚¬â€ upstream of HA entirely, not something more polling/automation logic can shorten. No further HA-side work identified for this; would need a Blink-side or camera-hardware change to improve further.
+12. **Fire TV PiP popup — THE "NOT FIXABLE FROM HA" CONCLUSION WAS WRONG. CORRECTED 2026-08-19.**
+*The old text blamed the remaining lag on "Blink's own cloud motion-detection latency — upstream of
+HA entirely, not something more polling/automation logic can shorten." That closed the question and
+nobody looked again. It was the wrong answer.*
+
+**What was actually happening:** the popup chain was motion -> `blink.save_video` -> ffmpeg extract
+frame -> scan. **Jeff has NO Blink subscription** (already recorded: "6 unsubscribed devices"), so
+Blink stores no cloud clips and all six cameras report `recent_clips=0 / video=None /
+last_record=None`. `save_video` therefore downloaded `{"message":"Media not found","code":700}` and
+**blinkpy wrote that error body into the .mp4** — its `video_to_file` checks only `response is None`
+and never `response.status`, unlike `image_to_file` in the same file. ffmpeg then failed
+`moov atom not found` and the OLD `<cam>_latest.jpg` silently survived. Measured 08-19:
+**301_front_doorbell 2.8 DAYS stale**, back_left 18 h, 301_driveway 4 h — the popup and the AI were
+both reading days-old photographs. An earlier session had even predicted this in the record
+("if clips aren't reliably available, that step waits and retries, and that would produce exactly
+the lag") and it was never acted on.
+
+**Fixed 2026-08-19 at $0:** the pipeline only ever needed a STILL, and **`camera.snapshot` is a free
+Blink feature** — no subscription, no clip, no manifest, no ffmpeg. Verified live (HTTP 200,
+118,948 bytes, `ffd8ffe0`). `automation.hcc_snapshot_frame_on_motion_no_subscription_path` writes
+the snapshot to the same path the pipeline already reads, so nothing downstream changed. All six
+frames refreshed and verified valid. **Removing the download + ffmpeg steps should also cut the
+latency this item wrongly closed — worth a live re-test.**
+Full detail: `docs/incidents/blink_stale_frames_no_subscription_2026-08-19.md`.
 13. ~~Blink motion filtering for phone notifications~~ Ã¢â‚¬â€ **already existed, nothing to build (08-02).** `AI Object Detected Notify` already does this exactly: filters through CodeProject.AI, branches on person/vehicle/animal, sends distinct pushes with a 15-min per-camera mute button, confirmed live and covering all 6 cameras.
 14. ~~Rain-skip irrigation automation~~ Ã¢â‚¬â€ **NOT NEEDED, confirmed via research 08-02.** Jeff's B-Hyve WeatherSense already does real weather-adaptive watering (rain-skip + temp/wind adjustment), and genuinely supports a personal weather station (PWSWeather.com/Aeris) as Jeff described. Independent testing showed 100% skip reliability on any 0.2"+ rain day. An HA-side duplicate would be strictly worse (no wind/temp handling). Not building this.
 15. ~~Daily Morning Digest~~ Ã¢â‚¬â€ **BUILT AND TESTED 08-02, see Change Log.** `HCC Ã¢â‚¬â€ Morning Digest` (7am push + persistent notification, weather/vacuum/car/utility status/Blink health) is live. Caught and fixed a real bug during testing: the "active alerts" count silently always returned 0 (persistent notifications have been unreadable from templates since HA 2023.6 Ã¢â‚¬â€ confirmed via research, not a local misconfiguration) Ã¢â‚¬â€ removed that metric rather than ship a false "all clear."
