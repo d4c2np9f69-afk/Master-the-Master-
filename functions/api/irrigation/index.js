@@ -50,7 +50,19 @@ async function bhyveLogin(email, password) {
     const token = data.orbit_session_token || data.token || data.session_token || data.access_token;
     const userId = data.user_id || data.id || data.userId;
     if (token && userId) return { token, userId, appId };
-    attempts.push(`${appId}: 200 but no token — keys: ${Object.keys(data).join(',')}`);
+    // 2026-08-19: Orbit started returning HTTP 200 with the full account payload
+    // (first_name, user_id, bhyve_account_id, orbit_api_key...) but NO session
+    // token, for credentials that are definitely correct. pybhyve — the library HA
+    // uses — reads `orbit_session_token`, which we already check first, so the field
+    // name is not the problem: Orbit is simply withholding the token. The payload
+    // carries `require_password_change`, so surface its VALUE (a boolean, never a
+    // secret) rather than only the key name. Without it this failure is
+    // indistinguishable from a wrong password, which is what sent a session chasing
+    // a stale credential for hours.
+    attempts.push(
+      `${appId}: 200 but no token — require_password_change=${JSON.stringify(data.require_password_change)}` +
+      ` — keys: ${Object.keys(data).join(',')}`
+    );
   }
   throw new Error(`login_failed — ${attempts.join(' | ')}`);
 }
