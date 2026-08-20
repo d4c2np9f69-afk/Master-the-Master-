@@ -5056,13 +5056,16 @@ function loadStation(){
         var wc = w<0.75 ? 'var(--bad)' : w<1.0 ? 'var(--warn)' : 'var(--ok)';
         setc('wxHeroRain7d', w.toFixed(2)+'"', wc);
         var w7=document.getElementById('wxHeroRain7d');
-        if(w7) w7.title='Last 7 days at KTNWHITE21: '+w.toFixed(2)+'"
-'+
-          'Turf needs 1.0-1.5" per week — '+
-          (w<0.75?'well short, water needed':w<1.0?'a little short':'on target, no watering needed')+
-          (s.rain7dDays?'
-'+s.rain7dDays.map(function(x){return x.date+'  '+x.in.toFixed(2)+'\"';}).join('
-'):'');
+        if(w7){
+          var NL=String.fromCharCode(10);
+          var tip7='Last 7 days at KTNWHITE21: '+w.toFixed(2)+' in'+NL+
+            'Turf needs 1.0-1.5 in per week — '+
+            (w<0.75?'well short, water needed':w<1.0?'a little short':'on target, no watering needed');
+          if(s.rain7dDays){
+            tip7+=NL+s.rain7dDays.map(function(x){ return x.date+'  '+x.in.toFixed(2)+' in'; }).join(NL);
+          }
+          w7.title=tip7;
+        }
       }
       if(s.windGust!=null){
         var g=Math.round(s.windGust);

@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = "hcc-v90";
+﻿const CACHE_NAME = "hcc-v91";
 const CRITICAL_ASSETS = [
   "./",
   "./index.html",
