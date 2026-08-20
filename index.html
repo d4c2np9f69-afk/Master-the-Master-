@@ -5649,17 +5649,18 @@ function saveBhyveCreds(){
 }
 function irrControl(action,opts){
   var creds=getBhyveCreds();
-  if(!creds.email||!creds.pass){
-    var sc=document.getElementById('irrSetupCard'); if(sc) sc.style.display='';
-    var b=document.getElementById('irrBanner'); if(b){b.className='wx-banner wx-no';b.innerHTML='&#128688; Enter B-Hyve login in the setup card below';}
-    return;
-  }
+  // No localStorage gate — see fetchWithCreds(). The server can mint the session token
+  // from its own env credentials, so control works on a device with no saved login.
   var banner=document.getElementById('irrBanner');
   if(banner){ banner.className='wx-banner wx-load'; banner.innerHTML='&#8987; Connecting&#8230;'; }
   // Get session token via CF Worker (handles CORS), then do WebSocket directly from browser
-  fetch('/api/irrigation?e='+encodeURIComponent(creds.email)+'&p='+encodeURIComponent(creds.pass)+'&tk=1',{cache:'no-store'})
-    .then(function(r){return r.json();})
+  fetchWithCreds('/api/irrigation',creds,'tk=1')
     .then(function(d){
+      if(credsTrulyMissing(d)){
+        var sc=document.getElementById('irrSetupCard'); if(sc) sc.style.display='';
+        if(banner){banner.className='wx-banner wx-no';banner.innerHTML='&#128688; Enter B-Hyve login in the setup card below';}
+        return;
+      }
       if(!d||!d.ok||!d._token||!d.device) throw new Error(d.error||'no token');
       if(banner) banner.innerHTML='&#8987; Sending&#8230;';
       irrWsCommand(d._token, d.device.id, action, opts||{}, function(err){
@@ -5725,13 +5726,9 @@ function irrWsCommand(token, deviceId, action, opts, cb){
 }
 
 function irrStart(station){
-  var creds=getBhyveCreds();
-  if(!creds.email||!creds.pass){
-    var sc=document.getElementById('irrSetupCard'); if(sc) sc.style.display='';
-    var b=document.getElementById('irrBanner'); if(b){b.className='wx-banner wx-no';b.innerHTML='&#128688; Enter your B-Hyve login below to control zones';}
-    hccScroll('irrSetupCard');
-    return;
-  }
+  // No localStorage gate — irrControl() below asks the server and only surfaces the login
+  // form if the SERVER has no credentials either. Bailing here blocked zone control on any
+  // device without a saved B-Hyve login, even though the server has one.
   var m=prompt('Run Zone '+station+' for how many minutes?','10'); if(m===null) return;
   m=Math.max(1,Math.min(60,parseInt(m,10)||10));
   if(confirm('Start Zone '+station+' for '+m+' minutes?')) irrControl('start',{station:station,minutes:m});
@@ -5743,6 +5740,41 @@ function irrRain(h){ if(confirm(h>0?('Set a '+h+'-hour rain delay?'):('Clear the
 var LUX_STATE = {loaded:false, mode:'off', fan:'auto', cool_sp:72, heat_sp:68, device_id:null};
 
 function getLuxCreds(){ return {email:localStorage.getItem('lux_email')||'',pass:localStorage.getItem('lux_pass')||''}; }
+
+// ── ASK THE SERVER BEFORE ASKING JEFF (fixed 2026-08-20) ────────────────────────────
+// Jeff, on a browser signed in to loewenhome.com: "the lux is still asking for
+// credentials... and it looks like there maybe other as well. That was supposed to be
+// fixed yesterday." He was right on both counts.
+//
+// ROOT CAUSE — and it is NOT the bug that was fixed on 08-04, 08-06 or 08-18. Those all
+// fixed the SERVER. On 08-18 LUX_EMAIL/LUX_PASSWORD were added to Cloudflare Pages (they
+// had gone missing), and BHYVE_EMAIL/BHYVE_PASSWORD were already there. Both endpoints
+// now answer with NO client credentials at all — verified live 2026-08-20:
+//     curl /api/climate    -> ok:true, real thermostat, 72F
+//     curl /api/irrigation -> ok:true, "Water Hog", real zones
+// But FIVE call sites still checked localStorage and returned EARLY, before ever calling
+// the API. So on any browser or profile without a saved login — a different Chrome
+// profile, a new phone, Angela's device — the app demanded a login the server did not
+// need and would never have asked for. The server was fixed; nobody told the client.
+//
+// Two benefits from doing it this way round: a device with no saved login just works, and
+// Jeff's password stops riding in a query string (URLs get logged and kept in history) —
+// local creds are now only ever sent if the SERVER says it has none of its own.
+function fetchWithCreds(path, creds, extra){
+  var sep = path.indexOf('?') >= 0 ? '&' : '?';
+  return fetch(path + (extra ? sep + extra : ''), {cache:'no-store'})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d && d.error === 'credentials_not_provided' && creds && creds.email && creds.pass){
+        var q = sep + 'e=' + encodeURIComponent(creds.email)
+              + '&p=' + encodeURIComponent(creds.pass) + (extra ? '&' + extra : '');
+        return fetch(path + q, {cache:'no-store'}).then(function(r2){ return r2.json(); });
+      }
+      return d;
+    });
+}
+// True only when BOTH the server and this device are out of credentials.
+function credsTrulyMissing(d){ return !!(d && d.error === 'credentials_not_provided'); }
 
 function saveLuxCreds(){
   var e=document.getElementById('luxEmailIn'),p=document.getElementById('luxPassIn');
@@ -5823,16 +5855,17 @@ function loadClimate(isManualLogin){
   var creds=getLuxCreds();
   var b=document.getElementById('luxBanner');
   var ei=document.getElementById('luxEmailIn'); if(ei&&creds.email) ei.value=creds.email;
-  if(!creds.email||!creds.pass){
-    if(b){b.className='wx-banner wx-no';b.innerHTML='&#127777;&#65039; Enter your LUX login below to connect';}
-    return;
-  }
-  var sc=document.getElementById('luxSetupCard'); if(sc) sc.style.display='none';
+  // No localStorage gate — see fetchWithCreds(). Only the SERVER may say creds are missing.
   if(b){b.className='wx-banner wx-load';b.innerHTML='&#128260; Connecting to LUX…';}
-  fetch('/api/climate?e='+encodeURIComponent(creds.email)+'&p='+encodeURIComponent(creds.pass),{cache:'no-store'})
-    .then(function(r){return r.json();})
+  fetchWithCreds('/api/climate',creds)
     .then(function(d){
+      if(credsTrulyMissing(d)){
+        if(b){b.className='wx-banner wx-no';b.innerHTML='&#127777;&#65039; Enter your LUX login below to connect';}
+        var sc0=document.getElementById('luxSetupCard'); if(sc0) sc0.style.display='';
+        return;
+      }
       if(!d||!d.ok||!d.thermostat) throw new Error(d&&d.error||'no data');
+      var sc=document.getElementById('luxSetupCard'); if(sc) sc.style.display='none';
       luxApplyState(d.thermostat);
     })
     .catch(function(err){
@@ -5916,7 +5949,8 @@ function luxApplyState(t){
 }
 
 function luxAdjust(delta){
-  var creds=getLuxCreds(); if(!creds.email||!creds.pass) return;
+  // Gate removed 2026-08-20: the server holds LUX_EMAIL/LUX_PASSWORD, so blocking on a
+  // missing LOCAL login disabled thermostat control on any device without one.
   if(LUX_STATE.mode==='heat') LUX_STATE.heat_sp+=delta;
   else LUX_STATE.cool_sp+=delta;
   var sp=LUX_STATE.mode==='heat'?LUX_STATE.heat_sp:LUX_STATE.cool_sp;
@@ -5926,30 +5960,45 @@ function luxAdjust(delta){
 }
 
 function luxSetMode(mode){
-  var creds=getLuxCreds(); if(!creds.email||!creds.pass){var b=document.getElementById('luxBanner');if(b){b.className='wx-banner wx-no';b.innerHTML='Enter LUX login first';}return;}
+  // Gate removed 2026-08-20: the server holds LUX_EMAIL/LUX_PASSWORD, so blocking on a
+  // missing LOCAL login disabled thermostat control on any device without one.
   LUX_STATE.mode=mode;
   luxRenderMode(mode);
   luxSendControl('set_mode',{value:mode});
 }
 
 function luxSetFan(fan){
-  var creds=getLuxCreds(); if(!creds.email||!creds.pass) return;
+  // Gate removed 2026-08-20: the server holds LUX_EMAIL/LUX_PASSWORD, so blocking on a
+  // missing LOCAL login disabled thermostat control on any device without one.
   LUX_STATE.fan=fan;
   luxRenderFan(fan);
   luxSendControl('set_fan',{value:fan});
 }
 
 function luxSendControl(action,opts){
-  var creds=getLuxCreds(); if(!creds.email||!creds.pass) return;
+  var creds=getLuxCreds();
+  // Gate removed 2026-08-20: the server holds LUX_EMAIL/LUX_PASSWORD, so blocking on a
+  // missing LOCAL login disabled thermostat control on any device without one.
   var b=document.getElementById('luxBanner');
   if(b){b.className='wx-banner wx-load';b.innerHTML='&#128260; Sending command…';}
-  var payload=Object.assign({email:creds.email,password:creds.pass,action:action,device_id:LUX_STATE.device_id},opts||{});
+  // Only send a local login if this device actually has one. The server prefers its own
+  // env credentials regardless, and this keeps the password out of the request entirely
+  // on the normal path.
+  var payload=Object.assign({action:action,device_id:LUX_STATE.device_id},opts||{});
+  if(creds.email&&creds.pass){ payload.email=creds.email; payload.password=creds.pass; }
   if(action==='set_sp'){payload.cool_sp=LUX_STATE.cool_sp;payload.heat_sp=LUX_STATE.heat_sp;}
   fetch('/api/climate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
     .then(function(r){return r.json();})
     .then(function(d){
       if(!d||!d.ok){
         var err=d&&d.error||'unknown';
+        if(credsTrulyMissing(d)){
+          // Neither the server nor this device has a LUX login — the only case where
+          // asking Jeff to type one is the right answer.
+          if(b){b.className='wx-banner wx-no';b.innerHTML='&#127777;&#65039; Enter your LUX login below to control the thermostat';}
+          var scL=document.getElementById('luxSetupCard'); if(scL) scL.style.display='';
+          return;
+        }
         if(b){b.className='wx-banner wx-no';b.innerHTML='&#127777;&#65039; Command failed: '+err;}
         setTimeout(loadClimate,8000);
         return;
@@ -6075,21 +6124,19 @@ function haIrrToggle(entityId,onOff){
 
 function loadIrrigationDirect(){
   var creds=getBhyveCreds();
-  if(!creds.email||!creds.pass){
-    var b=document.getElementById('irrBanner');
-    if(b){ b.className='wx-banner wx-no'; b.innerHTML='&#128688; Enter your B-Hyve login below to see your zones'; }
-    // Fixed 2026-08-19: this branch told the user to "enter your B-Hyve login below"
-    // and then returned WITHOUT unhiding the card holding that form, so the message
-    // pointed at nothing — a dead end on any device with no HA token (a new phone, or
-    // Angela on a fresh device). The .catch branch below and irrStart() both already
-    // reveal it; only this path forgot. Matches their exact pattern.
-    var sc0=document.getElementById('irrSetupCard'); if(sc0) sc0.style.display='';
-    return;
-  }
-  var sc=document.getElementById('irrSetupCard'); if(sc) sc.style.display='none';
-  fetch('/api/irrigation?e='+encodeURIComponent(creds.email)+'&p='+encodeURIComponent(creds.pass),{cache:'no-store'})
-    .then(function(r){ return r.json(); })
+  // No localStorage gate — see fetchWithCreds(). The server holds BHYVE_EMAIL/PASSWORD and
+  // answers on its own, so a device with no saved login still sees the zones. The old
+  // early-return here is what made a signed-in page demand a B-Hyve login.
+  fetchWithCreds('/api/irrigation',creds)
     .then(function(d){
+      if(credsTrulyMissing(d)){
+        var b0=document.getElementById('irrBanner');
+        if(b0){ b0.className='wx-banner wx-no'; b0.innerHTML='&#128688; Enter your B-Hyve login below to see your zones'; }
+        // Always reveal the card that HOLDS the form — pointing at a hidden form was a
+        // real dead end fixed on 08-19; keep that behaviour.
+        var sc0=document.getElementById('irrSetupCard'); if(sc0) sc0.style.display='';
+        return;
+      }
       if(!d || !d.ok || !d.device){ throw new Error(d && d.error || 'no data'); }
       var dev=d.device;
       // B-Hyve's REST API doesn't expose watering history; remember the time whenever
