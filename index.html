@@ -41,7 +41,7 @@ button{font-family:inherit;cursor:pointer}
   --border2:rgba(220,195,145,.06);
   /* text — warm cream, not cool blue-white */
   --text:#ede8df;
-  --muted:rgba(235,215,185,.45);
+  --muted:rgba(235,215,185,.62);
   --dim:rgba(220,195,150,.22);
   /* accent palette */
   --blue:#4a9eff;
@@ -1269,6 +1269,35 @@ html.light .mapadj-btn{background:rgba(255,255,255,.10);border-color:rgba(255,25
 .wx-lbl{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
 .wx-val{font-size:20px;font-weight:800;color:var(--text);margin-top:4px}
 .wx-note{font-size:10px;color:var(--muted);text-align:center;margin:4px 0 8px;min-height:13px;line-height:1.5}
+/* ── Conditions legend (2026-08-20) ──────────────────────────────────────────
+   Jeff asked for "a little legend with what the numbers mean". The tooltips that
+   already existed are title= attributes, which only appear on hover — useless on
+   the iPhone and the iPad, and he reads this on both. Everything here works with
+   no mouse. All colors come from tokens so light mode cannot wash the text out. */
+.aqi-scale{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:10px;color:var(--text)}
+.aqi-scale span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.aqi-scale i{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
+.wx-legend{margin-top:12px;border:1px solid var(--border2);border-radius:10px;background:var(--card2);overflow:hidden}
+.wx-legend>summary{cursor:pointer;list-style:none;padding:10px 12px;font-size:11px;font-weight:800;
+  letter-spacing:.8px;text-transform:uppercase;color:var(--text);user-select:none}
+.wx-legend>summary::-webkit-details-marker{display:none}
+.wx-legend>summary::before{content:'\25B8';display:inline-block;margin-right:8px;transition:transform .15s}
+.wx-legend[open]>summary::before{transform:rotate(90deg)}
+.wx-legend>summary:hover{color:var(--text)}
+.wx-key{display:flex;flex-wrap:wrap;gap:8px 16px;padding:0 12px 10px;font-size:11px;color:var(--text)}
+.wx-key span{display:inline-flex;align-items:center;gap:6px}
+.wx-key i{width:11px;height:11px;border-radius:3px;flex:0 0 auto}
+/* The table keeps all five columns and SCROLLS on a narrow screen rather than
+   squashing — squashed cells were unreadable at 390px in testing. */
+.wx-legend-tbl{width:100%;border-collapse:collapse;font-size:11px;color:var(--text);display:block;overflow-x:auto;white-space:nowrap}
+.wx-legend-tbl th,.wx-legend-tbl td{text-align:left;padding:6px 12px;border-top:1px solid var(--border2);vertical-align:top}
+.wx-legend-tbl th{font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:var(--text);font-weight:800}
+.wx-legend-tbl td:first-child{font-weight:700}
+.wx-legend-tbl tr td:nth-child(3){color:var(--ok)}
+.wx-legend-tbl tr td:nth-child(4){color:var(--warn)}
+.wx-legend-tbl tr td:nth-child(5){color:var(--bad)}
+.wx-legend-tbl td[colspan]{color:var(--text)!important;opacity:.85}
+.wx-legend-note{padding:10px 12px 12px;font-size:10px;line-height:1.6;color:var(--text);border-top:1px solid var(--border2);white-space:normal}
 .wu-badge{display:flex;align-items:center;gap:13px;background:linear-gradient(135deg,rgba(180,130,15,.22),rgba(212,175,55,.10));border:1.5px solid rgba(212,175,55,.45);border-radius:12px;padding:13px 15px;margin:12px 0 8px;position:relative;overflow:hidden}
 .wu-badge::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(212,175,55,.7),transparent)}
 .wu-badge-medal{font-size:36px;line-height:1;flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(212,175,55,.5))}
@@ -2701,11 +2730,54 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
          site feed returns a full 24-hour hourly series, so the chart costs nothing extra. -->
     <div id="aqiChartWrap" style="display:none;margin-top:12px">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
-        <div style="font-size:10px;font-weight:700;color:var(--dim);letter-spacing:1.2px;text-transform:uppercase">Air Quality &mdash; last 24 h</div>
-        <div id="aqiChartSrc" style="font-size:10px;color:var(--muted)"></div>
+        <div style="font-size:10px;font-weight:700;color:var(--text);letter-spacing:1.2px;text-transform:uppercase">Air Quality &mdash; last 24 h</div>
+        <div id="aqiChartSrc" style="font-size:10px;color:var(--text)"></div>
       </div>
       <div id="aqiChart" style="width:100%;overflow-x:auto"></div>
+      <!-- EPA AQI scale, always visible under the chart so the bar colors mean something
+           without hovering. Hover tooltips are desktop-only and Jeff reads this on an
+           iPhone and a 60" TV — a legend has to work without a mouse. -->
+      <div class="aqi-scale">
+        <span><i style="background:#22c55e"></i>0&ndash;50 Good</span>
+        <span><i style="background:#eab308"></i>51&ndash;100 Moderate</span>
+        <span><i style="background:#f97316"></i>101&ndash;150 Sensitive groups</span>
+        <span><i style="background:#ef4444"></i>151&ndash;200 Unhealthy</span>
+        <span><i style="background:#a855f7"></i>201+ Very unhealthy</span>
+      </div>
     </div>
+
+    <!-- Collapsed by default so it never clutters the card, but one tap away on any
+         device. Native <details> — no JS, works in every browser, keyboard accessible. -->
+    <details class="wx-legend">
+      <summary>What do these mean?</summary>
+      <div class="wx-key">
+        <span><i style="background:var(--ok)"></i>Good / go</span>
+        <span><i style="background:var(--warn)"></i>Caution</span>
+        <span><i style="background:var(--bad)"></i>Bad / stop</span>
+      </div>
+      <table class="wx-legend-tbl">
+        <tr><th>Tile</th><th>The number is</th><th>Green</th><th>Amber</th><th>Red</th></tr>
+        <tr><td>Rain Risk</td><td>Chance of rain, next 6 h</td><td>under 30%</td><td>30&ndash;55%</td><td>over 55%</td></tr>
+        <tr><td>Soil Condition</td><td>Mowing verdict from rain + forecast</td><td>FIRM</td><td>MOIST</td><td>WET</td></tr>
+        <tr><td>Soil Temp</td><td>Soil temperature at the surface</td><td colspan="3">Reference only &mdash; not colored</td></tr>
+        <tr><td>Soil Moisture</td><td>Water in the root zone (3&ndash;9 cm)</td><td>20&ndash;32% ideal</td><td>12&ndash;20% dry, 32&ndash;40% wet</td><td>under 12% wilting, over 40% saturated</td></tr>
+        <tr><td>Dew on Grass</td><td>Whether the blades are wet</td><td>DRY</td><td>&mdash;</td><td>WET</td></tr>
+        <tr><td>Rain Next 90m</td><td>Peak chance / total inches, 15-min steps</td><td>none coming</td><td>possible</td><td>likely or falling</td></tr>
+        <tr><td>Rain 24&ndash;48h</td><td>Chance / inches over that window</td><td>under 30%</td><td>30&ndash;60%</td><td>over 60%</td></tr>
+        <tr><td>Heat Stress</td><td>Heat index, for you and the turf</td><td>under 80&deg;F</td><td>80&ndash;103&deg;F</td><td>over 103&deg;F</td></tr>
+        <tr><td>Air Quality</td><td>EPA AQI category, worst pollutant</td><td>Good, 0&ndash;50</td><td>Moderate, 51&ndash;150</td><td>Unhealthy, 151+</td></tr>
+        <tr><td>Lightning</td><td>Distance to the NEAREST strike in 30 min</td><td>over 30 mi</td><td>15&ndash;30 mi</td><td>under 15 mi</td></tr>
+        <tr><td>Hail</td><td>Observed at any station within ~75 mi</td><td>NONE</td><td>&mdash;</td><td>REPORTED</td></tr>
+        <tr><td>Nearest Fire</td><td>Distance to the nearest active WILDFIRE</td><td>over 150 mi</td><td>50&ndash;150 mi</td><td>under 50 mi</td></tr>
+      </table>
+      <div class="wx-legend-note">
+        A <b>~</b> after a value means it is <b>modelled</b> rather than measured.
+        Lightning shows the nearest strike within the last 30 minutes &mdash; the
+        <b>NWS 30&ndash;30 rule</b> is to stay inside until 30 minutes after the last one.
+        Fire counts <b>wildfires only</b>; planned prescribed burns are excluded on purpose.
+      </div>
+    </details>
+
     <button class="btn-full btn-gray" style="margin-top:10px" onclick="loadWeather()">&#128260; Refresh Conditions</button>
   </div>
 
@@ -4761,7 +4833,7 @@ function loadLightning(){
   // TIER 3 — the forecast, clearly labelled so it can never again be read as fact.
   function viaForecast(){
     if(_wxLtgForecast){ setc('wxLightning',_wxLtgForecast[0],_wxLtgForecast[1]); tip('Model forecast only — no live observation reachable'); }
-    else { setc('wxLightning','NO DATA','#ffd24a'); tip('No lightning source reachable'); }
+    else { setc('wxLightning','NO DATA','var(--warn)'); tip('No lightning source reachable'); }
   }
 
   viaBlitzortung().catch(function(){ return viaMetar(); }).catch(viaForecast);
