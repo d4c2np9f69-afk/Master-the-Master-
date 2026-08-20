@@ -1278,7 +1278,7 @@ html.light .mapadj-btn{background:rgba(255,255,255,.10);border-color:rgba(255,25
    Every rule is scoped to html.kiosk, which is only ever added by the kiosk
    module when ?kiosk=1 is present. Normal use is untouched. */
 html.kiosk{overflow-x:hidden}          /* belt and braces: drift can never scroll sideways */
-html.kiosk body{transition:transform 1.2s ease-in-out;overflow-x:hidden}
+html.kiosk body{position:relative;left:0;top:0;transition:left 1.2s ease-in-out,top 1.2s ease-in-out;overflow-x:hidden}
 #kioskUI{position:fixed;inset:0;pointer-events:none;z-index:99999}
 #kioskBar{position:absolute;top:0;left:0;right:0;height:3px;background:rgba(255,255,255,.08)}
 #kioskProgress{height:100%;width:0;background:var(--gold);transition:width .25s linear,opacity .3s}
@@ -8090,15 +8090,25 @@ function hccSection(id, btn) {
   // ── Anti burn-in drift ────────────────────────────────────────────────────────────
   // Applied to <body>, never to a positioned ancestor, and capped at DRIFT_PX so it can
   // never introduce a scrollbar. Verified at all 14 device widths by image-fit-audit.
-  // Drift is NEGATIVE-ONLY on purpose. The first version used positive offsets and pushed
-  // the page right, which put a horizontal scrollbar on every viewport — caught by
-  // kiosk-test.js before it ever shipped. Shifting left/up can only ever reveal a few
-  // pixels of page background, which is invisible; shifting right/down grows the document.
+  // Drift moves the page with position:relative + left/top — NEVER with `transform`.
+  //
+  // Two bugs live here, both found by measuring rather than reasoning:
+  //  1. The first version used POSITIVE offsets and pushed the page right, putting a
+  //     horizontal scrollbar on every viewport. Negative-only now: shifting left/up can
+  //     only reveal a few pixels of page background.
+  //  2. The second version used `transform` on <body>. A transformed ancestor becomes the
+  //     containing block for its position:fixed descendants — so #kioskUI stopped being
+  //     viewport-anchored and stretched to the full 6,263px document height, which meant
+  //     the X button scrolled off the screen the moment the page moved. Measured live on
+  //     loewenhome.com: uiBox.h was 6263 where the viewport is 864.
+  //     `position:relative` does NOT create a containing block for fixed elements, so
+  //     left/top drift the content and leave the overlay pinned to the screen.
   function drift(){
     driftStep = (driftStep + 1) % 4;
     var pts = [[0,0],[-DRIFT_PX,0],[-DRIFT_PX,-DRIFT_PX],[0,-DRIFT_PX]];
     var d = pts[driftStep];
-    document.body.style.transform = 'translate(' + d[0] + 'px,' + d[1] + 'px)';
+    document.body.style.left = d[0] + 'px';
+    document.body.style.top  = d[1] + 'px';
   }
 
   function go(i){
@@ -8144,7 +8154,8 @@ function hccSection(id, btn) {
   window.hccKioskExit = function(){
     stopRotation();
     if(wakeLock){ try{ wakeLock.release(); }catch(e){} wakeLock = null; }
-    document.body.style.transform = '';
+    document.body.style.left = '';
+    document.body.style.top = '';
     window.close();
     // Chrome only lets a script close a window it owns. The launcher opens this with
     // --app=, which DOES qualify (verified on this PC 2026-08-20) — but if the page was

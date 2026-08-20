@@ -107,12 +107,35 @@ async function newPage(browser, url, viewport) {
     check('rotates through every section and wraps', seen, order);
 
     // Drift must have moved the page, and must never cause sideways scroll.
-    const drift = await page.evaluate(() => ({
-      transform: document.body.style.transform || '',
-      overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth
-    }));
-    check('anti burn-in drift is applied', /translate\(/.test(drift.transform), true);
+    const drift = await page.evaluate(() => {
+      const ui = document.getElementById('kioskUI').getBoundingClientRect();
+      return {
+        left: document.body.style.left || '',
+        top: document.body.style.top || '',
+        usesTransform: !!document.body.style.transform,
+        overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+        uiHeight: Math.round(ui.height),
+        viewportHeight: window.innerHeight,
+        docHeight: Math.round(document.body.getBoundingClientRect().height)
+      };
+    });
+    check('anti burn-in drift is applied', /-?\d+px/.test(drift.left + drift.top), true);
     check('drift causes NO horizontal overflow', drift.overflowX, false);
+    // The bug this pins down: a transform on <body> makes it the containing block for
+    // position:fixed children, so the overlay stretched to the full document height and
+    // the X scrolled off screen. Measured live at 6263px against an 864px viewport.
+    check('drift does NOT use transform', drift.usesTransform, false);
+    check('overlay is pinned to the SCREEN, not the document', drift.uiHeight, drift.viewportHeight);
+    check('and the document really is taller than the screen', drift.docHeight > drift.viewportHeight, true);
+    // The X must still be on screen after the page has been scrolled down.
+    await page.evaluate(() => window.scrollTo(0, 1500));
+    await page.waitForTimeout(300);
+    const afterScroll = await page.evaluate(() => {
+      const b = document.getElementById('kioskExit').getBoundingClientRect();
+      return { top: Math.round(b.top), onscreen: b.top >= 0 && b.bottom <= window.innerHeight };
+    });
+    check('X stays on screen after scrolling down', afterScroll.onscreen, true);
+    await page.evaluate(() => window.scrollTo(0, 0));
 
     // Touch it — rotation must stop and stay stopped while he is using it.
     await page.mouse.move(700, 500);
