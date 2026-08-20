@@ -84,6 +84,30 @@ const CASES = [
     ltg: { ok: true, status: 'NEARBY', level: 'warn', nearestMi: 33, hail: false, detail: 'distant' },
     expect: { wxRain90: '90% / 0.06"', wxLightning: 'NEARBY · 33 mi' },
   },
+  {
+    // THE 2026-08-20 08:10 BUG. sensor.home_lightning_distance reported the most
+    // RECENT strike (48.9 mi south) while the CLOSEST was 4.2 mi. The tile said the
+    // storm was 49 miles away while lightning hit four miles from the house.
+    name: 'nearest strike wins over most-recent strike',
+    soil: 0.25, surf: 0.3, rain: [0, 10], aq: { ok: true, aqi: 30, label: 'GOOD', level: 'ok' },
+    ltg: { ok: true, status: 'NONE', level: 'ok', hail: false, detail: 'metar quiet' },
+    blitz: { live: true, strikes: [[48.9, 0, 35.77, -86.66], [4.2, 4, 36.4162, -86.66]] },
+    expect: { wxLightning: '4.2 mi S' },
+  },
+  {
+    name: 'integration absent (live:false) falls through to METAR, never a false NONE',
+    soil: 0.25, surf: 0.3, rain: [0, 10], aq: { ok: true, aqi: 30, label: 'GOOD', level: 'ok' },
+    ltg: { ok: true, status: 'OVERHEAD', level: 'bad', hail: false, detail: 'metar sees it' },
+    blitz: { live: false, strikes: [] },
+    expect: { wxLightning: 'OVERHEAD' },
+  },
+  {
+    name: 'blitzortung live but genuinely quiet -> NONE',
+    soil: 0.25, surf: 0.3, rain: [0, 10], aq: { ok: true, aqi: 30, label: 'GOOD', level: 'ok' },
+    ltg: { ok: true, status: 'OVERHEAD', level: 'bad', hail: false, detail: 'stale metar' },
+    blitz: { live: true, strikes: [[70.0, 200, 35.5, -86.66]] },   // 200 min old = stale
+    expect: { wxLightning: 'NONE' },
+  },
 ];
 
 async function main() {
@@ -113,6 +137,12 @@ async function main() {
         body = c.aq;
       } else if (u.includes('/api/lightning')) {
         body = c.ltg;
+      } else if (u.includes('%2Fapi%2Ftemplate') && c.blitz) {
+        // HA's /api/template returns the RENDERED STRING, not JSON, so reply as text.
+        return route.fulfill({
+          status: 200, contentType: 'text/plain',
+          body: JSON.stringify({ live: c.blitz.live !== false, strikes: c.blitz.strikes || [] }),
+        });
       } else {
         // includes /api/ha -- the Blitzortung tier fails here and falls through.
         return route.fulfill({ status: 503, contentType: 'application/json', body: '{}' });

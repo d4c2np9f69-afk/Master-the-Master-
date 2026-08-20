@@ -4579,32 +4579,64 @@ function loadLightning(){
   var CARD=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
 
   // TIER 1 — Blitzortung via Beehive. Individual strikes geolocated by a worldwide
-  // VLF network, so the distance is measured FROM THE HOUSE. Jeff, 2026-08-20:
+  // VLF network, so distance is measured FROM THE HOUSE. Jeff, 2026-08-20:
   // "any reading coming from Nashville is 30 miles away so closer readings would be
   // more accurate if we can find them." This is that. Delay is a few seconds.
+  //
+  // ⚠️ DO NOT go back to sensor.home_lightning_distance. That sensor reports the MOST
+  // RECENT strike, not the NEAREST one. Caught 2026-08-20 08:10 during a live storm
+  // Jeff described as "striking pretty close outside": the sensor read 48.9 mi south
+  // while the closest tracked strike was 4.2 mi WSW, with 8 inside 30 mi. The tile
+  // would have said "49 mi" — which reads as you are fine — while lightning was
+  // hitting four miles away. Only a real storm could surface that.
+  //
+  // So: query every tracked strike and take the MINIMUM. The 30-minute freshness
+  // window is deliberately the NWS 30-30 rule — wait 30 minutes after the last strike.
+  var LTG_TPL =
+    "{% set c = states('sensor.home_lightning_counter') %}" +
+    "{% set o = namespace(l=[]) %}" +
+    "{% for s in states.geo_location %}" +
+    "{% if s.attributes.source == 'blitzortung' and s.state not in ['unknown','unavailable'] %}" +
+    "{% set o.l = o.l + [[ s.state|float|round(1), ((now() - s.last_changed).total_seconds()/60)|round(0)|int," +
+    " s.attributes.latitude|float(0)|round(4), s.attributes.longitude|float(0)|round(4) ]] %}" +
+    "{% endif %}{% endfor %}" +
+    "{{ {'live': c not in ['unknown','unavailable',''], 'strikes': o.l}|tojson }}";
+  var HOME_LAT=36.477, HOME_LON=-86.66;
+  function bearingTo(la,lo){
+    var p1=HOME_LAT*Math.PI/180, p2=la*Math.PI/180, dl=(lo-HOME_LON)*Math.PI/180;
+    var y=Math.sin(dl)*Math.cos(p2);
+    var x=Math.cos(p1)*Math.sin(p2)-Math.sin(p1)*Math.cos(p2)*Math.cos(dl);
+    return (Math.atan2(y,x)*180/Math.PI+360)%360;
+  }
   function viaBlitzortung(){
     if(typeof haFetch!=='function') return Promise.reject(new Error('no haFetch'));
-    return Promise.all([
-      haFetch('/api/states/sensor.home_lightning_distance').then(function(r){ if(!r.ok) throw new Error('ha '+r.status); return r.json(); }),
-      haFetch('/api/states/sensor.home_lightning_azimuth').then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; })
-    ]).then(function(res){
-      var s=res[0], az=res[1];
-      var mi=parseFloat(s&&s.state);
-      if(!isFinite(mi)) throw new Error('no strike yet');
-      // The sensor HOLDS its last value forever — it only changes when a new strike
-      // lands. Freshness has to come from last_changed or a week-old strike reads live.
-      var ageMin=(Date.now()-new Date(s.last_changed).getTime())/60000;
-      if(!(ageMin<LTG_STALE_MIN)) throw new Error('stale '+Math.round(ageMin)+'m');
-      var deg=parseFloat(az&&az.state);
-      var dir=isFinite(deg)?CARD[Math.round(deg/22.5)%16]:'';
-      var lvl = mi<=10 ? 'bad' : mi<=30 ? 'bad' : mi<=60 ? 'warn' : 'ok';
-      var txt = mi<=10 ? 'OVERHEAD' : (mi<10?mi.toFixed(1):Math.round(mi))+' mi'+(dir?' '+dir:'');
-      setc('wxLightning',txt,COLORS[lvl]);
-      tip('Nearest strike '+mi.toFixed(1)+' mi'+(dir?' to the '+dir:'')+
-          ', '+(ageMin<1?'just now':Math.round(ageMin)+' min ago')+
-          '\nSource: Blitzortung.org strike network, via Beehive');
-      return true;
-    });
+    return haFetch('/api/template',{method:'POST',headers:{'Content-Type':'application/json'},
+                                    body:JSON.stringify({template:LTG_TPL})})
+      .then(function(r){ if(!r.ok) throw new Error('ha '+r.status); return r.text(); })
+      .then(function(body){
+        var d=JSON.parse(body);
+        // live=false means the integration is absent, which is NOT the same as "quiet".
+        // Without this check an uninstalled integration would render a confident NONE.
+        if(!d||!d.live) throw new Error('blitzortung not present');
+        var fresh=(d.strikes||[]).filter(function(x){ return x[1]<=LTG_STALE_MIN; });
+        if(!fresh.length){
+          setc('wxLightning','NONE',COLORS.ok);
+          tip('No strikes detected in the last '+LTG_STALE_MIN+' minutes'+
+              '\nSource: Blitzortung.org strike network, via Beehive');
+          return true;
+        }
+        fresh.sort(function(a,b){ return a[0]-b[0]; });
+        var n=fresh[0], mi=n[0], age=n[1];
+        var dir=CARD[Math.round(bearingTo(n[2],n[3])/22.5)%16];
+        var within15=fresh.filter(function(x){ return x[0]<=15; }).length;
+        var lvl = mi<=15 ? 'bad' : mi<=30 ? 'warn' : 'ok';
+        setc('wxLightning',(mi<10?mi.toFixed(1):Math.round(mi))+' mi '+dir,COLORS[lvl]);
+        tip('NEAREST strike '+mi.toFixed(1)+' mi '+dir+', '+(age<1?'just now':age+' min ago')+
+            '\n'+fresh.length+' strikes in the last '+LTG_STALE_MIN+' min, '+within15+' within 15 mi'+
+            (mi<=6?'\n⚠ Inside 6 miles — NWS 30-30 rule: stay indoors':'')+
+            '\nSource: Blitzortung.org strike network, via Beehive');
+        return true;
+      });
   }
 
   // TIER 2 — NOAA/FAA METAR + NWS alerts. Real observations, but the nearest field
