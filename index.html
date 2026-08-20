@@ -2684,11 +2684,17 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <div class="wx-card"><div class="wx-lbl">Rain Risk</div><div class="wx-val" id="wxRisk">--</div></div>
       <div class="wx-card"><div class="wx-lbl">Soil Condition</div><div class="wx-val" id="wxSoil">--</div></div>
       <div class="wx-card"><div class="wx-lbl">Soil Temp</div><div class="wx-val" id="wxSoilTemp">--</div></div>
+      <!-- Soil Moisture replaced "Soil Firmness" on 2026-08-20. Firmness was inferred
+           from precipitation and sat directly beside Soil Condition showing the same
+           verdict twice. This is modelled moisture at root depth (3-9 cm). -->
+      <div class="wx-card"><div class="wx-lbl">Soil Moisture</div><div class="wx-val" id="wxSoilMoist">--</div></div>
       <div class="wx-card"><div class="wx-lbl">Dew on Grass</div><div class="wx-val" id="wxGrassDew">--</div></div>
-      <div class="wx-card"><div class="wx-lbl">Soil Firmness</div><div class="wx-val" id="wxFirmness">--</div></div>
+      <div class="wx-card"><div class="wx-lbl">Rain Next 90m</div><div class="wx-val" id="wxRain90">--</div></div>
       <div class="wx-card"><div class="wx-lbl">Rain 24&ndash;48h</div><div class="wx-val" id="wxRainNext">--</div></div>
       <div class="wx-card"><div class="wx-lbl">Heat Stress</div><div class="wx-val" id="wxHeatStress">--</div></div>
+      <div class="wx-card"><div class="wx-lbl">Air Quality</div><div class="wx-val" id="wxAir">--</div></div>
       <div class="wx-card"><div class="wx-lbl">Lightning</div><div class="wx-val" id="wxLightning">--</div></div>
+      <div class="wx-card"><div class="wx-lbl">Hail</div><div class="wx-val" id="wxHail">--</div></div>
     </div>
     <button class="btn-full btn-gray" style="margin-top:10px" onclick="loadWeather()">&#128260; Refresh Conditions</button>
   </div>
@@ -4533,6 +4539,30 @@ function exportCart(){
   a.download='toro-parts-list.txt'; a.click();
 }
 
+// AIR QUALITY — the PWS cannot measure this at all. Free, keyless, from Open-Meteo.
+// Mowing throws particulates and wildfire-smoke days are invisible from a back porch.
+// Deliberately NOT including pollen: Open-Meteo's pollen model is Europe-only (verified
+// null for White House on 2026-08-20) and every US source wants a card on file.
+function loadAirQuality(){
+  function setc(id,val,color){ var e=document.getElementById(id); if(e){ e.innerHTML=val; e.style.color=color||''; } }
+  var COLORS={ bad:'#ff6262', warn:'#ffd24a', ok:'#22c55e' };
+  var ctrl=new AbortController();
+  var t=setTimeout(function(){ ctrl.abort(); },12000);
+  fetch('/api/airquality',{signal:ctrl.signal,cache:'no-store'})
+    .then(function(r){ clearTimeout(t); if(!r.ok) throw new Error('aq '+r.status); return r.json(); })
+    .then(function(d){
+      if(!d||!d.ok||d.aqi==null) throw new Error('shape');
+      setc('wxAir',d.label,COLORS[d.level]||'#ffd24a');
+      var e=document.getElementById('wxAir');
+      if(e) e.title='US AQI '+d.aqi+
+        (d.pm2_5!=null?'  ·  PM2.5 '+d.pm2_5+' µg/m³':'')+
+        (d.pm10!=null?'  ·  PM10 '+d.pm10:'')+
+        (d.ozone!=null?'  ·  Ozone '+d.ozone:'')+
+        '\nSource: '+(d.source||'');
+    })
+    .catch(function(){ clearTimeout(t); setc('wxAir','--',''); });
+}
+
 // LIGHTNING — OBSERVED, not forecast.
 // /api/lightning reads NOAA/FAA METAR present weather + remarks (TS, and LTG with
 // its OHD / VC / DSNT proximity qualifier) plus NWS active alerts. Both are free,
@@ -4579,19 +4609,33 @@ function loadLightning(){
 
   // TIER 2 — NOAA/FAA METAR + NWS alerts. Real observations, but the nearest field
   // that reports thunderstorms is 25 mi away, so this is area-level, not yard-level.
+  // Fired unconditionally because HAIL only comes from here — Blitzortung detects
+  // lightning, not hail — and hail is the one that costs money. Edge-cached 120 s.
+  var ctrl=new AbortController();
+  var tmo=setTimeout(function(){ ctrl.abort(); },12000);
+  var metar=fetch('/api/lightning',{signal:ctrl.signal,cache:'no-store'})
+    .then(function(r){ clearTimeout(tmo); if(!r.ok) throw new Error('lightning '+r.status); return r.json(); })
+    .catch(function(){ clearTimeout(tmo); return null; });
+
+  metar.then(function(d){
+    var e=document.getElementById('wxHail');
+    if(!e) return;
+    if(!d || typeof d.hail!=='boolean'){ setc('wxHail','--',''); return; }
+    setc('wxHail', d.hail?'REPORTED':'NONE', d.hail?COLORS.bad:COLORS.ok);
+    e.title = d.hail
+      ? 'Hail in a nearby METAR observation — check vehicles'
+      : 'No hail reported at any station within ~75 mi';
+  });
+
   function viaMetar(){
-    var ctrl=new AbortController();
-    var t=setTimeout(function(){ ctrl.abort(); },12000);
-    return fetch('/api/lightning',{signal:ctrl.signal,cache:'no-store'})
-      .then(function(r){ clearTimeout(t); if(!r.ok) throw new Error('lightning '+r.status); return r.json(); })
-      .then(function(d){
-        if(!d||!d.status) throw new Error('shape');
-        var txt=d.status;
-        if((d.status==='CLOSE'||d.status==='NEARBY') && d.nearestMi!=null) txt=d.status+' &middot; '+d.nearestMi+' mi';
-        setc('wxLightning',txt,COLORS[d.level]||'#ffd24a');
-        tip((d.detail||'')+(d.alert?'\n'+d.alert.event+' in force':'')+'\nSource: '+(d.source||''));
-        return true;
-      });
+    return metar.then(function(d){
+      if(!d||!d.status) throw new Error('metar unavailable');
+      var txt=d.status;
+      if((d.status==='CLOSE'||d.status==='NEARBY') && d.nearestMi!=null) txt=d.status+' &middot; '+d.nearestMi+' mi';
+      setc('wxLightning',txt,COLORS[d.level]||'#ffd24a');
+      tip((d.detail||'')+(d.alert?'\n'+d.alert.event+' in force':'')+'\nSource: '+(d.source||''));
+      return true;
+    });
   }
 
   // TIER 3 — the forecast, clearly labelled so it can never again be read as fact.
@@ -4609,6 +4653,11 @@ function loadWeather(){
   if(b){ b.className='wx-banner wx-load'; b.innerHTML='&#128260; Loading weather...'; }
   var ctrl=new AbortController();
   var t=setTimeout(function(){ ctrl.abort(); },12000);
+  // Lightning, hail and air quality come from their OWN endpoints and must not be
+  // hostage to this one. Fired up front so a mowconditions failure cannot blank them —
+  // that coupling is exactly what left these tiles empty before.
+  loadLightning();
+  loadAirQuality();
   // Server-side proxy (was a direct browser call to api.open-meteo.com that flaked out and
   // left Rain Risk / Soil Temp / Dew on Grass / Rain 24-48h / Lightning blank).
   fetch('/api/mowconditions',{signal:ctrl.signal,cache:'no-store'})
@@ -4661,9 +4710,50 @@ function loadWeather(){
                        : stormIn(24) ? ['FCST: LATER','#ffd24a']
                        : null;
       })();
-      loadLightning();
-      // Forecast fallbacks (the live station overrides these in loadStation)
-      setc('wxFirmness',soil,soil==='FIRM'?'#22c55e':soil==='MOIST'?'#ffd24a':'#ff6262');
+      // REAL soil moisture at root depth (3-9 cm), m3/m3. Replaced the old "Soil
+      // Firmness" tile, which restated the Soil Condition verdict beside it.
+      // Bands: wilting point for turf sits near 0.12, field capacity near 0.30-0.35.
+      (function(){
+        var sm=d.hourly.soil_moisture_3_to_9cm, ht2=d.hourly.time||[];
+        if(!sm||!sm.length) return;
+        var nowMs=Date.now(), k=0;
+        for(var i=0;i<ht2.length;i++){ if(new Date(ht2[i]).getTime()>nowMs){ k=Math.max(0,i-1); break; } }
+        var v=sm[k];
+        if(v==null||!isFinite(v)) return;
+        var pct=Math.round(v*100);
+        var band = v<0.12 ? ['#ff8c42','WILTING — turf is under water stress']
+                 : v<0.20 ? ['#ffd24a','DRY — irrigation would help']
+                 : v<0.32 ? ['#22c55e','GOOD — near field capacity']
+                 : v<0.40 ? ['#ffd24a','WET — hold off watering']
+                 :          ['#ff6262','SATURATED — do not mow, ruts'];
+        setc('wxSoilMoist',pct+'%',band[0]);
+        var sme=document.getElementById('wxSoilMoist');
+        if(sme){
+          var surf=d.hourly.soil_moisture_0_to_1cm?d.hourly.soil_moisture_0_to_1cm[k]:null;
+          sme.title=band[1]+'\nRoot zone (3-9 cm): '+v.toFixed(3)+' m³/m³'+
+                    (surf!=null?'\nSurface (0-1 cm): '+surf.toFixed(3):'')+
+                    '\nSource: Open-Meteo modelled soil — the PWS has no soil probe';
+        }
+      })();
+      // Rain in the next 90 minutes — 15-minute nowcast. Answers "can I mow RIGHT NOW",
+      // which the hourly series cannot.
+      (function(){
+        var m=d.minutely_15;
+        if(!m||!m.time||!m.time.length){ setc('wxRain90','--',''); return; }
+        var nowMs=Date.now(), start=0;
+        for(var i=0;i<m.time.length;i++){ if(new Date(m.time[i]).getTime()>=nowMs){ start=i; break; } }
+        var amt=0, prob=0, n=0;
+        for(var j=start;j<Math.min(start+6,m.time.length);j++){   // 6 x 15min = 90 min
+          amt+=(m.precipitation&&m.precipitation[j])||0;
+          var p=(m.precipitation_probability&&m.precipitation_probability[j]);
+          if(p!=null){ prob=Math.max(prob,p); n++; }
+        }
+        if(!n && amt===0){ setc('wxRain90','--',''); return; }
+        var col = (amt>=0.02||prob>=60) ? '#ff6262' : (amt>0||prob>=30) ? '#ffd24a' : '#22c55e';
+        setc('wxRain90', prob+'% / '+amt.toFixed(2)+'"', col);
+        var r90=document.getElementById('wxRain90');
+        if(r90) r90.title='Next 90 minutes, 15-minute steps: '+amt.toFixed(2)+'" total, peak chance '+prob+'%';
+      })();
       var tF=Math.round(c.temperature_2m);
       var hl=tF<80?['LOW','#22c55e']:tF<90?['MODERATE','#ffd24a']:tF<103?['HIGH','#ff8c42']:['EXTREME','#ff6262'];
       setc('wxHeatStress',hl[0],hl[1]);
@@ -4719,10 +4809,11 @@ function loadStation(){
         var lvl=hi<80?['LOW','#22c55e']:hi<90?['MODERATE','#ffd24a']:hi<103?['HIGH','#ff8c42']:['EXTREME','#ff6262'];
         setc('wxHeatStress',lvl[0],lvl[1]);
       }
-      // Soil firmness from precip total
-      var pt=(s.precipTotal!=null)?s.precipTotal:0;
-      var firm=pt<=0?['FIRM','#22c55e']:pt<=0.1?['MOIST','#ffd24a']:['SOFT','#ff6262'];
-      setc('wxFirmness',firm[0],firm[1]);
+      // The old "Soil Firmness" tile was overwritten here from the station's rain
+      // total. It is gone (2026-08-20) — it inferred soil state from rainfall and sat
+      // next to Soil Condition showing the same idea twice. Real modelled soil moisture
+      // now fills that slot, and the station's rain total still feeds the mow verdict
+      // via rainToday in applyMowVerdict().
       // Wind direction
       if(s.windDirCard!=null){
         var wdDeg=s.winddir!=null?(s.winddir+'&#176; '):'';
@@ -6247,7 +6338,8 @@ syncThemeBtn();
 renderAll();
 (function(){
   function set(id,txt){var e=document.getElementById(id); if(e) e.textContent=txt;}
-  set('wxFirmness','Auto'); set('wxRainNext','Checking'); set('wxHeatStress','Checking'); set('wxLightning','Checking');
+  set('wxRainNext','Checking'); set('wxHeatStress','Checking'); set('wxLightning','Checking');
+  set('wxSoilMoist','Checking'); set('wxRain90','Checking'); set('wxAir','Checking'); set('wxHail','Checking');
 })();
 loadWeather();
 loadIrrigation();
