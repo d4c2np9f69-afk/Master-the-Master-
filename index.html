@@ -5507,6 +5507,12 @@ function loadIrrigationDirect(){
   if(!creds.email||!creds.pass){
     var b=document.getElementById('irrBanner');
     if(b){ b.className='wx-banner wx-no'; b.innerHTML='&#128688; Enter your B-Hyve login below to see your zones'; }
+    // Fixed 2026-08-19: this branch told the user to "enter your B-Hyve login below"
+    // and then returned WITHOUT unhiding the card holding that form, so the message
+    // pointed at nothing — a dead end on any device with no HA token (a new phone, or
+    // Angela on a fresh device). The .catch branch below and irrStart() both already
+    // reveal it; only this path forgot. Matches their exact pattern.
+    var sc0=document.getElementById('irrSetupCard'); if(sc0) sc0.style.display='';
     return;
   }
   var sc=document.getElementById('irrSetupCard'); if(sc) sc.style.display='none';
