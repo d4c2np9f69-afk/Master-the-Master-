@@ -30,78 +30,85 @@ rest_command:
         payload: '{"title": "{{ title }}", "message": "{{ message }}", "duration": {{ duration | default(15) }}, "media": {"image": {"uri": "{{ image_url }}", "width": 480}}}',
       },
   }
+shell_command:
+  archive_clip: bash /config/archive_clip.sh {{ cam }}
+  prune_archive: find /config/www/blink_archive -name "*.mp4" -mtime +7 -delete
+  test_ffmpeg: "ffmpeg -version > /config/www/tmp/ffmpeg_check.txt 2>&1"
+  extract_clip_frame: "ffmpeg -y -i /config/www/blink_clips/{{ cam }}.mp4 -ss 00:00:01 -frames:v 1 -q:v 2 /config/www/blink_clip_frames/{{ cam }}_latest.jpg"
+
 image_processing:
   - {
       platform: codeproject_ai_object,
       ip_address: 192.168.1.194,
       port: 32168,
       timeout: 60,
-      confidence: 60,
+      confidence: 25,
       save_file_folder: /config/www/ai_snapshots/,
       save_file_format: jpg,
       show_boxes: true,
-      targets: [{ target: person }, { target: vehicle }, { target: animal }],
-      source: [{ entity_id: camera.301_backyard }],
+      roi_x_min: 0.15,
+      targets: [{ target: person }, { target: animal }],
+      source: [{ entity_id: camera.301_backyard_clipframe }],
     }
   - {
       platform: codeproject_ai_object,
       ip_address: 192.168.1.194,
       port: 32168,
       timeout: 60,
-      confidence: 60,
+      confidence: 45,
       save_file_folder: /config/www/ai_snapshots/,
       save_file_format: jpg,
       show_boxes: true,
       targets: [{ target: person }, { target: vehicle }, { target: animal }],
-      source: [{ entity_id: camera.301_driveway }],
+      source: [{ entity_id: camera.301_driveway_clipframe }],
     }
   - {
       platform: codeproject_ai_object,
       ip_address: 192.168.1.194,
       port: 32168,
       timeout: 60,
-      confidence: 60,
+      confidence: 25,
       save_file_folder: /config/www/ai_snapshots/,
       save_file_format: jpg,
       show_boxes: true,
       targets: [{ target: person }, { target: vehicle }, { target: animal }],
-      source: [{ entity_id: camera.301_front_doorbell }],
+      source: [{ entity_id: camera.301_front_doorbell_clipframe }],
     }
   - {
       platform: codeproject_ai_object,
       ip_address: 192.168.1.194,
       port: 32168,
       timeout: 60,
-      confidence: 60,
+      confidence: 25,
       save_file_folder: /config/www/ai_snapshots/,
       save_file_format: jpg,
       show_boxes: true,
       targets: [{ target: person }, { target: vehicle }, { target: animal }],
-      source: [{ entity_id: camera.front_right }],
+      source: [{ entity_id: camera.front_right_clipframe }],
     }
   - {
       platform: codeproject_ai_object,
       ip_address: 192.168.1.194,
       port: 32168,
       timeout: 60,
-      confidence: 60,
+      confidence: 25,
       save_file_folder: /config/www/ai_snapshots/,
       save_file_format: jpg,
       show_boxes: true,
       targets: [{ target: person }, { target: vehicle }, { target: animal }],
-      source: [{ entity_id: camera.back_left }],
+      source: [{ entity_id: camera.back_left_clipframe }],
     }
   - {
       platform: codeproject_ai_object,
       ip_address: 192.168.1.194,
       port: 32168,
       timeout: 60,
-      confidence: 60,
+      confidence: 25,
       save_file_folder: /config/www/ai_snapshots/,
       save_file_format: jpg,
       show_boxes: true,
       targets: [{ target: person }, { target: vehicle }, { target: animal }],
-      source: [{ entity_id: camera.garage }],
+      source: [{ entity_id: camera.garage_clipframe }],
     }
 
 http:
@@ -109,3 +116,106 @@ http:
     - https://loewenhome.com
     - https://www.loewenhome.com
     - https://toro1-5rz.pages.dev
+
+recorder:
+  purge_keep_days: 45
+
+# --- HomeKit bridge for Apple TV camera popups (rebuilt 2026-08-14) ---
+homekit:
+  - name: HCC Cameras
+    port: 21081
+    filter:
+      include_entities:
+        - camera.ai_driveway
+        - camera.ai_backyard
+        - camera.ai_front_doorbell
+        - camera.ai_front_right
+        - camera.ai_back_left
+        - camera.ai_garage
+    entity_config:
+      camera.ai_driveway:
+        name: Driveway
+        linked_motion_sensor: binary_sensor.301_driveway_motion
+        linked_doorbell_sensor: binary_sensor.ai_doorbell_301_driveway
+      camera.ai_backyard:
+        name: Backyard
+        linked_motion_sensor: binary_sensor.301_backyard_motion
+        linked_doorbell_sensor: binary_sensor.ai_doorbell_301_backyard
+      camera.ai_front_doorbell:
+        name: Front Doorbell
+        linked_motion_sensor: binary_sensor.301_front_doorbell_motion
+        linked_doorbell_sensor: binary_sensor.ai_doorbell_301_front_doorbell
+      camera.ai_front_right:
+        name: Front Right
+        linked_motion_sensor: binary_sensor.front_right_motion
+        linked_doorbell_sensor: binary_sensor.ai_doorbell_front_right
+      camera.ai_back_left:
+        name: Back Left
+        linked_motion_sensor: binary_sensor.back_left_motion
+        linked_doorbell_sensor: binary_sensor.ai_doorbell_back_left
+      camera.ai_garage:
+        name: Garage
+
+# --- Option B popup timing (2026-08-15): popups fire on CONFIRMED AI detections,
+# --- so the picture is always the current event. auto_off gives tvOS a clean ring.
+template:
+  - trigger:
+      - platform: event
+        event_type: codeproject_ai.object_detected
+        event_data:
+          {
+            entity_id: image_processing.codeproject_ai_object_301_driveway_clipframe,
+          }
+    binary_sensor:
+      - name: AI Doorbell 301 Driveway
+        unique_id: hcc_ai_doorbell_301_driveway
+        state: "true"
+        auto_off: 8
+  - trigger:
+      - platform: event
+        event_type: codeproject_ai.object_detected
+        event_data:
+          {
+            entity_id: image_processing.codeproject_ai_object_301_backyard_clipframe,
+          }
+    binary_sensor:
+      - name: AI Doorbell 301 Backyard
+        unique_id: hcc_ai_doorbell_301_backyard
+        state: "true"
+        auto_off: 8
+  - trigger:
+      - platform: event
+        event_type: codeproject_ai.object_detected
+        event_data:
+          {
+            entity_id: image_processing.codeproject_ai_object_301_front_doorbell_clipframe,
+          }
+    binary_sensor:
+      - name: AI Doorbell 301 Front Doorbell
+        unique_id: hcc_ai_doorbell_301_front_doorbell
+        state: "true"
+        auto_off: 8
+  - trigger:
+      - platform: event
+        event_type: codeproject_ai.object_detected
+        event_data:
+          {
+            entity_id: image_processing.codeproject_ai_object_front_right_clipframe,
+          }
+    binary_sensor:
+      - name: AI Doorbell Front Right
+        unique_id: hcc_ai_doorbell_front_right
+        state: "true"
+        auto_off: 8
+  - trigger:
+      - platform: event
+        event_type: codeproject_ai.object_detected
+        event_data:
+          {
+            entity_id: image_processing.codeproject_ai_object_back_left_clipframe,
+          }
+    binary_sensor:
+      - name: AI Doorbell Back Left
+        unique_id: hcc_ai_doorbell_back_left
+        state: "true"
+        auto_off: 8
