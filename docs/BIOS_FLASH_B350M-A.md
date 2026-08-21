@@ -19,14 +19,34 @@ died in a power cut, which is itself the reason this file exists.
 
 ## Which version to flash
 
-- **6232** (on the stick, Sep 2024) — AGESA **1.2.0.Cc**. Mitigates **Sinkclose**
+- **6232** (staged on the stick, Sep 2024) - AGESA **1.2.0.Cc**. Mitigates **Sinkclose**
   (SMM lock bypass) and fixes **CPU exceptions during sleep/hibernation**.
-- **6254** (2026-02-02) — ASUS's newest for this board, "Improve system compatibility."
-  Supersedes 6232 and contains its fixes.
+- **6254** (2026-02-02) - ASUS's newest for this board. Changelog is only
+  "Improve system compatibility."
 
-**Recommendation: flash 6254, not 6232.** Each flash carries a small risk, so do it once
-and land on ASUS's final state for the board. Ryzen 5 2600 is Pinnacle Ridge and is fully
-supported by this AGESA — no CPU-compatibility risk from going newer.
+**Recommendation: flash 6232 - the one already on the stick.** Reasoning, having gone
+back and forth on this: 6232 carries the two concrete fixes that matter here, and it has
+had two years of field use on this board. 6254 is six months old, its changelog names
+nothing Jeff needs, and last-ever BIOS releases for legacy boards are exactly where odd
+regressions show up. On a board with **no Flashback button**, chasing "newest" for a vague
+compatibility note is the wrong trade when the goal is stability.
+
+6254 stays available if a reason to want it ever appears. There is no need to flash twice.
+
+### Provenance of the staged file (verified 2026-08-21)
+
+Downloaded and staged by the session that was killed by the power cut, ~8 minutes before
+it died - which is why Jeff was never told it was there:
+
+- `PRIME-B350M-A-ASUS-6232.zip` downloaded to Downloads **07:18:36**
+- Extracted via ASUS `BIOSRenamer.exe` to `PRB350MA.CAP` **07:19:03**
+- Copied to the USB stick **09:12:07** (session died 09:32)
+
+SHA-256 is **identical** across the zip, the Downloads copy, and the stick:
+`14f5613c7652e362350328c8f06de3549128e7baccd68f50aca1214a183d9c07`
+
+The stick is Jeff's own Ubuntu installer for the J45 (contents dated 2026-07-01). The
+`.CAP` simply sits alongside it in the root; the installer is unaffected and still usable.
 
 ## Why it is safe to do this NOW and was not safe before
 
