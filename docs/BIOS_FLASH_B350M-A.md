@@ -75,15 +75,57 @@ measurements and would otherwise trigger a recovery-key prompt at next boot.
 6. **Do not touch anything. Do not power off.** It will reboot on its own, possibly
    several times, and may sit on a blank screen for a while. That is normal.
 
+## What this flash will and will not fix
+
+Measured from the event log 2026-08-21, last 60 days. Every Kernel-Power 41 carries a
+BugcheckCode that says which kind of event it was. **Two clearly separate signatures:**
+
+| When | Code | What it actually was |
+|---|---|---|
+| 07-26 18:45 | 0 | power loss (dirty cut) |
+| 07-27 07:36 | 0xEF | blue screen, CRITICAL_PROCESS_DIED |
+| 07-27 10:03 | 0xEF | blue screen, CRITICAL_PROCESS_DIED |
+| 08-07 13:38 | 0 | power loss |
+| 08-19 14:59 | 0 | power loss |
+| 08-20 09:05 | 0 | power loss |
+| 08-20 19:01 | 0xEF | blue screen, CRITICAL_PROCESS_DIED |
+| 08-20 19:21 | 0xEF | blue screen, CRITICAL_PROCESS_DIED |
+| 08-21 09:27 | 0 | power loss - **self-inflicted, Jeff's own UPS wiring work** |
+
+**So, honestly: this BIOS flash fixes neither signature.**
+
+- The **power losses (4 real grid events)** are already fixed - by the UPS, proven
+  end-to-end 08-21. That was the real repair.
+- The **0xEF blue screens** are `CRITICAL_PROCESS_DIED` (csrss), clustered in two pairs
+  ~20 min apart on two days, with Tor Browser open. That is a software fault. A BIOS
+  update does not touch it.
+
+The flash is worth doing for **security** (Sinkclose SMM lock bypass) and the
+sleep/hibernate CPU-exception fix. It is **not** the crash cure. Do not expect it to be.
+
+## Performance and the RAM
+
+The kit is a **DDR4-3000 CL15** kit (`CMK16GX4M2B3000C15`) running at **2933**. That gap
+is the "discrepancy" - and it is **correct behaviour, not a fault.** Zen+ on AM4 uses
+memory dividers in 133 MHz steps; 2933 is a real divider and 3000 is not, so ASUS DOCP
+lands a 3000 kit on 2933 by design. The difference is ~2%, unmeasurable in use. **Do not
+chase 3000 manually** - it risks instability for nothing.
+
+**The flash will not fix the RAM automatically. It does the opposite:** CMOS resets, DOCP
+turns OFF, and RAM drops to JEDEC stock. Re-enable DOCP afterwards to get 2933 back.
+
+**Revised from the earlier advice in this file:** I previously said leave DOCP off to test
+XMP as a crash suspect. The bugcheck data above weakens that badly - four *identical* 0xEF
+codes clustered on two days is a software signature. Genuine memory instability throws
+varied codes (0x1A, 0x4E, 0x50, 0x124), not the same process-death code four times. **XMP
+is a weak suspect. Just turn DOCP back on.**
+
 ## After the flash
 
 - CMOS resets to defaults. Enter BIOS, **Load Optimized Defaults**, then re-apply:
-  boot order, fan curves, and anything else custom.
-- **Leave DOCP/XMP OFF at first.** RAM will drop from 2933 to JEDEC default. This is a
-  free test of the one remaining untested crash suspect — XMP at 2933. Run a few days.
-  If the machine is clean, XMP was never the problem and it can go back on; if it was
-  already clean because of the UPS, that is the answer instead.
-- Re-check: `Get-CimInstance Win32_BIOS` should report the new version.
+  boot order, fan curves, and **DOCP** (back to 2933).
+- Confirm it took: `Get-CimInstance Win32_BIOS | Select SMBIOSBIOSVersion` should no
+  longer read 4207.
 
 ## If it goes wrong
 
