@@ -448,3 +448,52 @@ a few times instead of freezing. NOT built — Jeff's call.
 already on the machine). It is **scratch and can be deleted** — the removal was blocked by a
 path guard. Windows also auto-created **Block** firewall rules pointing at that dead path;
 harmless now, but they are why a "network failure" appeared mid-session (Block beats Allow).
+
+## Fire TV SYNCED to Apple TV (Jeff's request, 2026-08-21 4:07 PM)
+
+Jeff: *"if it fires on the Apple TV, it fires the same thing on the Fire TV... but if it's
+gonna make one work worse without the other I don't want that either."*
+
+**Both are now PERSON-ONLY.** The Fire TV popup got the same person filter that the AI Doorbell
+sensors already apply to the HomeKit/Apple TV path.
+
+**The other direction was REJECTED and here is why:** making Apple TV fire on animals/vehicles
+would mean loosening the AI Doorbell sensors, which reintroduces "somebody's at the door" for
+every cat and car — the exact thing Jeff asked to kill earlier the same day. Narrowing the Fire
+TV costs nothing in picture, speed or red boxes; loosening the Apple TV costs the whole fix.
+
+The parked-GLE and far-field filters were **kept as a second layer** on the Fire TV in case the
+person-only rule is ever loosened.
+
+⚠️ **This is an ALIGNMENT, not a coupling.** The two paths remain completely independent —
+HomeKit/RTSP for Apple TV, PiPup/still for Fire TV. Neither can break the other. That was
+deliberate, per Jeff's caveat.
+
+---
+
+# 🛡️ WILL IT SURVIVE? — what protects this, and what would break it
+
+Jeff's only remaining requirement: *"just make sure it doesn't fail after today's session."*
+
+**Health check, verified 2026-08-21 4:08 PM — ALL GREEN:** go2rtc running, startup task Running,
+CodeProject.AI up, and all six streams served a real frame (144-238 KB each).
+
+| protection | status |
+|---|---|
+| go2rtc survives a reboot | startup task as SYSTEM, auto-restart every 1 min — **proven twice by killing it** |
+| go2rtc.yaml recoverable | mirrored in repo at `windows-config/go2rtc.yaml` |
+| HA config recoverable | `/config/configuration.yaml.bak-20260821-*` on Beehive, several checkpoints |
+| a future session breaking it | loud DO-NOT-UNDO section + `Verify-CameraStreams.ps1` |
+| silent AI death | `HCC - Camera AI Server Heartbeat` alarms if motion continues with no detections |
+
+**The realistic ways this DOES break, in order:**
+
+1. **A future session "tidies" HomeKit back to `camera.ai_<name>`.** This is the big one. Those
+   are stills and cannot stream. Run the verify script.
+2. **The beast is off.** Streams die — but CodeProject.AI is on the same box, so there are no
+   detections either. Not a new failure mode.
+3. **Restoring an HA backup from before 2026-08-21** silently reverts configuration.yaml and
+   undoes the HomeKit repoint, the person-only doorbells and the parked-car filter. **If a
+   restore is ever done, re-check all of it.**
+4. **Someone deletes the 6 Generic Camera config entries** in HA (they are UI config entries,
+   not YAML — a YAML `camera:` block will NOT recreate them; that platform was removed from HA).
