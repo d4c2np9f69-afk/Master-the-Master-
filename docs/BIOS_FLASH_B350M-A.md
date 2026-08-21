@@ -268,6 +268,78 @@ Do **not** chase RAM past 2933 (see divider note above). Secure Boot is optional
 GPT/UEFI so it *can* be enabled, but it is a security nicety, not performance, and enabling
 it on a working install carries a small boot risk. Leaving it off is fine.
 
+## Step-by-step BIOS walkthrough (Jeff is navigating this alone)
+
+Order of the whole operation:
+
+1. Reboot, tap **Del** → BIOS
+2. **F7** if it opens in EZ Mode → Advanced Mode
+3. **Tool → ASUS EZ Flash 3 Utility** → via Storage Device → the stick → `PRB350MA.CAP`
+4. Confirm. **Hands off.** It reboots itself, possibly several times, possibly with a long
+   black screen.
+5. **Pull the USB stick as it restarts** — it is a bootable Ubuntu installer and the boot
+   order was just wiped.
+6. Tap **Del** again to get back into BIOS, then do the six settings below **in this order**.
+
+Menu bar in Advanced Mode:
+`My Favorites | Main | Ai Tweaker | Advanced | Monitor | Boot | Tool | Exit`
+
+If the BIOS offers a **search** (often F9), typing the setting name jumps straight to it.
+
+### 1. Load Optimized Defaults  — **Exit menu** (confirmed in manual)
+
+`Exit` → **Load Optimized Defaults** → Enter → **OK**
+
+**Do this FIRST.** It wipes every setting, so anything set before it is lost. It does not
+leave the BIOS.
+
+### 2. DOCP — **Ai Tweaker** (two steps, not one)
+
+`Ai Tweaker` → first item is **Ai Overclock Tuner**, showing `Auto`.
+
+Change **Ai Overclock Tuner** to **D.O.C.P.**
+
+A **new line appears underneath** — the D.O.C.P. profile. Select the profile (it will read
+something like `DDR4-2998` / Profile #1). **Memory Frequency** should then show ~**2933**.
+
+This is the correction: DOCP is a *value* on Ai Overclock Tuner, not a menu of its own.
+Selecting the profile is a separate second step, and skipping it leaves RAM at 2133.
+
+### 3. SVM Mode — **Advanced → CPU Configuration** (submenu confirmed in manual)
+
+`Advanced` → **CPU Configuration** → scroll to **SVM Mode** → **Enabled**
+
+### 4. fTPM — **Advanced**
+
+`Advanced` → **AMD fTPM configuration** → **AMD fTPM switch** → **AMD CPU fTPM**
+
+If that submenu is not present under the new firmware, look for
+`Advanced` → **Trusted Computing** → **Security Device Support** → **Enable**.
+Wording moved around across AGESA versions; either path is the same thing.
+
+### 5. Boot order — **Boot**
+
+`Boot` → **Boot Option Priorities** → **Boot Option #1**
+
+Choose **Windows Boot Manager** if it is listed — that is the proper UEFI entry. Otherwise
+choose the **ADATA SU650** (223.6 GB). Do this *after* the stick is out, so the stick cannot
+occupy the slot.
+
+### 6. Save — **F10** → **OK**
+
+Machine reboots into Windows.
+
+### If something is missing or worded differently
+
+**Do not force it.** The 2018 manual predates this firmware, so names can shift. Set what is
+findable, save, boot, and I will read back all of it from Windows and say exactly what is
+still wrong — that is cheaper than guessing at a menu.
+
+### Expect this on first boot
+
+The **Windows Hello PIN may be rejected** (fTPM reset — see the verification section). Sign
+in with the **Microsoft account password**, then re-create the PIN.
+
 ## After the flash — what I can and cannot verify from Windows
 
 I cannot enter BIOS setup; that is pre-boot with no OS. But from Windows I **can** read back
