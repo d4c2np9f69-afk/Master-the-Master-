@@ -199,6 +199,56 @@ Integrity or Credential Guard. Reclaiming that small Zen+ overhead is a **Window
 change needing no BIOS trip, so it can be tested and measured any time. Jeff has asked to
 keep SVM on - **leave this alone unless he raises it.**
 
+## FULL VERIFICATION PASS — 2026-08-21, at Jeff's request before flashing
+
+He asked for everything to be re-checked so this is done once, nothing breaks, and nothing
+gets silently switched off. Findings below are independently verified, not carried over.
+
+### 🔴 THE ONE REAL RISK FOUND: the Windows Hello PIN will probably stop working
+
+A Windows Hello **PIN is configured** on this machine (NGC container has 2 entries) and Jeff
+signs in with a **Microsoft account**, not a local account. A BIOS update commonly resets the
+AMD fTPM, which destroys the TPM-held keys Windows Hello uses. This is well documented and
+expected behaviour, not a failure.
+
+**Consequence: after the flash the PIN may be rejected, and the Microsoft account PASSWORD
+becomes the only way back in.**
+
+- **BEFORE flashing:** confirm the Microsoft account password is known / in Bitwarden.
+  See [[project_hcc_password_vault_legacy]].
+- **Recovery if the PIN fails:** sign in with the password → Settings → Accounts →
+  Sign-in options → PIN → set it up again.
+- If the PIN cannot be re-created, run `tpm.msc`, confirm "The TPM is ready for use", and if
+  not, use **Prepare the TPM**, reboot, retry.
+- Keep **fTPM Enabled** in BIOS (checklist item 4) — that is what minimises this.
+
+### ✅ Verified safe — each checked this session
+
+| Check | Result |
+|---|---|
+| File matches board | `PRB350MA.CAP` for PRIME B350M-A; SHA-256 **identical** across zip, Downloads copy and stick; 11,264,070 B = the 10.74 MB ASUS publishes for 6232 |
+| USB meets EZ Flash spec | ASUS requires **FAT32/16, single partition**. Stick is FAT32, **exactly 1 partition**, `.CAP` in root ✓ |
+| Staged update needed? | **No.** ASUS notes for 6232 name no prerequisite version. Direct 4207 → 6232 is supported |
+| Irreversible / no rollback? | **No such warning** in ASUS's notes for 6232 or 6254 |
+| CPU still supported? | **Yes.** The AM4 support that gets dropped is **Bristol Ridge A-series APUs**. Ryzen 5 2600 is Pinnacle Ridge, core ComboAM4 support |
+| BitLocker lockout risk | **None.** C:, D:, E: all Fully Decrypted, Protection Off — re-verified |
+| Will it still boot? | **Yes.** ESP healthy on Disk0 Part2 with `\EFI\Microsoft\Boot\bootmgfw.efi` **and the fallback `\EFI\Boot\bootx64.efi`** — boots even if the flash wipes all NVRAM boot entries |
+| Settings will stick? | **VBAT 3.23 V** — CMOS battery healthy. A weak one is why post-flash settings get lost |
+| Power safety | UPS in line, **proven** by live plug-pull 08-21. A cut mid-flash is the brick case, and this board has **no Flashback and no dual BIOS** |
+| PSU health | +12V 11.97 / +5V 4.96 / +3.3V 3.29 — all in spec |
+
+### Version choice re-confirmed — and ASUS settles it
+
+**ASUS lists 6254 as BETA.** That independently confirms flashing **6232**, the stable release.
+6232's actual notes: *"Updated AGESA to version ComboV2PI 1.2.0.Cc"* and a fix for a CPU
+exception when adjusting sleep/hibernate/soft-off items **in certain languages** (a
+localisation bug — narrower than "a stability fix", and almost certainly irrelevant in
+English). 1.2.0.Cc is the AGESA generation carrying AMD's Sinkclose mitigation.
+
+So the honest value of this flash is **six years of accumulated AGESA and security fixes**
+and landing on a stable, supported firmware — which is exactly the longevity reason Jeff
+gave. It remains **not** a fix for either crash signature.
+
 ## THE CHECKLIST — what to set while you are in there
 
 The flash resets CMOS, so **all of these turn themselves off.** Set them in one pass.
