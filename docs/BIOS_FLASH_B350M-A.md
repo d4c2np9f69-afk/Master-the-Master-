@@ -359,3 +359,70 @@ Re-run the baseline block above after booting and compare line by line.
 The PRIME B350M-A has **no BIOS Flashback button** and no dual BIOS. A failed flash means
 the chip needs external reprogramming or an RMA. That is precisely why the UPS goes first
 and why the flash happens once, to the newest version, on a charged battery.
+
+---
+
+# RESULT — flash completed 2026-08-21
+
+**BIOS 4207 → 6232. Success. No regressions, nothing silently reset.**
+
+Started 11:08 AM, verified 12:07 PM via `windows-scripts\Verify-PostFlash.ps1`
+(one command, diffs every CMOS-wiped setting against the 4207 baseline).
+
+## Settings readback — all clean
+
+| Setting | Result |
+|---|---|
+| BIOS version | **6232** |
+| SVM (virtualisation) | True |
+| Hypervisor running | True |
+| Windows VirtualMachinePlatform | Enabled |
+| fTPM | Enabled — **PIN was NOT rejected, no re-enrol needed** |
+| Firmware mode | UEFI |
+| BitLocker C: | Off (as required) |
+| RAM sticks / slots | 2 × DIMM_A2, DIMM_B2 (dual-channel intact) |
+| Boot disk | ADATA SU650 |
+
+## RAM — the one line that flagged, and why it is GOOD news
+
+`Verify-PostFlash.ps1` flagged "RAM configured clock 3000, expected 1467". That expectation
+was the old WMI reading, not a fault. CPU-Z proves the sticks got **faster**:
+
+| | BIOS 4207 | BIOS 6232 |
+|---|---|---|
+| DRAM Frequency | 1463.2 MHz (**2926 MT/s**) | 1499.8 MHz (**3000 MT/s**) |
+| Timings | CL16-17-17-35, CR 1T | CL16-17-17-35, CR 1T |
+
+The sticks are rated **XMP-2998**. Old AGESA fell 72 MT/s short of the profile; the new one
+applies it in full at identical timings and voltage. DOCP is on and working.
+
+**Live evidence:** `tools\cpuz-BEFORE-flash-4207.txt` vs `tools\cpuz-AFTER.txt`
+(in `C:\Users\jeffl\HCC-Scripts\tools\`).
+
+⚠️ **Crash-investigation note:** RAM XMP was one of two untested suspects in the
+2026-08-19/20 crashes (the other, stale NVIDIA driver, is still untested). The crashes were
+subsequently traced to **bad line power** and proven fixed by the APC BN600 on 08-21. But the
+RAM is now running 74 MT/s *faster* than it was during those crashes. If csrss 0xEF ever
+returns, **the first move is Ai Tweaker → Ai Overclock Tuner → Auto** to drop to JEDEC and
+re-test. Do not re-litigate the power line first — that one is proven.
+
+## Performance diff (winsat, same machine, same day)
+
+| Benchmark | 4207 | 6232 | Delta |
+|---|---|---|---|
+| Memory | 32654.09 MB/s | 31839.39 MB/s | −2.5% (run-to-run noise) |
+| CPU AES256 | 9869.72 MB/s | 9971.17 MB/s | +1.0% |
+| CPU LZW | 788.35 MB/s | 793.30 MB/s | +0.6% |
+| Disk seq read | 305.25 MB/s | 304.16 MB/s | flat |
+| Disk seq write | 158.06 MB/s | 460.91 MB/s | see below |
+
+Performance is **functionally identical** — the CPU/mem deltas are inside noise. The flash
+was for AGESA/stability, not speed, and that is exactly what it delivered.
+
+**Do not credit the flash for the disk write number.** The SU650 is a DRAM-less SATA SSD
+whose rated write is ~450–520 MB/s; the 158 MB/s baseline was almost certainly captured with
+its SLC cache exhausted. 460 MB/s is the drive's normal healthy speed, not an improvement.
+
+## Still open on this machine
+
+- **Stale NVIDIA driver** — the remaining untested crash suspect. Cheap to close.

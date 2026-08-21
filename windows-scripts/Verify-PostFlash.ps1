@@ -21,7 +21,7 @@ function Check($name, $actual, $expected, $note) {
 }
 
 Write-Host "`n=== POST-FLASH VERIFICATION - Beast / PRIME B350M-A ===" -ForegroundColor Cyan
-Write-Host "    baseline: BIOS 4207, captured 2026-08-21`n"
+Write-Host "    baseline: BIOS 6232, post-flash 2026-08-21`n"
 
 $bios = Get-CimInstance Win32_BIOS
 Write-Host ("BIOS VERSION NOW : {0}   (was 4207, target 6232)" -f $bios.SMBIOSBIOSVersion) -ForegroundColor Yellow
@@ -41,7 +41,9 @@ Check 'Windows VirtualMachinePlatform' $vmp 'Enabled' 'Windows-side, should surv
 
 $mem = Get-CimInstance Win32_PhysicalMemory
 $speed = ($mem | Select-Object -First 1).ConfiguredClockSpeed
-Check 'RAM configured clock (MHz)' $speed '1467' 'DOCP off? Ai Tweaker > Ai Overclock Tuner > D.O.C.P. THEN pick the profile line'
+# 4207 reported 1467 (=2926 MT/s). 6232's AGESA applies the sticks' full XMP-2998 and
+# reports 3000. Verified by CPU-Z 2026-08-21 - 1499.8 MHz, CL16-17-17-35 1T. 3000 is CORRECT.
+Check 'RAM configured clock (MHz)' $speed '3000' 'DOCP off? Ai Tweaker > Ai Overclock Tuner > D.O.C.P. THEN pick the profile line. (On BIOS 4207 this read 1467.)'
 Check 'RAM stick count' ($mem | Measure-Object).Count '2' ''
 $slots = ($mem | ForEach-Object { $_.DeviceLocator }) -join ','
 Check 'RAM slots' $slots 'DIMM_A2,DIMM_B2' 'dual-channel pair - must not move'
