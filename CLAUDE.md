@@ -82,6 +82,41 @@ Jeff wants this to feel like two friends building something together Ã¢â‚¬
 
 ## Ã°Å¸â€â€™ SETTLED DECISIONS Ã¢â‚¬â€ DO NOT RE-PROPOSE THESE (PROTECTED)
 
+### 🔴🔴 DO NOT TOUCH THE BLINK CAMERAS WITHOUT JEFF'S EXPLICIT AUTHORIZATION 🔴🔴
+**Jeff's standing rule, 2026-08-21 4:12 PM. This is a HARD STOP, not a preference.**
+
+The camera stack was finally made to work on 2026-08-21 after a very long session — Apple TV
+popups went from a 30-second spinning circle with no picture, to **instant, live, with red
+boxes**, on all six cameras. Jeff: *"That worked freaking perfect. It's the best one ever."*
+
+**Before changing ANYTHING in the camera stack — cameras, Blink, HomeKit, go2rtc, the AI
+scanners, the doorbell sensors, the popups — you must ASK JEFF AND GET A CLEAR YES.**
+"It looks wrong", "this seems redundant", "I'll just tidy this up" are NOT authorization.
+
+**FIRST, ALWAYS:** `.\windows-scripts\Verify-CameraStreams.ps1` (before AND after).
+**THEN READ:** `docs/incidents/camera_fixes_2026-08-21.md` — the full write-up, including
+every dead end already paid for.
+
+**The single fastest way to destroy it:** pointing HomeKit back at `camera.ai_<name>`.
+Those are `local_file` STILLS that cannot stream — that IS the 30-second-spinner bug.
+HomeKit must stay on `camera.ai_driveway_live`, `ai_backyard_live`, `ai_front_doorbell_live`,
+`ai_front_right_live`, `ai_back_left_live`, `ai_garage_live`.
+
+**Already ruled out WITH EVIDENCE — do not re-litigate, do not "just try it":**
+- **No local Blink feed exists.** Port scan of the live Blink device `192.168.1.214`: every
+  port closed (554, 80, 443, 8080, 1935, 8000, 8554…). Cloud-only by design.
+- **Blink gives ONE still per explicit trigger.** Three `camera.snapshot` calls 3 s apart were
+  byte-identical; `blink.trigger_camera` changed the md5 within 5 s, then it froze again.
+  **Polling Blink for liveness is what caused the 2026-08-19 lockout.**
+- **PiPup cannot render video** on the Fire TV; a clip test probably froze the Fire Stick.
+- **Never set `always_save_latest_file`** — it wipes the red boxes on zero-target scans.
+- **Blink RTSP / HomeKit Secure Video** remain on the never-re-propose list.
+
+⚠️ **Restoring an HA backup from before 2026-08-21 silently reverts all of this** — the
+HomeKit repoint, the person-only doorbells and the parked-car filter — with no error shown.
+If a restore ever happens, re-verify every one of them.
+
+
 **Jeff has settled these. Re-pitching any of them wastes his money, his time, and his patience.
 If a session is about to suggest one of these, it has not done its reading. Added 2026-08-16 after
 a session re-proposed the Inovelli dimmers he had already killed Ã¢â‚¬â€ because nobody wrote it down.**
