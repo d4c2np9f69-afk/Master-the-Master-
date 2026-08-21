@@ -164,6 +164,41 @@ Note the rails and VBAT: a healthy PSU and a healthy CMOS battery are both indep
 evidence against the "sick computer" theory, and VBAT matters specifically because the flash
 depends on CMOS holding the settings afterwards.
 
+### Why SVM is on, and what actually resets (settled 2026-08-21)
+
+Jeff remembered having to go into the BIOS himself "before Claude could work in the
+machine," and he is right. Claude Code on Windows originally **required WSL**, and WSL2
+requires **SVM enabled in BIOS** plus **VirtualMachinePlatform in Windows**. That was the
+BIOS trip. Evidence: `C:/Windows/System32/lxss` still exists, no distro packages remain,
+and Claude Code now runs natively from `C:/Users/jeffl/.local/bin/claude.exe`.
+
+So the requirement is historical - the native build needs neither - but the switches
+stayed on and Jeff wants them kept. Fine, and nearly free.
+
+**Which half the flash actually resets:**
+
+| Setting | Where it lives | Survives the flash? |
+|---|---|---|
+| **SVM Mode** | BIOS / CMOS | **NO - wiped, must be re-enabled** |
+| **VirtualMachinePlatform** | Windows | **Yes - untouched** |
+
+So only the BIOS toggle needs restoring. Turn SVM back on and the machine returns to
+exactly the state captured below - the Windows feature never left.
+
+**Verify after boot - all three must read as they do today:**
+
+```
+BIOS SVM (Win32_Processor.VirtualizationFirmwareEnabled)  True
+Hypervisor running (Win32_ComputerSystem.HypervisorPresent) True
+Windows VirtualMachinePlatform                            Enabled
+```
+
+Aside, not a recommendation: VBS is running (status 2) with
+`SecurityServicesRunning = 0`, i.e. the hypervisor is active but providing no Memory
+Integrity or Credential Guard. Reclaiming that small Zen+ overhead is a **Windows-side**
+change needing no BIOS trip, so it can be tested and measured any time. Jeff has asked to
+keep SVM on - **leave this alone unless he raises it.**
+
 ## THE CHECKLIST — what to set while you are in there
 
 The flash resets CMOS, so **all of these turn themselves off.** Set them in one pass.
