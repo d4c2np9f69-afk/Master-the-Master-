@@ -47,19 +47,50 @@ for e, label in watch.items():
     bits.append(f"{label}={v['state'] if v else 'MISSING'}")
 print("  " + " | ".join(bits))
 
-# anything that should fire daily but hasn't in 36h
+# anything that should fire daily but hasn't in 36h.
+# NOTE 2026-08-21: name-matching alone is WRONG - it flagged "HCC - Clip Archive"
+# (event-driven on codeproject_ai.object_detected) as a missed DAILY job for hours.
+# A stale candidate is only reported as "daily" if it really has a time trigger.
 now = datetime.datetime.now(datetime.timezone.utc)
-stale = []
+def is_scheduled(auto_id):
+    """True only if the automation actually has a time/sun trigger."""
+    try:
+        cfg = ha("/api/config/automation/config/" + auto_id, 20)
+    except Exception:
+        return True  # can't tell - report it rather than hide it
+    trigs = cfg.get("triggers") or cfg.get("trigger") or []
+    if isinstance(trigs, dict):
+        trigs = [trigs]
+    sched = ("time", "time_pattern", "sun", "calendar")
+    return any((t.get("trigger") or t.get("platform")) in sched for t in trigs if isinstance(t, dict))
+
+stale, quiet = [], []
 for a in autos:
     lt = a["attributes"].get("last_triggered")
     fn = a["attributes"].get("friendly_name", "")
+    aid = a["attributes"].get("id")
     if not any(k in fn.lower() for k in ("digest", "overnight", "archive", "daily")):
         continue
     if not lt:
-        stale.append(fn + " (NEVER)")
-    else:
-        age = (now - datetime.datetime.fromisoformat(lt.replace("Z", "+00:00"))).total_seconds() / 3600
-        if age > 36:
-            stale.append(f"{fn} ({age:.0f}h ago)")
+        (stale if (aid and is_scheduled(aid)) else quiet).append(fn + " (NEVER)")
+        continue
+    age = (now - datetime.datetime.fromisoformat(lt.replace("Z", "+00:00"))).total_seconds() / 3600
+    if age > 36:
+        (stale if (aid and is_scheduled(aid)) else quiet).append(f"{fn} ({age:.0f}h ago)")
 if stale:
     print("  DAILY AUTOMATIONS NOT FIRING: " + "; ".join(stale[:4]))
+if quiet:
+    print("  event-driven, no events (not necessarily a fault): " + "; ".join(quiet[:4]))
+
+# CodeProject.AI runs on THIS PC (301Server/.194). Every beast reboot or crash takes
+# the whole house's camera AI down silently - that is exactly what the 38h detection
+# gap on 2026-08-21 turned out to be. Cheap local check, so always do it.
+try:
+    import urllib.request as _u
+    with _u.urlopen("http://127.0.0.1:32168/v1/status/ping", timeout=5) as _r:
+        if json.loads(_r.read().decode()).get("success"):
+            print("  CodeProject.AI: UP on this PC")
+        else:
+            print("  *** CodeProject.AI answered but not OK - camera AI is DOWN ***")
+except Exception:
+    print("  *** CodeProject.AI DOWN on this PC - no camera detections will fire ***")
