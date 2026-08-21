@@ -364,3 +364,87 @@ clobbered, copy the repo version back and run
 | Apple TV popup | ~30 s, still image, NO red boxes | **instant, LIVE video, red boxes** |
 | HA event -> HomeKit doorbell | n/a | 0.6-2.0 s |
 | RTSP cold first frame | n/a (no stream existed) | 2.6 s |
+
+---
+
+# Session close-out — what else got built, tested, and RULED OUT
+
+## Pre-warm on detection (fixes the cold-start Jeff caught)
+
+go2rtc starts ffmpeg only when a client connects. So the FIRST popup for a camera nobody has
+viewed recently waits ~2.6 s for the encoder to spin up.
+
+**Jeff caught this himself and it disproved a theory in the process:** Back Left was slow, and
+Back Left is his **CLOSEST** camera. Driveway and backyard felt instant only because they had
+just been probed. **Distance has nothing to do with popup speed.**
+
+`automation.hcc_pre_warm_camera_stream_on_detection` pokes go2rtc's frame API the instant a
+detection fires — about a second before tvOS connects — so the encoder is already running.
+Costs **nothing at idle**. Keeping all six streams permanently warm was measured at ~2.4% CPU
+each, which is why this approach was chosen instead.
+
+## Garage Work Mode — Jeff can turn garage motion back ON
+
+Jeff had garage motion OFF because working out there set it off constantly; person detection
+cannot tell him from a stranger.
+
+`input_boolean.garage_work_mode` + `automation.hcc_garage_work_mode`. It reuses the existing
+per-camera mute (`input_datetime.hcc_ai_mute_garage`) that the notification's "Mute 15 min"
+button already uses — nothing new invented.
+
+**Verified both directions:**
+
+| | `hcc_ai_mute_garage` |
+|---|---|
+| before | `2020-01-01` (armed) |
+| work mode ON | `2026-08-21 18:49` (+3h) |
+| work mode OFF | `2020-01-01` (re-armed instantly) |
+
+⚠️ **The 3-hour auto-expiry is deliberate — do not remove it.** A mute with no expiry is how a
+camera quietly stops protecting the house.
+
+## Fire TV — video RULED OUT, still image is correct. Do not re-try blind.
+
+| attempt | result |
+|---|---|
+| continuous `stream.mp4` | nothing rendered |
+| finite 3 s clip (4.5 MB) | nothing rendered, and **probably froze the Fire Stick** |
+| image popup, seconds later | **worked** — so PiPup itself is healthy |
+
+**PiPup cannot render video on this build.** The still is also the FASTER path (~1 s direct LAN
+push, versus Apple TV going out through Apple's servers) and carries the same red boxes.
+If ever revisited: try a ~300 KB one-second clip, and **not** while Jeff is watching something.
+
+**Also fixed:** the Fire TV popup had **NO conditions at all** — it fired for every detection,
+including Jeff's own parked GLE (~90% "car" on every driveway scan). A screenshot caught it
+popping "Car detected - Driveway 57%" over a movie. It now uses the same filter as the phone.
+Its text also printed the raw entity_id; now reads "Person detected / Driveway - 93%".
+
+## 🔴 RULED OUT WITH EVIDENCE — do not spend another session on these
+
+**1. There is NO local Blink feed. None.** Port scan of the live Blink device `192.168.1.214`
+(MAC 40:89:c6, Amazon): **every port closed** — RTSP 554, HTTP 80/443/8080/8081, RTMP 1935,
+ONVIF 8000, 8554, 5000, 9000, 88, 7001. Blink is cloud-only by design.
+
+**2. Blink gives ONE still per explicit trigger — there is no live feed to tap.** Measured:
+
+| | md5 |
+|---|---|
+| three `camera.snapshot` calls, 3 s apart | `7fbe7731d4`, `7fbe7731d4`, `7fbe7731d4` — identical |
+| after `blink.trigger_camera` | `0555e29ba4` — changed within 5 s |
+| +10 s, +15 s with no new trigger | `0555e29ba4` — frozen again |
+
+`camera.snapshot` returns Blink's **cached thumbnail**, not a fresh capture. A true live view
+would mean triggering every few seconds — **which is exactly what caused the 2026-08-19 Blink
+lockout** (307 "System is busy", 2102 "Manifest stale", forced re-auth). This is also why
+blinkbridge exists and why even it carries ~30 s latency.
+
+**Still possible if ever wanted:** 3-4 triggers over ~15 s on motion only, so the popup updates
+a few times instead of freezing. NOT built — Jeff's call.
+
+## Cleanup note
+
+`C:\HCC-Stream\` was this session's redundant download (go2rtc + a 162 MB ffmpeg that was
+already on the machine). It is **scratch and can be deleted** — the removal was blocked by a
+path guard. Windows also auto-created **Block** firewall rules pointing at that dead path;
+harmless now, but they are why a "network failure" appeared mid-session (Block beats Allow).
