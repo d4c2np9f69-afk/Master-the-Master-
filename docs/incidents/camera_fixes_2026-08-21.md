@@ -240,3 +240,96 @@ Verified: **no HA automation fires on restart** that would announce anything. Th
 almost certainly the Alexa Smart Home skill **re-syncing exposed entities** on HA start and
 announcing rediscovered devices — `scene.turn_on_sharky` is a prime suspect.
 **Not fixed. Next step: stop exposing that scene to Alexa** (no restart needed).
+
+---
+
+# ✅ SOLVED — the Apple TV popup, 2026-08-21 3:25 PM
+
+**Jeff, on seeing it work:** *"That worked freaking perfect. It's the best one ever and it
+was fast as soon as I got the warning it popped up on the TV."* — and, on a second camera
+while watching the Braves game: *"Perfect and fast."* Photo confirms a picture-in-picture
+popup with the **LIVE** badge over live TV.
+
+## 🔴 DO NOT UNDO THIS. READ BEFORE TOUCHING THE CAMERA STACK.
+
+**The HomeKit cameras MUST stay pointed at the `*_live` entities:**
+
+```
+camera.ai_driveway_live        camera.ai_front_right_live
+camera.ai_backyard_live        camera.ai_back_left_live
+camera.ai_front_doorbell_live  camera.ai_garage_live
+```
+
+**Pointing HomeKit back at `camera.ai_<name>` (the local_file stills) IS THE BUG.** Those
+cannot stream. Doing that reintroduces the 30-second spinning circle and the box-less
+picture. This took a long session to find; do not "tidy" it away.
+
+**Health check, one command, run it before AND after any camera work:**
+`.\windows-scripts\Verify-CameraStreams.ps1`
+
+## The architecture now
+
+```
+Blink PIR motion
+  -> hcc_snapshot_frame_on_motion  (camera.snapshot -> raw frame)
+  -> image_processing.scan         (CodeProject.AI on the BEAST :32168)
+  -> annotated red-box JPEG        /config/www/ai_snapshots/..._latest.jpg
+       |                                   |
+       |                                   +--> go2rtc on the BEAST :8554
+       |                                        (ffmpeg loops the JPEG -> H264 RTSP)
+       |                                                 |
+       +--> AI Doorbell binary_sensor (person only)      +--> camera.ai_*_live (generic)
+                       |                                              |
+                       +----------> HomeKit bridge <------------------+
+                                          |
+                                    Apple TV popup  ->  INSTANT, LIVE, with red boxes
+```
+
+## Why it was broken, definitively
+
+`homekit.type_cameras: "Camera has no stream source"` at 13:52:33, `pyhap` giving up at
+13:53:03 — **exactly the 30 seconds Jeff saw**. tvOS demands live video from a doorbell
+accessory; a `local_file` still cannot provide it, so tvOS timed out and fell back to a
+still with no annotation. HA itself served that still in **0.03 s**, so the delay was never
+ours. Jeff described it independently: *"it sits there and has a circle spinning waiting for
+a video file."*
+
+## What was installed, and where — all $0, all reversible
+
+**go2rtc + ffmpeg were ALREADY on this PC** at `C:\Users\jeffl\HCC-Scripts\go2rtc\`
+(ffmpeg since 08-12, set up 08-15 for the Kiyo webcam "front_yard" feed) **with firewall
+rules already open for 1984/8554/8555.** That existing install is what we use.
+
+⚠️ **SEARCH THE MACHINE BEFORE DOWNLOADING ANYTHING.** This session downloaded a redundant
+162 MB ffmpeg into `C:\HCC-Stream\` before finding the copy that was already there. Windows
+also auto-created **Block** firewall rules for that stray path (Block beats Allow), which
+looked like a mystery network failure. `C:\HCC-Stream\` is scratch and can be deleted.
+
+- `go2rtc.yaml` holds all 6 AI streams **plus the pre-existing `front_yard` Kiyo stream —
+  do not remove that one.** Backup: `go2rtc.yaml.bak-20260821-preclaude`.
+- Startup task **`HCC go2rtc camera streams`** — runs as SYSTEM at boot, auto-restarts every
+  minute if it dies. **Verified by killing go2rtc and starting it via the task: it came back
+  and the stream served a 211 KB frame.** Without this, a reboot silently kills every popup.
+- HA side: 6 **Generic Camera** config entries (UI flow — the `generic` camera YAML platform
+  has been REMOVED from HA; a YAML `camera:` block passes `ha core check` and silently
+  creates nothing).
+
+## Gotchas paid for the hard way
+
+- **`-pix_fmt yuv420p` is mandatory** — HomeKit renders black without it.
+- **`-stream_loop -1 -f image2`** keeps frames flowing even though the JPEG only changes on a
+  real detection. Without it ffmpeg emits one frame and exits ("Stream ended; no additional
+  packets").
+- go2rtc's shorthand `ffmpeg:<url>#input=...` returned **"streams: unknown error"** on
+  v1.9.14 here. The **`exec:`** form works.
+- The 5 bulk-created Generic Cameras all arrived named `192_168_1_66`. They were mapped to
+  the right cameras **by md5-matching each entity's served image against the known
+  per-camera annotated file** — not by assuming creation order — then renamed.
+
+## Still open
+
+- **Fire TV** — its PiPup popup already fires in ~1 s with the annotated still. It is a
+  separate path from Apple TV and was NOT changed. Whether it should also carry live video
+  is Jeff's call.
+- **Backyard stream is a low-res 19 KB night frame** (the others are 150-240 KB) because
+  that is still the last real backyard detection. It self-corrects on the next one.
