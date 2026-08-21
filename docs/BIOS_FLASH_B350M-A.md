@@ -120,12 +120,55 @@ codes clustered on two days is a software signature. Genuine memory instability 
 varied codes (0x1A, 0x4E, 0x50, 0x124), not the same process-death code four times. **XMP
 is a weak suspect. Just turn DOCP back on.**
 
-## After the flash
+## Baseline captured BEFORE the flash (2026-08-21 10:27, BIOS 4207)
 
-- CMOS resets to defaults. Enter BIOS, **Load Optimized Defaults**, then re-apply:
-  boot order, fan curves, and **DOCP** (back to 2933).
-- Confirm it took: `Get-CimInstance Win32_BIOS | Select SMBIOSBIOSVersion` should no
-  longer read 4207.
+Everything below is what a correct machine looks like. After the flash, compare against it.
+
+```
+CPU            AMD Ryzen 5 2600, 6C/12T, 3400 MHz, L3 16384 KB
+SVM (virt)     True                     <-- Nox Android emulator needs this
+RAM            2 x 8GB Corsair CMK16GX4M2B3000C15
+               slots DIMM_A2 + DIMM_B2  <-- correct dual-channel pair, do not move
+               running 1467 MHz = 2933 MT/s  (DOCP on)
+Total RAM      15.93 GB
+Firmware       UEFI       Secure Boot: False      fTPM: enabled, 3.5.0.3
+Disks          Disk0 ADATA SU650 223.6GB GPT (boot)
+               Disk1 ST2000DM006 1863GB GPT
+Power plan     Ultimate Performance
+```
+
+## THE CHECKLIST — what to set while you are in there
+
+The flash resets CMOS, so **all of these turn themselves off.** Set them in one pass.
+
+0. **PULL THE USB STICK the moment the flash finishes**, before letting it boot Windows.
+   That stick is a bootable Ubuntu installer and the boot order was just wiped - leaving it
+   in risks booting into Ubuntu instead of Windows.
+1. **Load Optimized Defaults** first (clean base), then:
+2. **Ai Tweaker → DOCP → Profile 1** - puts RAM back to 2933. Without this it sits at 2133.
+3. **Advanced → CPU Configuration → SVM Mode → Enabled** - **Nox will not run without it.**
+4. **Advanced → AMD fTPM configuration → fTPM → Enabled** - Windows 11 wants it.
+5. **Boot → Boot Option #1 → ADATA SU650** (the 223.6GB SSD).
+6. **F10** to save and exit.
+
+Leave Cool'n'Quiet and C-States ON - that is the efficiency half, and it costs no speed.
+Do **not** chase RAM past 2933 (see divider note above). Secure Boot is optional: disks are
+GPT/UEFI so it *can* be enabled, but it is a security nicety, not performance, and enabling
+it on a working install carries a small boot risk. Leaving it off is fine.
+
+## After the flash — what I can and cannot verify from Windows
+
+I cannot enter BIOS setup; that is pre-boot with no OS. But from Windows I **can** read back
+the result of nearly every setting and diff it against the baseline above:
+
+**Verifiable:** BIOS version, RAM speed + slots + total, SVM/virtualisation state, fTPM,
+Secure Boot, UEFI vs Legacy, GPT/MBR, disks + bus types, boot order, power plan, CPU clocks.
+
+**NOT verifiable without a tool:** RAM *timings* (CL/tRCD/tRP), real DRAM voltage, fan
+curves, C-state detail. SMBIOS reports voltage as a nominal 1200mV regardless of truth.
+CPU-Z (free) would close that gap if it is ever worth it.
+
+Re-run the baseline block above after booting and compare line by line.
 
 ## If it goes wrong
 
