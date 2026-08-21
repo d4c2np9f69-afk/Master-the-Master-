@@ -333,3 +333,34 @@ looked like a mystery network failure. `C:\HCC-Stream\` is scratch and can be de
   is Jeff's call.
 - **Backyard stream is a low-res 19 KB night frame** (the others are 150-240 KB) because
   that is still the last real backyard detection. It self-corrects on the next one.
+
+## ⚡ The last 5 seconds — keyframe interval (Jeff: *"That was instant"*)
+
+First working version popped in **~7 seconds**. Our side was only 1.0 s of that; the rest was
+Apple TV waiting to render.
+
+**Cause: `-g 15` at `-framerate 5` = one keyframe every 3 SECONDS.** A decoder cannot render
+anything until it receives a keyframe, so tvOS sat idle waiting for one. The picture is a
+static image, so keyframes cost almost nothing here.
+
+**Fix: `-framerate 10 -g 10` = one keyframe EVERY SECOND.** Measured backyard cold-start
+first-frame latency afterwards: **2.6 s including ffmpeg spin-up** (was up to 3 s of pure
+keyframe wait on top of that).
+
+Result, Jeff's words: **"That was instant."**
+
+⚠️ **Do not raise `-g` back up to "save bandwidth".** These are static images; the bitrate
+saving is negligible and the cost is seconds of visible delay on every popup.
+
+The working config is mirrored in this repo at **`windows-config/go2rtc.yaml`** — the live
+file is `C:\Users\jeffl\HCC-Scripts\go2rtc\go2rtc.yaml`. If the live one is ever lost or
+clobbered, copy the repo version back and run
+`Start-ScheduledTask -TaskName "HCC go2rtc camera streams"`.
+
+**Timing ladder, measured today:**
+
+| stage | before | after |
+|---|---|---|
+| Apple TV popup | ~30 s, still image, NO red boxes | **instant, LIVE video, red boxes** |
+| HA event -> HomeKit doorbell | n/a | 0.6-2.0 s |
+| RTSP cold first frame | n/a (no stream existed) | 2.6 s |
