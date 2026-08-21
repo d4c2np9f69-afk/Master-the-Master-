@@ -85,3 +85,36 @@ if ($IncludeActions) {
 }
 
 
+
+# ---------------------------------------------------------------------------
+# REFERENCE GUIDES in iCloud\HCC-Archive (added 2026-08-21, Jeff's request:
+# "make it searchable in iCloud, so that future sessions can search for it if
+# something goes wrong").
+#
+# WHY THIS WAS ADDED: this script only ever searched the MASTER-RECORD subfolder,
+# so the how-to guides sitting in HCC-Archive itself - FAMILY_RUNBOOK,
+# BEEHIVE_REFERENCE, UTILITIES_REFERENCE, CAMERA_POPUP_REBUILD_GUIDE and the rest
+# - were INVISIBLE to search. A search for "Fire TV Apple TV sync" returned
+# nothing on 2026-08-21 for exactly that reason. An unsearchable guide is no
+# better than no guide.
+# ---------------------------------------------------------------------------
+$guides = "C:\Users\jeffl\iCloudDrive\HCC-Archive"
+Write-Host "`n=== REFERENCE GUIDES (iCloud\HCC-Archive) matching '$Pattern' ===" -ForegroundColor Green
+if (Test-Path $guides) {
+    $g = Select-String -Path (Join-Path $guides "*.md") -Pattern $Pattern -Context 1, 1 -ErrorAction SilentlyContinue |
+         Where-Object { $_.Path -notmatch 'STALE' }          # never surface the retired CLAUDE.md
+    if ($g) {
+        $gTotal = @($g).Count
+        Write-Host "  $gTotal hits (showing up to $Max)`n"
+        @($g) | Select-Object -First $Max | ForEach-Object {
+            Write-Host ("  [{0}]" -f [IO.Path]::GetFileName($_.Path)) -ForegroundColor DarkGreen
+            $_.Context.PreContext  | ForEach-Object { "    $_" }
+            Write-Host "  > $($_.Line)" -ForegroundColor Green
+            $_.Context.PostContext | ForEach-Object { "    $_" }
+            "  " + ("-" * 70)
+        }
+        if ($gTotal -gt $Max) { Write-Host ("  ...{0} more - narrow the pattern" -f ($gTotal - $Max)) }
+    } else { Write-Host "  (none)" }
+} else {
+    Write-Host "  (HCC-Archive not present - is iCloud synced?)"
+}
