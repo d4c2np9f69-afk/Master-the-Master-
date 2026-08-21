@@ -137,6 +137,33 @@ Disks          Disk0 ADATA SU650 223.6GB GPT (boot)
 Power plan     Ultimate Performance
 ```
 
+### RAM timings + health, read with CPU-Z 3.01 (BIOS 4207, before flash)
+
+Windows cannot show these. CPU-Z portable is kept in `HCC-Scripts/tools/` along with the
+full report, so the same report can be re-run after the flash and diffed.
+
+```
+Running now     2926 MT/s (1463.2 MHz)   max divider 1466.7 = 2933
+                CL16-17-17-35  tRC 69   Command Rate 1T
+Kit's own XMP   XMP-2998 rev 2.0, CL15, 1.350V, Samsung dies, 1 rank
+JEDEC fallback  DDR4-2133  <-- where it lands if DOCP is left off
+Channels        2 x 64-bit (dual channel confirmed)
+CPU             boosting 3841 MHz (38.5x), VCORE 1.21V, 48 degC
+Rails           +12V 11.97 / +5V 4.96 / +3.3V 3.29   all in spec
+VBAT            3.23V  <-- CMOS battery healthy; a weak one loses settings after a flash
+Fans            CPU 1178 RPM, chassis 868 RPM
+```
+
+**About the "discrepancy" Jeff remembered - it is real, and it is tiny.** The kit is rated
+CL15 and is running CL16: one clock looser, worth ~1-2%. The tRCD/tRP of 17 are *correct* -
+XMP specifies them in nanoseconds (11.33 ns), which is 17 clocks at this frequency. Command
+Rate is already the good one (1T, not 2T). **Nothing here is worth chasing.** The system is
+already running essentially as fast as this platform sensibly goes.
+
+Note the rails and VBAT: a healthy PSU and a healthy CMOS battery are both independent
+evidence against the "sick computer" theory, and VBAT matters specifically because the flash
+depends on CMOS holding the settings afterwards.
+
 ## THE CHECKLIST — what to set while you are in there
 
 The flash resets CMOS, so **all of these turn themselves off.** Set them in one pass.
