@@ -85,11 +85,17 @@ Measured from git history (84 camera-related commits of 731 total):
 | Days with camera work | **24 separate days** |
 | Calendar span | 2026-06-23 → 2026-08-22 = **60 days** |
 | Raw commit-span total | **66.1 hours** |
-| Minus two overnight-spanning outliers (07-10 16.2 h, 07-11 12.8 h) | **37.1 hours** |
+| ~~Minus two overnight-spanning outliers (07-10, 07-11) → 37.1 h~~ | 🔴 **STRUCK 12:12 — the claim was WRONG. Both are same-day spans; nothing crosses midnight. See the addendum.** |
 | Days contributing 0 (single commit, real work uncaptured) | **10** |
 
-**Honest figure: roughly 37 to 66 hours across 24 days.** The truth sits between — 66 h overstates
-(two spans cross midnight), 37 h understates (10 days count as zero).
+**Honest figure: 66.1 h is an UPPER bound for cameras alone.** Commit-span includes idle time
+between commits, so it overstates; 10 days hold a single commit and count as zero, so it also
+understates. `COST_LEDGER.md`'s tighter per-incident method measured 28.8 h project-wide through
+08-16 — a different, stricter method that is not comparable to this one.
+
+⚠️ **This section originally excluded the audit work entirely.** Cameras are 66.1 h; the
+audit/rules/master-record/hooks work is a further **47.0 h across 17 days**, for **113.0 h
+combined**. See the addendum at the bottom.
 
 **This EXCLUDES the pre-repo Blink saga**, which `COST_LEDGER.md` records separately:
 
