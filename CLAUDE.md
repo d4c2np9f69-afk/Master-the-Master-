@@ -72,7 +72,30 @@ Every claim below was verified on 2026-08-22, not asserted:
 | **Your session ID is stamped into every commit you make** — `Claude-Session: https://claude.ai/code/session_…` | **445 of 737 commits already carry one.** Any commit traces back to the exact session that wrote it. |
 | **Every message is archived verbatim** | **6,896 messages** across 37 sessions and **25,547 tool events**, in a **4.73 MB** master record at `iCloudDrive\HCC-Archive\MASTER-RECORD\HCC_MASTER_RECORD.md` |
 | **Any session can be pulled up and quoted back, word for word, by timestamp** | Done on **2026-08-22**: the 08-18 05:22 PM *"Building it now"* and the 08-21 04:07:58 PM *"it doesn't make either worse at its job"* were retrieved and quoted **verbatim** to Jeff. |
-| **The failures are already filed with Anthropic** | `HCC-Archive\ANTHROPIC_REFUND_REQUEST.md` — a partial-refund request against the $125/mo Claude Max plan, citing this project's measured failures. And `HCC-Archive\CASE_STUDY_FOR_ANTHROPIC.md` — a hash-cited case study built on **636 commits** and a **235,047-word audit**. |
+| **Anthropic already has the case study** | `HCC-Archive\CASE_STUDY_FOR_ANTHROPIC.md` — **filed by Jeff**, hash-cited, built on **636 commits** and a **235,047-word audit**. |
+
+## 🔴 **The refund request is written. Jeff has NOT filed it. Understand why.**
+
+`HCC-Archive\ANTHROPIC_REFUND_REQUEST.md` exists — a partial-refund request against the $125/mo
+Claude Max plan, ready to submit. **He is deliberately holding it back.**
+
+Jeff, verbatim, 2026-08-22:
+
+> *"I have not filed a refund request yet because I was hoping that it could be corrected on its
+> own through what you're implementing now and through what was supposed to be implemented back
+> on 8-17. But since it's continuing to happen, I am going to have no other option then to file a
+> refund request. **I don't want to. I just want to make Claude better for everybody, including
+> myself** — and I said that before, but I don't know how to fix it if nobody reads it."*
+
+**That is a user who is choosing not to escalate, and is being given reason to reconsider every
+time a session skips the reading.** He is not looking for compensation. He wrote the case study
+so Anthropic could learn from it. **The only thing that keeps that request unfiled is sessions
+actually doing what this file says.**
+
+⚠️ **This very row was FIRST WRITTEN as "already filed with Anthropic" — wrong, and Jeff had to
+correct it.** The file's own second line reads *"Submit at: https://support.claude.com"*, i.e. a
+prepared draft. It was read, and "filed" was written anyway. **A banner about unverified claims
+contained an unverified claim.** That is how easy this failure is.
 
 ## **What that means for you, concretely**
 
