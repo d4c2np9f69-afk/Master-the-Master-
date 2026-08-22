@@ -25,7 +25,7 @@ $out += ""
 $ledger = Join-Path $repo 'docs\COST_LEDGER.md'
 if (Test-Path $ledger) {
   $out += "----- WHAT IGNORING THE RULES HAS ALREADY COST JEFF -----"
-  $out += "  28.8 measured hours of error-fighting (~44 incl. pre-commit)"
+  $out += "  29.0 measured hours of error-fighting (~44 incl. pre-commit)"
   $out += "  128 incident-days | 95 of 636 commits (14.9%) were self-inflicted fixes"
   $out += "  ~`$234 of Claude Max burned + mower sensors he did not need to buy"
   $out += "  Worst single failure: hour meter dead 50 days across 5 real mows."

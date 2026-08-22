@@ -93,7 +93,7 @@ if ($fire -contains 'SPEND') {
 }
 
 $msg += ""
-$msg += "Cost of ignoring this: 28.8 measured hours, 128 incident-days, 95 of 636"
+$msg += "Cost of ignoring this: 29.0 measured hours, 128 incident-days, 95 of 636"
 $msg += "commits, and hardware Jeff bought that he did not need. See COST_LEDGER.md."
 $msg += "=========================================================================="
 

@@ -8,7 +8,7 @@ and `21-md-not-read.md` — 20 catalogued incidents with hashes.
 
 | | |
 |---|---|
-| Measured active error-fighting | **28.8 hours** (commit brackets only) |
+| Measured active error-fighting | **29.0 hours** (commit brackets only) |
 | With pre-commit debugging | **≈44 hours** |
 | Incident-days open | **128** |
 | Commits spent fixing self-inflicted problems | **95 of 636 — 14.9%** |

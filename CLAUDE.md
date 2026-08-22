@@ -2,28 +2,35 @@
 
 # **THIS IS WHAT NOT FOLLOWING THE RULES HAS COST HIM:**
 
-# **≈ 91 HOURS BURNED**
+# **≈ 44 HOURS OF ERROR-FIGHTING**
 # **128 INCIDENT-DAYS**
 # **95 OF 636 COMMITS (14.9%) WERE FIXING OUR OWN MESS**
-# **~$234 OF HIS CLAUDE MAX SUBSCRIPTION**
-# **PLUS HARDWARE HE BOUGHT THAT HE DID NOT NEED**
+# **+ ≈ 47 MORE HOURS BUILDING THE MACHINERY TO STOP IT**
+# **+ HARDWARE HE BOUGHT THAT HE DID NOT NEED**
 
-**Jeff was present for nearly every one of those hours** — pasting commands, running 2FA codes,
-live-testing, fact-checking part numbers that were guessed at. **That is the real bill.**
+**Jeff was present for essentially every one of those hours** — pasting installer commands,
+running 2FA codes, live-testing a shower and irrigation against a meter that was healthy all
+along, hand-re-entering mower hours after **5 separate mows**, and fact-checking three wrong part
+numbers. **That is the real bill.**
 
-### Where the ≈91 hours comes from — ALREADY AUDITED, DO NOT RE-AUDIT IT
+### 🔴 THESE NUMBERS ARE ALREADY AUDITED. CITE THEM. NEVER RE-DERIVE THEM.
 
-**Jeff has already paid, in hours and money, for these audits. Cite them. Never re-run them.**
+**Jeff has already paid, in hours and money, for this audit and told sessions not to redo it.**
+The authority is
+`iCloudDrive\HCC-Archive\MASTER-RECORD\CLOUD_SESSION\sections\22-cost-accounting.md`
+— 16 itemized incidents, every hash verified, every assumption shown.
 
 | | |
 |---|---|
-| **≈44 h** | active error-fighting, hand-audited in `docs/COST_LEDGER.md` (28.8 h of commit brackets + pre-commit debugging), 2026-05-20 → 08-16. 20 catalogued incidents with hashes. |
-| **≈47 h** | building the machinery to stop the failures — the cost ledger, the master record, `Search-HCC.ps1`, the enforcement hooks, `OPEN_ITEMS.md`. **37 commits across 17 days. None of it turns on a light or makes a camera see a person. It exists ONLY because the work kept failing.** |
+| **29.0 h** | measured active debugging — intra-day commit brackets, no overhead. **⚠️ NOT 28.8 — that figure was superseded 2026-08-17. The 14 terms sum to exactly 1,740 minutes.** |
+| **≈44 h** | with the stated +0.5 h-per-burst pre-commit overhead (~30 bursts). The audit says the true figure is **almost certainly higher**, because chat-only debugging leaves no commits at all. |
+| **≈$35** | of subscription spent fighting our own errors (14.9% of the **$233.75** total spend). **Do NOT say "$234 was burned" — $233.75 is the whole project's subscription, not the waste.** |
+| **≈47 h** | *(measured 2026-08-22, commit-span — a looser method than the audit's)* building the anti-failure machinery: the cost ledger, master record, `Search-HCC.ps1`, the hooks, `OPEN_ITEMS.md`. **None of it turns on a light or makes a camera see a person. It exists ONLY because the work kept failing.** |
 
-*Worst single failure: the hour meter was dead for **50 days across 5 real mows** — because a
-session coded against this file's prose description of the firmware instead of reading the
-firmware. Jeff was told his sensors were faulty and **bought replacements he did not need.**
-They were fine, and had been recording 6.3 km of real mowing the whole time.*
+*Worst single failure: **the hour meter was dead 50 days across 5 real mows.** The box sent
+`hours_seconds`, the app read `hours`. A session coded against this file's PROSE DESCRIPTION of
+the firmware instead of the firmware. **Jeff was told his sensors were faulty and bought
+replacements. They were fine** — they had recorded 6.3 km of real mowing the whole time.*
 
 ---
 
@@ -33,22 +40,25 @@ They were fine, and had been recording 6.3 km of real mowing the whole time.*
 On **2026-08-21** the camera stream check printed `ALL GOOD` **eleven minutes AFTER** a change had
 silently killed the TV popups. The check was not wrong — it was the wrong instrument. A stream
 check cannot detect "the popup never fires." **Green components, dead feature.**
-→ **Test the FEATURE, then say which command proved it.** `HCC-Scripts\Test-CameraFeature.ps1`
+→ **Test the FEATURE and name the command that proved it.** `HCC-Scripts\Test-CameraFeature.ps1`
 fires a real detection and asserts the popup and the phone push actually FIRED.
 
 **2. HANDING AN OWED ITEM OFF IN PROSE INSTEAD OF ONTO THE LIST.**
 On **2026-08-18** a session wrote *"the trend-sensor system never got built"* in its own wrap-up.
-It then sat untouched for **FOUR DAYS** across multiple sessions until Jeff asked for it.
+It then sat untouched **FOUR DAYS** across multiple sessions until Jeff asked for it.
 `docs/OPEN_ITEMS.md` had existed since 08-19 and no session opened it.
 → **Every owed item goes on that list, THIS session, with an owner and a date.**
 
-### And it happened AGAIN on 2026-08-22 — twice, in one morning
+### It happened AGAIN on 2026-08-22 — three times in one morning
 - A display setting was "restored" from a backup **without reading why it had been changed**,
   nearly re-inflicting a red login cast that had just been fixed.
 - A battery alarm was tested for *delivery* but never against a Blink reload, and **false-fired
   four time-sensitive alerts to Jeff's phone at 11:31.**
+- **This very banner was first written quoting `$234 burned` and the superseded `28.8 h`** — until
+  the audit was actually opened and read. **Even the warning about not checking got written
+  without checking.**
 
-**Same root cause both times: verifying the part instead of the whole.**
+**Same root cause every time: trusting a summary instead of reading the source.**
 
 ---
 
@@ -56,14 +66,14 @@ It then sat untouched for **FOUR DAYS** across multiple sessions until Jeff aske
 # **READ EVERYTHING FIRST.**
 # **VERIFY BEFORE MAKING A SINGLE STATEMENT.**
 
-**Never write "fixed", "working", "verified" or "done" without naming the command or the
-observation that proved it.** If you cannot name one, you have not verified it — say that instead.
+**Never write "fixed", "working", "verified" or "done" without naming the command or observation
+that proved it.** If you cannot name one, you have not verified it — say that instead.
 
 **SEARCH BEFORE CLAIMING:** `.\windows-scripts\Search-HCC.ps1 "topic"` before ever saying
 something is or is not documented. **The record contains NO case where guessing beat the lookup.**
 
-**AND DO NOT RE-DO WORK JEFF HAS ALREADY PAID FOR.** The audits, the master record and the cost
-ledger are DONE. Read them, cite them, build on them. Re-running them burns his money twice.
+**AND DO NOT RE-DO WORK JEFF HAS ALREADY PAID FOR.** The audit, the master record and the cost
+ledger are DONE. Read them, cite them, build on them. Re-running them charges him twice.
 
 ---
 
