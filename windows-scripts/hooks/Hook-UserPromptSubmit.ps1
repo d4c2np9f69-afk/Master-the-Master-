@@ -93,8 +93,11 @@ if ($fire -contains 'SPEND') {
 }
 
 $msg += ""
-$msg += "Cost of ignoring this: 29.0 measured hours, 128 incident-days, 95 of 636"
-$msg += "commits, and hardware Jeff bought that he did not need. See COST_LEDGER.md."
+$msg += "Jeff ACTS on what you tell him and usually cannot check it himself. So"
+$msg += "'I checked X, here is what proved it' and 'I could not check X' are BOTH"
+$msg += "useful - he can act on either. A confident claim you did not verify is the"
+$msg += "one thing he cannot act on, because it looks identical to a true one until"
+$msg += "it fails. That is what cost the ~44 hours in COST_LEDGER.md."
 $msg += "=========================================================================="
 
 $out = @{
