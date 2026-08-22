@@ -63,7 +63,10 @@ $beforeNotify = Get-LastTriggered $NOTIFY
 $ev = @{
     entity_id   = "image_processing.codeproject_ai_object_${Camera}_clipframe"
     object_type = $ObjectType
-    name        = $ObjectType
+    # Label it LOUDLY. 2026-08-22: Jeff saw a popup from this script and reasonably
+    # believed it was a real driveway detection. A test that is indistinguishable
+    # from the real thing is a test that wastes his time and erodes trust in alerts.
+    name        = "TEST-NOT-REAL ($ObjectType)"
     confidence  = 94.7
     box_area    = 0.08
     centroid    = @{ x = 0.42; y = 0.55 }
