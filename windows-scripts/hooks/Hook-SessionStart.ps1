@@ -53,6 +53,43 @@ $out += ""
 $out += "----- LIVE SAFETY GAP, STILL OPEN -----"
 $out += "  A person in the back yard at night may still be undetectable. See"
 $out += "  CLAUDE.md Pending Item 0b before touching the camera stack."
+$out += ""
+
+# ---- OPEN ITEMS, injected live so no session can claim it did not see the list ----
+# Added 2026-08-22. Jeff: "no session ever reads anything before continuing the
+# behaviour that causes the failures." Documents get skipped; injected context does not.
+# The 08-18 battery meter was flagged "still owed" in prose and then sat FOUR DAYS.
+$oi = Join-Path $repo 'docs\OPEN_ITEMS.md'
+if (Test-Path $oi) {
+    $lines = Get-Content $oi
+    $rows  = @($lines | Where-Object { $_ -match '^\|\s*\d+\s*\|' })
+    # Count by SECTION, not by emoji - emoji matching is encoding-fragile.
+    $p1 = @(); $sec = ''
+    foreach ($l in $lines) {
+        if ($l -match '^##\s')            { $sec = $l }
+        elseif ($l -match '^\|\s*\d+\s*\|' -and $sec -match 'P1') { $p1 += $l }
+    }
+    $stale = [int]((Get-Date) - (Get-Item $oi).LastWriteTime).TotalDays
+    $out += "----- OPEN ITEMS (docs\OPEN_ITEMS.md = THE list. UPDATE IT THIS SESSION) -----"
+    $out += ("  {0} open items, {1} flagged P1. List last updated {2} day(s) ago." -f $rows.Count, $p1.Count, $stale)
+    if ($stale -ge 2) {
+        $out += "  *** THAT IS STALE. Sessions have done work and not struck items off. ***"
+        $out += "  *** Closing an item means striking it HERE with the date and proof.  ***"
+    }
+    foreach ($r in ($p1 | Select-Object -First 3)) {
+        $t = ($r -split '\|')[2].Trim() -replace '\*\*','' -replace '[^\x20-\x7E]',' ' -replace '\s+',' '
+        if ($t.Length -gt 88) { $t = $t.Substring(0,88) + '...' }
+        $out += ("   P1: {0}" -f $t.Trim())
+    }
+    $out += ""
+}
+
+$out += "----- BEFORE SAYING ANYTHING WORKS -----"
+$out += "  A component check is NOT a feature check. On 08-21 the camera stream check"
+$out += "  printed ALL GOOD eleven minutes AFTER the TV popups had been silently killed."
+$out += "  Run the test that exercises the FEATURE, then say what proved it:"
+$out += "    HCC-Scripts\Test-CameraFeature.ps1   fires a real detection, asserts the"
+$out += "                                         popup + phone notify actually FIRED"
 $out += "==========================================================================="
 
 @{

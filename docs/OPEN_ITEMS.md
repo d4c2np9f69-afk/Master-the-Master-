@@ -138,3 +138,22 @@ ten-second hang, and `scripts/irr-offline-test.js` (12 checks) keeps it honest.
       cannot be tested against hardware is exactly what Jeff asked us to stop doing.
 - [ ] The per-zone duration prompt **already exists** (1-60 min, defaults to 10). It looked
       broken only because the command behind it never landed.
+
+---
+
+## 🟡 FOUND 2026-08-22 — added the same session, per the rule
+
+| # | Item | Owner | Age | Notes |
+|---|---|---|---|---|
+| 29 | **Clip archive saves DUPLICATES.** The 4 newest `301_driveway` clips are byte-identical (`md5 5761BC25CFCD`, 1,984,293 bytes) under 4 different event timestamps. The archive stores the most recent clip for every event, so it cannot be trusted forensically. | CLAUDE | found 08-22 | Not urgent. Do not fix inside the camera freeze without Jeff asking. |
+| 30 | **30 `back_left` clips from 08-21 are 40-byte stubs** (truncated downloads). Older `back_left` clips are real video, so this started recently. | CLAUDE | found 08-22 | Same freeze caveat as #29. |
+| 31 | **Zigbee quiet 12-18 h and the mailbox contact missed a REAL delivery** (mail carrier ~11:25 on 08-22). **NOT declared a fault** - MQTT answers on 1883, the `mqtt` integration is loaded, and `back_deck_door_voltage` did report at 08-21 23:00. Suspicion only. | CLAUDE investigates, JEFF confirms | found 08-22 | Do not raise an alarm on this without evidence. Separate from cameras. |
+| 32 | **`binary_sensor.back_deck_door_contact` has read OPEN for 17.8 h.** Either the door genuinely is open, or the sensor is stuck. | **JEFF** (one look) | found 08-22 | Ask before treating as a fault. |
+| 33 | **Guest bath leak sensor battery at 30%** - lowest in the house, and leak sensors are the worst ones to have silently dead. | **JEFF** | found 08-22 | Low-battery alert is armed and covers it. |
+| 34 | **Blink battery failure-point experiment RUNNING.** `front_right` (151) and `301_driveway` (146) are deliberately on ORIGINAL cells to find the real failure voltage. **DO NOT replace them or advise replacing them** - running to death IS the experiment. | JEFF decides | started 08-22 | Logger every 15 min; alert fires on failure carrying the last voltage. `Show-BlinkBatteryTrend.ps1`. |
+| 35 | **RTSP cameras DEFERRED ON COST.** 2x Tapo C320WS ~$34 ea, verified. **Do not re-pitch.** Blinks stay because those spots have NO MAINS POWER (except back deck). | **JEFF** | deferred 08-22 | `docs/CAMERA_PURCHASE_RTSP_2026-08-22.md` |
+
+**Closed 2026-08-22:** the 08-18 "still owed" battery trend meter - built as
+`Log-BlinkBatteries.ps1` + `Show-BlinkBatteryTrend.ps1`, running, alarm tested against a real
+Blink reload. It had sat undone for **four days** because the handoff was prose, not a row on this
+list. That is why the SessionStart hook now injects this file's item count and staleness.
