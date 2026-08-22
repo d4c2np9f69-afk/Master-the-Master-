@@ -1,3 +1,72 @@
+# 🛑 STOP. READ THIS BEFORE YOU TYPE ONE WORD TO JEFF.
+
+# **THIS IS WHAT NOT FOLLOWING THE RULES HAS COST HIM:**
+
+# **≈ 91 HOURS BURNED**
+# **128 INCIDENT-DAYS**
+# **95 OF 636 COMMITS (14.9%) WERE FIXING OUR OWN MESS**
+# **~$234 OF HIS CLAUDE MAX SUBSCRIPTION**
+# **PLUS HARDWARE HE BOUGHT THAT HE DID NOT NEED**
+
+**Jeff was present for nearly every one of those hours** — pasting commands, running 2FA codes,
+live-testing, fact-checking part numbers that were guessed at. **That is the real bill.**
+
+### Where the ≈91 hours comes from — ALREADY AUDITED, DO NOT RE-AUDIT IT
+
+**Jeff has already paid, in hours and money, for these audits. Cite them. Never re-run them.**
+
+| | |
+|---|---|
+| **≈44 h** | active error-fighting, hand-audited in `docs/COST_LEDGER.md` (28.8 h of commit brackets + pre-commit debugging), 2026-05-20 → 08-16. 20 catalogued incidents with hashes. |
+| **≈47 h** | building the machinery to stop the failures — the cost ledger, the master record, `Search-HCC.ps1`, the enforcement hooks, `OPEN_ITEMS.md`. **37 commits across 17 days. None of it turns on a light or makes a camera see a person. It exists ONLY because the work kept failing.** |
+
+*Worst single failure: the hour meter was dead for **50 days across 5 real mows** — because a
+session coded against this file's prose description of the firmware instead of reading the
+firmware. Jeff was told his sensors were faulty and **bought replacements he did not need.**
+They were fine, and had been recording 6.3 km of real mowing the whole time.*
+
+---
+
+## 🔴 THE TWO HABITS THAT CAUSED ALL OF IT
+
+**1. DECLARING SUCCESS FROM A GREEN COMPONENT CHECK.**
+On **2026-08-21** the camera stream check printed `ALL GOOD` **eleven minutes AFTER** a change had
+silently killed the TV popups. The check was not wrong — it was the wrong instrument. A stream
+check cannot detect "the popup never fires." **Green components, dead feature.**
+→ **Test the FEATURE, then say which command proved it.** `HCC-Scripts\Test-CameraFeature.ps1`
+fires a real detection and asserts the popup and the phone push actually FIRED.
+
+**2. HANDING AN OWED ITEM OFF IN PROSE INSTEAD OF ONTO THE LIST.**
+On **2026-08-18** a session wrote *"the trend-sensor system never got built"* in its own wrap-up.
+It then sat untouched for **FOUR DAYS** across multiple sessions until Jeff asked for it.
+`docs/OPEN_ITEMS.md` had existed since 08-19 and no session opened it.
+→ **Every owed item goes on that list, THIS session, with an owner and a date.**
+
+### And it happened AGAIN on 2026-08-22 — twice, in one morning
+- A display setting was "restored" from a backup **without reading why it had been changed**,
+  nearly re-inflicting a red login cast that had just been fixed.
+- A battery alarm was tested for *delivery* but never against a Blink reload, and **false-fired
+  four time-sensitive alerts to Jeff's phone at 11:31.**
+
+**Same root cause both times: verifying the part instead of the whole.**
+
+---
+
+# **THE RULE, IN JEFF'S WORDS:**
+# **READ EVERYTHING FIRST.**
+# **VERIFY BEFORE MAKING A SINGLE STATEMENT.**
+
+**Never write "fixed", "working", "verified" or "done" without naming the command or the
+observation that proved it.** If you cannot name one, you have not verified it — say that instead.
+
+**SEARCH BEFORE CLAIMING:** `.\windows-scripts\Search-HCC.ps1 "topic"` before ever saying
+something is or is not documented. **The record contains NO case where guessing beat the lookup.**
+
+**AND DO NOT RE-DO WORK JEFF HAS ALREADY PAID FOR.** The audits, the master record and the cost
+ledger are DONE. Read them, cite them, build on them. Re-running them burns his money twice.
+
+---
+
 # HCC Toro TimeMaster 21200 Ã¢â‚¬â€ Project Memory
 
 **READ THIS ENTIRE FILE BEFORE TOUCHING ANYTHING.** This is the single source of truth for every AI session. Do not guess. Do not ask Jeff to re-explain. Everything you need is here.
