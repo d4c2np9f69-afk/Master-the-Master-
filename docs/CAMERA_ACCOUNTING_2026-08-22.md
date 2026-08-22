@@ -124,3 +124,41 @@ A real `codeproject_ai.object_detected` person event was fired through the live 
 automation and the phone-notify automation both triggered, and **Jeff confirmed the Apple TV popup
 appeared.** The Fire TV was powered off, so PiPup had nothing to draw on — not a fault. The full path
 (detection → annotated red-box frame → HomeKit → TV) is confirmed working.
+
+---
+
+## ADDENDUM 2026-08-22 12:12 — Jeff asked: does that figure include the audit?
+
+**No, it did not.** Measured separately:
+
+| Workstream | Commits | Days | Commit-span |
+|---|---|---|---|
+| Cameras | 84 | 24 | **66.1 h** |
+| **Audit / rules / master record / hooks** | **37** | **17** | **47.0 h** |
+| Both (overlap already counted in cameras) | 3 | — | — |
+| **Combined** | **121** | | **113.0 h** |
+
+Audit's largest days: **08-16 (11h56m), 08-17 (12h21m), 08-20 (8h31m)** — the master-record
+reconstruction Jeff kept one session running for.
+
+### Correction to the earlier arithmetic in this file
+
+The "37.1 h" figure above was reached by removing 07-10 and 07-11 as "overnight-spanning
+outliers." **That was wrong — both are same-day spans.** The accurate caveats are:
+
+- **Commit-span includes idle time between commits → it is an UPPER bound.**
+- **10 camera days hold a single commit and therefore count as zero → it is also incomplete.**
+- `COST_LEDGER.md` used a tighter per-incident method and measured **28.8 h** of error-fighting
+  project-wide through 08-16 — far below the 66 h camera span here. **The methods are not
+  comparable, and the ledger's is the stricter one.**
+
+**Honest statement: 113 h is the outer bound across cameras + audit. The real active figure is
+lower and has not been measured with the ledger's method.**
+
+### The point that matters more than the number
+
+**The 47 h of audit work is not separate from the cost — it IS the cost.** The COST_LEDGER, the
+master record, `Search-HCC.ps1`, the enforcement hooks and `OPEN_ITEMS.md` are not house
+automation. None of it makes a light turn on or a camera see a person. **It exists only because
+the underlying behaviour kept failing.** That is 17 days of pure remediation overhead — and
+2026-08-22 added more of it.
