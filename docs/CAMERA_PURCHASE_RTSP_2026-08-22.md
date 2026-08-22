@@ -1,5 +1,19 @@
 # RTSP camera purchase — front + back yard, decided 2026-08-22
 
+🔴 **STATUS 2026-08-22 11:37 — DEFERRED. DO NOT BUY, DO NOT RE-PITCH.**
+Jeff: *"I can't get those right now because they're expensive so we've got to make do with what
+we've got until I can get the other ones."* **No spend.** This file is the plan for WHEN he
+chooses to buy, not a recommendation to act on. Do not raise it again unprompted.
+
+🔴 **WHY THE BLINKS STAY, AND WHY THEY ARE VALUABLE — corrected 2026-08-22.**
+Jeff: *"I don't have power to the locations where those cameras are with the exception of the back
+deck, so they serve a purpose."* **The Blink cameras exist because those spots have NO MAINS
+POWER.** That is not a workaround, it is the reason. Every wired RTSP camera in this document
+needs mains power and therefore **cannot** replace a Blink at a spot without it. The RTSP cameras
+go where power already exists; the Blinks stay where it does not, and become the backup.
+
+---
+
 **Jeff's call:** buy 2 RTSP cameras for front and back yard, demote Blink to backup.
 Constraints he gave: **mains power available at both spots, NO ethernet run — must be Wi-Fi.**
 Prices below were verified in-session on 2026-08-22, not quoted from memory.
