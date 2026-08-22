@@ -15,7 +15,7 @@ Cameras are CLOSED and frozen. Do not reopen them. Start on the two jobs below.
 |---|---|
 | `front_door_contact` | closed |
 | `mailbox_contact` | closed |
-| `back_deck_door_contact` | **OPEN — see the warning below** |
+| `back_deck_door_contact` | **OPEN — Jeff knows, it is part of this job (see below)** |
 | `guest_bath_leak` / `kitchen_refrigerator_leak` / `kitchen_sink_leak` | all dry |
 
 **Z2M is up:** bridge connection `on`, version **2.13.0**, `switch.zigbee2mqtt_bridge_permit_join`
@@ -57,7 +57,7 @@ already bought — three wrong part numbers in a row on this exact job made Jeff
 
 - **Position sensing:** two Zigbee contacts (CLOSED + FULLY-OPEN) are on the plan so HA can tell
   open from closed rather than just pulsing the door. OPEN_ITEMS #8.
-- **`docs/OPEN_ITEMS.md` is THE list — 39 items, 6 P1. Update it THIS session.** An owed item
+- **`docs/OPEN_ITEMS.md` is THE list — 39 items, 5 P1. Update it THIS session.** An owed item
   handed off in prose on 08-18 sat four days untouched.
 
 ## STILL WAITING ON JEFF (do not do these for him, do not nag)
