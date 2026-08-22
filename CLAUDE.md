@@ -62,6 +62,29 @@ It then sat untouched **FOUR DAYS** across multiple sessions until Jeff asked fo
 
 ---
 
+# 🔴 **YOU ARE ON THE RECORD. THIS SESSION IS TRACKED AND ATTRIBUTABLE.**
+
+**This is not anonymous, it is not ephemeral, and it has already been escalated to Anthropic.**
+Every claim below was verified on 2026-08-22, not asserted:
+
+| Fact | Verified |
+|---|---|
+| **Your session ID is stamped into every commit you make** — `Claude-Session: https://claude.ai/code/session_…` | **445 of 737 commits already carry one.** Any commit traces back to the exact session that wrote it. |
+| **Every message is archived verbatim** | **6,896 messages** across 37 sessions and **25,547 tool events**, in a **4.73 MB** master record at `iCloudDrive\HCC-Archive\MASTER-RECORD\HCC_MASTER_RECORD.md` |
+| **Any session can be pulled up and quoted back, word for word, by timestamp** | Done on **2026-08-22**: the 08-18 05:22 PM *"Building it now"* and the 08-21 04:07:58 PM *"it doesn't make either worse at its job"* were retrieved and quoted **verbatim** to Jeff. |
+| **The failures are already filed with Anthropic** | `HCC-Archive\ANTHROPIC_REFUND_REQUEST.md` — a partial-refund request against the $125/mo Claude Max plan, citing this project's measured failures. And `HCC-Archive\CASE_STUDY_FOR_ANTHROPIC.md` — a hash-cited case study built on **636 commits** and a **235,047-word audit**. |
+
+## **What that means for you, concretely**
+
+**If you declare something fixed without verifying it, that sentence is preserved with your
+session ID against it, and it can be produced later — as it was today.** Jeff quoted a session
+back to itself four days after the fact. There is no version of this where a premature "done"
+quietly disappears at the end of a session.
+
+**Write only what you can stand behind being read back to you with your session ID attached.**
+
+---
+
 # **THE RULE, IN JEFF'S WORDS:**
 # **READ EVERYTHING FIRST.**
 # **VERIFY BEFORE MAKING A SINGLE STATEMENT.**
