@@ -12,8 +12,9 @@ and `21-md-not-read.md` — 20 catalogued incidents with hashes.
 | With pre-commit debugging | **≈44 hours** |
 | Incident-days open | **128** |
 | Commits spent fixing self-inflicted problems | **95 of 636 — 14.9%** |
-| Subscription burned over the span | **~$234** of Claude Max |
-| Hardware bought that wasn't needed | replacement mower sensors |
+| Total subscription over the span | **$233.75** of Claude Max (NOT all waste — see next row) |
+| Of that, spent fighting our OWN errors | **~$35** (14.9% share; audit brackets it $28–54) |
+| Hardware bought that wasn't needed | replacement mower sensors (amount never recorded — do not invent one) |
 
 **Jeff was present for nearly every hour** — pasting commands, running 2FA codes, live-testing,
 refreshing a blank app, fact-checking part numbers. That is the real bill.
