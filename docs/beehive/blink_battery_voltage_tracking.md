@@ -74,3 +74,68 @@ part that matters, will be captured. What was lost is the early, uninteresting p
 
 There is **no back-history**. This starts from 2026-08-22 and cannot be backfilled, because the
 attribute was never recorded. The curve builds from here.
+
+---
+
+# The origin of this experiment — from the master record, 2026-08-18
+
+Jeff recalled this on 08-22 and the record confirms him word for word. Quoted here so it stops
+being oral history:
+
+**JEFF — 2026-08-18 04:05:42 PM CT:**
+> *"Btw it kinda strange those cameras run on 2aa lithium batteries and the back yard left camera
+> went out too so I was changing the batteries and in both cameras **only one battery was dead the
+> other one was at 100%** needless to say I put two new batteries in both cameras but why do you
+> think only one was bad? Is the camera only pulling from one battery?"*
+
+**JEFF — 2026-08-18 05:18:24 PM CT:**
+> *"I don't think we ever got a warning on the two I had to replace so **we may have to set our own
+> warning** because the two just went dark and it was definitely the one battery was dead in both.
+> **So maybe around the 150 mark is the real failure**"*
+
+**Jeff called the number on 08-18. The logging to confirm it was never built until 08-22.**
+
+## Why only one cell died — the answer to his question
+
+The 2 AA lithium cells sit in **series**, so the *same current* flows through both. Cells are never
+perfectly matched, so the weaker one depletes first. Once it is exhausted, the good cell keeps
+driving current **through** the dead one and can **reverse-charge** it — which destroys that cell
+outright while leaving the other near full. That is exactly the observed "one completely dead, one
+at 100%," and it is normal series-cell behaviour, not a camera fault. The camera is not "pulling
+from one battery."
+
+**This also explains the no-warning failures.** A single pack reading stays respectable while one
+cell quietly collapses, then falls off a cliff when that cell gives out. That is precisely why the
+two cameras "just went dark."
+
+🔴 **Limitation of this experiment, stated honestly:** the logged number is one value per camera, so
+it can establish a **failure threshold**, but it **cannot reveal which cell is weak** or detect
+imbalance. Sudden death is still possible above the threshold. The trend narrows the window; it
+cannot eliminate the surprise.
+
+## Status at 2026-08-22 11:25 — both test cameras are already at/below Jeff's mark
+
+| Camera | Voltage | vs Jeff's 150 hypothesis |
+|---|---|---|
+| front_right | **151** | **right at it** |
+| 301_driveway | **146** | **already below it** |
+
+Both could go dark any day. Logging runs every 15 min, so the failure will be captured.
+
+## The alarm — built and VERIFIED 2026-08-22
+
+`Log-BlinkBatteries.ps1` now pushes to `notify.mobile_app_jeffs_iphone` (time-sensitive) on:
+
+- **`FAILURE CAPTURED: <cam>`** — the camera stopped reporting a voltage, i.e. it just died. The
+  push carries **the last voltage read**, which is the datapoint this whole exercise exists for.
+- **`Battery crossed 150: <cam>`** — voltage fell below Jeff's suspected mark.
+
+The push path was tested end-to-end on 08-22 and accepted by HA — not merely assumed to work.
+
+## Jeff's stated end goal
+
+> *"so then moving forward anytime the voltage got to that point I would change them all at once
+> that was the logic behind it."*
+
+Once a real failure voltage is confirmed, the plan is **replace all cameras' cells together at that
+threshold**, rather than waiting for each to die. Do not propose anything that conflicts with this.

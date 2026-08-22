@@ -19,6 +19,30 @@ $Csv      = 'C:\Users\jeffl\HCC-Scripts\blink-battery-log.csv'
 
 $cams = @('301_driveway','front_right','back_left','301_backyard','301_front_doorbell','garage')
 
+# Jeff's own empirical call, master record 2026-08-18 05:18 PM CT:
+#   "the two just went dark ... So maybe around the 150 mark is the real failure"
+# front_right and 301_driveway are DELIBERATELY left on original cells to confirm this.
+$WatchThreshold = 150
+
+# Previous reading per camera, so we can catch the transition that matters.
+$prevVolt = @{}
+if (Test-Path $Csv) {
+    foreach ($r in (Import-Csv $Csv)) {
+        if ($r.camera -and $r.camera -ne 'ERROR') { $prevVolt[$r.camera] = $r.voltage }
+    }
+}
+
+function Send-HANotify {
+    param($Title, $Message)
+    try {
+        $body = @{ title = $Title; message = $Message;
+                   data = @{ push = @{ 'interruption-level' = 'time-sensitive' } } } | ConvertTo-Json -Depth 6
+        Invoke-RestMethod -Uri "$HaUrl/api/services/notify/mobile_app_jeffs_iphone" -Headers $h `
+            -Method Post -Body ([System.Text.Encoding]::UTF8.GetBytes($body)) `
+            -ContentType 'application/json; charset=utf-8' -TimeoutSec 30 | Out-Null
+    } catch { }
+}
+
 try {
     $token = (Get-Content $TokenPath -Raw).Trim()
     $h = @{ Authorization = "Bearer $token" }
@@ -58,4 +82,18 @@ foreach ($c in $cams) {
         $(if ($temp) { $temp.state } else { '' }),
         $note
     Add-Content -Path $Csv -Value $line -Encoding UTF8
+
+    # ---- THE WHOLE POINT: catch the failure the moment it happens ----
+    $was = $prevVolt[$c]
+    if ($was -match '^\d+$') {
+        if ($volts -notmatch '^\d+$') {
+            # It was reporting a voltage and now it is not -> this camera just died.
+            Send-HANotify -Title "FAILURE CAPTURED: $c" `
+                -Message "$c just went dark. LAST VOLTAGE READ: $was. This is the failure-point datapoint - do not replace anything until Jeff decides."
+        }
+        elseif ([int]$was -ge $WatchThreshold -and [int]$volts -lt $WatchThreshold) {
+            Send-HANotify -Title "Battery crossed $WatchThreshold : $c" `
+                -Message "$c dropped from $was to $volts, below Jeff's suspected 150 failure mark (record 2026-08-18). Failure likely soon."
+        }
+    }
 }
