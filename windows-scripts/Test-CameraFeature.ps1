@@ -74,6 +74,16 @@ $ev = @{
 } | ConvertTo-Json -Depth 6
 
 Write-Host ""
+Write-Host "  *** THIS FIRES A REAL POPUP ON JEFF'S TV AND A REAL PUSH TO HIS PHONE ***" -ForegroundColor Yellow
+Write-Host "  *** TELL HIM YOU ARE RUNNING IT. On 2026-08-22 he saw one, had no idea ***" -ForegroundColor Yellow
+Write-Host "  *** a test was running, and reasonably thought it was a real detection. ***" -ForegroundColor Yellow
+Write-Host ""
+
+# Leave a durable trace so any later "was that alert real?" is answerable in seconds.
+$log = 'C:\Users\jeffl\HCC-Scripts\test-alerts-fired.log'
+$who = try { (Get-CimInstance Win32_Process -Filter "ProcessId=$PID").ParentProcessId } catch { '?' }
+Add-Content -Path $log -Encoding UTF8 -Value ("{0}  TEST ALERT FIRED  camera={1} object={2}  (ppid {3})" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'), $Camera, $ObjectType, $who)
+Write-Host "  logged to $log" -ForegroundColor DarkGray
 Write-Host "  firing codeproject_ai.object_detected ..." -ForegroundColor DarkGray
 Invoke-RestMethod -Uri "$HaUrl/api/events/codeproject_ai.object_detected" -Headers $h -Method Post `
     -Body ([System.Text.Encoding]::UTF8.GetBytes($ev)) -ContentType 'application/json; charset=utf-8' -TimeoutSec 30 | Out-Null
