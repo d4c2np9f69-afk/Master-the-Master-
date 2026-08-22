@@ -86,3 +86,72 @@ gap (CLAUDE.md Pending Item 0b), not something the 08-21 session caused.
 17:39 restart on 08-21 — they sit at `unknown`. They only scan on motion, and motion never
 fires overnight. Fixing the popup filter does nothing for this; a popup cannot fire on a
 detection that never happens.
+
+---
+
+# The night gap — what was built, and the real root cause
+
+Jeff chose "freeze, but fix the night gap once first."
+
+## BUILT: `HCC - Backyard Night Sweep (Blink wake + AI scan)`
+
+Entity `automation.hcc_backyard_night_sweep_blink_wake_ai_scan`, live and `on`.
+Every 20 min, 22:00–06:00: `blink.trigger_camera` → 45 s → `update_entity` → 5 s →
+`camera.snapshot` → `image_processing.scan`. Alerts are deliberately NOT special-cased at
+night — Jeff chose "everything alerts, same as daytime." Repeat spam is bounded by the existing
+`HCC - AI Alert Cooldown` (30 min mute on 301_backyard when someone is home).
+
+**Jeff originally asked for 60-second sweeps. That was NOT built, and here is the proof it must
+not be:** HA ships `camera.snapshot` *and* a separate `blink.trigger_camera`. That second service
+only needs to exist because **`camera.snapshot` does not take a new picture** — it returns the
+last thumbnail Blink already had. A 60 s sweep on `camera.snapshot` would rescan a stale frame
+480×/night (this is how a week-old deer stayed on the HomeKit tile). Forcing a real capture needs
+`trigger_camera`, which wakes a **battery** camera through Blink's cloud — at 60 s intervals that
+means dead batteries in days and a repeat of the 08-19 Blink auth code-storm. 20 min = 24 wakes
+a night. **Do not shorten without Jeff's explicit say-so.**
+
+## The Angela test, 2026-08-22 10:56 — the system was right
+
+Jeff: *"Angela just left for the Barn and nothing fired on the Apple TV… she had to be seen to
+get in the car."*
+
+Traced live. Driveway motion fired, the scan ran at 10:56:09, and the annotated frame came back
+with `car 90.6%` (the parked GLE) plus two far-field street cars — **and no person anywhere in
+the frame.** Apple TV is person-only, so it correctly stayed silent; the Fire TV also correctly
+stayed silent because the parked-GLE and far-field filters caught all three cars. Every component
+did exactly the right thing.
+
+**She was never in the picture.** Blink delivers ONE still per trigger, chosen by Blink, out of a
+multi-second clip. She walked through the seconds that still does not cover. This is the single
+biggest limitation of the whole stack and no HA-side tuning changes it.
+
+## Root cause of the recurring "cameras are broken" cycle
+
+The pipeline (motion → snapshot → AI → red boxes → popup → phone) is **healthy** and was proven
+end-to-end twice today. What is lossy is everything upstream of it, in Blink:
+
+| Fault | Evidence | Fixable in HA? |
+|---|---|---|
+| One still per event, chosen by Blink | the 10:56 Angela frame | **No** |
+| Front doorbell offline | temp + Wi-Fi `unknown` since ~04:40, 0 motion in 25 h | **No** — physical/Blink app |
+| Front right never reports motion to HA | 0 motion events in 25 h, **yet Blink recorded clips at 12:19, 13:51, 15:25** | **No** — Blink→HA is lossy |
+| Backyard PIR aimed wrong | 0 motion in 25 h (known since 08-15) | **No** — physical aim |
+| Overnight blindness | 3 nights measured: 0 motion `on`, 0 detections, every night | partially — the sweep above |
+
+**Blink records motion that HA never sees.** `front_right` produced real clips on 08-21 while its
+HA `binary_sensor` never once went `on` — the 30 s poll misses events that open and close between
+polls. Chasing this in automations is why the cameras "never stay fixed."
+
+## Also found today, NOT fixed, not urgent
+
+- **Clip archive saves duplicates.** The 4 newest `301_driveway` clips are byte-identical
+  (`md5 5761BC25CFCD`, 1,984,293 bytes each) under 4 different event timestamps. The archive
+  stores the most recent clip for every event, so it cannot be trusted forensically.
+- **`back_left` 08-21 clips are 40-byte stubs** (30 files) — truncated downloads. Older
+  `back_left` clips are real video, so this started recently.
+
+## The standing rule from here
+
+See `feedback_camera_freeze_rule` in memory. **No camera/Blink/go2rtc/HomeKit/automation change
+unless `Verify-CameraStreams.ps1` actually fails, or Jeff asks.** "It could be better" is not a
+reason. The measured evidence is that the changes, not the cameras, are what break this house.
