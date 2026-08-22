@@ -232,6 +232,24 @@ if (Test-Path $oi) {
 $out += "----- TOOLS (cheap - use them) -----"
 $out += "  windows-scripts\Show-HCCNext.ps1     where we are / what's next"
 $out += "  windows-scripts\Search-HCC.ps1 `"x`"   what happened / what was decided"
+$out += ""
+
+# ---- What Jeff actually wants worked on next. Read live so it cannot go stale. ----
+$ns = Join-Path $repo 'docs\NEXT_SESSION.md'
+if (Test-Path $ns) {
+  $age = [int]((Get-Date) - (Get-Item $ns).LastWriteTime).TotalDays
+  $out += "###########################################################################"
+  $out += "#   START HERE - THIS IS WHAT JEFF WANTS WORKED ON NEXT                    #"
+  $out += "###########################################################################"
+  $out += ("  Full brief: docs\NEXT_SESSION.md  (written {0} day(s) ago)" -f $age)
+  $jobs = @(Get-Content $ns -Encoding UTF8 | Where-Object { $_ -match '^##\s+(JOB|STILL WAITING|WHAT NOT)' })
+  foreach ($j in $jobs) { $out += ("   {0}" -f ($j -replace '^##\s+','')) }
+  if ($age -ge 3) {
+    $out += "  *** That brief is $age days old - confirm with Jeff it is still the plan. ***"
+  }
+  $out += "  READ IT before starting work. It carries the traps, the on-hand parts,"
+  $out += "  and the live-verified state, so you do not rediscover them."
+}
 $out += "==========================================================================="
 
 @{
