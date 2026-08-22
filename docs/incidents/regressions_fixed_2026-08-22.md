@@ -155,3 +155,43 @@ polls. Chasing this in automations is why the cameras "never stay fixed."
 See `feedback_camera_freeze_rule` in memory. **No camera/Blink/go2rtc/HomeKit/automation change
 unless `Verify-CameraStreams.ps1` actually fails, or Jeff asks.** "It could be better" is not a
 reason. The measured evidence is that the changes, not the cameras, are what break this house.
+
+---
+
+# THE MAIL TEST — 2026-08-22 ~11:25 AM. Jeff's live, on-demand proof.
+
+Jeff: *"I just got a motion detection on the front yard which was the mail lady put mail in the
+mailbox. See if you can pick it up."* Then: *"Alexa saw it and she's the one that reported it."*
+
+| System | Saw the mail carrier? |
+|---|---|
+| **Alexa** (Blink → Amazon, native path) | **YES — she announced it** |
+| The Blink camera itself | YES — it is what told Alexa |
+| **Home Assistant** | **NO. `motion_detected=False` on all 6, no scan, no AI, no popup, no push** |
+| Mailbox Zigbee contact | NO — unchanged since 08-21 17:40 |
+
+Checked live: HA's logbook held **nothing** for that window except the 11:15 integration reload and
+Jeff's phone. Both front-facing camera thumbnails were pulled and inspected — current, and empty.
+
+**Blink saw her, told Amazon, and never told Home Assistant.** This reproduces on demand the exact
+fault recorded earlier the same day (front_right generating real Blink clips on 08-21 while its HA
+`binary_sensor` never once went `on`). **It is the cleanest evidence yet that the AI pipeline hangs
+off a signal Blink does not reliably deliver** — and therefore that every past session spent tuning
+HA was tuning the half that already worked. That is the mechanical reason the cameras "never stay
+fixed."
+
+**It also independently validates the RTSP purchase**
+(`docs/CAMERA_PURCHASE_RTSP_2026-08-22.md`): a Tapo streaming to go2rtc does not depend on Blink
+notifying anyone. The frames are continuously present and the AI reads them directly.
+
+## Open, deliberately NOT declared a fault
+
+No Zigbee device has reported in 12–18 h (all frozen at 08-21 17:40), and the mailbox contact
+missed a real delivery. **But this was NOT called an outage**, because the evidence is not
+conclusive: the MQTT broker answers on 1883, the `mqtt` integration is loaded, and
+`sensor.back_deck_door_voltage` DID report at 08-21 23:00 — after the restart. Zigbee contact
+sensors also publish mainly on change, so silence is not automatically failure.
+
+**Worth a look, not an alarm.** Also noted: `binary_sensor.back_deck_door_contact` has read `on`
+(open) for 17.8 h — either the door is genuinely open, or that sensor is stuck. Confirm with Jeff
+before acting on either.
