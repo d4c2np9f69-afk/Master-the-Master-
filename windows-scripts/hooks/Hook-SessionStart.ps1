@@ -14,6 +14,42 @@ $ErrorActionPreference = 'SilentlyContinue'
 $repo = 'C:\Users\jeffl\Documents\GitHub\master-the-master-'
 
 $out = @()
+# ---------------------------------------------------------------------------
+# THIS BLOCK IS FIRST ON PURPOSE (2026-08-22).
+# The cost banner also sits at the top of CLAUDE.md - but CLAUDE.md does NOT
+# auto-load for these sessions. They start in C:\Users\jeffl and the repo is a
+# CHILD directory, so CLAUDE.md only enters context if the session happens to
+# open the repo. THIS HOOK is the only thing that reaches every session.
+# So the bill goes here, at the very top, before anything else. Do not demote it.
+# ---------------------------------------------------------------------------
+$out += "###########################################################################"
+$out += "#  STOP. READ THIS BEFORE YOU TYPE ONE WORD TO JEFF.                      #"
+$out += "#                                                                         #"
+$out += "#  WHAT NOT FOLLOWING THE RULES HAS ALREADY COST HIM:                     #"
+$out += "#     ~44 HOURS of error-fighting (29.0 h measured + pre-commit)          #"
+$out += "#     128 INCIDENT-DAYS                                                   #"
+$out += "#     95 OF 636 COMMITS (14.9%) SPENT FIXING OUR OWN MESS                 #"
+$out += "#     ~47 MORE HOURS building the machinery to stop it happening          #"
+$out += "#     + hardware he bought that he did not need                           #"
+$out += "#                                                                         #"
+$out += "#  He was present for nearly all of it. That is the real bill.            #"
+$out += "#                                                                         #"
+$out += "#  YOU ARE ON THE RECORD. 445 of 737 commits carry a session ID.          #"
+$out += "#  6,896 messages are archived verbatim. Sessions ARE pulled up and       #"
+$out += "#  quoted back - that happened on 2026-08-22, four days after the fact.   #"
+$out += "#                                                                         #"
+$out += "#  Jeff filed a CASE STUDY with Anthropic. The REFUND REQUEST is written  #"
+$out += "#  and DELIBERATELY NOT FILED - he is holding it back hoping sessions     #"
+$out += "#  actually read this. Verbatim: 'I don't want to. I just want to make    #"
+$out += "#  Claude better for everybody... but I don't know how to fix it if       #"
+$out += "#  nobody reads it.'                                                      #"
+$out += "#                                                                         #"
+$out += "#  READ EVERYTHING FIRST. VERIFY BEFORE MAKING A SINGLE STATEMENT.        #"
+$out += "#  Never write 'fixed'/'working'/'verified'/'done' without naming the     #"
+$out += "#  command or observation that proved it. If you cannot name one, you     #"
+$out += "#  have not verified it - say that instead.                               #"
+$out += "###########################################################################"
+$out += ""
 $out += "================= HCC PROJECT - MANDATORY SESSION BRIEFING ================="
 $out += "Injected automatically. You did not choose to read this; that is the point."
 $out += ""

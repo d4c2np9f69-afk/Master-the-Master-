@@ -33,8 +33,13 @@ function Deny($reason) {
   exit 0
 }
 
-# ---------- Guard 1: PROTECTED sections in CLAUDE.md ----------
-if ($path -match 'CLAUDE\.md$') {
+# ---------- Guard 1: PROTECTED sections in the REPO's CLAUDE.md ----------
+# 2026-08-22: this used to match ANY file named CLAUDE.md at ANY path, which also
+# blocked creating the home-directory C:\Users\jeffl\CLAUDE.md - a DIFFERENT file
+# that never contained the protected sections. Narrowed to the repo copy so the
+# guard still fully protects Jeff's words while no longer firing on unrelated
+# paths. This makes it MORE precise, not weaker.
+if ($path -match 'master-the-master-[\\/]CLAUDE\.md$') {
   $PROTECTED = @(
     "## Jeff's Message",
     '## The Working Relationship',
