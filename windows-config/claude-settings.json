@@ -1,0 +1,65 @@
+﻿{
+    "enableWorkflows":  true,
+    "askUserQuestionTimeout":  "never",
+    "autoUpdatesChannel":  "latest",
+    "theme":  "dark",
+    "inputNeededNotifEnabled":  true,
+    "agentPushNotifEnabled":  true,
+    "remoteControlAtStartup":  true,
+    "enabledPlugins":  {
+                           "imessage@claude-plugins-official":  true
+                       },
+    "hooks":  {
+                  "SessionStart":  [
+                                       {
+                                           "hooks":  [
+                                                         {
+                                                             "type":  "command",
+                                                             "shell":  "powershell",
+                                                             "command":  "powershell -NoProfile -File \"C:\\Users\\jeffl\\Documents\\GitHub\\master-the-master-\\windows-scripts\\hooks\\Hook-SessionStart.ps1\"",
+                                                             "timeout":  30,
+                                                             "statusMessage":  "HCC briefing"
+                                                         }
+                                                     ]
+                                       }
+                                   ],
+                  "UserPromptSubmit":  [
+                                           {
+                                               "hooks":  [
+                                                             {
+                                                                 "type":  "command",
+                                                                 "shell":  "powershell",
+                                                                 "command":  "powershell -NoProfile -File \"C:\\Users\\jeffl\\Documents\\GitHub\\master-the-master-\\windows-scripts\\hooks\\Hook-UserPromptSubmit.ps1\"",
+                                                                 "timeout":  30,
+                                                                 "statusMessage":  "HCC guard"
+                                                             }
+                                                         ]
+                                           }
+                                       ],
+                  "PreToolUse":  [
+                                     {
+                                         "matcher":  "Edit|Write",
+                                         "hooks":  [
+                                                       {
+                                                           "type":  "command",
+                                                           "shell":  "powershell",
+                                                           "command":  "powershell -NoProfile -File \"C:\\Users\\jeffl\\Documents\\GitHub\\master-the-master-\\windows-scripts\\hooks\\Hook-GuardProtected.ps1\"",
+                                                           "timeout":  30,
+                                                           "statusMessage":  "HCC protected-section guard"
+                                                       }
+                                                   ]
+                                     }
+                                 ],
+                  "PostToolUse":  [
+                                      {
+                                          "matcher":  "Edit|Write",
+                                          "hooks":  [
+                                                        {
+                                                            "type":  "command",
+                                                            "command":  "powershell -NoProfile -File \"C:\\Users\\jeffl\\Documents\\GitHub\\master-the-master-\\windows-scripts\\hooks\\Hook-StaleCopies.ps1\""
+                                                        }
+                                                    ]
+                                      }
+                                  ]
+              }
+}
