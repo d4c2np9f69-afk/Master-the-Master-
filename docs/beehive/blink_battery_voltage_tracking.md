@@ -51,9 +51,24 @@ importantly it scans for the two events that actually answer the question:
 | 301_front_doorbell | *none* | doorbell reports no voltage — device capability |
 | garage | *none* | mains Mini, no battery |
 
-The driveway is the most valuable camera in this experiment: it is lowest, so it will very likely
-be the first to die and hand us the actual failure voltage. **Do not replace it the moment it
-flags low — that is the datapoint Jeff has been trying to capture.** Ask him first.
+## 🔴 THE EXPERIMENT — Jeff's explicit intent, stated 2026-08-22
+
+Jeff: *"That was the whole reason I didn't change all of the batteries. At one time I was waiting
+to see what the failure point was of the other two, the front right and the driveway, so that we
+would know exactly when we needed to change the batteries based off the voltage versus the sensor
+that says OK."*
+
+**`front_right` (151) and `301_driveway` (146) are deliberately still on their ORIGINAL batteries.
+That is a decision, not neglect.** He replaced `back_left` and `301_backyard` and left these two
+running specifically to find the failure voltage.
+
+🔴 **DO NOT replace, or tell Jeff to replace, the front_right or driveway batteries when they
+flag low.** Running them to actual failure IS the experiment. The voltage captured at the moment
+they die is the entire deliverable. Ask him before touching either.
+
+**The experiment is NOT lost by the late start.** Both are still well above failure at 151 and 146,
+and logging began 2026-08-22 — so the whole descent through the failure region, which is the only
+part that matters, will be captured. What was lost is the early, uninteresting part of the curve.
 
 ## Known limit
 
