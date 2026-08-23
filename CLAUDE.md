@@ -307,6 +307,15 @@ separately; this rule is the HA-side half.
 - **Zigbee2MQTT, not ZHA** Ã¢â‚¬â€ forced by the Gleco Z2M-only leak sensor already owned.
 - **Guardian priority is LIFE-SAFETY heavy, INTRUSION lean** Ã¢â‚¬â€ key doors and a few motions only,
   never "sensors on every window."
+- 🔴 **THE MERCEDES IS LEFT UNLOCKED ON PURPOSE. NEVER FLAG IT, NEVER SUGGEST LOCKING IT.**
+  Jeff's decision, stated 2026-08-23: *"we leave it unlocked so thieves don't bust out the windows
+  so they can [look] for valuables that are not ever left in the car, saves me $1000 for a new
+  window."* **Nothing valuable is ever kept in that car.** An unlocked door costs nothing; a smashed
+  window costs ~$1,000. A deliberate, reasoned trade — not an oversight.
+  ⚠️ `lock.gle_350_lock` reading `unlocked` is the NORMAL, CORRECT state. The Morning Digest and the
+  app's CAR/Guardian views render it with a ⚠️ — **that glyph is cosmetic, not a finding.** Do not
+  report it, do not "fix" it, do not add an alert for it.
+  **He also knows when it needs fuel — do not raise low fuel either.**
 
 ### Ã°Å¸Å½Â¯ Jeff's standing work preferences Ã¢â‚¬â€ recovered from the archive 2026-08-16
 *These were said once, acted on, and never written as rules. They are rules.*
