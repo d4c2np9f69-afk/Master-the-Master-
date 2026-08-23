@@ -147,8 +147,13 @@ merely hidden):
 
 The three HS220s are correctly protected. **The HS210 does not expose the toggle** — it is absent
 from the registry entirely, not disabled and not hidden. This is a model/firmware limitation, NOT a
-missed setup step, and the Kasa app is no help either (it hides that toggle — that is why the HA
-toggle was the answer in the first place, see `kasa_smart_lighting_project_2026-08-06.md`).
+missed setup step.
+
+**CORRECTION to my own first draft of this note (same session):** I wrote that the Kasa app is no
+help because it hides the toggle. That was over-stated. The record's "the app hides it" line was about
+the HS220's HA toggle specifically; the documented community guidance for Kasa generally IS to disable
+automatic firmware updates **in the Kasa app**. So for the HS210 the Kasa app is the route worth
+checking — it is the only one left, since HA does not expose the entity.
 
 `binary_sensor.masterbath_cans_cloud_connection` = **on**, so it can reach TP-Link.
 

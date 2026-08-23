@@ -97,3 +97,31 @@ devices private setup AP for diagnostics, without disturbing its wired LAN conne
 **BONUS: HA exposes `switch.<device>_auto_update_enabled`** — the firmware auto-update toggle the
 Kasa app does NOT show. **Turned OFF for this switch. Do the same for every future Kasa device.**
 HA also exposes an overheat sensor, signal level, smooth on/off fade, presets and the status LED.
+
+## WHY auto-update is off — the actual mechanism, researched 2026-08-23
+
+Jeff, 2026-08-23: *"Those Kasa firmware updates were turned off because I was instructed by another
+session that if you update the firmware on them, it gets worse and our control over them gets
+worse… if you research it, you'll probably find the same thing that the other session did."*
+
+Researched, and it holds up. This is not a preference — it is the difference between local control
+and cloud dependence:
+
+- TP-Link has shipped Kasa firmware (2024+) that **requires TP-Link cloud authentication even for
+  the Home Assistant integration.** That is the same shift already recorded here on 2026-08-14 as
+  the "SHIP 2.0" encrypted onboarding on port 80 instead of the legacy port 9999.
+- TP-Link **removed the local API outright** from HS100/HS110 plugs, citing a security concern.
+  Restoring local access required public pressure and a TP-Link-provided opt-in.
+- Standing community guidance is exactly what Jeff already did: **disable automatic firmware
+  updates and stay on the older firmware**, because older firmware is what keeps the local API.
+
+**So the rule is not "avoid a buggy update" — it is "a firmware push can permanently take local
+control away, and local control is the entire reason these devices were chosen over MOES/Shelly."**
+Never re-enable auto-update on a Kasa device, and never advise Jeff to update one.
+
+⚠️ **The HS210 (`switch.masterbath_cans`) is the exposure.** Verified against the HA entity registry
+2026-08-23 (including `disabled_by=integration` rows, so nothing is merely hidden): the three HS220s
+each have `switch.*_auto_update_enabled` = off, and the HS210 has **no auto-update entity at all.**
+It cannot be protected from HA. `binary_sensor.masterbath_cans_cloud_connection` = on, so it can
+reach TP-Link. The remaining route is the **Kasa app's own auto-update setting** for that device —
+worth checking there, since HA offers nothing.
