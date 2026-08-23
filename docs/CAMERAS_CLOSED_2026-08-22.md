@@ -48,7 +48,7 @@ backyard PIR aim, front_right not reporting, doorbell motion — are physical or
 
 - Backyard PIR aimed wrong (since 08-15). Physical.
 - `front_right` + doorbell log no motion to HA. Inside Blink.
-- Clip archive stores duplicates; 30 `back_left` clips are 40-byte stubs.
+- Clip archive stores duplicates; `back_left` clips are 40-byte stubs. **Counts corrected 2026-08-23 by direct measurement of D:\HCC-Clip-Archive: 53 of 131 files are byte-identical duplicates (not 4), and there are 14 40-byte stubs (not 30) spread across `back_left`, `301_driveway` and `301_front_doorbell` (not only `back_left`). Mechanism is now root-caused and written up in OPEN_ITEMS #29/#30/#61 — REFERENCE ONLY, still deliberately not being worked.**
 - Zigbee sensors quiet 12–18 h and the mailbox missed a real delivery — **suspicion, not a
   diagnosis**; MQTT is up and one device did report at 23:00. Separate from cameras.
 - `back_deck_door_contact` has read open for 17.8 h — ask Jeff, do not assume a fault.
