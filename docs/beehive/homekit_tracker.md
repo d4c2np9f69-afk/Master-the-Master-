@@ -99,3 +99,60 @@ immediately afterward.
 ---
 
 *Last reviewed 2026-08-15 evening — all six cameras on annotated images; mute system verified live (30-min back / 5-min front); clip archive running.*
+
+---
+
+## 🔴 CORRECTION 2026-08-23 — this file was stale; the lighting rollout moved on without it
+
+The "Blocked" table below/above says *"Kitchen/dining + garage lights — second HS220 not installed
+yet; garage still needs the HS210 2-location decision."* **That is out of date.** Read live from HA
+2026-08-23 5:05 PM:
+
+| Live in HA | Entity | In HomeKit? |
+|---|---|---|
+| Livingroom Cans HS220 | `light.livingroom_cans` | ✅ yes |
+| **Kitchen/Dinning Room HS220** | `light.kitchen_dining_room_cans` | ❌ **NO** |
+| **Bedroom Cans HS220** | `light.bedroom_cans` | ❌ **NO** |
+| **TP-LINK_HS210_BB9C** | `switch.masterbath_cans` | ❌ **NO** |
+
+**Three HS220s and one HS210 are installed and loaded.** All four `tplink` config entries report
+`loaded`. So the plan's "2 on hand / 3rd if a 3rd is wanted" and this file's "not installed yet" are
+both superseded by reality.
+
+**The HS210 went to the MASTER BATH, not the garage.** That is worth stating plainly because the
+garage 2-location question was long framed around an HS210 — and it was separately closed on
+2026-08-17 at $0 with the Ecoeler YM2108T Jeff already owned (OPEN_ITEMS #19 / CLAUDE.md). Do not
+re-open the garage question on the strength of an HS210 existing; it is in the bathroom.
+
+**This violates the standing rule at the top of this file** — *"every time a new device or entity is
+added to HA, check it against this file and decide — in, out, or blocked — and record the answer
+here. Never leave a new device unassessed."* Three devices were added and never assessed.
+
+**Decision still owed from Jeff:** do the kitchen/dining, bedroom and master-bath switches go INTO
+HomeKit like the living room one, or stay out? Not done unilaterally — HomeKit is inside the camera
+freeze.
+
+### ⚠️ The HS210 cannot have auto-firmware-update disabled
+
+Standing rule E.19 is *"Kasa auto-firmware-update OFF, every device, forever"* — because TP-Link
+firmware has previously broken local control, and local control is the whole reason these are used.
+
+Verified against the entity registry (including `disabled_by=integration` entries, so nothing is
+merely hidden):
+
+    switch.livingroom_cans_auto_update_enabled       off
+    switch.kitchen_dining_room_auto_update_enabled   off
+    switch.bedroom_cans_auto_update_enabled          off
+    masterbath (HS210)                               NO SUCH ENTITY AT ALL
+
+The three HS220s are correctly protected. **The HS210 does not expose the toggle** — it is absent
+from the registry entirely, not disabled and not hidden. This is a model/firmware limitation, NOT a
+missed setup step, and the Kasa app is no help either (it hides that toggle — that is why the HA
+toggle was the answer in the first place, see `kasa_smart_lighting_project_2026-08-06.md`).
+
+`binary_sensor.masterbath_cans_cloud_connection` = **on**, so it can reach TP-Link.
+
+**Known accepted risk, not an action item:** a future TP-Link firmware push could change or break
+local control on that one switch, and there is no supported way to stop it from HA. If master-bath
+local control ever breaks, look here first rather than re-debugging the network — the 2026-08-14
+HS220 install already burned ~2 hours proving the network was never the problem.
