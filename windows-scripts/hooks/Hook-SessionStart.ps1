@@ -1,4 +1,4 @@
-<#
+﻿<#
   HCC ENFORCEMENT HOOK - SessionStart
 
   Rule 1 said "READ THIS FILE FIRST" since 2026-06-24 and never worked: sessions
@@ -19,6 +19,13 @@ $ErrorActionPreference = 'SilentlyContinue'
 $repo = 'C:\Users\jeffl\Documents\GitHub\master-the-master-'
 
 $out = @()
+# ---- JEFF'S STANDING ORDER, added 2026-08-23 at his explicit instruction. ----
+# WORD FOR WORD. First thing every session sees, before anything else. Do not reword,
+# do not soften, do not move it below the header.
+$out += "🛑‼️ DO NOT PROCEED ON ANYTHING UNTIL THE FILES ARE READ🛑‼️"
+$out += "Failure to follow this or any other rule stated in the .md file will result an immediate report to Anthropic not an optional !!!!"
+$out += ""
+
 $out += "=========================== HCC - READ FIRST ============================="
 $out += "REAL TIME: " + (Get-Date -Format 'dddd yyyy-MM-dd h:mm tt') + " Central. Re-check before any 'today/tonight'."
 $out += ""
@@ -100,6 +107,43 @@ if (Test-Path $ns) {
   if ($age -ge 3) { $out += "    (that brief is ${age}d old - confirm it is still the plan)" }
   $out += ""
 }
+
+# ---- LIVE HOUSE HEALTH (added 2026-08-23) ---------------------------------
+# WHY: on 08-21 17:39 CT HA silently stopped consuming Zigbee2MQTT. Leak, door and
+# mailbox sensors were dark 44 h, a REAL mail delivery was missed, and NOT ONE
+# watchdog reported it - every watchdog waited for an EVENT, and a dead sensor
+# produces none. A briefing that only POINTS at documents cannot catch that either.
+# So the briefing now carries the CURRENT FAULT STATE itself. Do not remove.
+$out += "LIVE HOUSE HEALTH (measured right now, not read from a note):"
+try {
+  $tk = (Get-Content 'C:\Users\jeffl\HCC-secrets\ha_backup_token.txt' -Raw -ErrorAction Stop).Trim()
+  $hh = @{ Authorization = "Bearer $tk" }
+  $st = Invoke-RestMethod -Uri 'http://192.168.1.66:8123/api/states' -Headers $hh -TimeoutSec 8 -ErrorAction Stop
+  $crit = @('binary_sensor.front_door_contact','binary_sensor.back_deck_door_contact',
+            'binary_sensor.mailbox_contact','binary_sensor.guest_bath_leak_water_leak',
+            'binary_sensor.kitchen_refrigerator_leak_water_leak','binary_sensor.kitchen_sink_leak_water_leak',
+            'sensor.water_meter_last_seen')
+  $silent = @()
+  foreach ($e in $crit) {
+    $o = $st | Where-Object { $_.entity_id -eq $e }
+    if (-not $o) { $silent += ($e + ' MISSING'); continue }
+    $ageH = [math]::Round(((Get-Date).ToUniversalTime() - [datetime]::Parse($o.last_updated).ToUniversalTime()).TotalHours,1)
+    if ($ageH -gt 6) { $silent += ("{0} silent {1}h" -f $e.Split('.')[1], $ageH) }
+  }
+  if ($silent.Count) {
+    $out += ("  *** {0} CRITICAL SENSOR(S) SILENT - DATA IS BEING LOST RIGHT NOW ***" -f $silent.Count)
+    foreach ($x in $silent) { $out += ("      " + $x) }
+    $out += "      A quiet house STILL reports. Silence = broken pipeline, not calm."
+    $out += "      Fix that FIRST. Usual cause: reload the mqtt config entry."
+  } else {
+    $out += "  door/leak/meter sensors all reporting - OK"
+  }
+  $u = $st | Where-Object { $_.entity_id -eq 'update.home_assistant_core_update' -and $_.state -eq 'on' }
+  if ($u) { $out += ("  HA core update pending: {0} -> {1} (JEFF decides when)" -f $u.attributes.installed_version, $u.attributes.latest_version) }
+} catch {
+  $out += "  COULD NOT REACH HA - ping 192.168.1.66 before assuming the house is fine."
+}
+$out += ""
 
 $out += "IF JEFF TELLS YOU TO GO READ THE RECORD, HE MEANS THESE - GO READ THEM:"
 $out += "  docs\COST_LEDGER.md .................. what the failures cost"

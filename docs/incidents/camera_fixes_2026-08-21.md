@@ -497,3 +497,38 @@ CodeProject.AI up, and all six streams served a real frame (144-238 KB each).
    restore is ever done, re-check all of it.**
 4. **Someone deletes the 6 Generic Camera config entries** in HA (they are UI config entries,
    not YAML — a YAML `camera:` block will NOT recreate them; that platform was removed from HA).
+
+---
+
+## 2026-08-23 — duplicate go2rtc startup task removed
+
+**Symptom Jeff saw:** a console window full of red
+`listen tcp :8554: bind: Only one usage of each socket address` and the same for `:1984`.
+
+**Cause:** TWO scheduled tasks launched the same `go2rtc.exe`.
+
+| Task | Trigger | Runs as | Origin |
+|---|---|---|---|
+| `HCC go2rtc camera streams` | at boot | SYSTEM / Highest, 999 restarts @1min | built 08-21, documented above — **the keeper** |
+| `HCC go2rtc Camera Feed` | at logon | jeffl / Limited, no restart | built 08-15, **orphaned** when the boot task replaced it |
+
+Boot won the ports; logon lost ~5 s later, printed the two errors, and squatted on **TCP 8555**
+as an inert shell (0 CPU in 19 h, 4.1 MB).
+
+**Fix (10:36-10:40 AM CT):** `Disable-ScheduledTask 'HCC go2rtc Camera Feed'` (disabled, NOT
+deleted — `Enable-ScheduledTask` reverses it), then `Stop-ScheduledTask` on the same task to end
+its live instance. The keeper PID 2880 kept its original 8/22 3:41 PM start time — it was never
+restarted, and the camera stack was never interrupted.
+
+**Verified:** `Verify-CameraStreams.ps1` before AND after — all 6 streams served real frames both
+times (driveway 197 KB, backyard 44 KB, front_doorbell 144 KB, front_right 211 KB, back_left
+222 KB, garage 187 KB). The popup path never used 8555, which is why nothing was visibly broken.
+NOT tested: WebRTC-over-TCP viewing in the HA dashboard, which is the one thing 8555 could have
+affected.
+
+**Script bug this exposed:** `Verify-CameraStreams.ps1` did `$p = Get-Process go2rtc` and printed
+`pid System.Object[]` when two existed — the health check could not see the duplicate. Patched to
+count instances and report a multi-instance state loudly.
+
+**Lesson:** when a startup mechanism is *replaced*, disable the old one in the same session. This
+one fired at every logon for 8 days and only surfaced because Jeff happened to see the window.

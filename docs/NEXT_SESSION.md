@@ -9,7 +9,15 @@ Cameras are CLOSED and frozen. Do not reopen them. Start on the two jobs below.
 
 ## JOB 1 — Mount the remaining Zigbee sensors
 
-**Status verified live 2026-08-22 2:15 PM, not assumed:**
+🔴 **THE TABLE BELOW WAS WRONG WHEN IT WAS WRITTEN — corrected 2026-08-23 2:30 PM.**
+These sensors were NOT reporting on 08-22. Home Assistant had stopped consuming Zigbee2MQTT at
+**2026-08-21 17:39 CT** and every one of these entities was frozen at that timestamp for **44
+hours** — through the moment this table was written. The values looked correct because HA holds
+the last known state forever. **A plausible state is not proof of freshness. Check `last_updated`.**
+Zigbee2MQTT itself was never at fault; it published normally the whole time and HA discarded it.
+Cause: the documented HA/Z2M startup race. Fixed + prevented 08-23, see OPEN_ITEMS #44, #49-51.
+
+**Status as originally written 2026-08-22 2:15 PM — READ WITH THE CORRECTION ABOVE:**
 
 | Already paired and reporting | State |
 |---|---|

@@ -31,10 +31,20 @@ $streams   = 'driveway','backyard','front_doorbell','front_right','back_left','g
 Write-Host "`n=== HCC CAMERA STREAM HEALTH CHECK ===" -ForegroundColor Cyan
 Write-Host "    $(Get-Date -Format 'dddd yyyy-MM-dd h:mm tt')`n"
 
-# 1. go2rtc process
-$p = Get-Process go2rtc -ErrorAction SilentlyContinue
-if ($p) {
-    Write-Host ("go2rtc          RUNNING  pid {0}  {1}" -f $p.Id, $p.Path) -ForegroundColor Green
+# 1. go2rtc process  --  there must be exactly ONE
+#    2026-08-23: two startup tasks existed (a 08-15 logon orphan + the 08-21 boot
+#    task), so TWO go2rtc ran. The loser could not bind 8554/1984 and this check
+#    printed "pid System.Object[]" instead of noticing. Now it says so out loud.
+$p = @(Get-Process go2rtc -ErrorAction SilentlyContinue)
+if ($p.Count -eq 1) {
+    Write-Host ("go2rtc          RUNNING  pid {0}  {1}" -f $p[0].Id, $p[0].Path) -ForegroundColor Green
+} elseif ($p.Count -gt 1) {
+    Write-Host ("go2rtc          *** {0} INSTANCES RUNNING - only one can hold 8554/1984 ***" -f $p.Count) -ForegroundColor Red
+    foreach ($proc in $p) {
+        Write-Host ("                pid {0}  started {1}" -f $proc.Id, $proc.StartTime) -ForegroundColor Yellow
+    }
+    Write-Host '                cause: a second startup task running the same exe.' -ForegroundColor Yellow
+    Write-Host '                find it: Get-ScheduledTask | ? { $_.Actions.Execute -match "go2rtc" }' -ForegroundColor Yellow
 } else {
     Write-Host "go2rtc          *** NOT RUNNING - every popup will spin for 30s ***" -ForegroundColor Red
     Write-Host "                fix: Start-ScheduledTask -TaskName 'HCC go2rtc camera streams'" -ForegroundColor Yellow
