@@ -13,6 +13,26 @@ if (-not (Test-Path $Csv)) { Write-Host "No log yet at $Csv"; exit }
 $rows = Import-Csv $Csv | Where-Object { $_.camera -and $_.camera -ne 'ERROR' }
 if (-not $rows) { Write-Host "Log is empty."; exit }
 
+# ---- GUARD 1, reader side (added 2026-08-23) ----
+# Log-BlinkBatteries.ps1 refuses to alert during an integration reload:
+#     $isReload = ($blankNow.Count -ge 2) -or ($badState.Count -ge 2)
+#     if ($isReload) { exit 0 }   # never alert during a reload
+# The WRITER and the ALARM both had that guard. THIS READER never did, so it
+# reported every reload as ">> WENT DARK ... <== the real failure point" - 11 per
+# camera at identical timestamps across all four at once. Cameras do not fail in
+# unison, and the whole point of this log is to capture ONE real failure voltage;
+# burying it under fakes destroys the deliverable.
+# Mirror the writer's rule exactly: >=2 voltage cameras blank at the SAME timestamp
+# is a reload, not a battery event. One camera blank while the others still report
+# IS a real failure and must still be reported.
+$voltCams     = @($rows | Where-Object { $_.voltage -match '^\d+$' } |
+                          Select-Object -ExpandProperty camera -Unique)
+$reloadStamps = @{}
+$rows | Where-Object { $_.camera -in $voltCams -and $_.voltage -notmatch '^\d+$' } |
+        Group-Object timestamp |
+        Where-Object { $_.Count -ge 2 } |
+        ForEach-Object { $reloadStamps[$_.Name] = $true }
+
 Write-Host ""
 Write-Host "=== BLINK BATTERY TREND ===" -ForegroundColor Cyan
 $span = ([datetime]$rows[-1].timestamp) - ([datetime]$rows[0].timestamp)
@@ -44,7 +64,7 @@ foreach ($cam in ($rows | Select-Object -ExpandProperty camera -Unique)) {
     # THE POINT OF ALL THIS: what did it read just before it flagged low or went dark?
     $prev = $null
     foreach ($s in $r) {
-        if ($prev) {
+        if ($prev -and -not $reloadStamps.ContainsKey($s.timestamp)) {
             if ($prev.low_flag -eq 'off' -and $s.low_flag -eq 'on') {
                 Write-Host ("    >> FLIPPED TO LOW at {0} - last voltage before that: {1}" -f $s.timestamp, $prev.voltage) -ForegroundColor Yellow
             }
@@ -57,6 +77,13 @@ foreach ($cam in ($rows | Select-Object -ExpandProperty camera -Unique)) {
 }
 
 Write-Host ""
+if ($reloadStamps.Count -gt 0) {
+    Write-Host ("{0} integration-reload window(s) excluded - >=2 cameras blank at the same" -f $reloadStamps.Count) -ForegroundColor DarkGray
+    Write-Host "timestamp is a reload, not a battery event (same rule Log-BlinkBatteries.ps1" -ForegroundColor DarkGray
+    Write-Host "uses to refuse to alert). A single camera going blank while the others still" -ForegroundColor DarkGray
+    Write-Host "report IS a real failure and WILL still be reported above." -ForegroundColor DarkGray
+    Write-Host ""
+}
 Write-Host "Lowest reading is the next battery due. Blink's ok/low flag is NOT predictive -" -ForegroundColor DarkGray
 Write-Host "that is exactly why this log exists. Raw data: $Csv" -ForegroundColor DarkGray
 Write-Host ""
