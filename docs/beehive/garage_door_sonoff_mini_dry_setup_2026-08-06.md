@@ -18,7 +18,7 @@ Jeff has outlet access at both the wall-switch location and the opener itself, a
 
 - The low-voltage "wall console" terminals live at the opener's control board — installing there is the direct, short wire run. Installing at the wall switch would mean extending that run unnecessarily.
 - The wall-switch box is likely sized for just a momentary pushbutton — the Sonoff module may not physically fit in there alongside existing wiring (same box-depth concern already flagged for the Kasa lighting switches). Worth a quick look before ruling it out, but the opener location avoids the question entirely.
-- Outlet availability is equal at both spots, so it isn't the deciding factor here.
+- 🔴 **CORRECTED 2026-08-24 BY JEFF — the original line here read "Outlet availability is equal at both spots, so it isn't the deciding factor here." THAT IS WRONG AND IT WAS THE WHOLE POINT.** Jeff, verbatim: *"it could not be hooked up at the wall sensor because that was low-voltage — low-voltage will not work for this unit."* **The wall-switch location is LOW-VOLTAGE ONLY. There is no mains there.** The MINI-D needs 100-240V AC on N/L (or 12-48V DC on DC+/DC-), so the wall-switch box was never a candidate — this is a hard electrical disqualifier, not the soft box-depth/wire-run preference argued above. **Install at the opener, powered from the ceiling outlet the opener itself plugs into.** Jeff knew this before the doc did; the doc had it backwards for 18 days.
 
 ## Coexistence with the existing MyQ hub + wall button (resolved 08-06)
 

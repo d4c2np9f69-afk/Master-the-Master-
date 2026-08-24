@@ -114,6 +114,113 @@ checked.** See memory `feedback_local_note_beats_unrun_search`.
 
 ---
 
+---
+
+# 🔴 WHAT HAPPENED 2026-08-24 (2 PM – 6:30 PM) — READ THIS BEFORE THE JOBS BELOW
+
+**Jeff stopped for dinner mid-task. Pick up at "TOMORROW, START HERE".**
+
+## The measurement lesson of the day — it invalidates two watchdogs
+
+🔴 **`last_reported` IS NOT A LIVENESS SIGNAL FOR MQTT ENTITIES.** Verified in HA's own source
+(`homeassistant/components/mqtt/entity.py`): `_message_callback` writes state **only**
+`if attributes is not None and self._attrs_have_changed(attrs_snapshot)`. Unchanged value → no
+write → `last_reported` never moves. **Proven live:** one Front Door message carried `contact`,
+`battery`, `voltage`, `battery_low`; only `contact` had changed and only that entity updated.
+- **The SessionStart hook's "6 CRITICAL SENSORS SILENT — DATA IS BEING LOST" banner is FALSE BY
+  CONSTRUCTION.** It fires whenever the house is quiet. Nothing was wrong.
+- **#50's `hcc_sensor_silence_watchdog` has the same blind spot.**
+- **#31 and #44 are NOT disproven but are NOT proven** — same artifact could produce their evidence.
+- Full detail + the proposed fix (`last_seen: 'ISO_8601'` in Z2M): **OPEN_ITEMS #68**.
+
+🔴 **AND A SECOND MEASUREMENT TRAP, ALSO MINE:** I read Front Door LQI as `10` then `0` and built a
+whole diagnosis on it — "closest sensor has the worst link", a backwards coordinator location, an
+RTL-SDR interference theory. **Those two samples were taken in the two seconds Jeff was opening the
+door.** Z2M's log shows it ran **94-98 all night**. Cost Jeff a remount he did not need
+(`COST_LEDGER.md`). **Only quiet periodic reports are valid LQI. Never a reading taken while
+somebody is working the door.**
+
+## Zigbee — 9 of 12 paired, and the garage has NO usable coverage
+
+**Added, named and entity_id-corrected today:** `Garage Man Door` (`0xa4c138a359d762a5`),
+`Garage Door Down` (`0xa4c138efcd1e7c3d`), `Garage Door Up` (`0xa4c13864378427d2`) →
+`binary_sensor.garage_man_door_contact`, `binary_sensor.garage_door_down_contact`,
+`binary_sensor.garage_door_up_contact` (+ battery/voltage/battery_low each).
+
+🔴 **`Garage Door Down` needed FOUR interview attempts.** It joined, left, rejoined, and failed
+`simpleDescRsp after 10000ms` three times. **What fixed it: pressing the sensor's button repeatedly
+DURING the interview to keep it awake.** Remember that for the remaining sensors.
+
+🔴 **MEASURED LQI ONCE MOUNTED — the garage is dead:** Garage Door Down **0**, Garage Man Door **7**,
+Garage Door Up **21**. Meanwhile Guest Bath Leak 163, Back Deck Door 51, Front Door 76.
+**Z2M's own dashboard: Devices 9 · Router 0 · End device 9 · Low LQI 6.** There is not one router in
+the network; every sensor is a battery end device talking straight to the dongle.
+- **Jeff's plan, his words:** *"Put them up where they're gonna go then we'll see which ones are
+  working... if they come back like the mailbox, I'll know that the plugs are next."* **They came
+  back like the mailbox.** The router-plug purchase is now justified by measurement — verify current
+  pricing in-session, never from memory.
+- ✅ **Mailbox (too far) and Front Door (steel door) are ACCEPTED BY JEFF, not faults. Do not re-raise.**
+- **Still never heard from: `Kitchen Sink Leak` (LQI 14) and `Mailbox` (0).**
+
+✋ **`permit_join` and `automation.hcc_zigbee_pairing_mode_temporary_installing_sensors_08_17` were
+switched OFF at 6:29 PM and verified off.** Switch both ON again for the next mounting session.
+⚠️ **#16 lists that automation by its YAML `id`, which is NOT its entity_id** — calling the id does
+nothing and HA still returns HTTP 200.
+
+## Garage door opener — WIRED, powered, NOT yet in HA
+
+**Hardware done by Jeff:** SONOFF **MINI-D** (`S/N 25482400105228`) at the opener, powered from the
+ceiling outlet the opener uses. Opener is a **Chamberlain `41AC050-2M`, 315 MHz Security+ 1.0**
+(purple learn button) — plain dry contact, confirmed by his 08-05 bridge test.
+
+**The terminal block, worked out from his photos + his own inspection — record it so nobody re-derives it:**
+4 positions across: **RED · WHITE · WHITE · GREY**.
+- **RED + the WHITE holding ONE wire = the wall button.** ← MINI-D `NO` and `COM` land here
+- **GREY + the WHITE holding TWO wires = the two photo eyes.** Grey carries a white/black-stripe
+  **and a red** (someone extended an eye run with bell wire — that red is NOT a button wire).
+- `NC`, `S1`, `S2`, `DC+`, `DC-` all empty; `N`/`L` = the cord.
+
+✅ **#64 IS CLOSED — Matter Server add-on installed and the Matter integration configured**
+("Created configuration for Matter", `config_entry=01M0TYRGMNNXS7701EJ20V2P7T`). IPv6 verified
+`auto` on `enp1s0` first, per HA's documented prerequisite.
+
+🔴 **WHERE IT STOPPED:** commissioning requires the **HA Companion app on Jeff's iPhone** — HA's own
+dialog says so verbatim: *"You need to use the Home Assistant Companion app on your mobile phone to
+add Matter devices."* It cannot be done from the PC browser; pairing runs over **Bluetooth**, so he
+must be **near the MINI-D**. His phone is fine (`iPhone17,2`, **iOS 26.6.1**, app **2026.7.5**).
+He hit the "download the app" screen, which is what HA shows when it does not detect the app —
+i.e. he was in Safari, not the app. **Unresolved when he stopped.**
+
+**Fallback, RESEARCHED BUT NOT TOUCHED:** Beehive has a **`bluetooth` config entry**, so it has an
+adapter. Matter Server can commission over BLE itself, which would remove the phone entirely.
+⚠️ It may contend with the existing Bluetooth integration for that adapter — **read up before
+enabling it.**
+
+🔴 **Inching is still unsolved and it is REQUIRED.** The setting is **eWeLink-only** (`8d53af4`,
+re-confirmed by search 08-24) and **Jeff has no eWeLink**. Without it the relay latches instead of
+pulsing. **Plan agreed but NOT built:** do the pulse in HA (on → 0.5 s → off) plus a watchdog that
+force-offs if the switch is on >2 s.
+
+## App side — already built, but wrong for TWO position sensors
+
+`loadGarage()`/`loadGuardian()` already auto-detect `switch.*garage*` and `binary_sensor.*garage*`
+(commit **`a1a65fe`, 08-08**) — nothing to build for the relay. **But that code assumes ONE position
+sensor and Jeff now has TWO (up + down).** `garageSensorIsOpen()` will likely latch onto whichever it
+finds first and show a wrong door state. **CLAUDE's to fix before it misreports.**
+
+## 🟢 TOMORROW, START HERE
+1. **Commission the MINI-D** — Jeff, in the HA **app** (not Safari), Bluetooth on, standing at the
+   opener. Settings → Devices & Services → Matter → Add device → "No. It's new" → scan the QR or
+   type **`2197-114-6745`**.
+2. **Then** build the HA pulse script + the >2 s force-off watchdog (inching replacement).
+3. **Fix `garageSensorIsOpen()` for two sensors**, then run `node scripts/lint-app.js` and
+   `node scripts/smoke-test.js` before committing, and **push** — Cloudflare deploys on push.
+4. **Verify UP vs DOWN by moving the real door** — the names were assigned from the order Jeff
+   stated, never observed.
+5. **Price a Zigbee router plug** for the garage (verify in-session).
+
+---
+
 ## JOB 1 — Mount the remaining Zigbee sensors
 
 **6 of 12 are already mounted and reporting** (3 door/window, 3 leak) — corrected 08-23 by live

@@ -117,3 +117,6 @@ scoreboard. Three lines maximum per entry.
 *Note on what this cannot count: git records the confessions, not the crimes. Every incident above
 entered the record because a session caught itself and wrote it down. The ones nobody caught left
 no trace.*
+
+**ZIGBEE LQI READ FROM A DOOR MID-SWING — 2026-08-24, ~50 minutes and a remount Jeff did not need.** I sampled `Front Door` link quality at 14:12:15 and 14:12:17 — the two seconds Jeff was opening the door — got `LQI 10` and `0`, and built an entire diagnosis on it: "the closest sensor has the worst link", a coordinator-is-at-the-back geography that was backwards, an RTL-SDR interference theory, and a steel-door explanation. **Z2M's own log had `LQI 94-98` on every periodic report all night, one grep away.** Jeff remounted the front door on that reading; its post-remount numbers (47-76) are *lower* than the 94-98 it had before I touched anything.
+→ *Ended by finally reading the log history instead of the two samples in front of me. Two samples is not a baseline; the periodic reports were sitting there the whole time.* Same shape as the camera work: a component reading taken at the wrong instant, reported as the state of the feature.
