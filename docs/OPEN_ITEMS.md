@@ -299,6 +299,65 @@ LOCK BUTTON, not of anything in this install. Check the console before touching 
   that powers the MINI-D is confirmed live and is the obvious spot for a USB repeater — Jeff
   already owns the repeaters and the charger cubes ($0).
 
+## ✅ GARAGE 10 PM SECURE + ALEXA "CHECK GARAGE" — BUILT AND VOICE-VERIFIED 2026-08-26 2:25 PM
+
+Jeff's request, verbatim: *"set an automation for 10 PM that closes the door and turns off the
+garage fan and check the main door to make sure it's closed and have it set up to where I tell
+Alexa to check garage to make sure it's all closed"* + *"make sure that I can ask Alexa in several
+ways and she'll answer correctly — Alexa is the garage secure / Alexa are the garage doors closed
+/ Alexa is the garage fan off."*
+
+### The entities, all confirmed live — do not guess at these again
+| role | entity | proof |
+|---|---|---|
+| overhead door position | `binary_sensor.garage_door_down_contact` | `off` = CLOSED. Watched through a full open+close cycle 08-26. |
+| person door | `binary_sensor.garage_man_door_contact` | `on` = OPEN, confirmed against the physical door. |
+| relay | `switch.garage_garage_door_opener` | self-releases via `hcc_garage_relay_auto_release`. |
+| **garage fan** | **`switch.mini_smart_socket11_2_socket_1`** | friendly name *"Garage fan Socket 1"*. **Commands PROVEN**, not assumed: off at 19:20:10 → on at 19:20:14, `last_changed` actually moved, **and Jeff watched the fan stop and restart**. This matters because this house has plugs that report state correctly and ignore commands entirely (the Sylvanias). |
+
+### `automation.hcc_garage_secure_at_10_pm_door_fan_man_door`
+🔴 **THE GUARD IS THE POINT: it pulses the opener ONLY when the door reads OPEN.** The relay is a
+momentary toggle, not an open/close command — an unconditional 10 PM pulse would **OPEN a closed
+garage door every night** and leave it open until morning. Then: fan off, wait up to 45 s for the
+contact to confirm, and push **only if something is still not secure**. A silent night means it
+worked. The man door has no actuator and can only be reported.
+
+### `automation.hcc_alexa_check_garage` + `input_boolean.check_garage`
+**VOICE-VERIFIED — Alexa said it out loud and Jeff confirmed the words:** *"the man door is open
+and the fan is still running"*, which matched live state exactly at that moment.
+
+**ONE answer covers all three of Jeff's questions**, deliberately — so two phrasings can never
+give conflicting answers. Aliases on the helper: **Garage Secure · Garage Status · Garage Check ·
+Garage Doors · Garage Fan Check**.
+
+🔴 **TWO GOTCHAS MEASURED THE HARD WAY THIS SESSION — both would fail silently:**
+1. **`notify.alexa_media_last_called` ANNOUNCES TO NOTHING when no one has spoken to an Echo
+   recently.** Measured 08-26: every Echo read `last_called=False`, the automation fired, reset its
+   helper, logged **zero errors** — and nothing was ever spoken. A textbook green-component /
+   dead-feature. Now a templated target with an `or ['media_player.everywhere']` fallback.
+2. **`input_boolean` is NOT in `alexa_default_expose`** (that list is climate, cover, fan,
+   humidifier, light, lock, scene, script, sensor, switch, vacuum, water_heater). A helper is
+   invisible to Alexa until explicitly exposed.
+
+**How to expose an entity to Alexa from a session (the working command — two obvious ones do NOT
+exist on this HA):** `homeassistant/expose_entity/expose` → `unknown_command`.
+`cloud/alexa/entities/update` → `unknown_command`. **What works:**
+`config/entity_registry/update` with `options_domain: "cloud.alexa"`, `options: {should_expose: true}`.
+Aliases go on the same command as `aliases: [...]`. Read back with `homeassistant/expose_entity/list`.
+
+### ⚠️ ALEXA WILL NOT ROUTE QUESTION-FORM PHRASES — this is Amazon's wall, not a config miss
+*"Alexa, is the garage secure"* never reaches HA. Same reserved-phrase behaviour that defeated
+*"Alexa, fast forward"* on 08-03. Native phrasing is **"Alexa, turn on Check Garage"** (or any
+alias). Arbitrary wording requires an Alexa **Routine**, which is created in the phone app and
+**cannot be created from HA — there is no API for it.** Point each Routine's action at
+`Check Garage → Turn On`.
+
+### Owed by Jeff (small)
+- [ ] **"Alexa, discover devices"** — the helper is brand new to her.
+- [ ] Three Routines if he wants the natural wording: *is the garage secure* / *are the garage
+      doors closed* / *is the garage fan off*, each action = **Smart Home → Check Garage → Turn On**.
+- [ ] Watch the first 10 PM run.
+
 ## 🔋 CAMERA BATTERY MODEL — SETTLED 2026-08-26 (measured, three cameras)
 
 | # | Item | Owner | Age | Notes |
