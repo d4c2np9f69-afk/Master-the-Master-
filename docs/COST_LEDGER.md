@@ -123,3 +123,33 @@ no trace.*
 
 **REBUILT THE 2026-08-19 PIN STORM AS AN AUTOMATION — 2026-08-26, caught in 3 minutes.** Jeff said "fix it" about Blink going unavailable, so I wrote a watchdog: trigger on `alarm_control_panel.blink_loewen301` unavailable 20 min, then reload the config entry. **I never checked whether Blink automations already existed. Five did.** Two of them — `hcc_blink_auto_heal` and `hcc_blink_periodic_health_reload` — carry an explicit guard in their own descriptions: *"skips the reload whenever the config entry is in setup_error… each reload becomes a fresh login attempt and Blink texts Jeff a new 2FA PIN — 4/hour forever. That is exactly what happened 2026-08-19 4:00-4:40 PM CT."* Unavailable IS setup_error, so my automation did the forbidden thing on a timer.
 → *Caught only because I listed the automations afterwards to verify my own work. Deleted, verified gone. Also: my manual 7:05 AM reload was the same forbidden login-during-setup_error action — it worked, which was luck.* **Rule: enumerate what already exists before building anything, and read the incident doc named in the thing you are about to duplicate.**
+
+## 2026-08-26 — I declared a working sensor dead, using the exact trap in my own notes
+
+**Claimed:** `binary_sensor.garage_man_door_contact` was not delivering — *"the message genuinely
+never reached the coordinator"* — built on the observation that all four of its entities carried
+one timestamp (13:53:22, the HA 2026.8.3 restart) and nothing had arrived in 5 h 40 m.
+
+**Reality:** Jeff cycled the door and it reported in **under a second**. The sensor was fine the
+whole time. It sent nothing for 5 h 40 m because **the door was genuinely open for 5 h 40 m**, and
+these sensors only transmit on a CHANGE.
+
+**That is the trap already recorded in `project_hcc_session_2026_08_24` and in memory:**
+*"`last_reported` is NOT a liveness signal for MQTT entities — no changed value, no state write."*
+I quoted that rule correctly earlier in the very same session, then reasoned straight past it,
+because this time the sensor's reading also happened to be **stale and wrong**, which felt like
+corroboration. **Knowing a rule is not the same as applying it under a plausible-looking symptom.**
+
+**What was genuinely true and is worth keeping:** at **LQI 7** — the weakest device on the mesh —
+Jeff reported the door closed at 2:33 PM and the state did not follow; a fresh cycle at 2:35 PM
+came through instantly. So **one message was almost certainly lost**. Marginal, not dead. The
+garage still has **no Zigbee router**, and Jeff already owns the USB repeaters and charger cubes.
+
+**Cost:** small, and only because it was caught inside two minutes. **What kept it small was
+asking instead of acting** — I had offered to make the 10 PM automation ignore the man door. Had I
+just done it, a real sensor would have been silently excluded from the nightly security check, and
+the note explaining why would have made it look deliberate and correct to every later session.
+
+**Rule reinforced:** *do not diagnose a device as dead from an absence of messages when the
+mechanism only sends on change.* Cycle the input and watch, or say plainly that you cannot tell
+yet. "I could not check X" is a useful answer here; a confident wrong one is not.

@@ -406,6 +406,29 @@ now it prefers the cover and falls back to the contact. `scripts/garage-entity-t
 |---|---|---|---|---|
 | 79 | 🟡 **GUARDIAN NIGHT CHECK COUNTS 5 CAMERA AI SENSORS AS "DOORS".** Measured against live state: the Doors/windows row lists **8** entities, but only **3** are real door contacts (`front_door_contact`, `back_deck_door_contact`, `garage_man_door_contact`). The other five are `binary_sensor.ai_doorbell_301_driveway`, `..._301_backyard`, `..._301_front_doorbell`, `..._front_right`, `..._back_left` — **AI person-detection sensors on cameras**, matched only because "doorbell" contains "door". So Night Check would report *"5 open"* the moment people walk past the cameras, and the real door count is inflated even at rest. | **CLAUDE** | found 08-26 | Pre-existing, NOT introduced by today's garage work — the `*door*` substring match predates it. **App-side display only; touches no camera config, so the camera freeze does not apply.** Fix is to exclude `ai_doorbell_*` (or require a `door`/`window` device_class) in `loadGuardian()`. Gates: `lint-app.js` + `smoke-test.js`, then push. |
 
+## 🟠 GARAGE MAN DOOR — ALIVE, BUT ON THE THINNEST LINK IN THE HOUSE (2026-08-26 2:36 PM)
+
+🔴 **DO NOT RECORD THIS SENSOR AS FAULTY. IT IS NOT.** I said in-session that it was not
+delivering. **Wrong** — Jeff cycled the door and it reported in **under a second**. See
+`docs/COST_LEDGER.md`, 2026-08-26.
+
+**Why it looked dead, and why that reasoning was invalid:** all four of its entities carried the
+single timestamp `13:53:22` (the HA 2026.8.3 restart republishing cached values) and nothing had
+arrived in 5 h 40 m. But **these sensors only transmit on a CHANGE**, and the door was genuinely
+open for those 5 h 40 m. An absence of messages proves nothing about a change-driven device.
+
+**What IS real:** Jeff reported the door closed at **2:33 PM** and the state did not follow; a
+fresh cycle at **2:35 PM** registered instantly. At **LQI 7 — the weakest device on the mesh —
+one message was almost certainly lost.** Marginal, not dead.
+
+**Three-way agreement once it did report:** Jeff, the garage camera frame, and the sensor all read
+CLOSED. The camera is a genuinely independent witness for this door and is worth using again —
+`GET /api/camera_proxy/camera.garage`, a pure read that touches no camera config.
+
+| # | Item | Owner | Age | Notes |
+|---|---|---|---|---|
+| 80 | 🟠 **The garage has NO Zigbee router — man door LQI 7, overhead door LQI 43 (Z2M's threshold is 50).** Both work today and both have proven it. But one message on the man door was already lost once, on the one sensor that reports whether an exterior door is standing open. **$0 — Jeff already owns USB Zigbee repeaters and a pile of iPhone charger cubes**, and the garage ceiling outlet is confirmed live (it powers the MINI-D). This is Jeff's own stated trigger: *"if they come back like the mailbox, I'll know that the plugs are next."* | **JEFF** (plug it in) | opened 08-26 | Never re-propose the ThirdReality plugs — the power side is already solved, see the 08-26 supersede note. After the repeater is in, **re-pair the mailbox sensor** (orphaned since 08-23 19:34) and re-read both LQIs **quietly** — a reading taken mid-door-swing is garbage, see the 08-24 entry. |
+
 ## 🔋 CAMERA BATTERY MODEL — SETTLED 2026-08-26 (measured, three cameras)
 
 | # | Item | Owner | Age | Notes |
