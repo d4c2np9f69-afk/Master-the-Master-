@@ -3235,6 +3235,19 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <div class="wx-note">Live from Beehive &middot; auto-refreshes every minute</div>
     </div>
 
+    <!-- DOORS & CONTACTS — Jeff, 2026-08-26: "there is no where in the Guardian section that
+         shows the door sensors, that needs to be added". The hero cell only ever showed a COUNT
+         ("SECURE" / "2 OPEN"), so there was no way to see WHICH door, how its battery was doing,
+         or how long it had been standing open. Every row here is a real contact -- see
+         hccDoorSensors() for what is deliberately excluded and why. -->
+    <div class="card cat-safety" id="doorsCard" style="display:none">
+      <div class="card-title">&#128682; Doors &amp; Contacts <span id="doorsConn" class="irr-conn"></span></div>
+      <div id="doorsBanner" class="wx-banner wx-load">&#128260; Loading&hellip;</div>
+      <ul class="spec-list" id="doorsList" style="display:none"></ul>
+      <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadGuardian()">&#128260; Refresh</button>
+      <div class="wx-note" id="doorsNote">Live from Beehive</div>
+    </div>
+
     <!-- QUICK ACTIONS — moved here from the HOME "Hart of the Hive" photo overlay per Jeff 07-31;
          same actions, no more picture, just a clean icon grid. -->
     <div class="card cat-safety">
@@ -9990,6 +10003,65 @@ function grdPlaceholder(){
   grdSet('grd-devices', '—', 'hs-dim');
   var s = document.getElementById('guardianSetupCard'); if (s) s.style.display = 'block';
 }
+// Doors & Contacts card. Shows every real contact by name, with state, battery and how long it
+// has been that way. Jeff asked for this because a count cannot tell him WHICH door is open.
+function renderDoorsCard(states){
+  var card = document.getElementById('doorsCard');
+  var banner = document.getElementById('doorsBanner');
+  var list = document.getElementById('doorsList');
+  var conn = document.getElementById('doorsConn');
+  var note = document.getElementById('doorsNote');
+  if (!card) return;
+  var doors = hccDoorSensors(states);
+  card.style.display = '';
+  if (!doors.length){
+    if (banner){ banner.style.display = ''; banner.className = 'wx-banner wx-no'; banner.innerHTML = '&#128682; No door or window contacts in Beehive yet'; }
+    if (list) list.style.display = 'none';
+    if (conn){ conn.textContent = ''; }
+    return;
+  }
+  if (banner) banner.style.display = 'none';
+  if (conn){ conn.textContent = '● LIVE'; conn.style.color = 'var(--ok)'; }
+  doors.sort(function(a,b){
+    var ao = hccDoorIsOpen(a) ? 0 : 1, bo = hccDoorIsOpen(b) ? 0 : 1;   // open doors first
+    if (ao !== bo) return ao - bo;
+    return String(a.entity_id).localeCompare(String(b.entity_id));
+  });
+  var openN = 0, rows = '';
+  doors.forEach(function(d){
+    var open = hccDoorIsOpen(d); if (open) openN++;
+    var nm = (d.attributes && d.attributes.friendly_name) || d.entity_id;
+    nm = String(nm).replace(/\s+(Door|Contact)$/i, '').replace(/\s+Contact$/i, '');
+    // battery lives on a sibling entity: binary_sensor.x_contact -> sensor.x_battery
+    var base = d.entity_id.replace(/^binary_sensor\./, '').replace(/_contact$/, '');
+    var bat = states.filter(function(b){ return b.entity_id === 'sensor.' + base + '_battery'; })[0];
+    var low = states.filter(function(b){ return b.entity_id === 'binary_sensor.' + base + '_battery_low'; })[0];
+    var batTxt = '';
+    if (bat && /^\d+$/.test(String(bat.state))){
+      var lowFlag = low && low.state === 'on';
+      batTxt = ' <span style="font-size:10px;color:' + (lowFlag ? 'var(--bad)' : 'var(--muted)') + '">'
+             + (lowFlag ? '&#9888;&#65039; ' : '') + bat.state + '%</span>';
+    }
+    var since = '';
+    if (d.last_changed){
+      try {
+        var mins = Math.round((Date.now() - new Date(d.last_changed).getTime()) / 60000);
+        since = mins < 1 ? 'just now'
+              : mins < 60 ? mins + 'm'
+              : mins < 1440 ? Math.round(mins / 60) + 'h'
+              : Math.round(mins / 1440) + 'd';
+      } catch(e){ since = ''; }
+    }
+    rows += '<li><span class="sk">' + nm + batTxt + '</span>'
+          + '<span class="sv"><span class="' + (open ? 's-warn' : 's-ok') + '">' + (open ? 'OPEN' : 'Closed') + '</span>'
+          + (since ? ' <span style="font-size:10px;color:var(--muted)">' + since + '</span>' : '')
+          + '</span></li>';
+  });
+  if (list){ list.innerHTML = rows; list.style.display = ''; }
+  if (note) note.innerHTML = openN
+    ? '<b>' + openN + ' open</b> of ' + doors.length + ' &middot; live from Beehive'
+    : 'All ' + doors.length + ' secure &middot; live from Beehive';
+}
 function loadGuardian(){
   if (!getHaToken()) { grdPlaceholder(); return; }
   var setup = document.getElementById('guardianSetupCard'); if (setup) setup.style.display = 'none';
@@ -10080,16 +10152,13 @@ function loadGuardian(){
     }
 
     // DOORS — contact sensors (door/window), garage + car (Mercedes) excluded
-    var doors = states.filter(function(s){
-      var id = s.entity_id.toLowerCase();
-      if (id.indexOf('garage') >= 0) return false;
-      if (id.indexOf('mercedes') >= 0 || id.indexOf('gle') >= 0 || id.indexOf('mbapi') >= 0) return false;
-      if (s.entity_id.indexOf('binary_sensor.') === 0) return (id.indexOf('door') >= 0 || id.indexOf('window') >= 0);
-      if (s.entity_id.indexOf('cover.') === 0) return id.indexOf('door') >= 0;
-      return false;
-    });
+    // 08-26: was its own copy of the filter and counted 5 ai_doorbell_* camera sensors as doors,
+    // while excluding the garage MAN DOOR (a real exterior door) for containing "garage".
+    // One shared helper now, so the hero, Night Check and the Doors card cannot disagree.
+    var doors = hccDoorSensors(states);
+    renderDoorsCard(states);
     if (doors.length){
-      var openD = doors.filter(function(d){ return d.state === 'open' || d.state === 'on'; }).length;
+      var openD = doors.filter(hccDoorIsOpen).length;
       grdSet('grd-doors', openD > 0 ? openD + ' OPEN' : 'SECURE', openD > 0 ? 'hs-warn' : 'hs-ok');
       if (openD > 0) warnReasons.push(openD + ' door' + (openD > 1 ? 's' : '') + ' open');
     } else grdSet('grd-doors', 'Sensor pending', 'hs-dim');
@@ -10148,8 +10217,8 @@ function guardianNightCheck(){
     // entirely -- it is a real exterior door and Jeff had it standing open. Only the overhead
     // door is excluded here, because it gets its own row below. Battery/motion/link entities
     // are dropped too: garage_man_door_battery_low ends in 'door...' and was being counted.
-    var doors = states.filter(function(s){ var id = s.entity_id.toLowerCase(); return s.entity_id.indexOf('binary_sensor.') === 0 && (id.indexOf('door') >= 0 || id.indexOf('window') >= 0) && !garageIsOverheadDoor(id) && !/(battery|_low|motion|camera|tamper|spare|update|connectivity|problem|linkquality|signal)/.test(id) && id.indexOf('mercedes') < 0 && id.indexOf('gle') < 0 && id.indexOf('mbapi') < 0; });
-    if (doors.length){ any = true; var od = doors.filter(function(d){ return d.state === 'on' || d.state === 'open'; }).length; if (od) anyIssue = true; rows += grdRow(od === 0, 'Doors / windows', od === 0 ? 'Secure' : od + ' open'); }
+    var doors = hccDoorSensors(states);   // 08-26: shared helper, see hccDoorSensors()
+    if (doors.length){ any = true; var od = doors.filter(hccDoorIsOpen).length; if (od) anyIssue = true; rows += grdRow(od === 0, 'Doors / windows', od === 0 ? 'Secure' : od + ' open'); }
     // Garage
     // 08-26: the old `*garage*` match here also caught binary_sensor.garage_motion (the Blink
     // camera) and two *_battery_low flags, so a car going past the garage camera reported the
@@ -10339,6 +10408,33 @@ function loadLights(){
   });
 }
 
+// ── REAL DOOR / WINDOW CONTACTS ───────────────────────────────────
+// ONE definition, used by the Guardian hero cell, Night Check, and the Doors & Contacts card,
+// so the three can never report different numbers for the same house.
+// EXCLUDES, and every one of these was actually being counted as a door before 2026-08-26:
+//   ai_doorbell_*  -- camera PERSON-DETECTION sensors, matched only because "doorbell" contains
+//                     "door". Five of them. Night Check would have said "5 doors open" the moment
+//                     people walked past the cameras.
+//   *_battery_low, *_battery, linkquality, motion, tamper, spare, update -- diagnostics.
+//   mercedes / gle / mbapi -- the car.
+//   the overhead garage door -- it has its own card and its own Guardian cell; counting it here
+//                     too would report one physical door twice.
+// The garage MAN DOOR is deliberately INCLUDED: it is a real exterior door.
+function hccDoorSensors(states){
+  return states.filter(function(s){
+    if (s.entity_id.indexOf('binary_sensor.') !== 0) return false;
+    var id = s.entity_id.toLowerCase();
+    if (id.indexOf('ai_doorbell') >= 0) return false;
+    if (/(battery|_low|motion|camera|tamper|spare|update|connectivity|problem|linkquality|signal)/.test(id)) return false;
+    if (id.indexOf('mercedes') >= 0 || id.indexOf('gle') >= 0 || id.indexOf('mbapi') >= 0) return false;
+    if (garageIsOverheadDoor(id)) return false;
+    var dc = (s.attributes && s.attributes.device_class) || '';
+    if (dc === 'door' || dc === 'window' || dc === 'opening') return true;
+    return id.indexOf('door') >= 0 || id.indexOf('window') >= 0;
+  });
+}
+function hccDoorIsOpen(s){ return s.state === 'on' || s.state === 'open'; }
+
 // ── GARAGE DOOR (Home Guardian) ───────────────────────────────────────────
 // Two independent HA entity shapes, per docs/beehive/garage_door_sonoff_mini_dry_setup_2026-08-06.md:
 //   cover.*garage*   — ratgdo, if that's ever adopted instead. Real open/closed + position.
@@ -10447,13 +10543,34 @@ function loadGarage(preFetchedStates){
         else changed.textContent = '';
       }
       if (specs){
+        // 2026-08-26, Jeff: "the connection is wrong and says 0% don't know what that means."
+        // BOTH were real bugs.
+        //  * "0%" was HA's BLIND POSITION. A template garage cover with no position template
+        //    still reports current_position 0 when closed / 100 when open, and this line printed
+        //    it raw. A garage door is not a window shade -- 0% reads like a fault or a dead
+        //    battery. Show OPEN/CLOSED, and only ever show a percentage if the cover genuinely
+        //    supports SET_POSITION (CoverEntityFeature 4), which a garage opener does not.
+        //  * "Local (ratgdo / ESPHome)" was HARDCODED in 2026-08 when ratgdo was the assumed
+        //    hardware. It never was: this is a SONOFF MINI-D relay plus a Zigbee contact. Stating
+        //    a protocol the app cannot actually see from /api/states is how that lie survived a
+        //    year, so describe the TOPOLOGY, which is verifiable from the entities in hand.
         var name = a.friendly_name || cover.entity_id;
-        var pos = (typeof a.current_position === 'number') ? a.current_position + '%' : '--';
+        var stateTxt = st === 'open' ? 'Open' : st === 'closed' ? 'Closed'
+                     : st === 'opening' ? 'Opening' : st === 'closing' ? 'Closing'
+                     : (st ? st.charAt(0).toUpperCase() + st.slice(1) : '--');
+        var canPos = (typeof a.current_position === 'number') && ((a.supported_features || 0) & 4);
+        var pos = canPos ? (stateTxt + ' (' + a.current_position + '%)') : stateTxt;
+        var connTxt = (sw && sensor) ? 'Local &middot; relay + door contact'
+                    : sw ? 'Local &middot; relay (no position sensor)'
+                    : sensor ? 'Local &middot; door contact only'
+                    : 'Local';
         specs.innerHTML = '<li><span class="sk">Name</span><span class="sv">' + name + '</span></li>'
           + '<li><span class="sk">Position</span><span class="sv">' + pos + '</span></li>'
-          + '<li><span class="sk">Connection</span><span class="sv">Local (ratgdo / ESPHome)</span></li>';
+          + '<li><span class="sk">Connection</span><span class="sv">' + connTxt + '</span></li>';
       }
-      if (note) note.innerHTML = 'Live from Beehive &bull; ratgdo / ESPHome';
+      if (note) note.innerHTML = (sw && sensor)
+        ? 'Live from Beehive &bull; relay + door contact'
+        : 'Live from Beehive';
       return;
     }
 

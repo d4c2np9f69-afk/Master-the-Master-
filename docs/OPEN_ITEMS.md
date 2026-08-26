@@ -404,7 +404,7 @@ now it prefers the cover and falls back to the contact. `scripts/garage-entity-t
 
 | # | Item | Owner | Age | Notes |
 |---|---|---|---|---|
-| 79 | 🟡 **GUARDIAN NIGHT CHECK COUNTS 5 CAMERA AI SENSORS AS "DOORS".** Measured against live state: the Doors/windows row lists **8** entities, but only **3** are real door contacts (`front_door_contact`, `back_deck_door_contact`, `garage_man_door_contact`). The other five are `binary_sensor.ai_doorbell_301_driveway`, `..._301_backyard`, `..._301_front_doorbell`, `..._front_right`, `..._back_left` — **AI person-detection sensors on cameras**, matched only because "doorbell" contains "door". So Night Check would report *"5 open"* the moment people walk past the cameras, and the real door count is inflated even at rest. | **CLAUDE** | found 08-26 | Pre-existing, NOT introduced by today's garage work — the `*door*` substring match predates it. **App-side display only; touches no camera config, so the camera freeze does not apply.** Fix is to exclude `ai_doorbell_*` (or require a `door`/`window` device_class) in `loadGuardian()`. Gates: `lint-app.js` + `smoke-test.js`, then push. |
+| 79 | ✅ **CLOSED 2026-08-26 — and it was worse than filed: THREE separate copies of the same broken filter.** Night Check, the Guardian hero cell, and (once built) the Doors card each had their own `*door*` substring match. All three counted the **5 `ai_doorbell_*` camera person-detection sensors** as doors — so Night Check would have reported *"5 doors open"* the moment people walked past the cameras — and all three **excluded the garage MAN DOOR**, a real exterior door, for containing "garage". **Fixed with ONE shared `hccDoorSensors()` used by all three, so they cannot disagree.** | **CLAUDE** | found + fixed 08-26 | Verified against live state via `scripts/doors-entity-test.js`: **4 real contacts** (front door, back deck, garage man door, mailbox), **0 ai_doorbell**, 0 battery flags, overhead door excluded (it has its own card and hero cell — counting it here would report one door twice). lint clean, smoke passed. |
 
 ## 🟠 GARAGE MAN DOOR — ALIVE, BUT ON THE THINNEST LINK IN THE HOUSE (2026-08-26 2:36 PM)
 
@@ -454,6 +454,29 @@ never the value.
 **false positive** — the mower serial *range* `402082000` and the HTML chart entity `&#128200;`.
 **No credential leak.** Worth re-running that check rather than assuming, but also worth knowing
 those two hits are benign so the next session does not re-investigate them.
+
+## ✅ APP: GARAGE CARD FIXED + "DOORS & CONTACTS" ADDED — 2026-08-26 4:24 PM
+
+Jeff: *"In the app the garage door section needs to be fixed, the connection is wrong and says 0%,
+don't know what that means. Also there is nowhere in the Guardian section that shows the door
+sensors, that needs to be added."*
+
+### Both garage-card complaints were real bugs
+| shown | why it was wrong |
+|---|---|
+| **Position: 0%** | HA's **blind position**. A template garage cover with no position template still reports `current_position` 0 when closed / 100 when open, and the card printed it raw. **A garage door is not a window shade — "0%" reads like a fault or a dead battery.** Now shows **Open / Closed**, and only ever appends a percentage if the cover genuinely supports `SET_POSITION` (CoverEntityFeature 4), which a garage opener does not. |
+| **Connection: Local (ratgdo / ESPHome)** | **Hardcoded** back when ratgdo was the assumed hardware. **It never was ratgdo** — it is a SONOFF MINI-D relay plus a Zigbee contact. 🔴 **Root lesson: the app cannot see an integration/protocol from `/api/states`, so stating one was always a guess — which is exactly how a wrong string survived unnoticed.** Now describes the **topology**, which IS verifiable from the entities in hand: *"Local · relay + door contact"*. |
+
+### New card: 🚪 Doors & Contacts (Guardian section)
+The hero cell only ever showed a **count** — "SECURE" or "2 OPEN". That cannot tell Jeff **which**
+door, how its battery is doing, or how long it has been open. The card lists every real contact,
+**open ones sorted to the top**, with battery % (red + ⚠️ when its `battery_low` flag is on) and a
+compact age since last change.
+
+**Live right now:** back deck · mailbox · front door · garage man door — 4 contacts, all closed, all 100%.
+
+🔴 **Why `hccDoorSensors()` is ONE function and must stay that way:** the same broken `*door*`
+substring match existed in **three** places, and they had already drifted. See #79.
 
 ## 🔋 CAMERA BATTERY MODEL — SETTLED 2026-08-26 (measured, three cameras)
 
