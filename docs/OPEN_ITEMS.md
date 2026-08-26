@@ -429,6 +429,22 @@ CLOSED. The camera is a genuinely independent witness for this door and is worth
 |---|---|---|---|---|
 | 80 | 🟠 **The garage has NO Zigbee router — man door LQI 7, overhead door LQI 43 (Z2M's threshold is 50).** Both work today and both have proven it. But one message on the man door was already lost once, on the one sensor that reports whether an exterior door is standing open. **$0 — Jeff already owns USB Zigbee repeaters and a pile of iPhone charger cubes**, and the garage ceiling outlet is confirmed live (it powers the MINI-D). This is Jeff's own stated trigger: *"if they come back like the mailbox, I'll know that the plugs are next."* | **JEFF** (plug it in) | opened 08-26 | Never re-propose the ThirdReality plugs — the power side is already solved, see the 08-26 supersede note. After the repeater is in, **re-pair the mailbox sensor** (orphaned since 08-23 19:34) and re-read both LQIs **quietly** — a reading taken mid-door-swing is garbage, see the 08-24 entry. |
 
+## 🔒 SETTLED 2026-08-26 — THE GARAGE / ALEXA PIN STAYS AS IT IS
+
+**Jeff set an Alexa "Open by Voice" PIN and it is the same code as the outdoor keypad and
+Mercedes Me.** A session raised the overheard-aloud risk once; **Jeff considered it and kept them
+unified** — *"It's fine nobody can hear me, the only people here are Angela and I."*
+
+🔴 **NEVER RE-PROPOSE SPLITTING THESE CODES.** Do not flag it, do not build an alert for it, do not
+list it as a finding in a future security pass. **The value itself lives ONLY in
+`HCC-secrets\HCC_ACCESS.md` section 8 — never in this repo, which is PUBLIC.** Reference the path,
+never the value.
+
+✅ **Checked 2026-08-26, not assumed:** grepped the whole repo for that code. Every hit was a
+**false positive** — the mower serial *range* `402082000` and the HTML chart entity `&#128200;`.
+**No credential leak.** Worth re-running that check rather than assuming, but also worth knowing
+those two hits are benign so the next session does not re-investigate them.
+
 ## 🔋 CAMERA BATTERY MODEL — SETTLED 2026-08-26 (measured, three cameras)
 
 | # | Item | Owner | Age | Notes |
