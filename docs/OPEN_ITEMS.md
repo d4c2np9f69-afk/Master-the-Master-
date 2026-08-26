@@ -490,6 +490,80 @@ compact age since last change.
 🔴 **Why `hccDoorSensors()` is ONE function and must stay that way:** the same broken `*door*`
 substring match existed in **three** places, and they had already drifted. See #79.
 
+## 🔴 HA HEALTH SWEEP 2026-08-26 5:40 PM — THE WATER LEAK ALARM WAS DEAD
+
+Jeff: *"There is a watchdog error in HA that needs to be repaired, can you take a look and check
+for any other problems."* The watchdog he saw was the visible corner of a bigger fault.
+
+### 🔴 THREE automations called `notify.jeffs_iphone`, WHICH DOES NOT EXIST
+The real service is **`notify.mobile_app_jeffs_iphone`**.
+
+| automation | what was actually broken |
+|---|---|
+| `hcc_water_leak_alarm_all_zigbee_leak_sensors` | 🔴 **LIFE/PROPERTY SAFETY. Completely dead.** |
+| `hcc_sensor_silence_watchdog` | the error Jeff spotted in the UI |
+| `hcc_low_battery_alert_all_cameras_zigbee_sensors` | battery warnings, dead |
+
+🔴 **AND IT WAS WORSE THAN A MISSING PUSH.** In HA a `service_not_found` error **ABORTS the
+automation**, so every action *after* the bad call never runs either. The leak alarm's second
+action was `persistent_notification.create` — **so a wet leak sensor produced NO push AND NO record
+in HA. Both channels, silently.**
+
+**Repaired:** service name fixed in all three, **and the local `persistent_notification` moved to
+FIRST** so a push failure can never abort the record again. Re-scanned all 41 UI automations from
+scratch afterwards: **zero remaining calls to nonexistent services.** A real push was fired through
+the repaired service and delivered.
+
+⚠️ **NOT VERIFIED — 5 YAML automations could not be scanned:** `hcc_panic_button`,
+`hcc_mower_sensor_sync`, `hcc_severe_weather_alert`, `ai_camera_scan_on_motion`,
+`ai_object_detected_notify`. The config API serves **only UI-created** automations, so a 404 there
+is expected and is not itself a fault — but **do not claim those five are clean.** They live in
+`packages/hcc.yaml` and need a file-level read.
+
+### 🔴 THE SENSOR SILENCE WATCHDOG IS NOW DISABLED — AND MUST STAY OFF UNTIL REDESIGNED
+**Repairing its notification would have turned a silently-dead automation into a phone-spamming
+false-alarm machine.** Measured at 17:44, its condition was **already TRUE**, and all four
+"silent" sensors were behaving **correctly**:
+
+```
+front_door_contact            8.9h   nobody opened the front door
+guest_bath_leak_water_leak    8.9h   it is DRY
+kitchen_refrigerator_leak     8.9h   DRY
+kitchen_sink_leak             8.9h   DRY
+```
+
+It triggers `time_pattern /30`, **time-sensitive**, so that is a false alarm every 30 minutes all
+night. It last fired at **17:30** (erroring on the dead service); the fix landed 17:43 and the next
+run at **18:00 would have been its first *successful* false alarm.** Disabled at 17:45.
+
+🔴 **IT CANNOT BE FIXED BY TUNING THE THRESHOLD.** It measures `last_updated`, and **these are
+change-driven sensors — a quiet house genuinely reports nothing.** There is currently **no valid
+liveness signal**: `linkquality` entities = **0**, and per-device `last_seen` exists only for the
+water and gas meters. **The correct fix is Z2M's `availability` feature** (publishes real
+available/unavailable per device) — a Z2M config change, no cameras involved. **Until then a
+silence watchdog is not buildable, and pretending otherwise is worse than having none.**
+*This is the same blind spot already recorded against #50 and in the 08-24 session note.*
+
+### Everything else in the log — checked, and benign
+| seen | verdict |
+|---|---|
+| **12 x `blinkpy` "System is busy" code 307** | **Blink's cloud throttling us.** 🔴 Cameras are FROZEN — reported, not touched. |
+| **60 x "Update of `binary_sensor.301_driveway_motion` taking over 10 seconds"** | Same cause. ⚠️ **I theorised a dead camera and TESTED it before saying so — wrong.** Driveway reads -67 dBm and **168 volts, a fresh cell — Jeff changed that battery.** Causation runs the other way: Blink throttling makes the polls slow. |
+| **3 x `http.ban` "invalid authentication"** | **Not an intrusion.** Expired `camera_proxy` signed tokens from a dashboard tab left open (Safari 15.6.8 = the wall iPad). Benign. |
+| **2 x template `'value_json' is undefined`** | **Mine**, at 14:02:59 — the empty retained MQTT payload from my own `Garage Door Up -> Spare Contact 1` rename at 2:03 PM. One-off. |
+| **34 unavailable entities** | Phones asleep + the two PC Alexa apps + `dellmasterbed`. Normal. |
+
+### 🔴 `/api/error_log` IS GONE ON THIS HA — IT RETURNS 404
+**Use `/api/hassio/core/logs`.** ⚠️ **Earlier this same session I ran `/api/error_log`, grepped the
+404 body, found no matches and told Jeff "no errors."** I read a clean bill of health off a dead
+endpoint — the same green-component/dead-feature trap as the 08-21 camera check. **Any log check
+must assert the response is real before drawing a conclusion from its emptiness.**
+
+### Heads-up, not a fault
+`front_right` is at **149**, under the 150 threshold, so `hcc_camera_battery_at_150` fires at the
+next `/6h` boundary (**18:00**). `last_triggered` was `None` only because 12:00 passed before the
+automation existed. `input_datetime.camera_batteries_changed` = **2026-08-26**.
+
 ## 🔋 CAMERA BATTERY MODEL — SETTLED 2026-08-26 (measured, three cameras)
 
 | # | Item | Owner | Age | Notes |
