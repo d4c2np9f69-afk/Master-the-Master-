@@ -39,39 +39,12 @@ $span = ([datetime]$rows[-1].timestamp) - ([datetime]$rows[0].timestamp)
 Write-Host ("    {0}   |   {1} samples over {2:N1} days" -f (Get-Date -Format 'dddd yyyy-MM-dd h:mm tt'), $rows.Count, $span.TotalDays)
 Write-Host ""
 
-# ---- GUARD 2, reader side (added 2026-08-26) ----
-# A dead camera does NOT always blank its voltage. 301_driveway died at 02:16 on
-# 2026-08-25 and kept a numeric voltage of exactly 135 for 37+ consecutive samples,
-# with temp pinned at exactly 66. GUARD 1 never saw it (voltage stayed numeric) and
-# neither did the WENT DARK check, so this reader printed "now 135, -2.82/day" as
-# though the camera were alive and getting worse. It was a corpse holding a value.
-# The tell is Blink's OWN sentinel, already in the log: wifi_dbm goes to -255.
-# Live cameras report a real dBm (-39..-62 across this house). This is not a
-# heuristic invented here - it is the vendor's not-reporting marker.
-# So: rows with wifi_dbm -255 are NOT live. Trend and rate come from live rows only,
-# and a camera currently stuck at -255 is reported as STOPPED REPORTING with the
-# last voltage it read while alive - which is the failure point this log exists for.
 foreach ($cam in ($rows | Select-Object -ExpandProperty camera -Unique)) {
     $r = $rows | Where-Object { $_.camera -eq $cam }
-    $vAll = $r | Where-Object { $_.voltage -match '^\d+$' }
-    $v    = $vAll | Where-Object { $_.wifi_dbm -ne '-255' }
-
-    if (-not $vAll) {
-        Write-Host ("{0,-22} no voltage - this device type never reports one (doorbell / mains Mini)" -f $cam) -ForegroundColor DarkGray
-        continue
-    }
-
-    # Is it stuck on the -255 sentinel right now? Walk back to where that run began.
-    $staleSince = $null; $lastLive = $null
-    if ($vAll[-1].wifi_dbm -eq '-255') {
-        for ($i = $vAll.Count - 1; $i -ge 0; $i--) {
-            if ($vAll[$i].wifi_dbm -eq '-255') { $staleSince = $vAll[$i].timestamp }
-            else { $lastLive = $vAll[$i]; break }
-        }
-    }
+    $v = $r | Where-Object { $_.voltage -match '^\d+$' }
 
     if (-not $v) {
-        Write-Host ("{0,-22} NOT REPORTING - every logged row carries the -255 sentinel" -f $cam) -ForegroundColor Red
+        Write-Host ("{0,-22} no voltage - this device type never reports one (doorbell / mains Mini)" -f $cam) -ForegroundColor DarkGray
         continue
     }
 
@@ -87,15 +60,6 @@ foreach ($cam in ($rows | Select-Object -ExpandProperty camera -Unique)) {
         $line += "  - too early for a rate"
     }
     Write-Host $line
-
-    # GUARD 2 result: say plainly that this camera is dead, and when, and at what voltage.
-    if ($staleSince) {
-        $deadFor = ([datetime]$rows[-1].timestamp - [datetime]$staleSince).TotalHours
-        Write-Host ("    >> STOPPED REPORTING at {0} ({1:N1}h ago) - LAST LIVE VOLTAGE: {2}  <== the real failure point" -f `
-                    $staleSince, $deadFor, $(if ($lastLive) { $lastLive.voltage } else { 'n/a' })) -ForegroundColor Red
-        Write-Host ("       wifi_dbm has read -255 since then; the '{0}' above is a FROZEN value, not a live reading." -f $vAll[-1].voltage) -ForegroundColor Red
-        Write-Host ("       Blink's own flag still reads '{0}' for this camera." -f $vAll[-1].battery_flag) -ForegroundColor Red
-    }
 
     # THE POINT OF ALL THIS: what did it read just before it flagged low or went dark?
     $prev = $null
