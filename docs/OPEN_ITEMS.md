@@ -432,8 +432,18 @@ CLOSED. The camera is a genuinely independent witness for this door and is worth
 ## 🔒 SETTLED 2026-08-26 — THE GARAGE / ALEXA PIN STAYS AS IT IS
 
 **Jeff set an Alexa "Open by Voice" PIN and it is the same code as the outdoor keypad and
-Mercedes Me.** A session raised the overheard-aloud risk once; **Jeff considered it and kept them
-unified** — *"It's fine nobody can hear me, the only people here are Angela and I."*
+Mercedes Me.** A session raised the overheard-aloud risk once. **Jeff closed it, and his reasoning
+is stronger than the objection:**
+
+> *"When you're as old as I am, it's better to leave it like it is, because remembering another
+> PIN is just something else I'll forget."* — and *"nobody can hear me, the only people here are
+> Angela and I."*
+
+🔴 **THE FAILURE MODES ARE NOT SYMMETRIC, AND THAT IS THE POINT.** A forgotten PIN locks Jeff out
+of his own garage. A shared PIN only matters if a stranger is in the driveway to overhear it, and
+there isn't one. **And this house is being built so Angela and his sons can run it if he is gone —
+one code the family can remember beats three they cannot.** Unifying these codes is a deliberate
+usability-and-succession decision. **It is NOT an oversight and must never be written up as one.**
 
 🔴 **NEVER RE-PROPOSE SPLITTING THESE CODES.** Do not flag it, do not build an alert for it, do not
 list it as a finding in a future security pass. **The value itself lives ONLY in
