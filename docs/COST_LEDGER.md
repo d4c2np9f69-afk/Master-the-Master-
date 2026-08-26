@@ -143,7 +143,10 @@ corroboration. **Knowing a rule is not the same as applying it under a plausible
 **What was genuinely true and is worth keeping:** at **LQI 7** — the weakest device on the mesh —
 Jeff reported the door closed at 2:33 PM and the state did not follow; a fresh cycle at 2:35 PM
 came through instantly. So **one message was almost certainly lost**. Marginal, not dead. The
-garage still has **no Zigbee router**, and Jeff already owns the USB repeaters and charger cubes.
+garage still has **no Zigbee router**. ⚠️ **CORRECTED 2026-08-26 3:10 PM — the repeaters are NOT in
+hand.** Jeff: *"I don't have those Zigbee repeaters yet, they're still on their way from AliExpress."*
+He owns the iPhone charger cubes; the repeaters are **in transit**. **This fix is BLOCKED until they
+land, and AliExpress shipping is typically weeks, not days.**
 
 **Cost:** small, and only because it was caught inside two minutes. **What kept it small was
 asking instead of acting** — I had offered to make the 10 PM automation ignore the man door. Had I
@@ -153,3 +156,33 @@ the note explaining why would have made it look deliberate and correct to every 
 **Rule reinforced:** *do not diagnose a device as dead from an absence of messages when the
 mechanism only sends on change.* Cycle the input and watch, or say plainly that you cannot tell
 yet. "I could not check X" is a useful answer here; a confident wrong one is not.
+
+## 2026-08-26 — "already owns" was MY paraphrase of "ordered", and it spread to 5 files
+
+**What Jeff actually said (08-26, quoted correctly in OPEN_ITEMS #69):** *"I have several of the USB
+zigbee extenders **ordered** and I have a ton of the old iPhone charger cubes."*
+
+**What I later wrote in the summary:** *"Jeff already owns the USB repeaters and charger cubes."*
+That one-word drift — **ordered → owns** — then propagated into `COST_LEDGER.md`, two places in
+`OPEN_ITEMS.md`, the session memory, and `MEMORY.md`. Five files, all wrong, all from one
+paraphrase of a source that was accurate.
+
+**Jeff's correction, and the part worth keeping:** *"I don't have those Zigbee repeaters yet,
+they're still on their way from AliExpress"* — then, *"If I had them, don't you think I would
+already have them up?"* **He is right, and that was available without any lookup.** He spent that
+entire day mounting Zigbee sensors and wiring a garage opener. A man doing that work does not have
+an unopened mesh repeater sitting on the bench. **The context of the session already contradicted
+the claim; I checked the files instead of thinking about the person.**
+
+**Cost if it had survived:** the next session reads "$0, he already owns it, plug it in" and sends
+Jeff hunting the house for hardware that is on a slow boat. That is precisely the run-around he has
+a standing rule against.
+
+**Two rules this reinforces:**
+1. 🔴 **Preserve tense when summarizing.** *Ordered*, *on order*, *owns*, and *installed* are four
+   different states of a part. Collapsing them loses the only fact that decides whether a task is
+   actionable **today**.
+2. 🔴 **A quote is evidence; a paraphrase of a quote is not.** The original record was correct the
+   whole time. The corruption entered when a later pass restated it in its own words — so **when a
+   claim about what Jeff has or said matters, re-read the QUOTE, not the summary of it.** This is
+   the same failure shape as `feedback_local_note_beats_unrun_search`.

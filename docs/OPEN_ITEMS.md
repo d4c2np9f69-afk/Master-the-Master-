@@ -297,7 +297,7 @@ LOCK BUTTON, not of anything in this install. Check the console before touching 
 - 🟠 **`garage_door_down` sits at LQI 43**, below Z2M's 50 threshold, and `garage_man_door` at 7.
   It works and just proved it, but the garage still has **no Zigbee router**. The ceiling outlet
   that powers the MINI-D is confirmed live and is the obvious spot for a USB repeater — Jeff
-  already owns the repeaters and the charger cubes ($0).
+  has the charger cubes; the **repeaters are still in transit from AliExpress** (Jeff, 08-26 3:10 PM) — $0, but NOT yet actionable.
 
 ## ✅ GARAGE 10 PM SECURE + ALEXA "CHECK GARAGE" — BUILT AND VOICE-VERIFIED 2026-08-26 2:25 PM
 
@@ -427,7 +427,7 @@ CLOSED. The camera is a genuinely independent witness for this door and is worth
 
 | # | Item | Owner | Age | Notes |
 |---|---|---|---|---|
-| 80 | 🟠 **The garage has NO Zigbee router — man door LQI 7, overhead door LQI 43 (Z2M's threshold is 50).** Both work today and both have proven it. But one message on the man door was already lost once, on the one sensor that reports whether an exterior door is standing open. **$0 — Jeff already owns USB Zigbee repeaters and a pile of iPhone charger cubes**, and the garage ceiling outlet is confirmed live (it powers the MINI-D). This is Jeff's own stated trigger: *"if they come back like the mailbox, I'll know that the plugs are next."* | **JEFF** (plug it in) | opened 08-26 | Never re-propose the ThirdReality plugs — the power side is already solved, see the 08-26 supersede note. After the repeater is in, **re-pair the mailbox sensor** (orphaned since 08-23 19:34) and re-read both LQIs **quietly** — a reading taken mid-door-swing is garbage, see the 08-24 entry. |
+| 80 | 🟠 **The garage has NO Zigbee router — man door LQI 7, overhead door LQI 43 (Z2M's threshold is 50).** Both work today and both have proven it. But one message on the man door was already lost once, on the one sensor that reports whether an exterior door is standing open. 🔴 **BLOCKED, NOT ACTIONABLE YET — DO NOT TELL JEFF TO GO PLUG ONE IN.** Corrected 2026-08-26 3:10 PM, Jeff verbatim: *"I don't have those Zigbee repeaters yet, they're still on their way from AliExpress."* He owns the **iPhone charger cubes**; the **repeaters are IN TRANSIT** and AliExpress shipping is typically **weeks**. Still $0 when they land. The garage ceiling outlet is confirmed live (it powers the MINI-D). This is Jeff's own stated trigger: *"if they come back like the mailbox, I'll know that the plugs are next."* | **JEFF** (when the parts land) | opened 08-26 · **waiting on shipping** | Never re-propose the ThirdReality plugs — the power side is already solved, see the 08-26 supersede note. After the repeater is in, **re-pair the mailbox sensor** (orphaned since 08-23 19:34) and re-read both LQIs **quietly** — a reading taken mid-door-swing is garbage, see the 08-24 entry. |
 
 ## 🔒 SETTLED 2026-08-26 — THE GARAGE / ALEXA PIN STAYS AS IT IS
 
