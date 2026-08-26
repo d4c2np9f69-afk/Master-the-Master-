@@ -62,12 +62,19 @@ foreach ($cam in ($rows | Select-Object -ExpandProperty camera -Unique)) {
     }
 
     # Is it stuck on the -255 sentinel right now? Walk back to where that run began.
-    $staleSince = $null; $lastLive = $null
+    # MINIMUM RUN OF 4 SAMPLES (~1 hour) - added 2026-08-26 after checking 30 days of HA
+    # history (~6000 rows/camera): EVERY camera blips to -255 briefly and it means nothing.
+    # back_left did it 9 times, front_right 8, backyard 43 - all of them 0.0-0.2h. A real
+    # death is SUSTAINED: 301_driveway held -255 from 02:02 to 10:30 on 2026-08-25 and was
+    # still there 30h later. Without this floor a single unlucky 15-min sample would
+    # declare a healthy camera dead, which is the crying-wolf failure this file exists to avoid.
+    $staleSince = $null; $lastLive = $null; $staleRows = 0
     if ($vAll[-1].wifi_dbm -eq '-255') {
         for ($i = $vAll.Count - 1; $i -ge 0; $i--) {
-            if ($vAll[$i].wifi_dbm -eq '-255') { $staleSince = $vAll[$i].timestamp }
+            if ($vAll[$i].wifi_dbm -eq '-255') { $staleSince = $vAll[$i].timestamp; $staleRows++ }
             else { $lastLive = $vAll[$i]; break }
         }
+        if ($staleRows -lt 4) { $staleSince = $null }   # transient blip, not a death
     }
 
     if (-not $v) {
