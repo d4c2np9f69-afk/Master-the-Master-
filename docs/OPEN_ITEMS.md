@@ -323,8 +323,20 @@ contact to confirm, and push **only if something is still not secure**. A silent
 worked. The man door has no actuator and can only be reported.
 
 ### `automation.hcc_alexa_check_garage` + `input_boolean.check_garage`
-**VOICE-VERIFIED — Alexa said it out loud and Jeff confirmed the words:** *"the man door is open
-and the fan is still running"*, which matched live state exactly at that moment.
+✅ **ALL THREE ANSWER BRANCHES ARE VOICE-VERIFIED — Alexa spoke each one aloud and Jeff confirmed
+the words.** Each was fired against a real physical state Jeff had actually created, never a mock:
+
+| # | house state at the time | what she said | confirmed |
+|---|---|---|---|
+| 1 | man door open, fan on | *"the man door is open and the fan is still running"* | 2:25 PM |
+| 2 | both doors closed, fan on | *"Both garage doors are closed, but the fan is still running."* | 2:37 PM |
+| 3 | all secure | *"The garage is secure. Both doors are closed and the fan is off."* | 4:50 PM |
+
+🔴 **This is a FEATURE test, not a component test** — the distinction this project has paid for
+repeatedly (the 08-21 stream check printed ALL GOOD eleven minutes after the popups were dead).
+The automation firing and resetting its helper proves nothing; **audible speech, with the right
+words, matching live state, is the proof.** In fact branch 1 initially fired, reset cleanly and
+logged zero errors while saying **nothing at all** — see the `last_called` gotcha above.
 
 **ONE answer covers all three of Jeff's questions**, deliberately — so two phrasings can never
 give conflicting answers. Aliases on the helper: **Garage Secure · Garage Status · Garage Check ·
