@@ -10144,11 +10144,18 @@ function guardianNightCheck(){
     if (!Array.isArray(states)) throw new Error('bad');
     var rows = '', anyIssue = false, any = false;
     // Doors
-    var doors = states.filter(function(s){ var id = s.entity_id.toLowerCase(); return s.entity_id.indexOf('binary_sensor.') === 0 && (id.indexOf('door') >= 0 || id.indexOf('window') >= 0) && id.indexOf('garage') < 0 && id.indexOf('mercedes') < 0 && id.indexOf('gle') < 0 && id.indexOf('mbapi') < 0; });
+    // 08-26: was `id.indexOf('garage') < 0`, which threw the garage MAN DOOR out of Doors
+    // entirely -- it is a real exterior door and Jeff had it standing open. Only the overhead
+    // door is excluded here, because it gets its own row below. Battery/motion/link entities
+    // are dropped too: garage_man_door_battery_low ends in 'door...' and was being counted.
+    var doors = states.filter(function(s){ var id = s.entity_id.toLowerCase(); return s.entity_id.indexOf('binary_sensor.') === 0 && (id.indexOf('door') >= 0 || id.indexOf('window') >= 0) && !garageIsOverheadDoor(id) && !/(battery|_low|motion|camera|tamper|spare|update|connectivity|problem|linkquality|signal)/.test(id) && id.indexOf('mercedes') < 0 && id.indexOf('gle') < 0 && id.indexOf('mbapi') < 0; });
     if (doors.length){ any = true; var od = doors.filter(function(d){ return d.state === 'on' || d.state === 'open'; }).length; if (od) anyIssue = true; rows += grdRow(od === 0, 'Doors / windows', od === 0 ? 'Secure' : od + ' open'); }
     // Garage
-    var gar = states.filter(function(s){ var id = s.entity_id.toLowerCase(); return (s.entity_id.indexOf('cover.') === 0 || s.entity_id.indexOf('binary_sensor.') === 0) && id.indexOf('garage') >= 0; });
-    if (gar.length){ any = true; var go = gar.some(function(g){ return g.state === 'open' || g.state === 'on'; }); if (go) anyIssue = true; rows += grdRow(!go, 'Garage', go ? 'OPEN' : 'Closed'); }
+    // 08-26: the old `*garage*` match here also caught binary_sensor.garage_motion (the Blink
+    // camera) and two *_battery_low flags, so a car going past the garage camera reported the
+    // GARAGE DOOR AS OPEN on Night Check. Overhead-door entities only.
+    var gar = states.filter(function(s){ return (s.entity_id.indexOf('cover.') === 0 || s.entity_id.indexOf('binary_sensor.') === 0) && garageIsOverheadDoor(s.entity_id); });
+    if (gar.length){ any = true; var go = gar.some(function(g){ return g.state === 'open' || g.state === 'on'; }); if (go) anyIssue = true; rows += grdRow(!go, 'Garage door', go ? 'OPEN' : 'Closed'); }
     // Locks
     var locks = states.filter(function(s){ if (s.entity_id.indexOf('lock.') !== 0) return false; var id = s.entity_id.toLowerCase(); return id.indexOf('mercedes') < 0 && id.indexOf('gle') < 0 && id.indexOf('mbapi') < 0; });
     if (locks.length){ any = true; var un = locks.filter(function(l){ return l.state !== 'locked'; }).length; if (un) anyIssue = true; rows += grdRow(un === 0, 'Locks (' + locks.length + ')', un === 0 ? 'All locked' : un + ' unlocked'); }
@@ -10335,10 +10342,43 @@ function loadLights(){
 //   binary_sensor.*garage* — future Zigbee door contact (Pending Item, not bought yet).
 //                       Real position, independent of the switch. Shown alongside the
 //                       trigger button once it exists.
+// 🔴 EXACT IDS FIRST, FILTERED PATTERN SECOND -- added 2026-08-26 after measuring the damage.
+// The bare `*garage*` substring match below was correct when it was written on 08-08, because
+// the garage had no hardware in it. Once it did, it became DANGEROUS. Measured live against
+// Beehive 2026-08-26 14:03, those patterns actually matched:
+//    switch.*garage*        -> switch.garage_camera_motion_detection   <-- the Blink CAMERA
+//                              switch.garage_garage_door_opener
+//    binary_sensor.*garage* -> garage_man_door_contact                 <-- the PERSON door
+//                              garage_man_door_battery_low             <-- a BATTERY flag
+//                              garage_door_down_contact
+//                              garage_door_down_battery_low            <-- a BATTERY flag
+//                              garage_motion                           <-- the Blink CAMERA
+// Taking [0] out of either list could point the door BUTTON at a camera setting and the door
+// STATE at a battery flag -- a wrong state that looks right, which is the exact failure mode
+// this project keeps paying for. So: match the known id first, and filter the fallback.
+// Position is ONE sensor by Jeff's design, 2026-08-26: "if the door sensor is not down and
+// closed, then it's open -- doesn't matter at what stage it's open. It's still open."
+// binary_sensor.garage_door_down_contact: off = CLOSED, anything else = OPEN.
+function garageOpenerId(){ return 'switch.garage_garage_door_opener'; }
+function garagePositionId(){ return 'binary_sensor.garage_door_down_contact'; }
+// Never the overhead door, however it gets renamed: cameras, batteries, link quality, the
+// person door, and any spare/unmounted contact.
+function garageIsOverheadDoor(entityId){
+  var id = String(entityId || '').toLowerCase();
+  if (id.indexOf('garage') < 0) return false;
+  return !/(battery|_low|motion|camera|tamper|spare|update|connectivity|problem|linkquality|signal|man_door|man-door|person_door|light|lock)/.test(id);
+}
+function garagePickOne(states, domain, exactId, extraOk){
+  var exact = states.filter(function(s){ return s.entity_id === exactId; })[0];
+  if (exact) return exact;
+  return states.filter(function(s){
+    return s.entity_id.indexOf(domain) === 0 && garageIsOverheadDoor(s.entity_id) && (!extraOk || extraOk(s.entity_id));
+  })[0];
+}
 function garagePick(states){
-  var cover = states.filter(function(s){ return s.entity_id.indexOf('cover.') === 0 && s.entity_id.toLowerCase().indexOf('garage') >= 0; })[0];
-  var sw = states.filter(function(s){ return s.entity_id.indexOf('switch.') === 0 && s.entity_id.toLowerCase().indexOf('garage') >= 0; })[0];
-  var sensor = states.filter(function(s){ return s.entity_id.indexOf('binary_sensor.') === 0 && s.entity_id.toLowerCase().indexOf('garage') >= 0; })[0];
+  var cover = garagePickOne(states, 'cover.', null);
+  var sw = garagePickOne(states, 'switch.', garageOpenerId());
+  var sensor = garagePickOne(states, 'binary_sensor.', garagePositionId());
   return { cover: cover, sw: sw, sensor: sensor };
 }
 // Contact sensors sometimes name the entity/friendly_name for the CLOSED state (same

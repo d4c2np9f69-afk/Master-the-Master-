@@ -244,7 +244,60 @@ list. That is why the SessionStart hook now injects this file's item count and s
 | 64 | ✅ **CLOSED 2026-08-24 5:47 PM — Matter Server installed and the Matter integration configured.** Done the documented way (`home-assistant.io/integrations/matter`), not by improvising CLI: added the **Matter integration**, which installs the official Matter Server app itself. Slug confirmed from Beehive's own Supervisor store (`core_matter_server`, "Matter WebSocket Server for Home Assistant Matter support"). **Prerequisite verified FIRST:** IPv6 is `auto` on the active interface `enp1s0` (`wlp3s0` is disabled). Result: "Created configuration for Matter", `config_entry=01M0TYRGMNNXS7701EJ20V2P7T`, `update.matter_server_update` present. | ✅ closed 08-24 | — | ⚠️ **The config flow SITS on a "Success" dialog waiting for a Finish click** — the integration reads as not-loaded until you click it. Also note `{{ "matter" in integrations }}` in a template returned **False even after it was fully loaded** — that template variable is not a reliable test; check `/api/config/config_entries/entry` or the integrations page instead. |
 | 71 | 🔴 **GARAGE DOOR OPENER — WIRED AND POWERED, BUT NOT COMMISSIONED. Stopped here 2026-08-24 6:29 PM (dinner).** SONOFF **MINI-D** (`S/N 25482400105228`) mounted at the opener, powered from the ceiling outlet. Opener identified: **Chamberlain `41AC050-2M`, 315 MHz Security+ 1.0**, purple learn button — plain dry contact, matching Jeff's 08-05 bridge test. **Terminal block (4 across: RED · WHITE · WHITE · GREY), worked out from Jeff's photos — DO NOT RE-DERIVE:** RED + the WHITE holding **one** wire = wall button → MINI-D `NO`/`COM`; GREY + the WHITE holding **two** wires = the two photo eyes. Grey carries a white/black-stripe **and a red** (an eye run extended with bell wire — that red is NOT a button wire). `NC`/`S1`/`S2`/`DC+`/`DC-` empty. | **JEFF** (phone) then CLAUDE | 08-24 | 🔴 **BLOCKER: commissioning needs the HA Companion APP on Jeff's iPhone.** HA's own dialog: *"You need to use the Home Assistant Companion app on your mobile phone to add Matter devices."* Runs over **Bluetooth**, so he must be **at the MINI-D**. Phone is capable — `iPhone17,2`, **iOS 26.6.1**, app **2026.7.5**, reporting live. He hit the "download the app" screen, which is what HA shows when it does not detect the app (i.e. Safari, not the app). Code: **`2197-114-6745`**. **Fallback researched, NOT touched:** Beehive has a **`bluetooth` config entry**, and Matter Server can commission over BLE itself — but it may contend with the existing Bluetooth integration for the adapter. Read up first. |
 | 72 | 🔴 **INCHING IS UNSOLVED AND IT IS REQUIRED — Jeff has no eWeLink.** The MINI-D's momentary-pulse setting is **eWeLink-only** (`8d53af4`, re-confirmed by `Search-HCC.ps1 "inching"` on 08-24); HA's Matter integration does not expose it. Without it the relay **latches** instead of pulsing, which reads to the opener as the wall button held down and would block the button and MyQ until released. | CLAUDE builds | 08-24 | **Agreed plan, NOT built:** do the pulse in HA — script turns the switch on, waits ~0.5 s, turns it off — **plus a watchdog automation that force-offs the switch if it has been on more than 2 s**, since an HA-side pulse depends on the second command landing where device-side inching self-releases. Keeps the device fully local, no vendor cloud, which suits the Sylvania lesson. |
-| 73 | 🟠 **`garageSensorIsOpen()` ASSUMES ONE POSITION SENSOR — Jeff now has TWO.** `loadGarage()`/`loadGuardian()` already auto-detect `switch.*garage*` and `binary_sensor.*garage*` (commit `a1a65fe`, 08-08), so the relay needs no app work. But that code was written for the doc's single SNZB-04P at the closed position; `binary_sensor.garage_door_up_contact` **and** `binary_sensor.garage_door_down_contact` both match the pattern and it will likely latch onto whichever it finds first. | **CLAUDE** | found 08-24 | Fix before it shows a wrong door state — a wrong state that looks right is the failure mode this project keeps paying for. Gates before committing: `node scripts/lint-app.js` + `node scripts/smoke-test.js`, then **push** (Cloudflare deploys on push, not on commit — see #52). 🔴 **Also unverified: which sensor is UP and which is DOWN.** Assigned from the order Jeff stated, never observed. Move the real door and watch which entity flips before automating on them. |
+| 73 | 🔴 **THE APP'S GARAGE PATTERN IS NOW DANGEROUS, NOT JUST WRONG — WORSE THAN THIS ITEM ORIGINALLY SAID.** `loadGarage()`/`loadGuardian()` auto-detect `switch.*garage*` and `binary_sensor.*garage*` (commit `a1a65fe`, 08-08). That was correct on 08-08 because those entities did not exist yet. **Measured live 2026-08-26 14:03, what those two patterns actually match now:** `switch.*garage*` → **`switch.garage_camera_motion_detection`** and `switch.garage_garage_door_opener`; `binary_sensor.*garage*` → `garage_man_door_contact`, **`garage_man_door_battery_low`**, `garage_door_down_contact`, **`garage_door_down_battery_low`**, **`garage_motion`** (the Blink camera). 🔴 **Depending on which it finds first, the app's garage button can toggle the Blink camera's motion detection instead of moving the door**, and the door-state display can read a battery-low flag or the camera's motion sensor. **Fix = target the entities by exact id — `switch.garage_garage_door_opener` and `binary_sensor.garage_door_down_contact` — not a substring match.** | **CLAUDE** | found 08-24, scope corrected 08-26 | Gates before committing: `node scripts/lint-app.js` + `node scripts/smoke-test.js`, then **push** (Cloudflare deploys on push, not on commit — see #52). ✅ **UP vs DOWN is no longer unverified — see the block below;** the down sensor was watched through a real door cycle in both directions. |
+
+## ✅ GARAGE DOOR — FULL LOOP PROVEN 2026-08-26 2:04 PM, AND ONE SENSOR IS THE DESIGN
+
+**This is the first time the door's real position has ever been readable in Home Assistant.**
+MyQ never gave it locally — it is the capability Jeff was buying when he replaced it.
+
+**The test, both directions, commanded from HA and watched on the sensor (not inferred):**
+
+| | before | command | sensor |
+|---|---|---|---|
+| open  | `down_contact = off` (CLOSED) | one `switch.turn_on` | **`on` (OPEN) at t+3s**, held through t+21s |
+| close | `on` (OPEN) | one `switch.turn_on` | **`off` (CLOSED) at t+15s**, held through t+25s |
+
+Relay read `off` at every sample in both runs — `automation.hcc_garage_relay_auto_release`
+released it before the first poll each time. Jeff confirmed the physical door at both ends:
+*"Okay door is completely open"*, then *"Great close it and that'll complete the loop"*.
+
+### 🔴 ONE POSITION SENSOR IS DELIBERATE — DO NOT PROPOSE A SECOND ONE
+Jeff, verbatim 2026-08-26: *"We don't need another sensor. It would be wasted because if the
+door sensor is not down and closed, then it's open — doesn't matter at what stage it's open.
+It's still open, so the one sensor should be plenty."*
+
+**Binary by design: `binary_sensor.garage_door_down_contact` `off` = CLOSED, anything else = OPEN.**
+Partial-open positions are intentionally not distinguished. The former `Garage Door Up` sensor was
+**renamed `Spare Contact 1`** in Z2M the same session (all four entity_ids updated, each returned
+`success=true`) specifically so an unmounted device can never be picked up by a `*garage*` pattern.
+It is unmounted and Jeff is redeploying it elsewhere.
+
+### Verified against physical reality — the caveat #73 carried since 08-24 is closed
+Jeff, verbatim: *"1 yes the garage door is down/closed. the man door is open."* At that moment
+`garage_door_down_contact` = `off` and `garage_man_door_contact` = `on`. Both correct. Naming was
+previously assigned from the order Jeff stated and never observed; it has now been observed both
+statically and through a full door cycle.
+
+### ✅ ALL FOUR CONTROLS WORKING — Jeff, 2026-08-26 2:12 PM
+*"I also have reinstall the push button, garage door opener and the outside dial pad opener all
+working correctly, with new battery in the 9 Volt outside dial pad."*
+
+The door circuit now has **four independent controls in parallel** — the Chamberlain Security+
+wall console, the outside keypad, the handheld remotes, and the MINI-D via HA. Losing any one of
+them does not lose the door. The wall button being two bare wires is **closed**.
+
+🔴 **KNOW THIS BEFORE DIAGNOSING A "DEAD KEYPAD".** The wall console has a **LOCK** button
+(Security+ vacation lock). Engaging it disables the **radio** controls — keypad and remotes —
+while the **wall button and the MINI-D keep working**, because both are wired to the button
+terminals, not the receiver. So "the keypad quit but the app still works" is the SIGNATURE OF THE
+LOCK BUTTON, not of anything in this install. Check the console before touching the MINI-D.
+
+### Still owed here
+- 🟠 **`garage_door_down` sits at LQI 43**, below Z2M's 50 threshold, and `garage_man_door` at 7.
+  It works and just proved it, but the garage still has **no Zigbee router**. The ceiling outlet
+  that powers the MINI-D is confirmed live and is the obvious spot for a USB repeater — Jeff
+  already owns the repeaters and the charger cubes ($0).
 
 ## 🔋 CAMERA BATTERY MODEL — SETTLED 2026-08-26 (measured, three cameras)
 
