@@ -358,6 +358,54 @@ alias). Arbitrary wording requires an Alexa **Routine**, which is created in the
       doors closed* / *is the garage fan off*, each action = **Smart Home → Check Garage → Turn On**.
 - [ ] Watch the first 10 PM run.
 
+## ✅ REAL GARAGE-DOOR *COVER* — "ALEXA, OPEN/CLOSE THE GARAGE DOOR" 2026-08-26 2:30 PM
+
+Jeff: *"The only thing she's not responding to — if I say Alexa open garage door she said she
+couldn't find a device named garage door."*
+
+**Cause:** `switch.garage_garage_door_opener` was exposed to **`conversation` only, never to
+`cloud.alexa`** — Alexa genuinely had no such device.
+
+🔴 **THE FIX WAS DELIBERATELY *NOT* "EXPOSE THE SWITCH".** A plain switch exposed to Alexa has
+**no voice-PIN protection** — anyone within earshot of an Echo, including through an open window,
+could say "turn on garage door opener" and the garage opens. A `cover` with
+`device_class: garage` makes Alexa **require a spoken PIN to OPEN** (closing needs none). Same
+convenience, real protection.
+
+**Built:** `cover.garage_door`, a **template cover** created through the config-flow API — no
+`configuration.yaml` edit and no Studio Code Server needed.
+✅ **This HA offers template helpers for cover, lock, fan, light, vacuum, alarm_control_panel and
+more via `POST /api/config/config_entries/flow` with `handler: "template"`.** Worth remembering —
+the old assumption that template entities require a YAML include is wrong on this version.
+
+| | |
+|---|---|
+| state | `{{ 'open' if is_state('binary_sensor.garage_door_down_contact','on') else 'closed' }}` |
+| open_cover | pulses the relay **only if the contact reads CLOSED** |
+| close_cover | pulses the relay **only if the contact reads OPEN** |
+| aliases | Garage · Garage Door · Overhead Door · Big Garage Door |
+
+🔴 **WHY BOTH DIRECTIONS ARE GUARDED — do not "simplify" this.** The relay is a **momentary
+toggle, not an open/close command**. An unguarded `close_cover` on an already-closed door would
+**OPEN it**. Alexa and the app both send absolute commands, so the guard is what makes them safe.
+
+**VERIFIED — all three, with Jeff watching the physical door** (*"The garage door opened and
+closed"*):
+1. `close_cover` on a **closed** door → **did not move.** ← the guard, and the important one
+2. `open_cover` → OPEN at t+5s
+3. `close_cover` → CLOSED at t+15s
+
+**App side:** `garagePick()` prefers `cover` over `switch`, so the HCC app now gets real
+OPEN/CLOSE buttons instead of a single trigger — no app change was needed for that. But Guardian
+Night Check then counted **the same door twice** (the contact *and* the cover derived from it);
+now it prefers the cover and falls back to the contact. `scripts/garage-entity-test.js`: all pass.
+
+## 🟡 FOUND 2026-08-26 — added the same session, per the rule
+
+| # | Item | Owner | Age | Notes |
+|---|---|---|---|---|
+| 79 | 🟡 **GUARDIAN NIGHT CHECK COUNTS 5 CAMERA AI SENSORS AS "DOORS".** Measured against live state: the Doors/windows row lists **8** entities, but only **3** are real door contacts (`front_door_contact`, `back_deck_door_contact`, `garage_man_door_contact`). The other five are `binary_sensor.ai_doorbell_301_driveway`, `..._301_backyard`, `..._301_front_doorbell`, `..._front_right`, `..._back_left` — **AI person-detection sensors on cameras**, matched only because "doorbell" contains "door". So Night Check would report *"5 open"* the moment people walk past the cameras, and the real door count is inflated even at rest. | **CLAUDE** | found 08-26 | Pre-existing, NOT introduced by today's garage work — the `*door*` substring match predates it. **App-side display only; touches no camera config, so the camera freeze does not apply.** Fix is to exclude `ai_doorbell_*` (or require a `door`/`window` device_class) in `loadGuardian()`. Gates: `lint-app.js` + `smoke-test.js`, then push. |
+
 ## 🔋 CAMERA BATTERY MODEL — SETTLED 2026-08-26 (measured, three cameras)
 
 | # | Item | Owner | Age | Notes |

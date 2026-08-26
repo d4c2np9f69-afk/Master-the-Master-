@@ -10154,7 +10154,13 @@ function guardianNightCheck(){
     // 08-26: the old `*garage*` match here also caught binary_sensor.garage_motion (the Blink
     // camera) and two *_battery_low flags, so a car going past the garage camera reported the
     // GARAGE DOOR AS OPEN on Night Check. Overhead-door entities only.
-    var gar = states.filter(function(s){ return (s.entity_id.indexOf('cover.') === 0 || s.entity_id.indexOf('binary_sensor.') === 0) && garageIsOverheadDoor(s.entity_id); });
+    // 08-26 (same day, second pass): once cover.garage_door existed this matched TWO entities for
+    // ONE physical door -- the Zigbee contact and the template cover that is DERIVED FROM IT. They
+    // agree by construction today, but reporting one door twice is how a confusing "which one is
+    // right" bug ships. Prefer the cover when one exists; fall back to the raw contact.
+    var garAll = states.filter(function(s){ return (s.entity_id.indexOf('cover.') === 0 || s.entity_id.indexOf('binary_sensor.') === 0) && garageIsOverheadDoor(s.entity_id); });
+    var garCovers = garAll.filter(function(s){ return s.entity_id.indexOf('cover.') === 0; });
+    var gar = garCovers.length ? garCovers : garAll;
     if (gar.length){ any = true; var go = gar.some(function(g){ return g.state === 'open' || g.state === 'on'; }); if (go) anyIssue = true; rows += grdRow(!go, 'Garage door', go ? 'OPEN' : 'Closed'); }
     // Locks
     var locks = states.filter(function(s){ if (s.entity_id.indexOf('lock.') !== 0) return false; var id = s.entity_id.toLowerCase(); return id.indexOf('mercedes') < 0 && id.indexOf('gle') < 0 && id.indexOf('mbapi') < 0; });
