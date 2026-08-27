@@ -26,7 +26,7 @@ plus project knowledge. **(?) = needs Jeff to confirm.**
 | .215 | 20BEB83A8C5D | **Fire TV** (PiPup target) — FIXED tonight |
 | .209 | TY_WR | Tuya — hot-water-pump socket or Sharky (last two unclaimed Tuya devices) (?) |
 | .198 | CMWC1ZZABR | likely the **B-Hyve controller** (?) |
-| .166 | dp-730602E4 | possibly the **AirTV 2** (?) |
+| .166 | dp-730602E4 | 🔴 **NOT the AirTV — disproven 2026-08-27 by MAC.** `.166` is `00-fc-8b-23-64-87`; the AirTV's label reads `88:B6:EE:C7:06:E5`. Different OUI entirely. **`.166` is still UNIDENTIFIED — do not re-guess it as the AirTV.** |
 | .164 / — | WS-SD00PJBA / WS-Uejlwa4yAnSI | (?) unknown "WS-" pair — LUX thermostat? |
 | — | esp32-21206C, esp32-6BFCA4 | one is the **mower box** (mostly "off" = sleeping, correct); what's the other? (?) |
 | .170/.224/.195/.210 | ESP_DFC785, ESP_DFE142, ESP_0BDE3B, espressif | **four more ESP8266/ESP32s, online** — Jeff's other builds? (?) |
@@ -85,7 +85,7 @@ cams) will re-register as they wake — that's correct behavior.
 | .208 | HP444BD6 | HP printer |
 | .197 | MyQ-E31 | ⚠️ MyQ hub — UNPLUG + reset for eBay |
 | .198 | CMWC1ZZABR | likely B-Hyve controller (?) |
-| .166 | dp-730602E4 | possibly AirTV 2 (?) |
+| .166 | dp-730602E4 | **NOT the AirTV** (MAC mismatch, 2026-08-27). Still unidentified. |
 | .171 | "Nest Protect" | ✅ **UNMASKED 08-13: Angela's bed-lamp Tuya socket** — proven by unplug test (down, held 60s+, at 14:50). Cheap Tuya firmware self-reporting a fake hostname. There is NO Nest hardware in this house |
 | .209 | TY_WR | ✅ **Hot-water recirculating pump socket** (garage) — last Tuya standing after Sharky=.231. Switched OFF but plugged in, so radio stays up. Flap = weak garage signal |
 | .204 | Linux | Amazon MAC — likely Blink Sync Module |

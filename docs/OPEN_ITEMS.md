@@ -724,6 +724,53 @@ trigger spamming on a poll cycle. **Every one is the same root: checking a proxy
 instead of the thing.** The only two caught from the outside were caught by Jeff — *"I didn't get
 the 6:00 pm battery alert"* and *"that 6 in 30 min."*
 
+## 📺 AirTV **ANYWHERE** ARRIVED 2026-08-27 — NOT the AirTV 2 that was ordered
+
+Jeff: *"I think because they took so long to get it here that they may have given me the TV
+Anywhere instead of the AirTV 2, isn't that nice?"* **He is right, and it is a straight upgrade.**
+
+| | AirTV 2 (ordered, and what every old note assumes) | **AirTV Anywhere (what he actually has)** |
+|---|---|---|
+| tuners | 2 | **4** |
+| DVR | none — you supply a USB drive | **1 TB built in** (~150 h) |
+| external drive | required | 🔴 **NOT SUPPORTED AT ALL** — the rear USB port is a decoy |
+| WiFi | — | 802.11ac 2×2 dual-band |
+| fee | — | none; a free Sling account unlocks locals |
+
+**Label, recorded so nobody re-photographs it:** P/N **219739** · FCC ID **DKN-ATV3** ·
+SN **R5KWRG00731L** · **MAC `88:B6:EE:C7:06:E5`** · Made in India.
+
+### 🔴 A PART WAS FREED — the KESU 500 GB is no longer the DVR drive
+Every old note says *"KESU 500GB assigned to the AirTV 2 as its DVR recording drive."* **That plan
+is dead** — the Anywhere takes no external drive. **The KESU's documented fallback role becomes the
+live one: extra storage on the GaragePC.** Corrected in `BEEHIVE_REFERENCE.md` and
+`HCC_INVENTORY.md` the same session, so nobody goes looking for a drive that is spoken for.
+
+### 🔴 `.166` IS NOT THE AirTV — a guess that sat in the network map since August
+`NETWORK_MAP.md` listed `.166 / dp-730602E4` as *"possibly the AirTV 2 (?)"*. **Disproven by MAC:**
+`.166` is `00-fc-8b-23-64-87`; the AirTV's label reads `88:B6:EE:C7:06:E5`. Different OUI entirely,
+and the AirTV **has never joined the LAN** (not in ARP, verified 08-27 8:24 AM). **`.166` remains
+UNIDENTIFIED. Do not re-guess it as the AirTV.**
+
+### Setup — antenna is the only hard prerequisite, and Jeff HAS one
+*"I have a nice outdoor antenna."* Sequence, from AirTV/Sling's own docs:
+**antenna → coax in → power → Sling app (signed in) → phone on home WiFi →
+Settings ▸ Over-the-Air Channels → Scan.** Locals then appear inside Sling on phone, Fire TV,
+Roku and the wall iPad.
+
+**Expected-channel reference pinned to Jeff's real coordinates** (`36.476658, -86.660133`, read
+from the mower GPS box in his garage) — pull this BEFORE scanning so a short channel list can be
+told apart from a bad aim:
+`rabbitears.info/searchmap.php?request=result&q=36.476658%2C-86.660133`
+
+**Open questions blocking placement:** where the antenna coax comes inside (the AirTV needs coax
+AND network in the same spot), and whether the line has a preamp/power injector that must stay
+powered.
+
+⚠️ **The 'closed ecosystem, no open API, cannot feed HA' finding was verified against the AirTV 2 —
+treat it as UNVERIFIED for the Anywhere** until this box is actually probed. Different hardware,
+different generation; do not carry that conclusion across on the strength of the brand name.
+
 ## 🔋 CAMERA BATTERY MODEL — SETTLED 2026-08-26 (measured, three cameras)
 
 | # | Item | Owner | Age | Notes |

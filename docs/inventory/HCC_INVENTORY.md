@@ -113,9 +113,9 @@ gateway, or the MoCA + AP route above — decision deferred since garage WiFi me
 
 ## Other on-hand (from CLAUDE.md spare inventory, unchanged)
 
-KESU 500GB USB drive (AirTV DVR) · Lenovo B570 (kiosk candidate) · Delam XLR mic
+KESU 500GB USB drive (FREED 08-27 - AirTV Anywhere has 1TB built in and takes no external drive; now GaragePC storage) · Lenovo B570 (kiosk candidate) · Delam XLR mic
 (GaragePC voice) · WD 320GB bare HDD (Mint test drive) · HDMI-005 Miracast stick ·
-HDMI→USB capture stick (kitchen TV chain) · AirTV 2 (inbound) · GaragePC HP
+HDMI→USB capture stick (kitchen TV chain) · AirTV **Anywhere** (arrived 08-27, substituted for the AirTV 2 - 4 tuners, 1TB built in; MAC 88:B6:EE:C7:06:E5) · GaragePC HP
 TouchSmart 520
 
 ---
