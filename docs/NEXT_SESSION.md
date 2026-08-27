@@ -1,3 +1,43 @@
+# 🔴 WHAT HAPPENED 2026-08-27 — READ THIS FIRST
+
+## ✅ DONE AND WORKING — do not reopen
+- **AirTV Anywhere is set up and playing locals on the Apple TV, the Fire TV, the wall iPad and the
+  phone.** `192.168.1.184`, wired gigabit, firmware `5.222.958`, **82 channels**.
+  🔴 **It is an ANYWHERE, not the AirTV 2 that was ordered** — 4 tuners, 1 TB built in, **takes no
+  external drive**, so the **KESU 500 GB is freed** (all old notes corrected).
+- **Garage door (from 08-26):** opener + `cover.garage_door` + Alexa + the 10 PM automation, all
+  feature-verified. Camera battery alert is **once a day at 9 AM** — do not "improve" it back into a
+  pattern or template trigger.
+- **App:** `SLING HERE` + `BRAVES HERE` chips. **Real `<a href>`, never `window.open()`.**
+
+## 🔴 THE TOOL THAT SOLVED THE HARDEST PART
+**ADB into the Fire TV through Home Assistant** — `androidtv.adb_command`, read the result from the
+entity's `adb_response`. Use **`media_player.fire_tv_viewing_room`** (the other returns `None`).
+Gets you the app's own logcat, pings FROM the device, and its memory.
+**And the BGW320 device list — `http://192.168.1.254/cgi-bin/devices.ha` — needs NO password** and
+beats any ping sweep (PowerShell 5.1 has no `-Parallel`; sweeps ran 7+ min and found nothing).
+
+## 🔴 READ THIS BEFORE YOU DIAGNOSE ANYTHING
+Five mistakes on 08-27, all mine, all in `COST_LEDGER.md` and `OPEN_ITEMS.md`:
+1. Blamed **Cloudflare WARP** and had Jeff switch off his VPN **for nothing**.
+   ⚠️ WARP is **full tunnel**, not the "DNS-only" the old notes claimed.
+2. **Port-scanned the AirTV** chasing an API Jeff never asked for, leaving stuck sockets on **the
+   exact control port his TV needs**.
+3. Chased a **`W/System.err` stack trace** as the root cause for hours — **it also fires when
+   playback SUCCEEDS.** Check the level, and check the working state.
+4. Called an app's silent log a pass — **it was silent because nobody had used it.**
+5. **Guessed instead of researching, twice**, and Jeff had to say so. Research first; it is his rule.
+
+## Owed / next
+- **#80 · $0 · Jeff:** the garage still has **no Zigbee router** (man door LQI 7, overhead 43).
+  **The USB repeaters are ORDERED, not owned** — still shipping from AliExpress. Then re-pair the
+  mailbox and read LQI **quietly**.
+- **#79 · me:** Guardian Night Check counts 5 `ai_doorbell_*` camera sensors as doors.
+- **Camera batteries:** Jeff planned all four + the doorbell to one baseline. Set
+  `input_datetime.camera_batteries_changed` afterwards. Fresh cells read 170-177.
+
+---
+
 # 🛑 STOP. READ THIS BEFORE YOU TYPE ONE WORD TO JEFF.
 
 **Written 2026-08-23 7:45 PM as Jeff closed the day. His words:**
