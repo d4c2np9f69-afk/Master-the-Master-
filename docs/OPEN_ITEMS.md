@@ -653,6 +653,42 @@ has never complained. Exercise the notification path deliberately, or say plainl
 untested. This is the same family as the 08-21 camera check, the `/api/error_log` 404, and the 150
 battery alert whose CONDITION was verified while its TRIGGER never fired — all four in one day.
 
+## 🔴 I SPAMMED JEFF'S PHONE 6 TIMES IN 30 MINUTES — 2026-08-26 8:46 PM
+
+Jeff: *"Man the battery warning is wearing me out, that 6 in 30 min."*
+
+**Cause: a `template` trigger I added at 7:55 PM the same evening**, while fixing the opposite
+problem (the alert never firing at all). I fixed a silent alarm into a screaming one in under an hour.
+
+🔴 **DO NOT PUT A TEMPLATE TRIGGER ON A CAMERA ATTRIBUTE.** The voltages were **rock stable** —
+149/168/169/155 at every 15-minute sample, zero dropouts — so **it was not the readings moving.**
+A template trigger fires on every **false→true transition**, and the **Blink integration rebuilds
+these camera entities on its ~5-minute poll cycle**, so `state_attr(...,'battery_voltage')` briefly
+returns `none` and the template flips back and forth. **It was re-firing on the POLLING.** 6 pushes
+in 30 minutes ≈ one per poll.
+
+**Now:** `time_pattern` only (hours/minutes/seconds all explicit), plus a **hard 12-hour
+self-throttle** and a **waking-hours window (08:00–21:00)**. `mode: single`, `max_exceeded: silent`.
+
+🔴 **THE RULE THIS SHOULD HAVE BEEN BUILT WITH:** *an alert whose condition can stay TRUE for days
+needs a rate limit BUILT IN.* A low battery is not a one-shot event — `front_right` will sit at 149
+until Jeff physically changes it. A trigger that assumes "the condition becomes true once" is wrong
+for every threshold alert of this kind. **And a low battery is never a 2 a.m. problem:** the cliff
+from 150 takes DAYS (backyard held 148–155 for two weeks before falling to 134 in nine hours).
+
+⏸️ **LEFT DISABLED ON PURPOSE — re-arm it only AFTER Jeff changes the batteries** (he is doing all
+four cameras + the doorbell on 2026-08-27 while mowing). Re-enabling tonight would fire once more
+at noon tomorrow to report something he already knows and is already acting on. **Re-enable, then
+set `input_datetime.camera_batteries_changed`, so the 6-month backstop restarts clean.**
+
+### The pattern across today, stated plainly
+Four times today I reported something healthy that was not, and once I made a quiet failure loud:
+`/api/error_log` 404 read as "no errors" · a successful deploy called a failure · this alert's
+CONDITION verified while its TRIGGER never fired · a live sensor declared dead · and then this
+trigger spamming on a poll cycle. **Every one is the same root: checking a proxy for the thing
+instead of the thing.** The only two caught from the outside were caught by Jeff — *"I didn't get
+the 6:00 pm battery alert"* and *"that 6 in 30 min."*
+
 ## 🔋 CAMERA BATTERY MODEL — SETTLED 2026-08-26 (measured, three cameras)
 
 | # | Item | Owner | Age | Notes |
