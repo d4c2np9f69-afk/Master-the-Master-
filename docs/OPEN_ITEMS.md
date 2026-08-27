@@ -859,6 +859,43 @@ either way — **Jeff can settle it in 30 seconds: open the chip, Guide ▸ LOCA
 The locals unquestionably work on the **Apple TV, phone, Fire TV and Roku** — native apps can see
 the LAN.
 
+## 🔴 A FEATURE JEFF PAID FOR WAS DELETED BY MISTAKE — RESTORED 2026-08-27
+
+Jeff: *"I bought the Braves Vision package."* He asked whether MLB could be watched on the iPad the
+same way as Sling. **It already could. The button was built, then quietly removed.**
+
+| | |
+|---|---|
+| `9c415ab` **2026-08-08** | **ADDED** a Braves Vision chip → `https://www.braves.tv`, real anchor, PWA-safe. Commit: *"Jeff bought the MLB Braves Vision package and wanted a one-tap button to it."* |
+| `9a2dc3d` **2026-08-14** | **REMOVED** it. Reason given: *"Braves/Sling now open on the Apple TV instead of asking the iPad to install apps it cannot get."* |
+| **2026-08-27** | **RESTORED** as `BRAVES HERE`, alongside the Apple TV remote (now `BRAVES TV`). |
+
+🔴 **THE REMOVAL REASONING WAS WRONG, AND THE WRONGNESS IS THE LESSON.** `braves.tv` is a **web
+player** — it was never an app install. The genuine problem (MLB.com pushing iPadOS users to the App
+Store, which Jeff hit on 08-14) was **generalised onto a link that was working**. A paid-for feature
+disappeared for **19 days** and Jeff only found out by asking for it again.
+
+**The two chips are NOT substitutes.** `BRAVES TV` is a **remote** — it tells the Apple TV to open
+MLB on the 60". `BRAVES HERE` **plays on the device in your hand.** Replacing one with the other
+silently removed the only way to watch on the kitchen iPad. Same now applies to `SLING TV` vs
+`SLING HERE`.
+
+🔴 **RULE: when consolidating features, a REMOTE is not a replacement for a LOCAL PLAYER.** Before
+deleting a link because "the TV can do it", ask whether the deleted thing served a device the
+replacement cannot reach.
+
+⚠️ **Never independently verified, either in 2026-08 or now:** `braves.tv` could not be loaded from
+the sandbox in August ("flagged to Jeff to confirm on his device") and cannot be loaded from this
+session either. **The chip is proven to produce a correct anchor; whether braves.tv plays on
+iPadOS 15 Safari is Jeff's to confirm.** If it pushes an app install, try **ᴀA ▸ Request Desktop
+Website** first.
+
+✅ **MLB.com proper is a different story and is NOT restored:** Jeff, 2026-08-14 — *"the Braves
+button now asks me to download the app from MLB."* MLB funnels iOS/iPadOS to its native app. That is
+why the Apple TV remote exists, and it stays.
+
+**Verified:** `lint-app.js` clean, `smoke-test.js` passed.
+
 ## 🔋 CAMERA BATTERY MODEL — SETTLED 2026-08-26 (measured, three cameras)
 
 | # | Item | Owner | Age | Notes |

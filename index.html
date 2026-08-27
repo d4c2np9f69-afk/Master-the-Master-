@@ -3311,10 +3311,25 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <span class="hive-chip-icon">&#128241;</span>
           <span class="hive-chip-lbl">SLING HERE</span>
         </a>
-        <div class="hive-chip hc-braves" onclick="appleTvApp('MLB')" title="Open MLB on the Apple TV — no app needed on this device">
+        <div class="hive-chip hc-braves" onclick="appleTvApp('MLB')" title="Open MLB on the Apple TV (the 60&quot; Vizio)">
           <span class="hive-chip-icon">&#9918;</span>
-          <span class="hive-chip-lbl">BRAVES</span>
+          <span class="hive-chip-lbl">BRAVES TV</span>
         </div>
+        <!-- BRAVES HERE - Braves Vision on THIS device. RESTORED 2026-08-27.
+             🔴 THIS EXISTED AND WAS DELETED BY MISTAKE. Added 2026-08-08 (9c415ab) because Jeff
+             BOUGHT the Braves Vision package and asked for a one-tap button. Removed 2026-08-14
+             (9a2dc3d) by the Apple TV work, whose reasoning was "Braves/Sling now open on the
+             Apple TV instead of asking the iPad to install apps it cannot get".
+             THAT REASONING DID NOT APPLY: braves.tv is a WEB player, never an app install. The
+             genuine app-install problem (MLB.com pushing the App Store) got generalised onto a
+             link that was working, and a feature Jeff paid for vanished for 19 days.
+             The Apple TV chip above is a REMOTE for the big screen; this one plays on the device
+             in your hand - they are not substitutes for each other.
+             Real <a>, not window.open() - see the SLING HERE note above. -->
+        <a class="hive-chip hc-bravesweb" href="https://www.braves.tv" target="_blank" rel="noopener" title="Watch Braves Vision right here on this device (works on the kitchen iPad)">
+          <span class="hive-chip-icon">&#9918;</span>
+          <span class="hive-chip-lbl">BRAVES HERE</span>
+        </a>
         <div class="hive-chip hc-beehive" onclick="openBeehive()" id="hiveBeehiveBtn" title="Open Beehive dashboard">
           <span class="hive-dot" id="hiveDot2" style="background:#444"></span>
           <span class="hive-chip-icon">&#127793;</span>
