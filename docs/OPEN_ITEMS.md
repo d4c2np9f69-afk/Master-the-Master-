@@ -564,6 +564,56 @@ must assert the response is real before drawing a conclusion from its emptiness.
 next `/6h` boundary (**18:00**). `last_triggered` was `None` only because 12:00 passed before the
 automation existed. `input_datetime.camera_batteries_changed` = **2026-08-26**.
 
+## 🔴 THE 150 BATTERY ALERT NEVER FIRED — MY TRIGGER WAS BROKEN (2026-08-26 7:55 PM)
+
+**Jeff caught it the only way it could be caught: he did not get the alert.** *"I didn't get the
+6:00 pm battery alert."*
+
+**The alert was correct in every part except the trigger.** `front_right` sat at **149** across the
+entire 18:00 boundary (logged 149 at 18:01:02), and both conditions evaluate **TRUE** — verified
+step by step through the filter pipeline. Yet `last_triggered` stayed **None**. The automation
+never ran.
+
+🔴 **CAUSE: `time_pattern` with `hours: "/6"` and NO `minutes` / `seconds`.** HA's own
+documentation **does not state** what unspecified time_pattern fields do — checked, it is simply
+undocumented. **So never rely on the default: always set hours, minutes AND seconds explicitly.**
+
+**Fixed:** `hours: "/6", minutes: 0, seconds: 0`, **plus a `template` trigger** so a crossing is
+caught the moment it happens instead of waiting up to six hours for a boundary. Then fired with
+`skip_condition: false` so the real conditions were evaluated — `last_triggered` set, action path
+proven.
+
+⚠️ **THE LESSON IS THE TEST I DID NOT DO.** When this was built earlier the same day it was
+verified by evaluating the CONDITION (`would_fire = True`). **That proves the condition, not the
+automation.** A trigger that never fires makes a perfect condition worthless — the same
+green-component/dead-feature shape as the 08-21 camera check and the `/api/error_log` 404 earlier
+today. **An alert is only verified when it has actually ARRIVED.**
+
+## ✅ MOWER PRE-MOW CHECK 2026-08-26 7:50 PM — CLEAR TO MOW
+
+Jeff mows 2026-08-27 and asked whether hours and GPS are ready. Read live from `/api/hours`:
+
+| check | reading | why it matters |
+|---|---|---|
+| `tracking_paused` | **False** | 🔴 if true, GPS coverage records NOTHING and the day is lost silently |
+| `service_mode` | **False** | 🔴 if true, HOURS DO NOT COUNT |
+| hour meter | `hours_seconds 20070 / 3600 = 5.575` = reported `hours` | ✅ the 08-11 bug (box sent `hours_seconds`, app read `hours`, 50 days / 5 mows lost) is genuinely fixed |
+| GPS | `has_fix: True`, `gps_rx: 4` | locked |
+| tilt | `tilt_ref: True`, `upright: True`, `0.5°` | calibrated — no phantom Tip Risk CRITICAL |
+| MPU | `i2c_errors 0`, `mpu_reinits 0` | clean |
+| last sync | **3 min ago** (parked interval is 300 s) | box is live |
+| coverage | `coverage_n: 202` | map intact |
+| 12 V battery | 13.16 V | healthy |
+| firmware | `fw 1.4.0`, `cfg_rev 2`, `boot_count 12`, `reset_reason 8` (deep sleep, normal) | |
+
+**Non-blocking:** `wifi_rssi -77` where it parks — posts fine now, but that is the margin where a
+failed post gets buffered to RTC and replayed, so a late sync is not a fault. `history` has ONE
+entry (2026-08-12) — that is simply the last mow; history itself works.
+
+⚠️ **Mid-mow silence is BY DESIGN — do not diagnose it as a fault.** The box runs with **WiFi off**
+and posts **nothing** while mowing. It banks locally and dumps totals on the first parked post
+afterwards, flagged `mow_ended`.
+
 ## 🔋 CAMERA BATTERY MODEL — SETTLED 2026-08-26 (measured, three cameras)
 
 | # | Item | Owner | Age | Notes |
