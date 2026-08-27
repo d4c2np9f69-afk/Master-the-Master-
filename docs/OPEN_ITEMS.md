@@ -752,6 +752,21 @@ live one: extra storage on the GaragePC.** Corrected in `BEEHIVE_REFERENCE.md` a
 and the AirTV **has never joined the LAN** (not in ARP, verified 08-27 8:24 AM). **`.166` remains
 UNIDENTIFIED. Do not re-guess it as the AirTV.**
 
+### 🔴 SETTLED 2026-08-27 — THE OTA SCAN CANNOT BE DONE FROM A BROWSER. PHONE ONLY.
+Jeff asked *"can't you do it on the beast."* **Checked properly, both signed OUT and signed IN as
+his real JEFF profile.** `watch.sling.com` ▸ Settings ▸ **Local Channels** is **informational text
+only** — no scan button, no device pairing, no tuner controls — and the page says so in Sling's own
+words: ***"Already have AirTV? You can breeze through setup using your smartphone."***
+The signed-in view is **word-for-word identical** to the signed-out one. **Do not re-try this from
+a browser.** ✅ Side benefit: the beast's Chrome is now signed into Sling, so `watch.sling.com`
+works on the 60" Vizio.
+
+⚠️ **Two browser-automation gotchas on watch.sling.com, worth keeping:** (1) **deep links do not
+work** — navigating straight to `/dashboard/settings/sub_screen/local_channels` bounces back to the
+profile picker every time; you must click through in-app. (2) The **"Who's Watching?" profile
+picker** intercepts the first navigation after sign-in, and clicking the avatar CIRCLE did nothing —
+clicking the **name label underneath** is what registered.
+
 ### Setup — antenna is the only hard prerequisite, and Jeff HAS one
 *"I have a nice outdoor antenna."* Sequence, from AirTV/Sling's own docs:
 **antenna → coax in → power → Sling app (signed in) → phone on home WiFi →
