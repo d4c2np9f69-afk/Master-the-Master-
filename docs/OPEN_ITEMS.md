@@ -932,7 +932,30 @@ needed the Apple TV remote. Jeff then: *"the Braves button now asks me to downlo
 MLB."* **Going in via `braves.tv` reaches a WEB login instead.** The 19-day-old removal of the
 Braves Vision chip was built on that wrong conclusion — see the restoration entry above.
 
-⚠️ **STILL UNPROVEN: whether VIDEO plays.** Rendering a page is not playing a stream, and iPadOS 15
+### ✅ VIDEO PLAYS. PROVEN 2026-08-27 10:31 AM. THE QUESTION IS CLOSED.
+Jeff sent a 5.6 s 4K video of the wall iPad. **Two frames extracted 3 seconds apart show the stream
+ADVANCING**, which is what separates playback from a frozen poster image:
+
+| frame | what is on screen |
+|---|---|
+| **t = 0 s** | Melton rounding the bases · score bug `TB 2-6` · `P:89` |
+| **t = 3 s** | Hicks #34 in the dugout, TIGERS.COM signage · score bug `3-0` · `P:69` |
+
+Different play, different score bug, **pitch count advancing**. `NOW PLAYING` on the sidebar,
+`mlb.com` in the address bar, on the **iPad Air 2 running iPadOS 15**.
+
+🔴 **THIS CLOSES A FLAG OPEN SINCE 2026-08-08.** That session added the chip, could not load
+`braves.tv` from its sandbox, and wrote *"flagged to Jeff to confirm on his device."* **Nobody ever
+confirmed it. Six days later the chip was DELETED on the assumption it could not work.** The
+assumption was wrong, and an unverified flag is what let it be deleted.
+**RULE: an unconfirmed flag is not permission to remove the thing later.**
+
+✅ **HOW A VIDEO FROM JEFF GETS VERIFIED — reusable.** A `.mov` cannot be viewed directly, but
+**ffmpeg ships with go2rtc at `C:\Users\jeffl\HCC-Scripts\go2rtc\ffmpeg.exe`** (not on PATH).
+`ffmpeg -i clip.mov -vf "fps=1/3,scale=1000:-1" -q:v 3 out_%02d.jpg` gives frames that CAN be read.
+**Extract at least TWO frames and compare them** — one frame proves a picture, two prove motion.
+
+⚠️ ~~**STILL UNPROVEN: whether VIDEO plays.**~~ *(superseded above, kept so the sequence is legible)* Rendering a page is not playing a stream, and iPadOS 15
 Safari is the open question. **Test suggested and not yet reported: the free "Watch Now" on Recap
 Rundown** — a 45-minute video that proves playback without waiting for first pitch.
 **Braves vs Dodgers tonight, `LAD @ ATL` 7:15 PM EDT = 6:15 PM Central.**
