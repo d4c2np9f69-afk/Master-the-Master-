@@ -963,6 +963,61 @@ Rundown** — a 45-minute video that proves playback without waiting for first p
 Jeff already owns — Apple TV → HDMI capture stick → go2rtc → a card in the app, which is
 indifferent to what Safari supports.
 
+## ✅ AirTV LOCALS WORKING ON THE FIRE TV — 2026-08-27 3:32 PM. THE FIX WAS A FACTORY RESET.
+
+**What finally worked: the FACTORY reset** (paperclip, hold ~15 s until the Network LED blinks twice,
+~2 min to restore), then re-setup in the Sling app and a rescan. **A soft reset was NOT enough.**
+
+**Channel count climbed at every stage — the tuner was never the problem:**
+`71` (first scan) → `76` (after soft reset) → **`82` (after factory reset)**
+
+**Verified after it worked, not assumed:** `JNISSTune` errors **0**, `AirTvModule` errors **0** (the
+exact exception that failed all day), AirTV link 1.1 ms / 0.5 ms jitter / 0% loss, Fire TV memory
+recovered to 56 MB free / 642 MB available.
+
+### 🔴 THE DIAGNOSTIC THAT ACTUALLY CRACKED IT — use this first next time
+**ADB into the Fire TV through Home Assistant and read the app's own log.** HA's `androidtv`
+integration exposes `androidtv.adb_command`; the output lands in the entity's `adb_response`
+attribute. Entity: **`media_player.fire_tv_viewing_room`** (the other Fire TV entity returns `None`).
+```
+logcat -d -v time | grep "System.err" | tail -40
+```
+That produced the actual failure in one shot:
+```
+org.json.JSONException: End of input at character 0 of ""
+  at SSSlingRequestStatus.<init>
+  at SlingSessionEngine.JNISSTune          <- the tune request to the AirTV
+  at AirTvModule.tune
+```
+**The AirTV was answering tune requests with an EMPTY string.** Everything else about it worked —
+ping, port 8888, channel scans, and the Sling app reading its firmware/MAC over TCP.
+**A device can be perfectly reachable and still be broken in one specific function.**
+You can also ping FROM the Fire TV (`ping -c 3 192.168.1.184`) to prove or kill a client-isolation
+theory in seconds, and read `/proc/meminfo` and `dumpsys meminfo` for memory pressure.
+
+### Things ELIMINATED with evidence — do not re-chase these
+| theory | how it was killed |
+|---|---|
+| Gateway firewall / "too much security" | **All 5 packet filter rules DISABLED** (factory templates targeting placeholder `1.2.3.4`). Also: two devices on the SAME LAN never traverse the firewall at all. |
+| Client isolation / multicast | The **Fire TV pinged the AirTV itself: 0% loss**. |
+| The switch | The **beast is on LAN-4, direct to the gateway**, and its browser failed the same way. Switch is not the common factor. |
+| Fire TV WiFi | Real and fixed (below), but the failure continued after. |
+| Fire TV memory | Freed 40 MB → 108 MB by force-stopping `com.amazon.tv.livetv`; **still failed.** |
+| Firmware being stale | Box factory-reset at 2:37 PM re-provisioned from Sling and came back **5.222.958** — so that IS current. AirTV publishes **no** version list, changelog or release notes; the reset is the only way to establish it. |
+| Cloud relay | Device Information shows **Connection Type: TCP**, a direct LAN connection. |
+
+### ✅ A REAL WIN ALONG THE WAY — the Fire TV's WiFi
+Jeff added the **little HDMI extender cord** and reset the stick. Measured before/after:
+`avg 23.2 ms → 3.3 ms · max 142 ms → 8 ms · jitter ~37 ms → 1.3 ms`
+The stick's antenna was inside the TV's metal chassis. **Jeff was right that 18 ft is nothing for
+5 GHz** — the distance was never the issue, the two inches of television were. Fire TV's own screen
+confirmed −50 dBm, SNR 42.
+
+⚠️ **PING LATENCY DURING ACTIVE STREAMING IS NOT A HEALTH METRIC.** While the stream was working,
+the Fire TV measured **85 ms avg / 39.8 ms jitter / 0% loss** — worse-looking than when it was
+broken. The radio deprioritises ICMP when it is busy carrying video. **Do not "fix" a working setup
+over this number.**
+
 ## 🔋 CAMERA BATTERY MODEL — SETTLED 2026-08-26 (measured, three cameras)
 
 | # | Item | Owner | Age | Notes |
