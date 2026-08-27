@@ -963,7 +963,36 @@ Rundown** — a 45-minute video that proves playback without waiting for first p
 Jeff already owns — Apple TV → HDMI capture stick → go2rtc → a card in the app, which is
 indifferent to what Safari supports.
 
-## ⚠️ AirTV LOCALS WORKING — ON THE **APPLE TV**. THE FIRE TV IS STILL UNTESTED. 2026-08-27 3:36 PM
+## ✅ AirTV LOCALS WORKING ON **BOTH** THE APPLE TV AND THE FIRE TV — 2026-08-27 3:43 PM
+
+**Fire TV confirmed playing at 3:43 PM**, after: factory reset of the AirTV → re-setup → rescan
+(82 channels) → on the Fire TV, `am force-stop com.sling` + clear its cache + relaunch. The cache
+clear mattered because **the factory reset gave the AirTV a NEW Device ID** and the app was holding
+the old registration.
+
+### 🔴 MY ROOT-CAUSE DIAGNOSIS WAS WRONG. THE EXCEPTION IS NOT THE FAULT.
+I spent hours calling this the smoking gun:
+```
+org.json.JSONException: End of input at character 0 of ""
+  at SlingSessionEngine.JNISSTune  /  AirTvModule.tune
+```
+**It fires 4 times during a SUCCESSFUL playback too** (verified 15:43:05 on a deliberately cleared
+log, with 245 Sling lines proving the app was really used). **Note the level: `W/System.err` — a
+WARNING, not an error.** The app throws it, catches it, retries and succeeds. It is almost certainly
+present on every normal day.
+🔴 **RULE: a stack trace in the log is not automatically the cause. Check the LEVEL (W vs E), and
+check whether it also appears when the thing WORKS.** I never did the second test, and built an
+afternoon on it.
+
+**What actually fixed it: the factory reset + rescan, and on the Fire TV the app-cache clear.**
+Which specific part did it is **not** established — do not claim otherwise.
+
+⚠️ **AND THE FIRST VERSION OF THIS ENTRY WAS WRONG TWICE.** Committed as "working on the Fire TV"
+when Jeff was watching the **Apple TV** (*"I haven't checked the fire tv again"*), and "verified"
+with **zero errors that were zero only because nobody had used the app.** Silence read as success —
+the exact trap written into this file the day before ("a quiet alarm is UNVERIFIED, not healthy"),
+repeated within the hour. **When a log is quiet, prove the feature was EXERCISED before calling it
+healthy** — here that meant clearing the log first and counting the app's own lines afterwards.
 
 🔴 **THIS SECTION WAS FIRST WRITTEN AND COMMITTED AS "WORKING ON THE FIRE TV". THAT WAS WRONG.**
 Jeff: *"I haven't checked the Fire TV again, I am watching it on the Apple TV."*
@@ -977,7 +1006,7 @@ repeated within an hour of writing it down.**
 **What IS true:** locals play **on the Apple TV**. The factory reset + rescan produced a working
 box. **The Fire TV has not been retried and its status is UNKNOWN.**
 
-## ✅ WHAT THE FACTORY RESET ACTUALLY ACHIEVED
+### What the factory reset achieved
 
 **What finally worked: the FACTORY reset** (paperclip, hold ~15 s until the Network LED blinks twice,
 ~2 min to restore), then re-setup in the Sling app and a rescan. **A soft reset was NOT enough.**
