@@ -676,6 +676,25 @@ until Jeff physically changes it. A trigger that assumes "the condition becomes 
 for every threshold alert of this kind. **And a low battery is never a 2 a.m. problem:** the cliff
 from 150 takes DAYS (backyard held 148–155 for two weeks before falling to 134 in nine hours).
 
+## 🎯 DESIGN PRINCIPLE FROM JEFF — MAKE THE ALERT RIDE ALONG WITH A JOB HE IS ALREADY DOING
+
+**Jeff, 2026-08-26 8:52 PM, on why once-a-day-at-9-AM is right:** *"That will remind me to put the
+new batteries in my pocket, so as I pass each one while mowing I will put the new ones in."*
+
+**He is not using it as a task alert. He is using it as a PACKING LIST.** 9 AM lands before he
+goes out, so the useful content is **what to carry**, not an explanation of the discharge curve.
+The message was rewritten to match: *"Put batteries in your pocket before you head out. Five to do:
+driveway, front right, back left, backyard, and the front doorbell — swap each one as you pass
+it."* plus the live readings. The physics stays in #74 where it belongs.
+
+🔴 **THIS IS A GENERAL RULE, NOT A ONE-OFF.** An alert that asks Jeff to make a **special trip**
+competes with his day and eventually gets ignored. An alert timed so the work **folds into
+something he is already doing** costs him nothing. Same family as his own standing rule that *"if
+the GPS is going to be useful it has to work automatically — no pushing buttons"*: **a feature that
+depends on him remembering, or on him going out of his way, is not finished.**
+**When building any future reminder, ask WHEN he will already be in the right place, and fire it
+just before that — not when the condition first becomes true.**
+
 ## ✅ RESOLVED THE SAME NIGHT — ONCE A DAY, 9 AM. Jeff's call, and it beat both of my designs.
 
 **Jeff, 2026-08-26 8:49 PM: *"Just set it to 1 time a day."*** Trigger is now
