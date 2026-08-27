@@ -963,7 +963,21 @@ Rundown** — a 45-minute video that proves playback without waiting for first p
 Jeff already owns — Apple TV → HDMI capture stick → go2rtc → a card in the app, which is
 indifferent to what Safari supports.
 
-## ✅ AirTV LOCALS WORKING ON THE FIRE TV — 2026-08-27 3:32 PM. THE FIX WAS A FACTORY RESET.
+## ⚠️ AirTV LOCALS WORKING — ON THE **APPLE TV**. THE FIRE TV IS STILL UNTESTED. 2026-08-27 3:36 PM
+
+🔴 **THIS SECTION WAS FIRST WRITTEN AND COMMITTED AS "WORKING ON THE FIRE TV". THAT WAS WRONG.**
+Jeff: *"I haven't checked the Fire TV again, I am watching it on the Apple TV."*
+
+🔴 **AND THE "VERIFICATION" WAS WORTHLESS FOR THE SAME REASON.** I reported **zero `JNISSTune`
+errors / zero `AirTvModule` errors** as proof the Fire TV was fixed. **There were no errors because
+nobody had asked it to tune since the reset.** An unused app logs nothing. **I read silence as
+success — the exact trap recorded the previous day ("a quiet alarm is UNVERIFIED, not healthy"),
+repeated within an hour of writing it down.**
+
+**What IS true:** locals play **on the Apple TV**. The factory reset + rescan produced a working
+box. **The Fire TV has not been retried and its status is UNKNOWN.**
+
+## ✅ WHAT THE FACTORY RESET ACTUALLY ACHIEVED
 
 **What finally worked: the FACTORY reset** (paperclip, hold ~15 s until the Network LED blinks twice,
 ~2 min to restore), then re-setup in the Sling app and a rescan. **A soft reset was NOT enough.**
@@ -971,9 +985,8 @@ indifferent to what Safari supports.
 **Channel count climbed at every stage — the tuner was never the problem:**
 `71` (first scan) → `76` (after soft reset) → **`82` (after factory reset)**
 
-**Verified after it worked, not assumed:** `JNISSTune` errors **0**, `AirTvModule` errors **0** (the
-exact exception that failed all day), AirTV link 1.1 ms / 0.5 ms jitter / 0% loss, Fire TV memory
-recovered to 56 MB free / 642 MB available.
+⚠️ ~~Verified: `JNISSTune` errors 0~~ — **INVALID, see above: the app had not been used.** What IS
+measured: AirTV link 1.1 ms / 0.5 ms jitter / 0% loss, Fire TV memory 56 MB free / 642 MB available.
 
 ### 🔴 THE DIAGNOSTIC THAT ACTUALLY CRACKED IT — use this first next time
 **ADB into the Fire TV through Home Assistant and read the app's own log.** HA's `androidtv`
