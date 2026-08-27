@@ -763,6 +763,35 @@ from the mower GPS box in his garage) — pull this BEFORE scanning so a short c
 told apart from a bad aim:
 `rabbitears.info/searchmap.php?request=result&q=36.476658%2C-86.660133`
 
+### ✅ ON THE NETWORK 2026-08-27 9:08 AM — found via the ROUTER'S device list, not ARP
+```
+MAC     88:b6:ee:c7:06:e4      <- label reads ...e5; wired and wireless get sequential MACs
+IP      192.168.1.184
+Name    AirTV3                  <- matches FCC ID DKN-ATV3
+Link    Ethernet LAN-1, 1000Mbps full duplex   (through Jeff's switch)
+```
+**Coax was already run to the Vizio** (which is also the beast's monitor), so the AirTV sits in that
+room and Jeff moved the cable over. ⚠️ **Consequence stated up front: the Vizio's own tuner goes
+dark.** A 2-way splitter restores both if he ever wants it — try the free move first.
+
+🔴 **HOW TO FIND A DEVICE LIKE THIS — do NOT ping-sweep from the beast.** Two sweeps here produced
+nothing and one took >7 minutes; PowerShell **5.1 has no `ForEach-Object -Parallel`**, and devices
+that ignore ICMP never land in ARP anyway. **The BGW320-500's Device List at
+`http://192.168.1.254/cgi-bin/devices.ha` reads WITHOUT the access code** and lists every client
+with MAC, IP, name, link type and speed. That is the authoritative answer in one page load.
+
+⚠️ **I twice printed "FOUND" when the device was NOT present** — a `Select-String ... && echo FOUND`
+shell pattern fired on an exit code, and once the grep matched **my own script's echo line**. Both
+caught before misleading Jeff, but **never conclude presence from an exit code; print the matched
+line itself.**
+
+### 🔎 IT DOES LISTEN LOCALLY — the AirTV 2 "no open API" verdict does NOT transfer
+Port scan of `192.168.1.184`: **49152 open** (a real HTTP server — answers, but returns 500 on
+`/`, `/description.xml`, `/api`, `/status`) and **8888 open** (accepts TCP, never speaks HTTP —
+some non-HTTP protocol). **So the old blanket conclusion is wrong for this generation.** Not chased
+further — Jeff wanted to watch TV, not do API archaeology, and he was mowing that day.
+**Worth revisiting** if a Home Assistant / Channels-style integration is ever wanted.
+
 **Open questions blocking placement:** where the antenna coax comes inside (the AirTV needs coax
 AND network in the same spot), and whether the line has a preamp/power injector that must stay
 powered.
