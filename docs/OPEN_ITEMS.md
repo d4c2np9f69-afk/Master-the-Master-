@@ -614,6 +614,45 @@ entry (2026-08-12) — that is simply the last mow; history itself works.
 and posts **nothing** while mowing. It banks locally and dumps totals on the first parked post
 afterwards, flagged `mow_ended`.
 
+## 🔒 SETTLED 2026-08-26 — THE 5 AM OVERNIGHT WATER CHECK KEEPS RUNNING. DO NOT DISABLE IT.
+
+**A future session WILL be tempted to switch this off** — the irrigation water is shut off at the
+main until the Orbit valve is installed, so the nightly report currently finds nothing, night after
+night. **That is not noise. Turning it off would destroy the thing it is collecting.**
+
+**Jeff, 2026-08-26:** *"Just leave it going, because after I put the valve in I will want to test it
+a couple of nights to make sure we are all good."*
+
+🔴 **THE WATER-OFF NIGHTS ARE THE CONTROL DATA.** They establish what a genuinely leak-free night
+looks like on this meter. When the valve goes in, the post-install nights get compared against a
+**continuous** baseline instead of a cold restart. Stopping and restarting the report would leave a
+hole exactly where the comparison has to be made.
+
+**Also do not re-open the leak investigation itself.** Jeff, same conversation: *"that was the
+reason we did all of the water tests, to make sure the house had no leaks and that the irrigation
+valve was the only source. It was all confirmed down to the drop."* The house is CLEARED — see
+`reference_hcc_water_signatures` (1.28 gal toilet fill, two icemakers) and the LTS proof
+(6-15 gal/night → 1.3 after shutoff). **Cite it; never re-derive it.**
+
+**Still running and verified 2026-08-26 8:05 PM:** `hcc_overnight_water_baseline_1_am` (ran 1:00 AM),
+`hcc_overnight_water_check_5_am` (ran 5:00 AM), `hcc_possible_water_leak_idle_flow`, meter live
+(`sensor.water_gallons` updated 5 min ago).
+
+### 🔴 WHY THE DEAD LEAK ALARM HID — the most useful thing learned tonight
+`hcc_water_leak_alarm` had `last_triggered: None`. **Nothing was lost** — there was no leak, so the
+broken service was never exercised by a real event, and all three point sensors read dry.
+
+**But that is exactly why it stayed broken: AN ALARM THAT NEVER FIRES NEVER REVEALS ITS OWN
+BREAKAGE.** The only reason tonight's fault surfaced at all is that the *silence watchdog* runs
+`time_pattern /30`, so it hit the dead service constantly and raised a repair card. The leak alarm —
+sitting quietly, looking perfectly healthy — would have stayed dead indefinitely and shown itself
+only on the night it actually mattered.
+
+🔴 **RULE: a quiet alarm is UNVERIFIED, not healthy.** Do not infer that an alert works because it
+has never complained. Exercise the notification path deliberately, or say plainly that it is
+untested. This is the same family as the 08-21 camera check, the `/api/error_log` 404, and the 150
+battery alert whose CONDITION was verified while its TRIGGER never fired — all four in one day.
+
 ## 🔋 CAMERA BATTERY MODEL — SETTLED 2026-08-26 (measured, three cameras)
 
 | # | Item | Owner | Age | Notes |
