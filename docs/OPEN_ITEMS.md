@@ -676,7 +676,23 @@ until Jeff physically changes it. A trigger that assumes "the condition becomes 
 for every threshold alert of this kind. **And a low battery is never a 2 a.m. problem:** the cliff
 from 150 takes DAYS (backyard held 148–155 for two weeks before falling to 134 in nine hours).
 
-⏸️ **LEFT DISABLED ON PURPOSE — re-arm it only AFTER Jeff changes the batteries** (he is doing all
+## ✅ RESOLVED THE SAME NIGHT — ONCE A DAY, 9 AM. Jeff's call, and it beat both of my designs.
+
+**Jeff, 2026-08-26 8:49 PM: *"Just set it to 1 time a day."*** Trigger is now
+`time: "09:00:00"`, conditions unchanged, automation **ON**.
+
+🔴 **DO NOT "IMPROVE" THIS BACK INTO A TIME PATTERN OR A TEMPLATE TRIGGER.** One fixed daily time
+is immune to **both** failures I shipped in one evening — a `/6h` pattern that never fired because
+minutes/seconds were unspecified, and a template trigger that fired on Blink's ~5-minute poll
+cycle. It also made the 12-hour self-throttle and the waking-hours window redundant, so both were
+deleted: **once a day IS the rate limit.** Fewer moving parts, and nothing left to get subtly wrong.
+
+**Why it is the RIGHT resolution, not just the quiet one:** a low battery is a **slow fact, not an
+event.** `front_right` sits at 149 until it is physically changed, and the fall from 150 to the
+133–134 death takes **days**. One reminder a morning matches the physics of the thing being
+measured. *(The superseded plan below is kept only so nobody re-derives it.)*
+
+⏸️ ~~**LEFT DISABLED ON PURPOSE — re-arm it only AFTER Jeff changes the batteries**~~ (he is doing all
 four cameras + the doorbell on 2026-08-27 while mowing). Re-enabling tonight would fire once more
 at noon tomorrow to report something he already knows and is already acting on. **Re-enable, then
 set `input_datetime.camera_batteries_changed`, so the 6-month backstop restarts clean.**
