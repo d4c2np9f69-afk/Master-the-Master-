@@ -1605,6 +1605,11 @@ html.light #kioskHint{background:rgba(255,255,255,.9)}
 .hive-chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
 .hive-chip{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 4px 10px;border-radius:10px;background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.22);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .2s,background .2s}
 .hive-chip:active{background:rgba(56,189,248,.16);border-color:rgba(56,189,248,.4)}
+/* 2026-08-27: the FIRST anchor-based chip. It MUST be a real <a href target=_blank> and NOT an
+   onclick+window.open, because window.open is a NO-OP in an installed iOS PWA - that is the
+   07-31 incident that left ~20 dead buttons. Anchors need the underline/colour stripped to
+   match the button chips. */
+a.hive-chip{text-decoration:none;color:inherit}
 .hive-chip-icon{font-size:18px;line-height:1}
 .hive-chip-lbl{font-size:8.5px;font-weight:800;letter-spacing:.5px;color:var(--muted);text-transform:uppercase;white-space:nowrap}
 .hive-chip .hive-dot{width:6px;height:6px;border-radius:50%;position:absolute;top:6px;right:6px}
@@ -3287,10 +3292,25 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
           <span class="hive-chip-icon">&#63743;</span>
           <span class="hive-chip-lbl">APPLE TV</span>
         </div>
-        <div class="hive-chip hc-sling" onclick="appleTvApp('Sling')" title="Open Sling on the Apple TV">
+        <div class="hive-chip hc-sling" onclick="appleTvApp('Sling')" title="Open Sling on the Apple TV (the 60&quot; Vizio)">
           <span class="hive-chip-icon">&#9654;&#65039;</span>
-          <span class="hive-chip-lbl">SLING</span>
+          <span class="hive-chip-lbl">SLING TV</span>
         </div>
+        <!-- SLING HERE - watch on THIS device. Added 2026-08-27 at Jeff's request: "have the Sling
+             app to where I can open it and watch it from the app on the kitchen iPad".
+             The chip above is a REMOTE - it tells the Apple TV to open Sling on the big screen.
+             This one plays Sling on the device you are holding.
+             WHY IT IS AN <a> AND NOT AN onclick: the wall iPad runs this app as an INSTALLED PWA,
+             where window.open() is a silent no-op (07-31: ~20 dead buttons). A real anchor with
+             target=_blank hands off to Safari and works. Do NOT "tidy" this into an onclick.
+             The old code comment nearby says the iPad "can no longer install apps" and concludes
+             you must watch on the TV instead. That conclusion is STALE: Jeff photo-confirmed
+             watch.sling.com playing live TV in that iPad's Safari on 2026-08-05. You cannot
+             install the APP; the WEB PLAYER is fine. -->
+        <a class="hive-chip hc-slingweb" href="https://watch.sling.com" target="_blank" rel="noopener" title="Watch Sling right here on this device (works on the kitchen iPad)">
+          <span class="hive-chip-icon">&#128241;</span>
+          <span class="hive-chip-lbl">SLING HERE</span>
+        </a>
         <div class="hive-chip hc-braves" onclick="appleTvApp('MLB')" title="Open MLB on the Apple TV — no app needed on this device">
           <span class="hive-chip-icon">&#9918;</span>
           <span class="hive-chip-lbl">BRAVES</span>

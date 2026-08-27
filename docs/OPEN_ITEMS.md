@@ -815,6 +815,50 @@ powered.
 treat it as UNVERIFIED for the Anywhere** until this box is actually probed. Different hardware,
 different generation; do not carry that conclusion across on the strength of the brand name.
 
+## 📺 "SLING HERE" CHIP — watch Sling ON the device, added 2026-08-27
+
+Jeff: *"I have Apple TV on the Vizio and that has the Sling app on it, which should show all the
+locals. What I would like is in the app have the Sling app to where I can open it and watch it from
+the app on the kitchen iPad."*
+
+🔴 **I HAD THIS TANGLED AND HE CORRECTED ME.** I had been trying to make Sling's **web** player reach
+the AirTV on the beast, and had started suggesting Roku/Fire TV for the 60". **The 60" was never the
+problem — the Apple TV's native Sling app already covers it.** The actual gap was the kitchen iPad.
+
+### What existed vs what was missing
+The app's `SLING` chip calls `appleTvApp('Sling')` — that is a **REMOTE**: it tells the Apple TV to
+open Sling on the big screen. **Nothing opened Sling on the device in your hand.**
+
+🔴 **AND THE CODE COMMENT EXPLAINING WHY WAS STALE.** It reads: *"The wall iPad can no longer install
+apps (iPadOS 15 is past what MLB/Sling ship for), so instead of opening an app HERE, we tell the
+Apple TV to open it THERE."* **True about the APP, wrong as a conclusion** — Jeff photo-confirmed
+`watch.sling.com` playing live TV in that iPad's Safari on **2026-08-05** ("Kitchen TV solved at
+$0"). You cannot install the app; **the web player works fine.** Nobody went back and added the
+button.
+
+### Built
+New **`SLING HERE`** chip beside the existing one, which is now labelled **`SLING TV`** so the two
+are not confused (one casts to the TV, one plays here).
+
+🔴 **IT IS AN `<a href target="_blank">`, NOT AN onclick — DO NOT "TIDY" IT INTO ONE.** The wall iPad
+runs this app as an **installed PWA**, where **`window.open()` is a silent no-op** — that is the
+2026-07-31 incident that left **~20 dead buttons**. This is the **first anchor-based chip** in the
+app, so `a.hive-chip{text-decoration:none;color:inherit}` was added to make it match the buttons.
+
+**Verified:** `lint-app.js` clean; `smoke-test.js` passed. ⚠️ Its external-link count stayed at
+**374 — that is CORRECT, not a miss**: the smoke test only counts anchors inside `#section-yard`,
+and this chip is on HOME. Checked rather than assumed.
+
+### ⚠️ HONEST LIMIT — this gives Sling, but probably NOT the AirTV locals
+Sling's **subscription** channels play in the iPad's Safari (proven 08-05). **The OTA locals are a
+different matter:** the web player must reach the AirTV **on the LAN**, and browsers refuse to hand
+out local IPs — measured on the beast this morning as `localIps: []`, which sent Sling to its
+EchoStar relay and produced *"Connection to AirTV was lost [16-31]"*. **Safari has the same
+restriction and no flag to change it, so locals-in-browser on the iPad is unlikely.** Not asserted
+either way — **Jeff can settle it in 30 seconds: open the chip, Guide ▸ LOCALS, tap a channel.**
+The locals unquestionably work on the **Apple TV, phone, Fire TV and Roku** — native apps can see
+the LAN.
+
 ## 🔋 CAMERA BATTERY MODEL — SETTLED 2026-08-26 (measured, three cameras)
 
 | # | Item | Owner | Age | Notes |

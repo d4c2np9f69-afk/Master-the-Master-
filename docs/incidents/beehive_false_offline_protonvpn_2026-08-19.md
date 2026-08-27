@@ -141,7 +141,17 @@ will not slow the internet connection down*. Measurements decided it.
 | Proton VPN connected | (noisy sample) | 19.8 ms | **NO** |
 | No VPN at all | ~447 Mbit/s | 11.6 ms | yes |
 | WARP **full tunnel** | ~276 Mbit/s | 10.9 ms | yes |
-| **WARP DNS-only (chosen)** | **428 Mbit/s (-4.2%, noise)** | 11.2 ms | **yes** |
+| **WARP DNS-only (chosen 08-19)** | **428 Mbit/s (-4.2%, noise)** | 11.2 ms | **yes** |
+
+🔴 **NO LONGER TRUE — MEASURED 2026-08-27 9:40 AM.** `warp-cli settings` reports **`(user set) Mode: Warp`** —
+a **FULL TUNNEL**, not DNS-only — over MASQUE, and `ipinfo` showed the beast egressing as
+**104.28.220.4 (Cloudflare)** instead of AT&T. Whether Jeff changed it or an update did is unknown;
+**what matters is that the note above was stale and a session acted on it.** Re-read `warp-cli status`
+and `warp-cli settings` live before making any claim about WARP's mode.
+⚠️ **Consequence found the same morning:** full-tunnel WARP **breaks Sling web's AirTV connection** —
+the browser reports `localIps: []` and Sling falls back to its EchoStar relay, which cannot match a
+Cloudflare-egressing client to a LAN box. See the AirTV section in `OPEN_ITEMS.md`.
+
 
 **Methodology warning for future sessions:** 50 MB samples finish in 1-2 s and measure TCP
 ramp-up, not bandwidth — they produced a bogus "Proton is faster" result. Non-interleaved runs
