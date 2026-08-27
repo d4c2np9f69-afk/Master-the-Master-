@@ -896,6 +896,50 @@ why the Apple TV remote exists, and it stays.
 
 **Verified:** `lint-app.js` clean, `smoke-test.js` passed.
 
+## ⌨️ WALL iPAD: "THE KEYBOARD WON'T COME UP" = A BLUETOOTH KEYBOARD IS CONNECTED
+
+**Confirmed by Jeff, 2026-08-27 10:29 AM — it was the keyboard, not Guided Access.**
+
+**Symptom:** tap a text field on the wall iPad, **the cursor appears and blinks**, and **no on-screen
+keyboard ever comes up.** Looks like the page or the iPad is broken.
+
+🔴 **CAUSE: iOS suppresses the on-screen keyboard whenever it believes a PHYSICAL keyboard is
+attached** — even one that is asleep, flat, or in another room, as long as it is paired and
+connected.
+
+🔎 **THE TELL THAT RULES OUT EVERYTHING ELSE: the caret is visible.** A blinking cursor means the
+field **has focus**. iOS *always* raises the keyboard for a focused field — the ONLY common
+exception is a connected hardware keyboard. **If you can see the cursor, stop suspecting the page,
+Safari, or the app.**
+
+**Fix:** Settings ▸ Bluetooth ▸ ⓘ ▸ **Forget This Device**. ⚠️ **Disconnect alone is not enough** —
+it re-pairs the moment the keyboard wakes near the iPad and the symptom returns with no obvious
+cause. Alternative if the keyboard is to hand: most have an **eject / keyboard key** that toggles
+the on-screen keyboard back.
+
+**Ruled out and worth not re-chasing:** Guided Access was the first suspect (it is in use on this
+iPad and caused the 08-08 "stuck sideways" bug) — **not the cause here.** AssistiveTouch is enabled
+on this iPad and its Device ▸ More ▸ Keyboard can force the keyboard up as a workaround.
+
+## ✅ MLB.TV / BRAVES VISION LOADS AND LOGS IN ON THE WALL iPAD — 2026-08-27 10:28 AM
+
+**Photo-confirmed by Jeff.** The `BRAVES HERE` chip → `braves.tv` → **MLB.com's browser sign-in**
+(*not* an App Store push) → signed in, **MLB.TV's full site rendering in iPadOS 15 Safari** with the
+account icon present and "Today's Lineup" populated.
+
+🔴 **THIS DISPROVES THE 2026-08-14 CONCLUSION** that the iPad could not reach MLB and therefore
+needed the Apple TV remote. Jeff then: *"the Braves button now asks me to download the app from
+MLB."* **Going in via `braves.tv` reaches a WEB login instead.** The 19-day-old removal of the
+Braves Vision chip was built on that wrong conclusion — see the restoration entry above.
+
+⚠️ **STILL UNPROVEN: whether VIDEO plays.** Rendering a page is not playing a stream, and iPadOS 15
+Safari is the open question. **Test suggested and not yet reported: the free "Watch Now" on Recap
+Rundown** — a 45-minute video that proves playback without waiting for first pitch.
+**Braves vs Dodgers tonight, `LAD @ ATL` 7:15 PM EDT = 6:15 PM Central.**
+**Fallbacks if video fails:** (1) ᴀA ▸ Request Desktop Website; (2) the capture chain whose parts
+Jeff already owns — Apple TV → HDMI capture stick → go2rtc → a card in the app, which is
+indifferent to what Safari supports.
+
 ## 🔋 CAMERA BATTERY MODEL — SETTLED 2026-08-26 (measured, three cameras)
 
 | # | Item | Owner | Age | Notes |
