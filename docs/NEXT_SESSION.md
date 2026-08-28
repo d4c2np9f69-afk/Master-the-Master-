@@ -1,3 +1,44 @@
+# 🟢 WHAT HAPPENED 2026-08-27 EVENING — THE ZIGBEE MESH IS FIXED
+
+**Router 0 → 3. Low LQI 6 → 0. Read `docs/zigbee/zigbee_mesh_routers_2026-08-27.md` before any
+Zigbee thought — every number in it was measured live, and OPEN_ITEMS #69 and #80 are CLOSED.**
+
+- **Two Tuya TS0501B USB repeaters + the TS0224 siren all joined as ROUTERS.** Named
+  `Garage Repeater`, `Floating Repeater` (Jeff's word — it moves), `301 Alarm`.
+- **Garage Repeater now carries 4 children.** Garage Man Door 29 → 83, Garage Door Down 25 → 83.
+- **Mailbox 0 → 76 — and it was NEVER a distance problem, it was ORPHANED.** It re-paired straight
+  to the coordinator; the repeater out front had zero children. **Jeff's 08-24 "too far, accepted"
+  is retired.**
+- ⚠️ **The sensors are SONOFF SNZB-04 and HOBEIAN ZG-222Z** — the 08-13 buildout doc's
+  Excellux/Coolo/Tuya list was wrong.
+- 🔴 **A battery end device does NOT re-parent on command.** Re-pair it or pull the battery.
+
+## 🔊 The siren — JEFF'S VERDICT IS SETTLED, DO NOT RE-TEST IT
+> *"it's pretty weak. You get what you pay for it'll work as an alert, but it's no way it's gonna
+> scare anybody off."* — 6:50 PM
+
+**It is an indoor annunciator.** ✅ **Jeff's call: use it as the LEAK ALARM** — already wired into
+`automation.hcc_water_leak_alarm` (verified: action 2 of 3, tone `emergency`, before the push).
+🟠 **Jeff plans to buy real sirens later** — *"I'll get some big sirens. That'll blow the windows
+out."* His purchase, his timing. **Never name a part or a price from memory.**
+
+🔴 **Three traps in the TS0224, all found by live test:**
+1. **HA's `siren.turn_on` CANNOT reach the loudest level.** Z2M's warning has `low/medium/high/
+   very_high`; `volume_level: 1.0` only reaches **high**. Use `mqtt.publish` to
+   `zigbee2mqtt/301 Alarm/set`.
+2. **Minimum duration is 60 s.** No short chirp exists. It self-stops at the duration.
+3. **`select.301_alarm_volume` is write-only** (always `unknown`), and `assumed_state: true` means
+   HA's `off` is NOT proof it stopped.
+
+🔑 **Access route worth keeping: Supervisor REST 401s, but Supervisor over HA's WEBSOCKET accepts
+the long-lived token** — `{"type":"supervisor/api","endpoint":"/addons"}`. That is how the Z2M
+ingress URL was obtained with no clicking. MQTT 1883 is open but refuses anonymous, and there are
+no manual Mosquitto logins — so talk to Z2M through HA's `mqtt.publish`.
+
+✋ **`permit_join` and the pairing automation were both verified OFF at 6:50:29 PM.**
+
+---
+
 # 🔴 WHAT HAPPENED 2026-08-27 — READ THIS FIRST
 
 ## ✅ DONE AND WORKING — do not reopen

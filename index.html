@@ -3402,6 +3402,76 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       <div class="wx-note" id="garageNote">Live from Beehive</div>
     </div>
 
+    <!-- MAILBOX -- built 2026-08-27 the evening the mailbox sensor came back to life.
+         It had been ORPHANED and silent since 08-23 at LQI 0; a re-pair put it at 76.
+         Everything here is fed by automation.hcc_mail_arrived_mailbox_door_opened, which
+         writes the helpers below. If this card ever reads "--", check that automation first,
+         not this code. -->
+    <style>
+      @keyframes mailGlow {
+        0%,100% { box-shadow:0 0 0 0 rgba(34,197,94,.55); }
+        50%     { box-shadow:0 0 18px 5px rgba(34,197,94,.30); }
+      }
+      @keyframes mailNudge {
+        0%,88%,100% { transform:translateY(0) rotate(0deg); }
+        92%         { transform:translateY(-4px) rotate(-7deg); }
+        96%         { transform:translateY(-2px) rotate(5deg); }
+      }
+      #mailHero { display:flex; align-items:center; gap:14px; padding:14px; border-radius:14px;
+                  border:1px solid var(--line,rgba(255,255,255,.12)); margin-bottom:10px; }
+      #mailHero.is-here { border-color:var(--ok); animation:mailGlow 2.4s ease-in-out infinite; }
+      #mailHero.is-here #mailIcon { animation:mailNudge 3.2s ease-in-out infinite; }
+      #mailIcon { font-size:40px; line-height:1; }
+      #mailHeadline { font-size:19px; font-weight:900; letter-spacing:.6px; }
+      #mailSub { font-size:12px; color:var(--muted); margin-top:2px; }
+      .mail-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:10px 0 4px; }
+      .mail-stat { text-align:center; padding:9px 4px; border-radius:11px;
+                   border:1px solid var(--line,rgba(255,255,255,.10)); }
+      .mail-stat b { display:block; font-size:16px; font-weight:900; }
+      .mail-stat span { font-size:10px; letter-spacing:.7px; color:var(--muted); text-transform:uppercase; }
+      #mailRecent { font-size:11px; color:var(--muted); margin-top:8px; line-height:1.7; word-break:break-word; }
+      /* "You've got mail" -- Jeff's picture, 2026-08-27. Hidden unless mail is actually in.
+         It fires ONCE on arrival (mailPop) then settles into a slow breathe, so a card left
+         open on the wall iPad all afternoon is not strobing at anybody. */
+      @keyframes mailPop {
+        0%   { opacity:0; transform:scale(.55) rotate(-9deg); }
+        55%  { opacity:1; transform:scale(1.12) rotate(3deg); }
+        75%  { transform:scale(.97) rotate(-2deg); }
+        100% { opacity:1; transform:scale(1) rotate(0deg); }
+      }
+      @keyframes mailBreathe {
+        0%,100% { transform:scale(1);    filter:drop-shadow(0 0 4px rgba(34,197,94,.35)); }
+        50%     { transform:scale(1.035); filter:drop-shadow(0 0 14px rgba(34,197,94,.60)); }
+      }
+      #mailGotWrap { display:none; text-align:center; margin:2px 0 12px; }
+      #mailGotImg  { width:100%; max-width:210px; height:auto; border-radius:12px;
+                     animation:mailPop .85s cubic-bezier(.2,1.5,.4,1) both,
+                               mailBreathe 3.4s ease-in-out 1s infinite; }
+    </style>
+    <div class="card" id="mailCard" style="display:none">
+      <div class="card-title">&#128235; Mailbox <span id="mailConn" class="irr-conn"></span></div>
+      <div id="mailBanner" class="wx-banner wx-load">&#128260; Loading&hellip;</div>
+      <div id="mailBody" style="display:none">
+        <div id="mailGotWrap"><img id="mailGotImg" src="./images/youve-got-mail.jpg" alt="You&#39;ve got mail" loading="lazy"></div>
+        <div id="mailHero">
+          <div id="mailIcon">&#128235;</div>
+          <div style="flex:1">
+            <div id="mailHeadline">--</div>
+            <div id="mailSub"></div>
+          </div>
+        </div>
+        <button class="btn-full btn-green" id="mailGotBtn" style="display:none;margin-bottom:4px" onclick="mailCollected()">&#128233; GOT THE MAIL</button>
+        <div class="mail-stats">
+          <div class="mail-stat"><b id="mailAvg">--</b><span>Average</span></div>
+          <div class="mail-stat"><b id="mailEarliest">--</b><span>Earliest</span></div>
+          <div class="mail-stat"><b id="mailLatest">--</b><span>Latest</span></div>
+        </div>
+        <div id="mailRecent"></div>
+      </div>
+      <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadMail()">&#128260; Refresh</button>
+      <div class="wx-note" id="mailNote">Live from Beehive</div>
+    </div>
+
     <!-- ROBOT VACUUM — its own card; only shows when a vacuum.* entity exists -->
     <div class="card" id="vacuumCard" style="display:none">
       <div class="card-title">&#129302; <span id="vacName">Robot Vacuum</span> <span id="vacConn" class="irr-conn"></span></div>
@@ -6822,7 +6892,7 @@ function splashLogin(){
         if(msg){msg.style.color='#22c55e';msg.textContent='Welcome home!';}
         setTimeout(function(){
           dismissSplash();
-          checkBeehive(false);loadCameras();loadHomeStatus();loadUtilities();loadGuardian();loadLights();loadGarage();loadVacuum();loadCar();acctRefreshStatus();
+          checkBeehive(false);loadCameras();loadHomeStatus();loadUtilities();loadGuardian();loadLights();loadGarage();loadMail();loadVacuum();loadCar();acctRefreshStatus();
         },600);
       } else {
         if(msg){msg.style.color='#ff6262';msg.textContent=res.data.error==='not_setup'?'Login not set up yet':'Wrong password';}
@@ -8075,7 +8145,7 @@ function hccSection(id, btn) {
     if (!window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
     loadUtilities(); loadCameras(); loadHomeStatus(); loadClimate(); loadStation();
   }
-  if (id === 'guardian') { loadGuardian(); loadLights(); loadGarage(); loadVacuum(); }
+  if (id === 'guardian') { loadGuardian(); loadLights(); loadGarage(); loadMail(); loadVacuum(); }
   if (id === 'car') { carSwitchVehicle(_activeVehicle); }
   if (id === 'yard') { mowerSync(false); }
   if (id === 'weather') {
@@ -9307,7 +9377,7 @@ setTimeout(function() {
 setInterval(function(){
   mowerSync(false);
   loadClimate(); loadStation();
-  if (getHaToken()) { checkBeehive(false); loadCameras(); loadUtilities(); loadGuardian(); loadLights(); loadGarage(); loadVacuum(); loadCar(); }
+  if (getHaToken()) { checkBeehive(false); loadCameras(); loadUtilities(); loadGuardian(); loadLights(); loadGarage(); loadMail(); loadVacuum(); loadCar(); }
 }, 60000);
 setInterval(loadWeather, 5*60*1000);
 
@@ -9428,6 +9498,7 @@ function saveHaTokenInline() {
         loadGuardian();
         loadLights();
         loadGarage();
+        loadMail();
         loadVacuum();
         checkBeehive(false);
       } else { throw new Error('unexpected_response'); }
@@ -10729,6 +10800,152 @@ function loadVacuum(){
 //     sensor.gas_month    (utility_meter, monthly, ccf)
 //     sensor.gas_cost     (template, $ this month)
 //     sensor.electric_now / electric_today (DIY CT-clamp monitor, later)
+// MAILBOX -- 2026-08-27. Fed entirely by automation.hcc_mail_arrived_mailbox_door_opened,
+// which writes these helpers when binary_sensor.mailbox_contact opens. This function only READS.
+// Times are stored as MINUTES PAST MIDNIGHT in input_numbers because HA input_datetime cannot
+// hold a rolling average, and a template sensor would need a `template:` YAML include that this
+// Beehive does not have (see reference_ha_yaml_include_gap).
+function mailFmt(mins){
+  var m = Number(mins);
+  if (!isFinite(m) || m <= 0) return '--';
+  var h = Math.floor(m / 60), mm = Math.round(m % 60);
+  if (mm === 60) { mm = 0; h += 1; }
+  var ap = h >= 12 ? 'PM' : 'AM', h12 = h % 12; if (h12 === 0) h12 = 12;
+  return h12 + ':' + (mm < 10 ? '0' : '') + mm + ' ' + ap;
+}
+// GOT THE MAIL -- marks it collected so the card stops glowing. Deliberately does NOT touch the
+// average, the count or the history: he collected the mail, the carrier still delivered it.
+// automation.hcc_mail_arrived_mailbox_door_opened clears this flag on the next real delivery.
+function mailCollected(){
+  haFetch('/api/services/input_boolean/turn_on', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ entity_id: 'input_boolean.mail_collected' }) })
+  .then(function(){ setTimeout(loadMail, 800); })
+  .catch(function(){ alert('Couldn’t reach Beehive — mail not marked collected.'); });
+}
+function loadMail(){
+  var card = document.getElementById('mailCard');
+  var banner = document.getElementById('mailBanner');
+  var body = document.getElementById('mailBody');
+  var conn = document.getElementById('mailConn');
+  if (!getHaToken()){ if (card) card.style.display = 'none'; return; }
+  haFetch('/api/states', { signal: AbortSignal.timeout(25000) })
+    .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(states){
+      var by = {};
+      for (var i = 0; i < states.length; i++) by[states[i].entity_id] = states[i];
+      var last  = by['input_datetime.mail_last_arrived'];
+      var avg   = by['input_number.mail_average_minutes'];
+      var early = by['input_number.mail_earliest_minutes'];
+      var late  = by['input_number.mail_latest_minutes'];
+      var count = by['input_number.mail_sample_count'];
+      var recent= by['input_text.mail_recent_times'];
+      var box   = by['binary_sensor.mailbox_contact'];
+      var got   = by['input_boolean.mail_collected'];
+      if (!last){
+        if (banner){ banner.style.display = ''; banner.className = 'wx-banner wx-no';
+          banner.innerHTML = '&#128235; Mail tracking helpers not found in Beehive'; }
+        if (card) card.style.display = '';
+        return;
+      }
+      if (card) card.style.display = '';
+      if (banner) banner.style.display = 'none';
+      if (body) body.style.display = '';
+      if (conn){ conn.textContent = '● LIVE'; conn.style.color = 'var(--ok)'; }
+
+      var hero = document.getElementById('mailHero');
+      var icon = document.getElementById('mailIcon');
+      var head = document.getElementById('mailHeadline');
+      var sub  = document.getElementById('mailSub');
+
+      // "arrived today" is decided from the LOCAL date on the stored timestamp, not from a
+      // day-old sensor state -- the contact sensor is closed again seconds after the carrier leaves.
+      var arrivedToday = false, when = null;
+      try {
+        var raw = String(last.state || '').replace(' ', 'T');
+        when = new Date(raw);
+        if (!isNaN(when.getTime())){
+          var now = new Date();
+          arrivedToday = when.getFullYear() === now.getFullYear()
+                      && when.getMonth() === now.getMonth()
+                      && when.getDate() === now.getDate();
+        } else { when = null; }
+      } catch(e){ when = null; }
+
+      var openNow = box && String(box.state).toLowerCase() === 'on';
+      // Jeff, 2026-08-27: "figure out a way to determine whether it's us going to get the mail or
+      // if it's truly the mail lady." Two halves. The AUTOMATION half: only the FIRST open of the
+      // day is recorded and announced, so the carrier is what gets logged and Jeff walking out to
+      // the box later never counts as a second delivery. The APP half is this flag -- once he
+      // presses GOT THE MAIL the card stops shouting, without touching the average.
+      var collected = got && String(got.state).toLowerCase() === 'on';
+      var mailIsIn = (arrivedToday && !collected) || openNow;
+      if (hero) hero.className = mailIsIn ? 'is-here' : '';
+      // Restart the animation on every transition into "mail is in". Without the reflow the
+      // browser keeps the finished animation and the picture just appears flat.
+      var gotWrap = document.getElementById('mailGotWrap');
+      var gotImg  = document.getElementById('mailGotImg');
+      if (gotWrap){
+        var wasIn = gotWrap.getAttribute('data-in') === '1';
+        gotWrap.style.display = mailIsIn ? 'block' : 'none';
+        gotWrap.setAttribute('data-in', mailIsIn ? '1' : '0');
+        if (mailIsIn && !wasIn && gotImg){
+          gotImg.style.animation = 'none';
+          void gotImg.offsetWidth;
+          gotImg.style.animation = '';
+        }
+      }
+      if (openNow){
+        if (icon) icon.innerHTML = '&#128234;';
+        if (head){ head.textContent = 'MAILBOX IS OPEN'; head.style.color = 'var(--warn)'; }
+        if (sub) sub.textContent = 'The door is open right now.';
+      } else if (arrivedToday && !collected){
+        if (icon) icon.innerHTML = '&#128235;';
+        if (head){ head.textContent = 'MAIL HAS ARRIVED'; head.style.color = 'var(--ok)'; }
+        if (sub) sub.textContent = 'Delivered at ' + when.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+      } else if (arrivedToday && collected){
+        if (icon) icon.innerHTML = '&#128234;';
+        if (head){ head.textContent = 'MAIL COLLECTED'; head.style.color = 'var(--muted)'; }
+        if (sub) sub.textContent = 'Delivered at ' + when.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) + ' — you picked it up.';
+      } else {
+        if (icon) icon.innerHTML = '&#128236;';
+        if (head){ head.textContent = 'NO MAIL YET'; head.style.color = 'var(--muted)'; }
+        if (sub) sub.textContent = when
+          ? 'Last delivery ' + when.toLocaleDateString([], {month:'short', day:'numeric'})
+            + ' at ' + when.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})
+          : 'No delivery recorded yet.';
+      }
+
+      var gotBtn = document.getElementById('mailGotBtn');
+      if (gotBtn) gotBtn.style.display = (arrivedToday && !collected) ? '' : 'none';
+
+      var n = count ? Number(count.state) : 0;
+      var elAvg = document.getElementById('mailAvg');
+      var elEar = document.getElementById('mailEarliest');
+      var elLat = document.getElementById('mailLatest');
+      if (elAvg) elAvg.textContent = n > 0 && avg   ? mailFmt(avg.state)   : '--';
+      if (elEar) elEar.textContent = n > 0 && early ? mailFmt(early.state) : '--';
+      if (elLat) elLat.textContent = n > 0 && late  ? mailFmt(late.state)  : '--';
+
+      var rec = document.getElementById('mailRecent');
+      if (rec){
+        var txt = recent ? String(recent.state || '') : '';
+        if (txt === 'unknown' || txt === 'unavailable') txt = '';
+        // Say how thin the sample is instead of implying an average of 1 means anything.
+        var basis = n <= 0 ? 'No deliveries recorded yet — the averages fill in from the first one.'
+                  : n === 1 ? 'Based on 1 delivery — not an average yet.'
+                  : 'Based on ' + n + ' deliveries.';
+        rec.innerHTML = basis + (txt ? '<br>' + txt.replace(/&/g,'&amp;').replace(/</g,'&lt;') : '');
+      }
+      var note = document.getElementById('mailNote');
+      if (note) note.textContent = 'Live from Beehive';
+    })
+    .catch(function(){
+      if (card) card.style.display = '';
+      if (banner){ banner.style.display = ''; banner.className = 'wx-banner wx-no';
+        banner.innerHTML = '&#128235; Couldn’t reach Beehive'; }
+      if (conn){ conn.textContent = '● OFFLINE'; conn.style.color = 'var(--bad)'; }
+    });
+}
 function loadUtilities() {
   var WATER_BASE = 10.32, WATER_PER_GAL = 0.00908;
   var SEWER_BASE = 23.42, SEWER_PER_GAL = 0.01011; // City of WH rate increase confirmed 5/7-6/6/26 bill (was 22.74 / 0.00982)
