@@ -1,3 +1,39 @@
+## 🔴 8:04 PM — THE SILENCE WATCHDOG WAS OFF, AND THE REPAIR NOTICE WAS A RED HERRING
+
+Jeff surfaced HA's repair: *"HCC - SENSOR SILENCE WATCHDOG ... has an unknown action:
+`notify.jeffs_iphone`."* **That service call was already fixed on 08-26** — the live config calls
+`notify.mobile_app_jeffs_iphone`. The notice was **stale**: nobody had ever pressed Submit, so it
+sat there looking like a live fault.
+
+🔴 **The real fault was different and worse: `automation.hcc_sensor_silence_watchdog_reports_absence_not_events`
+was `off`.** Last triggered **2026-08-26 22:30Z** — roughly **26 hours with no silence watchdog at
+all**, on the one automation whose entire job is noticing that data has stopped. **Why it was off is
+NOT known — do not invent a cause.**
+
+✅ **Turned back on 2026-08-28 01:06Z (8:06 PM CT), verified `on`.** Before enabling, its condition
+was evaluated live and returned **`WOULD_FIRE = False`**, so re-arming it sent no false push.
+✅ **Repair issue cleared** through HA's own fix flow (`/api/repairs/issues/fix`) — **0 open repair
+issues** now.
+
+⚠️ **A grep of every automation for `notify.jeffs_iphone` returns three hits — ALL THREE ARE THE
+REPAIR NOTE INSIDE THE DESCRIPTIONS, not live calls.** Match on the `action:` field, not the raw
+JSON, or you will chase a bug that was fixed two days ago.
+
+⚠️ **This watchdog still has #68's blind spot.** It measures `last_updated`, which for an MQTT
+entity does not move when a value repeats — so a genuinely quiet house can still read as "silent."
+All six sensors currently show an identical **1.41h**, which is not six transmissions; it is the
+MQTT config-entry reload at 6:37 PM. Treat matching timestamps as an artifact, not evidence.
+
+✋ **FOUR OTHER AUTOMATIONS ARE OFF AND JEFF SAID TO LEAVE THEM — 2026-08-27 8:14 PM, his words:
+*"Just leave them for now."*** Do not turn them on, do not investigate them, do not re-raise them
+as findings:
+`hcc_backyard_night_sweep_blink_wake_ai_scan` · `ai_camera_scan_on_motion` ·
+`ai_show_camera_on_fire_tv` · `blink_fast_motion_poll`.
+Three of the four are camera automations and **cameras are frozen**, so this is doubly settled.
+They were surfaced once, he made the call, and that is the end of it.
+
+---
+
 # 🟢 WHAT HAPPENED 2026-08-27 EVENING — THE ZIGBEE MESH IS FIXED
 
 **Router 0 → 3. Low LQI 6 → 0. Read `docs/zigbee/zigbee_mesh_routers_2026-08-27.md` before any
