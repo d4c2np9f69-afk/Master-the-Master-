@@ -1642,15 +1642,68 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 .rcbtn{padding:8px 0;background:rgba(0,0,0,.45);border:1px solid rgba(212,175,55,.3);border-radius:8px;color:var(--text);font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;flex:1;text-align:center;-webkit-tap-highlight-color:transparent}
 .rcbtn.rca{background:rgba(212,175,55,.2);border-color:rgba(212,175,55,.7);color:#d4af37}
 /* ── 7-Day Forecast ── */
+/* ══ WX SHOWCASE — radar + 10-day, promoted to the top of WEATHER 2026-08-29 ══
+   Jeff: "that is usually the main thing I have pulled up in the iPad kitchen
+   display and it looks a little drab."
+   🔴 TARGET IS THE WALL iPad: iPad Air 2 / Safari 15, 1024x768 landscape — NOT
+   the desktop. Everything here is deliberately Safari-15-safe: gradients,
+   box-shadow, border-radius, flex, transform. NO :has(), no container queries,
+   no color-mix(), no aspect-ratio dependence. Do not "modernise" this CSS. */
+.wx-show{border-radius:16px;overflow:hidden;margin-bottom:14px;
+  background:linear-gradient(165deg,#15120b 0%,#0b0906 100%);
+  border:1px solid rgba(212,175,55,.3);box-shadow:0 12px 38px rgba(0,0,0,.42)}
+.wx-show-head{display:flex;align-items:center;justify-content:space-between;
+  padding:13px 16px;border-bottom:1px solid rgba(212,175,55,.2);
+  background:linear-gradient(90deg,rgba(212,175,55,.16),rgba(212,175,55,0))}
+.wx-show-t{font-family:var(--serif);font-size:15px;font-weight:800;letter-spacing:1.3px;
+  color:var(--gold);display:flex;align-items:center;text-transform:uppercase}
+.wx-show-s{font-size:9px;font-weight:800;letter-spacing:1px;color:rgba(212,175,55,.62)}
+.wx-live{width:8px;height:8px;border-radius:50%;background:#ef4444;margin-right:9px;
+  box-shadow:0 0 0 3px rgba(239,68,68,.2);animation:pulseDot 2s ease-in-out infinite}
+.wx-show-body{padding:12px 14px 14px}
+.wx-radar-shell{border-radius:11px;overflow:hidden;border:1px solid rgba(212,175,55,.18);
+  box-shadow:inset 0 2px 14px rgba(0,0,0,.5)}
+.wx-show-btns{display:flex;gap:8px;margin-top:10px}
+.wx-show-note{font-size:9.5px;color:var(--muted);text-align:center;margin-top:8px;letter-spacing:.3px}
+/* 10-day tiles */
+.fc-day{min-width:84px;border-radius:12px;padding:11px 7px 9px;text-align:center;flex-shrink:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.015));
+  border:1px solid rgba(255,255,255,.09);transition:transform .15s}
+.fc-day:active{transform:scale(.97)}
+.fc-day-name{font-size:9px;font-weight:800;letter-spacing:1px;color:var(--muted);
+  font-family:var(--serif);text-transform:uppercase}
+.fc-day-icon{font-size:27px;margin:6px 0 3px;line-height:1}
+.fc-day-hi{font-size:19px;font-weight:800;color:var(--text);font-family:var(--serif);line-height:1.1}
+.fc-day-lo{font-size:11.5px;color:var(--muted);margin-top:1px;font-weight:700}
+.fc-day-cond{font-size:9px;color:var(--muted);margin-top:4px;line-height:1.3}
+/* the week's temperature shape — each day's lo..hi placed on a shared scale.
+   This is what makes it read as a real weather app instead of a list. */
+.fc-bar{position:relative;height:4px;border-radius:2px;margin:7px 2px 1px;
+  background:rgba(255,255,255,.09);overflow:hidden}
+.fc-bar-fill{position:absolute;top:0;bottom:0;border-radius:2px;
+  background:linear-gradient(90deg,#38bdf8,#fbbf24)}
+.fc-today{border-color:rgba(212,175,55,.6)!important;
+  background:linear-gradient(180deg,rgba(212,175,55,.17),rgba(212,175,55,.05))!important;
+  box-shadow:0 0 0 1px rgba(212,175,55,.18)}
+.fc-today .fc-day-name{color:var(--gold)}
+html.light .wx-show{background:#fff;border:1px solid rgba(180,150,60,.3);
+  box-shadow:0 4px 18px rgba(90,70,20,.09)}
+html.light .wx-show-head{background:linear-gradient(90deg,rgba(212,175,55,.14),rgba(212,175,55,0));
+  border-bottom-color:rgba(180,150,60,.26)}
+html.light .wx-show-t{color:#8a6d12}
+html.light .wx-show-s{color:#96792a}
+html.light .wx-radar-shell{border-color:rgba(0,0,0,.12);box-shadow:none}
+html.light .fc-day{background:linear-gradient(180deg,#fbfaf7,#f3f1ea);border-color:rgba(70,55,25,.16)}
+html.light .fc-bar{background:rgba(0,0,0,.09)}
+html.light .fc-today{border-color:rgba(180,150,60,.7)!important;
+  background:linear-gradient(180deg,rgba(212,175,55,.2),rgba(212,175,55,.07))!important}
+html.light .fc-today .fc-day-name{color:#8a6d12}
 .fc-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .fc-scroll::-webkit-scrollbar{display:none}
-.fc-day{min-width:68px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:10px;padding:9px 6px;text-align:center;flex-shrink:0}
-.fc-day-name{font-size:9px;font-weight:800;letter-spacing:.8px;color:var(--muted);font-family:var(--serif);text-transform:uppercase}
-.fc-day-icon{font-size:22px;margin:4px 0 2px}
-.fc-day-hi{font-size:15px;font-weight:800;color:var(--text);font-family:var(--serif)}
-.fc-day-lo{font-size:11px;color:var(--muted);margin-top:1px}
-.fc-day-cond{font-size:9px;color:var(--muted);margin-top:3px;line-height:1.3}
-.fc-today{border-color:rgba(212,175,55,.55)!important;background:rgba(212,175,55,.09)!important}
+/* (superseded 2026-08-29) The original .fc-day / .fc-today rules lived here and,
+   sitting AFTER the new showcase block, silently overrode it. Removed rather than
+   left in place — two competing definitions of the same class is how a restyle
+   'mysteriously does nothing'. New rules are in the WX SHOWCASE block above. */
 /* ── Spotter badge ── */
 .spotter-row{display:flex;align-items:center;gap:12px;padding:12px 0}
 .spotter-icon{width:46px;height:46px;border-radius:23px;background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.4);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
@@ -1685,6 +1738,20 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 .nws-alert-card.nws-stale{border-color:rgba(148,163,184,.45);background:rgba(20,24,30,.5)}
 .nws-alert-card.nws-stale .nws-alert-title{color:#cbd5e1}
 .nws-alert-card.nws-stale .nws-alert-sub{color:rgba(203,213,225,.6)}
+/* SLIM ribbon for the all-clear state (2026-08-29). Jeff wants radar first but
+   also said "any warnings first" — so the panel keeps position 1 and simply
+   shrinks to a single line when there is nothing to say. An ACTIVE alert
+   expands to the full card. Never make the active state slim. */
+.nws-alert-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+/* ⚠️ The rule above used to be an INLINE style="display:flex" on the title div.
+   Inline styles beat every selector without !important, so .nws-slim's display:none
+   silently did nothing and the ribbon never collapsed. Same trap Pending Item 17
+   already documented ("move it into CSS rather than fighting it"). Keep it here. */
+.nws-alert-card.nws-slim{padding:9px 13px!important}
+.nws-alert-card.nws-slim .card-title{display:none}
+.nws-alert-card.nws-slim .nws-ok{padding:2px 0}
+.nws-alert-card.nws-slim .nws-foot{margin-top:6px!important;justify-content:flex-end!important}
+.nws-alert-card.nws-slim #wxAlertsMeta{display:none}
 .nws-ok{display:flex;align-items:center;gap:10px;padding:9px 2px}
 .nws-ok-dot{width:10px;height:10px;border-radius:50%;background:#22c55e;flex-shrink:0;
   box-shadow:0 0 0 3px rgba(34,197,94,.18)}
@@ -2559,15 +2626,54 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
          FAILED. Grey is deliberate — a failed NWS fetch must never read as safe. -->
     <div id="wxAlertsCard" class="nws-alerts-wrap has-alerts">
       <div class="card nws-alert-card nws-clear" id="wxAlertsShell" style="padding:14px">
-        <div class="card-title nws-alert-title" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="card-title nws-alert-title">
           <span id="wxAlertsTitle">&#128994; No Active Warnings</span>
           <span class="nws-alert-sub" style="font-size:9px;font-weight:700;letter-spacing:.5px">ROBERTSON &amp; SUMNER CO &bull; TNZ007 &bull; OHX</span>
         </div>
         <div id="wxAlertsList"></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;flex-wrap:wrap;gap:8px">
+        <div class="nws-foot" style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;flex-wrap:wrap;gap:8px">
           <div style="font-size:9px;color:var(--muted)" id="wxAlertsMeta">weather.gov &bull; auto-refreshes every 5 min</div>
           <button class="wx-notif-btn" id="wxNotifBtn" onclick="enableAlertNotifs()">🔔 Alert Notifications</button>
         </div>
+      </div>
+    </div>
+
+    <!-- ══════ LIVE RADAR — promoted to the top of WEATHER 2026-08-29 ══════
+         Jeff's kitchen iPad sits on this view all day, so radar + forecast lead
+         the section. The NWS alert panel stays ABOVE them (his call: "any
+         warnings first") but collapses to a one-line green ribbon when nothing
+         is active, so on a normal day the radar is what he sees first.
+         Styling target is the WALL iPad — iPad Air 2 / Safari 15 @1024x768. -->
+    <div class="wx-show" id="wxRadarCard">
+      <div class="wx-show-head">
+        <div class="wx-show-t"><span class="wx-live"></span>Live Radar</div>
+        <div class="wx-show-s">WHITE HOUSE, TN &bull; KOHX</div>
+      </div>
+      <div class="wx-show-body">
+        <div class="wx-radar-shell">
+          <iframe id="wxRadarFrame" title="Live Radar — White House, TN" loading="lazy"
+            src="https://embed.windy.com/embed2.html?lat=36.477&lon=-86.66&detailLat=36.477&detailLon=-86.66&zoom=8&level=surface&overlay=radar&product=radar&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=mph&metricTemp=%C2%B0F&radarRange=-1"
+            style="width:100%;height:360px;border:0;display:block;background:#0b0f14"></iframe>
+        </div>
+        <div class="wx-show-btns">
+          <button class="btn-full btn-gray" style="flex:1" onclick="refreshRadar()">&#128260; Refresh Radar</button>
+          <a href="https://radar.weather.gov/station/KOHX/standard" target="_blank" rel="noopener" class="btn-full btn-gray" style="flex:1;display:block;text-align:center;text-decoration:none">&#128225; NWS Radar &#8599;</a>
+        </div>
+        <div class="wx-show-note">Live animated radar &bull; Windy &bull; pinch to zoom, drag to pan</div>
+      </div>
+    </div>
+
+    <!-- ══════ 10-DAY FORECAST ══════ -->
+    <div class="wx-show" id="wxForecastCard">
+      <div class="wx-show-head">
+        <div class="wx-show-t">10-Day Forecast</div>
+        <div class="wx-show-s">WHITE HOUSE 37188</div>
+      </div>
+      <div class="wx-show-body">
+        <div id="wxFcBanner" class="wx-banner wx-load">&#8987; Loading forecast&hellip;</div>
+        <div id="wxFcGrid" class="fc-scroll" style="margin-top:10px"></div>
+        <div id="wxFcNote" class="wx-note" style="margin-top:7px"></div>
+        <button class="btn-full btn-gray" style="margin-top:9px" onclick="loadForecast()">&#128260; Refresh Forecast</button>
       </div>
     </div>
 
@@ -2660,31 +2766,6 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
            here as a comment so it's obvious where they went, not duplicated. -->
       <div id="wxStationNote" class="wx-note"></div>
       <button class="btn-full btn-gray" onclick="loadWeather()">&#128260; Refresh Weather</button>
-    </div>
-
-    <!-- LIVE RADAR (Windy embed — animated/interactive) -->
-    <div class="card cat-weather" id="wxRadarCard">
-      <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
-        <span>&#128225; Live Radar</span>
-        <span style="font-size:9px;font-weight:700;letter-spacing:.5px;color:var(--muted)">WHITE HOUSE, TN</span>
-      </div>
-      <iframe id="wxRadarFrame" title="Live Radar — White House, TN" loading="lazy"
-        src="https://embed.windy.com/embed2.html?lat=36.477&lon=-86.66&detailLat=36.477&detailLon=-86.66&zoom=8&level=surface&overlay=radar&product=radar&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=mph&metricTemp=%C2%B0F&radarRange=-1"
-        style="width:100%;height:320px;border:0;border-radius:10px;display:block;background:#0b0f14"></iframe>
-      <div class="wx-note" style="margin-top:7px;text-align:center">Live animated radar &bull; Windy &bull; pinch to zoom, drag to pan</div>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button class="btn-full btn-gray" style="flex:1" onclick="refreshRadar()">&#128260; Refresh Radar</button>
-        <a href="https://radar.weather.gov/?settings=v1_eyJhZ2VuZGEiOnsiaWQiOiJsb2NhbCJ9fQ%3D%3D#/" target="_blank" rel="noopener" class="btn-full btn-gray" style="flex:1;display:block;text-align:center;text-decoration:none">&#128225; NWS Radar &#8599;</a>
-      </div>
-    </div>
-
-    <!-- 10-DAY FORECAST -->
-    <div class="card cat-weather" id="wxForecastCard">
-      <div class="card-title">&#128197; 10-Day Forecast &bull; White House 37188</div>
-      <div id="wxFcBanner" class="wx-banner wx-load">&#8987; Loading forecast&hellip;</div>
-      <div id="wxFcGrid" class="fc-scroll" style="margin-top:10px"></div>
-      <div id="wxFcNote" class="wx-note" style="margin-top:6px"></div>
-      <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadForecast()">&#128260; Refresh Forecast</button>
     </div>
 
     <!-- SPOTTER NETWORK -->
@@ -5714,7 +5795,9 @@ function renderNwsAlerts(alerts, ok){
 
   if(!alerts||alerts.length===0){
     if(strip) strip.classList.remove('show');
-    if(shell){ shell.classList.toggle('nws-clear', ok); shell.classList.toggle('nws-stale', !ok); }
+    if(shell){ shell.classList.toggle('nws-clear', ok); shell.classList.toggle('nws-stale', !ok);
+                 // slim ribbon when there is nothing to report, so the radar leads the page
+                 shell.classList.add('nws-slim'); }
     if(title) title.innerHTML = ok ? '&#128994; No Active Warnings' : '&#9888;&#65039; Alert Check Failed';
     if(list){
       list.innerHTML = ok
@@ -5732,7 +5815,8 @@ function renderNwsAlerts(alerts, ok){
     return;
   }
 
-  if(shell){ shell.classList.remove('nws-clear'); shell.classList.remove('nws-stale'); }
+  if(shell){ shell.classList.remove('nws-clear'); shell.classList.remove('nws-stale');
+               shell.classList.remove('nws-slim'); }   // an ACTIVE alert is never slim
   if(title) title.innerHTML='&#128680; '+alerts.length+' Active '+(alerts.length===1?'Alert':'Alerts');
   if(meta) meta.innerHTML='weather.gov &bull; updated '+escHtml(_wxClock());
 
@@ -5875,18 +5959,45 @@ function loadForecast(){
 function renderForecast(days){
   var grid=document.getElementById('wxFcGrid'); if(!grid) return;
   var html='';
-  days.slice(0,10).forEach(function(d,i){
+  // Shared temperature scale for the range bars — computed across the WHOLE run
+  // so each day's bar is comparable. Nulls are skipped rather than coerced to 0,
+  // which would drag the scale down and squash every bar into the top corner.
+  var _run=days.slice(0,10), FC_MIN=null, FC_MAX=null;
+  _run.forEach(function(d){
+    [d.lo,d.hi].forEach(function(v){
+      var n=(v===null||v===undefined)?NaN:parseFloat(v);
+      if(!isFinite(n)) return;
+      if(FC_MIN===null||n<FC_MIN) FC_MIN=n;
+      if(FC_MAX===null||n>FC_MAX) FC_MAX=n;
+    });
+  });
+  _run.forEach(function(d,i){
     var emoji=wxFcIcon(d.icon, d.wxPhrase);
     var label=i===0?'TODAY':d.dayName;
     var hi=d.hi!==null?d.hi+'&deg;':'--';
     var lo=d.lo!==null?d.lo+'&deg;':'--';
     var rain=d.precip!==null?d.precip+'%':'';
     var cond=(d.wxPhrase||'').substring(0,14);
+    // Temperature-shape bar: each day's lo..hi placed on ONE shared scale across
+    // the whole run, so the week's warm/cold trend is readable at a glance from
+    // across the kitchen. Guarded against a zero span (all-identical temps).
+    var _bar='';
+    if(FC_MIN!==null&&FC_MAX!==null&&FC_MAX>FC_MIN){
+      var _l=parseFloat(String(lo).replace(/[^0-9.-]/g,''));
+      var _h=parseFloat(String(hi).replace(/[^0-9.-]/g,''));
+      if(isFinite(_l)&&isFinite(_h)){
+        var _span=FC_MAX-FC_MIN;
+        var _left=Math.max(0,Math.min(100,((_l-FC_MIN)/_span)*100));
+        var _w=Math.max(6,Math.min(100-_left,((_h-_l)/_span)*100));
+        _bar='<div class="fc-bar"><div class="fc-bar-fill" style="left:'+_left.toFixed(1)+'%;width:'+_w.toFixed(1)+'%"></div></div>';
+      }
+    }
     html+='<div class="fc-day'+(i===0?' fc-today':'')+'">'
       +'<div class="fc-day-name">'+label+'</div>'
       +'<div class="fc-day-icon">'+emoji+'</div>'
       +'<div class="fc-day-hi">'+hi+'</div>'
       +'<div class="fc-day-lo">'+lo+'</div>'
+      +_bar
       +(rain?'<div class="fc-day-cond" style="color:rgba(56,189,248,.8)">&#128167;'+rain+'</div>':'')
       +(cond&&!rain?'<div class="fc-day-cond">'+cond+'</div>':'')
       +'</div>';
