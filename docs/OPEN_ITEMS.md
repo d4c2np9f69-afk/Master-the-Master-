@@ -1193,3 +1193,21 @@ Stub `window.fetch` inside the page instead. **Do not "fix" app code to satisfy 
 ✋ **NOT DEPLOYED.** These are working-tree changes to `index.html`, `functions/api/alerts.js` and a
 new `scripts/weather-emergency-test.js`. The app only goes live on a push to
 `claude/time-master-project-liq1jw`. Jeff's call.
+
+---
+
+## 🔴 MY MISS — THE NIGHT WATCH RAN 10 HOURS AND NEVER SAW THE DEAD VACUUM (#94–#95)
+
+**Jeff, 2026-08-29 07:32: *"Why didn't all that show in your report I thought you were watching
+everything for failures wasn't that the whole point of the night watch ???"* He is right.**
+
+| # | Item | Owner | Age | Notes |
+|---|---|---|---|---|
+| 94 | 🔴 **THE WATCHER WAS SCOPED TO ONE PLATFORM AND ITS OUTPUT SAID "ALL CLEAR" ANYWAY.** `nightwatch.py` check #2 read *"any MQTT-platform entity unavailable"*. **Sharky is TUYA.** It went unavailable **08-28 18:34:07** and every tick from **21:16 through 07:25** printed ALL CLEAR over the top of it. **Measured after the fact: the watcher covered 4 of the 89 unavailable entities in the house.** Jeff found his own dead vacuum ~13 h later, which is precisely the thing the watch existed to prevent. | 🔴 CLAUDE | found by JEFF 08-29 | 🔴 **THIS IS THE THIRD INSTANCE OF THE SAME BUG CLASS IN ONE SESSION, AND I HAD JUST CRITICISED THE OTHER TWO.** `smoke-test.js` is scoped to `#section-yard` and reported *374 links / 0 bad* while testing none of the weather work; `contrast-check.js` is scoped to the Conditions card and reported *0 NEW* while 16 contrast failures existed. I named both as the green-component trap, then shipped a watcher with the same flaw. **A narrow check may only report a narrow verdict — "ALL CLEAR" was the wrong words for "the 7 things I chose to look at are fine."** |
+| 95 | ✅ **FIXED — the watcher now checks EVERY entity against a documented baseline.** Anything unavailable that is not explicitly baselined is reported, grouped by device so 20 dead Sharky entities read as one fault rather than 20 lines. Baseline holds only genuinely-normal states, each with its reason: sleeping phones, the Alexa virtual groups from the 08-19 cleanup, the two PC Alexa apps, the Mercedes between trips, idle AI scanners, Blink wake-only sensors. **Verified: the fixed script immediately reports `FAULT sharky 20 entities unavailable (772 min)`** — i.e. it would have caught this on the first tick. | ✅ CLAUDE 08-29 | — | ⚠️ **The script is in the session scratchpad, not the repo — it dies with this session.** The DURABLE fix is HA-side: `automation.hcc_watchdog_integration_down_alert` currently watches only `media_player.fire_tv_viewing_room`, the Mercedes engine-light sensor and an Alexa entity. **`vacuum.sharky` is not in it, and neither is anything else that matters.** Adding to that list is the real repair — NOT YET DONE, needs Jeff's nod on which devices are worth a phone alert. |
+
+### The rule this earns
+🔴 **Before reporting a monitoring result, state what the check DID NOT cover.** A watcher that
+prints a clean verdict without naming its own scope is worse than no watcher, because it converts
+"nobody looked" into "everything is fine." If the scope cannot be stated in one line, the check is
+too narrow to be reported as a verdict.

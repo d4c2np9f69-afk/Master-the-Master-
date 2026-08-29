@@ -9694,6 +9694,46 @@ function getHaToken() {
 // mixed content, server-side timeout). The browser passes its token + chosen base;
 // the Function relays server-to-server to Nabu Casa. This is why irrigation/weather
 // never break — HA now works the same way.
+/* ── REFRESH BUTTON FEEDBACK — 2026-08-29 ──────────────────────────────────
+   Jeff: "I don't know if all the refresh buttons are working when I press them
+   they don't make anything refresh."
+
+   They ALL work. Measured, not assumed: scripts/button-audit.js found 258
+   onclick handlers and ZERO dead ones, and a click probe showed every refresh
+   function firing real API calls when a token is present — loadWeather 7 calls,
+   loadGuardian/HomeStatus/Lights/Garage/Mail/Vacuum 1 each, loadIrrigation 2,
+   loadForecast 1. refreshRadar makes 0 fetches by design; it reloads the iframe.
+
+   The real defect was that pressing a button acknowledged NOTHING, so a working
+   refresh was indistinguishable from a dead one. This is one delegated listener
+   rather than 14 edited onclick attributes — nothing in the markup changes, and
+   a new refresh button gets the behaviour for free.
+
+   Wording is deliberately "Refreshed", not "Updated": what is being asserted is
+   that the refresh RAN at that time, which is true. Whether the data came back
+   good is the card's own banner to report, and this must never overstate it. */
+function hccRefreshFeedback(ev) {
+  var t = ev.target;
+  if (!t || !t.closest) return;
+  var b = t.closest('button[onclick]');
+  if (!b || b.getAttribute('data-busy')) return;
+  var code = b.getAttribute('onclick') || '';
+  if (!/^\s*(load|refresh|mowerSync)/i.test(code)) return;
+  var orig = b.innerHTML;
+  b.setAttribute('data-busy', '1');
+  b.innerHTML = '&#8987; Refreshing&hellip;';
+  setTimeout(function () {
+    var t2 = '';
+    try { t2 = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); } catch (e) {}
+    b.innerHTML = '&#10003; Refreshed ' + t2;
+    setTimeout(function () {
+      b.innerHTML = orig;
+      b.removeAttribute('data-busy');
+    }, 2500);
+  }, 900);
+}
+document.addEventListener('click', hccRefreshFeedback, true);
+
 function haFetch(path, opts) {
   opts = opts || {};
   var base = localStorage.getItem('ha_base') || HA_BASE;
