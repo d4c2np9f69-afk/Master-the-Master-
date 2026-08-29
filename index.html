@@ -1673,6 +1673,63 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 .nws-alert-card{border-color:rgba(239,68,68,.45);background:rgba(40,0,0,.4)}
 .nws-alert-title{color:#fca5a5}
 .nws-alert-sub{color:rgba(252,165,165,.55)}
+/* ── ALL-CLEAR state (2026-08-29) ──
+   The card used to be display:none whenever nothing was active, so on a calm day
+   the WEATHER section looked like it had no emergency feature at all. It is now
+   always visible: green when clear, red when not, GREY when the check FAILED.
+   The grey state matters — "we could not reach NWS" must never look like
+   "nothing is wrong". */
+.nws-alert-card.nws-clear{border-color:rgba(34,197,94,.4);background:rgba(0,32,12,.34)}
+.nws-alert-card.nws-clear .nws-alert-title{color:#4ade80}
+.nws-alert-card.nws-clear .nws-alert-sub{color:rgba(74,222,128,.6)}
+.nws-alert-card.nws-stale{border-color:rgba(148,163,184,.45);background:rgba(20,24,30,.5)}
+.nws-alert-card.nws-stale .nws-alert-title{color:#cbd5e1}
+.nws-alert-card.nws-stale .nws-alert-sub{color:rgba(203,213,225,.6)}
+.nws-ok{display:flex;align-items:center;gap:10px;padding:9px 2px}
+.nws-ok-dot{width:10px;height:10px;border-radius:50%;background:#22c55e;flex-shrink:0;
+  box-shadow:0 0 0 3px rgba(34,197,94,.18)}
+.nws-ok-txt{font-size:12px;font-weight:700;color:#4ade80;font-family:var(--serif);line-height:1.4}
+.nws-ok-sub{font-size:10px;color:var(--muted);margin-top:2px;font-weight:600}
+.nws-stale .nws-ok-dot{background:#94a3b8;box-shadow:0 0 0 3px rgba(148,163,184,.18)}
+.nws-stale .nws-ok-txt{color:#cbd5e1}
+/* "What to do" — NWS's own instruction text, the part the radio reads aloud */
+.nws-instr{margin-top:7px;padding:9px 11px;border-radius:8px;background:rgba(0,0,0,.28);
+  border:1px solid rgba(255,255,255,.09)}
+.nws-instr-h{font-size:9px;font-weight:800;letter-spacing:.7px;opacity:.75;margin-bottom:4px}
+.nws-instr-b{font-size:11px;line-height:1.5;white-space:pre-wrap}
+html.light .nws-alert-card.nws-clear{background:#fff;border:1px solid rgba(34,197,94,.35);
+  box-shadow:0 2px 10px rgba(20,120,60,.06)}
+html.light .nws-alert-card.nws-clear .nws-alert-title{color:#15803d}
+html.light .nws-alert-card.nws-clear .nws-alert-sub{color:rgba(21,128,61,.65)}
+html.light .nws-ok-txt{color:#15803d}
+html.light .nws-alert-card.nws-stale{background:#fff;border:1px solid rgba(100,116,139,.35);box-shadow:none}
+html.light .nws-alert-card.nws-stale .nws-alert-title,
+html.light .nws-stale .nws-ok-txt{color:#475569}
+html.light .nws-instr{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.1)}
+/* ── Emergency audio / links (replaced the dead TuneIn NOAA button 08-29) ──
+   🔴 COLOURS ARE CLASSES, NOT INLINE HEX, ON PURPOSE.
+   First cut used inline bright hex (#38bdf8 etc). Measured in both themes:
+   DARK was fine at 6-9:1 but LIGHT mode gave SIXTEEN failures, worst 1.57:1 —
+   the green was effectively invisible on the white card. That is exactly the
+   Pending-Item-17 bug class this project already paid to fix once.
+   Every colour below therefore has an html.light override. If you add a button,
+   use one of these classes — do NOT inline a hex. */
+.emg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:8px}
+.emg-btn{display:block;text-align:center;text-decoration:none;padding:11px 8px;border-radius:9px;
+  font-size:11.5px;font-weight:800;font-family:inherit;cursor:pointer;line-height:1.3}
+.emg-sub{display:block;font-size:9px;font-weight:600;opacity:.75;margin-top:2px;letter-spacing:.2px}
+.emg-h{font-size:9px;font-weight:800;letter-spacing:.9px;color:var(--muted);margin:13px 0 0}
+.emg-h:first-of-type{margin-top:6px}
+.emg-blue  {background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.35);color:#38bdf8}
+.emg-red   {background:rgba(239,68,68,.12); border:1px solid rgba(239,68,68,.35); color:#fca5a5}
+.emg-green {background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.35); color:#4ade80}
+.emg-purple{background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.35);color:#a78bfa}
+.emg-amber {background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);color:#fbbf24}
+html.light .emg-blue  {background:rgba(2,132,199,.07); border-color:rgba(2,132,199,.35); color:#0369a1}
+html.light .emg-red   {background:rgba(185,28,28,.06); border-color:rgba(185,28,28,.32); color:#b91c1c}
+html.light .emg-green {background:rgba(21,128,61,.06); border-color:rgba(21,128,61,.32); color:#15803d}
+html.light .emg-purple{background:rgba(109,40,217,.06);border-color:rgba(109,40,217,.3); color:#6d28d9}
+html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,14,.3);  color:#92400e}
 /* ── Alert badge dot on nav ── */
 .wx-alert-dot{position:absolute;top:5px;right:7px;width:8px;height:8px;border-radius:50%;background:#ef4444;display:none;box-shadow:0 0 0 2px var(--bg),0 0 8px rgba(239,68,68,.9);animation:pulseDot 2s ease-in-out infinite}
 .wx-alert-dot.show{display:block}
@@ -2495,18 +2552,104 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
 
   <div class="content">
 
-    <!-- NWS ACTIVE ALERTS — shown only when alerts are active -->
-    <div id="wxAlertsCard" class="nws-alerts-wrap">
-      <div class="card nws-alert-card" style="padding:14px">
+    <!-- NWS ACTIVE ALERTS — ALWAYS VISIBLE as of 2026-08-29.
+         It used to be display:none unless an alert was active, which is why the
+         WEATHER section never felt like an emergency page on a normal day.
+         Three states now: green ALL CLEAR, red/orange active alert, grey CHECK
+         FAILED. Grey is deliberate — a failed NWS fetch must never read as safe. -->
+    <div id="wxAlertsCard" class="nws-alerts-wrap has-alerts">
+      <div class="card nws-alert-card nws-clear" id="wxAlertsShell" style="padding:14px">
         <div class="card-title nws-alert-title" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <span>🚨 NWS Active Alerts</span>
-          <span class="nws-alert-sub" style="font-size:9px;font-weight:700;letter-spacing:.5px">Robertson &amp; Sumner Co &bull; TN</span>
+          <span id="wxAlertsTitle">&#128994; No Active Warnings</span>
+          <span class="nws-alert-sub" style="font-size:9px;font-weight:700;letter-spacing:.5px">ROBERTSON &amp; SUMNER CO &bull; TNZ007 &bull; OHX</span>
         </div>
         <div id="wxAlertsList"></div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;flex-wrap:wrap;gap:8px">
-          <div style="font-size:9px;color:var(--muted)">weather.gov &bull; auto-refreshes every 5 min</div>
+          <div style="font-size:9px;color:var(--muted)" id="wxAlertsMeta">weather.gov &bull; auto-refreshes every 5 min</div>
           <button class="wx-notif-btn" id="wxNotifBtn" onclick="enableAlertNotifs()">🔔 Alert Notifications</button>
         </div>
+      </div>
+    </div>
+
+    <!-- EMERGENCY AUDIO & OFFICIAL LINKS — 2026-08-29.
+         Replaced the dead "NOAA Radio" TuneIn button, which had turned into a
+         paid-app landing page. Every link below was tested this session and
+         returned HTTP 200 free, no account.
+         ⚠️ WHY THERE IS NO IN-APP SCANNER AUDIO: Broadcastify's direct MP3
+         endpoints answer `401 You need to authenticate` (Icecast basic auth —
+         Premium only), so embedding them would rebuild the same paywall Jeff
+         just complained about. Their WEB PLAYER pages are free, so these are
+         link-outs on purpose, not laziness. Do not "improve" these into
+         <audio src> tags — they will 401. -->
+    <div class="card cat-weather" id="wxEmergencyCard">
+      <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+        <span>&#128680; Emergency Audio &amp; Info</span>
+        <span style="font-size:9px;font-weight:700;letter-spacing:.5px;color:var(--muted)">WHITE HOUSE, TN</span>
+      </div>
+
+      <div style="font-size:11px;color:var(--muted);line-height:1.5;margin:8px 0 2px">
+        When it hits the fan, start here. The warning panel above is the fastest,
+        most authoritative thing on this page &mdash; everything below is for finding out
+        <i>what is actually going on</i>. Every link was tested 2026-08-29 and is free.
+      </div>
+
+      <div class="emg-h">&#128226; IS TODAY DANGEROUS?</div>
+      <div class="emg-grid">
+        <a href="https://www.spc.noaa.gov/products/outlook/day1otlk.html" target="_blank" rel="noopener" class="emg-btn emg-amber">
+           &#127786; Severe Risk Today<span class="emg-sub">SPC Day 1 convective outlook</span></a>
+        <a href="https://www.weather.gov/ohx/" target="_blank" rel="noopener" class="emg-btn emg-green">
+           &#127760; NWS Nashville<span class="emg-sub">Office OHX &bull; hazards</span></a>
+        <a href="https://radar.weather.gov/station/KOHX/standard" target="_blank" rel="noopener" class="emg-btn emg-green">
+           &#128225; KOHX Radar<span class="emg-sub">Official NWS radar</span></a>
+        <a href="https://water.noaa.gov/" target="_blank" rel="noopener" class="emg-btn emg-green">
+           &#127754; Flood &amp; River<span class="emg-sub">NOAA water prediction</span></a>
+      </div>
+
+      <div class="emg-h">&#128225; LIVE SCANNER TRAFFIC &bull; YOUR AREA</div>
+      <div class="emg-grid">
+        <a href="https://www.broadcastify.com/listen/feed/42114" target="_blank" rel="noopener" class="emg-btn emg-blue">
+           &#128680; TN Highway Patrol<span class="emg-sub">+ TDOT HELP &bull; District 3</span></a>
+        <a href="https://www.broadcastify.com/listen/feed/34476" target="_blank" rel="noopener" class="emg-btn emg-blue">
+           &#128110; Sumner Co Sheriff<span class="emg-sub">Dispatch</span></a>
+        <a href="https://www.broadcastify.com/listen/feed/34511" target="_blank" rel="noopener" class="emg-btn emg-red">
+           &#128657; Sumner Co EMS<span class="emg-sub">Dispatch</span></a>
+        <a href="https://www.broadcastify.com/listen/feed/34573" target="_blank" rel="noopener" class="emg-btn emg-blue">
+           &#128677; Millersville PD<span class="emg-sub">Nearest town dispatch</span></a>
+        <a href="https://www.broadcastify.com/listen/feed/34575" target="_blank" rel="noopener" class="emg-btn emg-blue">
+           &#128677; Portland PD<span class="emg-sub">Dispatch &bull; north of you</span></a>
+      </div>
+
+      <div class="emg-h">&#9889; LIFELINES &bull; POWER, ROADS, GROUND</div>
+      <div class="emg-grid">
+        <a href="https://outagemap.cemc.org/" target="_blank" rel="noopener" class="emg-btn emg-amber">
+           &#128161; CEMC Outage Map<span class="emg-sub">Your electric co-op &bull; live</span></a>
+        <a href="https://smartway.tn.gov/traffic" target="_blank" rel="noopener" class="emg-btn emg-amber">
+           &#128739; TDOT SmartWay<span class="emg-sub">Road closures &amp; cameras</span></a>
+        <a href="https://earthquake.usgs.gov/earthquakes/map/" target="_blank" rel="noopener" class="emg-btn emg-amber">
+           &#127755; USGS Quake Map<span class="emg-sub">New Madrid is our fault zone</span></a>
+        <a href="https://www.tn.gov/tema.html" target="_blank" rel="noopener" class="emg-btn emg-amber">
+           &#127963; TEMA<span class="emg-sub">TN Emergency Management</span></a>
+      </div>
+
+      <div class="emg-h">&#128251; RADIO &bull; WHEN THE NORMAL CHANNELS ARE GONE</div>
+      <div class="emg-grid">
+        <a href="https://radio.weatherusa.net/NWR/WXK63.mp3" target="_blank" rel="noopener" class="emg-btn emg-purple">
+           &#128251; NOAA Wx Radio<span class="emg-sub">&#9888; WXK63 Beechgrove &mdash; NOT your counties</span></a>
+        <a href="http://websdr.org/" target="_blank" rel="noopener" class="emg-btn emg-purple">
+           &#128225; WebSDR Receivers<span class="emg-sub">Ham/shortwave, live in browser</span></a>
+        <a href="https://rx.skywavelinux.com/" target="_blank" rel="noopener" class="emg-btn emg-purple">
+           &#128506; SDR Receiver Map<span class="emg-sub">2,000+ free radios worldwide</span></a>
+        <a href="https://www.ready.gov/" target="_blank" rel="noopener" class="emg-btn emg-purple">
+           &#128203; Ready.gov<span class="emg-sub">Federal preparedness guidance</span></a>
+      </div>
+
+      <div class="wx-note" style="margin-top:9px">
+        <b>Scanner feeds open Broadcastify's free web player</b> &mdash; free to listen, no account.
+        Their in-app audio stream needs a paid Premium account, so these are links rather than
+        built-in players. &bull; <b>KIG79</b>, the NOAA transmitter that actually covers White House,
+        has <b>no working free stream anywhere</b> (checked 08-29) &mdash; the NOAA button is
+        Beechgrove, which carries NWS Nashville forecasts but warnings for <b>Coffee/Bedford,
+        not your counties</b>. Trust the warning panel above, not that audio.
       </div>
     </div>
 
@@ -2568,9 +2711,13 @@ html.light .grd-light-toggle.on{background:rgba(21,128,61,.12);color:#15803d;bor
       </div>
       <div style="display:flex;gap:8px;margin-top:8px">
         <a href="https://apps.apple.com/us/app/mping/id584383400" target="_blank" rel="noopener" style="flex:1;text-align:center;text-decoration:none;padding:10px;background:rgba(249,115,22,.2);border:1px solid rgba(249,115,22,.5);border-radius:8px;color:#fb923c;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#127783; Report to mPING &#8599;</a>
-        <a href="https://tunein.com/radio/NOAA-Weather-Radio-16255-s95242/" target="_blank" rel="noopener" style="flex:1;text-align:center;text-decoration:none;padding:10px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.3);border-radius:8px;color:#a78bfa;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#128251; NOAA Radio &#9654;</a>
+        <a href="#wxEmergencyCard" onclick="var e=document.getElementById('wxEmergencyCard');if(e){e.scrollIntoView({behavior:'smooth',block:'center'});}return false;" style="flex:1;text-align:center;text-decoration:none;padding:10px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.3);border-radius:8px;color:#a78bfa;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer">&#128680; Emergency Audio</a>
       </div>
-      <div class="wx-note" style="margin-top:8px">NOAA Radio plays the free live KIG79 Nashville NOAA Weather Radio stream (162.550 MHz, covers White House) directly on TuneIn &bull; Spotter Network opens your spotter site &bull; Report to mPING opens the official NOAA app to submit precip reports</div>
+      <!-- 2026-08-29: the old button here pointed at TuneIn for KIG79 and had rotted
+           into a paid-app landing page. The claim it carried — "plays the free live
+           KIG79 stream" — was no longer true. KIG79 has no working free stream
+           anywhere (verified 08-29). It now jumps to the Emergency Audio card. -->
+      <div class="wx-note" style="margin-top:8px">Emergency Audio jumps to the scanner &amp; NWS card below &bull; Spotter Network opens your spotter site &bull; Report to mPING opens the official NOAA app to submit precip reports</div>
     </div>
 
     <!-- mPING REPORT — direct link to the official NOAA/OU mPING app (in-app submit is not permitted by NSSL) -->
@@ -5505,13 +5652,16 @@ function loadAlerts(){
     .then(function(r){return r.json();})
     .then(function(d){
       ALERTS=(d&&d.alerts)||[];
-      renderNwsAlerts(ALERTS);
+      // ok:false means we could NOT reach NWS. That must not render as ALL CLEAR —
+      // an unreachable warning service looking identical to a calm sky is exactly
+      // the failure this app has been burned by before.
+      renderNwsAlerts(ALERTS, !!(d&&d.ok));
       updateAlertBadge(ALERTS);
       checkAndNotify(ALERTS);
       if(typeof renderReadiness==='function') renderReadiness();
       if(typeof renderBurn==='function') renderBurn();
     })
-    .catch(function(){ ALERTS=[]; renderNwsAlerts([]); updateAlertBadge([]); });
+    .catch(function(){ ALERTS=[]; renderNwsAlerts([], false); updateAlertBadge([]); });
 }
 
 /* ===== NWS Alert rendering ===== */
@@ -5542,29 +5692,72 @@ function alertIcon(a){
   return '📢';
 }
 
-function renderNwsAlerts(alerts){
+function _wxClock(){
+  try { return new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}); }
+  catch(e){ return ''; }
+}
+
+function renderNwsAlerts(alerts, ok){
   var wrap=document.getElementById('wxAlertsCard');
+  var shell=document.getElementById('wxAlertsShell');
+  var title=document.getElementById('wxAlertsTitle');
+  var meta=document.getElementById('wxAlertsMeta');
   var list=document.getElementById('wxAlertsList');
   var strip=document.getElementById('homeAlertStrip');
   var stripText=document.getElementById('homeAlertText');
   if(!wrap) return;
+  if(ok===undefined) ok=true;
+
+  // The card is ALWAYS visible now (2026-08-29) — this is Jeff's emergency page,
+  // and a page that renders nothing on a calm day reads as broken.
+  wrap.classList.add('has-alerts');
+
   if(!alerts||alerts.length===0){
-    wrap.classList.remove('has-alerts');
     if(strip) strip.classList.remove('show');
+    if(shell){ shell.classList.toggle('nws-clear', ok); shell.classList.toggle('nws-stale', !ok); }
+    if(title) title.innerHTML = ok ? '&#128994; No Active Warnings' : '&#9888;&#65039; Alert Check Failed';
+    if(list){
+      list.innerHTML = ok
+        ? '<div class="nws-ok"><span class="nws-ok-dot"></span><div>'
+          +'<div class="nws-ok-txt">No watches, warnings or advisories for your location.</div>'
+          +'<div class="nws-ok-sub">Checked '+escHtml(_wxClock())+' &bull; National Weather Service, Nashville (OHX)</div>'
+          +'</div></div>'
+        : '<div class="nws-ok"><span class="nws-ok-dot"></span><div>'
+          +'<div class="nws-ok-txt">Could not reach the National Weather Service.</div>'
+          +'<div class="nws-ok-sub">This is NOT an all-clear &mdash; it means the check itself failed at '
+          +escHtml(_wxClock())+'. Use the NWS links below.</div>'
+          +'</div></div>';
+    }
+    if(meta) meta.innerHTML='weather.gov &bull; auto-refreshes every 5 min';
     return;
   }
-  wrap.classList.add('has-alerts');
+
+  if(shell){ shell.classList.remove('nws-clear'); shell.classList.remove('nws-stale'); }
+  if(title) title.innerHTML='&#128680; '+alerts.length+' Active '+(alerts.length===1?'Alert':'Alerts');
+  if(meta) meta.innerHTML='weather.gov &bull; updated '+escHtml(_wxClock());
+
   if(list){
     list.innerHTML=alerts.map(function(a){
       var cls=alertSeverityClass(a);
       var ico=alertIcon(a);
       var hl=(a.headline||'').replace(/^[^·—]*[·—]\s*/,'');
       if(!hl&&a.headline) hl=a.headline.substring(0,120);
+      // NWS's own instruction text — the literal "what to do" wording the weather
+      // radio reads aloud (TAKE COVER NOW, move to an interior room…). Falls back
+      // to the description when NWS sends no instruction, which it often does for
+      // advisories. Truncated so one long flood statement can't bury the rest.
+      var instr=(a.instruction||'').trim();
+      var body=instr||(a.description||'').trim();
+      var lbl=instr?'WHAT TO DO':'DETAILS';
+      var area=(a.area||'').trim();
       return '<div class="nws-alert-item '+cls+'">'
         +'<div class="nws-ae">'+ico+'<span>'+escHtml(a.event||'Alert')+'</span>'
         +'<span style="margin-left:auto;font-size:9px;letter-spacing:.5px;opacity:.7">'+escHtml((a.severity||'')+(a.urgency?' · '+a.urgency:''))+'</span>'
         +'</div>'
-        +(hl?'<div class="nws-ah">'+escHtml(hl.substring(0,140))+'</div>':'')
+        +(hl?'<div class="nws-ah">'+escHtml(hl.substring(0,180))+'</div>':'')
+        +(area?'<div class="nws-ah" style="opacity:.6">&#128205; '+escHtml(area.substring(0,160))+'</div>':'')
+        +(body?'<div class="nws-instr"><div class="nws-instr-h">'+lbl+'</div>'
+               +'<div class="nws-instr-b">'+escHtml(body.substring(0,700))+'</div></div>':'')
         +'</div>';
     }).join('');
   }

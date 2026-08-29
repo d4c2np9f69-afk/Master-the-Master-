@@ -515,7 +515,7 @@ Every hero Ã¢â‚¬â€ including any NEW section Ã¢â‚¬â€ MUST 
 
 ```
 index.html                        Ã¢â‚¬â€ entire PWA (single file)
-service-worker.js                 Ã¢â‚¬â€ cache version: hcc-v78 (bump on every asset change)
+service-worker.js                 Ã¢â‚¬â€ cache version: hcc-v93 (bump on every asset change — this line was stale at v78 while the file was already v92; check the file, not this note)
 manifest.json                     Ã¢â‚¬â€ PWA manifest
 functions/api/hours.js            Ã¢â‚¬â€ GET/POST sensor data Ã¢â€ â€ Cloudflare KV + box control channel
 firmware/mower_hours_esp32/       Ã¢â‚¬â€ THE ESP32 FIRMWARE (canonical copy; secrets.h gitignored)

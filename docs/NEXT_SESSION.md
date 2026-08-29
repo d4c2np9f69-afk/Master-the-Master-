@@ -1,3 +1,97 @@
+# 🟢 2026-08-28 7:45 PM — THE "DOWN SENSORS" WERE NEVER DOWN. THE WATCHDOG WAS.
+
+**Jeff at 6:46 PM: *"check the HA logs and see what is going on with the down sensors? I just
+restarted it to see if that would fix it."* He had restarted HA at 06:29 AND 18:42 chasing this.
+Each restart bought exactly 6 hours of quiet. That was the tell.**
+
+## 🔴 READ THIS BEFORE YOU TOUCH ANY AUTOMATION, EVER
+
+```
+08-26 17:45:13  hcc_sensor_silence_watchdog -> off   (disabled ON PURPOSE, documented)
+08-27 20:06:02  hcc_sensor_silence_watchdog -> on    (a session re-armed it)
+```
+
+The 08-27 session found it `off`, wrote *"Why it was off is NOT known — do not invent a cause"*,
+and turned it on. **The cause was written down, in `OPEN_ITEMS.md`, under a heading that literally
+said "MUST STAY OFF UNTIL REDESIGNED."** It then paged Jeff every 30 minutes from 13:00 to 18:30.
+
+🔴 **AN AUTOMATION IN A NON-DEFAULT STATE IS EVIDENCE, NOT A FAULT.** Before you "fix" one, run
+`windows-scripts\Search-HCC.ps1 "<its name>"`. One command would have prevented this entire day.
+
+## What was actually wrong (proven on the wire, not inferred)
+
+At **18:56:33** I captured this off the broker live:
+`zigbee2mqtt/Back Deck Door` → `{"battery":100,"battery_low":false,"contact":true,"linkquality":94,"voltage":2900}`
+
+One second later HA read:
+
+| entity | last_updated |
+|---|---|
+| `binary_sensor.back_deck_door_contact` | 18:47:21 — **did not move** |
+| `sensor.back_deck_door_battery` | 18:47:21 — **did not move** |
+| `sensor.back_deck_door_voltage` | 18:47:21 — **did not move** |
+| `sensor.…af3185764f_linkquality` | **18:56:33** — moved (98→94) |
+
+**Only the field whose VALUE changed got a timestamp.** That is `OPEN_ITEMS.md` #68, reproduced.
+`last_reported` is frozen too — it is **not** an escape hatch. The watchdog measured `last_updated`
+on dry leak sensors and closed doors, so it read "silent" forever and reset only on an HA restart.
+
+⚠️ **The giveaway to recognise this on sight:** at 18:30 it flagged Mailbox + all three leak
+sensors but **NOT** front door or back deck — because those two doors had actually been opened that
+day. The flagged set is exactly "sensors whose state did not change," never "sensors that stopped
+talking."
+
+## ✅ What is fixed and armed right now
+
+- **Z2M per-device availability is ON.** `availability.enabled` false → true, **verified in Z2M's
+  own `bridge/info`, not from the checkbox.** Z2M restarted 19:30.
+- **All 12 devices publish `zigbee2mqtt/<name>/availability` = online** (12/12 retained topics).
+- **HA consumes it: 19 of 19 contact/leak discovery configs carry the per-device availability topic,
+  `availability_mode: all`.** Before tonight the only source was `zigbee2mqtt/bridge/state`, which
+  can never mark ONE device offline. That is the whole reason a dead sensor was invisible.
+- **Watchdog rebuilt on that signal**, same id `hcc_sensor_silence_watchdog`, now
+  **"HCC - SENSOR OFFLINE WATCHDOG (Z2M availability, real signal)"**, state `on`.
+  Tested both ways before install: healthy house → `False`; dwell forced to −1 s → `True` and it
+  names the devices. Read back off the box and re-rendered → `False`.
+
+🔴 **THE 30-MINUTE DWELL IN THAT WATCHDOG IS LOAD-BEARING. DO NOT REMOVE IT.** An HA restart or
+MQTT reload makes every Zigbee entity unavailable for ~60 s (twice on 08-28: 18:43:23, 18:46:44).
+The dwell is the only thing stopping the new watchdog becoming the old false-alarm machine on a
+different metric.
+
+⚠️ **The water meter is deliberately still age-based** — it is rtlamr2mqtt, has no availability
+topic, and its `last_seen` value genuinely changes every message. **That inconsistency is correct.
+Do not tidy it.**
+
+## Owed — on the list, not in prose (#84, #85, #86)
+
+- **#84 · JEFF'S CALL · detection is 25 h at worst.** Z2M passive timeout is the 1500-min default.
+  Measured worst reporting gaps 08-25→08-28: everything **2.0–4.0 h except the Mailbox at 8.05 h**.
+  720 min (12 h) would halve detection with 1.5× margin — **but the Mailbox is what would false-fire,
+  and a false page is what this whole day was about.** Left safe on purpose. One word = 60 s change.
+- **#85 · `last_seen: ISO_8601` still not set.** Blocked by tooling only, not risk: the Z2M
+  Settings→Advanced page is in an ingress iframe that would not scroll, and `mqtt.publish` was
+  refused three times by the permission classifier. **Not urgent — availability alone fixes it.**
+- **#86 · MAILBOX LQI IS 0–3** and has been since 08-27 19:00; 13 messages in 3.7 days. ⚠️ The
+  08-27 mesh doc says "Mailbox 0 → 76" — **it is not 76 now, and `Floating Repeater` reads exactly
+  76, so a mix-up is possible. Re-measure before correcting that doc.**
+
+## 🔴 Honest limits — do not overstate this
+
+- **No device has actually gone offline yet, so the alarm has never been seen to fire for real.**
+  Every link is proven (Z2M publishes 12/12, HA consumes 19/19, condition detects and names when
+  forced) but the end-to-end event needs a device dark past the timeout — 25 h, not stageable.
+- **`packages/hcc.yaml` was NOT read live.** The config API serves only UI automations, and the
+  repo's `beehive-config/hcc.yaml` is **from 08-19 and stale** (has `hcc_weather_severe`; the box
+  runs `hcc_freeze_warning`). Used instead: nothing fired when every Zigbee entity dropped at
+  18:43:23 and 18:46:44, and the only `to: unavailable` triggers in the 42 UI automations are Fire
+  TV, Blink doorbell, a Tuya socket and the Mercedes.
+
+## Untouched on purpose
+Cameras (frozen — nothing here goes near them). The four automations Jeff parked 08-27. The
++3-min MQTT re-subscribe automation. Passive timeout.
+
+---
 ## 🔴 8:04 PM — THE SILENCE WATCHDOG WAS OFF, AND THE REPAIR NOTICE WAS A RED HERRING
 
 Jeff surfaced HA's repair: *"HCC - SENSOR SILENCE WATCHDOG ... has an unknown action:
