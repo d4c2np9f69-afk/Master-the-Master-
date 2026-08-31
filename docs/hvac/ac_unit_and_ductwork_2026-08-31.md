@@ -68,6 +68,95 @@ data, against the post-07-25 / pre-replacement window — that is the only hones
 **This is measurable.** Baseline it from the CEMC 15-minute data the same way the 07-25 repair was
 measured, so the twist fix gets credited separately from the new unit.
 
+## 1b. THE TWO UNITS — verified specs, 2026-08-31
+
+### OUTGOING — Nordyne R4GD-030K072C (from Jeff's own data plate photo)
+
+**Manufacturer is NORDYNE.** Jeff, 2026-08-31: *"I do not think it is a Maytag. It is a Nordine."*
+He is right. The R4GD chassis was built by Nordyne and badged under several brands; the archived
+spec sheet that turns up first (`files.rheem.com/LiteratureArchive/a981b.pdf`) is the **Maytag-badged
+edition of the same chassis** — same dimensions, different sticker. Parts catalogues list it as
+"Nordyne R4GD 030K072". **Do not call this a Maytag or a Teledyne.**
+
+```
+Model            R4GD-030K072C      Serial R4F070901754
+Capacity         030 = 30,000 BTU = 2.5 TON  |  072 = 72,000 BTU gas heat
+Refrigerant      R-22, 93.5 oz factory charge   <- phased out
+Efficiency       SEER 13 · EER 11 · AFUE 78 · Therm Eff 0.78
+Electrical       208/230V 1ph 60Hz · MCA 25.0 A · MAX OVERCURRENT 40 A
+                 compressor RLA 15.7 / LRA 68 · blower 1/2 HP · fan 1/4 HP
+Gas              nat max inlet 10.0" WC, min supply 4.5" WC
+Age              complies with 2007 ASHRAE 90.1 -> ~2007, about 19 years old
+Dimensions       47.5 in (side view)
+Entry heights    electric 31.0"  ·  low voltage 24.6"  ·  gas 16.6"
+```
+
+🔴 **The unit is NOT original to the house.** It is ~2007; the house and its ductwork are ~1996.
+So the twisted duct was carried over by whoever did the last replacement — they had the system
+apart and left the defect in. That is the mistake not to repeat.
+
+### INCOMING — Blueridge BPRPGE1430-072EP-2 (Alpine product page + spec sheet, read live)
+
+```
+Price            $2,990 - $299 coupon (coupon ENDS SEPT 14)
+Capacity         2.5 ton cooling / 72,000 BTU gas heat  -> EXACT MATCH to the old unit
+                 => the 2.5 vs 3 ton question is SETTLED. 2.5 ton is correct.
+Efficiency       14 SEER · R410A
+Dimensions       47.66" W x 47.66" D x 40.89" H · 406 lbs
+PAD REQUIRED     50 x 53 in
+Electrical       MIN AMPACITY 18.22 A · MAX FUSE/BREAKER 25 A
+Gas connection   0.5 in
+AHRI#            206903398 · approved North/Southeast/Southwest · not ENERGY STAR
+
+DUCT OPENINGS — ALL RECTANGULAR, multi-positional (side AND bottom):
+  Supply   side 13.44w x 14.32h   |  bottom 14.02w x 11.49d
+  Return   side 13.44w x 17.07h   |  bottom 16.77w x 11.49d
+
+WARRANTY  10 yr parts · 10 yr compressor · LIFETIME heat exchanger
+          🔴 ALL THREE REQUIRE ONLINE REGISTRATION
+```
+
+### THE THREE FINDINGS THAT CHANGE THE JOB
+
+**1. The pad is almost certainly fine — no pour needed.** Old unit 47.5 in vs new 47.66 in: a
+**0.16 inch** difference. The existing pad already carries a 47.5 in unit. (Caveat: only the side
+dimension was readable from the archived sheet; the plan view would not render. The new unit is
+square, so the only failure mode is a pad poured tight in the other axis — visible at a glance.)
+
+**2. 🔴 THE BREAKER MUST COME DOWN.** Old unit: MCA 25.0 A, **max overcurrent 40 A**. New unit:
+MCA 18.22 A, **max fuse/breaker 25 A**. The existing 40 A breaker **exceeds the new unit's maximum**
+— max fuse/breaker is a ceiling, not a suggestion. Conductors sized for the old 25 A MCA are ample
+for the new 18.22 A, so **the wire is fine; the breaker changes.** Jeff wires his own house — a $10
+part, not a service call.
+
+**3. The duct answer is confirmed: rectangular openings, so a sheet-metal plenum on each.** Jeff
+2026-08-31: *"if we're just going to do that with a square box, then there's no reason to buy those
+rounded sheet metal adapters."* **Correct.** The plenum IS the square-to-round transition. He still
+needs **takeoff/start collars** to land round flex on the flat plenum face — a different item from
+an adapter, and already inside the $150-350 allowance. Alpine's own copy: *"flush connector means
+easy ducting connection to any type of duct."*
+
+### ACCESSORIES AND LONGEVITY — verified, with the ones to skip
+
+- **Internal Filter kits** — offered by Blueridge as a factory accessory. Better than a downstream
+  filter grille on a package unit.
+- **UV / air cleaning:** coil-and-drain-pan sterilization is the application with real evidence
+  behind it; **in-duct "air sterilization" is the weak claim** (dose = intensity x exposure, and
+  air moves past too fast). Note the BPRPGE14 already ships with an **antimicrobial insulated drain
+  pan**, which covers part of the same job. Budget **lamp replacement every 12-24 months** — that is
+  the real running cost. Verdict: coil lamp yes, whole-air steriliser no.
+- 🔴 **HARD START KIT — DO NOT BUY, on a new unit.** Researched 2026-08-31. *"A quality new
+  compressor should not need a hard start kit... as a rule, a scroll compressor doesn't need one."*
+  *"Not a permanent fix, does not meaningfully raise SEER."* Aftermarket kits can also be
+  **prohibited under warranty** on some units. If a NEW compressor struggles to start, that is a
+  symptom to diagnose under warranty, not to mask. **This is the $0 recommendation: skip it.**
+  Legitimate only for an ageing compressor drawing hard — a year-15 decision, not day one.
+- 🔴 **REGISTER THE WARRANTY ONLINE THE DAY IT IS COMMISSIONED.** 10 yr parts, 10 yr compressor,
+  lifetime heat exchanger — all conditional on registration. For a 30-year goal this is the single
+  highest-value five minutes of the entire project.
+- **Ask the friend to read static pressure before and after.** He has the manometer. It turns "it
+  breathes better" into a number, and pairs with the CEMC 15-minute data as a second proof.
+
 ## 2. Ductwork materials — priced 2026-08-31, real search, not from memory
 
 Home Depot, R8 insulated flexible duct, 25 ft rolls:
