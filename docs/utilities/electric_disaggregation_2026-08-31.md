@@ -54,6 +54,40 @@ days as of 2026-08-31 — enough for a summer baseline, NOT enough for a winter 
 
 ⚠️ **The PDF's CONTENTS have not been read** — it is an iCloud placeholder and hydration timed out twice (`The cloud operation was not completed before the time-out period expired`). Only the file's timestamps were readable. **What Jeff actually repaired is therefore still unknown to the record.** If it matters, open the file once on the Mac/PC to force the download, then re-read it.
 
+### What the duct repair actually saved — measured 2026-08-31
+
+Jeff, 2026-08-31: *"The duct repair was done in late July so that gives us an entire month of data
+with the duct being fixed to see how much difference the repair made."* It does. Method: fit
+kWh-vs-temperature on the PRE-repair cooling days, then use that model to predict what the
+POST-repair period *would* have consumed at its own actual temperatures, and compare to what it
+really used. This removes the weather, which otherwise hides the result — August was hotter.
+
+```
+before fix   78 cooling days   63.0 kWh/day @ 77.4 F   (2.45 kWh per F)
+after fix    37 cooling days   59.1 kWh/day @ 80.7 F
+             -> used LESS while running 3.3 F HOTTER
+
+counterfactual at the OLD efficiency   2,627 kWh
+actually used                          2,186 kWh
+SAVED                                    441 kWh   = 16.8%
+```
+
+At the app's own rate ($0.11504/kWh):
+
+```
+saved so far, 37 days      $50.73
+per day                     $1.37
+per 30-day month           $41.07
+per 5-month cooling season $205.35
+```
+
+**The repair is paying for itself at about $41/month of cooling weather.** Note the savings figure
+is cooling-season only — it says nothing about winter, and winter is confounded by (b) below.
+
+⚠️ Year-over-year against Aug 2025 was NOT possible: this daily pull only reached back to
+2025-09-17, so there are 0 daily samples for Aug 2025. The before/after comparison above is the
+cleaner test anyway — same house, same year, same meter.
+
 **(b) WINTER IS CONFOUNDED BY A 1500 W SPACE HEATER.** Jeff: *"Angela has a tendency to run one of
 those 1500 W heaters under her desk because she's always cold… in the winter that little heater
 probably pulls as much as everything else in the house because we pretty much go to gas for
