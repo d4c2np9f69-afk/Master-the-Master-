@@ -42,6 +42,20 @@ pressure, the blower moves less air, and the system runs longer for the same coo
 same class of penalty as the duct leak repaired 07-25, which measured **441 kWh / 16.8% / ~$41 a
 month** once fixed.
 
+**ORIGIN — it is original construction, not degradation.** Jeff, 2026-08-31: *"it was put in that
+way 30 years ago when the house was built, they were too lazy to fix the unit so they just twisted
+what they had in the ductwork already to fit the air conditioner... they had already run the
+ductwork so in order to make it work they just twisted it to line up with the intake and outtake."*
+The builder ran the duct first, then twisted it to meet the unit's collars rather than re-working it.
+
+🔴 **THE MEASUREMENT CONSEQUENCE — this is important and easy to get wrong.** Because the twist is
+**original**, **every year of usage data this house has ever produced includes it.** There is no
+clean historical period to compare against — not 2025, not any prior summer. So unlike the 07-25
+duct-leak repair (which had a clean before/after inside the same season), the gain from fixing the
+twist **cannot be predicted from Jeff's own history**. Do not model it from past data and do not
+quote him an expected saving derived that way. Measure it after the fact, from the CEMC 15-minute
+data, against the post-07-25 / pre-replacement window — that is the only honest baseline available.
+
 **What the new install needs:**
 - A proper **sheet-metal transition/plenum** at the package unit on BOTH the supply and return —
   not flex twisted onto the collar. This is an extra BOM line that the flex-duct pricing below does
