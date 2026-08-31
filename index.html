@@ -11661,9 +11661,11 @@ function loadUtilities() {
         return at.station != null && IRR_FLOW[at.station] != null;
       });
       if (!zones.length) return;
+      // Same cycle boundary as the water math -- these two numbers are compared against
+      // each other to produce the sewer-overcharge figure, so they MUST share a start date.
       var d = new Date(), yy = d.getFullYear(), mm = d.getMonth();
-      if (d.getDate() < 21) { mm--; if (mm < 0) { mm = 11; yy--; } }
-      var cycleStart = new Date(yy, mm, 21, 0, 0, 0);
+      if (d.getDate() < WHUD_CYCLE_DAY) { mm--; if (mm < 0) { mm = 11; yy--; } }
+      var cycleStart = new Date(yy, mm, WHUD_CYCLE_DAY, 0, 0, 0);
       Promise.all(zones.map(function(z){
         return haFetch('/api/history/period/' + cycleStart.toISOString() + '?filter_entity_id=' + z.entity_id, { signal: AbortSignal.timeout(15000) })
           .then(function(r){ return r.ok ? r.json() : []; })
