@@ -11324,6 +11324,13 @@ function loadUtilities() {
   //   SPIRE  day 5  -- docs/UTILITIES_REFERENCE.md:26, rate validated against 3 bills
   //   CEMC   day 23 -- bill PDF 07/30/2026: "Services From 06/23/2026 To 07/23/2026, 30 Days"
   var SPIRE_CYCLE_DAY = 5;
+  // SEWER IS NOT WHUD. It is billed by the CITY OF WHITE HOUSE on its own 7th->7th cycle,
+  // off the same WHUD water meter (there is no sewer meter). Confirmed from the City bill
+  // acct 0071-000690-03: service period 4/7-5/7/26, and the 5/7-6/6/26 bill before it.
+  // Using WHUD's 22nd for sewer understated it by $16.77 on 2026-08-31 (582.1 gal on the
+  // WHUD clock vs 2,241.1 gal on the City's). Three different clocks, all real:
+  //   WHUD water = 22nd   ·   City sewer/sanitation/stormwater = 7th   ·   Spire gas = 5th
+  var CITY_CYCLE_DAY = 7;
   var CEMC_CYCLE_DAY  = 23;
   // First moment of the current billing cycle for a given read-day.
   function cycleStartFor(day){
@@ -11717,7 +11724,19 @@ function loadUtilities() {
         }
       });
     }
+    // Water and sewer are on DIFFERENT cycles, so Combined needs both numbers held here
+    // rather than derived from one figure. Either may resolve first; renderCombined()
+    // only writes once it has both.
+    var _waterCycleGal = null, _sewerCycleGal = null;
+    function renderCombined(){
+      if (_waterCycleGal == null || _sewerCycleGal == null) return;
+      var w = WATER_BASE + _waterCycleGal * WATER_PER_GAL;
+      var v = SEWER_BASE + _sewerCycleGal * SEWER_PER_GAL;
+      put('util-combined-cost', '$' + (w + v + GARBAGE_FLAT + STORMWATER_FLAT)
+            .toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    }
     function putWaterCycle(cyc){
+      _waterCycleGal = cyc;
       put('util-water-month', cyc.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
       var waterEst = WATER_BASE + cyc * WATER_PER_GAL;
       var sewerEst = SEWER_BASE + cyc * SEWER_PER_GAL;
@@ -11725,10 +11744,14 @@ function loadUtilities() {
       var sewerWaste = irrGal > 0 ? irrGal * SEWER_PER_GAL : 0;
       var fmt = function(v){ return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
       put('util-water-cost', fmt(waterEst));
-      put('util-sewer-cost', fmt(sewerEst));
+      // PLACEHOLDER ONLY -- sewerCycleFromHistory() overwrites this with the City's own
+      // 7th->7th figure the moment history resolves. Left in so the field is never blank.
+      if (_sewerCycleGal == null) put('util-sewer-cost', fmt(sewerEst));
       put('util-garbage-cost', fmt(GARBAGE_FLAT));
       put('util-stormwater-cost', fmt(STORMWATER_FLAT));
-      put('util-combined-cost', fmt(waterEst + sewerEst + GARBAGE_FLAT + STORMWATER_FLAT));
+      if (_sewerCycleGal == null)
+        put('util-combined-cost', fmt(waterEst + sewerEst + GARBAGE_FLAT + STORMWATER_FLAT));
+      else renderCombined();
       irrGalFromHistory();
       var ck = whudCycleKey();
       if (cyc > 0) {
@@ -11762,6 +11785,31 @@ function loadUtilities() {
         })
         .catch(function(){});
     }
+    // ---- SEWER: the CITY's billing cycle (reads the 7th), NOT WHUD's ------------------
+    // Sewer has no meter of its own -- the City bills it off the WHUD water reading. But it
+    // bills on a DIFFERENT cycle, so the gallons must be counted from the City's own start
+    // date. Same diff-two-readings pattern as water; different start day.
+    function sewerCycleFromHistory(curGal){
+      if (curGal == null) return;
+      var wEnt = null;
+      states.forEach(function(s){ if (s && typeof s.entity_id === 'string'){ var id=s.entity_id.toLowerCase(); if (id.indexOf('water_meter')>=0 && id.indexOf('reading')>=0) wEnt=s.entity_id; } });
+      if (!wEnt) return;
+      var cs = cycleStartFor(CITY_CYCLE_DAY);
+      haFetch('/api/history/period/' + cs.toISOString() + '?filter_entity_id=' + wEnt + '&minimal_response',
+              { signal: AbortSignal.timeout(15000) })
+        .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+        .then(function(h){
+          var arr = (h && h[0]) || [], base = null;
+          for (var i = 0; i < arr.length; i++){ var v = parseFloat(arr[i].state); if (!isNaN(v)) { base = v / 10; break; } }
+          if (base == null) return;
+          _sewerCycleGal = Math.max(0, curGal - base);
+          put('util-sewer-cost', '$' + (SEWER_BASE + _sewerCycleGal * SEWER_PER_GAL)
+                .toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+          renderCombined();
+        })
+        .catch(function(){});
+    }
+
     // ---- GAS: real billing cycle (Spire reads the 5th) --------------------------------
     // sensor.gas_ccf is a TRUE cumulative odometer (8858.76 and climbing, never resets), so
     // this is the same diff-two-readings pattern as waterCycleFromHistory(). sensor.gas_month
@@ -11891,6 +11939,7 @@ function loadUtilities() {
       if (wr.month != null) putWaterCycle(wr.month);            // local cycle estimate first
       else if (haWaterMonth != null) putWaterCycle(haWaterMonth); // calendar-month placeholder
       waterCycleFromHistory(curWaterGal);                        // authoritative -- always runs
+      sewerCycleFromHistory(curWaterGal);                        // City's 7th cycle, not WHUD's
     }
     var curGasCcf = gCcf != null ? gCcf : (graw != null ? graw / 100 : null);
     gasCycleFromHistory(curGasCcf);   // authoritative -- always runs, overrides the calendar month
