@@ -128,3 +128,318 @@ clamps add little over this data is correct.**
 - Overnight floor is **higher than a year ago** at the same hour (2025-08-19 5:00–5:30 AM:
   0.30 / 0.19 / 0.19 vs 2026-08-30: 0.38 / 0.32 / 0.28), and at 75F 2025 ran ~36 kWh/day vs 42.27
   in 2026. One sample — a real always-on-load question, not a conclusion.
+
+---
+
+## 2026-08-31 15:20 — the cycle script is LIVE and AUTOMATED (it was not before)
+
+🔴 **Read this before believing any "it's automated" claim in this project.** Earlier today this
+session wrote `HCC-Scripts/HCC-UtilityCycle.py` and reported it as the answer to Jeff's
+*"get it going and automated so that I don't ask this question again."* **The script had never
+executed and no schedule existed.** `utility_cycles.json` did not exist on disk. Writing a script
+is not automating a task.
+
+**Now actually running.** Scheduled task **`HCC Utility Billing Cycle`**, daily at **06:15**,
+running `C:\Users\jeffl\AppData\Local\Programs\Python\Python313\python.exe HCC-UtilityCycle.py`.
+
+**Verified by feature, not by component** — the task was triggered and `utility_cycles.json` was
+watched go from **1 row to 2**, `LastTaskResult 0`, `NextRunTime 2026-09-01 06:15`. Registering a
+task proves nothing; running it and seeing the file grow does.
+
+### First live output — 2026-08-31 15:19
+
+```
+WATER    cycle from 08-22 (day 9)    582.1 gal
+         water $15.61 · sewer $29.31 · flat fees $32.99      CONFIRMED day 22
+
+ELECTRIC cycle from 08-24 (day 7)    388.0 kWh  = $ 83.64
+         calendar month              1777.0 kWh = $243.43    PROVISIONAL day 24
+         -> the calendar figure is 2.9x the real one
+
+GAS      8858.76 CCF cumulative      cycle NOT COMPUTED — no bill has ever been checked
+```
+
+**That 2.9x is the whole point of the exercise.** It is the same class of bug already fixed on water
+($43.29 → $15.18), and it is why Jeff said *"I don't want my electric bill to continue to say and
+build that I owe $285,000 in six months."*
+
+### What is still open, and why the app was NOT changed
+
+🔴 **The electric cycle day (24) rests on ONE sample. The app's electric billing code is
+deliberately untouched.** Jeff, 2026-08-31: *"do not go in and fuck up that billing algorithm just
+hat hazard doing shit without verifying everything first."* Changing live billing math on a single
+observation is exactly that.
+
+Supporting evidence, consistent but **not** a second independent read of the start day: the bill is
+dated **07/30**, due **08/21**, and SmartHub's `Current Bill` quick-range resolved to **08-24 → now**.
+A read on the 24th, billed ~the 30th, due the 21st of the following month is a normal utility shape.
+
+**To close it, Jeff logs into SmartHub** (`cemc.smarthub.coop` — his password, he types it; a
+session must never enter it per `HCC_ACCESS.md`), then Usage Explorer →
+`quickPickSelection=PREVIOUS_BILL` across several cycles, reading the start day each time. Two more
+matching samples and the fix is a one-line change to `WHUD_CYCLE_DAY`'s electric equivalent.
+**Meanwhile the daily script is already banking both figures, so the history will be there.**
+
+⚠️ **A session attempting this will find the SmartHub session times out** — it dropped to
+`/ui/#/login` mid-navigation at 15:19 today. That is normal, not a fault.
+
+### ⚠️ NEW AND UNRESOLVED — a $274 gap in the payment record
+
+CEMC's home page shows **last payment $557.07, paid 07/31/2026**. But 2,120 kWh (their own July
+figure) at the bill-validated rate is `$39.00 + 2120 x $0.11504 = ` **$282.88**.
+
+**$274.19 unaccounted for.** Most likely Cumberland Connect internet billed on the same account —
+CEMC sells electric, internet and phone together and the account header carries both logos. Could
+also be two months settled at once.
+
+🔴 **NOT VERIFIED. Do not reconcile the bill ledger against $557.07, and do not put it in the app.**
+It needs one look at the itemised bill under Bill & Pay → Billing History, which requires Jeff to
+log in. If it is internet, the electric rate model is fine and only the payment figure is mixed.
+
+
+---
+
+# 2026-08-31 15:25 — ELECTRIC CYCLE **CONFIRMED** FROM THE ACTUAL BILL
+
+Jeff logged into SmartHub. Read straight off the CEMC bill PDF `2026_07_30_4501007001.pdf`
+(Bill & Pay -> Billing History -> View Bill). **This closes the PROVISIONAL flag.**
+
+```
+Meter #      145590962
+Services     From 06/23/2026   To 07/23/2026     Billing Period: 30 Days
+Readings     Previous 10550 -> Present 12670     Multiplier 1     Usage 2,120 kWh
+Rate         22-Residential Electric
+```
+
+**THE METER IS READ ON THE 23rd, NOT THE 24th.** The earlier provisional 24 came from SmartHub's
+`Current Bill` range starting 08-24 — that is the day *after* the read, the same boundary seen from
+the other side. `HCC-UtilityCycle.py` now uses **day 23, CONFIRMED**. Bills are dated the **last
+business day of the month** (07/30, 06/30, 05/29, 04/30, 03/31, 02/27, 01/30, 12/31 ...) and are due
+the **21st** of the following month.
+
+## The rate model reproduces the bill EXACTLY — do not touch it
+
+```
+Base Charge                                    $ 39.00
+Energy Charge     2,120 kWh @ 0.08657          $183.53
+TVA Fuel Cost     2,120 kWh @ 0.02847          $ 60.36
+Cutoff Notice Fee (one-time)                   $  2.00
+                                               -------
+Current Charges                                $284.89
+```
+
+`0.08657 + 0.02847 = 0.11504` — **exactly** the `ELEC_PER_KWH` already in the script, and base
+$39.00 exactly. Check: `39.00 + 2120 x 0.11504 = $282.88`; the only gap to $284.89 is the **$2.00
+one-time cutoff fee**. The rate is validated to the penny. Never "update" it without a newer bill.
+
+## The $557.07 mystery — SOLVED, and my first guess was WRONG
+
+Earlier today I flagged a $274 gap and guessed it was probably Cumberland Connect internet on the
+same account. **Wrong.** Billing History labels every row `Electric - 4501007001`; there is no
+internet on this bill. The real answer, off page 2:
+
+```
+Previous Balance (June bill)                   $259.31
+No Payment Received                            $  0.00
+Late Fee                                       $ 12.87
+  Past Due Amount - Due Immediately            $272.18
+Current Charges                                $284.89
+                                               -------
+TOTAL AMOUNT DUE                               $557.07
+```
+
+**The June payment was missed.** It cost **$12.87 late fee + $2.00 cutoff notice fee = $14.87**, and
+the bill carried a service-termination warning. Settled 07/31 — past due is $0.00 today.
+**Do not enter $557.07 anywhere as an electric cost.** July electric was **$284.89**.
+
+## Bill-face figures worth keeping
+
+```
+This month  2,120 kWh @ 81F     Last month 1,903 kWh @ 76F     Yr ago 1,756 kWh @ 83F
+Average daily use   71 kWh   (CEMC stated range 46-88)
+Average daily cost  $9.50    (range $6.18-$11.83)   -> 9.50 x 30 = $285, matches $284.89
+```
+
+## Current cycle, live 2026-08-31 15:23
+
+```
+electric  cycle from 08-23, day 8    445.0 kWh = $ 90.19   CONFIRMED
+          calendar month            1777.0 kWh = $243.43   <- what the app would wrongly show
+water     cycle from 08-22, day 9    582.1 gal
+          water $15.61 / sewer $29.31 / flat $32.99        CONFIRMED
+```
+
+## DRYER GROUND-TRUTH TEST — set up today, resolves tomorrow
+
+Jeff, 2026-08-31 ~15:20: *"I have been running the dryer all morning."* That is a **labelled
+ground-truth event** — what the disaggregation model needs to be validated against rather than
+assumed.
+
+**CEMC interval data lags ~1 day.** Pulled at 15:24 today, the series runs
+`Sun Aug 30 12:00 AM -> Mon Aug 31 12:00 AM`, 97 points. **Today's intervals are not posted yet**,
+so the dryer cannot be seen yet. Expected lag, not a fault.
+
+**The control day, re-pulled live today** — Aug 30, 97 x 15-min points:
+
+```
+total            55.5 kWh
+floor (5th pct)   0.92 kW     median 2.40 kW     max 4.20 kW
+intervals >4 kW      2        >5 kW  0           >6 kW  0     <- NO DRYER ALL DAY
+peaks            4:45 PM 4.20 / 5:00 PM 4.12 / 2:15 PM 3.60 / 3:30 + 3:45 PM 3.56
+```
+
+**THE TEST: pull 2026-08-31 tomorrow and look in the >5 kW band.** A 30 A dryer should land near
+6 kW and Aug 30 had **zero** intervals there. If a morning block appears above 5 kW on the 31st and
+not on the 30th, the 240 V disaggregation is **validated against a known event**. If nothing
+appears, the model is wrong and must be reported as wrong.
+
+**How to pull it** (Jeff must be logged in — his password, he types it):
+Usage Explorer -> set Start/End dates directly. Two gotchas found today:
+`quickPickSelection=LAST_24_HOURS` is **rejected and silently falls back to NONE**, and the interval
+view is **capped at 30 days**. Then read the chart's `aria-label` attributes — every point carries
+date, kWh and temperature, far more reliable than reading the rendered chart.
+
+
+---
+
+# 2026-08-31 15:33 — GAS CLOSED. ALL THREE UTILITIES NOW ON THEIR REAL CYCLES.
+
+Jeff, 15:31: *"The cycle day for spire is in the record."* **He was right and I had just claimed the
+opposite.**
+
+```
+docs/UTILITIES_REFERENCE.md:26
+  "Piedmont Natural Gas, transitioning to Spire ... Billing cycle ~5th."
+```
+
+It had been sitting there. Worse, the gas **rate** in that same file is annotated
+*"validated against 3 bills"* (May-Jul 2026: **$34.58 / $47.83 / $27.08**, all reproduced to the
+penny) — so bills were obviously in hand, and the comment I had written in
+`HCC-UtilityCycle.py` — *"No gas bill has ever been checked for its cycle date"* — was false on its
+face and contradicted by the line directly above the rate I was already using.
+
+## And the electric cycle day was ALSO already written down
+
+`docs/UTILITIES_REFERENCE.md:37`, written **2026-07-31**:
+
+> *"Billing cycle resets ~23rd (per the 06/23-07/23 cycle on the 07/30 bill)"*
+
+**That is the exact figure — 23rd, from the exact bill — that I spent this afternoon re-deriving**
+by opening SmartHub, clicking into Billing History, opening the July bill PDF and reading the meter
+table. All of it confirmed a number that had been in the reference file for a month.
+
+🔴 **This is the CLAUDE.md headline failure, twice in one afternoon: I measured before I searched.**
+`windows-scripts/Search-HCC.ps1 "Spire"` and a grep of `UTILITIES_REFERENCE.md` would have answered
+both questions in seconds. The portal work was not wasted — it independently *confirmed* the record
+and produced the exact rate itemisation — but it should have been a **check**, not a discovery.
+
+## Also corrected: a wrong artifact I wrote earlier TODAY
+
+`docs/utilities/BILL_LEDGER.md` carried, in two places, *"Spire gas cycle date — no gas bill in
+hand"* and listed it under *"Still unknown."* **I wrote that this morning, without searching.** Both
+lines are now struck through and corrected in place, per the standing rule that a bad local note is
+worse than a missing one — the next session would have believed it.
+
+## Gas rate now implemented (it was recorded but never computed)
+
+```
+GAS_BASE $13.44 + round(CCF x 1.068) therms x $1.235/therm, all x 1.05 franchise fee
+```
+
+## All three utilities, live 2026-08-31 15:32
+
+```
+water     cycle from 08-22, day  9    582.1 gal
+          water $15.61 / sewer $29.31 / flat $32.99      day 22  CONFIRMED bill 07/28
+electric  cycle from 08-23, day  8    445.0 kWh = $90.19
+          calendar month 1777.0 kWh   = $243.43          day 23  CONFIRMED bill 07/30
+gas       cycle from 08-05, day 26      6.02 CCF = 6 therms = $21.89
+                                                          day  5  CONFIRMED ref:26
+```
+
+Gas check: `6.02 x 1.068 = 6.43 -> 6 therms`; `(13.44 + 6 x 1.235) x 1.05 = $21.89`. Six CCF over 26
+summer days sits below the lowest validated bill ($27.08, also a summer month) — consistent.
+
+🔴 **CORRECTION, same minute — I wrote "water-heater-and-stove" and THE STOVE IS ELECTRIC.**
+Jeff, 2026-08-31 15:36: *"Stove is electric."* **My own file already said so, twice**: the panel
+inventory in §4 reads **A/C 30A · Range 50A · Dryer 30A**, and Jeff's quote in §3(b) is *"we pretty
+much go to gas for everything in the winter except for the dryer and stove."* The range is the
+**largest 240 V load in the house** and I called it a gas appliance minutes after being told off for
+not reading the record. Third instance in one afternoon.
+
+✅ **ANSWERED by Jeff, 2026-08-31 15:40: the hot water heater is the gas appliance.** So with the
+package unit's gas heat off for the season, **summer gas IS the water heater, isolated** — a single
+appliance with no confounders. That is a genuinely clean measurement and it is worth keeping.
+(`switch.hot_water_heater_socket_1` is the **circulation pump** on a 120 V smart socket — a separate
+thing from the burner, and it lands on the electric side.)
+
+**Every one of the three now has a CONFIRMED cycle day and a bill-validated rate, computed daily by
+the scheduled task at 06:15 and appended to `utility_cycles.json`.** Nothing here is estimated.
+
+
+---
+
+## 2026-08-31 15:37 — THE RANGE IS THE CONFOUNDER FOR TOMORROW'S DRYER TEST
+
+The stove correction changes the dryer test, so this is written down before the test runs rather
+than discovered after it.
+
+**All three 240 V loads are electric** (panel photo 06-25, re-confirmed by Jeff 08-31):
+
+| Load | Breaker | Expected draw | Shape in 15-min data |
+|---|---|---|---|
+| A/C | 30 A | **2.64 kW measured** | fixed step, repeats through the day |
+| Dryer | 30 A | ~5-6 kW | **sustained block, 45-60 min** |
+| **Range / oven** | **50 A** | 2-5 kW typical, up to ~12 kW | **spiky and short** — burners and oven element cycle |
+
+🔴 **Magnitude alone cannot separate the dryer from the range** — both can land in the 5-6 kW band.
+**Duration is the discriminator.** A dryer is a broad plateau; cooking is ragged, with the oven
+element cycling on and off. A single 15-min interval above 5 kW is ambiguous; **three or four
+consecutive ones is a dryer.**
+
+This is why the Aug 30 control is useful: **zero intervals above 5 kW all day** means neither the
+dryer nor the oven ran, so the band is genuinely empty rather than merely quiet.
+
+**Restated test for 2026-08-31 data:** look for a *run of consecutive* 15-min intervals above 5 kW
+during the morning. Jeff said the dryer ran *all morning*, so the expected signature is several
+plateaus, not one spike. If what appears is a lone spike, that is more likely the range and the test
+is inconclusive — **say inconclusive, do not claim the dryer.**
+
+
+---
+
+## 2026-08-31 15:41 — SUMMER GAS = THE WATER HEATER, ISOLATED
+
+Because gas heat is off for the season and the stove is electric, the current gas reading is a
+**single-appliance measurement**. Worth having: most utility numbers are a blend, this one is not.
+
+```
+measured          6.02 CCF over 26 days      = 0.2315 CCF/day
+                  x 1.068 heat factor        = 0.2473 therms/day
+projected month   7.42 therms  -> 7 billed
+cost              (13.44 + 7 x 1.235) x 1.05 = $23.19 / month
+  of which base   13.44 x 1.05               = $14.11   fixed meter charge
+  actual gas       8.645 x 1.05              = $ 9.08
+```
+
+🔴 **61% of the summer gas bill is the meter charge, not gas.** Hot water costs about **$9 a month**
+to run; the other $14 is for having the pipe. Nothing to optimise there — but it means "reduce the
+gas bill in summer" is not a thing that can work, and no session should propose it.
+
+Sanity check against the validated bills: lowest of the three was **$27.08** (a summer month),
+against $23.19 projected here. Same neighbourhood, slightly higher usage month. Consistent.
+
+### What this baseline is FOR
+
+1. **A hot-water fault detector.** 0.23 CCF/day is now a known-good summer rate for one appliance.
+   A failing water heater, a stuck circulation pump, or a hot-water leak would push summer CCF up
+   with no seasonal explanation. Nothing like that exists today — this is the number to compare to.
+2. **It separates heating from hot water in winter.** Winter gas minus ~0.25 therms/day of water
+   heating = actual space heating. **No real winter bill has ever been checked**, so that split
+   cannot be computed yet — do not estimate it.
+3. 🟢 **It baselines the new A/C unit's heating side.** The replacement package unit
+   (`BRP7GE1330E054P-01A`) steps heat input **72,000 -> 54,000 BTU**. Winter gas runs through this
+   same meter, so the before/after can be measured exactly the way the 25 July duct repair was
+   (441 kWh, 16.8%) — **provided a winter baseline is captured on the OLD unit before it comes out.**
+   Jeff is replacing it before winter, so that baseline may not be obtainable. Say so rather than
+   inventing one later.

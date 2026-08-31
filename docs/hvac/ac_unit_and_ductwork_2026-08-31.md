@@ -212,3 +212,221 @@ The old ductwork was **leaking**, and the repair on **2026-07-25** is measurable
 `docs/utilities/electric_disaggregation_2026-08-31.md`. Complete new ductwork plus a new unit should
 show up the same way. **Baseline the before/after from the CEMC 15-minute data** so the result is a
 measured number, not a hope.
+
+---
+
+## Ductwork design — how it gets built (Jeff's ask, 2026-08-31)
+
+Jeff: *"you didn't put in there about the duct work and how to improve that on the front end."*
+This is the half that decides whether the new equipment actually performs.
+
+**At the unit — fabricated rectangular plenums, both sides.** Jeff reached this himself:
+*"if we're just going to do that with a square box, then there's no reason to buy those rounded
+sheet metal adapters."* Correct, and the spec sheet backs it — the Blueridge openings are
+**rectangular**, not round:
+
+```
+supply   side 13.44 w x 14.32 h   |  bottom 14.02 w x 11.49 d
+return   side 13.44 w x 17.07 h   |  bottom 16.77 w x 11.49 d
+```
+
+A box built to those dimensions IS the square-to-round transition. No adapters to buy, and it is
+what eliminates the 30-year-old twist (both trunks run down the centre of the house and were
+twisted at the unit when the house was built, because the trunk orientation never matched the
+equipment).
+
+**Branches — round takeoff collars off the plenum face**, flex pulled taut and strapped. Slack or
+spiralled flex is the same mistake as the twist, further downstream.
+
+**Sizing — 7 in vs 8 in is a real cost fork.** $69.99/roll vs $94.55/roll, a 35% jump for one inch.
+The A/C friend is sizing the system anyway; ask before buying. 7 registers, 1 central return.
+
+**The return is the tightest point in the whole system** — one central return in the living room for
+the entire house. Check the **grille free area**, not just the duct. A starved return makes the
+equipment work harder no matter how good the supply side is.
+
+**Measure it.** Static pressure before and after, on the friend's manometer. Turns "it breathes
+better" into a number that can sit next to the meter data.
+
+## Labour — what to pay the A/C friend
+
+| Anchor (searched 2026-08-31) | Rate |
+|---|---|
+| Tennessee HVAC labour, billed | $75 – $150 / hr |
+| Full system install, labour only | $1,000 – $3,000 |
+| TN HVAC helper, average | $25.65 / hr |
+| Nashville area vs state average | +10 – 15% |
+| **Fair for this job, Jeff working alongside him** | **$700 – $1,200** |
+
+## Small parts (priced 2026-08-31)
+
+| Item | Cost |
+|---|---|
+| AC disconnect, 60 A non-fused | $28.98 |
+| 25 A 2-pole breaker (Square D) — the existing 40 A is oversized for this unit | $18.24 |
+| AC whip, 6 ft liquidtight | $35.00 |
+| Gas connector + filter kit | $40 – $150 |
+| UV coil light | $60 – $280 |
+| **Parts subtotal** | **$182 – $512** |
+
+## All-in
+
+```
+unit after coupon      $2,691.00
+ductwork materials     $  786.52 - $  986.52
+parts + UV             $  182.22 - $  512.22
+labour to the friend   $  700.00 - $1,200.00
+                       -------------------------
+TOTAL                  $4,359.74 - $5,389.74
+```
+
+Tennessee full replacement, installed, runs **$5,400 – $13,100**. This lands below the bottom of
+that range **and includes complete new ductwork**, which a quote in that range would not.
+
+🔴 **THE CANOPY IS A NO — and it is a safety no, not a preference.** Jeff asked for a cover over the
+unit to keep leaves out. The Blueridge install manual: *"Do not permit overhanging structures or
+shrubs to obstruct condenser air discharge outlet, combustion air inlet, or vent outlet."* This is a
+**top-discharge package unit with a gas flue** — anything above it blocks both the air the condenser
+throws and the flue. It voids the warranty and it is a combustion-safety problem. Manual Table 1
+clearances: front 0"/24", back 0"/0", left 0"/24", right (from vent hood) 12"/24", plus 4 ft
+horizontal from gas meters/regulators.
+
+---
+
+# 🔴 CORRECTION 2026-08-31 14:00 — THE UNIT IN THIS DOC WAS DISCONTINUED
+
+Everything above priced **Blueridge BPRPGE1430-072EP-2 at $2,691**. Verified live in Chrome on
+Alpine's own product page, 2026-08-31:
+
+> **"The Blueridge BPRPGE1430-072EP-2 is no longer available for sale."**
+
+No Add to Cart button. Confirmed twice — page text and element search.
+
+🔴 **THE TRAP, AND IT IS THE REASON THIS SLIPPED THROUGH:** that page **still renders the price
+`$2,990.00`, still shows "Apply $299.00 Coupon — Ends September 14th", still says Free Shipping.**
+Every signal that made the figure look verified is still on the page. Only the buy button is gone.
+A price scraped or read from that page looks perfectly valid and is not purchasable.
+**A visible price is not proof of availability — check for the Add to Cart control.**
+
+The `BPRPGE1430-054EP` (2.5 ton / 54,000 BTU) is likewise superseded; its page names the successor.
+
+## THE UNIT TO ACTUALLY BUY — verified in stock 2026-08-31
+
+**Blueridge BRP7GE1330E054P-01A** — 2.5 ton cooling / 54,000 BTU heat / 13.4 SEER2
+`.../14-16-seer/blueridge/brp7ge1330e054p-01a`
+
+```
+list                     $3,470.00
+coupon SUMMER2026 (10%)  -$ 347.00     expires 14 Sep 2026
+                         ----------
+net                      $3,123.00     In Stock · Add to Cart · free shipping
+```
+
+Jeff approved the smaller heat 2026-08-31: *"The 54,000 BTU heat will be fine if the price is right."*
+2.5 ton keeps the **correct** cooling size — the 3-ton alternatives would oversize a 1,400 sq ft
+house and hurt humidity removal.
+
+| | old (dead) BPRPGE1430-072EP-2 | new BRP7GE1330E054P-01A |
+|---|---|---|
+| net price | $2,691 | **$3,123** (+$432) |
+| heat input / output | 72,000 / 58,000 BTU | 54,000 / 44,000 BTU |
+| refrigerant | R-410A (phasing down) | **R-454B + onboard leak detection** |
+| min ampacity / max breaker | 18.22 A / 25 A | **17.5 A / 25 A** |
+| cabinet | 47.66 × 47.66 × 40.89 | **identical** |
+| duct openings | supply 13.44×14.32 / btm 14.02×11.49 · return 13.44×17.07 / btm 16.77×11.49 | **identical** |
+
+🟢 **The duct openings are identical, so every plenum/ductwork conclusion in this document stands
+unchanged.** The 40 A → 25 A breaker line also stands (it would have become 35 A on a 3-ton).
+
+## Other corrections found in the same pass
+
+- **Alpine's own parts are cheaper than what was priced here and ship free with the unit:**
+  disconnect **$21.99** (was $28.98), whip **$24.99** (was $35.00), 50 ft 8-conductor thermostat
+  wire **$29.99**. Doc updated.
+- **"No pour needed" was overconfident.** Alpine specs a **50×53** pad for this cabinet. The unit is
+  within 0.16" of the existing one so the current pad should carry it, but **measure before
+  delivery** — a 50×53×3 replacement is $239.99.
+- **"1996 builder" was invented.** The year built is not in any record found, and no search returned
+  it. Jeff said "30 years ago"; the doc now says only "since the house was built."
+- **House is 1,400 sq ft, 3 bed / 2 bath** (public property record, 2026-08-31). Cross-checks: 2.5
+  ton is normal for that size, and 7 registers = 3 bed + 2 bath + living + kitchen.
+- **Packaged units keep the 13.4 SEER2 NATIONAL minimum.** The Southeast 14.3 SEER2 rule applies to
+  **split systems**, not packaged. Do not let anyone claim a higher SEER is required here.
+
+## Revised totals
+
+```
+A  equipment                       $3,123.00
+B  ductwork materials              $  787 - $  987
+C  electrical, gas, accessories    $  195 - $  525
+D  labor, complete installation    $  700 - $1,200
+                                   -----------------
+   Phase 1  A/C installed          $4,805 - $5,835
+   Phase 2  crawl space materials  $  600 - $  950
+                                   -----------------
+   GRAND TOTAL                     $5,405 - $6,785
+```
+
+## Crawl space enclosure — priced and sequenced
+
+1,400 sq ft footprint. **DIY materials $600 – $950** (12-mil woven liner, seam tape, fasteners,
+sealant; a complete ~2,000 sq ft kit runs $949.99). Contractor barrier-only $3–$7/sq ft =
+$4,200–$9,800; full system with dehumidifier and drainage $5–$12/sq ft = $7,000–$16,800.
+
+🔴 **SEQUENCE: DUCTWORK FIRST, ENCAPSULATION LAST.** The vapor barrier is always the final step —
+sheet metal, screws and crawling while running new duct will puncture a liner already down. This is
+the opposite of the intuitive order and it is what the trade sources say.
+
+## Document status
+
+Artifact republished (est. rev **HCC-2026-002**) at the same URL. **Verified 2026-08-31, not
+asserted:** renders to exactly **2 printed pages** (Letter, 0.4in margins — counted `/Type /Page`
+objects in a real Playwright PDF render, `pcount.mjs`); **0 px horizontal overflow at 1536 px**;
+all 7 subtotals/totals recomputed independently and reconcile to the penny; 87/87 div, 6/6 table,
+8/8 section, 8/8 svg; every CSS token defined on bare `:root`. Canopy section and UV air-cleaner
+removed at Jeff's direction; UV **coil** light kept.
+
+---
+
+## REVISION 2026-08-31 14:20 — crawl space split out, gas and UV priced properly
+
+**Crawl space removed from the A/C estimate.** Jeff: *"take out the crawlspace stuff for now."* It
+does not gate the A/C job — see the sequencing finding above (ductwork first, liner last). The
+priced crawl-space figures stay recorded in this file; a standalone sheet was drafted and parked at
+`scratchpad/crawlspace.html`, not delivered.
+
+**The LP conversion kit is NOT needed and never was in the estimate.** Jeff, 2026-08-31: *"I don't
+need a gasket because I'm not going to propane I'm going natural gas."* Correct — the Blueridge
+**22B87 LPG/Propane Conversion Kit ($64.99)** is required only to run LP. The unit ships configured
+for **natural gas**. Do not add it.
+
+**The vague "$40–$150 gas connector & filter kit" line is retired.** It was an unpriced guess
+carried from earlier in the session. Replaced with real parts (Home Depot, priced 2026-08-31):
+1/2 in. coated-stainless flex connector **$11.75–$25.93**, or **$19.57** for the version with an
+integral shutoff valve, plus black-iron nipples for a sediment trap. Line is now **$20–$45**.
+
+**UV coil light is now a real priced line, not a range.** 14 in. germicidal coil lamp, **$65.00**.
+🔴 **Specify the 24 VAC version, not 120 V.** This is a package unit sitting outside with no
+receptacle — a 24 VAC lamp runs off the unit's own control transformer instead of requiring a 120 V
+circuit run out to it. Confirm the transformer has ~50 VA spare, or add a small dedicated one.
+Running cost ~$36/yr, bulb every 1–2 years.
+
+### Current totals (supersedes every figure above)
+
+```
+A  equipment   Blueridge BRP7GE1330E054P-01A   $3,123.00   ($3,470 less $347 coupon)
+B  ductwork materials                          $  787 - $  987
+C  electrical, gas, accessories                $  180 - $  205
+D  labor, complete installation                $  700 - $1,200
+                                               -----------------
+   TOTAL, installed                            $4,790 - $5,515
+```
+
+C breaks down as: UV coil light $65.00 · disconnect $21.99 · 25 A breaker $18.24 · whip $24.99 ·
+gas connector/valve/trap $20–$45 · 50 ft 8-conductor thermostat cable $29.99. The disconnect, whip
+and thermostat cable are Alpine parts that ship free with the unit.
+
+**Verified 2026-08-31, not asserted:** renders to exactly **2 printed pages** (Letter, 0.4 in
+margins, `/Type /Page` count on the delivered PDF); **0 px horizontal overflow at 1536 px**; all
+subtotals recomputed independently and reconcile to the penny; 83/83 div, 5/5 table, 7/7 section,
+6/6 svg; every CSS token defined on bare `:root`; stale-value sweep clean on 19 retired figures.

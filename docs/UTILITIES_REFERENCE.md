@@ -25,6 +25,7 @@ Mirrored to `C:\Users\jeffl\iCloudDrive\HCC-Archive\UTILITIES_REFERENCE.md`.
 ### 🔥 GAS — Piedmont/Spire · Itron 100G ERT
 - Piedmont Natural Gas, transitioning to Spire (billing continues under Piedmont during transition). Account `6100 0546 4779`. Meter Elster AC-250, Piedmont# `T821986`. Billing cycle ~5th.
 - Itron 100G ERT, FCC `EO9100GDLA`, unencrypted, 900–920 MHz ISM. Same RTL-SDR reads both water + gas. Raw ÷100 = CCF.
+- **Gas appliances (Jeff, 2026-08-31): the HOT WATER HEATER, plus the package unit's gas heat in winter. The STOVE/RANGE IS ELECTRIC (50 A) — do not call it a gas appliance.** With heat off, summer gas is the water heater alone: measured **0.23 CCF/day ≈ $9/month of gas**, on top of a **$14.11 fixed meter charge** — i.e. 61% of a summer gas bill is the base charge, so "cut the summer gas bill" is not actionable. Billing cycle **day 5** (already recorded above; re-derived needlessly on 08-31, see OPEN_ITEMS #107).
 - Rates (validated against 3 bills): Base $13.44 + Distribution $0.61809/therm + PGA $0.61691/therm = $1.235/therm all-in. Heat factor 1.068 (CCF→therms). 5% local franchise fee. `(13.44 + round(CCF × 1.068) × 1.235) × 1.05`.
 
 ### ⚡ ELECTRIC — Cumberland Electric (CEMC)

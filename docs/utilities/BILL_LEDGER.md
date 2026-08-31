@@ -84,7 +84,11 @@ equal the bill's Water Charges line.
   three different clocks: ours (1st), WHUD's (22nd), the City's (7th).
 
 ### NOT YET VERIFIED — do not assume
-- **Spire gas cycle date** — no gas bill in hand. `gas_month` resets on the 1st; whether that matches
+- ~~**Spire gas cycle date** — no gas bill in hand.~~ 🔴 **WRONG, corrected 2026-08-31.** The cycle day
+  IS in the record: `docs/UTILITIES_REFERENCE.md:26` says **"Billing cycle ~5th"**, and the gas rate was
+  validated against **three** real bills (May–Jul 2026: $34.58 / $47.83 / $27.08). I wrote "no gas bill in
+  hand" without searching. `HCC-UtilityCycle.py` now uses **day 5** and computes gas cost. The old text:
+  `gas_month` resets on the 1st; whether that matches
   Spire is unknown.
 - **CEMC electric cycle date** — the SmartHub sensor resets near the 1st, which *suggests* a calendar
   cycle, but no CEMC bill has been checked for this. (Note an unexplained SmartHub revision on
@@ -117,7 +121,8 @@ resetting on 09-22. Gates: `lint-app.js` clean, `smoke-test.js` passed (374 link
 **HA's `sensor.water_month` was deliberately NOT touched** — it stays a calendar meter and is now
 only a placeholder. No `configuration.yaml` edit, no risk of resetting the meter.
 
-**Still unknown — needs a real bill before anything is changed:** Spire gas cycle date, CEMC
+**Still unknown — needs a real bill before anything is changed:** ~~Spire gas cycle date~~ (**CLOSED
+2026-08-31 — it was already in `UTILITIES_REFERENCE.md:26`, day 5**), CEMC
 electric cycle date. Do not guess these.
 
 ---

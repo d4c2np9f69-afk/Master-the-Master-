@@ -2474,7 +2474,7 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
             </div>
             <div class="util-stats util-stats-1col">
               <div class="util-stat"><div class="util-stat-label">Reading</div><div class="util-stat-val" id="util-gas-today">&mdash;<span class="util-stat-unit">ccf</span></div></div>
-              <div class="util-stat"><div class="util-stat-label">This Month</div><div class="util-stat-val" id="util-gas-month">&mdash;<span class="util-stat-unit">ccf</span></div></div>
+              <div class="util-stat"><div class="util-stat-label">This Cycle</div><div class="util-stat-val" id="util-gas-month">&mdash;<span class="util-stat-unit">ccf</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Est. Cost</div><div class="util-stat-val" id="util-gas-cost">&mdash;</div></div>
             </div>
             <div class="util-foot" id="util-gas-foot"><span class="dot"></span> Waiting for Beehive meter reader</div>
@@ -2501,7 +2501,7 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
               <div class="util-stat"><div class="util-stat-label">Today</div><div class="util-stat-val" id="util-elec-today">&mdash;<span class="util-stat-unit">kWh</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Yesterday</div><div class="util-stat-val" id="util-elec-yesterday">&mdash;<span class="util-stat-unit">kWh</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Peak Hour</div><div class="util-stat-val" id="util-elec-peak">&mdash;</div></div>
-              <div class="util-stat"><div class="util-stat-label">This Month</div><div class="util-stat-val" id="util-elec-month">&mdash;<span class="util-stat-unit">kWh</span></div></div>
+              <div class="util-stat"><div class="util-stat-label">This Cycle</div><div class="util-stat-val" id="util-elec-month">&mdash;<span class="util-stat-unit">kWh</span></div></div>
               <div class="util-stat"><div class="util-stat-label">Est. Cost</div><div class="util-stat-val" id="util-elec-cost">&mdash;</div></div>
             </div>
             <div class="util-foot" id="util-elec-foot"><span class="dot"></span> Waiting for Beehive energy monitor</div>
@@ -11316,6 +11316,21 @@ function loadUtilities() {
   // ~144 gal (~$1.31), so a fixed day is close enough -- but never substitute a calendar
   // month, which is 21 days out of phase and can never match the bill.
   var WHUD_CYCLE_DAY = 22;
+  // Jeff, 2026-08-31: "all I wanna know is if I look at the app is that the number that I
+  // owe now through the cycle and then at the end of the cycle it goes back to zero."
+  // Every utility bills on ITS OWN read date. HA's utility_meter helpers all reset on the
+  // 1st of the calendar month, which matches NONE of them. Both days below are CONFIRMED
+  // from real bills -- do not "tidy" them to 1.
+  //   SPIRE  day 5  -- docs/UTILITIES_REFERENCE.md:26, rate validated against 3 bills
+  //   CEMC   day 23 -- bill PDF 07/30/2026: "Services From 06/23/2026 To 07/23/2026, 30 Days"
+  var SPIRE_CYCLE_DAY = 5;
+  var CEMC_CYCLE_DAY  = 23;
+  // First moment of the current billing cycle for a given read-day.
+  function cycleStartFor(day){
+    var d = new Date(), y = d.getFullYear(), m = d.getMonth();
+    if (d.getDate() < day) { m--; if (m < 0) { m = 11; y--; } }
+    return new Date(y, m, day, 0, 0, 0);
+  }
   function whudCycleKey(){
     var d = new Date(), y = d.getFullYear(), m = d.getMonth();
     if (d.getDate() < WHUD_CYCLE_DAY) { m--; if (m < 0) { m = 11; y--; } }
@@ -11747,6 +11762,79 @@ function loadUtilities() {
         })
         .catch(function(){});
     }
+    // ---- GAS: real billing cycle (Spire reads the 5th) --------------------------------
+    // sensor.gas_ccf is a TRUE cumulative odometer (8858.76 and climbing, never resets), so
+    // this is the same diff-two-readings pattern as waterCycleFromHistory(). sensor.gas_month
+    // is HA's utility_meter and resets on the 1st -- 4 days out of phase with the bill.
+    function putGasCycle(ccf){
+      put('util-gas-month', ccf.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+      var th = Math.round(ccf * GAS_HEAT);
+      var c  = (GAS_BASE + th * GAS_PER_THERM) * (1 + GAS_FRANCHISE);
+      put('util-gas-cost', '$' + c.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    }
+    function gasCycleFromHistory(curCcf){
+      if (curCcf == null) return;
+      var cs = cycleStartFor(SPIRE_CYCLE_DAY);
+      haFetch('/api/history/period/' + cs.toISOString() + '?filter_entity_id=sensor.gas_ccf&minimal_response',
+              { signal: AbortSignal.timeout(15000) })
+        .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+        .then(function(h){
+          var arr = (h && h[0]) || [], base = null;
+          for (var i = 0; i < arr.length; i++){ var v = parseFloat(arr[i].state); if (!isNaN(v)) { base = v; break; } }
+          if (base == null) return;
+          putGasCycle(Math.max(0, curCcf - base));
+        })
+        .catch(function(){});
+    }
+
+    // ---- ELECTRIC: real billing cycle (CEMC reads the 23rd) ---------------------------
+    // HARDER than water/gas, and the reason is worth reading before changing anything.
+    // There is NO cumulative electric odometer in HA -- the ONLY entity is SmartHub's
+    // MONTHLY TOTAL, which resets to 0 on the 1st. So a plain (now - base) diff is correct
+    // ONLY while the cycle start and today sit in the same calendar month. From the 1st
+    // until the 23rd the cycle spans the reset and a plain diff goes NEGATIVE.
+    // Handled by summing the two pieces:  (month-end - base) + today's running total.
+    function putElecCycle(kwh){
+      put('util-elec-month', kwh.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }));
+      var c = ELEC_BASE + kwh * ELEC_PER_KWH;
+      put('util-elec-cost', '$' + c.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    }
+    function firstNum(arr){
+      for (var i = 0; i < arr.length; i++){ var v = parseFloat(arr[i].state); if (!isNaN(v)) return v; }
+      return null;
+    }
+    function lastNum(arr){
+      for (var i = arr.length - 1; i >= 0; i--){ var v = parseFloat(arr[i].state); if (!isNaN(v)) return v; }
+      return null;
+    }
+    function elecCycleFromHistory(ent, curKwh){
+      if (!ent || curKwh == null) return;
+      var cs = cycleStartFor(CEMC_CYCLE_DAY), now = new Date();
+      var sameMonth = (cs.getMonth() === now.getMonth() && cs.getFullYear() === now.getFullYear());
+      // NOTE: /api/history/period/<start> defaults to a ONE DAY window unless end_time is
+      // given. That is all we need here -- the FIRST reading at/after the cycle start.
+      haFetch('/api/history/period/' + cs.toISOString() + '?filter_entity_id=' + ent + '&minimal_response',
+              { signal: AbortSignal.timeout(15000) })
+        .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+        .then(function(h){
+          var base = firstNum((h && h[0]) || []);
+          if (base == null) return;
+          if (sameMonth) { putElecCycle(Math.max(0, curKwh - base)); return; }
+          // Cycle spans the 1st: add what was used from the cycle start to month end,
+          // then everything since the reset (which is exactly the current value).
+          var mEnd = new Date(now.getFullYear(), now.getMonth(), 0, 0, 0, 0); // last day of prev month
+          return haFetch('/api/history/period/' + mEnd.toISOString() + '?filter_entity_id=' + ent + '&minimal_response',
+                         { signal: AbortSignal.timeout(15000) })
+            .then(function(r2){ return r2.ok ? r2.json() : Promise.reject(); })
+            .then(function(h2){
+              var endOfMonth = lastNum((h2 && h2[0]) || []);
+              if (endOfMonth == null || endOfMonth < base) return;   // cannot verify -> leave alone
+              putElecCycle(Math.max(0, (endOfMonth - base) + curKwh));
+            });
+        })
+        .catch(function(){});
+    }
+
     // Flow (gpm) needs two live samples to compute a rate, so it's blank on the very first
     // poll of a session. Instead of waiting for a second live poll, pull the last couple of
     // real readings HA already recorded (recorder history) and compute a real rate from
@@ -11805,6 +11893,7 @@ function loadUtilities() {
       waterCycleFromHistory(curWaterGal);                        // authoritative -- always runs
     }
     var curGasCcf = gCcf != null ? gCcf : (graw != null ? graw / 100 : null);
+    gasCycleFromHistory(curGasCcf);   // authoritative -- always runs, overrides the calendar month
     if (curGasCcf != null) {
       var gr = rollMeter('util_roll_gas', curGasCcf);
       if (num('sensor.gas_month') == null && gr.month != null)
@@ -11914,6 +12003,7 @@ function loadUtilities() {
       put('util-elec-month', eMonth.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }));
       var eCost = ELEC_BASE + eMonth * ELEC_PER_KWH;
       put('util-elec-cost', '$' + eCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+      elecCycleFromHistory(eMonthEnt, eMonth);  // authoritative -- overrides the calendar month
       elecBackfillProfile(eMonthEnt);
 
       var nowTs = Date.now(), lastSample = {};
