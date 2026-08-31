@@ -11310,9 +11310,15 @@ function loadUtilities() {
   // use at all, so they're tracked as their own line items and only folded into the Combined total.
   var GARBAGE_FLAT = 24.00, STORMWATER_FLAT = 8.99; // confirmed 5/7-6/6/26 bill
   var WH_KEY = 'water_billing_history';
+  // WHUD reads the meter on the 22nd -- confirmed from Jeff's bill dated 07/28/26:
+  // "Read Dates 6/22/2026 - 7/22/2026, Days 30". The cycle therefore turns on the 22nd,
+  // NOT the 1st of the calendar month. Read dates can drift a day either way; one day is
+  // ~144 gal (~$1.31), so a fixed day is close enough -- but never substitute a calendar
+  // month, which is 21 days out of phase and can never match the bill.
+  var WHUD_CYCLE_DAY = 22;
   function whudCycleKey(){
     var d = new Date(), y = d.getFullYear(), m = d.getMonth();
-    if (d.getDate() < 21) { m--; if (m < 0) { m = 11; y--; } }
+    if (d.getDate() < WHUD_CYCLE_DAY) { m--; if (m < 0) { m = 11; y--; } }
     return 'whud-' + y + '-' + (m + 1);
   }
   function getWaterHistory(){ try { return JSON.parse(localStorage.getItem(WH_KEY) || '[]'); } catch(e){ return []; } }
@@ -11727,8 +11733,8 @@ function loadUtilities() {
       states.forEach(function(s){ if (s && typeof s.entity_id === 'string'){ var id=s.entity_id.toLowerCase(); if (id.indexOf('water_meter')>=0 && id.indexOf('reading')>=0) wEnt=s.entity_id; } });
       if (!wEnt) return;
       var d=new Date(), yy=d.getFullYear(), mm=d.getMonth();
-      if (d.getDate()<21){ mm--; if(mm<0){mm=11;yy--;} }
-      var cycleStart=new Date(yy,mm,21,0,0,0);
+      if (d.getDate()<WHUD_CYCLE_DAY){ mm--; if(mm<0){mm=11;yy--;} }
+      var cycleStart=new Date(yy,mm,WHUD_CYCLE_DAY,0,0,0);
       haFetch('/api/history/period/'+cycleStart.toISOString()+'?filter_entity_id='+wEnt+'&minimal_response', { signal: AbortSignal.timeout(15000) })
         .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
         .then(function(hist){
@@ -11777,13 +11783,24 @@ function loadUtilities() {
       // always run it off whatever cycle-gallons value we have, whether that's HA's own
       // water_month helper or the local fallback. Previously this was gated to the fallback
       // path only, so once HA's helper existed the cost fields silently never populated.
+      // CYCLE SOURCE -- fixed 2026-08-31. sensor.water_month is HA's utility_meter and it
+      // resets on the 1st of the CALENDAR MONTH (verified live: last_reset 2026-08-01,
+      // next_reset 2026-09-01). WHUD bills the 22nd->22nd, so that number is 21 days out of
+      // phase and can NEVER equal the bill's Water Charges line. It used to take priority
+      // here, which made waterCycleFromHistory() -- the code that computes the REAL billing
+      // cycle -- dead whenever HA's helper existed, i.e. always.
+      //
+      // Jeff, 2026-08-31: "when that billing date cuts off it goes back to zero and starts
+      // building what I owe for that month."
+      //
+      // Order now: show something immediately (so the 6abb907 "costs never populate" bug
+      // cannot come back), then ALWAYS override with the true cycle number once history
+      // resolves. waterCycleFromHistory() no-ops silently if it cannot get history, so the
+      // placeholder is never left worse off.
       var haWaterMonth = num('sensor.water_month');
-      if (haWaterMonth != null) {
-        putWaterCycle(haWaterMonth);
-      } else if (wr.month != null) {
-        putWaterCycle(wr.month);        // immediate local estimate
-        waterCycleFromHistory(curWaterGal); // refine from HA history (overrides)
-      }
+      if (wr.month != null) putWaterCycle(wr.month);            // local cycle estimate first
+      else if (haWaterMonth != null) putWaterCycle(haWaterMonth); // calendar-month placeholder
+      waterCycleFromHistory(curWaterGal);                        // authoritative -- always runs
     }
     var curGasCcf = gCcf != null ? gCcf : (graw != null ? graw / 100 : null);
     if (curGasCcf != null) {
