@@ -28,6 +28,32 @@ Replace the A/C unit **and** run complete new ductwork.
   cut the labor cost.** Jeff: *"I'm going to try to get my AC friend to let me help him do it but
   the ductwork in and see if that won't save some money."*
 
+### 🔴 KNOWN DEFECT TO FIX ON THE NEW INSTALL — the twist at the unit
+
+Jeff, 2026-08-31: *"both the main register line and the return line run down the center of the house
+[and] when they approach the unit they are twisted so that needs to be fixed on the new unit."*
+
+**Existing layout:** main supply trunk and the return both run down the **centre of the house**, and
+**both are twisted where they meet the package unit.**
+
+**Why this matters and is not cosmetic:** a twist at the unit is the worst place for a restriction —
+every cubic foot of air in the house passes through those two points. Twisted flex raises static
+pressure, the blower moves less air, and the system runs longer for the same cooling. That is the
+same class of penalty as the duct leak repaired 07-25, which measured **441 kWh / 16.8% / ~$41 a
+month** once fixed.
+
+**What the new install needs:**
+- A proper **sheet-metal transition/plenum** at the package unit on BOTH the supply and return —
+  not flex twisted onto the collar. This is an extra BOM line that the flex-duct pricing below does
+  NOT cover, and it is part of the "$150-350 not priced" allowance.
+- Straight, supported runs into those transitions. Flex should be pulled taut and strapped, not
+  compressed or spiralled.
+- Worth having the A/C friend measure **static pressure** before and after — that turns "it feels
+  better" into a number.
+
+**This is measurable.** Baseline it from the CEMC 15-minute data the same way the 07-25 repair was
+measured, so the twist fix gets credited separately from the new unit.
+
 ## 2. Ductwork materials — priced 2026-08-31, real search, not from memory
 
 Home Depot, R8 insulated flexible duct, 25 ft rolls:
