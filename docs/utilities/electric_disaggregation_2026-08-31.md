@@ -31,9 +31,12 @@ Verified live in Jeff's own SmartHub session (`cemc.smarthub.coop`, acct 4501007
 **(a) DO NOT USE DATA FROM BEFORE THE DUCTWORK REPAIR.** Jeff: *"that was putting out a real strain
 on the AC so that's going to be flaw data but everything since then should be correct."*
 
-**The repair date is NOT recorded anywhere in this project** — searched; the only trace is *"real
-ductwork leak, since fixed"* with no date. **Derived from the data instead:** scanning 109 cooling
-days (temp >= 70F) for the split that best separates kWh-per-degree gives a change point at
+**CONFIRMED 2026-08-31: the duct repair is dated 2026-07-25.** Jeff pointed to
+`iCloudDrive/duct-repair-home-depot-list.pdf` — his Home Depot parts list for the job — whose
+CreationTime and LastWriteTime are both **7/25/2026 6:06:35 PM**.
+
+**Two independent sources agree to within one day.** Before knowing that file existed, a change-point
+scan of 109 cooling days (temp >= 70F) on CEMC's own meter data put the efficiency step at
 **~2026-07-24**:
 
 ```
@@ -41,9 +44,15 @@ BEFORE  May 10 - Jul 23   71 days   64.7 kWh/day @ 77.7 F
 AFTER   Jul 24 - Aug 30   38 days   58.9 kWh/day @ 80.6 F
 ```
 
-Usage fell 5.8 kWh/day while average temperature ROSE 2.9 F — 0.833 -> 0.731 kWh per degree-day,
-a **12% efficiency gain**. That is the signature of the duct repair. **AWAITING JEFF'S CONFIRMATION
-of the real date** — do not treat ~07-24 as settled until he says so, then write it here.
+Usage fell 5.8 kWh/day while average temperature ROSE 2.9 F — 0.833 -> 0.731 kWh per degree-day, a
+**12% efficiency gain**. The meter saw the repair the day before the receipt is dated, which is
+exactly what you would expect if the work was done on or just before the 25th.
+
+🔴 **USE 2026-07-25 AS THE HARD START LINE FOR CLEAN ELECTRIC DATA.** Anything earlier reflects an
+A/C straining against leaking ductwork and will bias every model built on it. That leaves ~37 clean
+days as of 2026-08-31 — enough for a summer baseline, NOT enough for a winter one.
+
+⚠️ **The PDF's CONTENTS have not been read** — it is an iCloud placeholder and hydration timed out twice (`The cloud operation was not completed before the time-out period expired`). Only the file's timestamps were readable. **What Jeff actually repaired is therefore still unknown to the record.** If it matters, open the file once on the Mac/PC to force the download, then re-read it.
 
 **(b) WINTER IS CONFOUNDED BY A 1500 W SPACE HEATER.** Jeff: *"Angela has a tendency to run one of
 those 1500 W heaters under her desk because she's always cold… in the winter that little heater
