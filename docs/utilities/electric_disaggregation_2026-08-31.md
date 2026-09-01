@@ -722,3 +722,45 @@ ceiling here.
 **THE TEST THAT WOULD SETTLE IT:** a dryer load run **overnight**, when outdoor temperature is
 stable and the A/C duty is flat. The dryer block would then stand alone against a quiet baseline
 with no thermal confounder at all. Cheap to do, definitive, and worth doing once.
+
+---
+
+# 🔬 PRE-REGISTERED PREDICTION — written 2026-09-01 06:23 CT, BEFORE the data exists
+
+Jeff, 06:23: *"I have a load I'm about to put in the dryer now."* This is the definitive test
+recorded earlier — a dryer run at the coolest hour, with A/C duty near zero and no cooking, so the
+one confounder that survived the 08-31 analysis (A/C step 2.64 kW vs dryer ~2.75 kW) is absent.
+
+🔴 **THIS PREDICTION IS WRITTEN BEFORE THE DATA CAN BE SEEN. It is falsifiable. If the data does
+not match, the model is wrong and this file must say so — do not retro-fit it.**
+
+## What the corrected model says must appear on 2026-09-01, starting ~06:30 CT
+
+| Quantity | Predicted | Basis |
+|---|---|---|
+| Block of consecutive elevated 15-min intervals | **YES, contiguous** | 3-of-3 blocks on 08-31 |
+| Duration | **60-90 min** (4-6 intervals) | loads 1/2 were 60, load 3 was 90 |
+| Elevation above the pre-load baseline | **+1.6 to +2.7 kW** | measured 08-31: 2.67 / 1.58 / 1.99 |
+| Absolute 15-min reading | **~2.8 - 4.5 kW** | 06:00-06:30 baseline was 0.92-1.12 kW, plus the above |
+| Peak single interval | **under 6 kW** | 08-31 max was 5.64 all day, WITH A/C |
+| Energy for the load | **~1.6 - 3.0 kWh** | 08-31 loads were 2.67 / 1.58 / 2.99 |
+| Return to baseline after | **full**, within one interval | 11:00-11:45 returned to control on 08-31 |
+
+## What would FALSIFY the model
+
+- **No contiguous elevated block** in the 06:15-08:30 window -> the 08-31 blocks were not the dryer.
+- **A flat 5-6 kW plateau** -> the nameplate assumption was right after all and the cycling /
+  duty-factor explanation is wrong.
+- **Elevation far outside +1.6 to +2.7 kW** -> the amplitude figure does not generalise; it was an
+  artefact of that particular day's A/C behaviour.
+- **No return to baseline** -> the block is not a discrete appliance.
+
+## Why this run settles what 08-31 could not
+
+On 08-31 the only surviving objection was that the A/C step (2.64 kW) and a dryer at ~50% duty
+(2.75 kW) are 4% apart and therefore inseparable by magnitude. At 06:30 on a September morning the
+A/C is at or near zero duty, so **any block that appears cannot be the A/C.** The structural
+argument from 08-31 (three on/off blocks against a monotonically RISING temperature, including a
+drop BELOW control at 11:30) already pointed this way; this makes it direct rather than inferred.
+
+**Check when the 09-01 15-minute data posts (CEMC lags ~1 day). Record the result either way.**
