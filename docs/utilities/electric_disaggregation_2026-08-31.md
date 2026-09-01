@@ -521,3 +521,64 @@ Also removed: dead `elecCycleFromHistory` / `firstNum` / `lastNum` and a **dupli
 count check disagreed with the label I had written on it.
 
 **The lesson, plainly: a simulated test proves the arithmetic, never the assumption underneath it.**
+
+---
+
+# 2026-09-01 06:15 — DRYER GROUND-TRUTH TEST: RESULT
+
+Jeff, 2026-08-31 ~15:20: *"I have been running the dryer all morning."* The labelled event
+`#105b` was set up to validate the 240 V disaggregation against.
+
+⚠️ **The 15-minute data was NOT obtainable** — the CEMC session timed out and only Jeff can log in.
+This ran on **hourly** long-term statistics instead, which smear a 45–60 min cycle across two
+buckets. **That limitation is why the pre-registered pass/fail returned INCONCLUSIVE**, and it is
+reported as such rather than talked around.
+
+## Hourly, 06:00–12:00, against the 08-30 control
+
+```
+          08-30 control   08-31 test    excess
+06:00          1.16          1.24       +0.08
+07:00          0.88          1.64       +0.76
+08:00          0.96          2.03       +1.07
+09:00          1.17          3.84       +2.67   <- consecutive
+10:00          1.84          3.42       +1.58   <- consecutive
+11:00          2.57          2.66       +0.09
+12:00          2.94          4.78       +1.84
+                          morning excess +8.09 kWh
+```
+
+## Controlling for weather THREE independent ways — they agree
+
+**(a) Evening as control.** 14:00–20:00 had no dryer either day and A/C running on both:
+excess **+1.60 kWh over 7 h = +0.229 kWh/h** ambient difference. Applied to the 7 morning hours
+= 1.60 kWh weather-attributable. **Net non-weather morning excess = 6.49 kWh.**
+
+**(b) Measured temperature, not inferred.** `sensor.backyard_temperature` (real PWS, n=90 and 95
+samples): **08-30 avg 84.8 °F → 08-31 avg 86.6 °F, +1.8 °F.** The evening-control assumption was
+correct — 08-31 genuinely was the warmer day.
+
+**(c) The existing kWh/°F model.** 1.71 kWh per °F (R² 0.65, already in this file):
+`+1.8 °F x 1.71 = +3.1 kWh/day` expected from weather. Actual whole-day delta
+`66.4 - 54.9 = +11.5 kWh`. **Unexplained ≈ 8.4 kWh**, and 8.09 of the 11.5 fell in the morning.
+
+Methods (a) and (c) bracket the non-weather morning load at **6.5 – 8.4 kWh**.
+
+## Verdict — stated at the confidence the data supports, no more
+
+A 30 A dryer draws ~5–5.5 kW; a 45–60 min cycle is **3.8–5.5 kWh per load**. So 6.5–8.4 kWh is
+**1.2–2.2 loads** — consistent with "all morning".
+
+**SHAPE is the strongest evidence.** 09:00 (+2.67) and 10:00 (+1.58) are *consecutive* elevated
+hours. `#108` predicted in advance that a dryer would appear exactly this way at hourly resolution,
+and that a range/oven would instead be ragged and non-consecutive. It is consecutive.
+
+🟢 **CONCLUSION: strongly consistent with the dryer, and NOT proven.** The excess is real,
+survives three separate weather controls, and has the predicted shape. What hourly data cannot do
+is definitively separate a dryer plateau from a long oven cycle — only the 15-minute data can, and
+that needs Jeff logged into SmartHub. **The disaggregation model is supported but not yet
+validated. Do not upgrade that wording without the 15-minute pull.**
+
+⚠️ Note the 12:00 hour (+1.84, the day's highest at 4.78 kWh) sits at lunchtime and is the single
+most likely candidate to be the **range** rather than the dryer. It is included in the excess above,
+which makes the dryer-load estimate an upper bound.
