@@ -660,3 +660,65 @@ cook, which removes the only confounder that matters.
 What IS established: the dryer is electric (gas ruled out to 0.06 CCF), 08-31 carried 6.5–8.4 kWh
 of genuine non-weather load, and 08-31 had three intervals above 5 kW where the control day had
 none. The energy is real. The attribution is not yet proven.
+
+---
+
+# 2026-09-01 06:30 — RE-RUN WITH THE OVEN RULED OUT BY JEFF. CONTROL-DIFFERENCED.
+
+Jeff, 06:18 and again 06:29: *"I didn't cook yesterday I used the trigger and microwave"* /
+*"The oven was never turned on yesterday."* That removes the one confounder the earlier verdict
+hung on, so the analysis was redone properly: **both days pulled at 15-min resolution and
+differenced interval by interval.**
+
+## 08-31 minus 08-30, 15-min kW
+
+```
+06:45-08:45   +0.4 to +1.5      light, scattered
+09:00 +2.40  09:15 +2.64  09:30 +2.76  09:45 +2.88   <- FOUR CONSECUTIVE, 60 MINUTES
+10:00 +1.32  10:15 +1.52  10:30 +1.88  10:45 +1.60
+11:00-11:45   +0.6 to -0.4      back to control
+12:00 +2.92  12:15 +1.48  12:30 +2.24  12:45 +0.72  13:00 +2.92  13:15 +1.68
+
+net added energy 06:00-14:00 : 9.52 kWh
+```
+
+🟢 **THE SUSTAINED RUN EXISTS — at the right amplitude, which the first attempt got wrong.**
+`09:00 -> 09:45`, **4 consecutive intervals, 60 minutes, avg +2.67 kW, peak +2.88.** Sixty minutes
+is a dryer cycle. The first test looked for **5-6 kW absolute** (nameplate) and found nothing;
+the real signature is **+2.7 kW above the control day**, because the element cycles.
+
+## Weather controlled at the hour, not just the day
+
+`sensor.backyard_temperature`, 09:00-10:00 window, n=6 each day:
+
+```
+08-30  avg 80.5 F        08-31  avg 83.5 F        delta +3.0 F
+weather can explain (1.71 kWh/F)                  +0.21 kWh
+measured added energy that hour                   +2.67 kWh     -> weather = 8%
+whole day: +11.5 kWh actual - 3.1 kWh weather  =  8.4 kWh real appliance load
+                                                  ~3 h at 2.7 kW = 2-3 dryer cycles
+```
+
+## 🔴 WHAT IS STILL **NOT** PROVEN — and it will not be called proven
+
+```
+A/C step, measured 08-30                    2.64 kW
+electric dryer 5.5 kW at ~50% duty, 15-min  2.75 kW
+                                            4% apart
+```
+
+**Magnitude cannot separate dryer from A/C at 15-minute resolution.** 83.5 F could plausibly run
+the A/C when 80.5 F did not, and on 08-30 that hour sat at the floor (0.96-1.40 kW = A/C basically
+off). So an extra A/C run is *not* formally excluded by this data.
+
+**ESTABLISHED:** dryer is electric (gas moved 0.06 CCF; a gas load is 0.2-0.35) · 9.52 kWh added
+06:00-14:00 · 8.4 kWh survives weather normalisation · oven excluded by Jeff · a genuine
+60-minute continuous +2.67 kW block exists.
+
+**NOT ESTABLISHED:** that the block is the dryer rather than A/C. Most likely the dryer — nothing
+else fits a 60-minute continuous block on a day with no cooking — but "most likely" is the honest
+ceiling here.
+
+**THE TEST THAT WOULD SETTLE IT:** a dryer load run **overnight**, when outdoor temperature is
+stable and the A/C duty is flat. The dryer block would then stand alone against a quiet baseline
+with no thermal confounder at all. Cheap to do, definitive, and worth doing once.
