@@ -443,3 +443,81 @@ against $23.19 projected here. Same neighbourhood, slightly higher usage month. 
    (441 kWh, 16.8%) — **provided a winter baseline is captured on the OLD unit before it comes out.**
    Jeff is replacing it before winter, so that baseline may not be obtainable. Say so rather than
    inventing one later.
+
+---
+
+# 2026-09-01 06:05 — THE FIRST LIVE ROLLOVER BROKE IT, AND WHY
+
+Yesterday's cycle fix was tested by SIMULATION. The first real month boundary broke it inside
+12 hours. Found 05:45 today: **the app was showing electric at 0 kWh / $39.00 for a cycle that had
+used ~411 kWh.**
+
+## The premise was wrong, not the logic
+
+The SmartHub monthly sensor does not reset once, cleanly:
+
+```
+08-31 08:59 CT   1777.0
+08-31 20:08 CT    388.0   <- drop 1
+09-01 00:12 CT      0.0   <- drop 2
+```
+
+So "last value of August" read **388**. The guard (`endOfMonth < base -> refuse`) fired *correctly*
+and declined to compute. But the `0 / $39.00` placeholder had already been written, so refusing to
+correct it left the wrong number on screen. **Right guard, wrong premise.** The simulated test
+assumed one clean reset; nothing tested that assumption.
+
+## Worse: the recorder-derived statistic is CORRUPTED by that rollover
+
+HA read the 1722 -> 388 drop as a counter reset and treated 388 as fresh usage:
+
+```
+sensor.electric_smarthub_...        08-31  sum 2828  state 388  change 443   <- PHANTOM 443 kWh
+                                    cycle = 776.0 kWh  =  $128.27     WRONG
+
+smarthub:...energy_sensor_daily_    cycle = 410.7 kWh  =  $86.25      correct
+smarthub:...energy_sensor_          cycle = 410.8 kWh  =  $86.25      correct
+```
+
+The two `smarthub:` ids are the **integration's own** statistics — per its README they align usage
+to when it actually happened rather than being derived from a resetting state. They agree with each
+other to **0.1 kWh**. 🔴 **NEVER compute billing from the sensor entity id.**
+
+This was answerable from `electric_smarthub_data_upgrade_2026-08-06.md` — *"It explicitly creates
+2 Statistics (daily, hourly)"* — a file that had never been opened before today.
+
+## Second bug, found in the same pass
+
+`loadElectricStats()` was passing that same corrupted id, so **Today / Yesterday / Peak Hour /
+Last 7 Days read it too.** "Yesterday" would have rendered **443 kWh** against a real 66.4.
+Repointed at the clean hourly statistic.
+
+## Cycle boundary — from the bill, not a guess
+
+`"Services From 06/23/2026 To 07/23/2026 for 30 Days"`, readings 10550 -> 12670. The start-date
+reading is the **BASELINE**; usage accrues after it. So: diff from the cycle-start row forward.
+Summing `change` instead double-counts day one (454.5 vs 410.7).
+
+## Verified live on the deployed app, 2026-09-01 06:04
+
+```
+electric   411 kWh   $86.25      <- was 0 kWh / $39.00
+  yesterday  66.4 kWh            <- was going to be 443 kWh (the phantom). PROOF bug 2 is fixed.
+  peak hour  12-1 PM  4.8 kWh
+  today      ~0.8 kWh  (still marked "≈" — today's stats not imported yet. Honest, not faked.)
+water      603.4 gal  $15.80
+sewer                 $46.29
+gas       6.10 ccf    $23.19
+combined              $95.08     (15.80 + 46.29 + 24.00 + 8.99 = 95.08)
+```
+
+`HCC-UtilityCycle.py` had the identical bug (reported 0.0 / $39.00 at 05:45); rewritten the same
+way, now returns **410.7 / $86.25**, matching an independent WebSocket probe exactly. Its one bad
+banked row is flagged `INVALID` with figures nulled — kept, not deleted, since the file is
+append-only by design. Scheduled task re-enabled, next run 06:15.
+
+Also removed: dead `elecCycleFromHistory` / `firstNum` / `lastNum` and a **duplicate
+`putElecCycle` declaration** left behind by the replacement — caught only because the post-edit
+count check disagreed with the label I had written on it.
+
+**The lesson, plainly: a simulated test proves the arithmetic, never the assumption underneath it.**
