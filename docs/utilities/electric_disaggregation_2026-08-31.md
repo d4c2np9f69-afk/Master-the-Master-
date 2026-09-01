@@ -582,3 +582,81 @@ validated. Do not upgrade that wording without the 15-minute pull.**
 ⚠️ Note the 12:00 hour (+1.84, the day's highest at 4.78 kWh) sits at lunchtime and is the single
 most likely candidate to be the **range** rather than the dryer. It is included in the excess above,
 which makes the dryer-load estimate an upper bound.
+
+---
+
+# 2026-09-01 06:25 — 15-MINUTE DATA PULLED. THE PRE-REGISTERED TEST **FAILED**.
+
+Jeff logged back into SmartHub, so the test `#105b` was actually designed for could finally run:
+**95 x 15-minute points for 2026-08-31.**
+
+## The criterion, written in advance (#108), and the result
+
+> *"look for a RUN of consecutive 15-min intervals above 5 kW... If what appears is a lone spike,
+> that is more likely the range and the test is inconclusive — say inconclusive, do not claim the
+> dryer."*
+
+```
+intervals >6 kW : 0
+intervals >5 kW : 3   -- and all three are ISOLATED, none consecutive
+                        12:00  5.64 kW      12:30  5.16 kW      13:00  5.64 kW
+max all day     : 5.64 kW      (control 08-30 max: 4.20 kW, zero intervals >5)
+```
+
+🔴 **FAILED. No sustained run. Three lone spikes, at lunchtime, which is the signature I said in
+advance would indicate the RANGE.** Recorded as a failure, not massaged into a pass.
+
+## But the load is real, and the dryer IS electric — so the TEST was wrong, not the data
+
+**Gas ruled out decisively.** A gas dryer burns 0.2–0.35 CCF per load:
+
+```
+08-30   8858.54 -> 8858.64   used 0.10 CCF
+08-31   8858.64 -> 8858.80   used 0.16 CCF      difference 0.06 CCF
+```
+
+0.06 CCF is a fraction of one load. **The dryer is electric.** And the energy is genuinely there —
+6.5–8.4 kWh of non-weather morning excess, established three separate ways and independently
+confirmed by the backyard PWS (+1.8 °F).
+
+## The morning profile — 08-31, 15-min kW
+
+```
+06:00-08:45   0.92 - 2.40      baseline
+09:00-10:45   3.04 - 4.24      SUSTAINED 2-hour elevated block  (control same hours: ~1.2-1.8)
+11:00-11:45   2.48 - 2.76      back to baseline
+12:00-13:15   5.64 4.20 5.16 4.12 5.64 4.44   <- ALTERNATING, ~1.5 kW swing
+```
+
+## 🔴 THE REAL FINDING — MY DRYER SIGNATURE WAS WRONG, AND IT WAS WRONG BY CONSTRUCTION
+
+I set the 5–6 kW threshold from the **nameplate** (30 A x 240 V). An electric dryer's heating
+element is **thermostatically cycled** — it is not on continuously. Averaged over a 15-minute
+bucket, a 5.5 kW element at a ~65% duty cycle reads **~3.6 kW**, never the nameplate figure.
+
+That is exactly what the data shows: an alternating 4.1 ↔ 5.6 kW pattern, not a flat plateau.
+**The alternation IS the element cycling. I was looking for the wrong shape entirely.**
+
+### Corrected model — use this, not the nameplate
+
+| Load | Nameplate | **What 15-min data actually shows** |
+|---|---|---|
+| floor (all 120 V) | — | **1.40 kW** (5th pct, measured) |
+| A/C | 30 A | **+2.64 kW** step, measured |
+| electric dryer | 30 A / ~5.5 kW | **~3.5-4.0 kW averaged**, with a **1.5 kW alternation** — cycling, not a plateau |
+| range / oven | 50 A | short spikes, also cycling |
+
+🔴 **A threshold test on magnitude alone cannot separate dryer from oven at 15-min resolution —
+both are cycling elements of similar averaged size.** Duration was the right instinct; the
+threshold was set too high to ever trigger. **Do not re-run this test unchanged.**
+
+## Verdict
+
+**The disaggregation model is NOT validated, and the reason is that the test was built on a
+nameplate assumption instead of measured behaviour.** The corrected signature above comes from real
+data and is the thing to test against next time — ideally on a day Jeff runs the dryer and does NOT
+cook, which removes the only confounder that matters.
+
+What IS established: the dryer is electric (gas ruled out to 0.06 CCF), 08-31 carried 6.5–8.4 kWh
+of genuine non-weather load, and 08-31 had three intervals above 5 kW where the control day had
+none. The energy is real. The attribution is not yet proven.
