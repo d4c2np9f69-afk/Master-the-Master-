@@ -11332,6 +11332,23 @@ function loadUtilities() {
   //   WHUD water = 22nd   ·   City sewer/sanitation/stormwater = 7th   ·   Spire gas = 5th
   var CITY_CYCLE_DAY = 7;
   var CEMC_CYCLE_DAY  = 23;
+  // THE ELECTRIC STATISTIC ID -- and it is NOT the sensor entity id. Measured 2026-09-01.
+  //
+  // The SmartHub monthly SENSOR resets each month, and on 2026-08-31/09-01 it did so in TWO
+  // steps: 1777 -> 388 -> 0. HA's total_increasing handling read the 1722->388 drop as a
+  // counter reset and treated 388 as fresh usage, injecting a phantom 443 kWh into the
+  // recorder-derived statistic. Verified across the rollover:
+  //
+  //   sensor.electric_smarthub_...       08-31 sum 2828 state 388 change 443  -> 776.0 kWh  WRONG
+  //   smarthub:...energy_sensor_...                                           -> 410.8 kWh  correct
+  //   smarthub:...energy_sensor_daily_...                                     -> 410.7 kWh  correct
+  //
+  // The two `smarthub:` ids are the INTEGRATION'S OWN statistics -- per its README they align
+  // usage to when it actually happened, rather than being derived from a resetting state. They
+  // agree with each other to 0.1 kWh. USE THESE. Never compute billing from the sensor id.
+  // Source: docs/utilities/electric_smarthub_data_upgrade_2026-08-06.md ("2 Statistics").
+  var CEMC_STAT_DAY  = 'smarthub:smarthub_energy_sensor_daily_4501007001_16290';
+  var CEMC_STAT_HOUR = 'smarthub:smarthub_energy_sensor_4501007001_16290';
   // First moment of the current billing cycle for a given read-day.
   function cycleStartFor(day){
     var d = new Date(), y = d.getFullYear(), m = d.getMonth();
@@ -11552,6 +11569,10 @@ function loadUtilities() {
     // history/statistics_during_period doesn't exist on this HA version, it's
     // recorder/statistics_during_period -- see functions/api/ha-stats.js.
     function loadElectricStats(entId){
+      // entId is IGNORED for the statistics query as of 2026-09-01 -- it used to be the
+      // monthly sensor's id, whose recorder statistic is corrupted across a month rollover
+      // (see CEMC_STAT_HOUR). Kept in the signature so every existing caller still works.
+      entId = CEMC_STAT_HOUR;
       if (!entId) return;
       var now = new Date();
       var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
@@ -11836,49 +11857,99 @@ function loadUtilities() {
     }
 
     // ---- ELECTRIC: real billing cycle (CEMC reads the 23rd) ---------------------------
-    // HARDER than water/gas, and the reason is worth reading before changing anything.
-    // There is NO cumulative electric odometer in HA -- the ONLY entity is SmartHub's
-    // MONTHLY TOTAL, which resets to 0 on the 1st. So a plain (now - base) diff is correct
-    // ONLY while the cycle start and today sit in the same calendar month. From the 1st
-    // until the 23rd the cycle spans the reset and a plain diff goes NEGATIVE.
-    // Handled by summing the two pieces:  (month-end - base) + today's running total.
+    // REWRITTEN 2026-09-01 after the first live month rollover broke the previous version.
+    //
+    // v1 differenced the raw monthly sensor state. That assumed ONE clean reset on the 1st.
+    // Reality on 08-31/09-01 was TWO drops (1777 -> 388 -> 0), so "last value of August" read
+    // 388, the guard correctly refused to compute from it, and the 0/$39.00 placeholder was
+    // left standing. The app told Jeff his cycle was $39.00 when it was ~$86.
+    //
+    // v2 uses HA's long-term statistics instead, which carry a genuinely cumulative `sum`.
+    // Usage = diff of consecutive cumulative sums (NOT the `change` field, which comes back
+    // null/0 through the proxy -- same reason toDiffedSeries() exists for Today/Yesterday).
+    //
+    // Cycle boundary convention comes from the bill itself: "Services From 06/23/2026 To
+    // 07/23/2026 for 30 Days", readings 10550 -> 12670. The start-date reading is the
+    // BASELINE, so usage accrues AFTER it -- diff from the cycle-start row forward, do not
+    // add that row's own change. (Sub-day imprecision: the meter is read at some hour on the
+    // 23rd, statistics bucket by whole day. Worth under a day either way; not modelled.)
     function putElecCycle(kwh){
       put('util-elec-month', kwh.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }));
       var c = ELEC_BASE + kwh * ELEC_PER_KWH;
       put('util-elec-cost', '$' + c.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
     }
-    function firstNum(arr){
-      for (var i = 0; i < arr.length; i++){ var v = parseFloat(arr[i].state); if (!isNaN(v)) return v; }
-      return null;
+    function elecCycleFromStats(){
+      var cs = cycleStartFor(CEMC_CYCLE_DAY);
+      haStatsFetch(CEMC_STAT_DAY, cs.toISOString(), new Date().toISOString(), 'day')
+        .then(function(r){ return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)); })
+        .then(function(j){
+          var raw = (j && j.statistics) || [];
+          if (Array.isArray(raw) === false) {                 // proxy may key by statistic id
+            var k = Object.keys(raw)[0];
+            raw = k ? raw[k] : [];
+          }
+          if (!raw || raw.length < 2) return;                 // not enough to diff -- leave alone
+          var items = raw.slice().sort(function(a2, b2){ return new Date(a2.start) - new Date(b2.start); });
+          var total = 0, pairs = 0;
+          for (var i = 1; i < items.length; i++){
+            var p = items[i - 1].sum != null ? items[i - 1].sum : items[i - 1].state;
+            var c2 = items[i].sum != null ? items[i].sum : items[i].state;
+            if (p == null || c2 == null) continue;
+            if (c2 < p) return;                               // sum went backwards -> refuse
+            total += (c2 - p); pairs++;
+          }
+          if (!pairs) return;
+          putElecCycle(total);
+        })
+        .catch(function(){});                                 // unreachable -> leave display alone
     }
-    function lastNum(arr){
-      for (var i = arr.length - 1; i >= 0; i--){ var v = parseFloat(arr[i].state); if (!isNaN(v)) return v; }
-      return null;
-    }
-    function elecCycleFromHistory(ent, curKwh){
-      if (!ent || curKwh == null) return;
-      var cs = cycleStartFor(CEMC_CYCLE_DAY), now = new Date();
-      var sameMonth = (cs.getMonth() === now.getMonth() && cs.getFullYear() === now.getFullYear());
-      // NOTE: /api/history/period/<start> defaults to a ONE DAY window unless end_time is
-      // given. That is all we need here -- the FIRST reading at/after the cycle start.
-      haFetch('/api/history/period/' + cs.toISOString() + '?filter_entity_id=' + ent + '&minimal_response',
+
+    // ---- SEWER: the CITY's billing cycle (reads the 7th), NOT WHUD's ------------------
+    // Sewer has no meter of its own -- the City bills it off the WHUD water reading. But it
+    // bills on a DIFFERENT cycle, so the gallons must be counted from the City's own start
+    // date. Same diff-two-readings pattern as water; different start day.
+    function sewerCycleFromHistory(curGal){
+      if (curGal == null) return;
+      var wEnt = null;
+      states.forEach(function(s){ if (s && typeof s.entity_id === 'string'){ var id=s.entity_id.toLowerCase(); if (id.indexOf('water_meter')>=0 && id.indexOf('reading')>=0) wEnt=s.entity_id; } });
+      if (!wEnt) return;
+      var cs = cycleStartFor(CITY_CYCLE_DAY);
+      haFetch('/api/history/period/' + cs.toISOString() + '?filter_entity_id=' + wEnt + '&minimal_response',
               { signal: AbortSignal.timeout(15000) })
         .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
         .then(function(h){
-          var base = firstNum((h && h[0]) || []);
+          var arr = (h && h[0]) || [], base = null;
+          for (var i = 0; i < arr.length; i++){ var v = parseFloat(arr[i].state); if (!isNaN(v)) { base = v / 10; break; } }
           if (base == null) return;
-          if (sameMonth) { putElecCycle(Math.max(0, curKwh - base)); return; }
-          // Cycle spans the 1st: add what was used from the cycle start to month end,
-          // then everything since the reset (which is exactly the current value).
-          var mEnd = new Date(now.getFullYear(), now.getMonth(), 0, 0, 0, 0); // last day of prev month
-          return haFetch('/api/history/period/' + mEnd.toISOString() + '?filter_entity_id=' + ent + '&minimal_response',
-                         { signal: AbortSignal.timeout(15000) })
-            .then(function(r2){ return r2.ok ? r2.json() : Promise.reject(); })
-            .then(function(h2){
-              var endOfMonth = lastNum((h2 && h2[0]) || []);
-              if (endOfMonth == null || endOfMonth < base) return;   // cannot verify -> leave alone
-              putElecCycle(Math.max(0, (endOfMonth - base) + curKwh));
-            });
+          _sewerCycleGal = Math.max(0, curGal - base);
+          put('util-sewer-cost', '$' + (SEWER_BASE + _sewerCycleGal * SEWER_PER_GAL)
+                .toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+          renderCombined();
+        })
+        .catch(function(){});
+    }
+
+    // ---- GAS: real billing cycle (Spire reads the 5th) --------------------------------
+    // sensor.gas_ccf is a TRUE cumulative odometer (8858.76 and climbing, never resets), so
+    // this is the same diff-two-readings pattern as waterCycleFromHistory(). sensor.gas_month
+    // is HA's utility_meter and resets on the 1st -- 4 days out of phase with the bill.
+    function putGasCycle(ccf){
+      put('util-gas-month', ccf.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+      var th = Math.round(ccf * GAS_HEAT);
+      var c  = (GAS_BASE + th * GAS_PER_THERM) * (1 + GAS_FRANCHISE);
+      put('util-gas-cost', '$' + c.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    }
+    function gasCycleFromHistory(curCcf){
+      if (curCcf == null) return;
+      var cs = cycleStartFor(SPIRE_CYCLE_DAY);
+      haFetch('/api/history/period/' + cs.toISOString() + '?filter_entity_id=sensor.gas_ccf&minimal_response',
+              { signal: AbortSignal.timeout(15000) })
+        .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+        .then(function(h){
+          var arr = (h && h[0]) || [], base = null;
+          for (var i = 0; i < arr.length; i++){ var v = parseFloat(arr[i].state); if (!isNaN(v)) { base = v; break; } }
+          if (base == null) return;
+          putGasCycle(Math.max(0, curCcf - base));
         })
         .catch(function(){});
     }
@@ -12052,8 +12123,12 @@ function loadUtilities() {
       put('util-elec-month', eMonth.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }));
       var eCost = ELEC_BASE + eMonth * ELEC_PER_KWH;
       put('util-elec-cost', '$' + eCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
-      elecCycleFromHistory(eMonthEnt, eMonth);  // authoritative -- overrides the calendar month
+      elecCycleFromStats();                     // authoritative -- overrides the calendar month
       elecBackfillProfile(eMonthEnt);
+      // Today / Yesterday / Peak Hour / Last 7 Days were ALSO reading the recorder-derived
+      // statistic, which the 09-01 rollover poisoned with a phantom 443 kWh -- "Yesterday"
+      // would have rendered 443 kWh against a real 66.4. Point them at the integration's own
+      // hourly statistic instead. See CEMC_STAT_HOUR above.
 
       var nowTs = Date.now(), lastSample = {};
       try { lastSample = JSON.parse(localStorage.getItem(ELEC_SAMPLE_KEY) || '{}'); } catch (e) { lastSample = {}; }
