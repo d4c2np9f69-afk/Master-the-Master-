@@ -764,3 +764,24 @@ argument from 08-31 (three on/off blocks against a monotonically RISING temperat
 drop BELOW control at 11:30) already pointed this way; this makes it direct rather than inferred.
 
 **Check when the 09-01 15-minute data posts (CEMC lags ~1 day). Record the result either way.**
+
+### GROUND TRUTH — exact start time, recorded live
+
+Jeff, **2026-09-01 06:28 CT**: *"Putting the load in now will start in 2 min"* -> **START ≈ 06:30 CT.**
+
+That lands exactly on a 15-minute bucket boundary, so the leading edge of the block is unambiguous:
+**the 06:30 interval is the first that should be elevated, and 06:00 / 06:15 are clean pre-load
+baseline.** On 08-31 those two intervals read 1.12 and 0.92 kW.
+
+Expected block, restating the prediction against this exact start:
+
+```
+06:00, 06:15   baseline    (predict ~0.9 - 1.3 kW, A/C near zero at this hour)
+06:30          FIRST elevated interval
+06:30 -> 07:30 / 08:00     the block, 4-6 intervals
+after          full return to baseline within one interval
+```
+
+If **06:30 is NOT elevated**, or the elevation starts a bucket or more late with no explanation,
+that counts against the model too — a dryer draws its heaviest element current at the START of a
+cycle, on the wettest clothes.
