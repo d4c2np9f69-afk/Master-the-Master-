@@ -1250,3 +1250,73 @@ everything else so you can see these errors as they happen ... I would like a 24
 | 109 | 🛑 **HOLD — DO NOT TOUCH THE IRRIGATION / SEWER-OVERCHARGE CODE. Jeff's explicit instruction, 2026-08-31 16:22.** The Orbit anti-siphon valve **arrived in the mail and goes in 2026-09-01**. Once water is back on, real gallons start flowing again and the system must be observed picking back up **as currently built**, against real water, before anything is changed. Jeff: *"don't change what's in there because it needs to pick back up reading it like it's set up to be because there's no gallon for minute flow other than what we get off of the meter to show other than the zones running."* **He is right and it is the whole design:** B-Hyve says WHICH zone and HOW LONG; the water meter is the ONLY source of HOW MUCH. `IRR_FLOW={1:8.78,2:10.09,5:4.4}` was itself derived FROM the meter (isolated single-zone runs, 08-06). ✅ **Confirmed 08-31: today's two deployed commits (dde13d2 gas/electric cycles, 8b406ac sewer City cycle) touched ZERO lines of this path** — no `functions/` files, 0 deletions across `irrGal`/`sewerWaste`/`water_billing_history`/`IRR_FLOW`/`whudCycleKey`. A paginated deep-history fetch for `functions/api/irrigation/index.js` was written and then **REVERTED unpushed** on Jeff's instruction; the approach is recorded below, re-apply only when he says. | Jeff → me | 0d | 🟢 **IT SELF-CORRECTS — this is the key thing.** The guard `if (totalGal <= 0) return;` only blocks while there is NO water. The moment a real run lands, `totalGal > 0`, the guard passes, and `irrGalFromHistory()` overwrites the phantom 5,098 with the real number automatically. Nothing needs changing for that to happen. |
 | 109b | 📋 **VERIFY-AFTER-VALVE CHECKLIST — run this once irrigation resumes (from 2026-09-01). Do NOT change code before working through it.** (1) B-Hyve cloud logs the run — `/api/irrigation` `history[]` shows station + run_time. (2) Water meter shows a matching delta in that window — **this is the only proof water actually moved**; a valve can run with the supply off and the model would invent gallons. (3) `water_billing_history` current row flips off **5,098** to a real number. (4) The two sources agree. **Baseline already measured 08-12, both sources, water confirmed flowing:** B-Hyve 362.1 gal modelled (st1 20min×8.78 + st2 15min×10.09 + st5 8min×4.40) vs meter 416.2 gal over 13:02→15:01 UTC — excess is household, model runs ~10% UNDER measured (conservative, good for the claim). | me | 0d | **Known gaps to raise only AFTER the checklist, not before:** (a) HA's switch history is a LOSSY mirror — on 08-12 it reported st1 at 35 min and **missed st2 entirely**; B-Hyve cloud is authoritative. (b) `irrigation_gallons_model.md` step 3 specifies *"prefer the measured meter delta during the run; fall back to the GPM model"* and *"Never show a model as a measurement"* — **the code is model-only and never reads the meter during a run.** (c) Zones 3/4/6 have no `IRR_FLOW` GPM, so real watering there is invisible (undercount). (d) B-Hyve `/watering_events/{id}` is PAGINATED and the app takes only `slice(0,10)` — the multi-year runtime archive Orbit holds has never been pulled. (e) The two existing history rows still hold 5,098. |
 | 109c | 🟡 **PENDING ON THE VALVE — then OMIT the valve-out window and the number is correct. Jeff's instruction, 2026-08-31 16:23:** *"once it goes in we need to check all this and make sure that it squares itself back up once that irrigation system starts running again and then what we can do is omit the amount of time that the valve was out and the number should be correct."* **This is the right call for the claim** — a period when the system was physically down must not appear as irrigation, and omitting it is defensible in a way that a modelled guess is not. **THE OMIT WINDOW, measured not guessed: last real B-Hyve run 2026-08-12 14:36 UTC → valve install 2026-09-01.** B-Hyve shows ZERO runs in that span and the meter confirms no irrigation-shaped draw. | Jeff → me | 0d | **The two stored rows and what each should become:** `whud-2026-7` (cycle 07-22→08-22) **contains REAL runs** — 08-06 and 08-12 — so its phantom 5,098 gets replaced with the real total, **not** omitted. Floor computed from the 10 events the API currently returns: 08-06 st1 42min + st2 42.23min + st5 30min = 926.9 gal; 08-12 st1 20 + st2 15 + st5 8 = 362.2 gal; **≥1,289 gal** — a FLOOR, because `slice(0,10)` truncates and earlier runs in that cycle were never fetched. `whud-2026-8` (08-22→now) contains **zero** runs and is entirely inside the valve-out window → **0 gal / $0**, or omitted. |
+
+---
+
+## 🔋 BATTERY EXPERIMENT CLOSED 2026-09-03 12:46 — all five cameras on fresh cells
+
+**Supersedes the running state in #34.** Jeff replaced `front_right` himself at ~12:40.
+
+### The swap, verified by the study's own rule and not by assertion
+`front_right` **149 → 178** in the 12:46 sample (`wifi -57`). Both prior swaps showed the new
+voltage in the **very next 15-minute sample** — driveway `135 → 174`, back_left `155 → 169` —
+so there is no reporting lag on this system, and a reading that has not moved after one sample
+genuinely has not moved. ⚠️ **At 12:31 it still read 149 and that was reported honestly rather
+than agreeing; the swap happened in the following 15 minutes.** Do not read a single stale
+sample as a contradiction of what Jeff says he did — wait one interval, then answer.
+
+⚠️ **178 is one point ABOVE the documented fresh range of 170-177** (#74). That range was measured
+on three cameras; treat it now as **170-178**.
+
+### Swap dates, MEASURED from `blink-battery-log.csv`, not from memory
+| camera | swapped | reading |
+|---|---|---|
+| `301_driveway` | 2026-08-26 09:31 | 135 → 174 |
+| `301_backyard` | 2026-08-28 15:31 | 155 → 171 |
+| `back_left` | 2026-08-30 21:16 | 155 → 169, settling 174 |
+| `front_right` | **2026-09-03 12:46** | **149 → 178** |
+| `301_front_doorbell` | 2026-09-02, per Jeff | **no `battery_voltage` attribute exists — his word is the only possible evidence, by design** |
+
+### 🔴 THE EXPERIMENT ENDED BY REPLACEMENT, NOT BY DEATH — so the finding stays n=1
+`front_right` was terminated at **149** at Jeff's choice, having declined **-0.51/day**. It never
+reached the cliff. **The death-voltage finding therefore rests on ONE camera, `301_driveway`,
+which died 2026-08-25 02:16 at 133.** Do not write this up as two confirmations.
+
+**What #34 was built to prove is proven and stands:** Blink's own `battery` flag read **`ok` on
+`301_driveway` for 30+ hours after it was dead**. That was the whole question. A second arm would
+have been confirmation, not discovery, and a working camera is worth more than a datapoint.
+
+### Consequences — nothing to build, and that is the point
+- **The daily 09:00 `hcc_camera_battery_at_150_change_all_cameras` alert goes quiet on its own**
+  now that every voltage-reporting camera reads 172-178. 🔴 **Do NOT add a suppression rule for
+  `front_right`** — one was proposed while the experiment was live and is now unnecessary. Fewer
+  moving parts; see #75's own lesson that once-a-day IS the rate limit.
+- `input_datetime.camera_batteries_changed` set **2026-08-26 → 2026-09-02**, read back from HA to
+  confirm rather than trusting the POST. **Deliberately left at 09-02, not bumped to 09-03:** the
+  helper exists for the doorbell, which has no gauge at all, and the earlier date makes the
+  6-month backstop fire a day sooner. Conservative in the right direction.
+- **#76 stands unchanged:** `hcc_backyard_night_sweep` still costs `301_backyard` a battery every
+  3-4 weeks. Fresh cells reset the clock; they do not remove the cost. That trade is tied to #7
+  (backyard PIR aim) and remains Jeff's call.
+- **#6 — `front_right` PIR aim — is NOT closed by this.** New cells do not fix a camera that has
+  logged 1 clip since 08-15 and zero motion in 26 h. Raised with Jeff while he had the Blink app
+  open; **not marked done without his word.**
+
+---
+
+## 🗓️ LIST CAUGHT UP 2026-09-01 → 09-03 — the 09-01 work never reached this file
+
+🔴 **Habit #2 from `CLAUDE.md` ("an owed item handed off in PROSE instead of onto the list"),
+reproduced.** Five commits landed on 09-01 and every one recorded itself only inside
+`docs/utilities/electric_disaggregation_2026-08-31.md` or an uncommitted working-tree file. This
+list stopped at #109c on 08-31, so a session opening it on 09-02 would have seen none of it.
+
+| # | Item | Owner | Notes |
+|---|---|---|---|
+| 110 | ✅ **Electric cycle rollover FAILED on 09-01 and corrupted a statistic; fixed the same morning.** Recorded in `electric_disaggregation_2026-08-31.md` (commits `c1ef5b7`, `e4c05fc`) — the cycle is now computed from long-term statistics instead of the resetting sensor. **Never appeared on this list.** | ✅ closed 09-01 | Cite it, do not re-derive it. |
+| 111 | ✅ **The 09-01 dryer pre-registered test — RESOLVED 09-03, FAILED 4 of 5 criteria.** Its baseline assumption (0.9-1.3 kW pre-load) was wrong by ~4x: the house was at **4.90 kW at 06:00-06:15 before the load went in**, and elevation began **05:30**, an hour early, running past 10:00. **That falsifies the premise the test rested on** — that a September 06:30 has the A/C at near-zero duty, so any block "cannot be the A/C". Weather (+3.1 °F) explains ~5.3 of the +17.9 kWh. **Model still NOT validated.** | ✅ closed 09-03 | 🔴 **Do not run a fourth MORNING test.** The overnight run named in that file is the only clean one left. Full account and the measured CEMC API contract are in `electric_disaggregation_2026-08-31.md`. |
+| 112 | 🔴 **GaragePC is OFF the LAN and the cause is NOT settled.** Verified 09-03: absent from the BGW320 device list entirely — not at its recorded `.121`, not at `.212`. (`HP444BD6` at `.208` is the **printer** — 631/9100 open, 445/139 closed.) `media_player.garagepc` went `unavailable` **2026-09-01 13:18 CT**. ⚠️ **Two candidate causes, and they were conflated once already:** (a) the 08-13 extender retirement left it joined to the vanished `Loewen301_Ext` SSID; (b) **the 09-01 boot loop** caused by a setup script re-applying the `USER_RIGHTS` policy block via `secedit`, which Jeff recovered with System Restore — and a restore can itself roll back a wireless profile. **The 09-01 timestamp fits (b) better than (a).** | **JEFF** (physical) then CLAUDE | 🔴 **Jeff was told flatly it was the SSID, before the 09-01 note — which was sitting UNCOMMITTED in the working tree — had been read.** Committed now. Its recorded addresses are stale; when it rejoins it takes a fresh DHCP lease, so give it a reservation like Beehive's. Account is **"Jeff Loewen Office 2"**, not `jeffl`. |
+| 113 | 🟠 **`Document (6).docx` is the weakest link in the succession plan.** It is the ONLY copy of the GaragePC password, `HCC-secrets/garagepc.txt` points at it, it is a **Word file**, and it is **not in Bitwarden**. `FAMILY_RUNBOOK.md` routes Angela and Braxton through safe → five words → Bitwarden — **this credential is not on that path.** `HCC_ACCESS.md:167` already carries an unchecked box for the same class (B-Hyve, LUX, Blink, Amazon, SmartHub). | **JEFF decides, CLAUDE does** | Fold both into `HCC_ACCESS.md` (plain text, no Word required, already the documented map) and into Bitwarden. ⚠️ **Jeff, 09-03: Bitwarden "hasn't been working worth a shit"** — if the vault is unreliable, the runbook has a single point of failure at its most important step. **A plain-text fallback in the safe alongside the five words costs nothing and depends on no software.** Awaiting his description of the actual failure. |
+| 114 | 🟢 **A repeatable SmartHub 15-minute pull now exists — `HCC-Scripts/smarthub_pull.js`.** Drives an already-logged-in Chrome over CDP (`open_login_chrome.ps1`), so **no session ever types Jeff's password** and the login is reused rather than copied. **NOT in this repo — it reads a credential path and this repo is PUBLIC. Therefore NOT version-controlled: back it up.** | ✅ CLAUDE 09-03 | 🔴 Three traps measured — do not rediscover them: the API answers **`{"status":"PENDING"}` first** and returns data only on a re-POST; it **ignores the start epoch** and returns 96 points from **UTC** midnight (19:00 the prior evening → 18:45 CT, so a CT filter yields 76 — that is the window, not missing data); and **Playwright's bundled Chromium trips a browser-validation challenge** on CEMC and Ancestry where real Chrome plus `--remote-debugging-port` does not. |
+| 115 | 🟠 **Z2M reports 12 devices / 0 offline, which is at odds with #86's dead mailbox.** From this morning's `HCC-Audit` coverage block. **Not yet investigated — "available" at the 25 h passive timeout is not the same as a message actually arriving.** | CLAUDE | If the mailbox is genuinely back on the mesh then **#84 and #85 stop waiting on the AliExpress repeater** and can be done in one Z2M restart. **Do not claim either way until the Z2M log is read.** |
+| 116 | 🟢 **HA Core 2026.9.0 STABLE is now available** (the box runs `2026.9.0b1`). **#102's stated blocker — "moving off a beta may mean waiting for the stable 2026.9" — is gone.** Also pending: Zigbee2MQTT 2.13.0-1 → 2.14.0-1, Blitzortung v1.7.0 → v1.7.1. | **JEFF decides** | ⚠️ **Do not bulk-apply.** #102's sequencing still holds: the Mercedes `mbapi2020` bump first and on its own, since it is the integration behind #101. And run `Verify-CameraStreams.ps1` immediately after any HA restart — go2rtc is load-bearing for the frozen camera pipeline. |
