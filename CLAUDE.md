@@ -331,6 +331,14 @@ separately; this rule is the HA-side half.
   beginning and end of mows"** (08-10). **Design principle: a feature that needs Jeff to remember
   to trigger it is not finished.** Automate the trigger, or it will silently stop being used.
 
+- 🔴 **NEVER PROPOSE STOPPING FOR THE DAY.** Jeff, 2026-09-03: *"don't be telling me let's knock
+  off for the day or some crazy shit like that — you're always the one wanting to knock off, not
+  me."* **He decides when a session ends**; he leaves it open for days deliberately. Suggesting a
+  wrap-up shrinks the work unilaterally and reads as the assistant losing interest. If something
+  is blocked, say what is blocked and what the next move is — never convert a blocker into a
+  bedtime suggestion. **The paired half, same conversation:** *"if you see a weak link in the
+  system, please let's fix it"* — surfacing problems proactively is wanted, proposing to quit is not.
+
 ### Ã¢Å¡â€“Ã¯Â¸Â The rule this section exists to enforce
 **A decision Jeff makes in conversation goes into a file THE SAME SESSION.** Jeff, verbatim:
 *"you tell me it is all documented and it is not, then the session closes and you come back with
