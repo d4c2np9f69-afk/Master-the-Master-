@@ -785,3 +785,96 @@ after          full return to baseline within one interval
 If **06:30 is NOT elevated**, or the elevation starts a bucket or more late with no explanation,
 that counts against the model too — a dryer draws its heaviest element current at the START of a
 cycle, on the wettest clothes.
+
+---
+
+# 🔴 2026-09-03 11:30 — THE 09-01 PRE-REGISTERED TEST **FAILED**, 4 OF 5 CRITERIA
+
+**Recorded pass-or-fail as the prediction demanded. Not retro-fitted.**
+Resolved two days late only because it was flagged; this doc said *"check when the 09-01
+15-minute data posts."* Nobody checked on 09-02.
+
+## Method — repeatable now, which it was not before
+
+The 08-31 and 09-01 pulls were done BY HAND in Jeff's browser, so the test could not be
+re-run without him. There is now a script: **`HCC-Scripts/smarthub_pull.js`**, driving an
+already-logged-in Chrome over CDP (`open_login_chrome.ps1`). **No session ever types his
+password.** Deliberately NOT in this repo — it reads a credential path and this repo is PUBLIC.
+
+🔴 **API contract, MEASURED by capturing the portal's own traffic — do not guess at it again:**
+`POST /services/secured/utility-usage/poll` with
+`{timeFrame:"HOURLY", userId, screen:"USAGE_EXPLORER", includeDemand:false,
+serviceLocationNumber:"16290", accountNumber:"4501007001", industries:["ELECTRIC"],
+startDateTime, endDateTime, selectedIndustry:"ELECTRIC"}`.
+**It answers `{"status":"PENDING"}` first and only returns data on a RE-POST.** A single
+POST looks like an empty result and is not.
+⚠️ **It IGNORES the start epoch and returns 96 points from UTC midnight** — for a CT day that
+is 19:00 the previous evening → 18:45. Filtering to CT therefore yields 76, not 96. That is
+the API's window, not missing data.
+⚠️ Playwright's bundled Chromium trips a **browser-validation challenge** on this portal and on
+Ancestry. Real Chrome + `--remote-debugging-port` does not. Use CDP attach, not a fresh browser.
+
+## The data — 15-min kW, 09-01 against the 08-30 control
+
+```
+time    09-01   08-30   delta
+05:00    2.28    1.72   +0.56
+05:15    2.68    1.84   +0.84
+05:30    4.32    1.72   +2.60   <- elevation ALREADY STARTED, 1 h before the load
+05:45    4.68    2.08   +2.60
+06:00    4.56    2.36   +2.20   <- "clean pre-load baseline", predicted 0.9-1.3 kW
+06:15    5.24    2.04   +3.20   <- "clean pre-load baseline"
+06:30    4.60    2.92   +1.68   <- Jeff's load starts here
+07:00    4.96    2.72   +2.24
+08:15    5.48    2.76   +2.72
+09:30    5.44    3.40   +2.04
+10:45    3.96    3.56   +0.40
+```
+
+## Scoring, as written
+
+| criterion | predicted | measured | |
+|---|---|---|---|
+| contiguous elevated block | YES | **none detectable** | FAIL |
+| duration | 60-90 min | n/a | FAIL |
+| 06:30 is the FIRST elevated interval | YES | **NO — 05:30 was** | FAIL |
+| elevation over pre-load baseline | +1.6 to +2.7 kW | n/a | FAIL |
+| peak under 6 kW | YES | 5.48 kW | PASS |
+
+## 🔴 WHY IT FAILED — the premise was falsified, not the appliance
+
+**The pre-load baseline was 4.90 kW. The prediction assumed 0.9-1.3 kW.** Wrong by ~4x, and
+every threshold in the test was expressed *relative to that baseline*, so all of them became
+unmeasurable the moment it was wrong. The house was already drawing 4.6-5.2 kW at 06:00-06:15,
+before Jeff put the load in.
+
+The prediction's whole justification was:
+> *"At 06:30 on a September morning the A/C is at or near zero duty, so **any block that
+> appears cannot be the A/C.**"*
+
+🔴 **That is now disproven by measurement.** The elevation begins at **05:30**, a full hour
+before the load, and persists past 10:00 — roughly 4.5 hours, far longer than any dryer cycle.
+**The one confounder the test existed to eliminate was present the entire time.**
+
+**Weather, controlled:** `sensor.backyard_temperature` 04:00-11:00 CT — 09-01 **79.3 °F** vs
+08-30 **76.2 °F**, **+3.1 °F**. At this file's own 1.71 kWh/°F model that is ~5.3 kWh of the
+**+17.9 kWh** partial-day delta. Morning excess alone was **+10.73 kWh** (27.30 vs 16.57).
+So weather explains part and not most — **the energy is real, the attribution still is not.**
+
+## Verdict
+
+**The disaggregation model remains NOT VALIDATED.** Three attempts, three honest failures:
+nameplate threshold too high (08-31), oven confounder (08-31 re-run), and now a baseline
+assumption wrong by 4x. **Do not run a fourth morning test** — that a September morning is
+not a quiet baseline is the one thing this run did establish.
+
+🔴 **THE OVERNIGHT TEST NAMED IN THIS FILE IS NOW THE ONLY CLEAN ONE LEFT**, and this run is
+the evidence for why: *"a dryer load run overnight, when outdoor temperature is stable and the
+A/C duty is flat."* Everything else carries a thermal confounder that magnitude cannot separate.
+
+### The lesson worth keeping
+**A pre-registered prediction must state its BASELINE as a falsifiable claim, not an
+assumption.** "06:00-06:30 baseline was 0.92-1.12 kW" was carried over from 08-31 and treated
+as a constant. It was a measurement of a different day. Had the prediction said *"if the
+pre-load baseline is not 0.9-1.3 kW, this test is void"*, the collapse would have been visible
+in one line instead of four criteria scored against a foundation that had already failed.
