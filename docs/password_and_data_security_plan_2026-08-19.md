@@ -145,6 +145,8 @@ his reuse was bad; that was the measurement.
    offer a choice at login, which is the single thing Jeff found hardest all day. **Dedupe needs
    the vault unlocked in a browser I can drive (Chrome) — requires one master-password entry, so
    it was left rather than ask an exhausted man to type it again.** Do this first next session.
+   🔴 **STILL NOT DONE as of 2026-09-03 — 15 days, and Jeff raised it himself: "it was supposed to be all cleaned up and it never got done."** See OPEN_ITEMS #118 for the safe route (Bitwarden CLI with a revocable `BW_SESSION`, never the master password).
+   ⚠️ **A SEPARATE fault was found and fixed 2026-09-03 that this plan created and never noticed:** the extension was force-installed in **Brave only**, while `PasswordManagerEnabled=0` was applied to **Chrome, Edge and Brave**. So Chrome and Edge had NO password manager at all. That — not the duplicates — is what "it comes up on some things but not all" actually was. See OPEN_ITEMS #117.
 2. **Full-disk encryption.** Both drives unencrypted; TPM present and ready but **Secure Boot is
    OFF**, which Device Encryption requires. Needs a BIOS trip during a reboot. Separate session.
 3. **Tier-2 password rotation.** ~190 weak/reused remain. The plan stands: rotate as he logs in,
