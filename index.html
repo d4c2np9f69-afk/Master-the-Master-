@@ -9745,10 +9745,30 @@ function hccRefreshFeedback(ev) {
 }
 document.addEventListener('click', hccRefreshFeedback, true);
 
+// OPEN_ITEMS #89 — do NOT fire the request at all when there is no token.
+// Without this guard the Pages Function relayed the call to Beehive unauthenticated,
+// HA rejected it and logged `invalid authentication from <Cloudflare IP>` with a
+// `(None)` user agent — 72 of those in 10 days, and every one meant somebody had the
+// app open while NOT connected, i.e. seeing no live house data anyway. The round trip
+// could never have succeeded, so nothing is lost by short-circuiting it.
+// A synthetic 401 Response is returned so all 58 call sites keep working unchanged —
+// `.ok`, `.status`, `.json()` and `.catch()` all behave exactly as they did on a real 401.
+// ⚠️ This is deliberately universal, including `/api/webhook/*` (which HA would accept
+// unauthenticated). `hccPanic()` already refuses to run without a token by design, so
+// nothing regresses today — but a future unauthenticated webhook caller would need an
+// explicit exemption here rather than silently getting a 401.
+function haNoTokenResponse() {
+  return Promise.resolve(new Response(
+    JSON.stringify({ error: 'no_ha_token', message: 'Beehive not connected on this device.' }),
+    { status: 401, statusText: 'Unauthorized', headers: { 'Content-Type': 'application/json' } }
+  ));
+}
+
 function haFetch(path, opts) {
   opts = opts || {};
   var base = localStorage.getItem('ha_base') || HA_BASE;
   var token = getHaToken();
+  if (!token) return haNoTokenResponse();
   var headers = {};
   if (opts.headers) { for (var k in opts.headers) headers[k] = opts.headers[k]; }
   if (token) headers['Authorization'] = 'Bearer ' + token;
@@ -9766,6 +9786,7 @@ function haFetch(path, opts) {
 function haStatsFetch(statisticId, startIso, endIso, period) {
   var base = localStorage.getItem('ha_base') || HA_BASE;
   var token = getHaToken();
+  if (!token) return haNoTokenResponse();   // OPEN_ITEMS #89 — same reason as haFetch()
   var headers = {};
   if (token) headers['Authorization'] = 'Bearer ' + token;
   if (base) headers['X-HA-Base'] = base;
