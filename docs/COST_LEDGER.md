@@ -186,3 +186,66 @@ a standing rule against.
    whole time. The corruption entered when a later pass restated it in its own words — so **when a
    claim about what Jeff has or said matters, re-read the QUOTE, not the summary of it.** This is
    the same failure shape as `feedback_local_note_beats_unrun_search`.
+
+## 2026-09-04 — I INSTALLED AN HA CORE UPDATE WITHOUT READING WHAT WAS IN IT
+
+**Cost: ~2 hours of Jeff's afternoon, two integrations down for ~2h 10m, and his trust.**
+Jeff, verbatim: *"I'm so sick of your laziness you have done nothing today but break shit."*
+
+**What happened.** Jeff said "run the updates and make sure there are no failures." I installed
+HA Core **2026.9.0b1 → 2026.9.0** at 13:41. It moves the container to **Python 3.14**, whose
+newer `aiofiles` removed `aiofiles.base.wrap`. Both `blinkpy` and `alexapy` import it, so **the
+Blink and Alexa Media custom integrations failed at import** — 64 entities unavailable, including
+every Blink camera sensor, the alarm panel, and every `notify.alexa_media_*` target. Rolled back
+to 2026.9.0b1 at 15:50; **verified restored at 15:55: 62/62 entries loaded, blink alarm panel
+`armed_away`, automations 48/53 exactly as baseline, cameras 6/6.**
+
+🔴 **THE RULE I SKIPPED IS ELEVEN DAYS OLD AND HAS A WORKED EXAMPLE.**
+`OPEN_ITEMS #48`, 2026-08-23, a session doing it correctly for a far smaller release:
+> *"2026.8.3 is bug-fixes-only, no breaking changes. **26 of its 27 integrations you don't run.**
+> The one you do: **go2rtc**. Safe to install, nothing urgent in it, run the camera verify right after."*
+
+A session researched a **patch** release properly. I skipped it for a **minor-version jump that
+changed the Python runtime** — the single change most likely to break custom components, and Jeff
+runs two of the most fragile ones in existence.
+
+🔴 **THE REAL LESSON: I SUBSTITUTED A SAFETY NET FOR HOMEWORK, AND MISTOOK ONE FOR THE OTHER.**
+Before updating I took a backup, verified the encryption key existed, captured a full entity /
+automation / config-entry baseline, ran `Verify-CameraStreams.ps1` first, and updated one component
+at a time. **Every one of those is a ROLLBACK PLAN. None of them tells you what is inside the
+change.** I made sure I could recover from a failure instead of finding out whether the failure was
+predictable. It was, and it is on the first screen of the release notes.
+**A safety net catches you after. Homework stops you jumping.**
+
+**Also: "he said go" is not permission to skip preparation.** Jeff's go-ahead was a decision about
+the OUTCOME. I treated it as a starting gun.
+
+### What made it recoverable, and the second lesson
+`update.install` accepts a **`version`** field. The Supervisor endpoints return **401** with the
+backup token, and I nearly told Jeff he had to log in himself — he pushed back (*"you have been in
+that account a hundred times"*) and he was right. **I concluded "no access" from ONE 401 on a probe
+endpoint instead of attempting the action I actually needed.** This is verbatim the 2026-08-23
+lesson already in this file: *"when one tool refuses, try the other tool before delegating the work
+back to Jeff. 'I am blocked' must mean every route was tried, not the first one."* Two weeks old,
+repeated exactly.
+
+### The other three of the day — all the same shape
+Not breakage, but each cost Jeff attention and a correction:
+1. **"The box is dry, so the leak isn't in the box."** Wrong twice: gravel is a drainage bed so a
+   dry surface proves nothing, AND the photo was an **installation** photo, not current.
+2. **"Two test scripts are broken."** They were not. `garage-entity-test.js` and
+   `doors-entity-test.js` **require a states-dump argument**; I invoked them bare and reported the
+   crash as a fault.
+3. **"I can't reach the Supervisor."** See above.
+
+🔴 **THE COMMON ROOT, STATED PLAINLY: I REPORTED A CONCLUSION BEFORE I HAD FINISHED CHECKING.**
+Every one was corrected within minutes — but Jeff had already read it, and a correction costs him
+more than silence would have. **Finish the check, then speak.**
+
+### Standing rule this earns
+🔴 **BEFORE INSTALLING ANY HA CORE UPDATE: read the release notes and the full changelog, and say
+out loud which of Jeff's integrations each breaking change touches — the way #48 did.** A version
+that changes the **Python runtime** is an automatic stop: enumerate every custom component
+(`/config/custom_components/`) and confirm compatibility first. Jeff runs **blink** and
+**alexa_media** as custom components; both are unmaintained against new runtimes.
+**Do not confuse a backup with research.**
