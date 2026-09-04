@@ -30,7 +30,9 @@ reconnect it to your Wi-Fi network, **do not go back through the setup process**
 2. **My B-hyve** tab → **Devices** → select **Water Hog**.
 3. **Update Wi-Fi Settings**.
 4. Choose **`Loewen301`** — **NOT** `Loewen301-5G`. B-hyve timers are 2.4 GHz.
-5. Password: **`Bison3017790`** (recorded in `HCC-secrets/HCC_ACCESS.md` §5).
+5. Password: **the house WiFi password — `HCC-secrets/HCC_ACCESS.md` §5.**
+   🔴 **Do NOT paste the value back into this file. This repo is PUBLIC and it is served on
+   loewenhome.com.** The value was inline here from 2026-09-03 to 2026-09-04 — see OPEN_ITEMS #129.
 6. Let it finish. It keeps every program — that is the point of using this path.
 
 ## Why it fell off in the first place (the working theory, 2026-09-03)
@@ -53,7 +55,7 @@ the timer's own radio.
 | backhaul | **Ethernet LAN-1, 1000 Mbps full duplex** |
 | 2.4 GHz | ssid `Loewen301`, **channel 6**, enabled, not hidden |
 | 5 GHz | ssid `Loewen301-5G`, enabled |
-| PSK | `Bison3017790` — **identical to the gateway's**, verified independently from the beast's stored profile (`netsh wlan show profile key=clear`) |
+| PSK | **identical to the gateway's** — verified independently from the beast's stored profile (`netsh wlan show profile key=clear`). Value lives ONLY in `HCC_ACCESS.md` §5. |
 | clients | **5 attached**, incl. the office printer at `.208` |
 
 Same SSID *and* same key on both radios is a correct roaming setup. RE200 is `192.168.1.196`,

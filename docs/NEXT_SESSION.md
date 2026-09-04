@@ -1,3 +1,52 @@
+# 🟢 2026-09-04 5:50 PM — SESSION READ THE RECORD FIRST, THEN FOUND THREE THINGS
+
+**Jeff: *"read all the files so you can get up to speed… don't do anything unless you look up in the
+files everything to do with whatever it is."*** Read in full before touching anything: both
+`CLAUDE.md` files, `OPEN_ITEMS.md` (all 1,429 lines), this file, `COST_LEDGER.md`, the audited
+`22-cost-accounting.md`, `SESSION_START.md`, `CAMERAS_CLOSED`, `CAMERA_POPUP_REBUILD_GUIDE`,
+`camera_fixes_2026-08-21.md`, `BEEHIVE_REFERENCE`, `UTILITIES_REFERENCE`, `BILL_LEDGER`,
+`NETWORK_MAP`, `WATCH_POSTMORTEM`, `zigbee_mesh_routers`, `bhyve_wifi_reconnect`, the HVAC plan,
+and the genealogy `NEXT_SESSION` / `WORKLIST_TRIAGE` / `STRUCTURAL_AUDIT`.
+*(`CHANGELOG_ARCHIVE.md` deliberately NOT bulk-read — CLAUDE.md rule 16 says grep it on demand.)*
+
+## 💧 TONIGHT'S WATER TEST — Jeff installed the zone-4 bonnet today and wants a clean read
+
+**ARMED AND VERIFIED LIVE at 17:41–17:50. Nothing is assumed below.**
+
+| check | result |
+|---|---|
+| meter chain alive | `water_meter_last_seen` **17:40:35**, gas **17:42:34** — ~1 min old. **rtlamr2mqtt is NOT hung** (the #103 silent-hang would have killed tonight invisibly) |
+| task armed | `HCC Overnight Water Watch`, `LastTaskResult 0`, full interpreter path, `--notify` |
+| script proven | ran read-only at 17:43 — `n=5`, correct math, coverage block prints |
+| baseline | **11 nights logged, median 1.1 gal.** Ten clean nights 0.0–1.3, then **8.8 on 09-04** |
+
+🔴 **#130 — I MOVED THE TASK 06:15 → 08:05.** The script's quiet-hours guard is `8 <= hour < 21`,
+so a 06:15 run **could never push**. Verified `NextRunTime 2026-09-05 08:05:00`. HA's own 5 AM
+automation already pushes the single-night number, so Jeff was not blind — **but the 14-night
+DRIP CHECK, the thing he actually asked for, lives only in the Python script and was the part
+being swallowed.** 08:05 also guarantees the 05:00 LTS bucket is compiled; 06:15 did not.
+
+🟠 **#131 — THE TWO REPORTS DISAGREE BY 2 GAL. Trust the Python number.** Same night, real
+readings: HA's 5 AM math gave **10.8**, the Python LTS gave **8.8**. The meter batches hourly and
+republishes only on change, so HA's "1 AM baseline" is a stale broadcast and its span runs long.
+**Clean is ~1.3 and the HA trip is 3.5 — a 2 gal method gap is huge against that threshold.**
+**Do NOT change either before tonight's run** — #109: watch it pick back up as built, first.
+
+**Reading tomorrow's result:** ~0.0–1.6 **STEPPED** = repair holds · 3.5+ **CONTINUOUS** = still
+leaking, and per **#121 the other three bonnets are the suspects, same freeze** · in between = judge
+the SHAPE, not the total. **A single clean night does not prove no drip** — that is what the
+5-of-7-nights-over-baseline drip check is for.
+
+## 🔴 #129 — THE HOUSE WiFi PASSWORD IS PUBLIC RIGHT NOW
+
+`docs/utilities/bhyve_wifi_reconnect.md` (commit `c491065`, 09-03 14:19) carries the PSK **twice**.
+**Verified, not assumed:** unauthenticated `raw.githubusercontent.com` → **200**, and
+`loewenhome.com/docs/utilities/bhyve_wifi_reconnect.md` → **200**, both serving it. ~27 h exposed.
+**Same value is the RE200 admin password.** Scrubbing stops the live site and the branch tip but
+**not git history**. **Rotation is Jeff's call** — the PSK is on every IoT device in the house.
+**Awaiting his word; nothing scrubbed or rotated yet.**
+
+---
 # 🔴 2026-09-04 5:11 PM — READ THIS FIRST. Jeff ended the session angry, and he was right to.
 
 **His last words:** *"Can you just update the .md file, I'm done fucking around with you."*
