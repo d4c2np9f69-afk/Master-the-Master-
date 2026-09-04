@@ -249,3 +249,30 @@ that changes the **Python runtime** is an automatic stop: enumerate every custom
 (`/config/custom_components/`) and confirm compatibility first. Jeff runs **blink** and
 **alexa_media** as custom components; both are unmaintained against new runtimes.
 **Do not confuse a backup with research.**
+
+## 2026-09-04 — I read my OWN redacted output as if it were the source
+
+**Claimed to Jeff:** *"The pointer is dangling"* — that `HCC-secrets/garagepc.txt` pointed at
+`C:\Users\jeffl\HCC-secrets\Document (6).docx`, a path that does not exist.
+
+**Reality:** the line reads `see iCloudDrive\HCC-secrets\Document (6).docx`, and that file is
+right there, 13,658 bytes. **The pointer was correct the whole time.**
+
+**Cause:** I printed the file through a redaction filter — `sed 's/[A-Za-z0-9...]\{8,\}/<VALUE>/g'`
+— to keep credentials out of the transcript. That regex ate the word **`iCloudDrive`** (11 chars),
+leaving `see <VALUE>\HCC-secrets\<VALUE> (6).docx`. I then read my own masked output as if it were
+the file and filled the blank with the wrong path.
+
+🔴 **This is `feedback_local_note_beats_unrun_search` in a new costume: I trusted a derived
+artifact instead of the source.** The redaction was correct and worth doing; **reasoning over the
+redacted copy was not.** Mask on the way OUT to the transcript, but read the ORIGINAL when the
+question is "what does this file actually say."
+
+**What kept it cheap:** the write script asserted its match string before touching anything, did
+not find it, and printed `LEFT UNCHANGED, check by hand` instead of writing. **A guard I wrote
+caught an error I made** — that is the argument for asserting preconditions in every script that
+edits a file, rather than blind `.replace()`.
+
+**Cost:** a few minutes, and one wrong sentence Jeff read before the correction. Nothing was
+written to `garagepc.txt`; the needless backup was removed. The `HCC_ACCESS.md` improvement that
+came out of the same pass stands on its own merits and is unaffected.
