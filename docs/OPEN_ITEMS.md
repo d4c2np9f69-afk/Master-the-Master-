@@ -1346,3 +1346,61 @@ out passwords."*
   numbered, wait for confirmation. **Finding the screen is the hard part, not the typing.**
 - **Desktop screenshots were the single most effective tool on 08-19** — reach for that immediately
   rather than describing menus.
+
+---
+
+## 💧 THE LEAK WAS TWO LEAKS — ZONE 4 BONNET CRACKED BY FREEZE, FOUND 2026-09-04
+
+**Jeff installed the Orbit anti-siphon valve 2026-09-03 (#109, ordered 08-15, 20 days on the list).
+The very first night with the supply back on, the overnight loss returned.** He found the cause
+himself the next morning.
+
+| # | Item | Owner | Notes |
+|---|---|---|---|
+| 119 | 🔴 **A SECOND LEAK EXISTED THE WHOLE TIME — a cracked bonnet on the ZONE 4 valve.** Orbit **57280** (casting `57280-52`), the standard valve in Orbit pre-assembled manifolds. **Photographed and confirmed:** a jagged fracture radiating from the centre of the domed lid, crossing the moulded ribs, changing direction, with **stress-whitening** at its origin — none of which a moulding parting line does. 🔴 **Radiating from the centre means the part was pushed apart from the INSIDE. That is ice, not pressure.** Jeff's theory — last autumn's winterization left water in the valves — and the physical evidence supports it. | **JEFF** repairs | ⚠️ **Do NOT energise zone 4 until repaired** — static manifold pressure on a through-crack is one thing, full running flow can turn a 2 gal/hr weep into a split. |
+| 120 | 🔴 **THE ARITHMETIC IS THE LESSON: A HALVED LEAK IS NOT A PARTIAL FIX, IT IS TWO LEAKS.** Pre-fix nights ran **11.7-15.4 gal** (1-5 AM, Aug 7-13). After the anti-siphon replacement the first night read **8.8 gal**. Replacing one valve **halved** the loss instead of ending it — and that halving is what said a second fault existed, before the crack was ever seen. **Next time a repair improves a number without closing it, assume a second cause rather than a partial success.** | — | The old note "the failing anti-siphon valve" as *the* cause was true but incomplete. |
+| 121 | 🟠 **TWO OF FIVE VALVES FAILED FROM ONE FREEZE — the other three are suspect.** Same manifold, same depth, same event. A hairline that does not weep at static pressure today will open under a running zone next season. **The real fix is a proper blow-out this autumn**, not three more valve replacements next July. | **JEFF decides** | ✅ **$0 on parts either way:** Jeff has a scrap pile of the same Orbit valves for donor bonnets, **and** an entire brand-new manifold rebuild kit on the shelf. Nothing needs buying. |
+| 122 | 🟢 **REPAIR PLAN AGREED — bonnet swap now, manifold rebuild at winterization.** A bonnet swap is **four captured screws and zero cutting**; a manifold replacement means cutting every pinch clamp and rebuilding the assembly. 🔴 **The deciding check is the valve BODY under the cracked bonnet** — sealing rim, sidewalls, bleed port. Clean body → swap the lid, half an hour. Cracked body → the rebuild became necessary, and that was learned after removing 4 screws instead of a dozen clamps. **Reassembly: even cross-pattern, snug not tight — an over-torqued bonnet is pre-stressed, and pre-stressed plastic is what ice splits first.** | **JEFF** | 🔴 **The Orbit 57045 "Diaphragm Repair Kit" does NOT fix this** — its contents are a diaphragm assembly, solenoid filter, screws and a spring. **No bonnet.** A web summary claimed it covered "bonnet/diaphragm replacement"; that was wrong and would have cost a trip. ⚠️ Prices at Home Depot could NOT be read (page blocks extraction) — **not quoted from memory.** 78 valves / 99 kits showed in stock at Hendersonville. |
+
+### 🔬 The measurement that caught it, and why it was believable
+
+| night (01:00-05:00 CT) | gal | shape |
+|---|---|---|
+| Aug 26 - Sep 3, ten nights | **0.0 - 1.3** | **STEPPED** — flat, flat, flat, one 1.28 gal flush |
+| **Sep 4** — first night, valve in, supply on | **8.8** | 🔴 **CONTINUOUS** — 2.1 / 1.9 / 3.2 / 1.6, no quiet hour |
+
+**The SHAPE did the work, not the total.** `reference_hcc_water_signatures`: *"ice = flat→step→flat.
+A leak = continuous drift."* Ten stepped nights then one continuous night is not a threshold call,
+it is a change of kind. **And irrigation had NOT run** — rain delay confirmed, `next_start_time`
+2026-09-06, `last_watered` still 08-12 — so the draw could not be a watering cycle.
+
+### 🔴 THREE THINGS THE FIRST WATCH GOT WRONG — fixed 2026-09-04, do not reintroduce
+
+1. **It was written and never scheduled.** It existed and did not run; the leak was caught only
+   because Jeff asked. Now a registered task, **HCC Overnight Water Watch, daily 06:15**.
+   ⚠️ **It first registered with a bare `python` and failed `2147942402` (file not found) — Task
+   Scheduler does not inherit PATH.** Fixed to the full interpreter path and **proven with
+   `LastTaskResult: 0` plus a line actually written to the log.**
+2. **Two different windows were used on the same night** — 00:00-05:00 gave 11.4 gal, 01:00-05:00
+   gave 7.2. **One window now, permanently: 01:00-05:00 CT**, because that is what every constant
+   in the record was measured against.
+3. **No guard on sample count** — one night was computed from n=2. Now reports
+   **INSUFFICIENT DATA** below 3 samples instead of inventing a number.
+
+### 🔴 HOW A *DRIP* IS CAUGHT — Jeff's ask, and the honest answer
+
+Jeff: *"one drop leads to many gallons lost over time… make sure you can capture 100% if there's a
+drip coming out."*
+
+**Resolution cannot do it and no software can.** The meter reports in **0.1 gal** steps and batches
+roughly **hourly** (`rtlamr -unique=true` republishes only on change), and below a residential
+meter's **minimum registration flow** water passes **entirely unmeasured**. ⚠️ **That threshold has
+NOT been verified for this Itron ERT-SCM+.** So a single clean night never proves there is no drip.
+
+**PERSISTENCE catches it instead.** The watch keeps a rolling **14-night median** and flags a
+sustained excess — **5 of the last 7 nights ≥0.4 gal above baseline** — and reports it in gal/month.
+A 0.05 gal/hr seep is invisible on any one night and unmistakable across a fortnight. Baseline as
+of 2026-09-04 is **1.1 gal**.
+
+**Every run also prints what it did NOT cover** (daytime use, sub-threshold seeps, and *where* the
+water went) — the #94 lesson, so a clean verdict can never be read as "everything is fine."
