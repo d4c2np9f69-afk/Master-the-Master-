@@ -13,7 +13,7 @@ function extract(name){
   }
   throw new Error('unbalanced: ' + name);
 }
-const code = ['garageOpenerId','garagePositionId','garageIsOverheadDoor','garagePickOne','garagePick','garageSensorIsOpen'].map(extract).join('\n');
+const code = ['garageOpenerId','garagePositionId','garageIsOverheadDoor','garagePickOne','garagePick','garageSensorIsOpen','hccDoorSensors'].map(extract).join('\n');
 eval(code);
 if (typeof garagePick !== 'function') { console.error('extraction failed'); process.exit(1); }
 
@@ -58,7 +58,13 @@ console.log('  old binary_sensor.*garage* matched ' + oldSensor.length + ': ' + 
 console.log('  -> old code would have taken [0]: ' + oldSw[0].entity_id + ' / ' + oldSensor[0].entity_id);
 
 console.log('\n--- Guardian Night Check buckets ---');
-const doors = states.filter(function(s){ var id = s.entity_id.toLowerCase(); return s.entity_id.indexOf('binary_sensor.') === 0 && (id.indexOf('door') >= 0 || id.indexOf('window') >= 0) && !garageIsOverheadDoor(id) && !/(battery|_low|motion|camera|tamper|spare|update|connectivity|problem|linkquality|signal)/.test(id) && id.indexOf('mercedes') < 0 && id.indexOf('gle') < 0 && id.indexOf('mbapi') < 0; });
+// 2026-09-04: was a STALE INLINE COPY of the old *door* filter. It printed a Doors
+// bucket holding 5 ai_doorbell camera sensors and missing the mailbox - reproducing
+// the exact bug OPEN_ITEMS #79 fixed, inside the test meant to guard it, while its
+// assertions passed because none of them checked for ai_doorbell.
+// Now calls the app's OWN hccDoorSensors(), extracted from index.html, so this test
+// can never drift from the code again.
+const doors = hccDoorSensors(states);
 const garAll = states.filter(function(s){ return (s.entity_id.indexOf('cover.') === 0 || s.entity_id.indexOf('binary_sensor.') === 0) && garageIsOverheadDoor(s.entity_id); });
 const garCovers = garAll.filter(s => s.entity_id.indexOf('cover.') === 0);
 const gar = garCovers.length ? garCovers : garAll;
@@ -67,6 +73,8 @@ console.log('  Garage door (' + gar.length + '): ' + gar.map(g => g.entity_id + 
 check('man door counted as a Door', doors.some(d => d.entity_id === 'binary_sensor.garage_man_door_contact'), true);
 check('no battery flag in Doors', doors.every(d => !/battery|_low/.test(d.entity_id)), true);
 check('no spare contact in Doors', doors.every(d => !/spare/.test(d.entity_id)), true);
+check('no ai_doorbell in Doors', doors.every(d => d.entity_id.indexOf('ai_doorbell') < 0), true);
+check('mailbox contact IS in Doors', doors.some(d => d.entity_id === 'binary_sensor.mailbox_contact'), true);
 check('Garage row is exactly 1 entity', gar.length, 1);
 check('Garage row is the cover', gar[0] && gar[0].entity_id, 'cover.garage_door');
 
