@@ -1,0 +1,107 @@
+{
+  "style_name": "Premium Estate Command Center",
+  "visual_identity": "luxury residential cinematic realism",
+
+  "grading": {
+    "contrast": "medium-high",
+    "saturation": "natural + enhanced greens",
+    "warmth": "golden-hour bias",
+    "shadow_detail": "preserved",
+    "highlight_rolloff": "soft cinematic"
+  },
+
+  "lighting": {
+    "primary": "golden hour sun (low angle)",
+    "secondary": "soft landscape uplighting",
+    "fill": "natural bounce light",
+    "avoid": "flat midday lighting, harsh overexposure"
+  },
+
+  "lighting_signature": {
+    "time_of_day": "golden hour (primary rule)",
+    "key_light": "warm directional sunlight",
+    "rim_light": "subtle glow outlining main subject",
+    "practical_lights": "low garden path uplights (soft warm tone)",
+    "intensity": "balanced realism + luxury enhancement",
+    "mood": "calm, expensive, cinematic, aspirational"
+  },
+
+  "composition": {
+    "camera_style": "low to mid eye-level cinematic",
+    "depth": "strong foreground → midground → background separation",
+    "foreground_rule": "one dominant subject per hero image",
+    "background_rule": "supporting environmental storytelling only",
+    "framing": "rule of thirds with slight center bias for hero subject",
+    "negative_space": "reserved for UI overlays or app text"
+  },
+
+  "environment_rules": {
+    "grass": "deep emerald, striped, high density, no patchiness",
+    "trees": "full, mature, dense canopies, no gaps",
+    "sky": "soft dramatic clouds, slightly enhanced color but realistic",
+    "materials": "premium residential finishes only"
+  },
+
+  "landscaping": {
+    "lawn": "professionally maintained, striped mowing pattern",
+    "hedges": "tight, sculpted, continuous (no gaps)",
+    "trees": {
+      "leland_pines": {
+        "structure": "dense living wall",
+        "spacing": "zero visible gaps",
+        "shape": "full bottom-to-top taper",
+        "height": "tall privacy screen (~20ft visual impression)"
+      }
+    },
+    "beds": {
+      "rule": "minimal, curated planting only",
+      "allowed_elements": ["boxwoods", "roses", "ornamental grasses"],
+      "density": "clean luxury spacing, not cluttered"
+    }
+  },
+
+  "brand_consistency": {
+    "look": "all images must feel like one integrated app ecosystem",
+    "color_palette": [
+      "deep green",
+      "warm gold",
+      "charcoal shadows",
+      "brick red accents"
+    ],
+    "avoid": [
+      "cartoon styling",
+      "over-HDR look",
+      "over-saturated neon greens",
+      "inconsistent lighting between assets"
+    ]
+  },
+
+  "hero_subjects": {
+    "home": "architectural exterior + luxury lighting",
+    "yard": "mower + owner interaction (confident pose)",
+    "weather": "weather station instrument in foreground",
+    "irrigation": "sprinkler system / water motion + lawn health",
+    "focus_rule": "one clear subject must dominate each image"
+  },
+
+  "typography": {
+    "style": "elegant serif + modern sans mix",
+    "placement": "lower third safe zone",
+    "color": "soft gold or warm white",
+    "effects": "subtle glow, no harsh outlines",
+    "hierarchy": [
+      "Title (large)",
+      "Subtitle (medium)",
+      "tagline (small)"
+    ]
+  },
+
+  "final_rule": "Every generated hero image must look like it belongs to the same premium smart-home / landscaping command center application suite, with identical lighting logic, grading, and composition structure.",
+
+  "prompts": {
+    "yard": "Cinematic luxury hero image for a premium smart home lawn care app. Dominant subject: a confident middle-aged homeowner in a dark LawnCareHive t-shirt kneeling beside a red Toro TimeMaster 21200 30\" walk-behind mower, slight smile, one hand resting on the handle. Low to mid eye-level camera angle. Rule of thirds composition, subject center-left. Golden hour lighting — warm directional sunlight from behind/side creating a rim glow on subject and mower. Deep emerald green striped lawn, professionally maintained, high density. Background: dense tall Leyland cypress privacy wall (no gaps, full bottom-to-top taper, ~20ft tall), soft warm landscape uplighting on trees, fire pit with Adirondack chairs. Sky: soft dramatic clouds with golden hour enhancement. Charcoal shadows with detail preserved. Color palette: deep green, warm gold, charcoal shadows, brick red mower accents. Medium-high contrast, natural + enhanced green saturation, soft cinematic highlight rolloff. Bottom section text in elegant serif + modern sans mix, soft warm gold color, subtle glow: Title: 'YARD COMMAND CENTER APP' | Subtitle: 'MOW SMARTER. TRACK EVERY CUT.' | Small icons row: Mow Log · Service · GPS · Hours · Diagnostics. Must feel like one integrated premium smart home app suite identical in lighting, grading, and composition to the other hero images in the series. Photorealistic, no cartoon, no over-HDR, no neon greens. 16:9 landscape format.",
+    "home": "Cinematic luxury hero image for a premium smart home app. Dominant subject: brick ranch-style house exterior at golden hour / twilight. Low to mid eye-level camera angle. Warm landscape uplighting on house facade, mature trees, and sculpted hedge borders. Deep emerald green striped lawn. Dense Leyland cypress privacy wall background. Soft dramatic sky. Color palette: deep green, warm gold, charcoal shadows, brick red house accents. Bottom section text in elegant serif + modern sans mix, soft warm gold: Title: 'HOME COMMAND CENTER APP' | Subtitle: 'MANAGE · MAINTAIN · MONITOR' | Tagline: 'Everything. In One Place.' | Small icons row: mower, wrench, gauge, weather, checklist, cart. Photorealistic, cinematic, no over-HDR. 16:9 landscape.",
+    "weather": "Cinematic luxury hero image for a premium smart home weather app. Dominant subject: Ambient Weather professional weather station on a pole in the foreground, mid-frame, golden hour backlight creating rim glow on the instrument. Background: lush striped emerald lawn, sprinklers arcing in soft mist, fire pit with Adirondack chairs, dense Leyland cypress wall. Sky: golden sunset with soft dramatic clouds. Color palette: deep green, warm gold, charcoal shadows. Bottom section text in elegant serif + modern sans mix, soft warm gold: Title: 'WEATHER COMMAND CENTER APP' | Subtitle: 'REAL-TIME WEATHER. SMARTER DECISIONS.' | Small icons row: Temperature · Humidity · Wind Speed · Rainfall · UV Index · Air Quality. Photorealistic, cinematic, no cartoon, no over-HDR. 16:9 landscape.",
+    "irrigation": "Cinematic luxury hero image for a premium smart home irrigation app. Dominant subject: active sprinkler heads arcing water over a deep emerald striped lawn at golden hour. Background: brick house facade, dense Leyland cypress privacy wall, warm uplighting on trees, fire pit with Adirondack chairs. Sky: soft dramatic golden sunset clouds. Color palette: deep green, warm gold, charcoal shadows. Bottom section text in elegant serif + modern sans mix, soft warm gold: Title: 'IRRIGATION COMMAND CENTER APP' | Subtitle: 'SMART WATER. HEALTHIER LAWN.' | Small icons row: Zones · Schedule · Rain Delay · Smart · Status. Photorealistic, cinematic, no over-HDR, no neon greens. 16:9 landscape."
+  }
+}

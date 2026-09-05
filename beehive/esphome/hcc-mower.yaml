@@ -1,0 +1,447 @@
+# ═══════════════════════════════════════════════════════════════════════════
+#  HCC Mower Sensor — ESPHome Firmware
+#  ESP32 DevKit mounted on the Toro TimeMaster 21200
+#
+#  Measures:  Engine hours (hall effect on ignition wire)
+#             Battery voltage (ADC divider)
+#             Engine RPM (pulse counter on ignition wire)
+#             GPS position + distance (u-blox NEO-6M)
+#             Pitch / Roll (MPU-6050)
+#             Vibration + shock events (MPU-6050)
+#             WiFi signal strength
+#             ESP32 internal temperature
+#
+#  Reports:   → Home Assistant (ESPHome native API)
+#             → Cloudflare /api/hours (HTTP POST every 90s while running)
+#
+#  Hardware:
+#    GPIO27  — Hall effect sensor (ignition / engine running)
+#    GPIO34  — Battery voltage ADC (through 100k/10k divider → 0-3.3V = 0-16.5V)
+#    GPIO16  — GPS TX (UART1 RX on ESP32)
+#    GPIO17  — GPS RX (UART1 TX on ESP32)
+#    GPIO21  — SDA (MPU-6050)
+#    GPIO22  — SCL (MPU-6050)
+# ═══════════════════════════════════════════════════════════════════════════
+
+substitutions:
+  name: hcc-mower
+  friendly_name: HCC Mower Sensor
+  # Your Cloudflare Pages site — update if domain changes
+  api_url: https://toro1-5rz.pages.dev/api/hours
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  on_boot:
+    priority: -100
+    then:
+      - lambda: |-
+          id(session_dist_m) = 0.0;
+          id(shock_count) = 0;
+          id(rpm_peak) = 0;
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+logger:
+  level: INFO
+
+api:
+  encryption:
+    key: !secret esphome_api_key
+
+ota:
+  password: !secret esphome_ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: true
+  ap:
+    ssid: "HCC-Mower-Fallback"
+    password: !secret esphome_ota_password
+
+captive_portal:
+
+http_request:
+  verify_ssl: false
+
+i2c:
+  sda: GPIO21
+  scl: GPIO22
+  scan: true
+  id: i2c_bus
+
+uart:
+  id: uart_gps
+  rx_pin: GPIO16
+  tx_pin: GPIO17
+  baud_rate: 9600
+
+# ── Global state variables ──────────────────────────────────────────────────
+globals:
+  - id: session_dist_m
+    type: float
+    restore_value: false
+    initial_value: '0.0'
+  - id: total_dist_m
+    type: float
+    restore_value: true
+    initial_value: '0.0'
+  - id: shock_count
+    type: int
+    restore_value: false
+    initial_value: '0'
+  - id: rpm_peak
+    type: int
+    restore_value: false
+    initial_value: '0'
+  - id: prev_lat
+    type: double
+    restore_value: false
+    initial_value: '0.0'
+  - id: prev_lon
+    type: double
+    restore_value: false
+    initial_value: '0.0'
+  - id: has_prev_pos
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: engine_running
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+
+# ── GPS ─────────────────────────────────────────────────────────────────────
+gps:
+  uart_id: uart_gps
+  id: gps_module
+
+# ── MPU-6050 ────────────────────────────────────────────────────────────────
+mpu6050:
+  address: 0x68
+  id: mpu
+
+# ── Sensors ─────────────────────────────────────────────────────────────────
+sensor:
+  # Battery voltage (GPIO34 ADC, 100k/10k divider — reads 0-3.3V for 0-16.5V)
+  - platform: adc
+    pin: GPIO34
+    name: "${friendly_name} Battery Voltage"
+    id: batt_voltage
+    update_interval: 30s
+    attenuation: 11db
+    filters:
+      - multiply: 5.0          # divider ratio: (100k+10k)/10k = 11 → calibrate to match multimeter
+      - sliding_window_moving_average:
+          window_size: 5
+          send_every: 5
+    unit_of_measurement: V
+    accuracy_decimals: 2
+    device_class: voltage
+
+  # Engine RPM (pulse counter on ignition signal — ~1 pulse per revolution)
+  - platform: pulse_counter
+    pin:
+      number: GPIO27
+      mode:
+        input: true
+        pullup: true
+    name: "${friendly_name} Engine RPM"
+    id: engine_rpm
+    update_interval: 5s
+    filters:
+      - multiply: 0.5           # 2 pulses per rev on most small engines → adjust per your ignition
+    unit_of_measurement: RPM
+    accuracy_decimals: 0
+    on_value:
+      then:
+        - lambda: |-
+            int rpm = (int)x;
+            if (rpm > id(rpm_peak)) id(rpm_peak) = rpm;
+            id(engine_running) = (rpm > 200);
+
+  # GPS latitude
+  - platform: template
+    name: "${friendly_name} Latitude"
+    id: gps_lat
+    lambda: |-
+      if (id(gps_module).has_time()) return id(gps_module).latitude;
+      return NAN;
+    update_interval: 10s
+    accuracy_decimals: 6
+    unit_of_measurement: "°"
+
+  # GPS longitude
+  - platform: template
+    name: "${friendly_name} Longitude"
+    id: gps_lon
+    lambda: |-
+      if (id(gps_module).has_time()) return id(gps_module).longitude;
+      return NAN;
+    update_interval: 10s
+    accuracy_decimals: 6
+    unit_of_measurement: "°"
+
+  # GPS speed
+  - platform: template
+    name: "${friendly_name} GPS Speed"
+    id: gps_speed
+    lambda: |-
+      if (id(gps_module).has_time()) return id(gps_module).speed * 2.23694; // m/s → mph
+      return 0.0;
+    update_interval: 10s
+    unit_of_measurement: mph
+    accuracy_decimals: 1
+
+  # Pitch angle (MPU-6050)
+  - platform: mpu6050
+    mpu6050_id: mpu
+    accel_x:
+      name: "${friendly_name} Accel X"
+      id: accel_x
+      internal: true
+    accel_y:
+      name: "${friendly_name} Accel Y"
+      id: accel_y
+      internal: true
+    accel_z:
+      name: "${friendly_name} Accel Z"
+      id: accel_z
+      internal: true
+    gyro_x:
+      name: "${friendly_name} Gyro X"
+      id: gyro_x
+      internal: true
+    gyro_y:
+      name: "${friendly_name} Gyro Y"
+      id: gyro_y
+      internal: true
+    gyro_z:
+      name: "${friendly_name} Gyro Z"
+      id: gyro_z
+      internal: true
+    temperature:
+      name: "${friendly_name} MPU Temp"
+      id: mpu_temp
+      internal: true
+    address: 0x68
+    update_interval: 500ms
+
+  # Derived pitch / roll from accelerometer
+  - platform: template
+    name: "${friendly_name} Pitch"
+    id: sensor_pitch
+    lambda: |-
+      float ax = id(accel_x).state, ay = id(accel_y).state, az = id(accel_z).state;
+      return atan2(ay, sqrt(ax*ax + az*az)) * 57.2958;
+    update_interval: 1s
+    unit_of_measurement: "°"
+    accuracy_decimals: 1
+
+  - platform: template
+    name: "${friendly_name} Roll"
+    id: sensor_roll
+    lambda: |-
+      float ax = id(accel_x).state, ay = id(accel_y).state, az = id(accel_z).state;
+      return atan2(-ax, az) * 57.2958;
+    update_interval: 1s
+    unit_of_measurement: "°"
+    accuracy_decimals: 1
+
+  # Vibration magnitude
+  - platform: template
+    name: "${friendly_name} Vibration"
+    id: sensor_vibe
+    lambda: |-
+      float ax = id(accel_x).state, ay = id(accel_y).state, az = id(accel_z).state;
+      float mag = sqrt(ax*ax + ay*ay + az*az);
+      return abs(mag - 9.81); // remove gravity
+    update_interval: 500ms
+    unit_of_measurement: "m/s²"
+    accuracy_decimals: 2
+    filters:
+      - sliding_window_moving_average:
+          window_size: 4
+          send_every: 2
+
+  # WiFi signal
+  - platform: wifi_signal
+    name: "${friendly_name} WiFi RSSI"
+    id: wifi_rssi
+    update_interval: 60s
+
+  # ESP32 internal temperature
+  - platform: internal_temperature
+    name: "${friendly_name} ESP Temp"
+    id: esp_temp
+    update_interval: 60s
+    filters:
+      - lambda: return x * 9/5 + 32; # °C → °F
+    unit_of_measurement: "°F"
+
+  # Cumulative engine hours (pulse counter on ignition at low frequency)
+  - platform: integration
+    sensor: engine_rpm
+    name: "${friendly_name} Engine Hours"
+    id: engine_hours
+    time_unit: h
+    restore: true
+    filters:
+      - multiply: 0.0000277778  # RPM·h → hours (1/60/60 ... simplified for integration)
+
+# ── Binary sensors ───────────────────────────────────────────────────────────
+binary_sensor:
+  # Engine running (digital: HIGH when engine on)
+  - platform: gpio
+    pin:
+      number: GPIO27
+      mode:
+        input: true
+        pullup: true
+    name: "${friendly_name} Engine Running"
+    id: engine_on
+    device_class: running
+    filters:
+      - delayed_on: 2s
+      - delayed_off: 5s
+
+  # GPS fix
+  - platform: template
+    name: "${friendly_name} GPS Fix"
+    id: gps_fix
+    lambda: |-
+      return id(gps_module).has_time() && !isnan(id(gps_lat).state);
+
+# ── Text sensors ─────────────────────────────────────────────────────────────
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "${friendly_name} IP"
+
+# ── Interval: post data to Cloudflare /api/hours ────────────────────────────
+interval:
+  # GPS distance tracking (every 5s while running)
+  - interval: 5s
+    then:
+      - lambda: |-
+          if (!id(engine_on).state) return;
+          double lat = id(gps_lat).state;
+          double lon = id(gps_lon).state;
+          if (isnan(lat) || isnan(lon) || (lat == 0 && lon == 0)) return;
+          if (id(has_prev_pos)) {
+            // Haversine distance (meters)
+            const double R = 6371000.0;
+            double dLat = (lat - id(prev_lat)) * M_PI / 180.0;
+            double dLon = (lon - id(prev_lon)) * M_PI / 180.0;
+            double a = sin(dLat/2)*sin(dLat/2) +
+                       cos(id(prev_lat)*M_PI/180.0) * cos(lat*M_PI/180.0) *
+                       sin(dLon/2)*sin(dLon/2);
+            double dist = R * 2.0 * atan2(sqrt(a), sqrt(1.0-a));
+            if (dist < 20.0) { // ignore GPS jumps > 20m in 5s
+              id(session_dist_m) += dist;
+              id(total_dist_m)   += dist;
+            }
+          }
+          id(prev_lat) = lat;
+          id(prev_lon) = lon;
+          id(has_prev_pos) = true;
+
+  # POST to Cloudflare every 90 seconds while engine is running
+  - interval: 90s
+    then:
+      - if:
+          condition:
+            binary_sensor.is_on: engine_on
+          then:
+            - http_request.post:
+                url: !lambda 'return "${api_url}";'
+                headers:
+                  Content-Type: application/json
+                body: !lambda |-
+                  char buf[512];
+                  snprintf(buf, sizeof(buf),
+                    "{"
+                    "\"hours\":%.1f,"
+                    "\"battery\":%.2f,"
+                    "\"rpm_peak\":%d,"
+                    "\"rpm_avg\":%.0f,"
+                    "\"dist_total_m\":%.1f,"
+                    "\"dist_session_m\":%.1f,"
+                    "\"speed_mph\":%.1f,"
+                    "\"lat\":%.6f,"
+                    "\"lon\":%.6f,"
+                    "\"has_fix\":%s,"
+                    "\"pitch\":%.1f,"
+                    "\"roll\":%.1f,"
+                    "\"vibration\":%.2f,"
+                    "\"shock_events\":%d,"
+                    "\"wifi_rssi\":%.0f,"
+                    "\"esp_temp_f\":%.0f,"
+                    "\"mpu_ok\":1,"
+                    "\"gps_rx\":%d,"
+                    "\"batt_raw\":%.3f"
+                    "}",
+                    id(engine_hours).state,
+                    id(batt_voltage).state,
+                    id(rpm_peak),
+                    id(engine_rpm).state,
+                    id(total_dist_m),
+                    id(session_dist_m),
+                    id(gps_speed).state,
+                    isnan(id(gps_lat).state) ? 0.0 : (double)id(gps_lat).state,
+                    isnan(id(gps_lon).state) ? 0.0 : (double)id(gps_lon).state,
+                    id(gps_fix).state ? "true" : "false",
+                    id(sensor_pitch).state,
+                    id(sensor_roll).state,
+                    id(sensor_vibe).state,
+                    id(shock_count),
+                    id(wifi_rssi).state,
+                    id(esp_temp).state,
+                    id(gps_fix).state ? 1 : 0,
+                    id(batt_voltage).state / 5.0
+                  );
+                  return std::string(buf);
+                on_response:
+                  then:
+                    - lambda: |-
+                        if (response->status_code == 200) {
+                          ESP_LOGI("hcc", "Sensor sync OK");
+                          id(rpm_peak) = 0;      // reset peak each post
+                          id(shock_count) = 0;
+                        }
+
+  # Heartbeat every 5 minutes when engine is OFF — sends battery, WiFi, temp
+  # so the dashboard can confirm the sensor box is alive while parked.
+  - interval: 5min
+    then:
+      - if:
+          condition:
+            binary_sensor.is_off: engine_on
+          then:
+            - http_request.post:
+                url: !lambda 'return "${api_url}";'
+                headers:
+                  Content-Type: application/json
+                body: !lambda |-
+                  char buf[256];
+                  snprintf(buf, sizeof(buf),
+                    "{"
+                    "\"engine_running\":false,"
+                    "\"battery\":%.2f,"
+                    "\"battery_parked\":%.2f,"
+                    "\"wifi_rssi\":%.0f,"
+                    "\"esp_temp_f\":%.0f,"
+                    "\"batt_raw\":%.3f,"
+                    "\"source\":\"heartbeat\""
+                    "}",
+                    id(batt_voltage).state,
+                    id(batt_voltage).state,
+                    id(wifi_rssi).state,
+                    id(esp_temp).state,
+                    id(batt_voltage).state / 5.0
+                  );
+                  return std::string(buf);

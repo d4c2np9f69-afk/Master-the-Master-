@@ -1,0 +1,82 @@
+
+// Extract the REAL functions out of index.html (brace-matched) and run them against REAL HA states.
+const fs = require('fs');
+const src = fs.readFileSync('index.html', 'utf8');
+function extract(name){
+  const sig = '\nfunction ' + name + '(';
+  const start = src.indexOf(sig);
+  if (start < 0) throw new Error('MISSING in index.html: ' + name);
+  let i = src.indexOf('{', start), depth = 0;
+  for (; i < src.length; i++){
+    if (src[i] === '{') depth++;
+    else if (src[i] === '}') { depth--; if (depth === 0) return src.slice(start, i + 1); }
+  }
+  throw new Error('unbalanced: ' + name);
+}
+const code = ['garageOpenerId','garagePositionId','garageIsOverheadDoor','garagePickOne','garagePick','garageSensorIsOpen','hccDoorSensors'].map(extract).join('\n');
+eval(code);
+if (typeof garagePick !== 'function') { console.error('extraction failed'); process.exit(1); }
+
+const states = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+let fail = 0;
+function check(label, got, want){
+  const ok = got === want; if (!ok) fail++;
+  console.log((ok ? '  PASS  ' : '  FAIL  ') + label + '  got=' + got + (ok ? '' : '  WANT=' + want));
+}
+
+console.log('\n--- garagePick against LIVE Beehive ---');
+const p = garagePick(states);
+check('opener switch', p.sw && p.sw.entity_id, 'switch.garage_garage_door_opener');
+check('position sensor', p.sensor && p.sensor.entity_id, 'binary_sensor.garage_door_down_contact');
+check('cover is the garage door', p.cover && p.cover.entity_id, 'cover.garage_door');
+if (p.sensor) console.log('  door reads "' + p.sensor.state + '" -> ' + (garageSensorIsOpen(p.sensor) ? 'OPEN' : 'CLOSED'));
+
+console.log('\n--- every *garage* entity in the house ---');
+const expect = {
+  'switch.garage_garage_door_opener': true,
+  'binary_sensor.garage_door_down_contact': true,
+  'switch.garage_camera_motion_detection': false,
+  'binary_sensor.garage_motion': false,
+  'binary_sensor.garage_man_door_contact': false,
+  'binary_sensor.garage_man_door_battery_low': false,
+  'binary_sensor.garage_door_down_battery_low': false,
+};
+let seen = 0;
+for (const s of states){
+  if (s.entity_id.toLowerCase().indexOf('garage') < 0) continue;
+  const got = garageIsOverheadDoor(s.entity_id);
+  if (s.entity_id in expect){ seen++; check(s.entity_id, got, expect[s.entity_id]); }
+  else console.log('  (info) ' + s.entity_id + ' -> ' + got);
+}
+check('all 7 expected garage entities present in HA', seen, 7);
+
+console.log('\n--- REGRESSION: the pre-fix code, on the same data ---');
+const oldSw = states.filter(s => s.entity_id.indexOf('switch.') === 0 && s.entity_id.toLowerCase().indexOf('garage') >= 0);
+const oldSensor = states.filter(s => s.entity_id.indexOf('binary_sensor.') === 0 && s.entity_id.toLowerCase().indexOf('garage') >= 0);
+console.log('  old switch.*garage*        matched ' + oldSw.length + ': ' + oldSw.map(x => x.entity_id).join(', '));
+console.log('  old binary_sensor.*garage* matched ' + oldSensor.length + ': ' + oldSensor.map(x => x.entity_id).join(', '));
+console.log('  -> old code would have taken [0]: ' + oldSw[0].entity_id + ' / ' + oldSensor[0].entity_id);
+
+console.log('\n--- Guardian Night Check buckets ---');
+// 2026-09-04: was a STALE INLINE COPY of the old *door* filter. It printed a Doors
+// bucket holding 5 ai_doorbell camera sensors and missing the mailbox - reproducing
+// the exact bug OPEN_ITEMS #79 fixed, inside the test meant to guard it, while its
+// assertions passed because none of them checked for ai_doorbell.
+// Now calls the app's OWN hccDoorSensors(), extracted from index.html, so this test
+// can never drift from the code again.
+const doors = hccDoorSensors(states);
+const garAll = states.filter(function(s){ return (s.entity_id.indexOf('cover.') === 0 || s.entity_id.indexOf('binary_sensor.') === 0) && garageIsOverheadDoor(s.entity_id); });
+const garCovers = garAll.filter(s => s.entity_id.indexOf('cover.') === 0);
+const gar = garCovers.length ? garCovers : garAll;
+console.log('  Doors (' + doors.length + '): ' + doors.map(d => d.entity_id + '=' + d.state).join('  '));
+console.log('  Garage door (' + gar.length + '): ' + gar.map(g => g.entity_id + '=' + g.state).join('  '));
+check('man door counted as a Door', doors.some(d => d.entity_id === 'binary_sensor.garage_man_door_contact'), true);
+check('no battery flag in Doors', doors.every(d => !/battery|_low/.test(d.entity_id)), true);
+check('no spare contact in Doors', doors.every(d => !/spare/.test(d.entity_id)), true);
+check('no ai_doorbell in Doors', doors.every(d => d.entity_id.indexOf('ai_doorbell') < 0), true);
+check('mailbox contact IS in Doors', doors.some(d => d.entity_id === 'binary_sensor.mailbox_contact'), true);
+check('Garage row is exactly 1 entity', gar.length, 1);
+check('Garage row is the cover', gar[0] && gar[0].entity_id, 'cover.garage_door');
+
+console.log('\n' + (fail ? '*** FAILURES: ' + fail + ' ***' : 'ALL CHECKS PASSED') + '\n');
+process.exit(fail ? 1 : 0);
