@@ -7295,6 +7295,23 @@ renderAll();
 })();
 loadWeather();
 loadIrrigation();
+// 🔴 IRRIGATION MUST POLL. It was the ONLY live card in the app that never refreshed —
+// weather and alerts both run on 5-minute intervals, irrigation ran exactly once at boot
+// and then froze. But irrigation is the one card whose state changes with nobody touching
+// anything: zones start and stop on a schedule. On 2026-09-05 Jeff stood watching his
+// sprinklers run while the card said idle, because it had fetched before the zone started
+// and never looked again.
+// 60 s, not 5 min: a zone can be shorter than the run of the whole program, and "is it
+// watering right now" is worthless if it is five minutes behind. Skipped while the tab is
+// hidden or the section is off-screen so it costs nothing sitting in the background.
+setInterval(function(){
+  try{
+    if (document.hidden) return;
+    var s = document.getElementById('section-irrigation');
+    if (!s || s.offsetParent === null) return;   // section not visible
+    loadIrrigation();
+  }catch(e){}
+}, 60*1000);
 // LUX lives on HOME (moved 08-03), which is already the active section by default on
 // boot — so hccSection('home')'s own loadClimate()/loadStation() calls never fire on a
 // normal app open (only on manual nav away-and-back). Load it directly here too, same
@@ -8475,7 +8492,10 @@ function hccSection(id, btn) {
   if (btn) btn.classList.add('active');
   var hero = document.getElementById('hero-' + id);
   if (hero) hero.classList.add('active');
-  if (id === 'irrigation' && !window._irrLoaded) { window._irrLoaded = true; loadIrrigation(); }
+  // 🔴 2026-09-05: the `!window._irrLoaded` guard meant this fetched ONCE, ever. Opening
+  // the IRRIGATION tab again showed the same frozen snapshot. Zones start and stop on
+  // their own, so this card is stale the moment anything happens. Always refetch on open.
+  if (id === 'irrigation') { window._irrLoaded = true; loadIrrigation(); }
   if (id === 'home') {
     if (!window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
     loadUtilities(); loadCameras(); loadHomeStatus(); loadClimate(); loadStation();
