@@ -1,3 +1,76 @@
+# 🟢 2026-09-05 SATURDAY — THE LEAK IS SOLVED, AND THE IRRIGATION CARD WAS LYING
+
+## 💧 THE LEAK IS IRRIGATION-SIDE. THE HOUSE IS CLEAN. (#140)
+
+Jeff closed the irrigation main at **10:11**. Measured off `sensor.water_gallons`:
+
+| window | delta | conditions |
+|---|---|---|
+| 01:00-05:00 | **24.8 gal** (6.2/hr) | main OPEN, house asleep |
+| 09:02-10:00 | **6.1 gal** | main OPEN |
+| 10:00-11:03 | **+1.2** | straddles shutoff — **predicted 1.12** |
+| 11:03-12:01 | **+1.4** | closed (≈ one 1.28 gal flush) |
+| 12:01-13:01 | **+0.5** | closed |
+| 13:01-14:02 | **+1.1** | closed |
+
+**6.2 gal/hr → ~1 gal/hr the moment the valve shut.** A toilet, a supply line or a slab leak does
+not care about an irrigation valve. **≈144 gal/day, ≈$83/month stopped.**
+🔴 **SEARCH ORDER, from what changed:** (1) the **Orbit anti-siphon valve installed 09-03** — ten
+nights with the supply off ran 0.0-1.3 gal and the leak appeared the FIRST night it was
+pressurised; (2) the **zone-4 bonnet swapped 09-04** — the rate TRIPLED right after (#119's
+warning about running pressure); (3) the other three bonnets (#121).
+⏳ **Tonight's 01:00-05:00 with the main still shut is the definitive baseline.** The scheduled
+task fires **09-06 08:05** and will report it unprompted.
+
+## 🔴 THE IRRIGATION CARD HAD FOUR SEPARATE DEFECTS (#136-#139, #142)
+Jeff, watching sprinklers run while the app said idle: *"B hive is active and working fine. It's
+all the shit that you have build that's not working!"* **He was right on both halves.**
+
+1. **#136 `active_station` was ALWAYS null** — read `watering_status.stations`, a key that does not
+   exist. The truth is **`current_station`**; the list is nested in `group_watering[0].stations`.
+   ⚠️ Orbit ships two decoys, hyphenated `watering-status` and plural `watering_statuses`, both
+   empty — **do not switch to either on the strength of the name.**
+2. **#137 `rain_delay`** turned Orbit's null into a confident green **"None"**.
+3. **#138 `suggested_start_time` was never surfaced** — Orbit carries BOTH that (**05:00**, the one
+   that fired) and `next_start_time` (06:20). **Never treat `next_start_time` as "the next run".**
+4. **#139 the card NEVER refreshed** — one-shot at boot with a `_irrLoaded` guard. It was the only
+   live card in the app with no polling, and the one whose state changes by itself.
+
+**Also fixed:** 4 more frozen loaders now poll (**lightning 2 min**, fire, air quality, home
+status); **#142** the burn card scored a missing wind reading as green **"✓ Wind calm"** on a
+fire-safety card. Ended at **service worker hcc-v106** — bump it on EVERY `index.html` change.
+
+## ✅ Also closed today
+**#63** SMB1 client identified as the **Fire TV** (`.215`), stopped 08-29, all rejected — no
+exposure · **#133** #62's audit evidence had silently failed (Security log circular at 20 MB, only
+32 h; enlarged to 256 MB — **do not decide #62 before ~09-18**) · **#134** audit false positive on
+two Echo sensors · **#79b** the 09-04 "8-entity Night Check" thread — the app was always right,
+the TEST had the stale copy · **#89** haFetch no longer fires unauthenticated calls · **#129** the
+house WiFi PSK scrubbed from the public repo · **#3/#118** Bitwarden CLI installed + `bw-dupes.py`.
+
+## 🔵 NEEDS ONE WORD FROM JEFF (no work from him)
+- **#141** — six HA mower entities (`sensor.hcc_mower_battery` etc.) have been **dead since
+  creation**: `hcc_mower_sensor_sync` reads `last_triggered: None` because the firmware posts only
+  to Cloudflare. Fix is a `platform: rest` sensor on `/api/hours` — the #59 pattern, `rest.reload`,
+  no restart, no firmware trip. **Not built; it touches Beehive config.**
+- **#3/#118** — Bitwarden dedupe needs one `bw unlock` and the `BW_SESSION` key. Never the master password.
+- **#84/#85** — still correctly blocked. The mailbox caught today's delivery at 11:40:24 but is
+  **still LQI 0**; #132 stands.
+
+## 🧬 GENEALOGY — verified against the LIVE tree, correcting the audit
+- **The "Qualls seven" is SIX.** Georgo 1836, Francine 1843, Aliriari 1844, Lethia 1848, Daralo A
+  1848, William 1849. **William Newton reads b.1869 live** (audit said 1849) — already fixed.
+  New: **James Henry / James H. Qualls, both 1865 — a duplicate pair.**
+- **"John Qualls's six" rests on a wrong year.** Audit says b.1839; live tree says **ABT 1832,
+  d. 12 APR 1863**. His one datable child (1851) makes him **19**, not 11. **"Two brothers, same
+  defect" is NOT established.** Next test is his **death date** — any child born after ~Jan 1864.
+- ⚠️ **The `/edit` endpoint returns NO birth year for many people** (alternate facts, per
+  `ANCESTRY_API.md`). A comparison with a missing operand is not a passing test — my scripts
+  printed "0 impossible" twice off missing data and both were caught before reporting.
+- ⚠️ **FamilySearch session EXPIRED mid-search.** Ancestry still works. The probate/guardianship
+  hunt for George #2's father (`GEORGE2_BRICK_WALL.md` NEXT STEP 4) needs Jeff to re-login.
+
+---
 # 🟢 2026-09-04 5:50 PM — SESSION READ THE RECORD FIRST, THEN FOUND THREE THINGS
 
 **Jeff: *"read all the files so you can get up to speed… don't do anything unless you look up in the
