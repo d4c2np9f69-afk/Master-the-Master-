@@ -64,7 +64,7 @@ project's history missed him. He is with the **KELLETT** family in **both** cens
 **1850 Union, Arkansas (age 8)** and **1860 North Twp, LAWRENCE (age 17)** — Joseph Kellett + wife
 Elizabeth, with Alford/Alfred, William, Eliza and Henderson aged correctly forward in both.
 **Sharp County was carved out of Lawrence in 1868, so his 1870 "Sharp" address is the same ground.**
-🔴 **Two UNOPENED Ancestry hints on him: Role=Father and Role=Mother** (tree 16019643).
+🔴 **DO NOT OPEN THE TWO ANCESTRY PARENT HINTS ON HIM AS IF THEY WERE THE ANSWER.** I flagged them as *"the shortest path to his father we have ever had"* — **that was WRONG and Jeff caught it.** `genealogy/GEORGE2_BRICK_WALL.md` already warns, in as many words, that Ancestry's engine *"is also trying to RE-MERGE them — ignore any hint offering Moses R. Baker / Rebecca M. Callahan as George #2's parents."* Those hints are the **re-merge trap**, i.e. the very conflation the 09-02 session spent hours undoing.
 Full detail, including two record corrections, at the top of `HCC-Scripts/genealogy/NEXT_SESSION.md`.
 
 ---
