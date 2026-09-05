@@ -240,7 +240,20 @@ export async function onRequestGet({ env, request }) {
         connected: isConnected,
         last_connected: timer.last_connected_at || timer.last_connected || null,
         run_mode: status.run_mode || 'auto',
-        rain_delay: status.rain_delay || 0,
+        // ⚠️ WAS `status.rain_delay || 0`, which turns Orbit's null into a confident 0 —
+        // "no rain delay set" when Orbit in fact told us nothing. Same failure class as the
+        // isConnected bug above and the active_station bug below: a missing value coerced
+        // into a reassuring one. Verified 2026-09-05 06:04 — Orbit sent null, the app said 0.
+        // null now means UNKNOWN and the UI must not render it as "no delay".
+        rain_delay: (typeof status.rain_delay === 'number') ? status.rain_delay : null,
+        // 🔴 THE FIELD THAT WOULD HAVE PREDICTED THE 5 AM RUN. Orbit carries BOTH
+        // `next_start_time` (06:20 on 2026-09-05) AND `suggested_start_time` (05:00), and the
+        // 05:00 one is what actually fired. The app only ever surfaced next_start_time, so it
+        // could not tell Jeff his watering was about to begin — and I misread the 5 AM start
+        // as a leak partly for the same reason. Surface both; never treat next_start_time as
+        // "the next run" on its own.
+        suggested_start_time: timer.suggested_start_time || null,
+        num_stations: timer.num_stations != null ? timer.num_stations : null,
         active_station: activeZone,
         is_watering: activeZone != null,
         // what Orbit says is still to come in this run, so the card can show progress
