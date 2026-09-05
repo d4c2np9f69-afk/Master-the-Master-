@@ -7312,6 +7312,26 @@ setInterval(function(){
     loadIrrigation();
   }catch(e){}
 }, 60*1000);
+
+// 🔴 2026-09-05 SWEEP: 13 of 27 data loaders in this app rendered ONCE and then froze.
+// Some of those are correctly one-shot (loadForecast, loadClips, loadFullSensorLog —
+// nothing about them changes minute to minute). These five are NOT: they show live
+// conditions, and a frozen live reading is worse than a blank one because it looks
+// current. loadLightning is the sharp end — it drives the storm cells on WEATHER *and*
+// the hero, so during a storm it was showing whatever it saw when the app opened.
+// Same guard as above: nothing runs while the tab is hidden.
+(function(){
+  function poll(fn, ms){
+    setInterval(function(){
+      try{ if (document.hidden) return; if (typeof window[fn] === 'function') window[fn](); }catch(e){}
+    }, ms);
+  }
+  poll('loadLightning',   2*60*1000);   // storms move; 2 min
+  poll('loadFire',        5*60*1000);
+  poll('loadAirQuality',  5*60*1000);
+  poll('loadWatering',    5*60*1000);
+  poll('loadHomeStatus',  60*1000);     // HA state, same cadence as the other HA cards
+})();
 // LUX lives on HOME (moved 08-03), which is already the active section by default on
 // boot — so hccSection('home')'s own loadClimate()/loadStation() calls never fire on a
 // normal app open (only on manual nav away-and-back). Load it directly here too, same
