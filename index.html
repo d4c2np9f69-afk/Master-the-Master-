@@ -6642,8 +6642,16 @@ function loadIrrigationDirect(){
         }
       }
       set('irrMode', (dev.run_mode||'--').toString().toUpperCase());
-      var rd=Number(dev.rain_delay)||0, rdEl=document.getElementById('irrRainDelay');
-      if(rdEl){ if(rd>0){ rdEl.innerHTML=rd+' h'; rdEl.style.color='#ffd24a'; } else { rdEl.innerHTML='None'; rdEl.style.color='#22c55e'; } }
+      // 2026-09-05: `Number(dev.rain_delay)||0` turned Orbit's NULL into a confident green
+      // "None". That is the same coercion removed from /api/irrigation the same morning —
+      // undone one layer up, in the UI. UNKNOWN must never render as good news; that is the
+      // whole lesson of the isConnected bug that showed "● ONLINE" for a week.
+      var rdRaw=dev.rain_delay, rdEl=document.getElementById('irrRainDelay');
+      if(rdEl){
+        if(rdRaw==null){ rdEl.innerHTML='Unknown'; rdEl.style.color='#ffd24a'; }
+        else if(Number(rdRaw)>0){ rdEl.innerHTML=Number(rdRaw)+' h'; rdEl.style.color='#ffd24a'; }
+        else { rdEl.innerHTML='None'; rdEl.style.color='#22c55e'; }
+      }
       var active=dev.active_station, banner=document.getElementById('irrBanner');
       // "All zones idle" is TRUE of an unplugged controller too, and it reads as healthy.
       // Offline wins over idle — that is the whole point of the 08-20 fix.
@@ -6675,7 +6683,19 @@ function loadIrrigationDirect(){
       var zc=document.getElementById('irrZones'); if(zc) zc.innerHTML=html;
       // next run line
       var nr=document.getElementById('irrNextRun');
-      if(nr){ if(dev.next_start_time){ try{ nr.textContent='Next run: '+new Date(dev.next_start_time).toLocaleString([], {weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }catch(e){ nr.textContent=''; } } else nr.textContent=''; }
+      // 🔴 next_start_time is NOT the whole story. Orbit also publishes suggested_start_time,
+      // and on 2026-09-05 THAT is the one that fired: suggested 05:00 ran while next_start_time
+      // said 06:20. Showing only next_start_time meant the card could not tell Jeff his
+      // watering was about to begin. Show both when they disagree.
+      if(nr){
+        var fmt=function(t){ return new Date(t).toLocaleString([], {weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); };
+        try{
+          var parts=[];
+          if(dev.next_start_time) parts.push('Next run: '+fmt(dev.next_start_time));
+          if(dev.suggested_start_time) parts.push('B-hyve suggested start: '+dev.suggested_start_time);
+          nr.textContent=parts.join('  ·  ');
+        }catch(e){ nr.textContent=''; }
+      }
       // Populate Intelligence card
       var iic=document.getElementById('irrIntelCard');
       if(iic){ iic.style.display=''; }
