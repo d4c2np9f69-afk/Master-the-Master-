@@ -181,8 +181,35 @@ export async function onRequestGet({ env, request }) {
 
     const status = timer.status || {};
     const watering = status.watering_status || {};
-    const activeStations = watering.stations || [];
-    const activeZone = activeStations.length > 0 ? activeStations[0].station : null;
+
+    // ⚠️ THIS REPORTED "NOT WATERING" THROUGH EVERY SINGLE RUN. Fixed 2026-09-05.
+    // The old code was `watering.stations[0].station`. **`watering_status.stations` does
+    // not exist.** Captured straight off Orbit at 05:56:20 while Jeff stood watching
+    // zone 2 physically running:
+    //
+    //   watering_status = { current_station: 2,
+    //                       group_watering: [{ program:"e", stations:[
+    //                            {station:1,run_time:43},{station:2,run_time:14},
+    //                            {station:5,run_time:23} ]}],
+    //                       water_event_queue: [{station:2,run_time_sec:840},
+    //                                           {station:5,run_time_sec:1380}] }
+    //   watering-status  = null        watering_statuses = []
+    //
+    // So `.stations` -> undefined -> [] -> null -> the app said idle while the sprinklers
+    // were on. The running zone is `current_station`; the station LIST is nested one level
+    // down in group_watering[0].stations. Orbit also ships two decoy keys - a HYPHENATED
+    // `watering-status` and a plural `watering_statuses` - both empty here; do not switch
+    // to either of them on the strength of the name.
+    // Jeff, 2026-09-05: "B hive is active and working fine. It's all the shit that you have
+    // build that's not working!" - correct, this was ours.
+    const groupStations = (Array.isArray(watering.group_watering) && watering.group_watering[0]
+                            && Array.isArray(watering.group_watering[0].stations))
+                          ? watering.group_watering[0].stations : [];
+    const wateringQueue = Array.isArray(watering.water_event_queue) ? watering.water_event_queue : [];
+    const activeZone =
+      (watering.current_station != null) ? watering.current_station
+      : (Array.isArray(watering.stations) && watering.stations.length ? watering.stations[0].station
+      : (wateringQueue.length ? wateringQueue[0].station : null));
 
     // ⚠️ THIS WAS HARD-WIRED TO TRUE. Fixed 2026-08-20.
     // The old expression ORed in `timer.hardware_version` — a field EVERY device record
@@ -215,6 +242,13 @@ export async function onRequestGet({ env, request }) {
         run_mode: status.run_mode || 'auto',
         rain_delay: status.rain_delay || 0,
         active_station: activeZone,
+        is_watering: activeZone != null,
+        // what Orbit says is still to come in this run, so the card can show progress
+        watering_queue: wateringQueue.map(q => ({
+          station: q.station,
+          run_time: (q.run_time_sec != null ? Math.round(q.run_time_sec / 60) : (q.run_time != null ? q.run_time : null))
+        })),
+        program_stations: groupStations.map(s => ({ station: s.station, run_time: s.run_time })),
         last_watered: lastWateredFromEvents || timer.last_watering_end_time || null,
         next_start_time: status.next_start_time || timer.next_start_time || null
       },
