@@ -37,6 +37,38 @@ leaking, and per **#121 the other three bonnets are the suspects, same freeze** 
 the SHAPE, not the total. **A single clean night does not prove no drip** — that is what the
 5-of-7-nights-over-baseline drip check is for.
 
+## ✅ CLOSED / FIXED THIS EVENING (all committed and pushed)
+
+| # | what | proof |
+|---|---|---|
+| **#129** | House WiFi PSK scrubbed from the public repo | **0 hits** on loewenhome.com, www, pages.dev and GitHub raw. **Rotation still Jeff's call** — git history keeps it. |
+| **#89** | `haFetch()` no longer fires unauthenticated calls HA rejects and logs (72 in 10 days) | New `scripts/hafetch-token-guard-test.js`, proven **both ways**: guest **0** `/api/ha` calls, logged-in **13**, all authorized. Live on both domains. |
+| **#130** | Overnight water watch could measure but not speak — task ran 06:15 inside its own 08:00 quiet-hours gate | Moved to **08:05**, `NextRunTime 2026-09-05 08:05:00`, `--notify` intact. |
+| **#132** | 🔴 **RETRACTS #125.** Mailbox is NOT healthy: median LQI **3**, max gap **18.52 h** vs 3–6 h for every other device | **#84's 12 h timeout would have false-paged Jeff.** #84/#85 stay blocked on the repeater. |
+| **#133** | 🔴 #62's evidence plan had silently failed — Security log circular at 20 MB, only **32 h** of history, not 12 days | Audit *was* on; the log had rolled over. **Enlarged 20 MB → 256 MB (~15 days).** Do not decide #62 before **~09-18**. |
+| **#63** | ✅ **CLOSED** — the SMB1 client is the **Fire TV** (`192.168.1.215`), and it stopped **08-29** | 204 events, one client, confirmed via gateway hostname `20BEB83A8C5D`. SMB1 is disabled so all were *rejected* — no exposure. |
+| **#134** | `HCC-Audit.py` false FAIL on two Echo sensors | Same device's `next_reminder` held a live future value → not a fault. Baselined with the reason; `media_player` left unbaselined so a dead Echo still alarms. |
+| **#113** | GaragePC credential folded into `HCC_ACCESS.md` §5 — no Word file needed | Three docx copies textually identical (sha256 `b4cd53fe4a8fe928`). |
+| **#3/#118** | Bitwarden CLI **installed** (2026.6.0) + `bw-dupes.py` written | Read-only, never sees the master password, prints no password values. **Needs 2 min of Jeff: `bw unlock`, hand over `BW_SESSION`.** |
+
+🔴 **A CORRECTION I MADE AND TOLD JEFF:** I claimed the `garagepc.txt` pointer was dangling. It is
+not — it correctly reads `iCloudDrive\HCC-secrets\...`. I had reasoned over my own
+credential-**redacted** output, whose regex ate the word `iCloudDrive`. The write script asserted
+its match string, failed to find it, and refused to write, so nothing was damaged.
+**Mask on output; read the original.** Full account in `COST_LEDGER.md` 2026-09-04.
+
+## 🧬 GENEALOGY — THE BAKER BRICK WALL MOVED TONIGHT (Jeff's own insight cracked it)
+
+**George #2 is enumerated as "WASHINGTON BAKER", not George** — which is why every search in this
+project's history missed him. He is with the **KELLETT** family in **both** censuses:
+**1850 Union, Arkansas (age 8)** and **1860 North Twp, LAWRENCE (age 17)** — Joseph Kellett + wife
+Elizabeth, with Alford/Alfred, William, Eliza and Henderson aged correctly forward in both.
+**Sharp County was carved out of Lawrence in 1868, so his 1870 "Sharp" address is the same ground.**
+🔴 **Two UNOPENED Ancestry hints on him: Role=Father and Role=Mother** (tree 16019643).
+Full detail, including two record corrections, at the top of `HCC-Scripts/genealogy/NEXT_SESSION.md`.
+
+---
+
 ## 🔴 #129 — THE HOUSE WiFi PASSWORD IS PUBLIC RIGHT NOW
 
 `docs/utilities/bhyve_wifi_reconnect.md` (commit `c491065`, 09-03 14:19) carries the PSK **twice**.
