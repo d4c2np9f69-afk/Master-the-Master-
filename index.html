@@ -5698,7 +5698,17 @@ function renderBurn(){
   var card=document.getElementById('burnCard'); if(!card) return;
   var banner=document.getElementById('burnBanner'), body=document.getElementById('burnBody');
   if(!STATION){ if(banner){ banner.className='wx-banner wx-load'; banner.innerHTML='&#128260; Loading conditions…'; } return; }
-  var wind=Math.round(Number(STATION.windSpeed)||0), gust=Math.round(Number(STATION.windGust)||0);
+  // 2026-09-05: was `Number(STATION.windSpeed)||0`. On a BURN-SAFETY card, a missing wind
+  // reading scored as 0 mph and printed "✓ Wind calm" in green — the safest-looking possible
+  // answer produced by having no data at all. Same coercion as rain_delay||0 and the
+  // isConnected bug, but here it advises Jeff on whether to light a fire. Unknown is now
+  // treated as UNKNOWN: it does not score, and it says so.
+  var windRaw=(STATION.windSpeed!=null&&STATION.windSpeed!=='')?Number(STATION.windSpeed):null;
+  var gustRaw=(STATION.windGust!=null&&STATION.windGust!=='')?Number(STATION.windGust):null;
+  if(windRaw!=null&&isNaN(windRaw)) windRaw=null;
+  if(gustRaw!=null&&isNaN(gustRaw)) gustRaw=null;
+  var windKnown=(windRaw!=null||gustRaw!=null);
+  var wind=Math.round(windRaw||0), gust=Math.round(gustRaw||0);
   var hum=(STATION.humidity!=null)?Math.round(Number(STATION.humidity)):null;
   var rain=Number(STATION.precipTotal)||0;
   var temp=(STATION.temp!=null)?Math.round(Number(STATION.temp)):null;
@@ -5707,7 +5717,8 @@ function renderBurn(){
   var windAlert=(ALERTS||[]).some(function(a){ return a&&/wind advisory|high wind/i.test(a.event||''); });
   var score=0, rows=[];
   // Wind — #1 driver of ember spread
-  if(gust>=25||wind>=18){ score+=3; rows.push(['&#128168;','Wind dangerous — '+wind+' mph, gusts '+gust,'bad']); }
+  if(!windKnown){ score+=2; rows.push(['&#10068;','Wind UNKNOWN — station not reporting. Do not treat as calm.','warn']); }
+  else if(gust>=25||wind>=18){ score+=3; rows.push(['&#128168;','Wind dangerous — '+wind+' mph, gusts '+gust,'bad']); }
   else if(gust>=18||wind>=12){ score+=2; rows.push(['&#128168;','Wind high — '+wind+' mph, gusts '+gust+' (embers carry)','warn']); }
   else if(gust>=12||wind>=8){ score+=1; rows.push(['&#128168;','Wind moderate — '+wind+' mph, gusts '+gust,'warn']); }
   else { rows.push(['&#10003;','Wind calm — '+wind+' mph, gusts '+gust,'ok']); }
