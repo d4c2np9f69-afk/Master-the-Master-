@@ -5508,8 +5508,13 @@ function loadWeather(){
       }
       WX={status:mow,temp:Math.round(c.temperature_2m),risk:risk,soil:soil,dewOnGrass:dewOnGrass,loaded:true};
       var hw=document.getElementById('heroWeather');
-      var wCode=(d.hourly.weathercode&&d.hourly.weathercode.length)?d.hourly.weathercode[0]:(c.weathercode||0);
-      if(hw){var wIcon=wCode===0?'&#9728;&#65039;':wCode<3?'&#9925;':wCode<50?'&#9729;':wCode<70?'&#127783;&#65039;':wCode<80?'&#10052;':'&#26928;&#65039;';hw.innerHTML=wIcon+' '+Math.round(c.temperature_2m)+'&#176;F';}
+      // 2026-09-05: was `(c.weathercode||0)`. WMO code 0 means CLEAR SKY, so a MISSING
+      // weathercode rendered as a sun icon and the word "Clear" — missing data shown as
+      // good weather, the same coercion as rain_delay||0 and the isConnected bug. null
+      // now falls through to the honest "Partly Cloudy" default below and a neutral icon.
+      var wCode=(d.hourly.weathercode&&d.hourly.weathercode.length)?d.hourly.weathercode[0]
+                : (c.weathercode!=null ? c.weathercode : null);
+      if(hw){var wIcon=wCode==null?'&#127761;&#65039;':wCode===0?'&#9728;&#65039;':wCode<3?'&#9925;':wCode<50?'&#9729;':wCode<70?'&#127783;&#65039;':wCode<80?'&#10052;':'&#26928;&#65039;';hw.innerHTML=wIcon+' '+Math.round(c.temperature_2m)+'&#176;F';}
       // Weather hero subtitle = actual sky condition (not the mow verdict — that's on YARD now).
       var hdesc=document.getElementById('wxHeroDesc');
       if(hdesc){var phr={0:'Clear',1:'Mostly Clear',2:'Partly Cloudy',3:'Overcast',45:'Fog',48:'Fog',51:'Drizzle',53:'Drizzle',55:'Drizzle',61:'Light Rain',63:'Rain',65:'Heavy Rain',71:'Snow',73:'Snow',75:'Snow',80:'Showers',81:'Showers',82:'Showers',95:'Thunderstorm',96:'Thunderstorm',99:'Thunderstorm'};hdesc.textContent=phr[wCode]||'Partly Cloudy';}
