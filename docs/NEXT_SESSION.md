@@ -1,3 +1,57 @@
+# 🔵 2026-09-06 SUNDAY — LEAK TEST CLOSED, AND THE GENEALOGY MOVED COUNTIES
+
+## 💧 #140 CLOSED — 0.0 gal overnight with the irrigation main shut
+Nine-night comparison, 01:00–05:00: **1.1 / 0.1 / 2.3 / 1.2 / 1.3 / 0.0** pre-valve, then
+**9.2** the first night after the Orbit anti-siphon valve (installed 09-03), then **25.3** after
+the zone-4 bonnet swap (09-04), then **0.0** with the main closed. Confirmed independently at
+06:00: **+1.2 gal across the whole six-hour night** (a 6.2 gal/hr leak would have logged ~37).
+
+🟢 **House plumbing exonerated.** 🔴 **The leak is NEW WORK** — 09-03 was 0.0 *before* the valve.
+Search order: **the valve → the zone-4 bonnet → the other three bonnets.**
+
+⚠️ **Verifying a ZERO on this meter needs a liveness check.** rtlamr2mqtt runs `-unique=true`, so
+an unchanged value is never republished — a dry meter and a dead receiver look identical.
+`sensor.gas_ccf` reported at 02:24 inside the window, proving the RTL-SDR stack was alive.
+
+## 🛠 App
+- **#143** irrigation card now renders the watering QUEUE ("Zone 2 (14 min) · then Zone 5 (23 min)")
+  plus a QUEUED badge. `scripts/irrigation-queue-test.js` 6/6, driven by the real 05:56:20 payload,
+  with a negative control. `hcc-v107` live.
+- **#144** my own leak watcher cried wolf at 19:02 Saturday. Replaced by
+  `HCC-Scripts/Watch-LeakWindow.py` — verdicts ONLY inside 01:00–05:00, always divides by real
+  elapsed time, flags batched gaps.
+- **#145** controller fires **05:00 Monday** regardless of the main being shut.
+- **#146** mailbox contact has read OPEN since 11:40 Sat (and 17 h on 09-03). Normal is 2–90 sec.
+  Points at the magnet, not the carrier. Needs eyes on the box.
+
+## 🧬 GENEALOGY — READ `HCC-Scripts/genealogy/GEORGE2_BRICK_WALL.md` (953 lines)
+🔴 **Jeff forced the re-think that worked:** *"there can't be that many people that were even in
+that county… you can't keep beating your head against the same wall."*
+
+**Two method corrections:**
+1. **The full-text API is NOT limited to one film.** `q.recordPlace=Arkansas` works; unscoped
+   works. The "Something Went Wrong" page is a **UI bug only**. Tool: `genealogy/fsq2.js`.
+2. **I had searched 93 of 300 Lawrence County Baker pages** — only court/probate. The 98 marriage,
+   78 deed and 13 tax pages had never been touched.
+
+**The enumeration that cracked it:** the **entire 1840 Lawrence County census has THREE Baker
+households — Isaac N., George A., Jacob M. — and all three outlived 1850.** So the father never
+headed a household there. Thomas Baker's other heirs, **Elisha and William**, were on the
+**1839 Randolph County tax roll, Davidson Township** — and are **gone by 1850**.
+
+🔴 **IT IS A RANDOLPH COUNTY PROBLEM, NOT A LAWRENCE COUNTY ONE.** Next: Randolph tax rolls
+1840–1850 page by page; Randolph probate/admin bonds 1842–1850; Randolph marriages 1838–1842
+(names the mother).
+
+**Also new:** Thomas Baker (d.1837) was **son of Elisha Baker of Hempstead County** (1821 bill of
+sale) — one generation further back than this file had ever reached.
+
+⚠️ **CHROME/FAMILYSEARCH:** the session dropped 08:05 Sunday when the debug Chrome was closed
+without flushing cookies. Relaunch with
+`chrome.exe --remote-debugging-port=9222 --user-data-dir=C:\Users\jeffl\HCC-Scripts\chrome-profile`
+**as a background task** (a plain `&` or Start-Process gets reaped), then **Jeff must sign in** —
+never enter credentials yourself.
+
 # 🟢 2026-09-05 SATURDAY — THE LEAK IS SOLVED, AND THE IRRIGATION CARD WAS LYING
 
 ## 💧 THE LEAK IS IRRIGATION-SIDE. THE HOUSE IS CLEAN. (#140)
