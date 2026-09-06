@@ -1608,3 +1608,37 @@ does not change for months. **Every one of those 20 was healthy.** Same trap as 
 Also re-confirmed: `sensor.hcc_mower_battery = 0.0` is **volts, not percent** (#141's dead
 webhook), and the Blink garage/doorbell `unknown` temperature entities are the documented
 mains-Mini and offline-doorbell cases — not new faults.
+
+## #140 CLOSED — 🟢 DEFINITIVE: 0.0 gal overnight with the main shut 2026-09-06
+
+**The quiet-window baseline came back at ZERO.** Nine consecutive nights, 01:00–05:00 local,
+measured off `sensor.water_gallons`:
+
+| night | gal | broadcasts | condition |
+|---|---|---|---|
+| 08-29 | 1.1 | 3 | pre-valve baseline |
+| 08-30 | 0.1 | 2 | " |
+| 08-31 | 2.3 | 4 | " |
+| 09-01 | 1.2 | 3 | " |
+| 09-02 | 1.3 | 3 | " |
+| 09-03 | **0.0** | 1 | " (valve installed later that day) |
+| 09-04 | **9.2** | 5 | ⚠️ first night AFTER the Orbit anti-siphon valve |
+| 09-05 | **25.3** | 5 | ⚠️ after the zone-4 bonnet swap on 09-04 |
+| **09-06** | **0.0** | **1** | ✅ **irrigation main CLOSED** |
+
+🟢 **HOUSE PLUMBING FULLY EXONERATED.** A flapper, a supply line or a slab leak does not stop
+when an irrigation valve closes. It went to a hard zero.
+
+🔴 **AND THE LEAK IS NEW WORK, NOT AN OLD FAULT.** 09-03 night = 0.0 *before* the valve went in;
+09-04 night = 9.2 *after*; 09-05 night = 25.3 after the zone-4 bonnet swap — roughly a tripling,
+matching what Jeff observed. **Two changes, two step increases.** Search order (#121) confirmed:
+**(1) the Orbit anti-siphon valve installed 09-03**, (2) the zone-4 bonnet swapped 09-04,
+(3) the other three bonnets.
+
+**Rate ~6.2 gal/hr ≈ 149 gal/day ≈ $83/month.** Shut since 10:11 on 09-05.
+
+⚠️ **HOW THE ZERO WAS VERIFIED, because "no broadcast" is not the same as "no water":**
+rtlamr2mqtt runs `-unique=true`, so an unchanged reading is never republished — a dead receiver
+and a dry meter look identical. **`sensor.gas_ccf` reported at 02:24**, inside the window, on the
+same RTL-SDR stack. The receiver was alive; the silence was real. **Never report a zero from this
+meter without an independent liveness check.**
