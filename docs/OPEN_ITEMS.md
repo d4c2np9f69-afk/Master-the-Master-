@@ -1566,3 +1566,45 @@ Live `/api/irrigation` reads `next_start_time = 2026-09-07T05:00:00-05:00`. **No
 tonight or Sunday night**, so both quiet windows are clean for the leak baseline. But at
 **05:00 Monday** the controller opens zone valves regardless of the main. Jeff's call — dry
 cycle, or reopen before then.
+
+
+## #146 — 🟡 Mailbox contact has hung OPEN twice in three days 2026-09-05
+
+`binary_sensor.mailbox_contact` went **`on` at 11:40:24 on 09-05 and was still `on` 8h 27m
+later** at 20:07. Measured against the previous four days:
+
+| day | opened | held OPEN |
+|---|---|---|
+| 09-01 | — | no open event |
+| 09-02 | 07:10:57 | **8 sec** |
+| 09-03 | *(already open at midnight)* | **61,069 sec ≈ 17 h** ⚠️ |
+| 09-04 | 11:48:32 | **90 sec** ← this is the mail carrier's signature |
+| 09-04 | 18:51:43 / 18:51:47 | 3 sec / 2 sec |
+| **09-05** | **11:40:24** | **30,400 sec and counting** |
+
+**Normal is 2–90 seconds.** Two multi-hour hangs in three days is a pattern, and a mail carrier
+does not leave the box open twice. **Most likely the magnet has drifted out of reed-switch
+range**, so the sensor never registers "closed" — the alternative is that the flap really is
+standing open.
+
+**Not yet diagnosed — needs eyes on the box.** If the flap is shut while HA still reads `on`,
+re-seat the magnet (VHB 5952; prep is 90% of the bond). Jeff notified 20:08.
+
+⚠️ **This is the one entity where "no state change" is NOT the benign change-driven-sensor
+case** — a contact sensor that never closes is either a real open door or a broken mount.
+Do not dismiss it the way `battery_low = off` should be dismissed.
+
+## Sensor sweep 2026-09-05 20:05 — 🟢 nothing else wrong, and here is the proof
+
+Pulled all **561** entities. 80 read `unavailable`/`unknown`, but they are **phone companion-app
+sensors and the Alexa-app-for-PC entities** — expected.
+
+🔴 **The trap, caught before reporting:** a first pass flagged ~20 "stale >26 h" water, door and
+Zigbee sensors. **273 of the 561 entities sit at exactly 28.2 h** — that is the **HA restart
+timestamp** (~2026-09-04 16:00), not staleness. A `binary_sensor.*_battery_low` reading `off`
+does not change for months. **Every one of those 20 was healthy.** Same trap as #68 and the
+08-26 "dead sensor" call. **Verify the age histogram before calling anything stale.**
+
+Also re-confirmed: `sensor.hcc_mower_battery = 0.0` is **volts, not percent** (#141's dead
+webhook), and the Blink garage/doorbell `unknown` temperature entities are the documented
+mains-Mini and offline-doorbell cases — not new faults.
