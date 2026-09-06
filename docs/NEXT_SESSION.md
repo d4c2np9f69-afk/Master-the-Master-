@@ -1,3 +1,64 @@
+# 🔵 2026-09-06 SUNDAY PM — GENEALOGY: THE CANDIDATE HAS A NAME
+
+**Read `HCC-Scripts/genealogy/GEORGE2_BRICK_WALL.md` (1,598 lines, iCloud-synced).**
+
+## 🎯 THE CANDIDATE — Elisha Baker, Union Twp, Lawrence Co.
+**1840 census, NARA M704 roll 19 p.20:** man 20-29 + wife 15-19, **2 persons, NO children**,
+farming. **The only young childless Baker couple in the county.** Named heir of Thomas Baker
+(1837). **Gone from Union Twp, from Lawrence County, and from the entire 1850 NATIONAL index**
+(20 Elisha Bakers, not one born in Arkansas). Washington Baker b.1842-43 in that township.
+🔴 **Circumstantial. No document says "Washington, son of Elisha."**
+
+## 📍 The 1850 Union Township block, by dwelling — he was NEVER isolated
+    665 Isaac Newton Baker + Harriett Elizabeth JANES
+    666 CELIE BAKER 50 (Celia Holcombe, Thomas's widow) + William 24, Elenor, Jasper N, Sarah, Almedia
+    673 George A. Baker 40 + Elizabeth E. 35 + 7 children
+    688 John Kellett 39 + Lucinda (Holcombe) Kellett 33
+    694 Joseph Kellett + Elizabeth + **WASHINGTON BAKER 8**
+    706 Bryant R. Kellett 43 + Darcus 39 + 7 children
+**Three Baker houses, then three Kellett houses.** He lived a few hundred yards from his kin.
+
+## ⛔ CLOSED — do not re-search these
+- **Thomas Baker heir distribution DOES NOT EXIST** — estate insolvent, closed Oct 1854,
+  *"nothing more in the hands of said admr."* The "dividends" were CREDITOR dividends.
+  *(This was the file's #1 next step from day one.)*
+- **No Elisha Baker probate anywhere in Arkansas** (coll. 8638); **no marriage** statewide
+  (coll. 2548) or in either county index; **no grave**.
+- **No Baker guardianship/orphan record** in 2,113 pages of Lawrence + Randolph court records.
+
+## 🔑 METHOD CORRECTIONS (all cost time today)
+1. **The FamilySearch full-text API is NOT limited to one film.** `q.recordPlace=Arkansas` works;
+   unscoped works. The "Something Went Wrong" page is a **UI bug only**. Tool: `genealogy/fsq2.js`.
+2. **Cross-check indexes.** FamilySearch said 3 Baker households in 1840 Lawrence; **Ancestry says
+   6** off the same microfilm.
+3. **Never filter a small closed set** — a birth-year filter hid George A. Baker from the 1850 census.
+4. **The WAYBACK MACHINE** holds the dead GenWeb transcriptions (`pages.suddenlink.net`,
+   `nlmatthews.com`) — the complete Lawrence Co. marriage index 1821-1851 lives there.
+5. **argenweb.net 406s to curl** (Mod_Security); fetch via Chrome (`genealogy/webget.js`).
+6. **Ancestry collection IDs:** 8058=1830, 8057=1840, 8054=1850, 7667=1860, 2548=AR marriages,
+   8638=AR wills/probate, 1030=public member trees. Get IDs from
+   `ancestry.com/search/places/usa/arkansas/` — do NOT guess (61373 is MAINE; 9068 is wrong).
+
+## ⚠️ FOUR SELF-CORRECTIONS LOGGED TODAY — read them before trusting a conclusion
+"3 Baker households in 1840" (it's 6) · "George A. Baker absent from 1850" (dw 673) ·
+"Celia and Lucinda Holcombe were sisters" (17 yrs apart, Georgia vs Arkansas) ·
+"Patsey Baker married a McWilliams" (no such marriage in 765+765 indexed; Celia's $8 was a
+**creditor judgment**, and an administrator is a legal office, not proof of kinship).
+🔴 **The recurring failure: asserting kinship from a name that fits a story I already liked.**
+
+## 🚧 BLOCKED ON ONE THING
+**FamilySearch session dropped 08:05 Sunday** and Jeff must sign in — never enter credentials.
+Relaunch Chrome as a **background task** (a plain `&` / `Start-Process` gets reaped by the
+sandbox): `chrome.exe --remote-debugging-port=9222 --user-data-dir=C:\Users\jeffl\HCC-Scripts\chrome-profile`
+**Ancestry stayed logged in and carried all of Sunday's work — when one site drops, check the other.**
+
+## NEXT
+1. **Randolph County** probate/court/tax films 1840-1850 for **Elisha** and **William Baker** —
+   needs FamilySearch full-text.
+2. **Elisha's marriage** in a third county (Izard, Independence, Greene, Missouri) — **names
+   Washington's mother.**
+3. **Elizabeth & Fanny McWilliams of Randolph Co.** — lead only, kinship NOT established.
+
 # 🔵 2026-09-06 SUNDAY — LEAK TEST CLOSED, AND THE GENEALOGY MOVED COUNTIES
 
 ## 💧 #140 CLOSED — 0.0 gal overnight with the irrigation main shut
