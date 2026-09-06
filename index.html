@@ -6669,6 +6669,24 @@ function loadIrrigationDirect(){
         else { rdEl.innerHTML='None'; rdEl.style.color='#22c55e'; }
       }
       var active=dev.active_station, banner=document.getElementById('irrBanner');
+      // The QUEUE is what B-Hyve will run after the active zone. Added 09-05 because the card
+      // said only "WATERING — Zone 2" while three zones were scheduled, so there was no way to
+      // tell a 14-minute finish from another 40 minutes of watering. Jeff asked "why is the
+      // irrigation running?" and the app could not answer it.
+      var q = Array.isArray(dev.watering_queue) ? dev.watering_queue : [];
+      function qMins(st){
+        for(var i=0;i<q.length;i++){
+          if(q[i] && q[i].station===st){
+            var s=q[i].run_time_sec;
+            return (s==null) ? null : Math.round(s/60);
+          }
+        }
+        return null;
+      }
+      var queued=[];
+      q.forEach(function(e){
+        if(e && e.station && e.station!==active && queued.indexOf(e.station)<0) queued.push(e.station);
+      });
       // "All zones idle" is TRUE of an unplugged controller too, and it reads as healthy.
       // Offline wins over idle — that is the whole point of the 08-20 fix.
       if(banner){
@@ -6676,22 +6694,35 @@ function loadIrrigationDirect(){
           banner.className='wx-banner wx-no';
           banner.innerHTML='🚿 Controller is OFFLINE — zone controls will not reach it.';
         }
-        else if(active){ banner.className='wx-banner wx-go'; banner.innerHTML='💧 WATERING — Zone '+active; }
+        else if(active){
+          var am=qMins(active), qtxt='';
+          if(queued.length){
+            qtxt=' &middot; then '+queued.map(function(s){
+              var m=qMins(s); return 'Zone '+s+(m==null?'':' ('+m+' min)');
+            }).join(', ');
+          }
+          banner.className='wx-banner wx-go';
+          banner.innerHTML='💧 WATERING — Zone '+active+(am==null?'':' ('+am+' min)')+qtxt;
+        }
         else { banner.className='wx-banner wx-go'; banner.innerHTML='✓ All zones idle'; }
       }
       var html='';
       (d.zones||[]).forEach(function(z){
         var isA = active && z.station===active;
+        var isQ = !isA && queued.indexOf(z.station)>=0;   // scheduled behind the active zone
+        var qm  = isQ ? qMins(z.station) : null;
         var stNum=z.station||0;
         var photoSrc=stNum>=1&&stNum<=6?'./images/zones/zone-'+stNum+'.jpg':z.image_url||null;
         var photo=photoSrc
           ?'<img class="zone-photo" src="'+photoSrc+'" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=zone-photo-empty>&#128688;</div>\'">'
           :'<div class="zone-photo-empty">&#128688;</div>';
+        var badgeTxt = isA ? '&#128167; WATERING' : (isQ ? ('&#9203; QUEUED'+(qm==null?'':' &middot; '+qm+' min')) : 'IDLE');
         html += '<div class="zone-card'+(isA?' active':'')+'">'
           + photo
           + '<div class="zone-body">'
           + '<div class="zone-header"><div class="zone-name">'+(z.name||('Zone '+z.station))+'</div>'
-          + '<span class="zone-badge '+(isA?'zone-badge-active':'zone-badge-idle')+'">'+(isA?'&#128167; WATERING':'IDLE')+'</span></div>'
+          + '<span class="zone-badge '+(isA?'zone-badge-active':'zone-badge-idle')+'"'
+          + (isQ?' style="color:#ffd24a"':'')+'>'+badgeTxt+'</span></div>'
           + '<div class="zone-sub">Station '+z.station+(z.smart?' &bull; &#128200; Smart Watering':'')+'</div>'
           + '<div class="zone-footer"><button class="zone-run-btn" onclick="irrStart('+z.station+')">&#9654; Run Zone</button></div>'
           + '</div></div>';
