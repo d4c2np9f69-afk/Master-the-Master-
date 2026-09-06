@@ -1642,3 +1642,38 @@ rtlamr2mqtt runs `-unique=true`, so an unchanged reading is never republished �
 and a dry meter look identical. **`sensor.gas_ccf` reported at 02:24**, inside the window, on the
 same RTL-SDR stack. The receiver was alive; the silence was real. **Never report a zero from this
 meter without an independent liveness check.**
+
+## #146 UPDATED — 🔴 it is the RADIO, not the magnet. Mailbox is now fully OFFLINE. 2026-09-06 15:10
+
+**My 09-05 diagnosis said "the magnet has drifted out of reed-switch range". That was wrong.**
+
+Measured 15:10 Sunday: **all four mailbox entities went `unavailable` simultaneously at 12:40**
+(`binary_sensor.mailbox_contact`, `..._battery_low`, `sensor.mailbox_battery`,
+`sensor.mailbox_voltage`), and the Z2M device `0xa4c138f1b3e16c9e` is `unavailable`.
+
+**The real sequence:**
+
+    Sat 11:40:24  contact -> ON       (the mail carrier)
+                  ...no further transmission for 25 hours...
+    Sun 12:40:25  device  -> UNAVAILABLE
+
+🔴 **A sensor that reports OPEN and then cannot report CLOSED is a radio failure, not a magnet
+failure.** It got one frame out and never reached the coordinator again.
+
+**The mesh is healthy — this is one device.** Same moment, every other Zigbee end-device is
+reporting normally: LQI 105 / 47 / 29 / 40 / 58 / 61 / 76 / 54, all within 0.0-3.7 h.
+*(The two entities sitting at 47.2 h are the mains-powered ROUTERS, which do not send periodic
+LQI — documented behaviour, not a fault. Do not flag them.)*
+
+🔗 **This is #84/#85, not a new problem.** The mailbox has been at **LQI 0** — the farthest
+device on the network — waiting on the AliExpress repeater that is still in shipping. It has now
+degraded from marginal to offline. **The two causes compound:** a device at maximum range burns
+battery retrying failed transmissions, which drains the cell, which weakens the radio further.
+
+**Action: none available until the repeater lands.** Do NOT send Jeff out to re-seat a magnet —
+that was my wrong call and it would waste a trip. When the repeater arrives, re-pair the mailbox
+and re-check LQI before assuming the sensor itself has failed.
+
+⚠️ **Lesson:** *"stuck in one state"* and *"stopped transmitting"* look identical from a single
+state read. Check device availability and the rest of the mesh before blaming the hardware you
+can see.
