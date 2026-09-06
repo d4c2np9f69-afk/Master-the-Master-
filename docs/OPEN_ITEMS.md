@@ -1519,3 +1519,50 @@ when an irrigation valve closes. **It is downstream of that valve.**
 ⏳ **The definitive baseline is tonight's 01:00-05:00 window with the main still shut** — if it
 reads back at the 0.0-1.3 gal of the ten pre-valve nights, that closes it completely.
 💧 **Stopped so far:** ~6.1 gal/hr from 10:11 ≈ **17 gal by 13:01**, ~144 gal/day ongoing.
+
+
+---
+
+## #143 — Irrigation card now shows the WATERING QUEUE 🟢 DONE 2026-09-05
+
+`3a05b89`. The API returned `watering_queue` after #136–#139 but nothing rendered it, so the
+card could say only "WATERING — Zone 2" while three zones were scheduled. Jeff asked *"why is
+the irrigation running?"* and the app had no answer.
+
+    banner     "WATERING — Zone 2 (14 min) · then Zone 5 (23 min)"
+    zone card  ⏳ QUEUED + minutes on every zone behind the active one
+
+**Verified:** `scripts/irrigation-queue-test.js` 6/6 — it lifts the queue block out of
+`index.html` and runs it, so it fails if the shipped code changes rather than testing a copy.
+Driven by the **actual** B-Hyve payload captured live at 05:56:20 on 09-05. A negative control
+(removing the dedupe guard) makes it fail, so it is not passing vacuously. `lint-app` clean;
+`smoke-test` 374 links / 0 bad / 0 page errors. `hcc-v106 → v107`, confirmed live on
+`toro1-5rz.pages.dev`. No `irrGal|IRR_FLOW|sewer|gallons` lines — **#109 hold respected.**
+
+## #144 — 🔴 MY WATER WATCHER CALLED A FALSE LEAK. FIXED. 2026-09-05 19:02
+
+The `Watch-OvernightWater`-style monitor fired:
+*"METER 19:02 delta=+23.4 gal (main CLOSED) → VERDICT: LEAK IS HOUSE-SIDE. Not irrigation."*
+
+**Both halves were wrong.**
+1. It rendered a verdict **at 7 PM on a Saturday**. 23.4 gal is one shower plus a dishwasher.
+   The threshold could not distinguish a leak from Jeff and Angela living in the house.
+2. It treated the delta as **one hour**. The meter BATCHES — it went 17:00:36 → 19:02:06 with
+   no broadcast at all. The real rate was 11.6 gal/hr over 2.02 h, not 23.4 gal/hr.
+
+**Not relayed to Jeff as a finding.** Replaced by `HCC-Scripts/Watch-LeakWindow.py`, which
+**only** issues a verdict between **01:00 and 05:00** and **always divides by real elapsed
+time**, flagging any gap over 1.4 h as batched. Validated: parses clean, 0 control chars,
+`read_meter()` returns live data.
+
+⚠️ **The rule this cost:** *a water number taken while people are awake carries no information
+about a leak.* The informative datum today was the **0.5 gal hour at 13:01** — a 6.2 gal/hr
+leak cannot produce a near-zero hour, and before the main was closed there was not one such
+hour in four. **Quiet minutes are the evidence, not big numbers.**
+
+## #145 — Irrigation will run itself dry Monday 05:00 if the main is still shut
+
+Live `/api/irrigation` reads `next_start_time = 2026-09-07T05:00:00-05:00`. **No run scheduled
+tonight or Sunday night**, so both quiet windows are clean for the leak baseline. But at
+**05:00 Monday** the controller opens zone valves regardless of the main. Jeff's call — dry
+cycle, or reopen before then.
