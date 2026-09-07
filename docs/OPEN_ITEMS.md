@@ -1760,3 +1760,50 @@ the solenoids opened, and **no water passed**: the main is still shut and the cy
 ⚠️ **It will fire again at 05:00 Tuesday 09-08** and every morning after. Each dry run is
 harmless, but the lawn gets nothing until the main is reopened — and as of 09-06 the station had
 logged **0.09 in of rain in seven days at a 105 F heat index**. Jeff's call.
+
+## #149 — 🟢 The "Kasa error storm" is ONE SWITCH'S FIRMWARE, not the network 2026-09-07
+
+The 09-07 08:00 audit flagged *"Kasa switches/dimmers logged 691 errors in 24h (normal is under
+50) — that is a storm, not a blip."* **Traced to a single device, and it is not a fault.**
+
+### All 737 errors are one IP
+    691 x  kasa.smart.smartdevice
+           "Error querying 192.168.1.178 individually for module query 'get_preset_rules'
+            after first update: (Unable to query the device: 192.168.1.178, TimeoutError())"
+     46 x  homeassistant.components.tplink.coordinator
+           "Error fetching 192.168.1.178 data: ... get_device_info not found in
+            {'get_device_time': INTERNAL_QUERY_ERROR, 'get_device_info': ...}"
+
+**192.168.1.178 = `light.livingroom_cans`** — the HS220 dimmer, the first smart switch Jeff wired
+(installed 2026-08-14, commit `09de34b`).
+
+### It is NOT a network problem — measured, not assumed
+    192.168.1.178  12 pings  0% loss  min 3ms / avg 9ms / max 25ms
+    192.168.1.66   (HA, wired)        avg 1ms
+    192.168.1.171  (other Kasa)       0% loss
+
+**Zero packet loss.** The switch answers every ping. ⚠️ **This does NOT contradict the standing
+`HCC_INVENTORY.md` note** (*"if drops become FREQUENT the fix is AP / mesh placement, NOT the
+switch"*) — that note is about **availability drops**, and there are none here. Different failure.
+
+### It costs nothing
+`light.livingroom_cans` is **`off`, available, and controllable**. The audit's own entity check
+found no Kasa entity unavailable. The failing calls are `get_preset_rules` and `get_device_info` —
+**dimmer-preset metadata that nothing in this house uses.**
+
+### 🔎 AND IT EXPLAINS THE 08-23 MYSTERY
+`HCC-Audit.py` records two unexplained spikes against a **median of 1 error/day**: **715 on
+08-23** (*"NOT explained and is 8 days stale - deliberately not chased"*) and **691 now**.
+**Same signature, same device — and 08-23 → 09-06 is exactly 14 days.** Worth watching for a
+third around **09-20**; if it recurs on that cadence it is a firmware timer, not chance.
+
+### Action
+🟢 **None required.** Nothing is broken and nothing is unavailable. **Do NOT replace the switch**
+and do NOT re-run the network diagnosis — the 2026-08-14 install already proved *"the network was
+NEVER the problem"* after a two-hour fight. If it ever becomes a real fault it will show as
+`light.livingroom_cans` going **unavailable**, which `check_entities()` catches independently.
+
+⚠️ **Note for any future fix attempt:** this HS220 runs the NEW encrypted "SHIP 2.0" firmware and
+its **auto-update was deliberately turned OFF** (`switch.*_auto_update_enabled`). A firmware
+update might clear the query error — but that is a deliberate, reversible decision for Jeff, not
+a background change.
