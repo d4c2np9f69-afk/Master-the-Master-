@@ -1702,3 +1702,31 @@ idles for 10 minutes, which is user-visible and could interrupt whatever is on s
 
 **Also worth doing when it is looked at:** find out *why* it terminated. 0xC000013A is a console
 Ctrl+C / close, so something killed the hosting process while the other two survived.
+
+## #148 — 🟡 Watch-LeakWindow.py judges a span that STRADDLES the window boundary 2026-09-07
+
+At **01:02:07** the watcher emitted:
+
+    +1.3 gal over 2.03h = 0.64 gal/hr   (quiet window, between thresholds, inconclusive)
+
+**That span runs from 23:00 to 01:02** — two hours of which are *outside* the 01:00-05:00 quiet
+window and are ordinary late-evening household use. The verdict logic tests only the **end**
+timestamp's hour (`WINDOW[0] <= t.hour < WINDOW[1]`), so any reading that lands just inside the
+window gets judged on a delta mostly accumulated outside it.
+
+**Fix (after 05:00 — do NOT restart the watcher mid-measurement):** require the span to be fully
+inside the window, i.e. test the PREVIOUS reading's timestamp as well:
+
+    inwin = in_window(prev_t) and in_window(t)
+
+and emit a distinct `STRADDLES WINDOW - no verdict` line otherwise, the same way the batched-gap
+case is flagged.
+
+⚠️ **Not dangerous, but misleading.** A 6.2 gal/hr leak would still be obvious; the flaw only
+mislabels a borderline number. **The 08:05 `HCC Overnight Water Watch` scheduled task is the
+authoritative reporter and is unaffected** — it computes the 01:00-05:00 delta directly.
+
+🔁 **Third instance of the same root cause in two days:** attributing a measurement to a period
+it does not actually cover (the 19:02 false leak verdict, the batched 2-hour gap, and now the
+straddling span). **When a reading spans time, check what the span actually covers before
+labelling it.**
