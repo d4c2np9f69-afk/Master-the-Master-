@@ -1703,7 +1703,7 @@ idles for 10 minutes, which is user-visible and could interrupt whatever is on s
 **Also worth doing when it is looked at:** find out *why* it terminated. 0xC000013A is a console
 Ctrl+C / close, so something killed the hosting process while the other two survived.
 
-## #148 — 🟡 Watch-LeakWindow.py judges a span that STRADDLES the window boundary 2026-09-07
+## #148 — 🟢 FIXED 2026-09-07 07:05 — Watch-LeakWindow.py judged a span that STRADDLED the window
 
 At **01:02:07** the watcher emitted:
 
@@ -1730,3 +1730,17 @@ authoritative reporter and is unaffected** — it computes the 01:00-05:00 delta
 it does not actually cover (the 19:02 false leak verdict, the batched 2-hour gap, and now the
 straddling span). **When a reading spans time, check what the span actually covers before
 labelling it.**
+
+**🟢 FIXED 2026-09-07 07:05**, after the measurement window closed at 05:00 — instrumentation is
+not adjusted mid-reading. `in_window()` helper added; the verdict now requires **both endpoints**
+inside the window (`in_window(t) and in_window(last[1])`), and a partial span prints
+`[STRADDLES WINDOW EDGE -- span is only partly inside 01:00-05:00, NO verdict]`.
+
+**Verified** against last night's six real spans — 23:00->01:02 now reports STRADDLE (it was the
+bug), 01:02->01:44 and 01:44->03:02 JUDGE, 03:02->06:02 STRADDLE, and the two fully-outside spans
+report OUTSIDE. 6/6 pass. Backup: `Watch-LeakWindow.py.bak-20260907-0700`. Watcher restarted on
+the fixed file.
+
+**The night's result was unaffected:** 09-07 01:00-05:00 came in at ~1.2-2.4 gal, inside the
+normal pre-valve band of 0.0-2.3 — and the shape was two discrete ~1.2 gal steps (toilet fills),
+not the dead-flat continuous draw of a leak. **Second night confirming.**
