@@ -1560,7 +1560,7 @@ about a leak.* The informative datum today was the **0.5 gal hour at 13:01** —
 leak cannot produce a near-zero hour, and before the main was closed there was not one such
 hour in four. **Quiet minutes are the evidence, not big numbers.**
 
-## #145 — Irrigation will run itself dry Monday 05:00 if the main is still shut
+## #145 — 🟢 CLOSED 2026-09-07 — the Monday 05:00 run fired dry, exactly as predicted
 
 Live `/api/irrigation` reads `next_start_time = 2026-09-07T05:00:00-05:00`. **No run scheduled
 tonight or Sunday night**, so both quiet windows are clean for the leak baseline. But at
@@ -1744,3 +1744,19 @@ the fixed file.
 **The night's result was unaffected:** 09-07 01:00-05:00 came in at ~1.2-2.4 gal, inside the
 normal pre-valve band of 0.0-2.3 — and the shape was two discrete ~1.2 gal steps (toilet fills),
 not the dead-flat continuous draw of a leak. **Second night confirming.**
+
+**🟢 #145 CLOSED 2026-09-07 07:20 — verified, not assumed.**
+
+    /api/irrigation  last_watered    = 2026-09-07T10:33:01Z  = 05:33:01 Central  <- it DID run
+                     next_start_time = 2026-09-08 05:00 -05:00
+    sensor.water_gallons  04:30:00 = 23561.3
+                          06:02:07 = 23562.5    -> +1.2 gal across the whole cycle
+
+**A real irrigation cycle moves ~530 gal** (measured during the #109b check: meter +531.9 vs
+~529 predicted from IRR_FLOW). This one moved **1.2 gal — one toilet fill.** The controller ran,
+the solenoids opened, and **no water passed**: the main is still shut and the cycle ran dry.
+**No harm — solenoids do not mind running without water.**
+
+⚠️ **It will fire again at 05:00 Tuesday 09-08** and every morning after. Each dry run is
+harmless, but the lawn gets nothing until the main is reopened — and as of 09-06 the station had
+logged **0.09 in of rain in seven days at a 105 F heat index**. Jeff's call.
