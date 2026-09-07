@@ -1677,3 +1677,28 @@ and re-check LQI before assuming the sensor itself has failed.
 ⚠️ **Lesson:** *"stuck in one state"* and *"stopped transmitting"* look identical from a single
 state read. Check device availability and the rest of the mesh before blaming the hardware you
 can see.
+
+## #147 — 🟡 "HCC Kiosk Watcher" has been dead since 09-04 and is UNDOCUMENTED 2026-09-06
+
+    Task    : HCC Kiosk Watcher
+    Descr   : "Opens the Loewen Home dashboard when the PC goes idle."
+    Trigger : at logon (MSFT_TaskLogonTrigger)
+    Action  : powershell -File windows-scripts\HCCKioskWatcher.ps1 -IdleMinutes 10 -RotateSeconds 60
+    LastRun : 2026-09-04 17:21:41      LastResult: 3221225786 (0xC000013A, terminated)
+    State   : Ready  <- intended to run; NOT deliberately disabled
+
+**Its two sibling logon-triggered tasks started at the same 09-04 17:21 logon and are still
+Running** (`HCC go2rtc camera streams`, `HCC UPS Guard`, both result 267009 = still executing).
+**The Kiosk Watcher started with them and died.** Jeff's idle dashboard has not come up since.
+
+🔎 **Checked the record first, per the standing rule** (*an automation in a non-default state is
+EVIDENCE, not a fault*): `Search-HCC.ps1 "Kiosk Watcher"` returns **nothing** — no Jeff decision,
+no conversation, no project history, no reference guide. **This is an undocumented feature that
+silently stopped**, not a documented choice.
+
+⏳ **NOT restarted — needs Jeff's word.** Starting it takes over the 60-inch Vizio when the PC
+idles for 10 minutes, which is user-visible and could interrupt whatever is on screen.
+`Start-ScheduledTask -TaskName 'HCC Kiosk Watcher'` is the one-liner once he says go.
+
+**Also worth doing when it is looked at:** find out *why* it terminated. 0xC000013A is a console
+Ctrl+C / close, so something killed the hosting process while the other two survived.
