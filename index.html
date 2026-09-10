@@ -3683,9 +3683,22 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
         50%     { transform:scale(1.035); filter:drop-shadow(0 0 14px rgba(34,197,94,.60)); }
       }
       #mailGotWrap { display:none; text-align:center; margin:2px 0 12px; }
+      /* margin:auto is what actually centres this, NOT the text-align:center above.
+         Measured 2026-09-09 with a Playwright harness against live HA data: the img
+         computes to display:block, and text-align only centres INLINE content, so the
+         picture sat hard left with leftGap 43px vs rightGap 1283px on Jeff's 1536px
+         screen. The text-align rule is kept because it centres correctly if this ever
+         becomes inline again. */
       #mailGotImg  { width:100%; max-width:210px; height:auto; border-radius:12px;
+                     margin-left:auto; margin-right:auto;
                      animation:mailPop .85s cubic-bezier(.2,1.5,.4,1) both,
                                mailBreathe 3.4s ease-in-out 1s infinite; }
+      /* margin:auto, not text-align -- same block-element trap fixed above 2026-09-09. */
+      #mailEvidenceWrap { margin:6px 0 10px; }
+      #mailEvidenceCap  { font-size:12px; color:var(--muted); margin-bottom:4px; text-align:center; }
+      #mailEvidenceImg  { display:block; width:100%; max-width:420px; height:auto;
+                          margin-left:auto; margin-right:auto;
+                          border-radius:10px; border:1px solid var(--border); }
     </style>
     <div class="card" id="mailCard" style="display:none">
       <div class="card-title">&#128235; Mailbox <span id="mailConn" class="irr-conn"></span></div>
@@ -3700,6 +3713,16 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
           </div>
         </div>
         <button class="btn-full btn-green" id="mailGotBtn" style="display:none;margin-bottom:4px" onclick="mailCollected()">&#128233; GOT THE MAIL</button>
+        <!-- WHO OPENED THE BOX -- 2026-09-09. Jeff: the 09-09 09:28 "delivery" was HIM taking
+             the trash out. The 08-27 rule ("only the FIRST open of the day counts") cannot tell
+             the carrier from Jeff when Jeff opens it first, and doors were TESTED as a
+             discriminator that day and FAILED (all 4 recorded events had a door open in the
+             preceding 45 min). So this does not guess -- automation.hcc_mail_evidence_capture
+             photographs the driveway on every box-open and this shows Jeff the picture. -->
+        <div id="mailEvidenceWrap" style="display:none">
+          <div id="mailEvidenceCap"></div>
+          <img id="mailEvidenceImg" alt="Driveway at the moment the mailbox opened" loading="lazy">
+        </div>
         <div class="mail-stats">
           <div class="mail-stat"><b id="mailAvg">--</b><span>Average</span></div>
           <div class="mail-stat"><b id="mailEarliest">--</b><span>Earliest</span></div>
@@ -11400,6 +11423,31 @@ function loadMail(){
 
       var gotBtn = document.getElementById('mailGotBtn');
       if (gotBtn) gotBtn.style.display = (arrivedToday && !collected) ? '' : 'none';
+
+      // WHO OPENED THE BOX -- 2026-09-09. Shows the driveway photo taken at the moment the
+      // box opened, plus what the AI saw in it. It SHOWS rather than DECIDES on purpose:
+      // "first open of the day" (08-27) mislabels Jeff as the carrier when he opens it
+      // first, and door sensors were tested as a discriminator on 09-09 and FAILED -- all
+      // four recorded events had a door open within the preceding 45 min, because Jeff is
+      // in and out constantly. Written by automation.hcc_mail_evidence_capture.
+      // /local/ is HA's public www folder -- no token needed, and it works over Nabu Casa.
+      var evWrap = document.getElementById('mailEvidenceWrap');
+      var evImg  = document.getElementById('mailEvidenceImg');
+      var evCap  = document.getElementById('mailEvidenceCap');
+      var evTxt  = by['input_text.mail_last_evidence'];
+      var evSrc  = by['input_text.mail_last_evidence_image'];
+      var evPath = evSrc ? String(evSrc.state || '') : '';
+      var haveEv = evPath.indexOf('/local/') === 0;
+      if (evWrap) evWrap.style.display = (haveEv && mailIsIn) ? '' : 'none';
+      if (haveEv && mailIsIn) {
+        var evBase = (localStorage.getItem('ha_base') || HA_BASE || '').replace(/\/+$/, '');
+        if (evImg) evImg.src = evBase + evPath;
+        if (evCap) {
+          var capTxt = evTxt ? String(evTxt.state || '') : '';
+          if (capTxt === 'unknown' || capTxt === 'unavailable') capTxt = '';
+          evCap.textContent = capTxt ? ('📷 ' + capTxt) : '📷 Driveway when the box opened';
+        }
+      }
 
       var n = count ? Number(count.state) : 0;
       var elAvg = document.getElementById('mailAvg');
