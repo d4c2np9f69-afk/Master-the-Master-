@@ -1422,3 +1422,100 @@ That connection work is the entire reason this counts as turnkey.
 tonnage, same 60,000 BTU heat, same 13.4 SEER2, same installer, same scope — the $400 buys a
 lifetime stainless heat exchanger instead of 20-year aluminized, R-454B (GWP 466) instead of R-32
 (675), and 90 days to register instead of 60. Nothing was traded away for it.
+
+---
+
+# 🔬 DEEP DIVE — CARRIER 48NL-B300603, the unit Jeff picked. 2026-09-10 4:15 PM
+
+Jeff: *"I want a deep dive on the carrier unit — what is its strengths? How long is the Freon that
+is used in it going to be available and what's the reputation of that model?"*
+
+## 1. STRENGTHS — what is actually good about it
+
+**From Carrier's own product literature, not inferred:**
+- 🟢 **Stainless steel heat exchanger.** This is the headline and it is a *material* advantage, not
+  a paperwork one. Goodman's GPGM3 spec sheet says **"T-140 aluminized steel tubular heat
+  exchanger."** Aluminized is what fails to condensate corrosion; stainless resists it. On a
+  package unit that lives **outdoors in Tennessee humidity**, with **known water ingress and rust
+  already visible in Jeff's own cabinet photos**, that is the single most relevant durability
+  difference between the two quotes.
+- 🟢 **LIFETIME heat exchanger warranty** — registered within **90 days**. Unregistered it drops to
+  20 years, and parts drop from 10 years to 5. **Register it the day it is commissioned.**
+- 🟢 **Corrosion-resistant aluminum coil** (Carrier's wording) — no copper/aluminium galvanic pair
+  in the coil.
+- 🟢 **A warranty option Goodman does not offer:** 10-yr parts only, **or** 5-yr parts + **3-yr
+  labour**. Worth knowing next to Daniels' $800 labour add-on.
+- 🟢 **60,000 BTU heat, matched.** Old Nordyne was 72,000; Jeff approved 54,000; this is 60,000.
+- 🟢 **13.4 SEER2 / 81% AFUE.** The old unit was **SEER 13 / AFUE 78** — so this is a modest but
+  real efficiency gain, and **13.4 SEER2 is the national minimum for PACKAGED units.** The
+  Southeast 14.3 rule applies to split systems, not this. Nobody can tell Jeff he needs more.
+
+⚠️ **Honest positioning: 48NL is Carrier's "Comfort" line — their BASE tier.** 48NG "Performance"
+and Infinity sit above it. He is buying entry-level Carrier, which is exactly the right comparison
+against Goodman's GPGM3 and Derryberry's American Standard **Bronze** — all three are the value tier
+of their brand. **The Derryberry SILVER is the only step-up machine anyone quoted.**
+
+## 2. THE REFRIGERANT — how long is R-454B going to be available?
+
+**Short answer: longer than this unit will live. It is the destination, not the thing being phased out.**
+
+- **R-454B is the new US residential standard**, not a phase-down target. Since **1 Jan 2025**
+  manufacturers may only build low-GWP systems, and R-454B is the predominant replacement
+  (Carrier, Lennox, Trane/American Standard). **R-410A is the one going away** — virgin production
+  is being phased down and servicing older kit gets progressively dearer.
+- **The AIM Act schedule runs to 2036** and is explicitly designed around a transition to R-454B-class
+  equipment across that window. At **GWP 466** it sits comfortably inside every threshold currently
+  in force.
+- ⚠️ **The honest counterweight:** the trade press does describe R-454B and R-32 as *transitional*
+  in the long run, and manufacturers are researching what comes next. **But the barriers are large
+  and structural** — the next step down means **higher flammability, lower fluid density and higher
+  temperature glide**, which would require an overhaul of codes and standards and changes to
+  equipment architecture and installation practice. That is not a 5-year problem.
+- 🟢 **Practical read for a unit installed in 2026:** R-454B will be manufactured, stocked and
+  serviceable well past this machine's useful life. And **R-454B (466) sits further from any future
+  threshold than R-32 (675)** — which is the original reason it beat the Goodman on Jeff's own
+  stated preference.
+- ⚠️ **Cost note, unchanged:** R-454B runs roughly **3× R-32 per pound** (~$12.89 vs ~$4.11). That
+  only matters if the system leaks — and a system that needs topping up has a fault, not a running
+  cost.
+
+## 3. REPUTATION — and the honest answer is that there is not one yet
+
+🔴 **THERE IS NO INDEPENDENT FIELD DATA ON THE 48NL-B300603. I looked and did not find it, and I am
+not going to invent a reputation for it.** The `48NL-B` is the **R-454B generation, on the market
+since roughly 2025**. No owner reviews, no reliability ratings, no long-run failure data exist for
+this specific model yet. Anyone who tells Jeff otherwise is repeating the brand's reputation, not
+the model's.
+
+**What IS knowable, and it is the useful part:**
+
+🔴 **The one real, documented problem with first-generation R-454B equipment is A2L LEAK-SENSOR
+FALSE ALARMS.** Technicians across North America report elevated nuisance trip rates. The cause:
+first-gen **metal-oxide semiconductor (MOS)** leak sensors cross-react with **volatile organic
+compounds** — hairspray, paint, cleaning products — and lock the system out **with zero refrigerant
+present**. Callbacks run **$250–$400**.
+
+🟢 **AND JEFF'S CONFIGURATION IS LARGELY IMMUNE TO IT.** That failure mode is about household
+chemicals reaching an **indoor** air handler. **This is a PACKAGE unit — the whole machine,
+sensor included, sits outside on a slab.** There is no indoor coil section for hairspray or paint
+fumes to reach. The single most-reported problem with new R-454B systems is the one his layout
+mostly designs out.
+
+⚠️ **Still worth asking Daniels:** where the leak sensor sits, what it does when it trips, and
+whether it locks out or just alarms. If it ever nuisance-trips, that is the first thing to check
+before anyone starts hunting a leak.
+
+## Verdict
+
+**The pick stands.** The strengths are real and material — stainless heat exchanger with a lifetime
+warranty on a unit that lives outdoors in a wet, rusty spot; matched heat; lower-GWP refrigerant on
+the safer side of the phase-down. The refrigerant question is settled in its favour. **The only
+honest gap is that the model has no track record yet — that is a fact about its age, not a
+criticism**, and the mitigation is the warranty registration, which is free and takes five minutes.
+
+**Sources:** [Carrier 48NL product page](https://www.carrier.com/us/en/residential/combined-heating-cooling/48nl/) ·
+[Carrier warranty](https://www.carrier.com/residential/en/us/homeowner-resources/warranty/) ·
+[Goodman GPGM5-R32 spec sheet](https://www.acdirect.com/media/specs/Goodman/gpgm5-r32_specifications.pdf) ·
+[ACHR News — what comes after R-454B and R-32](https://www.achrnews.com/articles/165039-what-comes-after-r-454b-and-r-32) ·
+[HVAC Know It All — A2L sensor false alarms](https://hvacknowitall.com/blog/a2l-sensor-false-alarms-why-vocs-trigger-nuisance-lockouts-on-r-454b-systems) ·
+[AC Direct — R-454B 2026 homeowner guide](https://www.acdirect.com/blog/r454b-refrigerant-2026-homeowner-guide/)
