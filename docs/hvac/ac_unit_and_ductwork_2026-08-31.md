@@ -1091,3 +1091,102 @@ replace branch runs** — that is the number that compares against the other two
 
 ⚠️ **Live proposal system.** The Payzer pages carry **Accept Proposal / Decline Proposal** with an
 electronic signature block. **Nothing was clicked.** Accepting is Jeff's, in his own hands.
+
+---
+
+# 💵 QUOTE #2 IN — DERRYBERRY'S, 2026-09-10. Written sheet, Comfort Specialist **Charlie**.
+
+`212 N. Water Ave, Gallatin TN 37066 · (615) 452-8121` · dated **9-10-26** · Tonnage **2.5**,
+**Gas**, **Change Out**, **Pkg**. So the White-House service-area doubt from the 09-09 research is
+answered — they came.
+
+## The two tiers offered (GOLD/multi-stage and MINI SPLITS left blank)
+
+| | **BRONZE — Standard** | **SILVER — High Efficiency** |
+|---|---|---|
+| Equipment | **American Standard** | **American Standard** |
+| Retail | **$8,958** | **$12,100** |
+| Efficiency | **13.4 SEER** | **15.2 SEER**, ENERGY STAR ✓ |
+| Staging | single | **2-stage compressor + 2-stage gas** |
+| TVA rebate | — | **−$250** |
+| C.O.D. discount | −$200 | −$200 |
+| Senior Citizen | −$200 | −$200 |
+| **NET** | **$8,558** | **$11,450** |
+| Parts | 10 yr | 10 yr |
+| **Labor** | **1 yr** | **3 yr** |
+| **Heat exchanger** | **10 yr** | **20 yr** |
+| Compressor | 10 yr | **12 yr** |
+
+**Extra labour warranty:** *"to max at 10 yrs + $60/yr"* — and Charlie did the arithmetic on the
+sheet himself: **`13 — 9 × 60 = 540`** (Bronze, 1 yr → 10 yr) and **`15 — 7 × 60 = 420`**
+(Silver, 3 yr → 10 yr).
+
+| with labour taken to 10 years | |
+|---|---|
+| Bronze | **$9,098** |
+| Silver | **$11,870** |
+
+## 🔴 THE DUCT NUMBER — the one Daniels never gave
+
+| | |
+|---|---|
+| **Duct REPLACEMENT** | **$7,800** — *"Replace Main Supply · Return · Leads · Boots · Registers, using R8 flex duct"* |
+| TVA rebate on ducts | **−$300** → **net $7,500** |
+| Duct REPAIR (separate) | **$350** — *"add a lead to garage"* |
+
+🔴 **DERRYBERRY AND DANIELS DISAGREE ABOUT THE DUCTWORK, AND IT IS WORTH $7,500.**
+Daniels: *"the ducts are good, the supply is the only one that could use replacing."*
+Derryberry: a complete change-out of supply, return, leads, boots and registers.
+**Both cannot be right.** This is exactly the fork Jeff's per-foot method exists to resolve.
+
+⚠️ **NO LINEAR FOOTAGE ON THE SHEET, so no $/ft can be computed.** Against this file's benchmark
+($25–55/lf national, $35–55/lf Nashville) $7,500 implies **~135–215 linear feet** to land in range.
+**Ask Charlie for the footage** — that single number decides whether $7,800 is fair or fat.
+
+## What IS and IS NOT in the base price — read off the checkboxes
+
+**Included (ticked):** remove old system and haul away · **level ground and install a NEW PAD**
+(not "if needed") · install new system to local code · owners manuals · site left clean ·
+**reconnect electrical to new unit** · **reconnect existing gas service** · reconnect to existing
+ductwork · add new duct runs · **install NEW thermostat**
+
+🔴 **NOT ticked — and these cost money:**
+- **"Provide NEW electrical for new unit" is UNCHECKED.** Only *reconnect* is included. The
+  **40 A breaker has to come DOWN** for any of these units — that is not in this price.
+- **VENTING: neither box ticked.** Not "reconnect flue to existing" nor "install new venting."
+  On a gas package unit that is not a detail to leave blank. **Ask.**
+- No Manual J / S / D, no static pressure, no return-grille assessment — same gap as Daniels.
+- **No model numbers, and no refrigerant named.** Same gap as Daniels.
+
+## ⚠️ A COMMERCIAL TERM DANIELS DOES NOT HAVE
+
+Printed at the foot of the sheet: **"Derryberry's reserves the right to charge a $300 Re-Stock
+Permit fee on all cancelled orders."** Signing this is not a free option. Daniels' Payzer proposal
+carries an Accept/Decline with no stated cancellation fee.
+
+## Where the three now stand — equal terms (unit only, 10-yr labour, existing ducts)
+
+| | net | heat exchanger |
+|---|---|---|
+| Daniels **Goodman** | **$8,600** | 20 yr, **aluminized** |
+| Daniels **Carrier** | **$9,000** | **LIFETIME, stainless** |
+| Derryberry **Bronze** (Am. Std) | **$9,098** | **10 yr** |
+| Derryberry **Silver** (Am. Std) | **$11,870** | 20 yr |
+
+**Three of the four are within $500 of each other, so price is not the decision — warranty and
+machine are.** On that basis the Bronze is the weakest of the group: same money as the Daniels
+Carrier for a **10-year** heat exchanger instead of a lifetime one.
+
+**The Silver is the only genuinely different machine on offer** — 15.2 SEER2, **two-stage
+compressor and two-stage gas**, 20-yr HX, 12-yr compressor, Energy Star (which is what earns the
+$250 TVA rebate). It is **$2,870 over the Daniels Carrier**.
+
+ℹ️ **American Standard and Trane are the same manufacturer** — same equipment, different badge.
+Not a mark against it; worth knowing when comparing brands.
+
+## Still open
+
+1. **Linear footage** on the $7,800 duct replacement.
+2. **Model numbers + refrigerant** on both tiers (American Standard/Trane went **R-454B**).
+3. **Who is right about the ducts** — Daniels' "supply only" vs Derryberry's full change-out.
+4. **Petitt has not quoted yet.**
