@@ -312,3 +312,32 @@ not reading the folder. When the task is "George's parents" and there is a file 
 anything: the groom is b.1822, matching the **1850** head (27) but **not** the 1860 head (45), which
 is the "one loose thread" the file had already identified, and **no Janes household appears in 1850
 Lawrence County at all.** Reported as a lead, not a finding.
+
+
+## 2026-09-09 — I DIAGNOSED THE WHOLE HOUSE EXCEPT THE ONE MACHINE I WAS SITTING ON
+
+**Cost: ~3 hours of Jeff's morning, five wrong public theories, and he had to stop me twice.**
+Jeff, verbatim: *"go research, dig around the Internet, the HA forums and find a solution"* and
+*"if they would just go in and read what's been done … we wouldn't go through this perpetual loop."*
+
+**The fault:** CodeProject.AI's `ObjectDetectionYOLOv5-6.2` module was wedged — *"Unable to create
+YOLO detector for model yolov5m"* — so its reply had no `predictions` key, which raised
+`KeyError` in the custom component and killed all six `image_processing` scanners. **Fixed by one
+`Restart-Service "CodeProject.AI Server"` on the beast.**
+
+🔴 **What I did instead, in order:** blamed Blink auth, then a blinkpy version **that does not
+exist** (read "0.28.9" off a GitHub issue *title* and asserted it as fact), then an Amazon API
+change, then the Sync Module's USB card, then a lapsed Blink subscription — **on a system Jeff
+built specifically because he refuses to pay for one.** Two of those went into OPEN_ITEMS and
+memory as if settled, which is exactly the "push it to the next session" failure. I was one
+keystroke from restarting Home Assistant for a fault that was not in Home Assistant.
+
+🔴 **What ended it:** reading `SESSION_START.md` and `COST_LEDGER.md` — the two files whose own
+rules say read them first, every session — and then pulling the actual **traceback** out of HA's
+`system_log` over the WebSocket API instead of theorising from entity states. The traceback named
+the file, the line and the exception in one shot.
+
+**The instrument lesson, and it is the same one as 08-21:** `ping` said 200. `binary_sensor.camera_ai_server_reachable`
+said `on`. `Verify-CameraStreams.ps1` said **ALL GOOD 6/6** — before and after — because it tests
+go2rtc streams, not detections. **Every green light in the house was green while the feature was
+dead for five days.** A health check that cannot fail when the feature fails is not a health check.

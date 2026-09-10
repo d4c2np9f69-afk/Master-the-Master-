@@ -20,6 +20,7 @@ Rates in force: **Water $10.32 + $0.00908/gal** · **Sewer $23.42 + $0.01011/gal
 | (old rates) | City sewer | 2,461 | 22.74 | 24.17 | — | ✅ at old rates |
 | **4/7–5/7/26** | City sewer | **2,801** | 23.42 | 28.32 | **$51.74** | ✅ **new, 08-31** |
 | 5/7–6/6/26 | City sewer | 6,839 | 23.42 | 69.14 | **$92.56** | ✅ exact |
+| **6/6–7/6/26** | City sewer | **6,359** | 23.42 | 64.29 | **$87.71** | ✅ **new, 09-09** |
 | **6/22–7/22/26** | WHUD water | **6,359** | 10.32 | 57.74 | **$68.06** | ✅ **new, 08-31** |
 
 **All six reproduce to the penny.** The rate constants in `index.html` (`WATER_BASE`/`WATER_PER_GAL`,
@@ -136,3 +137,60 @@ electric cycle date. Do not guess these.
 - The 24-cycle history (`8d32625`, 07-23) lives in **`localStorage`** under `water_billing_history`
   — per-browser, per-device, and this project has blown localStorage away before. For a 3-year
   reimbursement claim that is not a durable evidence store. **Raised, not acted on.**
+
+### Bill captured 2026-09-09 — City of White House sewer, billed 09/01/26
+
+**City of White House sewer**, acct `0071-000690-03`, **billed 09/01/26, DUE 09/16/26**, service
+**6/6–7/6/26**, 30 days. Name on account: **Angela Spinelli**.
+Reading **9,640 -> 15,999 = 6,359 gal**. Base 23.42 + consumption 64.29 + sanitation 24.00 +
+stormwater 8.99 = **$120.70** current. Previous balance **$125.55**, payments **$0.00** ->
+**$246.25 due**.
+
+**Re-checked against the rates in force — every line exact:**
+```
+6,359 gal x $0.01011/gal = $64.289   ->  SEWER CONSUMPTION  $64.29   MATCH
+base                                 ->  SEWER BASE RATE    $23.42   MATCH
+23.42+64.29+24.00+8.99 = 120.70      ->  CURRENT BILL      $120.70   MATCH
+120.70 + 125.55                      ->  AMOUNT DUE        $246.25   MATCH
+```
+🟢 **The 08-05 rate increase still holds two cycles on.** The sewer rate constants are
+correct. **No code change needed and NONE MADE — the #109 hold is respected; this entry touches
+only this ledger file.**
+
+🟢 **Cross-check that validates the ledger itself:** the **$125.55 previous balance is exactly
+the 5/7–6/6/26 bill** already recorded here ($92.56 + $24.00 + $8.99). Two independently captured
+bills agree to the penny.
+
+### 🔴 ACTION — PAST DUE, WITH A DISCONNECTION NOTICE PRINTED ON THE BILL
+Previous balance **$125.55 unpaid, payments $0.00**. Printed on the bill:
+*"Your Account Has A Past Due Balance, Please Make Payment To Avoid Disconnection."*
+**$246.25 due 09/16/2026.** The only time-sensitive item here.
+
+### 🔴 FINDING — city and WHUD bill the SAME reading under DIFFERENT service dates
+
+| | Service period stated | Reading | Usage |
+|---|---|---|---|
+| WHUD water, bill 07/28/26 | **6/22 – 7/22/26** | 9,640 -> 15,999 | 6,359 |
+| City sewer, bill 09/01/26 | **6/6 – 7/6/26** | 9,640 -> 15,999 | 6,359 |
+
+Identical readings, identical usage, **service windows 16 days apart**. The record establishes the
+city *"mirrors the WHUD meter, no separate meter"* — so both bill the **same 6,359 gallons** while
+stating different periods. **Not double-billing** (water and sewer are legitimately separate charges
+on one consumption) and **not an overcharge on its own** — but it matters to the case: any argument
+that ties irrigation to a **date range** is weaker when the two utilities disagree by 16 days about
+which days the water was used. The city also runs **~2 months behind** — billed 09/01 for a period
+ending 07/06.
+
+### ✅ CHECKED AND RULED OUT — the leak does NOT contaminate this bill
+The **144 gal/day irrigation-side leak** (#140) began on the **first night the new Orbit anti-siphon
+valve was pressurised, 09-03**, and tripled after the zone-4 bonnet swap on 09-04. **This bill's
+service period ends 07/06/26 — two months earlier.** Do not attribute any of these 6,359 gallons
+to it.
+
+⚠️ **STILL AWAITING JEFF'S CALL, unchanged since 08-05:** whether to fold the ~$33/mo flat fees
+(Sanitation $24.00 + Stormwater $8.99) into the app's "Est. Sewer". They are deliberately
+**excluded** today so the usage-based overcharge data stays clean. This is now the **third
+consecutive bill** carrying both flats at identical amounts.
+
+⚠️ **#109b item (3) is still owed and untouched:** the stored `whud-2026-7` row holding the
+phantom **5,098**. Left alone, per the hold.

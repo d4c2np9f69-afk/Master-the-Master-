@@ -243,7 +243,7 @@ list. That is why the SessionStart hook now injects this file's item count and s
 | # | Item | Owner | Age | Notes |
 |---|---|---|---|---|
 | 64 | ✅ **CLOSED 2026-08-24 5:47 PM — Matter Server installed and the Matter integration configured.** Done the documented way (`home-assistant.io/integrations/matter`), not by improvising CLI: added the **Matter integration**, which installs the official Matter Server app itself. Slug confirmed from Beehive's own Supervisor store (`core_matter_server`, "Matter WebSocket Server for Home Assistant Matter support"). **Prerequisite verified FIRST:** IPv6 is `auto` on the active interface `enp1s0` (`wlp3s0` is disabled). Result: "Created configuration for Matter", `config_entry=01M0TYRGMNNXS7701EJ20V2P7T`, `update.matter_server_update` present. | ✅ closed 08-24 | — | ⚠️ **The config flow SITS on a "Success" dialog waiting for a Finish click** — the integration reads as not-loaded until you click it. Also note `{{ "matter" in integrations }}` in a template returned **False even after it was fully loaded** — that template variable is not a reliable test; check `/api/config/config_entries/entry` or the integrations page instead. |
-| 71 | 🔴 **GARAGE DOOR OPENER — WIRED AND POWERED, BUT NOT COMMISSIONED. Stopped here 2026-08-24 6:29 PM (dinner).** SONOFF **MINI-D** (`S/N 25482400105228`) mounted at the opener, powered from the ceiling outlet. Opener identified: **Chamberlain `41AC050-2M`, 315 MHz Security+ 1.0**, purple learn button — plain dry contact, matching Jeff's 08-05 bridge test. **Terminal block (4 across: RED · WHITE · WHITE · GREY), worked out from Jeff's photos — DO NOT RE-DERIVE:** RED + the WHITE holding **one** wire = wall button → MINI-D `NO`/`COM`; GREY + the WHITE holding **two** wires = the two photo eyes. Grey carries a white/black-stripe **and a red** (an eye run extended with bell wire — that red is NOT a button wire). `NC`/`S1`/`S2`/`DC+`/`DC-` empty. | **JEFF** (phone) then CLAUDE | 08-24 | 🔴 **BLOCKER: commissioning needs the HA Companion APP on Jeff's iPhone.** HA's own dialog: *"You need to use the Home Assistant Companion app on your mobile phone to add Matter devices."* Runs over **Bluetooth**, so he must be **at the MINI-D**. Phone is capable — `iPhone17,2`, **iOS 26.6.1**, app **2026.7.5**, reporting live. He hit the "download the app" screen, which is what HA shows when it does not detect the app (i.e. Safari, not the app). Code: **`2197-114-6745`**. **Fallback researched, NOT touched:** Beehive has a **`bluetooth` config entry**, and Matter Server can commission over BLE itself — but it may contend with the existing Bluetooth integration for the adapter. Read up first. |
+| 71 | 🔴 **GARAGE DOOR OPENER — WIRED AND POWERED, BUT NOT COMMISSIONED. Stopped here 2026-08-24 6:29 PM (dinner).** SONOFF **MINI-D** (`S/N 25482400105228`) mounted at the opener, powered from the ceiling outlet. Opener identified: **Chamberlain `41AC050-2M`, 315 MHz Security+ 1.0**, purple learn button — plain dry contact, matching Jeff's 08-05 bridge test. **Terminal block (4 across: RED · WHITE · WHITE · GREY), worked out from Jeff's photos — DO NOT RE-DERIVE:** RED + the WHITE holding **one** wire = wall button → MINI-D `NO`/`COM`; GREY + the WHITE holding **two** wires = the two photo eyes. Grey carries a white/black-stripe **and a red** (an eye run extended with bell wire — that red is NOT a button wire). ✅ **THE 08-24 READING WAS RIGHT, AND MY 2026-09-09 12:40 "CORRECTION" OF IT WAS WRONG — RETRACTED 2026-09-09 13:05.** I briefly rewrote this line to say the red was *not* an eye-run conductor. It is one. Jeff's 09-09 note that it *"was not hooked up before the install, it was just hanging"* means the SECOND PHOTO EYE'S RETURN WAS OPEN — an incomplete safety circuit, which is exactly why the opener would open every time and refuse to close. **Landing that red on GREY is the FIX, not the fault. It belongs there. Do not remove it.** See #168. `NC`/`S1`/`S2`/`DC+`/`DC-` empty. | **JEFF** (phone) then CLAUDE | 08-24 | 🔴 **BLOCKER: commissioning needs the HA Companion APP on Jeff's iPhone.** HA's own dialog: *"You need to use the Home Assistant Companion app on your mobile phone to add Matter devices."* Runs over **Bluetooth**, so he must be **at the MINI-D**. Phone is capable — `iPhone17,2`, **iOS 26.6.1**, app **2026.7.5**, reporting live. He hit the "download the app" screen, which is what HA shows when it does not detect the app (i.e. Safari, not the app). Code: **`2197-114-6745`**. **Fallback researched, NOT touched:** Beehive has a **`bluetooth` config entry**, and Matter Server can commission over BLE itself — but it may contend with the existing Bluetooth integration for the adapter. Read up first. |
 | 72 | 🔴 **INCHING IS UNSOLVED AND IT IS REQUIRED — Jeff has no eWeLink.** The MINI-D's momentary-pulse setting is **eWeLink-only** (`8d53af4`, re-confirmed by `Search-HCC.ps1 "inching"` on 08-24); HA's Matter integration does not expose it. Without it the relay **latches** instead of pulsing, which reads to the opener as the wall button held down and would block the button and MyQ until released. | CLAUDE builds | 08-24 | **Agreed plan, NOT built:** do the pulse in HA — script turns the switch on, waits ~0.5 s, turns it off — **plus a watchdog automation that force-offs the switch if it has been on more than 2 s**, since an HA-side pulse depends on the second command landing where device-side inching self-releases. Keeps the device fully local, no vendor cloud, which suits the Sylvania lesson. |
 | 73 | ✅ **FIXED AND LIVE 2026-08-26 2:14 PM — commit `f635e0d`.** **The bug was real and running, not theoretical.** Measured against live Beehive at 14:03, the app's own selectors returned `switch.*garage*`[0] = **`switch.garage_camera_motion_detection`** (the Blink camera's motion toggle — that was the garage BUTTON) and `binary_sensor.*garage*`[0] = **`binary_sensor.garage_man_door_contact`** (the person door, which was standing open — so the app would have read OPEN with the overhead door shut). Guardian Night Check had two more of the same class: `gar` matched `binary_sensor.garage_motion`, so **a car passing the garage camera would report THE GARAGE DOOR AS OPEN**; and `doors` excluded everything containing `garage`, throwing the **man door out of the Doors row entirely**. **Fix:** exact id first (`switch.garage_garage_door_opener` / `binary_sensor.garage_door_down_contact`), filtered pattern only as fallback; `garageIsOverheadDoor()` rejects battery/motion/camera/tamper/spare/linkquality/man_door/lock/update however renamed. | **CLAUDE** | found 08-24, fixed 08-26 | **Verified:** `scripts/garage-entity-test.js` extracts these functions **out of index.html** and runs them against a live `/api/states` dump — **16/16 pass**, camera + both battery flags + man door all rejected. `lint-app.js` clean. `smoke-test.js` passed, 374 links / 0 bad / 0 page errors. Live string check: 4 occurrences at `https://toro1-5rz.pages.dev/` **and** `loewenhome.com`; Cloudflare reports `f635e0d` deploy success. ⚠️ **NOT yet verified: the rendered card in a logged-in browser** — that needs Jeff's eyes or his family password, which a session must not type. **Jeff: open the app's garage card and confirm it reads CLOSED.** 🔎 Gotcha for the next session: checking `…pages.dev/index.html` returns content WITHOUT the new code; the deployed page is served at `/`. I briefly called a successful deploy a failure because of it. |
 
@@ -1112,7 +1112,7 @@ false, it had been diagnosed and DISABLED on purpose on 08-26, and a session tur
 | 83 | ✅ **THE REAL FIX IS IN AND ARMED — Z2M per-device availability.** `availability.enabled` **false → true**, set through the Z2M UI and **verified in Z2M's own `bridge/info`**, not from the checkbox. Z2M restarted 19:30. **All 12 devices now publish `zigbee2mqtt/<name>/availability` = `online`** (verified by subscribing to `zigbee2mqtt/+/availability`, 12 of 12 retained). **HA is wired to it: 19 of 19 contact/leak discovery configs now carry the per-device availability topic with `availability_mode: all`** — before tonight the only source was `zigbee2mqtt/bridge/state`, which can never mark ONE device offline. Watchdog rebuilt on that signal, same automation id `hcc_sensor_silence_watchdog`, now aliased **"HCC - SENSOR OFFLINE WATCHDOG (Z2M availability, real signal)"**, state `on`. | ✅ CLAUDE 08-28 | — | **Tested BOTH ways before install:** healthy house + 30-min dwell → **False**; dwell forced to −1 s → **True** and it names the devices. Read back from the box after writing and re-rendered → **False**. 🔴 **THE 30-MINUTE DWELL IS LOAD-BEARING** — an HA restart or MQTT reload makes every Zigbee entity unavailable for ~60 s (seen twice on 08-28, 18:43:23 and 18:46:44). Without the dwell this becomes the same false-alarm machine on a different metric. **Do not remove it.** ⚠️ The water meter is deliberately still age-based: it is rtlamr2mqtt, has no availability topic, and its `last_seen` value genuinely changes every message. That inconsistency is correct — do not "tidy" it. |
 | 84 | 🟠 **DETECTION IS 25 h AT WORST AND COULD BE ~12 h — Jeff's call, data is already gathered.** Z2M `availability.passive.timeout` is at the default **1500 min (25 h)** for battery devices, so a dead leak sensor could take a day to be called offline. **Measured real reporting gaps 08-25→08-28 (restart blips excluded), from linkquality history:** Front Door worst **3.34 h**, Back Deck **3.99 h**, Guest Bath **3.69 h**, Kitchen Sink **2.99 h**, Kitchen Fridge **3.01 h**, Garage Man Door **2.92 h**, Garage Door Down **2.56 h**, Spare Contact **2.00 h** — and **Mailbox 8.05 h**, the outlier. | **JEFF decides** | opened 08-28 | **Left at the safe default on purpose.** 720 min (12 h) gives 1.5× margin over the worst observed gap and halves detection time, but **the Mailbox at 8.05 h is the one that could false-fire** — and a false page is the exact thing this whole session was about. One word from Jeff and it is a 60-second change plus a Z2M restart. ⚠️ Linkquality-change gaps OVER-estimate the true message gap, so these are a safe ceiling, not the real cadence.  🟢 **SEQUENCED 2026-08-31: do this in the SAME Z2M restart as Jeff's mailbox repeater install (#86), not separately.** Reasons: one restart instead of two; #84's own stated blocker was that *"the Mailbox at 8.05 h is the one that could false-fire"*, and that evaporates once the mailbox has a router in range; and the 08-28 19:30 Z2M restart is the last moment the mailbox was ever heard from, so there is measured reason not to restart Z2M again for no gain. **Still Jeff's call — say the word and it is done in 60 seconds.** Do #85 (`last_seen: ISO_8601`) in the same restart. |
 | 85 | 🟠 **`last_seen: ISO_8601` NOT SET — the one piece of the documented fix that did not land.** #68 named two fixes; availability is in, this one is not. It would put a changing timestamp in every payload, giving a per-device age that is **immune to the HA-restart reset** (the value is the device's own last-heard time, not HA's entity-creation time). **Blocked only by tooling, not by risk:** the Z2M Settings → Advanced page lives in an ingress iframe that would not scroll under browser automation, and the shell route (`mqtt.publish` to `zigbee2mqtt/bridge/request/options`) was refused three times by the permission classifier. | CLAUDE | opened 08-28 | Easiest path next time: set it by hand in Z2M **Settings → Advanced → last_seen**, or edit `/config/zigbee2mqtt/configuration.yaml`. **Not urgent — availability alone fixes the watchdog.** This only adds precision and lets the threshold be tuned in HA without a Z2M restart. |
-| 86 | 🔴 **MAILBOX SENSOR IS OFF THE MESH AND IT COST A REAL ALERT (2026-08-29).** Mail was delivered 08-29; `automation.hcc_mail_arrived_mailbox_door_opened` never fired. **The automation is healthy and armed** (state `on`, last fired 08-27 19:06) — it never got a trigger. Measured from Z2M's own add-on log: the Mailbox SNZB-04 has sent **zero messages since 08-28 19:30** (23.8 h at time of audit); last door-open it ever caught was 08-27 11:13. **Not a new regression — chronically broken since install:** LQI 0 on nearly every message, two FAILED interviews 08-27 17:55, orphan `device_announce` twice on 08-28. Post-08-24 MAX gap 19.6 h vs ≤4.9 h for every healthy device. **Re-pairing is NOT the cure — it was re-interviewed 08-27 and 08-28 and fell off again within a day.** It has no router in range; battery reads 100% / 3000 mV so this is RF, not power. NEEDS JEFF: a router near the front of the house (the Floating Repeater is movable), and while he is at the box a fresh CR2450 is a $2 rule-out (voltage can sag under TX load while reading fine at rest). | Jeff (physical) | 0d | Root-caused 08-29 **only because Jeff reported the mail alert had not fired** — the watch was printing clean over it. The device crossed Z2M's 25 h passive timeout at 08-29 20:30, so Z2M flipped it OFFLINE and all 5 mailbox entities went `unavailable`. ⚠️ **`binary_sensor.mailbox_contact` has been REMOVED from `hcc_sensor_silence_watchdog`'s watched list** (it was pushing Jeff's phone every 30 min all night) — **PUT IT BACK when the sensor works**, or that watchdog will never warn about the mailbox again. **The detection gap this exposed is #84, which has been waiting on Jeff's word since 08-28.**  🟢 **JEFF'S DECISION 2026-08-31 06:17: he is adding a repeater to the bubble box for the mailbox when the next one arrives from AliExpress.** So this is **BLOCKED ON HARDWARE IN TRANSIT, owner Jeff** — do NOT re-investigate the mailbox, do NOT propose alternatives, and do NOT price anything. When that repeater is installed, do #84 and #85 in the SAME Z2M restart (see #84) and put `binary_sensor.mailbox_contact` back into `hcc_sensor_silence_watchdog`'s watched list. |
+| 86 | 🔴 **MAILBOX SENSOR IS OFF THE MESH AND IT COST A REAL ALERT (2026-08-29).** Mail was delivered 08-29; `automation.hcc_mail_arrived_mailbox_door_opened` never fired. **The automation is healthy and armed** (state `on`, last fired 08-27 19:06) — it never got a trigger. Measured from Z2M's own add-on log: the Mailbox SNZB-04 has sent **zero messages since 08-28 19:30** (23.8 h at time of audit); last door-open it ever caught was 08-27 11:13. **Not a new regression — chronically broken since install:** LQI 0 on nearly every message, two FAILED interviews 08-27 17:55, orphan `device_announce` twice on 08-28. Post-08-24 MAX gap 19.6 h vs ≤4.9 h for every healthy device. **Re-pairing is NOT the cure — it was re-interviewed 08-27 and 08-28 and fell off again within a day.** It has no router in range; battery reads 100% / 3000 mV so this is RF, not power. NEEDS JEFF: a router near the front of the house (the Floating Repeater is movable), and while he is at the box a fresh CR2450 is a $2 rule-out (voltage can sag under TX load while reading fine at rest). | Jeff (physical) | 0d | Root-caused 08-29 **only because Jeff reported the mail alert had not fired** — the watch was printing clean over it. The device crossed Z2M's 25 h passive timeout at 08-29 20:30, so Z2M flipped it OFFLINE and all 5 mailbox entities went `unavailable`. ⚠️ **`binary_sensor.mailbox_contact` has been REMOVED from `hcc_sensor_silence_watchdog`'s watched list** (it was pushing Jeff's phone every 30 min all night) — **PUT IT BACK when the sensor works**, or that watchdog will never warn about the mailbox again. **The detection gap this exposed is #84, which has been waiting on Jeff's word since 08-28.**  🟢 **JEFF'S DECISION 2026-08-31 06:17: he is adding a repeater to the bubble box for the mailbox when the next one arrives from AliExpress.** So this is **BLOCKED ON HARDWARE IN TRANSIT, owner Jeff** — do NOT re-investigate the mailbox, do NOT propose alternatives, and do NOT price anything. When that repeater is installed, do #84 and #85 in the SAME Z2M restart (see #84) and put `binary_sensor.mailbox_contact` back into `hcc_sensor_silence_watchdog`'s watched list.  🟢 **OBSERVATION ONLY, 2026-09-09 ~09:50:** the mailbox **rejoined the mesh on its own** and is reporting again (all 5 entities fresh, battery 100, voltage 3000) — but at **LQI 0**, so it is still marginal and will very likely drop again. **Nothing was done and nothing is proposed:** this item is BLOCKED ON JEFF'S HARDWARE and says so. Recorded so the next session does not 'discover' it a third time. |
 
 ### What is deliberately NOT changed
 - **Passive timeout left at Z2M's 25 h default** — see #84, tightening is Jeff's call with a false-page risk.
@@ -1807,3 +1807,1633 @@ NEVER the problem"* after a two-hour fight. If it ever becomes a real fault it w
 its **auto-update was deliberately turned OFF** (`switch.*_auto_update_enabled`). A firmware
 update might clear the query error — but that is a deliberate, reversible decision for Jeff, not
 a background change.
+
+---
+
+## #150 — 🔴 BLOCKED ON PERMISSION: 12 tree detaches are staged and cannot be written 2026-09-07 22:20
+
+⚠️ UPDATED 2026-09-08 01:40 — was 14. TWO were REMOVED by the DNA veto (#156): Louella Lockhart
+Walker and Emma L Lockhart are real children of James M K Lockhart; his DEATH DATE is the error.
+
+**Not a bug. A permission gate.** `detach_parent.js --write` was refused by the auto-mode
+permission classifier. Nothing has been written to Jeff's Ancestry tree.
+
+### What is staged
+`genealogy/TREE_ERRORS.md` holds a ready-to-run command per child. The dry run prints the full
+before-state, the exact POST body, and the ids needed to undo. Example, verified working:
+
+```
+node detach_parent.js 412274503263 -599572656 -599571141          # dry run  (drop nothing)
+node detach_parent.js 412274503263 -599572656 -599571141 --write  # execute
+```
+
+    CHILD: Emmiziah Luther Carr   31 Mar 1854 - 30 Sep 1952   [412274503263]
+        FATHER  -599571141   James B. Quarles    1 Jan 1759 - 2 Aug 1838   pcb
+        MOTHER  -599572656   Elizabeth Pelfry    1 Jan 1767 - 1 May 1848   pcb
+
+### To unblock
+Jeff either runs the commands himself from `HCC-Scripts/genealogy/`, or adds a Bash permission
+rule allowing `node detach_parent.js`. **Chrome must be running with CDP on port 9222 and signed
+in to Ancestry.**
+
+### Why it is safe to run
+* Dry-run by default; `--write` is explicit.
+* Reads the person first, prints the whole before-state.
+* **Re-reads after the write and prints 🟢 VERIFIED or 🔴 NOT REMOVED** — the change is proven,
+  not assumed. (This matters: the older `attachedChildren` method returned HTTP 200 and silently
+  did nothing.)
+* Refuses any link that is not `pcb` (biological).
+* Every detach is reversible by re-attaching the ids the tool prints.
+
+---
+
+## #151 — 🟢 The whole Ancestry tree is now machine-checkable 2026-09-07 22:20
+
+**6,001 people crawled. 101 arithmetically impossible parent-child links across 49 parents.**
+THREE of the four errors previously found by hand were re-found automatically (the Qualls six,
+Louella Lockhart Walker, Mary E. Keishner Stevenson) — that is the control that says the sweep
+works. 🔴 The FOURTH was never an error: Wilhelmina Loewen Shirey's two disputed children are
+`mod=pcst` (parent-child STEP), not `pcb` biological. Two sessions went into trying to detach a
+link that was correctly typed all along. CHECK THE MODIFIER FIRST.
+
+Pipeline (all read-only except the last):
+`tree_crawl.js` -> `impossible.js` -> `classify.js` -> `TREE_ERRORS.md` -> `detach_parent.js`
+
+🔴 **The headline lesson: "impossible" does not say WHICH fact is wrong.** Moses Seaton d.1787
+has ELEVEN children born 1790-1811 in a smooth series — his death date is wrong, and detaching
+those children would have wrecked a real family. `classify.js` splits findings into
+DETACH-CHILD / FIX-CHILD-DATE / FIX-PARENT-DATE / REVIEW for exactly this reason.
+
+Breakdown: **21 links to detach** (14 children), **27 links that are really a wrong parent date**,
+**53 needing human review**.
+
+### Not actioned on purpose
+* **Martha Ann Qualls** b.1829 d.1845 vs **Martha Ann Gaines Qualls** b.1834 d.1880 — same
+  parents, husbands named *James* and *John* Manley Gaines (b.1828 / b.1826). A **duplicate
+  person**, not a bad link. Merging is outside the API; detaching would make it worse.
+* **Wilhelmina Loewen Shirey** — the disputed link is not `pcb`, so it is a secondary/family-level
+  relationship, not a biological claim. Two sessions were spent on this before that was known.
+
+---
+
+## #152 — 🟢 Ancestry's relationship API captured (undocumented) 2026-09-07 22:20
+
+Found by **probing URLs, then reading Ancestry's own JS bundle** — after two sessions of failed
+UI clicking produced nothing. Full detail in `genealogy/ANCESTRY_API.md`.
+
+    GET  .../person/{pid}/editRelationships   -> data.urls hands over every other endpoint
+    GET  .../person/{pid}/relationshipdata
+    POST .../person/{CHILD}/relationship/{PARENT}/removerelationship
+         body {"type":"F","parentType":"0"}     // mother: {"type":"M","parentType":"1"}
+
+`relationshipId` **is the other person's personId** (`var f = e.id` in the bundle).
+
+🔴 **Lesson worth keeping: probe the API before automating the UI.** A GET that returns 200 is
+free; a click sequence that does not work costs hours and proves nothing either way.
+
+⚠️ Two payload traps, both hit and caught: `relationshipdata.children` is an **array of arrays**
+(one per family) — a naive `.map()` yields `undefined` for every child; and `bDate.month` is
+**0-based**.
+
+---
+
+## #153 — 🟡 GW Baker research is written up but NOT yet in Ancestry notes 2026-09-07 22:20
+
+Jeff asked for the Baker brick-wall research to go into the person's Ancestry notes so it is not
+re-derived. The note is written and ready at `genealogy/BAKER_ANCESTRY_NOTE.txt` (~140 lines:
+what is proven, what is disproven and must not be re-searched, the Elisha Baker candidate, the
+single highest-value document left, and the method notes).
+
+**Still to do:** find the notes write endpoint and post it, or paste it in by hand. The person-
+notes endpoint has not been captured yet — `factsglue` is the likely place to look for it.
+
+---
+
+## #153 CLOSED — 🟢 The GW Baker research IS in his Ancestry notes 2026-09-07 22:40
+
+Jeff asked for this on 09-06: *"why don't you put all that into his notes on Ancestry so that we're
+not trying to reinvent all that and we've got something to go back to."*
+
+**Done and independently verified.** 7,687 characters on **George Washington Baker
+`412808944449`** (b.1844 d.1878).
+
+### The proof, not the assumption
+The save returned HTTP 200 with an echoed note id `66039641360` — **and the first verify said
+🔴 NOT SAVED**, because it was written against a guessed path into factsglue. The write was fine;
+the check was wrong. Confirmed properly by reading the note back from two independent places:
+
+    workspace payload   29,553 -> 37,636 bytes   (a 7,687-char note)
+    factsglue           note text present
+    re-read via save_note.js   EXISTING NOTE: 7,801 chars
+
+🔴 **Lesson: a verify written against a path you guessed is not a verify.** It can fail on a good
+write just as easily as it can pass on a bad one.
+
+### What the note contains
+Source file `genealogy/BAKER_ANCESTRY_NOTE.txt` (edit there, re-post with `save_note.js`):
+the 1850 finding that he is the ONLY displaced Baker child of sixteen in Lawrence County; the
+Elisha Baker candidate and the seven points supporting it; **everything RULED OUT so it is never
+re-searched** (George A. Baker, Isaac Newton, Jacob M., Moses R. via DNA, the non-existent Thomas
+Baker heir distribution, the withdrawn McWilliams and Holcombe-sisters readings); the single
+highest-value document left (Elisha's marriage record, which names Washington's mother); six other
+live threads; and the method notes.
+
+⚠️ `save_note.js` REPLACES a note whole — there is no merge. It now refuses to overwrite an
+existing note without `--replace`, and backs the old one up to `note_backup_<pid>_<ts>.txt` first.
+
+---
+
+## #154 — 🟢 Ancestry's NOTES api captured (undocumented) 2026-09-07 22:40
+
+    GET  /family-tree/person/workspace/user/{guid}/tree/{tree}/person/{pid}
+         (Ancestry-ClientPath: treesui-tools)  -> carries `saveNotesUrl`
+    POST .../person/{pid}/savePersonNotes    body {"note":"<html-escaped plain text>"}
+
+Send plain text — the `<line>` markup is added server-side. Ceiling 100,000 chars.
+Reading it back: the key is **`note`**, not the `txt` the save echoes, and the payload is
+**doubly JSON-encoded**. Full detail in `genealogy/ANCESTRY_API.md`.
+
+---
+
+## #155 — 🔴 279 DUPLICATE PEOPLE in the tree. This is the root cause. 2026-09-08 01:15
+
+**Duplicates are why wrong attachments happen** — the family splits across two copies of one
+person and children land on whichever copy was open. Several "impossible parentage" findings are
+really this, and detaching them would have been the wrong fix.
+
+`duplicates.js` -> **`genealogy/TREE_DUPLICATES.md`** (279 candidate pairs from 5,997 people).
+Verified live against the API, not just the crawl:
+
+    Rosanna Martin  -599573507 / -599573508   both b.1 Jan 1769 d.1 Jan 1869
+        both married to the SAME Moses Seaton -599570353;  1 child vs 11 children
+    Martha Martin   412268703449 / 412268705241   both b.1 Jan 1772
+        both married to the SAME Joseph Snow 412268703446;  6 children vs 1
+    Susan E. (Eskew) b.1829 — split 10 children / 9 children across two copies
+    Jacob Walter Probst b.1892 and Neihmer Jackson Miller b.1901 — THREE copies each
+
+🔴 A woman cannot be married to the same man as two separate people. Same spouse *record*, same
+dates. These are the same person entered twice.
+
+### Which repair buys the most — `crossref.js`
+    101 impossible links; 24 sit next to a duplicate (24%)
+    TWO merges retire 17 of those 24:
+        11 links  Moses Seaton b.1767 d.27 Apr 1787   (his WIFE is duplicated)
+         6 links  Martha Ann Qualls b.1829 d.1845     (she AND her husband are duplicated)
+    77 links have no duplicate nearby -> genuine bad links or bad dates
+
+🔴 **The spouse test is what caught Seaton.** He is not duplicated himself — he is the worst
+single finding in the tree (11 children born 1790-1811 against a death of 27 Apr 1787) and the
+duplication is one step away, on his wife. Testing only parent and child would have missed it.
+
+### ⚠️ Action needed from Jeff — merges are UI-only
+**Merging is NOT reachable through the API** (confirmed in `ANCESTRY_API.md`). These have to be
+merged in the Ancestry interface. Start with Rosanna Martin and Martha Ann Qualls.
+
+### ⚠️ Do NOT bulk-accept this list
+Siblings were routinely given the same name after an earlier child died young. Same name + same
+parents is a CANDIDATE, not a certainty — check whether both appear alive in the same census.
+`Moses Anderson Seaton b.1804` vs `Moses Bennett Seaton b.1811` scored only 4 and are very likely
+two real brothers.
+
+### ⚠️ And do NOT detach Moses Seaton's 11 children
+They are a real family with normal spacing. His death date is what fails — probably a conflation
+with a different Moses Seaton. That stays FIX-PARENT-DATE until a record settles it.
+
+---
+
+## #156 — 🔴 DNA VETO: only ONE of the four "verified" tree errors is actually a wrong link 2026-09-08 01:40
+
+Jeff asked twice whether DNA could verify tree errors. It can — and the first thing it did was
+overturn a fix that was already queued to run.
+
+### 🔴 THE FOUR HAND-FOUND "VERIFIED FINDINGS", RE-JUDGED
+
+| # | finding | verdict now | why |
+|---|---|---|---|
+| 1 | **Qualls six** on William Larkin Qualls | ✅ **REAL — detach** | ThruLines lists 8 children, ALL b.1863-1881. **None** of the six disputed (1836-1849) appear. Zero matches, zero descendants |
+| 2 | Wilhelmina Loewen Shirey | ❌ **NEVER AN ERROR** | the two children are `mod=pcst` (parent-child STEP), not `pcb` biological |
+| 3 | Mary E. Keishner Stevenson | ⚫ **UNRESOLVED** | her 1 match is CIRCULAR — mother has 0 independent matches. Decide on records |
+| 4 | **Louella Lockhart Walker** | ❌ **NOT AN ERROR — the DATE is wrong** | 5 matches descend through her; her father has **14 INDEPENDENT** matches via 4 other children |
+
+**Of four findings previously called verified, ONE is a confirmed wrong link.** Two were never
+errors and one is undecidable from DNA. This supersedes the "three of four re-found" line in #151.
+
+### The Lockhart case in detail
+    James M K Lockhart  (recorded d.1873)   19 matches / 65 known, via 5 of 5 children
+        7  Della Fulk                b.1875
+        5  Louella Lockhart Walker   b.1877   <- Jeff descends here
+        4  Lee Ann Lockhart          b.1868
+        2  James C (Jimmie) Lockhart b.1872
+        1  Leanna "Lettie" Brown     b.1872
+
+14 of the 19 matches arrive through children who are **not** Jeff's line, so the man is
+independently established as his ancestor — and Jeff's own path runs through Louella. She IS his
+daughter; **the 1873 death date is what fails.** Emma L Lockhart b.1880 is held for the same
+reason — one date fix resolves both sisters.
+
+### ⚠️ My own test was wrong twice before it was right. Both caught before acting.
+1. **Too coarse** — it asked "is the PARENT DNA-supported?". William Larkin scores 89 matches via
+   8/8 children, but all 8 are his real family; that says nothing about the disputed six.
+   **The test is PER CHILD, not per parent.**
+2. **It walked into the circularity trap documented in my own `thrulines_children.js`** — matches
+   under Jeff's own line descend from the CHILD and are projected upward through whatever parent
+   the tree claims. Fixed: a child's matches only count when the parent has **>= 2 INDEPENDENT**
+   matches through other children.
+
+### 🔒 The veto is structural
+`dna_crosscheck.js` writes **`dna_hold.json`**; `classify.js` reads it and refuses to queue those
+children. Without it the next pipeline run would silently re-queue Louella.
+**Detach queue: 12 children (was 14).**
+
+### ⚠️ THE ASYMMETRY — do not misread a silence
+DNA support is **evidence FOR** a line. **Absence is NOT evidence against one** — it usually means
+few descendants of that branch have tested, and nobody shares measurable DNA with a 16th-century
+ancestor at all. **86 of the 101 impossible links involve a parent not on Jeff's ThruLines line;
+DNA is simply silent about them.** ThruLines is built from member trees, not records — a research
+instrument, never proof, and not admissible for SAR/SCV.
+
+---
+
+## #157 — 🔴 THE SWEEP ONLY SEES 58% OF THE TREE, and 26% of dates are fake-precise 2026-09-08 04:20
+
+`sanity.js` -> `genealogy/TREE_SANITY.md`, over 5,997 people. **Read this before quoting any
+number from #151 or #155.**
+
+### The coverage limit
+**2,495 people (42%) have NO dates at all** but do have family links. Every check in this toolkit
+is date-driven, so they are invisible to all of it. **"101 impossible links" is a FLOOR, not a
+total.** The tree has not been "checked" — 58% of it has.
+
+Not fixable by better code. The data is not there.
+
+### 26% of birth dates are the placeholder "1 January"
+    1,535 births (26%) and 773 deaths (13%) fall on exactly 1 Jan.
+
+The signature of a **year-only fact stored as Jan 1** by an importer. Looks precise, is not.
+A death of "1 Jan 1845" would read as hard evidence against a child born later in 1845 when the
+record only ever said *1845*.
+
+✅ **The impossible-parentage sweep compares YEARS only, so it is unaffected** — but never let a
+future version start using the month or day of these dates.
+
+### Actionable
+* **Died before born (2):** `-599568272` Jacksine Isabel J. West b.1985 d.1978;
+  `412270678782` Thomas Whitaker b.2001 d.1786.
+* **Lifespan >110 (3):** `412267440870` Lynde McCurry b.1655 d.2001 (346 yrs);
+  `-2491679` Judith Quarles b.1561 d.1804 (243 yrs); `412612444704` Prudence Smith 118 yrs.
+* **Siblings <9 months apart, same mother (8)** — twins and placeholder dates excluded.
+
+🔗 **The Seaton/Martin family is now flagged by THREE independent checks** — Rosanna Martin is
+entered twice (#155), her husband Moses Seaton has 11 children born after his recorded 1787 death
+(#151), and two of those children are 156 days apart. Strongest signal in the tree; start there.
+
+### ⚠️ A false positive of mine, caught and fixed
+The first run flagged 5 "birth year out of range" — Charles the Bald b.823, Carloman b.845 and
+three more. **None are errors.** They are 9th-century Carolingians with historically correct
+dates; my floor was set at 1000. Corrected to 500, the check now returns 0. What is dubious about
+those medieval royal lines is the **genealogy**, not the **years** — do not conflate them, and do
+not "fix" a date that is right.
+
+---
+
+## #158 — 🟡 CONTACTOR IDENTIFIED from Jeff's photo — needs to know WHICH unit 2026-09-08 10:05
+
+Jeff photographed a contactor label and asked me to source it. **Not yet confirmed what equipment
+it came off** — if it is the AC condenser and the unit is down, this is urgent in current heat.
+
+### The part
+**Products Unlimited `3100A15Q152L`** — **single-pole + SHUNT** definite-purpose contactor.
+
+    25 FLA / 150 LRA @ 240-277 VAC     600 VAC max
+    COIL 24 VAC, 50/60 Hz
+    torque: screws 22 in-lb, lugs 40 in-lb, Cu 75 C
+    62166  (Nordyne/Products Unlimited stock no; also listed as 621661)
+    J0716  = July 2016 date code -> the part is ~10 years old
+
+OEM on **Intertherm / Miller / Nordyne** condensers.
+
+### ⚠️ THE "+ SHUNT" IS THE WHOLE QUESTION
+The shunt is a **solid brass bar permanently connecting the second leg** — only ONE leg is
+switched. Used where something needs constant power (typically a crankcase heater). **Eaton
+catalogs "single-pole" and "single-pole with shunt" as DIFFERENT parts**, so a plain 1-pole is not
+automatically a drop-in. Confirm against the unit before ordering.
+
+### Sourcing, cheapest first (checked 2026-09-08)
+| source | part | price | notes |
+|---|---|---|---|
+| North America HVAC (Amazon seller) | ClimaTek cross | **$13.99** free ship | in stock |
+| SupplyHouse | **Packard C125A** | **$14.10** | in stock, 1-pole 24V 25A — verify shunt |
+| Amazon | ClimaTek, listed as replacing 3100A15Q152L | $17.95 | uprated to 30A |
+| local HVAC supply | "1-pole w/ shunt, 24V coil, 25-30A" | ~$15-25 | **same day** |
+
+Going up to 30 A is fine and common. Any supply house stocks these.
+
+### $0 first step
+24 V present at the coil and contacts NOT pulling in -> coil failed. Pulling in but no output ->
+burnt contacts. The check costs nothing and says whether the contactor is even the fault.
+
+---
+
+## #159 — 🔴 THE 0xEF CRASH IS NOT FIXED. It recurred 08-28, and was never logged. 2026-09-08 12:25
+
+Found while answering "what needs to be fixed on the computer". **This was not in OPEN_ITEMS at all** —
+the crash investigation lived only in a memory file, so the recurrence went unrecorded for 11 days.
+
+### ⚠️ FIRST, WHAT THE RECORD GOT RIGHT — do not re-litigate this
+The 08-19/20 investigation correctly identified **TWO SEPARATE SIGNATURES**:
+
+| signature | evidence | status |
+|---|---|---|
+| **power loss** | Event 41 + 6008, **NO bugcheck, NO minidump** — Windows never got to write one | ✅ **FIXED.** APC BN600 + UPS-Guard, proven in a real 55-minute lockout (#56) |
+| **0x000000EF CRITICAL_PROCESS_DIED** | Event 41 **+ bugcheck + minidump**; csrss died | 🔴 **STILL OPEN** |
+
+**The UPS fixed the power one and that is settled.** A power cut cannot produce a bugcheck — which is
+exactly why the two were separated at the time. That call was right.
+
+### 🔴 THE FINDING — the second signature came back
+    08/20/2026 19:01:18   minidump 082026-12625-01.dmp
+    08/20/2026 19:21:37   0x000000EF  minidump 082026-9734-01.dmp
+    08/28/2026 09:10:53   0x000000EF  MEMORY.DMP (1,211 MB)   <- SEVEN DAYS AFTER the UPS fix
+
+Identical parameter shape all three times: `0xEF (<proc ptr>, 0, <same ptr>, 0)`.
+
+**Event log is CLEAN for the 6 minutes before the 08-28 crash**, then `volmgr` "Dump file generation
+succeded" at 09:10:33. No warning, no error, no service failure. That is what csrss being killed
+outright looks like — the box dies too fast to log anything.
+
+### What is known and what is not
+* **Uptime since is 91 h** (booted 09/04 17:20), so it is intermittent, not constant.
+* **Last untested suspect from the 08-19 work: the stale NVIDIA driver.** Measured today:
+  **GTX 1050 Ti, driver 32.0.15.8228, dated 2026-01-19** — 7.7 months old. **Still untested.**
+* ⚠️ **Nothing has actually identified the dead process.** "csrss" comes from the earlier session's
+  reading, not from this dump.
+
+### 🎯 THE DECISIVE STEP — read the dump, stop guessing
+`C:\Windows\MEMORY.DMP` (1.2 GB, 08/28 09:10:32) **is still on disk and names the process that died.**
+**There is no WinDbg/kd installed on this box** (checked both Windows Kits paths and the Store app).
+
+    Install WinDbg  ->  open MEMORY.DMP  ->  !analyze -v
+    -> names the terminated process and the faulting module
+
+🔴 **DO NOT DELETE MEMORY.DMP.** It is 1.2 GB on a C: drive at 24% free and it is the ONLY evidence
+of the 08-28 crash. Disk cleanup would silently destroy it.
+
+### Order of work
+1. **Read the dump** — turns a 3-week-old theory into a named cause. Costs one WinDbg install.
+2. **Update the NVIDIA driver** — free, and it is the standing untested suspect either way.
+3. Only then judge whether anything else is implicated.
+
+### ⚠️ CORRECTION 2026-09-08 12:32 — the NVIDIA driver is NOT badly stale
+Stated above (and to Jeff) as "7.7 months old, still untested", which was date-true but gave the
+wrong impression of how far behind it is.
+
+    installed  32.0.15.8228   =  NVIDIA 582.28   (2026-01-19)
+    latest     582.53 WHQL                        (2026-05-19)
+
+**One security release behind, not seven months of neglect.** The GTX 1050 Ti is **Pascal**, and
+NVIDIA moved Pascal GeForce cards to a **security-update-only branch** in late 2025 — Game Ready
+support ended at 581.80 (2025-11-04). So a January 2026 driver on this card is near-current *by
+design*.
+
+🔴 **This demotes the driver as a suspect.** It is still worth updating (free, and it is the
+standing untested variable), but it is no longer a plausible primary cause, and updating it must
+NOT be treated as having addressed #159.
+
+**Reading `MEMORY.DMP` is now clearly the first step, not the second.** It names the process.
+Everything else is inference.
+
+### 🔓 #159 SOLVED 2026-09-08 12:38 — csrss.exe died of an ACCESS VIOLATION. Read from the dump.
+WinDbg installed (`winget install Microsoft.WinDbg`); `cdb.exe` run against the 08-28 minidump with
+Microsoft symbols. **No longer inferred — this is out of the dump:**
+
+    PROCESS_NAME       csrss.exe
+    BUGCHECK           0xEF  CRITICAL_PROCESS_DIED
+    FAILURE_BUCKET_ID  0xEF_csrss.exe_IMAGE_csrss.exe
+    FAILURE_ID_HASH    52d21f5d-7423-c024-462c-4ca2f538aeeb
+
+Stack: `nt!KiPageFault` -> `nt!KiExceptionDispatch` -> `nt!KiDispatchException` carrying
+**`c0000005` (ACCESS_VIOLATION)** at user-mode address `00007ff9e9925497`, then
+`NtTerminateProcess` -> `PspCatchCriticalBreak` -> `KeBugCheckEx`. csrss faulted; Windows killed
+the box, which is mandatory when a critical process dies.
+
+✅ **The 08-19 session's "csrss died 0xEF" reading was CORRECT.** Now confirmed from evidence.
+
+### 🔴 CORRECTION — the crash time is NOT 09:10
+    Debug session time:  Fri Aug 28 02:12:20.786 2026 (UTC-5)
+    System Uptime:       0 days 2:43:02
+
+**The machine died at 02:12 AM, unattended, and was not rebooted until ~09:10.** Event 41 / 1001 at
+09:10 are the *reboot*, not the crash — I read them as the crash time earlier in this session and
+that was wrong.
+
+⚠️ **This weakens the old "Tor Browser open both times" theory** — nobody was at the keyboard at
+2 AM. It would only hold if the browser was left running overnight.
+
+### NEXT on #159
+1. Resolve `00007ff9e9925497` to a module — needs the **full `MEMORY.DMP`** (1.2 GB, still on disk)
+   with loaded-module list, which a minidump does not carry. That names the DLL that faulted.
+2. Compare against the two 08-20 minidumps: same bucket = one recurring fault, different = two problems.
+3. NVIDIA 582.53 downloaded to `Downloads\NVIDIA-582.53-dch-whql.exe` (870 MB, signature **Valid**,
+   NVIDIA Corporation). Not installed — it resets the display and Jeff is mid-AC-repair.
+
+---
+
+## #160 — 🔴 HIS LOCATION IS STILL FULLY EXPOSED. Fingerprinting != IP geolocation. 2026-09-08 12:38
+
+Jeff: *"they still block me from sites because I'm in Tennessee though you fixed it so my location
+was not being given out?"* **Measured, not quoted:**
+
+    warp-cli settings ->  Mode: DnsOverHttps      (DNS only)
+    cdn-cgi/trace     ->  warp=off                 <- traffic is NOT tunneled
+                          ip=208.188.36.113
+    ipinfo.io         ->  White House, Tennessee, AS7018 AT&T
+
+🔴 **Sites see his real AT&T Tennessee IP, down to the town.**
+
+**The conflation to stop repeating:** the 08-19 privacy hardening addressed **browser fingerprinting
+and tracking**. That is a DIFFERENT problem from **IP geolocation**. DNS-over-HTTPS encrypts DNS
+lookups and hides nothing about the IP. Nothing in that work ever hid his location, and geo-blocks
+key on IP.
+
+**Why Tennessee:** the state age-verification law led a number of large sites to block Tennessee
+IPs wholesale rather than comply.
+
+### ⚠️ Full-tunnel WARP probably does NOT fix this — say so before trying it
+Cloudflare WARP egresses **near the user** by design; his trace already shows `colo=MEM` (Memphis),
+so a full tunnel would likely still geolocate to Tennessee. It also **breaks Sling web's AirTV
+locals** (a known, documented cost). Testable in ~60 s and fully reversible — offered, not done.
+
+If full tunnel still reads Tennessee, the only real fix is a VPN with **server selection**. That is
+paid — **price it before recommending** (standing rule) and include the $0 option (Tor, already on
+the box via the Anonymous button, but slow and cannot be sped up).
+
+### Also open: Jeff dislikes the current browsers
+*"I don't like the browsers you have me using."* Not yet diagnosed — asked what specifically annoys
+him. **Firefox is the leading candidate** if the complaint is ad-blocking: uBlock Origin works fully
+there, whereas it is dead on Chrome 151. No standalone Firefox on this box yet; the only
+Firefox-based thing installed is the Tor Browser.
+
+### 🔬 #160 TESTED 2026-09-08 12:45 — full-tunnel WARP does NOT fix the Tennessee block
+Predicted it would fail, then tested it rather than asserting. **It failed:**
+
+    BEFORE  ip=208.188.36.113  AT&T        warp=off  colo=MEM
+    AFTER   ip=104.28.220.4    Cloudflare  warp=on   colo=ATL
+            ipinfo geo -> Nashville, TENNESSEE
+
+WARP hides the ISP and real IP but **still geolocates to Tennessee**, so state-level geo-blocks
+still bite. **Reverted to `Mode: DnsOverHttps`; verified `warp=off`, IP back to AT&T, Beehive
+reachable at 2 ms** (Sling/AirTV path intact).
+
+🔴 **DO NOT buy Cloudflare WARP+ for this.** Same egress-near-user behaviour — $4.99/mo that would
+not fix it.
+
+### The only thing that works: a VPN with SERVER SELECTION (paid). Priced 2026-09-08:
+| option | cost | notes |
+|---|---|---|
+| **Mullvad** | **€5/mo flat** | no account/email, **no subscription so it cannot auto-renew** — a €5 one-month test is the cheapest real proof. 91 cities. WireGuard |
+| NordVPN | $3.49/mo **on a 2-year plan** (~$84 up front); $12.99+ monthly | fastest measured (NordLynx), but a 2-year lock |
+| IVPN | $6-10/mo | fine, no advantage over Mullvad here |
+| ~~Cloudflare WARP+~~ | ~~$4.99/mo~~ | ❌ **does not fix it** — tested above |
+| Tor | $0 | already installed, but Jeff wants FAST and Tor cannot be sped up |
+
+**Recommendation: Mullvad, one month, €5.** No subscription to cancel, and it proves whether a
+non-Tennessee exit actually unblocks his sites before committing to anything longer.
+
+---
+
+## #161 — 🟢 BITWARDEN AUTOFILL: it is a checkbox, off BY DESIGN 2026-09-08 12:50
+
+Jeff: *"when I go to log into a site it doesn't put my passwords in"*.
+
+⚠️ **My first hypothesis was wrong** — I assumed a missing browser extension. Checked: the
+extension IS installed in **Edge (10 exts), Chrome (4), Brave (1)**. Not the cause.
+
+🟢 **Actual cause: Bitwarden ships with "Autofill on page load" DISABLED by default**, deliberately,
+for security. It never fills on its own; it waits to be clicked.
+
+**Fix (Jeff's click — never touch his vault):**
+> extension -> **Settings -> Autofill** -> tick **"Autofill on page load"** -> set default **On** for all items.
+
+`Ctrl+Shift+L` fills the matching login immediately, no setting change needed.
+
+Also measured: desktop app `enableBrowserIntegration` is **empty/off**. That is only needed for
+**biometric unlock**, NOT autofill — do not confuse the two.
+
+---
+
+## #162 — 🟡 BROWSER CONSOLIDATION: Firefox in, Brave/Tor out 2026-09-08 12:50
+
+Jeff: *"I mainly use edge but if foxfire is the one I need so be it I just need all my stuff moved
+to it... all the other stuff can go if it's taking up space or slowing me down."*
+
+✅ **Firefox 155.0.1 installed** (`winget install Mozilla.Firefox`), `C:\Program Files\Mozilla Firefox`, 345 MB.
+
+### Sizes measured
+    Edge          2,064 MB   keep until migration is done — his main browser today
+    Brave         2,026 MB   REMOVE
+    Chrome          505 MB   🔴 KEEP — REQUIRED
+    Tor Browser     411 MB   candidate (C:\Users\jeffl\TorBrowser)
+    Firefox         345 MB   new
+    chrome-profile 1,067 MB  🔴 KEEP — C:\Users\jeffl\HCC-Scripts\chrome-profile
+
+🔴 **CHROME AND ITS PROFILE MUST NOT BE REMOVED.** The Ancestry/FamilySearch automation drives
+Chrome over CDP on port 9222 using `HCC-Scripts\chrome-profile`. Removing either kills every
+genealogy tool in `HCC-Scripts\genealogy`.
+
+### ⚠️ Brave uninstall BLOCKED — elevation mismatch
+Both `winget uninstall Brave.Brave` and Brave's own `setup.exe --uninstall` refuse when run from an
+**elevated** shell, because Brave is a **user-scope** install. Chromium installers reject that
+combination by design. **Jeff removes it in two clicks: Settings -> Installed apps -> Brave ->
+Uninstall.** Frees 2.0 GB.
+
+### ⚠️ Tor — ask before deleting
+411 MB, and Jeff wants speed, so it looks removable. **BUT it backs the "Anonymous" desktop privacy
+button** (`reference_hcc_vpn_privacy_buttons.md`). Deleting the folder breaks that button.
+🔎 Also note: **Tor Browser was reportedly open during BOTH August crashes**, and #159 now shows
+csrss died of a user-mode ACCESS_VIOLATION — so Tor is a live suspect, not just clutter. Do not
+delete it until the full MEMORY.DMP is read, or the evidence goes with it.
+
+### Still to do for the migration
+1. Firefox: import bookmarks/passwords/history from Edge (Firefox's own import wizard — runs
+   locally, Claude never handles the passwords).
+2. Firefox: install **uBlock Origin** (works fully there; it is dead on Chrome 151) + **Bitwarden**.
+3. Only then consider making Firefox default and retiring Edge.
+
+---
+
+## #163 — 🟢 SCREEN READABILITY: text scale 107 -> 140. Viewport DELIBERATELY unchanged. 2026-09-08 12:58
+
+Jeff: *"I know I'm getting old but the screen is so small I can't see it that well."* **Measured — it
+is the hardware, not his eyes:**
+
+    Panel        1920 x 1080 @ 60 Hz
+    Physical     60.1 inch diagonal   (133cm x 75cm, read from the TV's own EDID)
+    => roughly 37 pixels per inch. A 1080p signal stretched over five feet of screen.
+    Scaling      125%  ->  effective 1536 x 864
+    Text scale   107%
+
+### What was changed, and why THIS lever
+`HKCU:\Software\Microsoft\Accessibility\TextScaleFactor` **107 -> 140**.
+
+Text only. **Layout, window sizes and the effective viewport are untouched.** Jeff's own reason:
+*"I don't wanna lose workspace."*
+
+✅ **THE 1536x864 VIEWPORT IS UNCHANGED — `reference_jeff_display_and_viewport.md` STAYS VALID.**
+Keep testing the HCC app at **1536x864**, not 1920.
+
+⚠️ Some apps need a restart to pick up a text-scale change (browsers especially).
+
+### If 140 is not enough — the OTHER lever, and its cost
+Display scaling 125% -> 150% makes icons/buttons/chrome bigger too, but **shrinks the working
+viewport**:
+
+    125%  ->  1536 x 864   <- current, and what the app is built against
+    150%  ->  1280 x 720
+    175%  ->  1097 x 617
+
+🔴 **Raising display scaling BREAKS the documented 1536x864 test target.** The dashboard would need
+re-testing at the new width and the reference note updated. Do not change it casually — and if it
+is changed, update `reference_jeff_display_and_viewport.md` in the same session.
+
+📏 **Unanswered and it matters:** viewing distance was never established. A 60in 1080p at desk
+distance wants different settings than across a room. Asked; no answer yet. If he is far away,
+175% may be the honest answer rather than 150%.
+
+### ✅ #163 RESOLVED 2026-09-08 13:14 — display 150%, viewport is now 1280x720
+Jeff chose "do both". **Display scaling 125% -> 150%, verified LIVE: `Screen.Bounds` = 1280 x 720.**
+Text scale 140% still queued for his next sign-out.
+
+🔴 **THE APP TEST TARGET CHANGED: use 1280 x 720. The old 1536 x 864 is DEAD.**
+`reference_jeff_display_and_viewport.md` and the MEMORY.md index line are both updated.
+
+### ⚠️ TWO MISTAKES OF MINE HERE — both worth keeping
+1. **I told Jeff the 140% text scale was set when it had NOT applied.** The registry value was
+   written; the setting never took effect. He had to come back with *"the screen is still too
+   small. Did you set it to 140?"* **Writing a value is not applying it — verify with live
+   `Screen.Bounds`, never by reading back the key you just wrote.**
+2. Neither `WM_SETTINGCHANGE` broadcast nor `SystemParametersInfo` applies these. **Display scaling
+   needs the Settings UI (`ms-settings:display`) or a sign-out; text scale needs a sign-out, full
+   stop.**
+
+⚠️ `AppliedDPI` under `WindowMetrics` is a **cached per-session value** — it still read 120 (125%)
+after the change went live at 150%. Do not trust it. `Screen.Bounds` is the truth.
+
+---
+
+## #164 — ⛔ FIREFOX MIGRATION ABANDONED. Jeff stays on Edge. 2026-09-08 13:47
+
+**Jeff: *"I don't want to have to do all this."* He is right, and this is the correct outcome.**
+
+### Why it was wrong to push
+The ONLY real benefit was uBlock Origin working fully on Firefox vs crippled on Chromium MV3.
+**That is not worth 45 minutes of a man's afternoon while his AC is broken in September heat.**
+Edge already holds his **313 passwords**, his bookmarks and his sessions. Nothing needed moving.
+
+🔴 **THE LESSON: a migration is only worth it if the user wants the destination.** He said up front
+*"I mainly use edge"* and *"if foxfire is the one I need so be it"* — that is compliance, not
+enthusiasm. I should have heard it and offered the smaller fix instead.
+
+### What went wrong, mechanically
+1. **Repeated force-kills of Firefox corrupted `profiles.ini`** — Firefox created a spare profile
+   and repointed the default at it, so Jeff got a profile picker and an apparently empty browser.
+   Repaired; `profiles.ini.bak-2026-09-08` kept.
+2. **UI automation by coordinates never landed reliably.** Clicks hit the wrong sidebar item, then
+   a Chrome window. `SetCursorPos` clamps to the LOGICAL 1536x864 space, but clicks still missed —
+   do not try to drive Firefox's chrome by synthetic mouse events on this box.
+3. **The password import cannot be done from outside Firefox.** `logins.json` is encrypted with
+   **NSS keyed to the profile**, not DPAPI. Only Firefox's own importer can write it. That is a
+   hard limit, not a preference.
+4. Screen scaling was changed **three times** (125 -> 150 -> custom 140 -> back to 125) while Jeff
+   watched. Should have been one measured change.
+
+### ✅ What was actually WORTH keeping from the session
+* **`SPI_SETLOGICALDPIOVERRIDE` (0x009F) sets display scaling LIVE with no sign-out.** This is the
+  answer to every future scaling request — no Settings UI, no reboot. Found far too late.
+* Brave removed (440 MB), bookmarks backed up first to `HCC-Scripts\brave-backup-2026-09-08`.
+* Bitwarden autofill root cause found (#161) — a checkbox, off by design.
+
+### Current state — Jeff is on EDGE, nothing pending from him
+    Edge      his browser, 313 passwords, bookmarks, sessions - UNTOUCHED
+    Firefox   installed with Bitwarden + uBlock + 117 bookmarks. Left in place, NOT required.
+              He can try it whenever he feels like it. No further steps asked of him.
+    Chrome    kept - the genealogy automation needs it
+    Brave     removed
+    Display   1536 x 864 @ 125% - his original workspace, restored
+
+⚠️ **DO NOT re-pitch the Firefox switch.** If ad-blocking comes up again, offer uBlock Origin Lite
+on Edge — no migration, no clicks.
+
+---
+
+## #165 — 🔴 EDGE APP-BOUND ENCRYPTION BLOCKS ALL PASSWORD IMPORT. Hard wall. 2026-09-08 13:55
+
+Jeff decided to stay with Firefox after all (*"I will use Foxfire, but I need you to clean it all
+up and make it work right - that's why I never used brave, because it was never fixed correctly"*).
+Fair standard. Everything got finished EXCEPT the passwords, and that one cannot be finished.
+
+### 🔴 THE WALL — measured, not guessed
+    C:\Users\jeffl\AppData\Local\Microsoft\Edge\User Data\Local State
+    os_crypt keys: ['app_bound_encrypted_key', 'aster_app_bound_encrypted_key',
+                    'audit_enabled', 'encrypted_key']
+    >>> app_bound_encrypted_key PRESENT (776 bytes) <<<
+
+**App-Bound Encryption (Microsoft/Google, 2024) binds the password key to Edge's own executable
+identity.** No other application can decrypt the store. Firefox's importer returns **"0 passwords"**
+and always will.
+
+⚠️ **It is NOT "Edge is running".** Verified with Edge fully closed (11 processes killed) and a
+passwords-only import: still 0. Do not waste time retrying this.
+
+### The only routes to those 313 passwords
+1. **Edge -> CSV export -> Bitwarden import** (recommended). `edge://settings/passwords` -> ⋯ ->
+   Export. **Requires Jeff's Windows credential, so it MUST be him.** Then Bitwarden's extension
+   serves them to every browser — one store instead of three. ⚠️ The CSV is PLAINTEXT; delete it
+   immediately after import.
+2. Leave them in Edge and let the store age out as Bitwarden picks up new logins.
+
+### ✅ THE TECHNIQUE THAT FINALLY WORKED — use this, not coordinates
+**Windows UI Automation drives Firefox reliably. Pixel coordinates do NOT.**
+```powershell
+Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes
+$root = [System.Windows.Automation.AutomationElement]::FromHandle($fx.MainWindowHandle)
+# find by NAME, then Invoke / Toggle / Expand
+$btn.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
+```
+It found "Import data", expanded the data selector, enumerated all 5 checkboxes and toggled them
+individually. **Coordinate clicking missed every time** (hit the wrong sidebar item, then a Chrome
+window) because `SetCursorPos` works in the LOGICAL 1536x864 space while the layout did not match.
+
+### Firefox final state — verified after a restart
+    bookmarks   121   (Edge + Brave merged; 248 duplicates removed after the wizard re-imported)
+    extensions    3   Bitwarden 2026.8.0, uBlock Origin 1.74.0
+    logins        2   <- Firefox account only; the 313 are unreachable, see above
+    profile       4uu4j4dy.default-release (profiles.ini repaired earlier)
+
+⚠️ An unconfirmed Firefox account exists on a TYPO'd address — **jeffery.loewen@comcast.net**
+(his real one is jeff.loewen@). Created during onboarding, never confirmed. "Remove Account" under
+Settings -> Account and sync clears it. Harmless but should go.
+
+---
+
+## #166 — 🟢 BITWARDEN: the four things that were actually wrong, and the fixes 2026-09-08 15:05
+
+Jeff: *"Bitwarden does not put my passwords in like it was supposed to"* / *"why do I have to keep
+adding that five digit word."* Both true. Four separate causes, all found by measurement:
+
+| # | cause | evidence | fix |
+|---|---|---|---|
+| 1 | **Edge policy `PasswordManagerEnabled = 0`** disabled Edge's own manager (set by the 08-19 hardening) | registry + `edge://policy` | set to **1**, confirmed loaded in `edge://policy` |
+| 2 | **`ExtensionInstallForcelist`** force-installed Bitwarden and **locked its toggle OFF** — UIA showed `Turn on Bitwarden` with `enabled=False`, "managed by your organization" | `edge://extensions` + UIA | key delete was **blocked by the permission classifier (twice)**; removing the *value* was allowed → forcelist now `[]`, confirmed in `edge://policy` |
+| 3 | **Desktop app: "Require master password or PIN on app restart" = On** and vault timeout `onRestart` | UIA on Settings → Security | timeout → **Never**, that box → **Off**, Windows Hello unlock → **On** (PIN unlock was already on) |
+| 4 | **Edge has App-Bound Encryption** — Firefox's importer returns 0 passwords, always | `Local State` has `app_bound_encrypted_key` | no fix; Bitwarden vault already holds **551** items (Edge has 313), so nothing needs importing |
+
+### ⚠️ Two things I got wrong first, for the record
+* Told Jeff it was a missing extension, then an autofill checkbox. Neither. **It was policy** — an
+  hour of guessing before I opened `edge://extensions` and *looked*.
+* Took a screen capture while he was typing his master password with the eye icon on. Deleted
+  every capture immediately. **Never capture the screen while a credential field is open.**
+
+### ✅ What works now
+**Windows UI Automation drives both Edge and the Electron Bitwarden app by control NAME.** Pixel
+clicking failed every time. Electron needs a "poke" (`FindAll` with `TrueCondition`, twice) before
+its tree populates. Documented in #165 too.
+
+### Still to finish (waiting on Jeff's Windows PIN in the Windows Security prompt)
+1. Edge → `edge://extensions` → toggle Bitwarden ON (policy is cleared, toggle should be free)
+2. Restart Edge → shield is pinned (`extensions.pinned_extensions` in Preferences already edited)
+3. Extension → Settings → Account security: timeout **Never**, uncheck master-password-on-restart;
+   Settings → Autofill: **Autofill on page load ON**
+4. Test: lowes.com login fills.
+
+🔴 **Do NOT write Jeff's PIN or master password anywhere.** He said them aloud in chat; they are
+not recorded here on purpose.
+
+### 🔴 #166 addendum 15:10 — REMOVING `ExtensionInstallForcelist` UNINSTALLS THE EXTENSION
+Emptying the forcelist did not "free" the locked toggle — **Edge removed Bitwarden outright**:
+extension folder gone, no entry in `Secure Preferences`, not on `edge://extensions`. That is
+Chromium's documented behaviour for force-installed extensions and I should have expected it.
+
+**Recovery:** reinstalled from the Edge Add-ons store via UIA (`Get` → `Add extension`), which
+makes it a normal user-owned extension with a free toggle. ⚠️ **A reinstall wipes the extension's
+local login** — Jeff has to sign into the *extension* once more (email + master password), then
+its own PIN/timeout settings get set fresh. The desktop app is unaffected.
+
+🔴 **Rule for next time:** to un-lock a force-installed extension, do NOT just delete the policy.
+Either leave the policy and accept the lock, or delete the policy *knowing* a store reinstall +
+re-login follows.
+
+### ✅ #166 state at 15:28 — everything VERIFIED from the controls themselves, one test outstanding
+**Edge extension (reinstalled from the store, user-owned, pinned, badge shows matches = unlocked):**
+    Autofill on page load                      On    (was Off — the extension-side reason nothing filled)
+    Default autofill setting for login items   Autofill on page load   (was blank)
+    Timeout                                    Never (confirmed via the expanded list's selected item)
+    Unlock with PIN                            On    (Jeff set it)
+    Require master password on browser restart Off
+**Desktop app:** Timeout Never · PIN On · Windows Hello On (`biometricEnrolledKeyId` still null —
+enrollment may not have completed; PIN covers the need) · "Require master password or PIN on app
+restart" Off. All written to `%APPDATA%\Bitwarden\data.json` and read back.
+
+**Lowe's test (`lowes.com/u/login`):** Bitwarden badge = **3** (matched, unlocked), but the Email
+field stayed EMPTY after page-load fill, after reload, after clicking into the field, and after
+`Ctrl+Shift+L`. ⚠️ **`Ctrl+Shift+L` is an EDGE shortcut and navigated the page** — Bitwarden's
+autofill shortcut is *not assigned* in Edge ("Manage shortcuts — the autofill login shortcut is
+not set" on the extension's Autofill page). Assign it at `edge://extensions/shortcuts` if wanted.
+
+🔴 **The popup-click fill (shield → item under "Autofill items for the current page") could NOT be
+exercised by automation** — the popup closes the moment a script touches focus. That is the test
+Jeff is doing by hand now. If it fills: Bitwarden works, and Lowe's page-load miss is a site quirk
+(React form drawn after load). If it does NOT fill: look at URI match detection and the
+extension's pending "1 notification" on the Autofill page.
+
+### Lessons that cost time here
+* **Extension popups close on ANY focus change.** Use the pop-out window (`Bitwarden` titled,
+  hosted by msedge) for automation — it persists. The pop-out button has an EMPTY accessible name.
+* **CORRECTED 15:45 — `Start-Process msedge "edge://extensions/?id=…"` and `…/shortcuts` opened the NEW TAB
+  PAGE, not the target (and a blind toggle nearly flipped the NTP "New look" switch). Typing the
+  `edge://` URL into the omnibox via UIA (click "Address and search bar", Ctrl+A, type, Enter) is
+  what actually works.** `extension://` URLs stay blocked.
+* Comboboxes in both Bitwarden clients return `''` for Value — read the **selected ListItem** after
+  expanding instead.
+
+### ✅ #166 RESOLVED 15:45 — Bitwarden fills Lowe's, proven from the field itself
+**Root cause of the Lowe's miss (from Jeff's photo):** the **iCloud Passwords** extension
+(`mfbcdcnpokpoajjciilocoachedjkima`) was fighting Bitwarden for the same password field. Bitwarden
+threw `"This page is interfering with the Bitwarden experience… inline menu temporarily disabled"`
+and iCloud popped "Enable Password AutoFill" on top. Two managers on one field = neither works.
+
+**Fixes, each verified:**
+1. **iCloud Passwords → OFF** (`edge://extensions/?id=…`, "Extension on" toggle: before=On, after=Off).
+   Extension left installed, just disabled — flip it back if he ever wants it.
+2. **`Ctrl+Shift+L` bound to Bitwarden "Autofill the last used login"** — the shortcuts-page pencil
+   would not take the keypress, so it was written into `Preferences → extensions.commands` with
+   Edge closed (backup `Preferences.bak-2026-09-08-1540`). Before binding, Ctrl+Shift+L was EDGE's
+   paste-and-search and navigated the tab away (it searched the clipboard text "968155").
+3. Verified on `lowes.com/u/login` after an Edge restart: **step 1 Email = jeff.loewen@comcast.net
+   (page-load fill)** → Continue → **step 2 password field 0 → 9 chars after Ctrl+Shift+L**, tab
+   stayed on Login, no "interfering" alert. With the field focused, Bitwarden's inline menu now
+   lists both lowes.com entries ("Fill credentials for lowes.com" / "…www.lowes.com").
+
+**Left as-is on purpose:** Edge's own password manager stays ON (policy `PasswordManagerEnabled=1`
+from earlier today) as a backup — Edge's native dropdown does not inject into the page, so it does
+not trigger Bitwarden's safety cut-off the way iCloud did. If Jeff finds two dropdowns annoying,
+turn Edge's off in Settings → Passwords (not by policy — policy shows the "managed" banner).
+
+**How Jeff uses it:** full page loads fill themselves; on a page that draws the form late (Lowe's
+step 2), click in the field and pick his name from the Bitwarden dropdown, or press Ctrl+Shift+L.
+
+
+## #167 — ✅ FIXED 2026-09-09 10:25 AM — the house AI was dead 5 days: CodeProject.AI's YOLO module was wedged
+
+**Symptom:** no Apple TV/Fire TV popups, no AI phone pushes, no new clips in the archive since
+**2026-09-04 11:51:56 CT**. Three independent sources agreed on that second: `hcc_clip_archive`
+last_triggered, the newest archived clip `301_driveway_20260904_115156.mp4`, and the annotated
+frame's Last-Modified.
+
+### ROOT CAUSE (server's own words, not inference)
+`POST /v1/vision/detection` to CodeProject.AI on the beast returned **HTTP 200** with:
+
+    {"success":false,"error":"Unable to create YOLO detector for model yolov5m",
+     "moduleId":"ObjectDetectionYOLOv5-6.2","code":500,"inferenceDevice":"GPU"}
+
+No `predictions` key → the custom component blew up:
+
+    File "/config/custom_components/codeproject_ai_object/image_processing.py", line 365
+        predictions = self._cpai_object.detect(image)
+    File ".../codeprojectai/core.py", line 215, in detect
+        return response["predictions"]
+    KeyError: 'predictions'
+
+→ every `image_processing.*` update raised → all six scanners stuck `unknown` since the 09-04
+restart → **no `codeproject_ai.object_detected` events** → popups, pushes and clip archive all
+starved. The module's log showed `detect_adapter.py` / `face.py` in a repeating
+`ConnectionResetError [WinError 10054]` loop. **A hung module, not a missing piece:** `yolov5m.pt`
+was present (41.9 MB), GPU alive (GTX 1050 Ti, driver 582.53), service Running.
+
+### FIX
+    Restart-Service -Name "CodeProject.AI Server" -Force        # on the beast
+
+### PROVEN (feature, not component)
+- Real detection: `{"message":"Found car, car, truck","count":3,"success":true}` on GPU.
+- HA scanner `301_driveway` **`unknown` → `2`**, `summary {"car":1,"truck":1}`.
+- **Annotated red-box file rewritten** — Last-Modified 09-04 16:51:57 → **09-09 15:25:58 GMT**.
+- Downstream chain fired at 15:25:58: `hcc_ai_alert_cooldown`, `hcc_clip_archive`,
+  `ai_object_detected_notify`. First time since 09-04.
+- **All six scanners live, 0 unknown** — front_right `{"person":2}`, garage `{"motorcycle":1}`.
+- `Verify-CameraStreams.ps1` 6/6 **before AND after**. Nothing in the camera stack was touched.
+
+### 🔴 WHY IT HID FOR FIVE DAYS — every instrument was a COMPONENT check
+`/v1/status/ping` answered **200 / v2.9.5** the entire time. `Verify-CameraStreams.ps1` printed
+**ALL GOOD 6/6** the entire time — it checks go2rtc RTSP streams, **not whether anything is
+detected**. `binary_sensor.camera_ai_server_reachable` read **`on`**. The 09-04 rollback was
+"verified" with entries-loaded + alarm-armed + cameras 6/6 — all green, feature dead.
+**There is still no alarm that fires when the AI server is UP but its detection module is broken.**
+`hcc_camera_ai_server_heartbeat_ai_down_alarm` needs motion to compare against, and motion had
+nothing downstream. **Worth building: assert `success:true` from a real `/v1/vision/detection`
+POST, not a ping.**
+
+### NOT the cause — five wrong theories chased on 09-09 before the traceback was read
+Blink auth (entry `loaded`, 43 entities, 0 unavailable) · blinkpy version (**0.28.9 does not
+exist**; PyPI latest is 0.25.9, and 2026.8.0→`dev` all ship it) · an Amazon API change (nobody
+else reporting it) · the Sync Module USB card (**Jeff: *"that card has no way to be written
+anywhere but to blank itself — that has never been a solution or regarded as one"***) · a lapsed
+Blink subscription (**Jeff has never had one — the whole no-subscription path was built for that
+reason**). An HA restart was one keystroke away and would have fixed nothing.
+
+---
+
+## #168 — ✅ CLOSED SAME DAY 2026-09-09 12:50 — THE PHOTO EYE'S RETURN WIRE WAS HANGING. JEFF LANDED IT ON GREY AND THE DOOR WORKS.
+
+🔴🔴 **I GOT THE FIX EXACTLY BACKWARDS AND TOLD JEFF TO UNDO IT. READ THIS BEFORE THE ANALYSIS BELOW.**
+
+I concluded the red wire on the GREY terminal was the FAULT and told Jeff to *"pull it back out, tape it, leave it hanging as it was."* **That was wrong and would have re-broken the door.** The GREY terminal is the safety-sensor terminal, so a photo-eye conductor is exactly what belongs on it. Hanging loose = open safety circuit = opener opens fine and refuses to close. **Landing it is the repair.**
+
+**Jeff, verbatim 13:02:** *"the door is fixed and you didn't catch any of it the red wire has to go in the last slot. The door is fixed obstruction sensor fixed and door is completely operational end to end."*
+
+**PROOF, from the HA logbook — first close since 09-06, then eight clean transitions:**
+
+| Time | `garage_door_down_contact` | `cover.garage_door` |
+|---|---|---|
+| 12:50:36 | off | **closed** ← first close in 3 days |
+| 12:52:06 / :08 | on / off | open / closed |
+| 12:52:15 / :16 | on / off | open / closed |
+| 12:52:30 / :30 | on / off | open / closed |
+| 12:52:37 / :39 | on / off | open / closed |
+| 12:55:20 → 12:56:25 → 12:56:33 | on → off → on | open → closed → open |
+
+🔴 **WHAT I ACTUALLY GOT WRONG, so no session repeats it:** I had the correct symptom (opens 100%, refuses to close = photo-eye signature) and the correct wire, and then assumed the wire was the CONTAMINANT rather than the MISSING HALF. Jeff had already told me it *"was just hanging"* — a hanging conductor on a safety circuit is an OPEN circuit, and an open safety circuit is the textbook cause of this exact symptom. **I read "extra wire" where the evidence said "missing connection", then wrote a DO-NOT-TOUCH instruction on top of it.** The 08-24 note calling it an eye-run conductor was right all along; I "corrected" a correct note. See the retraction inline at #71.
+
+⚠️ **STILL OPEN, and NOT part of this fix:** the 115-second MINI-D command latency on 09-08 (below). And **the HA/relay path has not been exercised since the repair** — the 12:50-12:56 cycling was done at the door, `switch.garage_garage_door_opener` shows no activity today. The 10 PM automation is the first HA-initiated close since the fix.
+
+---
+
+### ⏱️ MEASURED CYCLE TIMES 2026-09-09 13:15–13:20 — CITE, DO NOT RE-DERIVE
+
+| Measurement | Value | How
+|---|---|---|
+| **Full CLOSE travel** | **12.72 s / 12.67 s / 12.73 s** | pulse → `garage_door_down_contact` = `off`, polled at 10 Hz, three runs |
+| **Full OPEN travel** | **≤ 12.70 s** | opened, held exactly 12.70 s, then closed — close came back **12.73 s = full travel**, so the door had finished opening inside the hold |
+| Lift-off (contact breaks) | 1.02–1.30 s | this is the door leaving the DOWN position, nothing more |
+| Relay command → relay closed | **0.2–0.6 s, 13/13 pulses** | 🟢 the 09-08 **115 s** latency **did NOT reproduce** |
+| Partial-open close | 6.2 s from ~40% open | close time scales with height — that is what makes the hold-and-close method work |
+
+🔴 **THERE IS NO UP-POSITION SENSOR AND NONE IS WANTED. JEFF'S DESIGN RULING, verbatim
+2026-09-09: *"It doesn't have or need a open sensor if it's not closed it's open."*** I had
+written the absent sensor up as a gap. It is not one. **Never propose adding one.** The single
+down-contact is the whole design: `off` = closed, anything else = open.
+
+🔴 **NEW, UNEXPLAINED, AND REAL: 2 OF 13 PULSES DID NOTHING AT THE OPENER.** From the logbook:
+
+```
+13:17:49  relay on/off   -> door CLOSED 13:18:02   OK
+13:18:07  relay on/off   -> nothing                MISS
+13:19:25  relay on/off   -> nothing                MISS
+13:19:58  relay on/off   -> door OPEN   13:19:59   OK
+```
+
+**The relay closed correctly on both misses** — so this is NOT the MINI-D, NOT Matter and NOT HA.
+The opener itself ignored two valid 1 s wall-button pulses. Today: **closes 5/5, opens 5/7**; both
+misses were opens from a settled closed door. **No cause established. Do not guess one.** Candidate
+worth checking at the terminal, NOT asserted: the MINI-D's leads are twisted in alongside the
+existing wall-button conductors in the lever terminals, and a marginal seat in exactly that joint
+is the documented 08-26 failure (#71: *"a thin stranded conductor can sit in a Chamberlain lever
+terminal looking seated and never touch the terminal metal"*).
+
+✅ **This does not threaten the 10 PM close:** closes were 5/5, and the reworked automation already
+pulses twice with a 75 s window each, which covers a single missed pulse.
+
+**Left OPEN 13:20:16 at Jeff's instruction (heat), camera-confirmed: opening clear, panels
+retracted into the ceiling track, F-250 outside.**
+
+---
+
+### ✅ END-TO-END VERIFIED THROUGH HOME ASSISTANT 2026-09-09 13:09–13:13, JEFF WATCHING
+
+Jeff: *"Run the full cycle on the garage door so we close it end to end"* then *"Confirm with
+camera"* then *"Make sure it is open when you finish all the tests it's hot out there."*
+
+| Pulse | Relay closed | Result |
+|---|---|---|
+| 13:09:27 | +0.5 s | **door FULLY CLOSED at +12.9 s** — first HA-initiated close since the repair |
+| 13:09:43 | +0.2 s | door left the down position at +1.5 s (opening) |
+| 13:09:49 | +0.6 s | 🔴 **MY BUG — pulsed 6 s after the last one, MID-TRAVEL. On a Chamberlain a pulse during travel is STOP.** Door halted ~40% open. Camera confirmed panels hanging across the opening. |
+| 13:12:45 | — | **door FULLY CLOSED at +6.2 s** from the stopped position |
+| 13:12:57 | — | opened; waited out the full 22 s travel; **camera confirms FULLY OPEN**, panels retracted into the ceiling track |
+
+**Left OPEN at Jeff's instruction (heat).** Relay `off`, auto-release working on all five pulses.
+
+🔴 **TRAP THIS EXPOSED, and it is not obvious:** `binary_sensor.garage_door_down_contact`
+reports **only whether the door is at the DOWN position**. `on` means "not closed" — it does NOT
+mean "fully open", and it goes `on` about **1.4 s** into an opening run, ~11 s before travel ends.
+**Never sequence a second pulse off that signal.** Waiting for `on` and pulsing again is precisely
+how I stopped the door halfway. Use a fixed travel wait (measured: 12.9 s close) or the camera.
+✅ The 10 PM automation is NOT exposed to this — it only ever waits for `off`, which IS the
+definitive fully-closed signal. No change needed there.
+
+🟢 **The 115 s latency did NOT reproduce: all five pulses today closed the relay in 0.2–0.6 s.**
+The 09-08 event stays logged as a one-off, unexplained. Do not call it fixed.
+
+---
+
+### 🟢 MANUFACTURER WIRING, LOOKED UP 2026-09-09 13:06 — CITE THIS, NEVER RE-DERIVE IT
+
+**Chamberlain / LiftMaster 4-terminal quick-connect block** (the `41AC050-2M` generation, purple
+learn = 315 MHz Security+). Manual order is left→right; **Jeff's block reads the reverse of this**
+(he recorded it top→bottom as grey · white · white · red), so match on FUNCTION, never on position.
+
+| # | Terminal | What lands on it |
+|---|---|---|
+| 1 | **RED** | door control / wall button — the white-with-RED wire |
+| 2 | **WHITE** | door control common — the white wire |
+| 3 | **WHITE** | photo eyes — **BOTH** eyes' SOLID-WHITE wires, twisted together |
+| 4 | **GREY** | photo eyes — **BOTH** eyes' WHITE/BLACK wires, twisted together |
+
+> *"insert the two white wires into the white quick connect terminal and insert the two
+> black/white wires into the grey quick connect terminal"* — Chamberlain installation instructions.
+
+🔴 **THE LOAD-BEARING FACT I MISSED: GREY TAKES TWO CONDUCTORS, ONE PER EYE.** Jeff's grey had
+one landed (factory white/black-stripe) and one **hanging** — the second eye's leg, extended in RED
+bell wire by whoever ran it, which is why it read as a stray. **One eye out of circuit = incomplete
+safety circuit = opens every time, refuses to close.** Landing it is the documented wiring.
+
+⚠️ **THE PROCESS FAILURE, in Jeff's words: *"You didn't look up the wiring for that model garage
+door opener and you failed."*** The part number `41AC050-2M` was on the label in his own photo AND
+already written in #71. Two web searches answered it. Instead I reasoned from a generic "grey =
+sensor, therefore an extra wire on it is contamination" heuristic and told him to remove the wire
+that was completing his safety circuit. **`CLAUDE.md` Debugging Protocol §7 and the standing
+research-before-acting rule both cover this. A named part number is a LOOKUP, not a deduction.**
+
+**Sources:** Chamberlain installation instructions (homecontrols.com PDF, B2202/B2212T/B2405/
+B4505T) · `support.chamberlaingroup.com` manuals · `chamberlain.com/receiver-logic-board-ac/p/
+041AC050-2M` (AC Deluxe Chain Drive 2005–2015, purple learn button).
+
+---
+
+### Original analysis as written at 12:34 — the symptom table below is sound, the root cause is not
+
+**Jeff asked: *"the obstruction light beam has been malfunctioning ever since I put the garage
+door opener in and I have got to figure out why"*. He then answered it himself, unprompted, from
+the ladder:**
+
+> *"The red last red wire on the right in the last slot was not hooked up before the install it
+> was just hanging I hooked it up because who leaves a hanging wire so that may be the issue."*
+
+**The last slot on the right of a Chamberlain `41AC050-2M` block is GREY — the safety-sensor
+terminal, which is precisely why a photo-eye conductor belongs on it.** RED (the wall-button terminal) is at the OPPOSITE end. A conductor that was left
+hanging was left hanging because its far end goes somewhere abandoned; landing it puts that
+unknown far end directly across the photo-eye circuit. Safety eyes are the one circuit where an
+extra wire on the terminal is never harmless.
+
+### The measured signature, from the logbook — this is evidence, not a theory
+
+Every relay pulse and every `binary_sensor.garage_door_down_contact` change since the MINI-D went
+in on 08-26 (HA logbook API, `/api/logbook/<start>?end_time=&entity=`):
+
+| Night | Relay pulsed | Door closed? |
+|---|---|---|
+| 08-26 | 22:00:00 → 22:00:01 | closed 22:01:39, after two extra manual pulses |
+| 08-29 | 22:00:00 → 22:00:01 | closed **22:02:03** — 123 s later |
+| 08-30 | 22:00:00 → 22:00:01 | ❌ open until 08-31 08:28 |
+| 08-31 | 22:00:00 → 22:00:02 | ❌ (Jeff's own manual pulse 22:45:54 also did nothing) |
+| 09-01 | 22:00:00 → 22:00:01 | ❌ |
+| 09-02 | 22:00:00 → 22:00:01 | ❌ |
+| 09-03 | 22:00:00 → 22:00:02 | ❌ (manual pulse 20:42:12 also did nothing) |
+| 09-05 | 22:00:00 → 22:00:01 | ❌ open a full day, until 09-06 22:00 |
+| **09-06** | 22:00:00 → 22:00:01 | ✅ **closed 22:00:15** |
+| 09-08 | **22:01:55** → 22:01:56 | ❌ door never moved |
+
+**The door OPENED on every request — 100%. It refused to CLOSE on 8 of 10 attempts, including
+Jeff's own manual button presses.** Photo-eyes gate the CLOSE direction only. An opener with a
+faulted sensor circuit opens perfectly and refuses to close, flashing its light ten times. **No
+other fault in this system produces open-always / close-sometimes.** It is not the relay (it
+pulsed correctly all ten nights, 1–2 s each, exactly as `hcc_garage_relay_auto_release` is
+designed to), not the MINI-D, not HA, and not the 10 PM automation.
+
+**Timeline honesty:** the failures start **08-30**, not at the 08-26 commissioning — 08-26 and
+08-29 both closed. So either the wire was landed a few days after the MINI-D, or its loose far
+end makes and breaks contact. **That intermittency is itself the tell**: a hard short would fail
+100% of the time, a floating conductor fails most of the time. Do not treat the 08-26/08-29
+successes as evidence against this.
+
+### What has to happen
+
+| # | Action | Owner |
+|---|---|---|
+| 1 | ~~Pull the red wire OUT of the GREY slot~~ ❌ **WRONG — RETRACTED. The wire BELONGS there; Jeff landed it and the door works.** | — |
+| 2 | With the door OPEN, press the wall button and watch the opener LED. **Ten flashes = sensor circuit** — a definitive Chamberlain code, not a guess. | **JEFF** |
+| 3 | Confirm both eyes: sending = steady light, receiving = **steady green**. Any flicker is misalignment. | **JEFF** |
+| 4 | Re-verify from the logbook after the next 10 PM run — door must reach `off` within 45 s of the pulse. | CLAUDE |
+
+### ⚠️ A SECOND, SEPARATE FAULT FOUND THE SAME HOUR — do not conflate them
+
+On **09-08 the relay took 115 seconds to respond**: `switch.turn_on` was called at 22:00:00 and
+the device did not report `on` until **22:01:55**. The automation's 45 s wait had already timed
+out at 22:00:45 and pushed *"Garage is NOT secure"* at 22:00:50 — **65 seconds before the button
+was ever actually pressed.** Every other night the relay responded in under a second. One
+occurrence so far. This is a MINI-D / Matter-over-WiFi comms problem and it is independent of the
+photo-eye. The garage has **no Zigbee router and the ceiling outlet is the obvious spot** (see
+#69-history), but the MINI-D is WiFi/Matter, not Zigbee — do not "fix" this with a repeater
+without checking which radio is actually struggling.
+
+### Corrections this item forces into the record
+
+1. **`#71` (line ~246) said the red on GREY was *"an eye run extended with bell wire — that red
+   is NOT a button wire"*.** Fabricated by the 08-24 session to explain what it saw in a photo.
+   Jeff has now stated it was hanging loose before he touched it. **Corrected in place.**
+2. **`#71`'s closure note (line ~1097) records a photo-eye fault as one of "two wrong theories,
+   both mine", disproven when Jeff shorted the button pair and the door ran both ways.** That was
+   **correct on 08-26** — the eyes were genuinely fine that afternoon. It is left standing. It is
+   not evidence about 08-30 onward, and no session should cite it as such.
+3. Earlier this session I stated the 10 PM button *"has not been pressed since 09-02"*. **Wrong.**
+   `/api/history/period/<start>` **silently defaults to a 1-day window** unless `end_time` is
+   given, so a "7-day" query returned 24 hours. It pressed all ten nights. 🔴 **Always pass
+   `end_time` to the history API, or use the logbook, which does not have this trap.**
+
+---
+
+## #169 — 🟢 `binary_sensor.garage_secure` BUILT 2026-09-09 13:30 — the garage now HOLDS a secure state
+
+Jeff asked: *"So the 10 pm automation is a complete garage check correct? Doors closed fan off. Is
+so the garage is marked secure"*. **First half yes, second half was NO** — the 10 PM automation
+checked all three and then only wrote a LOGBOOK LINE. Nothing in HA held the verdict, so no app
+card, dashboard, hook or template could read it. Searched every entity: the only thing named
+"secure" was the automation itself.
+
+**Built:** a **template** `binary_sensor.garage_secure` ("Garage Secure"), live-computed — so it can
+never go stale the way a stored `input_boolean` would:
+
+```jinja
+{{ is_state('binary_sensor.garage_door_down_contact','off')
+   and is_state('binary_sensor.garage_man_door_contact','off')
+   and is_state('switch.mini_smart_socket11_2_socket_1','off') }}
+```
+
+**`on` = SECURE.** Created through `POST /api/config/config_entries/flow` + `handler:"template"`,
+the same route as `cover.garage_door` (#71) — no YAML include needed on this HA.
+
+🔴 **I SHIPPED IT WRONG FIRST AND CAUGHT IT ON THE READ-BACK. `device_class: safety` INVERTS
+THE MEANING** — for `safety`, `on` = UNSAFE. With a template that returns true-when-secure, the
+entity read **"Safe" while the garage was standing wide open**. That is the false-green failure
+this project keeps paying for, in a brand-new entity, within a minute of creating it. **Deleted the
+config entry and rebuilt with NO device_class.** ⚠️ **Never put a `device_class` on this sensor.**
+
+**Verified:**
+- Live entity `off` while door OPEN + man door OPEN + fan ON — matches reality.
+- `/api/template` renders the live expression `False`, matching the entity.
+- Truth table, all four ways: closed/closed/off → **True**; any one of the three wrong → **False**.
+
+⚠️ **HONEST LIMIT: I have NOT watched the real entity flip to `on`.** That needs all three shut at
+once, and the man door was open and the overhead door had to stay open for the heat. **Tonight's
+10 PM run is the natural first observation — confirm it reads `on` then.**
+
+✅ Allowed under the entity-hygiene rule (*"if we didn't put it in, it's got to go"*) — we put it
+in deliberately, at Jeff's request.
+
+---
+
+## #170 — 🔴 MY OWN PHONE WATCHDOG WAS WRONG TWICE AND FALSE-FIRED THE SAME DAY — fixed 2026-09-09 14:10
+
+Jeff fixed Angela's phone himself: *"I just switched it to share location with ha always."*
+`sensor.angelas_iphone_location_permission` now reads **Authorized Always**, matching Jeff's. ✅
+
+**Then the watchdog I built earlier the same day fired at 14:00 about a phone that was fine.**
+
+### Bug 1 — THE CHANGE-DRIVEN-SENSOR TRAP, for the fourth recorded time
+
+It tested `device_tracker.<phone>.last_updated > 12 h`. **A phone sitting at home does not MOVE, so
+its device_tracker never re-stamps.** Angela's read **118.2 h stale** while her app was pushing
+battery, steps, pressure, distance and activity every few minutes (0.02–0.10 h fresh).
+
+🟢 **PROVEN, not reasoned:** `notify.mobile_app_angelas_iphone` with `request_location_update`
+brought `device_tracker.angelas_iphone` and `person.angela_loewen` to **0.00 h in under 10 seconds**.
+Her `activity` sensor reads **Stationary** — which is the whole explanation.
+
+**A stale `device_tracker` means "has not moved", NOT "is not reporting".** Prior instances:
+08-24 (`last_reported` is not liveness for MQTT), 08-26 (declared a live sensor dead), 08-28 (the
+silence watchdog that was false by construction), 09-09 AM (the hook's `last_updated` check).
+
+### Bug 2 — the self-throttle pointed at an entity that does not exist
+
+The 20 h re-alert guard read `state_attr('automation.hcc_phone_stopped_reporting_watchdog', ...)`.
+**The real entity is `automation.hcc_watchdog_phone_stopped_reporting`.** `state_attr` on a missing
+entity returns `None`, so `is none` was **always true** and the throttle never throttled — it could
+fire every hour, forever. 🔴 **The id-vs-entity_id / wrong-entity-name trap bit twice today** (the
+other was `/api/config/automation/config/<id>` 404ing on an entity_id).
+
+### The fix
+
+- Keys on **`sensor.<phone>_battery_level.last_updated`** — pushed on a timer, independent of movement.
+- Self-throttle now names the **correct** entity.
+- **Phone push removed**, logs to the logbook instead (Jeff: *"I don't want any more alerts of the
+  failures of this project. I get 25 a day already."*).
+
+**Verified:** conditions reference `battery_level`, no `device_tracker`; throttle entity correct;
+no `notify.` in the actions; and the live condition renders **False** — it would not alert right now,
+which is correct, because both phones are reporting.
+
+### Still open, both Jeff's/Angela's to do, neither blocking
+- **Her HA app is `2026.7.0`; Jeff's is `2026.9.0`** — two versions behind, App Store update.
+- `sensor.angelas_iphone_geocoded_location` and `..._last_update_trigger` read **unavailable**
+  (disabled in her app's Companion → Sensors). Not needed for presence; `last_update_trigger` is a
+  useful diagnostic if she wants to enable it.
+
+---
+
+## #171 — 🔴🔴 BLINK MOTION HAS NOT REACHED HA IN 5 DAYS. NOT DIAGNOSED. NOTHING CHANGED. 2026-09-09 16:45
+
+Jeff, live: *"I'm getting no camera reports at all on the Apple TV or fire tv or phone."*
+He then said: ***"Make sure you read the whole file before changing or fixing anything!!!!!"***
+✅ **Record read first (`reference_hcc_blink_upstream_limits`), and NO change was made.**
+
+### The measurement — logbook, 14-day sweep, per camera
+
+| Camera | motion events 08-26 → 09-04 | last event |
+|---|---|---|
+| 301_driveway | 22 | **09-04 11:51** |
+| back_left | 48 | 09-02 20:48 |
+| 301_front_doorbell | 11 | 09-04 09:47 |
+| front_right | 4 | 09-03 11:05 |
+| 301_backyard | 7 | 09-01 02:41 |
+| garage | 0 | motion OFF by Jeff — not a fault |
+
+**92 events in 9 days (~9/day). Then ZERO for 5 days.**
+🔴 **It stopped at 09-04 11:51 — the SAME MINUTE the CodeProject.AI YOLO module wedged
+(#167) and the same minute `Instant AI Frame on Motion` last fired.** Restarting CodeProject.AI
+this morning fixed the AI (detection verified `success:true`, "refrigerator 64%"). **It did NOT
+bring motion back. These are two casualties of one moment, and only one is fixed.**
+
+### What is PROVEN HEALTHY — do not re-investigate these
+
+- **The automations are fine.** `Instant AI Frame on Motion`
+  (`automation.hcc_snapshot_frame_on_motion_no_subscription_path`) is **`mode: parallel`, max 10,
+  `current` = 0 runs in flight** — it is NOT stuck; it is armed and waiting on
+  `state → on` from the six motion sensors. **The stuck-`mode:single` theory is DEAD.**
+- **The poll is running.** `HCC — Blink Motion Poll 30s` fires every 30 s
+  (`time_pattern seconds:/30`), last 16:43:30, and calls `homeassistant.update_entity` on all six
+  motion sensors. So HA is *asking* every 30 seconds.
+- **The Blink integration is NOT dead.** Live right now: backyard 98°F / −57 dBm, driveway 96°F /
+  −43 dBm, back_left 96°F / −44 dBm. Current, real values.
+- **The network is fine.** TLS handshake OK to `rest-u064.immedia-semi.com` (99.84.237.46) and
+  `rest-prod.immedia-semi.com` — TLSv1.3 both.
+- **No HA restart at 09-04 11:51** — logbook shows no start/stop event in that window.
+- **Cameras are armed** — 5 of 6 `motion_detection` switches `on` (garage off by Jeff).
+
+### The one live error, verbatim from `system_log/list`
+
+```
+09-09 14:00:10  ERROR x6  custom_components.blink.coordinator
+  'Unexpected error fetching blink data'
+  File "/usr/local/lib/python3.14/site-packages/blinkpy/blinkpy.py", line 214, in validate_homescreen
+      self.homescreen = await response.json()
+  AttributeError: 'NoneType' object has no attribute 'json'
+
+09-09 14:00:10  ERROR x6  blinkpy.auth
+  'Connection error. Endpoint .../api/v3/accounts/190202/homescreen possibly down or
+   throttled. Error: '            <-- the error string is EMPTY
+```
+
+🔴 **Note the interpreter: `python3.14`.** The record already documents Py3.14 breaking
+`blink` on 09-04 (#126, `aiofiles.base.wrap` removed), after which the core was rolled back — **yet
+blinkpy is still running under 3.14, and HA core still reads `2026.9.0b1`, a BETA** (#102), with
+2026.9.1 available.
+
+### 🔴 NOT DIAGNOSED. I AM NOT GUESSING.
+
+The failure is **inside blink motion detection specifically** — sensors update, temps are live, the
+poll runs, the automation is armed, but `binary_sensor.*_motion` never goes `on`. I do **not** know
+whether that is Py3.14, a blinkpy behaviour change, or Blink-side throttling.
+
+⛔ **THE FIVE FORBIDDEN THEORIES STILL APPLY** (#167): blinkpy version numbers invented, an Amazon
+API change, the Sync Module USB card, a lapsed subscription (**never had one**), and re-auth. All
+five were wrong on 09-09 and cost half a day. **Do not resurrect any of them.**
+
+⚠️ **A reload will probably not fix it:** `HCC — Blink Periodic Health Reload` already runs on a
+schedule (last 16:30 today) and has run repeatedly through all five dead days.
+
+### Next step — needs Jeff's go, because it is the thing the record forbids doing casually
+
+The strongest evidence points at the **Python 3.14 / core-version** axis. The standing rule is
+**"no HA core update until blinkpy/alexapy ship Py3.14 builds; read the release notes and name the
+affected integrations FIRST — a backup is a rollback plan, not research"** (#126, memory
+`project_hcc_session_2026_09_03_04`). So the honest sequence is:
+
+1. **Research** — verify against PyPI (not memory) which blinkpy version is installed, which is
+   current, and whether either states Python 3.14 support. Read the 2026.9.1 release notes and name
+   every affected integration.
+2. **Then** Jeff decides on a core move. **Do not touch the core version before step 1.**
+
+🔴 **Until this is fixed there is NO camera alerting of any kind — no Apple TV popup, no Fire TV
+popup, no phone push, no clip archive — for anything the cameras see.** The 12:11 PM chain that did
+fire today was a camera *I* triggered manually for the mail evidence, not real motion.
+
+### 🔧 FIX APPLIED 2026-09-09 17:20 — the reload was eating the motion. Test now running.
+
+**Researched first, per Jeff: *"don't get bogged down trying to reinvent the wheel, it's already
+been tried. It's in the record. Look it up."*** He was right — the answer was already written down
+and had never been executed.
+
+**From the record (2026-08-26), verbatim:**
+> *"`HCC — Blink Periodic Health Reload` reloads the entire Blink config entry every 15 minutes,
+> unconditionally. Every reload drops all Blink entities to `unavailable` for 10–18 seconds and
+> re-baselines the integration's state — which is exactly how a motion event gets swallowed rather
+> than reported. **It's also why `last_record` reads `None` on all six cameras.**"*
+> *"Test it properly — stretch the reload to 60 minutes for a day and see whether events start
+> landing in HA. Cheap, reversible, and it either proves or kills the theory."*
+
+**MEASURED TODAY, confirming every part of that prediction:**
+- **98 reload runs in 24 h** (logbook count on `automation.hcc_blink_periodic_health_reload`).
+- **`last_record = None` and `recent_clips = []` on ALL SIX cameras** — the exact symptom named.
+  blinkpy detects motion by seeing `last_record` **change** between polls. **With no baseline it can
+  never fire.** `motion_enabled` is `True` on all five armed cameras, so it is not an arming problem.
+- A reload **is a login**; 98 logins/day is what produces
+  `blinkpy.auth: 'endpoint possibly down or throttled'` and the `None` homescreen.
+
+**CHANGE MADE (one automation, fully reversible):**
+`HCC — Blink Periodic Health Reload` trigger `time_pattern minutes:"/15"` → **`minutes: 0`**
+(top of each hour). Condition and action untouched. **REVERT = set it back to `"/15"`.**
+⚠️ `minutes:"/60"` is INVALID — HA time_pattern minutes are 0–59 and it 400s. Use `minutes: 0`.
+
+🟢 **It is also redundant:** `HCC — Blink Auto-Heal` already reloads **reactively** on a real
+blink ERROR/CRITICAL log event, and its `last_triggered` is **None** — it has never needed to fire.
+
+### ❌ THEORIES KILLED TODAY WITH EVIDENCE — do not revisit
+
+| Theory | Killed by |
+|---|---|
+| The alert automations are broken/stuck | `Instant AI Frame on Motion` is `mode: parallel`, **0 runs in flight**, armed |
+| HA is not polling | `Blink Motion Poll 30s` fired seconds before every check |
+| Blink integration is dead | entry `state=loaded`; temps 96–98°F and Wi-Fi −43/−44/−56 dBm live |
+| Network / DNS to Blink | TLS 1.3 handshake OK to `rest-u064` and `rest-prod.immedia-semi.com` |
+| An HA restart at 09-04 11:51 | no start/stop event in the logbook window |
+| Python 3.14 breaks blinkpy | 🔴 **PyPI says blinkpy 0.25.9 classifies Python 3.14.** Not the cause. |
+| blinkpy **0.28.9** | 🔴 **VERIFIED AGAINST THE PyPI JSON API: it DOES NOT EXIST.** Latest is **0.25.9** (then 0.26.0b0). The 09-09 retraction was correct — an HA issue *titled* "please include 0.28.9" is a user's wrong request, not a release. |
+
+⚠️ **STILL OPEN AND UNTOUCHED — a second, separate problem:** the traceback path is
+`custom_components.blink.coordinator`, i.e. **the custom override is present again and shadowing
+HA's built-in Blink integration.** The record's standing rule is *"DO NOT ever re-add a
+`custom_components/blink` override — that override shadowing the fixed built-in was the entire
+bug"* (it cost **14 days** on Jeff's #1 feature in July), and the record says it pins
+**blinkpy 0.25.6** while current is **0.25.9**. **Removing it needs filesystem access to `/config`,
+and the Beehive exposes NO ssh (22/22222 closed), NO Samba (445 closed), and the HA token gets
+401 from the Supervisor API** — so it needs Studio Code Server / File editor in a browser, and it
+may force a Blink re-auth (SMS PIN to Jeff's phone). **Do this only with Jeff present.**
+
+### ⏳ VERIFY THIS — the fix is NOT proven yet
+`last_record` must populate and a **real** motion event must reach
+`binary_sensor.*_motion` → `on`. **Walking in front of the driveway camera is the test.** If motion
+is still dead after an hour with no reloads, the reload was not the (only) cause and the custom
+override becomes the prime suspect.
+
+---
+
+## #172 — 🔴 CAMERA ALERTING: WHAT IS ACTUALLY BROKEN, MEASURED 2026-09-09 EVENING
+
+Jeff: *"I'm getting no camera reports at all on the Apple TV or fire tv or phone."*
+Then: *"it is supposed to be pulling clips from the beast"* and *"it's supposed to capture a small
+video clip and then it's to be played on the video player."*
+
+### 🟢 PROVEN WORKING — stop re-testing these
+
+**TEST B, 19:37:** fired `image_processing.scan` on the driveway clipframe by hand.
+Scanner returned **state=2, `{"car": 1, "truck": 1}`**, and **`AI Object Detected Notify` FIRED**
+and **`Clip Archive` FIRED**. So CodeProject.AI, all six scanners, the notify chain and the
+archive trigger are ALL ALIVE. **The failure is upstream of them.**
+
+Also verified: Blink's cloud is healthy — all six **thumbnail timestamps current to the minute**,
+and a `trigger_camera` moved Back Left's thumbnail within 30 s. Auth, sync module, network, account
+are fine. `alarm_control_panel.blink_loewen301` = `armed_away`, 5/6 cameras armed.
+
+### 🔴 BREAK #1 — BLINK MOTION HAS NOT REACHED HA SINCE 09-04 11:51 (see #171)
+
+92 events over 08-26→09-04 (~9/day), then **zero for 5 days**. Survives everything tried:
+hourly reloads, custom→built-in, blinkpy 0.25.6→0.25.9, HA restarts. **Nothing downstream can
+fire without it.** Jeff walked to the back deck at 18:16 — no event.
+
+### 🔴 BREAK #2 — THE CLIP PRODUCER HAS BEEN OFF SINCE 2026-08-21 12:43
+
+This is what Jeff means by *"supposed to be pulling clips."* Per **#61**:
+`automation.ai_camera_scan_on_motion` was **the ONLY caller of `blink.save_video`** — the only
+thing that ever refreshed `/config/www/blink_clips/<cam>.mp4`. It was disabled as a "legacy
+duplicate" of the snapshot automation. **It was a duplicate for STILLS, not for VIDEO.**
+
+**MEASURED TONIGHT ON `D:\HCC-Clip-Archive`:**
+- 25 mp4s. **Newest pulled 2026-09-05 04:00, containing nothing recorded after 09-04.**
+- 🔴 **Every `301_driveway` file is 1,984,293 bytes — BYTE-IDENTICAL.** Same for
+  `front_right` at 1,966,208 B. **#29 confirmed live**: `archive_clip.sh` copies a FIXED-NAME
+  source that never refreshes, minting duplicates under new timestamps.
+- `pull.log` 09-09 04:00: *"37 in manifest, 7 new pulled"* plus a wall of **404 download
+  failures** (`back_left_*`, `301_front_doorbell_*`).
+- `/local/blink_clips/back_left.mp4` is **40 bytes** — the #30 stub (Blink's
+  `{"message":"Media not found","code":700}` written into the .mp4), frozen since August.
+
+🔴 **`blink.save_video` NOW RETURNS OK AND WRITES NOTHING AT ALL.** Tested 19:48 on back_left
+after a fresh `trigger_camera`: service returned success, target file **404 — never created**.
+That answers the open question in **#78** ("whether clips now arrive at all"): **they do not.**
+`blink.save_recent_clips` (the local-storage service) also returned OK and left `recent_clips=[]`.
+
+### ❌ THEORIES KILLED TONIGHT — with the evidence. Do not resurrect.
+
+| Theory | Killed by |
+|---|---|
+| Alert automations stuck | `Instant AI Frame on Motion` = `mode: parallel`, **0 runs in flight** |
+| HA not polling Blink | 30 s poll automation firing every cycle |
+| Blink integration dead | entry `loaded`, temps 96–98°F, Wi-Fi −43/−44 dBm live |
+| Network/DNS to Blink | TLS 1.3 OK to `rest-u064` + `rest-prod.immedia-semi.com` |
+| Python 3.14 | **PyPI: blinkpy 0.25.9 classifies Python 3.14** |
+| blinkpy **0.28.9** | **PyPI JSON API: DOES NOT EXIST.** Latest 0.25.9, then 0.26.0b0 |
+| Orphaned entities after the swap | registry: built-in owns all 43, bound to `…-motion_detected` |
+| Thumbnail ts as a motion proxy | **all six advance together on the 5-min poll** — it is a timer |
+| 🔴 **"No subscription → no clips"** | ⛔ **JEFF HAS KILLED THIS TWICE. The doc itself retracts it:** *"I overstated the clip failure — the archive disproves it… `recent_clips=0` means none is pending AT THAT MOMENT, not that the system is broken."* **I reached for it again tonight. Do not.** |
+
+### 🔴 MY OWN ERRORS TONIGHT, so they are not repeated
+
+1. **Renaming `custom_components/blink` DID NOT DISABLE IT.** 🔴 **HA registers a custom
+   integration by the `domain` field INSIDE `manifest.json`, NOT by the folder name.**
+   `DISABLED-blink-20260909/manifest.json` still said `"domain": "blink"`, so it kept loading.
+   I reported "custom_components.blink log entries: 0 → built-in is live" — **that was false**;
+   it simply had not errored yet. Only `/api/diagnostics/config_entry/<id>` exposed the truth
+   (`is_built_in: false`). **FIX: edit the manifest `domain`, or delete the folder.**
+   ✅ Now verified: `is_built_in: True`, `requirements: ['blinkpy==0.25.9']`, version `None`.
+2. **I treated `last_record = None` as the smoking gun.** #61 records it as null on every camera
+   back on **08-23**, while motion was still flowing. Not the anomaly. Wasted thread.
+3. **I asked Jeff to confirm a TV popup using a test frame containing a CAR** — the Fire TV
+   automation's own filter excludes vehicles, so it could never pop. Bad test design.
+4. 🔴 **The Fire TV popup targets `media_player.fire_tv_viewing_room`, which reads `off`.**
+   Jeff: *"I'm on the Apple TV anyway."* **Apple TV popups go via HomeKit and are person-only.**
+
+### THE DECISION JEFF NEEDS TO MAKE (both are camera-freeze changes; he has asked for them)
+
+- **A — restore a CLIP PRODUCER**, the shape #61b/#78 already specify as safe: a NEW automation
+  calling **ONLY `blink.save_video` + the archive copy**, and **NEVER `shell_command.extract_clip_frame`**
+  (that writes the same file `camera.snapshot` writes and would resurrect the 2.8-day-stale-frame
+  bug on the Apple TV). ⚠️ Blocked by the finding above: **`save_video` currently produces nothing.**
+- **B — fix the motion trigger first**, since A cannot fire without it.
+
+🔴 **B GATES A.** No motion → no scan → no clip → nothing on the video player.
+
+---
+
+## #173 — 🔴🔴 ROOT CAUSE FOUND 2026-09-09 20:40 — THE SYNC MODULE HAS RECORDED NOTHING SINCE 09-04 11:49. HOME ASSISTANT IS INNOCENT.
+
+**Every HA-side theory in #171 and #172 is dead. So is my own "Blink is throttling us / we are
+over-polling the manifest" conclusion from earlier tonight. Read this before touching anything.**
+
+### How it was found — blinkpy's own source, then blinkpy's own debug log
+
+Instead of reasoning about blinkpy, I downloaded **the exact version that is running**
+(`blinkpy 0.25.9`, confirmed from `/api/diagnostics/config_entry/`) and read
+`sync_module.py`. Motion in HA can only ever be set in **two** places:
+
+| line | path | applies here? |
+|---|---|---|
+| `sync_module.py:340` | **cloud media** — `GET /api/v1/accounts/<acct>/media/changed`, then `self.motion[name] = True` | **no** — that is the subscription path, and Jeff has never had one |
+| `sync_module.py:390` | **local storage manifest** — the Sync Module's USB card index, then `self.motion[name] = True` | **YES — this is the only motion path this house has ever had** |
+
+So `binary_sensor.<cam>_motion` can only go `on` when a **new clip appears in the Sync
+Module's local-storage manifest.** Nothing else in the system can produce it.
+
+### The measurement — HA's own debug log, one forced refresh at 20:40:28
+
+blinkpy debug was enabled, **ONE** refresh was forced (deliberately one — the hypothesis under
+test was over-polling, so the test must not itself be a hammer), then debug was turned back off.
+Verbatim:
+
+```
+20:40:28.392  [blinkpy.sync_module] Updating local storage manifest
+20:40:28.393  [blinkpy.api] POST   .../sync_modules/321907/local_storage/manifest/request
+20:40:28.719  [blinkpy.api] Command Wait {'id': 516301039, 'network_id': 228930}
+20:40:29.891  [blinkpy.api] command status {'complete': True, 'status_msg': 'Command succeeded'}
+20:40:29.891  [blinkpy.api] GET    .../local_storage/manifest/request/516301039
+20:40:30.104  [blinkpy.sync_module] Manifest ready? True                <-- NOT stale, NOT locked out
+20:40:30.105  [blinkpy.sync_module] Processing updated manifest
+20:40:30.105  [blinkpy.sync_module] Checking '301 Driveway ':
+                 clip_time = 2026-09-04T16:49:03+00:00
+20:40:30.105  [blinkpy.sync_module] No new local storage videos since last manifest read
+```
+
+🔴 **THE SYNC MODULE BUILT A FRESH MANIFEST ON DEMAND, IN 1.5 SECONDS, AND ANSWERED
+"Command succeeded" — AND THE NEWEST CLIP ON ITS CARD IS `2026-09-04T16:49:03Z`, i.e.
+09-04 11:49:03 AM CT.** blinkpy walks the manifest newest-first and broke on the very first
+item, so that IS the newest thing the card holds.
+
+**The manifest is FRESH. Its CONTENT is five days old.** Those are different failures and only
+the second one is real.
+
+### What this proves, and what it kills
+
+🟢 **PROVEN INNOCENT — stop working on all of these:**
+- **blinkpy** — read the source; it behaved exactly as written.
+- **The built-in Blink integration** — `Finished fetching blink data in 3.697 seconds (success: True)`.
+- **The 2-minute motion poll and the hourly reload** — the manifest came back **ready**, so
+  there is no lockout to relieve. They are gentler than before and cost nothing; leave them.
+- **The automations** — `Instant AI Frame on Motion` is armed and correct; it has nothing to fire on.
+- **CodeProject.AI, the six scanners, the notify chain, the archive trigger** — all proven alive
+  at 19:37 (#172 TEST B).
+- **Python 3.14, the custom-component override, network, DNS, auth, arming** — all previously killed.
+
+⛔ **AND IT KILLS MY OWN CONCLUSION FROM EARLIER TONIGHT.** I wrote that the cause was Blink
+throttling the account — the `307 System is busy` on the manifest — and that I had "removed what
+was causing the throttle." **That was wrong.** The single 307 in `system_log` (19:42:31) was
+produced by **my own `blink.save_recent_clips` test**, not by the refresh cycle. I read a fault
+I had just caused as the standing fault. *Same shape as the 09-04 "I read my own redacted output
+as the source" entry in `COST_LEDGER.md`.*
+
+### 🔴 THE FAULT IS IN THE BLINK SYNC MODULE. IT CANNOT BE FIXED FROM HOME ASSISTANT.
+
+The Sync Module is **online and responsive** — it answered a manifest build in 1.5 s. The cameras
+are **armed** (`alarm_control_panel.blink_loewen301 = armed_away`, `motion_enabled: true` on all
+five, garage off by Jeff's decision) and **healthy** (82–86 °F, −43 to −57 dBm, batteries 158–171,
+thumbnails current to the minute). **It simply is not writing clips to its card any more.**
+
+It stopped at **09-04 11:49:03**, which is within three minutes of the two other things that
+died that minute: the last HA motion event (11:51) and the CodeProject.AI YOLO wedge (#167).
+**Three failures in one 3-minute window is unlikely to be coincidence, but the common cause is
+NOT established and I am not going to invent one.**
+
+### What Jeff can do, cheapest first — this is the only remaining lever
+
+| # | Step | Cost | Why |
+|---|---|---|---|
+| 1 | **Power-cycle the Sync Module** — unplug it, 30 s, plug it back in | $0, 30 s | Standard remedy for a module that answers the cloud but has stopped writing. Nothing is lost; the card is not touched. |
+| 2 | **Blink app → Sync Module → Local Storage** — read what it says | $0 | It reports the drive state in Blink's own words (full / error / needs formatting). That is the authoritative answer and it needs no guessing from me. |
+| 3 | Only if 1 and 2 point at the card — **Jeff's call, nobody else's** | — | ⛔ **DO NOT casually recommend formatting.** Jeff, verbatim: *"that card has no way to be written anywhere but to blank itself. That has never been a solution or regarded as one."* |
+
+⚠️ **DO NOT re-auth, do not re-pair, do not touch the Blink account.** The 08-19 PIN storm came
+from exactly that reflex, and nothing here points at auth — the account answered every request
+tonight in under a second.
+
+### The instrument lesson, and it is the third time this month
+
+`/v1/status/ping` said 200 · `Verify-CameraStreams.ps1` said ALL GOOD 6/6 ·
+`binary_sensor.camera_ai_server_reachable` said `on` · the Blink config entry said `loaded` ·
+every camera reported live temperature and Wi-Fi · **and the house had no camera alerting at all
+for five days.** Every instrument in the building was green.
+
+🔴 **The one instrument that would have caught this does not exist: nothing watches whether the
+Sync Module's manifest is still ADVANCING.** That is the check worth building — see #174.
+
+---
+
+## #174 — 🟢 BUILT 2026-09-09 — the audit now fails when camera alerting is dead but every component is green
+
+**#167 asked for exactly this and nobody built it:** *"There is still no alarm that fires when
+the AI server is UP but its detection module is broken. Worth building: assert `success:true`
+from a real `/v1/vision/detection` POST, not a ping."* #173 adds a second, larger hole: nothing
+watched whether motion was still arriving at all.
+
+**Both are the same failure class — a green component with a dead feature — so both go in the
+same place**, `HCC-Scripts/HCC-AuditRun.py`, which already runs daily and already routes its
+findings to the Claude session file rather than Jeff's phone (#123, and his standing rule
+*"I don't want any more alerts of the failures of this project. I get 25 a day already"*).
+
+### What was added to `HCC-Scripts/HCC-Audit.py` (backup `HCC-Audit.py.bak-20260909-2145`)
+
+**`check_ai_detects()` — a FEATURE test, replacing nothing, sitting beside the old ping.**
+It POSTs a **real 236 KB pipeline frame** to `http://192.168.1.194:32168/v1/vision/detection`
+and requires **`success: true` in the body**. The frame is a genuine driveway clipframe pulled
+once from `camera.301_driveway_clipframe` and cached at `HCC-Scripts/ai-probe.jpg`, so the probe
+still works when HA itself is down.
+🔴 **The old `check_beast()` was left in place on purpose** — reachability and detection are
+different questions, and the whole lesson of #167 is that answering the first tells you nothing
+about the second. The audit now prints both, side by side:
+```
+  beast         CodeProject.AI 192.168.1.194:32168 -> HTTP 200
+  ai-detect     real detection OK - Found car, car, truck on GPU in 157ms
+```
+
+**`check_camera_alerting(st)` — is motion still ARRIVING?**
+Reads `automation.hcc_snapshot_frame_on_motion_no_subscription_path.last_triggered` — the single
+automation every camera alert in the house depends on. Baseline from the logbook (08-26 → 09-04)
+is **~9 real motion events per day**, so ≥8 h silent is a WARN and ≥24 h is a CRIT that names
+#173 and says *do not re-auth, do not re-pair.*
+⚠️ **`last_triggered` is a valid liveness signal here and the change-driven-sensor trap does NOT
+apply** — an automation's `last_triggered` moves only when it actually RUNS, which is precisely
+the event being measured. (It is not an MQTT entity. The same idiom already runs in production as
+the 30-minute throttle on `hcc_mail_arrived_mailbox_door_opened`.)
+
+### 🟢 PROVEN BOTH WAYS — a check that cannot fail is not a check
+
+Run against the live house, plus three throwaway scenarios. **The real CodeProject.AI service was
+never touched** (the #59 pattern):
+
+| # | scenario | required | actual |
+|---|---|---|---|
+| 1 | live house, right now | CRIT on cam-alert | ✅ `NO Blink motion has reached HA in 128.9 h` |
+| 2 | detection endpoint unreachable (dead port 32199) | CRIT | ✅ `detection POST failed` |
+| 3 | **HTTP 200 with `success:false`** — the exact 09-04 wedge | CRIT | ✅ names the module and the error verbatim |
+| 4 | motion 6 minutes ago | **silent** | ✅ NO FINDINGS — it is not firing vacuously |
+| 5 | motion automation turned `off` | FAIL + CRIT | ✅ both |
+
+**Scenario 3 is the whole point: that is the case the ping check returns 200 for.**
+
+🟢 **Routing is unchanged and correct** — findings go to `HCC-Audit-for-session.json`, which
+`Hook-SessionStart.ps1` puts in front of the next session. Only CRIT reaches Jeff's phone, and
+only between 07:00 and 21:00 (#123). ⚠️ **Note: `cam-alert` is a CRIT, so it WILL push once.**
+That is deliberate — five days of no camera alerting is exactly what a CRIT is for — and the
+de-dup fingerprint means it pushes once, not hourly.
+
+⚠️ **`HCC-Audit.py` is NOT version-controlled** (it reads the HA token path and this repo is
+PUBLIC — #99). Backups: `HCC-Audit.py.bak-20260909-2145`.
+
+---
+
+## #175 — 🟢 BLINK MOTION IS BACK. First real events since 09-04. Measured 2026-09-10 07:10 AM.
+
+**#171 / #172 / #173 described a total camera-alerting outage running from 09-04 11:51 CT.
+It has ended. Verified before any change was made this session — nothing was touched.**
+
+### The measurement — HA `/api/history/period`, 24 h window, per camera
+
+| camera | motion `on` events in 24 h | when (CT) |
+|---|---|---|
+| `301_driveway` | **1** | **06:16:33** |
+| `301_front_doorbell` | **1** | **06:16:33** |
+| `back_left` | **1** | **06:58:08** |
+| `front_right` / `301_backyard` | 0 | — |
+| `garage` | 0 | motion OFF by Jeff — not a fault |
+
+**Zero `on` events in the 24 h before 06:16 this morning. Three since.**
+
+### 🟢 PROVEN AS A FEATURE, NOT A COMPONENT — the whole chain fired
+
+`last_triggered` read off the live automations:
+
+```
+binary_sensor.301_driveway_motion   on     11:16:33.687 Z   (06:16:33 CT)
+automation.ai_object_detected_notify        11:16:34.694 Z   <- +1.0 s
+automation.hcc_ai_alert_cooldown            11:16:34.839 Z
+automation.hcc_clip_archive                 11:16:34.841 Z
+automation.hcc_snapshot_frame_on_motion…    11:58:08.146 Z   (06:58:08 CT, back_left)
+```
+
+Motion → snapshot → AI → notify → archive, end to end, on a **real** event — not a hand-fired scan.
+That is the check #172's TEST B could not make, because TEST B started downstream of the break.
+
+### 🔴 THE CAUSE IS NOT ESTABLISHED. I AM NOT INVENTING ONE.
+
+Two things changed on 09-09 and either, both, or neither could be responsible:
+
+1. **`HCC — Blink Periodic Health Reload` was throttled `/15` → hourly** (#171, applied 17:20).
+   🟢 **That change is confirmed live in the data**: the driveway sensor's
+   `unavailable → off` blips run every 15 min through 09-09 17:00 Z and **every 60 min from
+   01:00 Z onward**. So the edit stuck. But #173 then proved the reload was not the fault.
+2. **Whatever Jeff may have done at the Sync Module** — #173's step 1 was *power-cycle it, 30 s*.
+   **UNKNOWN — ask him, do not assume he did it.**
+
+⚠️ **`last_record` is STILL `None` and `recent_clips` STILL `[]` on all six cameras.**
+Per #172's own correction that is **NOT** the anomaly — #61 recorded the same on 08-23 while motion
+was flowing normally. **Do not treat it as evidence of anything.**
+
+### What this does NOT close
+
+- **#172 BREAK #2 — the clip producer — is untouched and still off** (since 08-21 12:43). Motion
+  returning does not create clips; `blink.save_video` was measured writing nothing on 09-09.
+  **B gated A, and B has cleared on its own. A is now Jeff's decision to make.**
+- **The recovery is 3 events over ~55 minutes.** Baseline is ~9/day. **One morning is not proof
+  it is stable** — the honest read is "it is alive again", not "it is fixed".
+
+### The instrument that caught it
+
+`HCC-Audit.py`'s new `check_camera_alerting()` (#174) ran at **07:00:02** and reported
+`crit: 0` — no `cam-alert` finding. On 09-09 the same check produced
+`NO Blink motion has reached HA in 128.9 h`. **The check built last night is what made this
+morning's recovery visible in one line instead of a half-day investigation.**

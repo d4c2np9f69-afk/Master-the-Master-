@@ -1,3 +1,63 @@
+# 🔴 2026-09-09 WEDNESDAY AM — THE HOUSE AI WAS DEAD 5 DAYS. FIXED. READ THIS FIRST.
+
+## What was broken (09-04 11:51:56 CT → 09-09 10:25 CT)
+**No camera popups, no AI phone pushes, no new clips for five days.** Cause was **not** Blink, the
+cameras, HA, the core version, the sync card or a subscription. It was **CodeProject.AI on the
+beast**: the `ObjectDetectionYOLOv5-6.2` module was wedged — *"Unable to create YOLO detector for
+model yolov5m"* — so its reply had no `predictions` key, which raised `KeyError` in
+`custom_components/codeproject_ai_object/image_processing.py:365` and killed all six scanners.
+
+**FIX (~90 s, on the beast):** `Restart-Service -Name "CodeProject.AI Server" -Force`
+
+**Proven as a FEATURE, not a component:** detection returned `Found car, car, truck / success:true`;
+HA scanner `unknown → 2`; the annotated red-box file rewrote (09-04 16:51:57 → 09-09 15:25:58 GMT);
+`hcc_ai_alert_cooldown` + `hcc_clip_archive` + `ai_object_detected_notify` all fired at 15:25:58;
+**all 6 scanners live, 0 unknown.** `Verify-CameraStreams.ps1` 6/6 before AND after — camera stack
+untouched. Full write-up: **OPEN_ITEMS #167.**
+
+## 🔴 WHY IT HID — every instrument lied, and they will lie to you too
+`/v1/status/ping` = 200 the whole time. `binary_sensor.camera_ai_server_reachable` = `on`.
+**`Verify-CameraStreams.ps1` printed ALL GOOD 6/6 the whole time** — it tests go2rtc streams, NOT
+whether anything is detected. The 09-04 rollback was "verified" the same way and the feature was dead.
+**When the AI is suspected the ONLY valid check is a real POST to
+`http://127.0.0.1:32168/v1/vision/detection` asserting `success:true`. A ping is not proof.**
+
+## 🔴 FIVE THEORIES THAT WERE ALL WRONG — cost Jeff half a day 09-09. Do not repeat them.
+Blink auth (entry was `loaded`, 43 entities, 0 unavailable) · a blinkpy version (**0.28.9 DOES NOT
+EXIST**; PyPI latest is 0.25.9 and every HA tag 2026.8.0→`dev` ships it) · an Amazon API change
+(nobody else reporting) · the Sync Module USB card (**Jeff: *"that card has no way to be written
+anywhere but to blank itself — that has never been a solution or regarded as one"***) · a lapsed
+Blink subscription (**Jeff has NEVER had one — the whole no-subscription path exists for that
+reason**). Detail in COST_LEDGER.md, 2026-09-09.
+
+## Built the same session
+- **SessionStart hook now alarms the SESSION, never Jeff's phone** (his instruction — he gets ~25
+  alerts/day already). It reports AI scanner health from the existing HA call and, when dead, orders
+  the session to read OPEN_ITEMS #167 before touching anything. Tested: healthy path and a synthetic
+  fault path both correct.
+- **Fixed a false alarm in that same hook.** It judged Zigbee liveness by `last_updated` age, so dry
+  leak sensors and closed doors read as "DATA IS BEING LOST RIGHT NOW". Proven false 09-09: all 12
+  Zigbee devices were reporting (linkquality 0.2–2.9 h). Now uses **Z2M per-device availability**
+  (`unavailable`), which is the signal #83 built on 08-28. Water meter stays age-based on purpose (#83).
+
+## Open, with owners — NOT mine, do not re-investigate
+- **Mailbox LQI 0** — #86. **BLOCKED ON HARDWARE IN TRANSIT, owner Jeff** (repeater from AliExpress).
+  Do NOT re-investigate, propose alternatives, or price anything. *09-09 observation only: it rejoined
+  the mesh on its own at ~09:50 and is reporting again at LQI 0 — still marginal, still blocked.*
+- **#84 (passive timeout 25 h → 12 h) and #85 (`last_seen: ISO_8601`)** — Jeff's call, and both are
+  sequenced into the SAME Z2M restart as the mailbox repeater. Do not do them separately.
+- **Angela's iPhone has not reported to HA since 09-04** (114 h). Her `location_permission` is
+  *"Authorized when in use"*, Jeff's is *"Authorized Always"* — zone automations need Always. Needs her
+  hands on her phone. `automation.hcc_watchdog_phone_stopped_reporting` (built 09-09) now catches this
+  inside 12 h instead of five days.
+- **Clip-archive manifest 404s nightly (24 of 37)** — `prune_archive` deletes files but never rebuilds
+  `manifest.txt`. **DECIDED NOT TO FIX 09-09:** the 404s are `back_left` 40-byte stubs (#30) that the
+  D: purge correctly bins, so **no real video is being lost**; the fix needs a hand-edit of the house's
+  live `configuration.yaml` through Studio Code Server, which silently broke YAML on 08-16. Cosmetic
+  noise is the better trade. Same call #15 made.
+
+---
+
 # 🔵 2026-09-06 SUNDAY PM — GENEALOGY: THE CANDIDATE HAS A NAME
 
 **Read `HCC-Scripts/genealogy/GEORGE2_BRICK_WALL.md` (1,598 lines, iCloud-synced).**

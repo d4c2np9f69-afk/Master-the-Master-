@@ -430,3 +430,432 @@ and thermostat cable are Alpine parts that ship free with the unit.
 margins, `/Type /Page` count on the delivered PDF); **0 px horizontal overflow at 1536 px**; all
 subtotals recomputed independently and reconcile to the penny; 83/83 div, 5/5 table, 7/7 section,
 6/6 svg; every CSS token defined on bare `:root`; stale-value sweep clean on 19 retired figures.
+
+---
+
+## ✅ RE-VERIFIED LIVE 2026-09-09 13:55 — price, coupon AND availability all still good
+
+Checked in Chrome on Alpine's own product page (WebFetch gets **HTTP 403** from alpinehomeair.com —
+use the browser, not the fetcher). Re-checked because the 08-31 pricing was 9 days old and this doc's
+own hard lesson is that **a visible price is not proof of availability**.
+
+```
+model            BRP7GE1330E054P-01A   2.5 ton / 54,000 BTU heat / 13.4 SEER2   CONFIRMED
+list             $3,470.00                                    unchanged from 08-31
+coupon           "Apply $347.00 Coupon - Ends September 14th"  STILL LIVE
+net              $3,123.00                                    unchanged
+AVAILABILITY     *** Add to Cart PRESENT *** (twice on the page)  <- the real signal
+shipping         "Ships FREE Thursday"
+```
+
+**Spec cross-check against the page, all matching this doc:** min ampacity 17.5 A · max fuse/breaker
+25 A · pad 50×53 · supply side 13.44×14.32, btm 14.02×11.49 · return side 13.44×17.07, btm
+16.77×11.49 · R-454B with on-board RDS · AHRI# **217109080** · warranty 10 yr parts / 10 yr
+compressor / lifetime heat exchanger, all *with online registration*.
+
+**Two small things the live page adds:**
+- **Weight is 400 lb, not 406.** The 406 figure came off the discontinued BPRPGE1430 and is still in
+  the artifact's freight line. Affects nothing; fix on the next republish.
+- **AFUE is 81%** on this unit (the old Nordyne was 78%). Not previously recorded here.
+- ⚠️ Alpine lists the **21J92 square-to-round adapter ($279.99) under "REQUIRED COMPONENTS"**. It is
+  not required for this job — the **fabricated plenum does that exact job**, which is the decision
+  already made in this document. Do not let the word "required" reverse it. Same for the
+  **Kickstart hard-start device ($79.99)** and the **22B87 LP kit ($64.99)**: both offered in the
+  install-kit upsell, both already ruled out here (new compressor; natural gas).
+
+
+---
+
+# 🔄 DIRECTION CHANGE 2026-09-09 14:11 — GOING OUT FOR CONTRACTOR QUOTES
+
+Jeff: *"We are changing directions with the air conditioner plan because I don't think my guy is
+gonna be able to get to me for a while so I need to start the quote process."* **The friend-labor
+plan ($700–$1,200) is on hold, not cancelled.**
+
+## 🔴 THE FORK THAT CHANGES EVERYTHING — ASK IT ON THE FIRST CALL
+
+**Most full-service HVAC companies will not install owner-supplied equipment.** The entire plan in
+this document is built on Jeff buying the Blueridge from Alpine himself at **$3,123**. Two outcomes:
+
+| Path | What happens |
+|---|---|
+| **Labor-only** (they install *his* Alpine unit) | Keeps the $3,123 buy and the warranty in Jeff's name. Fewer companies will do it, and some void their own labor warranty on customer equipment. |
+| **Turnkey** (they supply the unit) | The Alpine purchase goes away. Expect a different brand and a markup; TN full replacement runs **$5,400–$13,100** installed. Get the model number so it can be spec-matched against BRP7GE1330E054P-01A. |
+
+## THE THREE, RESEARCHED 2026-09-09 — ranked by FIT FOR THIS JOB, not by ad spend
+
+### 1. Daniels Heating & Air — BEST CAPABILITY MATCH
+`2880 Gideon Rd, Greenbrier TN 37073` · **(615) 804-1078** / (615) 643-3143 · `danielshvacinc.com`
+- **Est. 1988, third generation.** BBB file open since 2004.
+- **Reviews: 4.9 / 749** · Porch 4.97 / 128.
+- **Serves White House BY NAME** (Robertson, Sumner, Davidson).
+- 🟢 **THE DIFFERENTIATOR: "Custom Ductwork" and "Sheet Metal Fabrication" are listed services.**
+  That is literally this job — the fabricated supply and return plenums that kill the 30-year twist.
+  No other candidate advertises in-house sheet metal.
+- York Comfort Certified · Daikin. ~12 miles out.
+- ⚠️ Package units not named on the site. Gas piping not named. **Ask both.**
+
+### 2. Petitt Heating & Cooling — BEST REPUTATION + MOST LOCAL + GAS LICENSED
+`127 Raymond Hirsch Pkwy, White House TN 37188` (also Springfield + Hendersonville) · **615-654-0814**
+- **Est. 2010.** License cited as **TN-64284** — TN **Mechanical, Plumbing and gas** licenses, EPA certified.
+- **Reviews: 5.0 / 499 (Birdeye); site claims 800–1,000+ five-star.** Not BBB-accredited (a paid
+  membership, not a quality signal — do not read it as a mark against them).
+- **10-Year Parts & Labor warranty on new installs** · $500 on-time guarantee · financing.
+- 🟢 **They also do crawl-space encapsulation** — that is Jeff's Phase 2 ($600–$950 DIY materials).
+  One contractor could carry both, and the sequencing rule still applies: **ductwork first, liner last.**
+- ⚠️ **Site names NO ductwork, sheet metal, package units, static pressure or load calcs.**
+  Strongest reputation, least-proven fit for THIS scope. **Ask hard.**
+
+### 3. Derryberry's Heat & Air — DEEPEST PEDIGREE, SERVICE AREA UNCONFIRMED
+`212 N Water Ave, Gallatin TN 37066` · **615-452-8121** · `derryberryac.com`
+- **Est. 1986 — 40 years.** **NATE-certified technicians** · **TVA Quality Contractor, 10+ years.**
+  Those are real third-party credentials, not self-claimed.
+- ⚠️ **Site says "Gallatin, Hendersonville and surrounding Middle Tennessee" — White House and
+  Robertson County are NOT named. Confirm they come this far before spending a call on scope.**
+- ⚠️ No ductwork fabrication, package units or gas piping advertised.
+
+**Backup if one drops out:** Evolution Home Services, `105 Flex Ave, Portland TN 37148`,
+**615-477-1081** — 10+ yrs, and **lists 37188 explicitly** in its service zips. Thinner credentials,
+no duct-fab or package-unit mention.
+
+🔴 **SCREENED OUT — do not call these, they are lead-generation farms, not local companies:**
+`furnacecontractorsnearme.com`, `ac-repair.netlify.app`, `emergency-hvac.bitbucket.io`,
+`duct-repair-white-house-tn.harrisheatingcooling.com`. They rank well and sell the lead on.
+Also skipped: **T.A. Kaiser** (Nashville/commercial, 11 Yelp reviews) and the Murfreesboro package-unit
+specialists (Reliable Comfort, Airstream) — real companies, ~50 miles away.
+
+## 📞 THE CALL SCRIPT — same ten questions to all three, so the quotes are comparable
+
+1. **Do you install PACKAGE units?** Gas/electric, everything outside on a slab. *(Many residential
+   shops mostly do split systems — this is the single best disqualifier and it is question one.)*
+2. **Will you install an owner-supplied unit** (Blueridge BRP7GE1330E054P-01A from Alpine), or must
+   you supply it? **If you supply it — what model, and what is the installed price?**
+3. **Will you fabricate new sheet-metal supply AND return plenums at the unit?** Both trunks are
+   twisted onto the equipment and have been since the house was built. *(This is the whole job.)*
+4. **Complete duct replacement — 7 supply branches, 1 central return.** Included or extra?
+5. **Manual J load calculation** to confirm 2.5 ton before ordering?
+6. **Static pressure reading before and after** — will you record and give me the numbers?
+7. **Gas connection and the electrical** — the breaker must come DOWN from 40 A to 25 A. Included?
+   Who pulls permits?
+8. **Labor warranty — how long?** (Petitt advertises 10-year parts AND labor; use it as the anchor.)
+9. **Lead time — how soon can you start?** *(This is the entire reason for switching. Ask early.)*
+10. **Is the existing pad reusable?** 47.5 in old vs 47.66 in new; Alpine specs 50×53.
+
+## Verifying them yourself
+
+**`verify.tn.gov`** — the Board for Licensing Contractors' official lookup: status, classification,
+**monetary limit**, and disciplinary history. Board: **800-544-7693**.
+
+⚠️ **Know what the license does and does not prove here:** Tennessee requires a state contractor
+license only at **$25,000 and above**. This job is $5–6k, so a company can legally do it without one.
+**"Licensed" is therefore a weak filter for this project** — reviews, in-house sheet metal, and
+package-unit experience are the real discriminators. The exception is **gas**: that work wants a
+proper gas/mechanical license, which is where Petitt's TN-64284 counts.
+
+🔴 **NOT VERIFIED — no company has been contacted.** Everything above is public-record research:
+company sites, BBB, Birdeye/Yelp/Porch review counts. **Whether any of the three will take this
+exact scope is unknown until Jeff calls.** Nothing here is a quote.
+
+---
+
+# 🔴🔴 DEEP RESEARCH 2026-09-09 14:25 - FOUR FINDINGS THAT CHANGE THE PLAN
+
+Jeff: *"Dig deeper and think harder"*, then *"That was weak search forums."* Both fair - the first
+pass read marketing pages. This pass pulled apart **the manufacturer's own warranty PDF** locally
+with zlib (WebFetch could not decode it) and went to trade/cost sources.
+
+## 1. 🔴 THE WARRANTY - VERBATIM, Blue Summit LLC rev 07/2024
+
+> **Limitation 4:** *"The Equipment must be installed **(or certified)** by a qualified installer and
+> the installation must adhere to the **Quality Installation protocols of the Air Conditioning
+> Contractors of America (ACCA)**, and these products must be **registered with the manufacturer
+> within 60 days of installation** for the warranty to be in place."*
+>
+> **Limitation 3:** *"The Owner is responsible for all costs associated with **diagnostics and labor**."*
+>
+> **Limitation 5:** *"All repairs ... must be made by a **Licensed HVAC contractor** using
+> manufacturer-specified service components."*
+
+**(a) 🟢 "(or certified)" IS AN ESCAPE HATCH - the most valuable thing found today.** The
+friend-labor path is NOT dead. The warranty accepts equipment *certified* by a qualified installer,
+not only *installed* by one - and the claim procedure asks for **"Installing or certifying contractor
+information"**, confirming certification is a recognised route. A paid commissioning visit can
+preserve the 10-yr/lifetime coverage on an owner-installed unit.
+
+**(b) 🔴 ACCA QUALITY INSTALLATION IS A CONDITION OF COVERAGE, not a nice-to-have.**
+ANSI/ACCA 5 QI requires **Manual J** load calc, **Manual S** selection, **Manual D** duct design,
+verified airflow, verified charge and **static pressure measurement**. Those were on the old
+"questions to ask" list as optional. They are warranty conditions. Get them in writing.
+
+**(c) 🔴 THE MANUFACTURER COVERS NO LABOUR, EVER.** Parts only. Corroborated by owner
+complaints: *"Blue Ridge will not cover labor or refrigerant costs."* **This re-values Petitt
+sharply** - their **10-year parts AND LABOUR** warranty is contractor-backed cover the manufacturer
+will never give.
+
+**(d) 🔴 REAL COVERAGE NUMBERS + A CLOCK TRAP NOBODY RECORDED**
+
+| | Unregistered | Registered within 60 days |
+|---|---|---|
+| Parts | **5 years** | 10 years |
+| Compressor | **5 years** | 10 years |
+| Heat exchanger | **20 years** | **Lifetime** |
+| Warranty STARTS | **7 days after DATE OF SHIPMENT** | date of actual installation |
+
+The Extended warranty is **NONTRANSFERABLE** - sell the house and it reverts to 5/5/20 dated from
+shipment. Relevant to a 30-year-hold house and to resale.
+
+## 2. 🔴 R-454B / A2L - a 2026 qualifier missed entirely on the first pass
+
+- From **1 Jan 2026** the EPA AIM Act Technology Transitions Rule **bans installing new residential
+  R-410A systems.** R-454B is the only road - the old $2,691 R-410A unit vanishing was the market.
+- 🔴 **A cheap R-410A Goodman package unit online is a TRAP - it is no longer legally installable.**
+- R-454B is **A2L, mildly flammable.** Federally nothing beyond **EPA 608** is required, but several
+  states have added rules - verify for TN.
+- 🔴 **Tooling runs roughly $5,000-$10,000 PER TRUCK** (A2L gauges, recovery machines, leak
+  detectors); R-410A tools are not all compatible. **A shop that has not tooled up cannot service
+  this unit.** "Are you A2L / R-454B trained and tooled?" is now question #2 on every call - and it
+  is a quality filter, because it costs real money to answer yes.
+
+## 3. 🔴 PRICE EXPECTATION RESET - the DIY number will not survive a contractor
+
+| Benchmark (2026) | Figure |
+|---|---|
+| Duct replacement, national | **$25-$55 per linear foot** |
+| Duct replacement, Nashville | **$35-$55/lf**, Nashville **10-15% over TN average** |
+| Typical single-family duct job | 30-90 lf -> **$1,000-$5,000** |
+| HVAC replacement, Nashville | **$3,677-$11,765** |
+| Full system + new ductwork | **can approach $13,000** |
+
+🔴 **Line B, "ductwork materials $787-$987", is MATERIALS ONLY.** A contractor doing that same
+ductwork charges **$1,000-$5,000 for that scope alone.** The $4,790-$5,515 all-in assumed a friend at
+$700-$1,200. **Contractor quotes will land far above it and that is not gouging** - it is the labour
+line finding its market price. Expect **$8,000-$13,000** turnkey.
+
+## 4. 🔴 MARKUP - Jeff: *"I'm not paying a bunch of mark up"*
+
+**Industry norms, researched not guessed:** residential install equipment/materials are marked
+**2.5x-3.5x wholesale** (some sources put it as **25-100%**); **install gross margin runs 35-45%,
+national average ~40%**; repair parts 3x-4x. Markup and margin differ - a 50% markup is a 33% margin.
+
+**How to see the markup instead of arguing about it - three moves:**
+1. **Demand an itemised quote: equipment line separate from labour line.** A lump sum exists to hide
+   the split. This single request does more than any negotiation.
+2. **Ask the same contractor for a labour-only price if Jeff supplies the unit.** The gap between
+   turnkey and labour-only **IS** the equipment markup, revealed by their own two numbers.
+3. **Benchmark against the direct price:** Blueridge BRP7GE1330E054P-01A is **$3,123 delivered** to
+   the door. A comparable **Goodman SEER2 gas package unit retails ~$3,885-$4,334**. If a quote's
+   equipment line is far above that, ask what it buys.
+
+⚠️ **Be fair about it too:** margin funds the labour warranty, the callback, the A2L tooling and
+the permit. The goal is a quote that is *itemised and explainable*, not the lowest number.
+
+## Revised call script - the questions that actually discriminate
+
+1. **Do you install PACKAGE units?** (gas/electric, all outside on a slab)
+2. 🔴 **Are you A2L / R-454B trained and tooled?**
+3. **Will you install an owner-supplied unit - or CERTIFY one to ACCA QI so the warranty stands?**
+4. **Will you fabricate sheet-metal supply AND return plenums at the unit?**
+5. **Manual J / S / D in writing?** (warranty condition, not a favour)
+6. **Static pressure before and after, recorded and handed over.**
+7. **Complete duct replacement, 7 supplies + 1 central return** - in or out?
+8. **Gas connection + breaker 40 A -> 25 A + permits.** White House enforces 2021 ICC Mechanical
+   since 1 Jan 2025. Codes: **615-672-4350 ext 2120**, Ceagus Clark, 105-D College St.
+9. **Labour warranty - how many years?** (Petitt advertises 10 yr parts AND labour; use as anchor.)
+10. **Lead time.** The whole reason for the switch.
+11. **Itemise equipment vs labour**, and quote labour-only as an alternate.
+
+## The deadline collision - decide before Monday
+
+**The $347 coupon expires Mon 14 Sep; quotes started Wed 9 Sep.** Three contractors will not have
+quoted and been compared in five days. Buying Monday saves $347 but commits to owner-supplied before
+knowing who will install or certify it (mitigated by the "(or certified)" clause). Letting it lapse
+costs $347 and keeps every door open - **ask Alpine (800) 865-5931 whether a successor code follows.**
+
+**Sources:** Blue Summit/Blueridge Limited Warranty rev 07/2024 (documents.alpinehomeair.com,
+extracted locally) - EPA AIM Act Technology Transitions Rule - ANSI/ACCA 5 QI - Angi / HomeGuide /
+RealCostIQ / Contractor+ 2026 cost data - Jobber / Sera / Simpro markup data - City of White House
+Planning & Codes - owner complaints via PissedConsumer and GreenBuildingAdvisor.
+⚠️ **HVAC-Talk is paywalled (HTTP 402 via tollbit); its threads could NOT be read - do not cite
+them as if they were.**
+
+---
+
+# 🔴 GOODMAN vs BLUERIDGE - HEAD TO HEAD, READ LIVE IN CHROME 2026-09-09 14:30
+
+Jeff: *"I am not opposed to going with Goodman but I'm not paying a bunch of mark up."* Read off
+**Alpine's own category page**, so it is the same retailer, same day, same margin structure - the
+cleanest possible comparison. (WebFetch gets HTTP 403 from alpinehomeair.com and acdirect.com; the
+browser works. Alpine's page even greets with *"Your Location: White House, TN"*.)
+
+| | **Blueridge BRP7GE1330E054P-01A** | **Goodman GPGM33004031** | Goodman GPGM33006031 |
+|---|---|---|---|
+| Cooling | 2.5 ton (30,000 BTU) | 2.5 ton (29,000 BTU) | 2.5 ton |
+| **Heat in / out** | **54,000 / 44,000** | **40,000 / 32,000** | 60,000 / — |
+| List price | **$3,470** | **$4,645** | **$4,715** |
+| After SUMMER2026 | **$3,123** | ~$4,180 (see caveat) | ~$4,244 |
+| Stock | **In Stock** | In Stock | ❌ **OUT OF STOCK** |
+| Refrigerant | R-454B | **R-32** | R-32 |
+| **Heat exchanger warranty** | **LIFETIME** (registered) | **20 YEARS** (registered) | 20 years |
+| Parts / compressor | 10 / 10 yr registered | 10 / 10 yr registered | same |
+| Min ampacity / max breaker | **17.5 A / 25 A** | **21.2 A / 30 A** | — |
+| Cabinet W x D x H | 47.66 x **47.66** x 40.89 | 47 x **51** x 34.5 | — |
+| Weight | 400 lb | 380 lb | — |
+| **Duct openings** | supply 13.44x14.32 / return 13.44x17.07 | **16 x 16 SQUARE both** | — |
+| Altitude range | 0-4,500 ft | 0-2,000 ft | — |
+
+## 🔴 SIX FINDINGS, and they mostly run against Goodman FOR THIS HOUSE
+
+**1. Goodman costs roughly $1,000-$1,500 MORE and delivers LESS HEAT.** $4,645 vs $3,470 list, while
+dropping from 54,000 to 40,000 BTU input (44,000 -> 32,000 output). The Goodman that actually matches
+the heat is the **60,000 BTU GPGM33006031 at $4,715 - and it is OUT OF STOCK.**
+⚠️ **Caveat, not verified:** the Goodman page says *"View Discounted Price In Cart"* rather than
+naming a coupon, so its net may also fall ~10%. **Not confirmed - would require adding to cart.**
+Even at the friendlier reading, Goodman is ~$1,058 more.
+
+**2. 🔴 THE WARRANTY RUNS BACKWARDS FROM THE ASSUMPTION.** Goodman heat exchanger =
+**20 years**. Blueridge = **LIFETIME**. The budget house brand carries the better long-term cover,
+and for a house Jeff intends to hold 30 years that is the single most valuable line in the table.
+
+**3. 🔴 GOODMAN'S WARRANTY HAS NO "(or certified)" ESCAPE HATCH.** Goodman requires installation
+**by a licensed HVAC professional** - full stop. Blueridge accepts *installed **or certified*** by a
+qualified installer. **Choosing Goodman therefore KILLS the friend-labour path outright.** That is
+not a small print difference; it removes an option Jeff still has.
+
+**4. 🔴 THE PAD QUESTION RE-OPENS ON GOODMAN.** Old Nordyne is 47.5 in; Blueridge 47.66 in -
+a 0.16 in difference, which is why "no pour needed" held. **Goodman is 51 in deep - 3.5 in bigger
+than what the existing pad carries.** Expect to need the **50x53x3 pad, $239.99**, which erases
+more of any saving.
+
+**5. 🔴 EVERY PLENUM DIMENSION IN THIS DOCUMENT IS BLUERIDGE-SPECIFIC.** Goodman's openings are
+**16 x 16 square, both supply and return**. The note above that says *"duct openings identical, so
+every plenum/ductwork conclusion stands unchanged"* is true **only for the Blueridge**. Switch to
+Goodman and the plenums get re-measured. Not fatal - they are fabricated anyway - but the numbers
+in this file would be wrong.
+
+**6. Different refrigerants: Blueridge R-454B, Goodman R-32.** Both A2L, both AIM-Act compliant
+(Goodman is Daikin-owned and Daikin went R-32). **Ask the contractor which A2L they are tooled for**
+- being ready for one does not guarantee the other.
+
+## 🟢 THE ANSWER TO THE MARKUP QUESTION
+
+**If a contractor proposes Goodman, that is NOT automatically markup - Goodman genuinely costs more
+at retail, by about $1,200 at list on the same website.** So the brand choice and the markup are two
+separate arguments. Judge markup by asking for the **equipment line itemised separately** and
+comparing it to these public numbers:
+
+- Blueridge 2.5 ton / 54k: **$3,470 list, $3,123 couponed, in stock, ships free**
+- Goodman 2.5 ton / 40k: **$4,645 list**  ·  Goodman 2.5 ton / 60k: **$4,715 list, out of stock**
+
+An equipment line materially above those, on top of a labour line, is markup worth questioning.
+Industry norm is 2.5x-3.5x wholesale on materials and a 35-45% install gross margin.
+
+**Bottom line for this house: Goodman is the more expensive unit, with less heat, a 20-year rather
+than lifetime heat exchanger, a probable new pad, and it forfeits the owner-install option.** Worth
+taking only if a contractor Jeff otherwise wants will not touch Blueridge - which is a legitimate
+reason, and a fair thing to pay for.
+
+## 🔴 REFRIGERANT - Jeff 2026-09-09: *"Yes I want the most recent refrigerant"*
+
+**Neither is newer. R-32 and R-454B are the SAME generation** - the two parallel A2L answers to the
+AIM Act, chosen by different manufacturers. Daikin/Goodman went R-32; Carrier, Lennox and Blueridge
+went R-454B. Both clear the 700-GWP limit in force since 1 Jan 2025. **There is no third, newer
+option to wait for.**
+
+| | **R-454B** (Blueridge) | **R-32** (Goodman) |
+|---|---|---|
+| **GWP** | **466** | 675 |
+| Type | zeotropic blend (R-32 + R-1234yf) | single component |
+| Refrigerant cost | ~$12.89 / lb | ~$4.11 / lb |
+| Efficiency vs R-410A | 102% | **107%**, and needs up to 40% less charge |
+| Pressures | near-identical to R-410A | different |
+| Typical use | US central/residential | ductless & mini-split, heavy international use |
+
+🟢 **THE DECIDING FACT: the AIM Act phases down total GWP quotas through 2036.** A lower-GWP
+refrigerant is less exposed to the supply restrictions and price spikes that phase-down creates.
+**At 466 vs 675, R-454B sits further from the next threshold and is the more future-proof of the
+two.** For a house Jeff intends to hold 30 years, that is the answer to his question.
+
+⚠️ **The honest counterweight:** R-454B costs roughly **3x more per pound** to buy, so any future
+recharge is dearer, and R-32 is slightly more efficient. Neither should matter on a sealed system -
+a system that needs topping up has a leak, which is a repair, not a running cost.
+
+🟢 **Convergence worth noting: the refrigerant preference points at the SAME unit as everything
+else.** The Blueridge BRP7GE1330E054P-01A is the lower-GWP refrigerant **and** ~$1,200-$1,500
+cheaper **and** lifetime rather than 20-year heat exchanger **and** fits the existing pad (47.66 in
+vs Goodman's 51 in) **and** is the only one of the two whose warranty survives an owner/friend
+install via the "(or certified)" clause. **Four independent reasons landing on one unit.**
+
+---
+
+# 🟢 ALPINE **DOES** REFER INSTALLERS - `alpinehomeair.com/pro-installation`, read 2026-09-09 14:36
+
+Jeff asked whether Alpine recommends installers. **They do, and it directly addresses the two things
+this project was stuck on.** The page title is explicit: **"Contractor Referral Assistance (Not
+Installation Service)"** - Alpine does not install, it brokers introductions.
+
+## 🟢 THE HEADLINE: they will find a contractor to do ANY of three levels
+
+Verbatim from the page - *"We'll locate a professional contractor to:"*
+
+1. *"Do a full and complete home product installation."*
+2. *"Assist with **part or all** of your equipment installation."*
+3. 🟢 ***"Inspect and start up equipment AFTER YOU'VE INSTALLED IT."***
+
+**Item 3 is Alpine's productised version of the warranty's "(or certified)" clause.** The
+friend-labour path plus a paid commissioning visit is not a workaround Jeff has to invent and talk a
+contractor into - **it is a service Alpine already sells and staffs for.** That is the single most
+useful thing found today.
+
+At cart he picks the level *"ranging from **None (DIY) to Full Installation by Contractor**."*
+
+## How it works, and the ONE catch
+
+1. Add to cart. **Confirm the item shows "Contractor Referral Assistance" in its Services section**
+   (stated eligibility requirement - ⚠️ NOT yet verified on the BRP7GE1330E054P-01A page).
+2. Click **"Get Free Installation Quotes"** at the cart, choose the level of help per item.
+3. Check out normally.
+4. Alpine **mails a description of the project to multiple local contractors** and asks them to bid.
+5. Alpine **emails a list of recommended contractors with their customer ratings**.
+6. *"You will typically be contacted by **2-3 interested contractors**"* - free, no-obligation quotes.
+7. Jeff picks; scheduling and payment are strictly between him and the contractor.
+
+🔴 **THE CATCH - IT FIRES ONLY AFTER THE ORDER IS PLACED.** *"Once your order is placed, we will
+mail out a description of your project."* **He cannot use it to shop quotes before deciding to buy**,
+and it goes out by MAIL, so it is not fast.
+
+🟢 **But this cuts the coupon knot.** The reason to hesitate before Monday was "what if nobody
+will install an owner-supplied unit." **Alpine's entire referral programme exists to answer exactly
+that**, and it includes the inspect-and-start-up option. Buying by the 14th to keep the $347 is now
+materially less risky than it looked an hour ago.
+
+## Alpine's Yelp-powered lookup ALREADY RAN FOR 37188 - 50 results, top 10
+
+| # | Company | Yelp reviews | Phone |
+|---|---|---|---|
+| 1 | Blocker Heating and Cooling | 9 | (629) 333-6833 |
+| 2 | Honest Dave's HVAC | 23 | (615) 480-8343 |
+| 3 | Mike's Heating & AC | 7 | (615) 822-0280 |
+| 4 | **Mike Cross Heating & Cooling** | **48** | (615) 423-7177 |
+| 5 | Hiller Plumbing, Heating, Cooling & Electrical | 12 | (615) 851-4066 |
+| 6 | Cumberland Cooling | 26 | (615) 576-0742 |
+| 7 | Honest Air Heating And Cooling | 4 | (615) 517-2045 |
+| 8 | Roger Denton Heating & Cooling | 4 | (615) 672-3335 |
+| 9 | GPS Heating and Air Conditioning | 8 | (615) 859-0330 |
+| 10 | Star Heating & Air | 8 | (615) 824-3533 |
+
+🔴 **DO NOT READ THIS AS A QUALITY RANKING. It is a YELP-PRESENCE ranking.** Proof: **Daniels
+(4.9 / 749 Google reviews) and Petitt (5.0 / 499) do not appear at all** - Yelp is thin in rural
+Middle Tennessee, so the strongest local firms are invisible to it while shops with 4 Yelp reviews
+rank top-10. **Use it as a source of NAMES to research, never as a shortlist.**
+
+Worth noting: **Roger Denton (1726 Hwy 31 W)** and **Hiller (1617 Hwy 31 W)** are both on the
+highway through White House. **Hiller** is a large, well-known Middle-TN chain - deep resources and
+certain to be A2L-tooled, but chain pricing. **Mike Cross** carries the most Yelp reviews by 2x.
+
+## Where this leaves the plan
+
+- **Best case:** buy the Blueridge by Mon 14 Sep with the coupon, tick **"inspect and start up after
+  I've installed it"** (or "assist with part of the installation"), let Alpine bring 2-3 bidders,
+  and keep the friend-labour saving AND the lifetime-heat-exchanger warranty.
+- **Run the three researched companies in parallel** (Daniels / Petitt / Derryberry's) - Alpine's
+  referral is by mail and slow, and its own list misses the best local firms entirely.
