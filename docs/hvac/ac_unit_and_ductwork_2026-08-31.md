@@ -1561,3 +1561,101 @@ already carries a **"Duct Repair $350 — add a lead to garage"** line, so Derry
 duct work separately. If new transitions at the unit are a few hundred rather than $7,500, then the
 American Standard's extra 10,000 BTU of heat and 0.4 SEER2 come back into play at a comparable
 price. **If it is only offered as part of the $7,500, the Carrier wins on the finished job.**
+
+---
+
+# 🌡️ THERMOSTAT FOR THE NEW CARRIER — researched 2026-09-10 6:20 PM
+
+Jeff: *"What thermostat will work with HA, the app and the Carrier"* → *"I want one that is most
+compatible with our app and gives the most integration."*
+
+## 🔴 FIRST — TWO HARD FACTS FROM CARRIER'S OWN 48NL-B INSTALL MANUAL (`48NL-01SI`, 47 pages)
+
+### 1. "Do not use any type of POWER-STEALING thermostat. Unit control problems may result."
+
+Verbatim from page 14. **A C wire is mandatory on this unit.** That kills the no-C-wire options —
+including the **Sensi ST55** I listed earlier as "works without a C wire." **On this unit, don't.**
+🟢 Jeff has a C wire; the existing LUX is powered from it.
+
+### 2. 🔴 THE LEAK DISSIPATION SYSTEM — AND IT CORRECTS WHAT I TOLD HIM EARLIER TODAY
+
+Page 14, verbatim: *"This unit is equipped with the Puron Advance (R-454B) leak detection and
+dissipation system… The dissipation control board monitors the refrigerant sensor continuously.
+**If a sufficient concentration of refrigerant is detected within the conditioned air stream**, the
+dissipation board will **remove any call for cooling or heating and energize continuous fan.**"*
+
+Recovery: fan runs 5 more minutes · **cooling stays blocked** · gas heat is allowed · then calls are
+restored once the reading holds below threshold.
+
+🔴 **I TOLD JEFF AT 5:16 PM THAT HIS PACKAGE UNIT WAS "LARGELY IMMUNE" TO A2L SENSOR FALSE ALARMS
+BECAUSE EVERYTHING SITS OUTSIDE. THAT IS NOT RIGHT.** The **RDS reads the CONDITIONED AIR STREAM** —
+i.e. the air coming back from inside his house. Household VOCs can reach it through the return.
+It is **less exposed than a sensor in an indoor closet air handler, but it is not immune.**
+*Correcting it here rather than leaving a comfortable wrong answer in the record.*
+
+**Practical consequence worth knowing before it happens:** if the AC ever quits cooling while the
+**fan runs continuously**, that is the dissipation board, not a broken compressor. The DSB has a
+**test button** and two LEDs behind the control access panel, and **fault-code history** (hold
+5–29 s to display it). *Check that before anyone hunts a refrigerant leak.*
+
+### 3. Wiring shape — it is a SPLICE BOX, not a terminal strip
+Six 18-gauge pigtails leave the control box, identified **by colour: red, green, yellow, brown,
+blue, white.** No. 18 AWG up to 100 ft, no. 16 AWG beyond. **Confirm the colour→function map on the
+unit's own wiring diagram at install — do not assume from convention.**
+
+⚠️ **Also relevant to the duct argument:** the manual specifies a **Required Minimum Dissipation
+Airflow** that must be met in continuous-fan mode. A restrictive duct run is no longer only a
+comfort/efficiency question on an A2L unit — it is tied to a safety function.
+
+## 🏆 THE ANSWER: **ecobee Smart Thermostat PREMIUM**
+
+**Why it wins on "most integration", from HA's own docs:** *"The cloud integration exposes more
+sensors and supports `ecobee.set_climate_hold`; **Matter just gives you the thermostat as a generic
+climate entity**."*
+
+| what lands in HA → the app | ecobee Premium | a Matter-only stat |
+|---|---|---|
+| `climate.*` modes + setpoints + `target_temp_low/high` | ✅ | ✅ |
+| **per-room temperature** (SmartSensors) | ✅ | ❌ |
+| **per-room humidity** | ✅ | ❌ |
+| **per-room OCCUPANCY** (`binary_sensor.*`) | ✅ | ❌ |
+| **onboard VOC + CO₂ + humidity** | ✅ (Premium only) | ❌ |
+| outdoor temp via weather API | ✅ | ❌ |
+| `ecobee.set_climate_hold` service | ✅ | ❌ |
+
+**Why it fits THIS app specifically:**
+- The **air quality card already exists** (one of the four loaders given polling on 09-05) and has
+  **no local source today.** The Premium feeds it real VOC and CO₂ from inside the house.
+- **GUARDIAN gains per-room occupancy** — a security surface that does not exist today.
+- **Real indoor humidity**, which is directly useful against the damp duct insulation and the
+  crawl-space encapsulation decision. It turns "did that work?" into a measurement.
+- It fixes the **"house gets too cold"** complaint at the root — room sensors let it balance on
+  occupied rooms instead of one hallway wall.
+
+🟢 **AND IT DELETES A FRAGILE SUBSYSTEM.** Today the thermostat reaches the app through
+`functions/api/climate.js` — a 4-step Azure B2C flow to `myluxstat.io`, entirely outside HA, and the
+source of the "requires login every time" bugs fixed twice in this record. **Verified 2026-09-10:
+`isonline: false`, last connected 2026-09-08.** An HA-native `climate.*` entity reaches the app
+through the same `haFetch()` path as every other card and that whole file goes away.
+
+### The honest catch, and the hedge
+🔴 **The rich integration is CLOUD** — the same class of dependency that is failing on the LUX right
+now. **But the Premium is ALSO a Matter device** (the **Enhanced is not** — it must be the Premium).
+Pair it to the Matter Server already installed (#64, 08-24) and local basic control survives an
+ecobee cloud outage. Rich when the cloud is up, still a thermostat when it is not.
+
+### Price — checked 2026-09-10, not from memory
+| | |
+|---|---|
+| MSRP | $259.99 |
+| ecobee direct | $229.99 |
+| Amazon | $226.99 |
+| **Walmart** | **from $189.00** (also listed $214.89) |
+| extra SmartSensors | **$50** each · one is bundled |
+
+💵 **AND DANIELS ALREADY HAS A THERMOSTAT IN HIS $8,200.** Ask Ryan to credit that line or fit this
+one instead — that is the real cost, not the sticker.
+
+## Still to do
+- Confirm the colour→function map on the unit's own diagram at install time.
+- Decide how many SmartSensors ($50/room) — the answer probably comes from which rooms run cold.
