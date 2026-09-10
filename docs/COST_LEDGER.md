@@ -341,3 +341,31 @@ the file, the line and the exception in one shot.
 said `on`. `Verify-CameraStreams.ps1` said **ALL GOOD 6/6** — before and after — because it tests
 go2rtc streams, not detections. **Every green light in the house was green while the feature was
 dead for five days.** A health check that cannot fail when the feature fails is not a health check.
+
+## 2026-09-10 — I RECOMMENDED THE CORE UPDATE ON HALF THE HOMEWORK. JEFF CAUGHT IT.
+
+**Cost: nothing, because he stopped me.** Jeff: *"You need to double check all that crap with the
+record."*
+
+I researched all six pending updates, read every release note, and recommended taking HA Core
+2026.9.1 — reasoning that the 09-04 Python 3.14 fear did not apply because **`2026.9.0b1` is
+already Python 3.14** (true, and verified live). **The Python half was right and the conclusion was
+wrong.**
+
+`COST_LEDGER` 09-04 names the real mechanism: **the newer `aiofiles` removed `aiofiles.base.wrap`**,
+which `blinkpy` and `alexapy` both import. **Python was the ride, not the reason.** So "b1 is
+already 3.14" proves nothing about safety.
+
+**The check I had not done:** `alexa_media_player` **v5.15.7 is the newest release there is
+(2026-07-23) and it pins `alexapy==1.29.25`.** `alexapy 1.30.0` exists and classifies Python 3.14,
+but the component has not adopted it. **The unblock is not available yet.** Verdict flipped to HOLD.
+
+🔴 **THE PATTERN: I read six sets of release notes and skipped the one lookup that mattered.**
+Depth of research is not the same as answering the question. The question was never "what is in
+2026.9.1" — it was **"has the thing that broke it on 09-04 been fixed."**
+*Same shape as the ledger's own 09-04 entry: a rollback plan is not homework.*
+
+🟢 **Two record errors found in the same pass**, both now corrected in OPEN_ITEMS #181:
+`COST_LEDGER` 09-04 claims the 2026.9.0 update "moves the container to Python 3.14" — b1 already
+was, proven by today's live tracebacks. And `OPEN_ITEMS #48` still lists `vizio` as installed; it is
+not in the config entries any more.

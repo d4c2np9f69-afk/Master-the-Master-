@@ -3928,3 +3928,74 @@ the originals go `unavailable`. **That is not knowable without doing it.**
 3. **Blitzortung** and **MercedesMe** — trivial
 4. **Z2M — NOT YET.** With the repeater, with the baseline diff, with #84/#85 in the same restart.
 5. **Traccar — skip.** It is stopped on purpose.
+
+### 🔴 #181 CORRECTED — I TOLD JEFF TO TAKE THE CORE UPDATE. THAT WAS WRONG. 2026-09-10 18:45
+
+**Jeff: *"You need to double check all that crap with the record."* He was right, and checking it
+reversed the answer.**
+
+## What I said, and why it was wrong
+
+I wrote *"the 09-04 Py3.14 fear does not apply — 2026.9.0b1 IS already Python 3.14."* **The Python
+half of that is correct. The conclusion I drew from it is not.**
+
+**`COST_LEDGER.md` 2026-09-04, verbatim — the actual mechanism:**
+> *"I installed HA Core **2026.9.0b1 → 2026.9.0** at 13:41. It moves the container to Python 3.14,
+> whose **newer `aiofiles` removed `aiofiles.base.wrap`**. Both `blinkpy` and `alexapy` import it, so
+> **the Blink and Alexa Media CUSTOM integrations failed at import** — 64 entities unavailable."*
+
+🔴 **THE CAUSE WAS `aiofiles`, NOT PYTHON.** `aiofiles.base.wrap` was removed by the **aiofiles
+library** (25.1.0). Python 3.14 was the ride it arrived on, not the reason. **So "b1 is already
+3.14" does not make the update safe — it was never the version of Python that mattered.**
+
+## The check that actually decides it — done today against PyPI and GitHub
+
+| | |
+|---|---|
+| `alexapy` latest on PyPI | **1.30.0**, 2026-07-22, classifies Python 3.14 ✅ |
+| `alexa_media_player` latest release | **v5.15.7**, 2026-07-23 — and it **pins `alexapy==1.29.25`** |
+| Any alexa_media release mentioning aiofiles / Py3.14 / alexapy 1.30.0 | **NONE** |
+| Jeff's installed version | **v5.15.7**, `alexapy==1.29.25` — i.e. already the newest there is |
+
+🔴 **THE UPSTREAM FIX EXISTS BUT THE COMPONENT HAS NOT PICKED IT UP.** The 09-04 hard stop said
+*"no core update until blinkpy and alexapy ship Python 3.14 builds."* Both **libraries** now do —
+but **`alexa_media_player` still pins the old alexapy**, so in practice the block stands.
+**There is no newer alexa_media to update to first. The unblock is not available yet.**
+
+## 🟢 One thing HAS improved, and it halves the risk
+
+**`blink` is no longer a custom component.** Verified live today: `manifest/list` returns **8**
+custom integrations and blink is not among them; `/api/diagnostics/config_entry` reports
+`is_built_in: True`, `requirements: ['blinkpy==0.25.9']`. It was swapped to built-in on 09-09.
+**So one of the two 09-04 casualties cannot recur. `alexa_media` is the entire remaining exposure.**
+
+## ⚠️ The one thing I could NOT determine
+**Which `aiofiles` version core 2026.9.1 pins.** That is the actual decider and it is not in the
+release notes. Without it, recommending the update is guessing — **which is exactly the 09-04
+mistake, wearing better research.**
+
+## ✅ REVISED VERDICT
+
+| update | was | **now** |
+|---|---|---|
+| **HA Core 2026.9.1** | 🟢 take | 🔴 **HOLD** |
+| Mosquitto 7.1.1 | 🟢 take | 🟢 **take** — unchanged, it is an add-on and does not touch the core Python env |
+| Blitzortung v1.7.1 | 🟢 take | 🟢 **take** — HACS integration, no core change |
+| MercedesMe v0.40.0 | 🟢 safe | 🟢 **take** |
+| Z2M 2.14.1 | 🔴 hold | 🔴 **hold** |
+| Traccar | skip | skip |
+
+**What would unblock the core:** an `alexa_media_player` release that pins **alexapy ≥ 1.30.0**.
+Watch its releases page. Until then the answer is no, and *"he said go" is not permission to skip
+preparation* — the ledger's own words from that day.
+
+## 🔴 TWO RECORD CORRECTIONS FOUND WHILE DOING THIS
+
+1. **`COST_LEDGER.md` 09-04 says the 2026.9.0 update *"moves the container to Python 3.14."* That is
+   WRONG.** The 08-30 entries state twice that **`2026.9.0b1` ships Python 3.14**, and **I verified
+   it live today** — every traceback in this morning's `system_log` reads
+   `/usr/local/lib/python3.14/…`, on b1. The box was already on 3.14 *before* 09-04. The differing
+   ingredient between b1 and stable was **aiofiles**, not Python.
+2. **`OPEN_ITEMS #48` lists `vizio` as a loaded integration** (08-23). It is **not in the config
+   entries any more** — checked today, 63 entries, 38 domains, no `vizio`. That entry is stale, and
+   it means 2026.9.1's Vizio fix is irrelevant here.
