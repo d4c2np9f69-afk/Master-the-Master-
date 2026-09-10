@@ -3437,3 +3437,156 @@ was flowing normally. **Do not treat it as evidence of anything.**
 `crit: 0` — no `cam-alert` finding. On 09-09 the same check produced
 `NO Blink motion has reached HA in 128.9 h`. **The check built last night is what made this
 morning's recovery visible in one line instead of a half-day investigation.**
+
+---
+
+## #176 — 🔴 FIVE DAILY JOBS SILENTLY SKIPPED TODAY, INCLUDING THE OFF-SITE BACKUP. 2026-09-10 07:53
+
+**Found by the whole-stack audit Jeff asked for. Nothing in the house said a word.**
+
+### The measurement — `Get-ScheduledTaskInfo`, read live 07:47
+
+| task | last run | next run | missed |
+|---|---|---|---|
+| **HCC Beehive Backup Sync** | 09-09 06:30 | **09-11** 06:30 | 1 |
+| **HCC Master Record Update** | 09-09 05:45 | **09-11** 05:45 | 1 |
+| **HCC Utility Billing Cycle** | 09-09 06:15 | **09-11** 06:15 | 1 |
+| **HCC Clip Archive Pull** | 09-09 04:00 | **09-11** 04:00 | 1 |
+| **HCC Clip Archive Purge** | 09-09 04:30 | **09-11** 04:30 | 1 |
+
+All five are `MSFT_TaskDailyTrigger`, `DaysInterval 1`, `StartWhenAvailable True`, **enabled and
+Ready**. They skipped 09-10 entirely and the scheduler pushed the next run out a full 48 hours.
+
+🔴 **The machine was NOT asleep.** `powercfg SUB_SLEEP STANDBYIDLE` = **0** (never), and the
+System log shows exactly one clean reboot — **09-09 22:03:32, TrustedInstaller, a Windows
+Update** — and **no sleep/resume transitions in 36 h**. The box was up all night. The tasks were
+Ready. They did not fire.
+
+🔴 **THE CAUSE IS NOT ESTABLISHED AND I AM NOT INVENTING ONE.** The reboot is the only event in
+the window, which makes it the obvious suspect, but "obvious suspect" is how the last five wrong
+theories started (#171). What IS established is the consequence.
+
+### What it cost, and what was done about it
+
+**The off-site HA backup did not run.** `HCC-Beehive-Backup-2026-09-10.tar` did not exist; the
+newest was 09-09. That is the file the whole disaster-recovery plan rests on, and it is the one
+that silently did not happen.
+
+✅ **All five re-run at 07:53:53 via `Start-ScheduledTask`** — run exactly as designed, not by hand:
+
+| proof | value |
+|---|---|
+| master record rebuilt | `HCC_MASTER_RECORD.md` mtime **09-10 07:54:07** |
+| clip archive worked | `D:\HCC-Clip-Archive` 25 → **34** files (purge removed 6, pull added 15) |
+| backup running | `HCC-Beehive-Backup-2026-09-10.tar.partial` writing at 07:53:57 |
+| scheduler recovered | all five `NumberOfMissedRuns` 1 → **0**, next run **09-11** |
+
+⚠️ **The purge was dry-run FIRST** (`-WhatIf`): 6 files / 10.0 MB, five of them the byte-identical
+1,984,293-byte `301_driveway` duplicates of #29. Expected, and correct.
+
+### 🟢 THE REAL FIX — `check_scheduled()` added to `HCC-Audit.py`
+
+**Nothing anywhere watched Windows Task Scheduler.** `check_entities`, `check_addons`, `check_app`
+and `Verify-CameraStreams.ps1` all passed while the backup was not running — the exact
+green-component/dead-feature shape of #167, #173 and #174.
+
+Eight jobs now checked for freshness against **cadences read off the live triggers, not guessed**
+(daily → late at 26 h; the hourly audit → 2 h; the 15-min battery logger → 1 h), plus two that
+must be **Running** right now (`HCC go2rtc camera streams`, `HCC UPS Guard`).
+`HCC go2rtc Camera Feed` is excluded on purpose — it is the deliberately-disabled orphan of #38b.
+
+🟢 **PROVEN BOTH WAYS — `HCC-Scripts/test-audit-additions.py`, 13/13 passing.**
+Healthy house → **no findings** (it does not fire vacuously). Then, driven with injected data:
+the real 09-10 five-job miss → **5 FAILs naming all five**; go2rtc stopped → FAIL; the audit's own
+heartbeat 3.3 h stale → FAIL; a task deleted → FAIL; a task disabled → FAIL; non-zero exit → WARN;
+scheduler unreadable → WARN **and** coverage prints `NOT VERIFIED` rather than implying a pass.
+**Task Scheduler, HA and CodeProject.AI were never touched by the test.**
+
+---
+
+## #177 — 🟢 THE FIRE TV POPUP IS NOT BROKEN. The logged error is last night's own test. 2026-09-10
+
+**I nearly spent the morning on this. Reading the trace instead of the log stopped it.**
+
+The audit FAILs on this, three times over:
+
+```
+automation.hcc_ai_camera_popup_on_fire_tv: Error executing script. Error for call_service at pos 2
+homeassistant.helpers.template: Template variable error: 'dict object' has no attribute 'event'
+  when rendering the popup title from trigger.event.data.name
+```
+
+### What the traces actually show — 5 runs at today's 06:16:34 motion
+
+| run | script_execution | error |
+|---|---|---|
+| 06:16:34.659 | failed_conditions | None |
+| 06:16:34.670 | failed_conditions | None |
+| **06:16:34.686** | **finished** | **None** |
+| 06:16:34.724 | failed_single | None |
+| 06:16:34.838 | failed_conditions | None |
+
+**It ran and it finished.** The three `failed_conditions` are the parked-GLE / far-field vehicle
+filter doing its job; `failed_single` is `mode: single` correctly dropping an overlapping run.
+
+🔴 **The error is dated 2026-09-09 19:46:21.** Proven, not assumed: every trace carries
+`last_triggered: 2026-09-10T00:46:20.740385Z` as the PRIOR value — **09-09 7:46:20 PM CT**, which
+matches the log's `first_occurred` to the second. That is the previous session's **hand-fired
+test** (#172: *"I asked Jeff to confirm a TV popup using a test frame containing a CAR"*).
+A manually triggered automation has **no `trigger.event`**, so the template throws. The `default()`
+filter cannot save it — the attribute error happens before `default` is ever applied.
+
+⛔ **DO NOT "FIX" THIS AUTOMATION ON THE STRENGTH OF THAT LOG LINE.** It is the same trap the
+record already paid for on 08-27: *"chased a `W/System.err` stack trace as the root cause for
+hours — it also fires when it WORKS."* Cameras are frozen; there is nothing here to change.
+
+### The one genuine (small) gap, NOT acted on — needs Jeff's yes
+
+**This automation cannot be manually tested.** Any `automation.trigger` on it errors out, which
+matters because a manual fire is how a session checks the popup without waiting on real motion.
+A `trigger.event is defined` guard would fix it. **It is a camera-stack change and
+`Verify-CameraStreams.ps1` PASSES (6/6 at 07:44), so the freeze rule applies: it needs a clear
+yes.** Not urgent, not a fault.
+
+---
+
+## #178 — 🟡 The audit was measuring outage length off a timestamp a RELOAD resets. Fixed 2026-09-10
+
+`check_entities()` measured "how long has this been unavailable" from **`last_changed`** on
+`/api/states`. **HA resets `last_changed` when an entity is removed and re-added, which an
+integration reload does.** `media_player.garagepc` carries `last_changed 2026-09-09T23:47:34Z` —
+an alexa_media reload — while GaragePC has been off the LAN since **09-01** (#112).
+
+This is the **third** member of a family this project has already paid for twice:
+
+| | trap |
+|---|---|
+| #68 | `last_updated` does not move when an MQTT value repeats |
+| #170 | a parked phone's `device_tracker` does not move |
+| **#178** | **`last_changed` is RESET by an integration reload** |
+
+Every one is a timestamp on the state object trusted as a duration when it is not one.
+
+**Fix:** `true_state_age_min()` asks the **recorder** — which stores the transitions themselves —
+and the finding now uses the longer of the two and **prints its source**, e.g.
+`unavailable for 13.2 h [last_changed]` vs `[recorder]` vs `[recorder, >=14.0 d]`.
+It falls back to `last_changed` when history is unavailable and **says so** instead of quietly
+printing the shorter, wrong number.
+
+### 🔴 A RETRACTION, IN THE SAME BREATH — my own first reading of this was wrong
+
+I first wrote that the recorder proved a **7-day** garagepc outage against the audit's 13 h. **It
+does not.** A 7-day history window returned one row stamped `2026-09-03T12:50:40` — and that is
+**the window's own start time**, which is what HA stamps the synthesised opening state with. It
+was never a transition. Widening to 14 days shows the real series ends at **`idle`, 08-28
+11:30:18**, with nothing recorded since.
+
+So the honest position: **the trap is real and the fix is right, but garagepc is not the proof of
+it** — that entity simply stops being recorded, so the recorder cannot date its outage either.
+*Same shape as #173's own retraction: a fault read out of an artifact I had just created.*
+
+🟢 **PROVEN BOTH WAYS anyway, on injected data** (`test-audit-additions.py`, 4/4): a real
+9,000-minute outage is reported as ~9,000 min and not the reload watermark; an outage older than
+the window is flagged **capped** (`>= N days`); a recorder tail that disagrees with the live state
+returns `None` and falls back rather than lying; and an unreachable recorder returns `None`
+without raising.
