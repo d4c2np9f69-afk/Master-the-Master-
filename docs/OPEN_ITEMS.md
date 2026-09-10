@@ -3707,3 +3707,60 @@ copies reach `D:\HCC-Clip-Archive` then. **Revert if ever needed:** original con
 
 ⚠️ **`301_front_doorbell.mp4` is still the 40-byte stub from 08-19** — that camera has not had a
 detection since the change. Expected, not a fault; it will refresh on its next one.
+
+---
+
+## #180 — ✅ THE ALERT LOGIC WAS BROKEN THREE WAYS. FIXED AND CONFIRMED BY JEFF. 2026-09-10 18:26
+
+**Jeff, 18:26, on seeing the test push land: *"That worked"*.**
+
+Found by reading the automation's own config out of a trace, after Jeff said —
+correctly — *"you just sitting there firing test and making shit up is not getting it… Find the
+root cause, trace it back and fix it."* **He was right. I had identified the inverted alerting at
+16:08 and then asked permission instead of fixing it.**
+
+### The three defects, all in `AI Object Detected Notify` (packages/hcc.yaml)
+
+**1. 🔴 `mode: single` — IT WAS DISCARDING MOST DETECTIONS.**
+CodeProject.AI fires **one event per detected object**. A 5-object scan fires 5 events in the same
+millisecond, and `mode: single` runs ONE and drops the rest.
+**Measured at 17:08:36: 1 `finished`, 4 `failed_single` — an 80% drop rate on one scan.**
+🔴 **A PERSON was silently discardable because a car happened to be reported first.**
+Sister automation `hcc_clip_archive` was already `mode: queued, max: 10` — the pattern was known
+and this one was left on `single`.
+
+**2. 🔴 THE MUTE WAS APPLIED BEFORE THE BRANCH — a car or a bird silenced people.**
+The 15-minute per-camera mute sat as a top-level condition ahead of the `choose`. So any vehicle or
+animal alert muted that camera, and **a PERSON walking up inside that window produced nothing.**
+
+**3. 🟡 THE ANIMAL BRANCH HAD NO CONFIDENCE FLOOR.** Vehicle carried two filters (far-field
+`box_area`, parked-GLE centroid+GPS). Animal carried none. Result, measured 2026-09-10:
+**a bird at 30.078% pushed Jeff's phone at 16:08 while a truck at 83.5% correctly did not.**
+
+### The fix — `automation.hcc_ai_notify_v2`, in automations.yaml
+
+Rebuilt in **`automations.yaml`** (writable through the config API — **no Studio Code Server, no
+hand-edited YAML, no HA restart**, avoiding the 08-16 silent-YAML-break). Old one turned **OFF**.
+
+- `mode: queued`, `max: 10`
+- **PERSON: always alerts. Never muted, no confidence floor.**
+- **VEHICLE:** mute applies + both original filters, unchanged
+- **ANIMAL:** mute applies + **confidence >= 60**
+
+### 🟢 PROVEN BOTH WAYS, ON A REAL PUSH JEFF SAW
+
+| test | required | actual |
+|---|---|---|
+| person 88.5% **with the camera deliberately muted** | must alert | ✅ **PUSH SENT** — `mobile_app_jeffs_iphone :: 👤 Person at / Driveway — person detected`, trace `finished` |
+| **bird 30.078%** — the exact 16:08 detection | must be silent | ✅ **no notify call in the run** |
+| dog 82% | must alert | ✅ template renders True |
+| bird 47.7% | silent | ✅ False |
+| healthy house | no vacuous firing | ✅ |
+
+**`Verify-CameraStreams.ps1` ALL GOOD 6/6 before and after, same PID 3668.** The camera stack,
+go2rtc, HomeKit and the popup frames were not touched.
+
+**REVERT:** turn `automation.ai_object_detected_notify` back on and `hcc_ai_notify_v2` off. The old
+config is unchanged in `packages/hcc.yaml`.
+
+⚠️ **Do not put a mute ahead of the `choose` again, and do not set mode back to `single`.**
