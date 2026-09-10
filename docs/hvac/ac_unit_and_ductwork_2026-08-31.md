@@ -1400,3 +1400,25 @@ Strongest reputation of the three (5.0/499, TN-64284 mech+plumbing+**gas**), lea
 this exact scope. **The twist fix is the question to put to them**, same as the other two got.
 
 **Do NOT re-raise the breaker with them.** See the settled note above.
+
+---
+
+## ✅ JEFF'S CALL 2026-09-10 4:09 PM — **CARRIER 48NL-B300603, THROUGH DANIELS.**
+
+Jeff: *"I'm thinking the carrier is the best option right now."*
+
+**$9,000 delivered** — unit $8,200 + $800 extended warranty (all labour and freon, 10 years), with
+the twist fix and the new supply/return flex included. 2.5 ton, 60,000 BTU, 13.4 SEER2, R-454B,
+**lifetime stainless heat exchanger** (register within **90 days** or it drops to 20 years).
+
+**Not final until Petitt's sheet lands Friday morning** — but this is the standing pick and the
+bar the others have to clear.
+
+🔴 **THE ONLY THING STILL OWED BEFORE SIGNING: the flex diameters in writing.** The revised
+proposal deleted *"16" flex supply / return"*, the *"16"–14" reducer"* and the *875 CFM* line.
+That connection work is the entire reason this counts as turnkey.
+
+⛔ **Do not re-open the Goodman-vs-Carrier comparison.** It was decided on verified specs: same
+tonnage, same 60,000 BTU heat, same 13.4 SEER2, same installer, same scope — the $400 buys a
+lifetime stainless heat exchanger instead of 20-year aluminized, R-454B (GWP 466) instead of R-32
+(675), and 90 days to register instead of 60. Nothing was traded away for it.
