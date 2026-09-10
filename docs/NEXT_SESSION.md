@@ -1,3 +1,55 @@
+# 🟢 2026-09-10 THURSDAY — THE CAMERAS ARE FIXED. DO NOT UNDO ANY OF THIS.
+
+**Three real defects found and fixed, every one proven. Jeff confirmed the phone push himself:
+*"That worked"*. Then he said: *"Good it works lock it down."* This block is the lock.**
+
+## 🔒 WHAT MUST NOT BE TOUCHED
+
+| entity | state | why |
+|---|---|---|
+| `automation.hcc_ai_notify_v2` | **ON** | the fixed alerting. Lives in `automations.yaml` |
+| `automation.ai_object_detected_notify` | **OFF — LEAVE IT OFF** | the broken original in `packages/hcc.yaml` |
+| `automation.hcc_clip_archive` | **ON, `mode: single`** | save_video → delay 3 s → archive_clip |
+
+⛔ **DO NOT** set `hcc_ai_notify_v2` back to `mode: single`.
+⛔ **DO NOT** put a mute condition ahead of its `choose`.
+⛔ **DO NOT** turn `ai_object_detected_notify` back on — an automation in a non-default state is
+EVIDENCE, not a fault (the 08-27 lesson, which cost a whole day).
+⛔ **DO NOT** add `shell_command.extract_clip_frame` to the archive — that writes the file
+`camera.snapshot` writes and resurrects the stale-popup-frame bug (#61b).
+
+## The three defects, for anyone tempted to "tidy" this
+
+1. **`mode: single` was discarding most detections.** CodeProject.AI fires **one event per object**;
+   a 5-object scan fires 5 events in one millisecond. Measured 17:08:36: **1 finished, 4
+   `failed_single` — 80% dropped.** A PERSON was discardable because a car was reported first.
+2. **The 15-minute mute sat AHEAD of the `choose`** — so a car or a bird silenced a PERSON arriving
+   in that window.
+3. **The animal branch had no confidence floor** while vehicle had two filters. A **bird at 30.078%
+   pushed his phone at 16:08** while a **truck at 83.5%** correctly did not. Animals now need ≥60%.
+
+**Proven:** person 88.5% **with the camera deliberately muted** → real push Jeff saw · bird 30.078%
+→ no notify call · dog 82% → alerts · `Verify-CameraStreams.ps1` **6/6 before and after, same PID**.
+
+## Also fixed today
+- **Clip producer restored** (#179). `301_driveway.mp4` moved for the first time since **21 Aug**;
+  `back_left` too, both on REAL motion, both valid MP4. ⚠️ Proven on **2 of 4** cameras —
+  `front_right` and the doorbell have no clip on the Sync Module card to fetch, and the doorbell has
+  its own upstream Blink fault on the `doorbells/…/thumbnail` endpoint.
+- **Blink motion came back on its own** (#175) after 5 days dead. Cause never established.
+- **#176** five daily scheduled jobs silently skipped, including the off-site backup. Caught up, and
+  `HCC-Audit.py` now watches Task Scheduler.
+
+## 🔴 THE RULE I EARNED TODAY — READ THIS BEFORE TESTING ANY ALERT
+**DO NOT fire synthetic `codeproject_ai.object_detected` events on this house.** That event has
+**four** consumers, not one: the phone push, the **AI Doorbell sensors (person-only → HomeKit →
+Apple TV popup)**, the Fire TV popup, and the clip archive. I tested the push branch and shipped
+the other three at Jeff's television — **twice** — with an hours-old picture attached. He asked
+*"what is that junk false alarm."* It was me. **Prove notify branches with a template render, or
+wait for real motion.**
+
+---
+
 # 🔴 2026-09-09 WEDNESDAY AM — THE HOUSE AI WAS DEAD 5 DAYS. FIXED. READ THIS FIRST.
 
 ## What was broken (09-04 11:51:56 CT → 09-09 10:25 CT)
