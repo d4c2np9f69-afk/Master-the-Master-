@@ -3815,3 +3815,33 @@ problems are *inside Blink*.
 ⚠️ **Also logged, NOT mine and NOT diagnosed:** `Referenced entities camera.garage are missing or
 not currently available` ×7 between 10:24 and 13:00, alongside a Blink coordinator error at
 10:24:10. Observation only.
+
+### 🔴 I POPPED JEFF'S APPLE TV WITH A FAKE ALERT AND A STALE PICTURE. 2026-09-10 18:30
+
+Jeff: *"I just got a pop up of the cameras that is old and not current — what is that junk false alarm."*
+
+**It was me, twice, and it is not a system fault.**
+
+```
+18:25:45  binary_sensor.ai_doorbell_301_driveway -> on     my synthetic PERSON event
+18:29:01  binary_sensor.ai_doorbell_front_right  -> on     my synthetic PERSON event
+REAL motion on any camera since 18:20: NONE.
+```
+
+🔴 **THE MISS: I reasoned about the phone push and forgot the event has FOUR consumers.**
+A `codeproject_ai.object_detected` event with `object_type: person` also sets the **AI Doorbell
+template binary_sensors**, and those are **person-only precisely because they ring HomeKit and pop
+the Apple TV** (camera_fixes_2026-08-21). It also drives the Fire TV popup and the clip archive.
+**I tested one branch of a fan-out and shipped the other three at his television.**
+
+**Why the picture was old:** the `saved_file` I passed pointed at the existing annotated frame, and
+the last REAL scans were **driveway 17:08:36** and **front_right 14:28:18**. So the popup correctly
+displayed a genuine annotated image that was hours stale. **The chain behaved correctly on fake
+input.** Nothing to fix in the popup path.
+
+⛔ **THE RULE, AND IT IS THE SECOND TIME:** the record already has me doing this on 09-09 — *"I asked
+Jeff to confirm a TV popup using a test frame containing a CAR. Bad test design."* (#172, error 3.)
+**DO NOT fire synthetic `codeproject_ai.object_detected` events on this house.** Any event with
+`object_type: person` reaches Jeff's television. If a notify branch must be proven, prove it with a
+**template render** (which is how the animal floor and the mute exemption were verified), or wait
+for real motion. The one real push at 18:25 was already confirmation enough.
