@@ -1190,3 +1190,79 @@ Not a mark against it; worth knowing when comparing brands.
 2. **Model numbers + refrigerant** on both tiers (American Standard/Trane went **R-454B**).
 3. **Who is right about the ducts** — Daniels' "supply only" vs Derryberry's full change-out.
 4. **Petitt has not quoted yet.**
+
+---
+
+# 🔄 DANIELS REVISED PROPOSAL — 2026-09-10 PM. **THE MODEL NUMBERS ARE IN.**
+
+Same job #1211, same PC-1211-1, same prices. Two lines changed and one spec went missing.
+
+## 🟢 THE MODELS — and they settle both open questions
+
+| | Goodman **P-1211-1** | Carrier **P-1211-2** |
+|---|---|---|
+| **Model** | **GPGM33006031** *(sheet prints `GGPGM33006031` — extra G, confirm before ordering)* | **48NL-B300603** |
+| Price | $7,800 | $8,200 |
+| Cooling | 2.5 ton | 2.5 ton |
+| **Gas heat** | **60,000 BTU** | **60,000 BTU** |
+| **Efficiency** | **13.4 SEER2** (GPGM3 line) | **13.4 SEER2**, 81% AFUE |
+| Refrigerant | **R-32**, GWP **675** | **R-454B** ("Puron Advance"), GWP **466** |
+| **Heat exchanger** | **aluminized steel — 20 yr** | **stainless steel — LIFETIME** |
+| Registration window | 60 days | 90 days |
+| Parts | 10 yr | 10 yr, **or** 5 yr parts + 3 yr labour |
+
+### ✅ Both worries from this morning are cleared
+
+1. **HEAT OUTPUT IS RIGHT.** I flagged that the Goodman 2.5-ton priced in this file was the
+   **40,000 BTU** `GPGM33004031`, a bigger drop than Jeff approved. **It is not that unit** — it is
+   the **60,000 BTU** `…006031`, against the old Nordyne's 72,000 and the 54,000 Jeff said was fine.
+   ⚠️ *That model read **OUT OF STOCK** at Alpine on 08-31. Daniels sources through a distributor,
+   not Alpine, so that is not necessarily a problem — but ask about lead time.*
+2. **THE EFFICIENCY TIE-BREAK IS SETTLED.** I said the call would flip if Daniels were quoting a
+   15.2 SEER2 Goodman against a 13.4 Carrier. **He is not.** `GPGM3` is the 13.4 line (`GPGM5` is
+   the 15.2). **Both units are 13.4 SEER2, both 60,000 BTU, both 2.5 ton, same installer, same
+   scope, same $800 warranty option.**
+
+🟢 **So the $400 is now a clean, like-for-like premium and it buys exactly three things:**
+**a lifetime stainless heat exchanger instead of a 20-year aluminized one**, **R-454B instead of
+R-32**, and **30 extra days to register the warranty.** Nothing is traded away for it.
+
+## What changed in the revision
+
+**ADDED:** *"New electrical whip for high voltage wires."* Good — that is the whip line item, now
+explicitly included.
+
+🔴 **REMOVED — and this is a spec that got LESS precise:**
+
+| first version | revised version |
+|---|---|
+| "New **16"** flex for return" | "New flex for return" |
+| "New **16"** flex for supply" | "New flex for supply" |
+| "New **16"-14" reducer** for supply pipe" | **gone entirely** |
+| "CFM for 2.5 tons is around 875" | **gone** |
+
+**Get the sizes put back in writing.** The 16→14 reducer was the tightest point in the whole quote
+(818 FPM against 627 FPM at 16"), and a quote that no longer names a diameter cannot be held to one.
+
+⚠️ **Still not in either version: the BREAKER.** The Goodman GPGM3 max fuse/breaker is **30 A** and
+the existing is **40 A** — it has to come down for either unit. The whip is now included; the
+breaker is not mentioned. Also still absent: Manual J / S / D and static pressure, which are ACCA
+QI items and therefore warranty conditions.
+
+## Where all five options stand — equal terms, unit only, 10-yr labour, existing ducts
+
+| | net | SEER2 | heat | heat exchanger |
+|---|---|---|---|---|
+| Daniels **Goodman** GPGM33006031 | **$8,600** | 13.4 | 60k | 20 yr aluminized |
+| 🟢 Daniels **Carrier** 48NL-B300603 | **$9,000** | 13.4 | 60k | **LIFETIME stainless** |
+| Derryberry **Bronze** (Am. Std) | **$9,098** | 13.4 | ? | **10 yr** |
+| Derryberry **Silver** (Am. Std) | **$11,870** | **15.2** | ? | 20 yr, **2-stage** |
+
+🟢 **Of the three 13.4 SEER2 options the Daniels Carrier is the cheapest AND the only one with a
+lifetime heat exchanger.** The Derryberry Bronze is $98 more for a 10-year heat exchanger.
+
+**The Silver remains the only genuinely different machine** — 15.2 SEER2, two-stage compressor and
+two-stage gas — at **$2,870 over the Carrier**.
+
+**Unchanged and still the fork worth the most money:** Daniels says the ducts are sound apart from
+the supply; Derryberry quotes **$7,800** to replace the lot. Nobody has given a linear footage yet.
