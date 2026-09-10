@@ -990,3 +990,104 @@ all. Jeff's own eyes on it, his call.
 > duct scope is in your number?"*
 
 **That single question makes all three quotes comparable and reveals how each one thinks.**
+
+---
+
+# 💵 QUOTE #1 IN — DANIELS, received 2026-09-10 10:54 AM. THE FIRST REAL NUMBERS.
+
+**Source:** email from `deliveries@payzer.com`, attachment `PC-1211-1.pdf`, and the live Payzer
+proposal pages behind "Review Proposal Options". Job **#1211**, technician **Ryan Mlckovsky**,
+issue date 09/10/2026. Read in full; **nothing was accepted, declined or signed.**
+
+## The numbers
+
+| | Goodman (prop 1211-1) | Carrier (prop 1211-2) |
+|---|---|---|
+| **Price** | **$7,800.00** | **$8,200.00** |
+| Extended warranty (optional) | **+$800.00** | **+$800.00** |
+| **All-in with labour cover** | **$8,600** | **$9,000** |
+
+**Extended warranty = "all labor and freon for 10 years."**
+
+## Scope — IDENTICAL wording on both proposals, verbatim
+
+```
+2.5-ton gas package unit
+Includes all material needed to complete install with labor and hauling away all trash
+New thermostat
+New portable concrete pad (if needed)
+New square to rounds
+New Flashing
+New 16" flex for return
+New 16" flex for supply
+New 16"-14" reducer for supply pipe
+Unit comes with a 10-year manufacture parts warranty
+CFM for 2.5 tons is around 875
+```
+
+## 🟢 What this confirms
+
+- **The twist fix IS priced in.** "New square to rounds" + new 16" flex on **both** supply and
+  return is the connection work Ryan described on site — supply straight out, return crossing over
+  ~5 ft out. It is not an extra.
+- **The damp supply line is covered** by the new 16" supply flex.
+- **The pad question is handled** — "new portable concrete pad (if needed)", which matters because
+  a Goodman cabinet is **51" deep** against the old Nordyne's 47.5".
+- **$7,800–$8,200 lands at the BOTTOM of the $8,000–$13,000 turnkey benchmark** in this file, and
+  that benchmark assumed complete duct replacement. Good number.
+
+## 🔴 What is NOT in it — ask before comparing to anyone else
+
+1. **It is FLEX, not fabricated sheet metal.** This document's plan specified **fabricated
+   rectangular plenums**; the quote is square-to-round adapters plus 16" flex. Cheaper and faster,
+   and legitimate — but **flex carries more friction than metal at the same diameter**, so it is a
+   real difference in method, not just wording.
+2. 🔴 **THE 16"→14" REDUCER IS THE TIGHTEST POINT IN THE QUOTE.** Using the proposal's own
+   **875 CFM**:
+
+   | duct | area | velocity at 875 CFM |
+   |---|---|---|
+   | 16" round | 1.396 sq ft | **627 FPM** — comfortable |
+   | **14" round** | 1.069 sq ft | **818 FPM** — inside the normal 700–900 band, upper-middle |
+
+   818 FPM is acceptable, not generous — and it is **flex**, which runs higher friction than metal
+   at the same velocity. The reducer exists to meet the existing supply pipe. **Ask why 14" rather
+   than carrying 16" further.**
+3. **No Manual J, Manual S or Manual D. No static pressure before/after. No mention of the return
+   grille free area.** Those are **ANSI/ACCA 5 QI items and therefore CONDITIONS of the
+   manufacturer warranty** — not optional extras. Not in this quote.
+4. **NO MODEL NUMBERS on either option.** This matters more than it looks — see below.
+5. **Electrical and gas are not itemised.** The breaker must come DOWN from the existing **40 A**
+   (Goodman 2.5 T max breaker is 30 A; the Blueridge is 25 A). "All material needed" may cover it;
+   confirm. Permits not mentioned.
+
+## 🔴 THE MISSING MODEL NUMBERS — the one thing to get before comparing
+
+Everything already researched in this file turns on which model:
+
+- **HEAT OUTPUT.** The old Nordyne is **72,000 BTU** heat. Jeff approved dropping to **54,000**
+  (*"The 54,000 BTU heat will be fine if the price is right"*). The Goodman 2.5-ton this file
+  priced carries **40,000 BTU** input / 32,000 output — **a bigger drop than he agreed to**. The
+  60,000 BTU Goodman was **out of stock** on 08-31. **Ask which one.**
+- **REFRIGERANT.** Goodman is **R-32 (GWP 675)**; Carrier went **R-454B (GWP 466)**. Jeff,
+  2026-09-09: *"Yes I want the most recent refrigerant."* Neither is newer — same A2L generation —
+  but **R-454B sits further from the next AIM Act threshold**, so on Jeff's own stated preference
+  the **Carrier** is the answer, and the $400 buys it.
+- **HEAT EXCHANGER WARRANTY.** Goodman = **20 years**. Carrier's needs checking. The Blueridge
+  owner-supply path was **LIFETIME**.
+
+## The apples-to-apples number for Petitt and Derryberry's
+
+**Petitt advertises 10-year parts AND LABOUR included.** The manufacturer covers **parts only,
+never labour** — which is exactly what Daniels' $800 add-on is selling. So the comparable figures
+are **$8,600 (Goodman) / $9,000 (Carrier)**, not $7,800 / $8,200.
+
+## Per-foot — Jeff's comparison method
+
+This quote is a **lump sum with no linear footage stated**, so it yields no $/ft on its own. The
+duct content is the **connection at the unit** (square-to-rounds, 16" flex both ways, one reducer),
+not house ductwork. **To get a rate out of Daniels, ask what he would charge per linear foot to
+replace branch runs** — that is the number that compares against the other two.
+
+⚠️ **Live proposal system.** The Payzer pages carry **Accept Proposal / Decline Proposal** with an
+electronic signature block. **Nothing was clicked.** Accepting is Jeff's, in his own hands.
