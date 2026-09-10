@@ -1360,3 +1360,22 @@ alternative, which happens to carry the worst warranty of the four.
 **The Derryberry Silver is the only proposal that is better rather than merely different**, and it
 costs $10,370 more. Whether two-stage comfort plus new ductwork is worth that is Jeff's call, not a
 technical one.
+
+---
+
+## 🛑 SETTLED 2026-09-10 — THE BREAKER IS NOT A FINDING. STOP RAISING IT.
+
+Jeff, 2026-09-10 4:07 PM: *"Stop worrying about the damn breaker. That's the least of my worries.
+Hell, I'll put a new breaker in — they're 10 bucks."*
+
+He is right and it was raised **three times in one session**. The 40 A → 30 A change is a **$10 part
+and ten minutes for a man who wired his own house and is comfortable in his own panel.** It is not a
+quote gap, it is not a risk, and it does not belong in a contractor comparison.
+
+**Do not list it as missing from any quote. Do not add it to a question list. It is done when he
+does it.**
+
+⚠️ **The wider rule, and this is the second correction of the same kind today** (see the per-foot
+retraction above and memory `user_jeff_profile`): **Jeff is the expert on the hardware and the
+buying. Bring him figures he cannot look up standing in his driveway — warranty clauses, GWP
+numbers, model cross-references, $/ft benchmarks. Do not bring him electrical chores.**
