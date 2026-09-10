@@ -3590,3 +3590,89 @@ it** — that entity simply stops being recorded, so the recorder cannot date it
 the window is flagged **capped** (`>= N days`); a recorder tail that disagrees with the live state
 returns `None` and falls back rather than lying; and an unreachable recorder returns `None`
 without raising.
+
+---
+
+## #179 — 🟢 FULL-DAY CAMERA FEATURE TEST, 2026-09-10. Jeff's idea, and it corrects me.
+
+Jeff, 4:16 PM: *"You should have a ton of data with all the people that have been here today — the
+camera should be showing all of the motion that was here and that should be your test on the
+system."* **He is right, and a whole day of contractor traffic with known ground truth is the best
+test this system has ever had.**
+
+### 🔴 FIRST — A CORRECTION TO WHAT I TOLD HIM AT 9:50 AM
+
+At 09:50 I reported *"we picked up his truck, not him"* and explained it as the documented Blink
+ceiling (one still per event, Blink picks the moment, the parked cars are always in frame).
+
+**Measured over the full day, that conclusion was WRONG — or rather, it was a 55-minute sample
+stated as a property of the system.**
+
+| | 08:16–09:10 window | full day, 05:00 → 16:20 |
+|---|---|---|
+| motion events | 7 | **52** (baseline ~9/day) |
+| **PERSON detections** | **0** | **10, across 5 of 6 cameras** |
+
+**Person detections, full day:** driveway 06:16:34 · 12:18:09 · 13:34:14 · 14:36:11 · 14:50:13 ·
+**front doorbell 14:46:32** · front_right 12:56:29 · 13:00:38 · back_left 07:54:34 ·
+backyard 13:40:46.
+
+🟢 **So person detection works, repeatedly, on the camera I said had missed.** The 08:16–09:10 gap
+was real but it was a **miss**, not a ceiling. *The lesson is the one already in the record: I drew
+a system-wide conclusion from one hour of data and said it with more confidence than the sample
+carried.*
+
+### 🔴 THE REAL FINDING — ALERT QUALITY IS INVERTED
+
+Read out of the automation **traces**, not `last_triggered`:
+
+| time | detection | push? |
+|---|---|---|
+| 14:50:13 | **truck 83.5%** | **no push** |
+| 14:52:13 | **car 80.0%** | **no push** |
+| **16:08:09** | **bird 30.1%** | 🔴 **PUSH SENT to Jeff's iPhone** |
+| 16:08:09 | bird 38.9% | no push (cooldown) |
+| 16:08:09 | bird 47.7% | no push (cooldown) |
+
+🔴 **A 30%-confidence BIRD pushed his phone. An 83% truck in the driveway did not.**
+
+The vehicle branch carries the parked-GLE and far-field filters (correct, and they worked all day).
+**The animal branch carries no confidence floor at all.** So the least reliable class of detection
+is the one with the fewest guards on it.
+
+This matters beyond annoyance. `SESSION_START.md`: *"Alert fatigue is a security failure, not an
+annoyance. Too many alerts → Jeff disarms Blink → every camera automation silently stops."* And
+Jeff, 2026-09-09: *"I don't want any more alerts of the failures of this project. I get 25 a day
+already."*
+
+**Not changed — cameras are frozen and this needs his yes.** The fix is one condition: a confidence
+floor on the animal branch (a bird at 30% is noise; a dog at 80% is not). **Ask before touching it.**
+
+### 🟡 A REAL GAP ON THE DOORBELL CAMERA, SELF-RESOLVED, CAUSE UNKNOWN
+
+`image_processing…301_front_doorbell_clipframe` scanned at **07:54:34** and then **not again until
+12:56:29** — while that camera logged motion at **08:16, 08:30, 09:02, 09:48, 10:36 and 10:56**.
+Six motion events, no scan, five hours.
+
+Verified at 09:50 that this was not the change-driven-sensor trap: `last_changed`, `last_updated`
+**and `last_reported`** were all frozen at 07:54:34, so it genuinely did not report. It was not the
+mute (`hcc_ai_mute_301_front_doorbell` expired 06:21:39) and the camera was armed.
+
+**It resumed on its own and has scanned normally since** (12:56, 13:06, 14:28, 14:46, 14:52).
+🔴 **Cause NOT established. Recorded as an observation, not a diagnosis.** Watch for a recurrence.
+
+### 🟡 CLIP PRODUCER — INSTALLED, NOT YET PROVEN BY A REAL EVENT
+
+`hcc_clip_archive` last fired **16:08:09**; the change went in at **16:12**. So it has not run since.
+
+Current file state confirms nothing downstream has refreshed yet:
+
+| file | size | frozen since |
+|---|---|---|
+| `back_left.mp4` | **1,181,636** | **09-10 16:11** ← my manual `save_video` test |
+| `301_driveway.mp4` | 1,984,293 | **08-21** (the #29 byte-identical duplicate) |
+| `front_right.mp4` | 1,966,208 | **08-15** |
+| `301_front_doorbell.mp4` | **40** | **08-19** (the #30 stub) |
+
+**The next real detection is the test.** Success = those three stale files carry today's date and a
+new timestamped copy lands on `D:\HCC-Clip-Archive`.
