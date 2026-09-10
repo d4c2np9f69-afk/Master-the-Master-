@@ -3764,3 +3764,54 @@ go2rtc, HomeKit and the popup frames were not touched.
 config is unchanged in `packages/hcc.yaml`.
 
 ⚠️ **Do not put a mute ahead of the `choose` again, and do not set mode back to `single`.**
+
+### 🔴 #179 CORRECTION — A DEFECT IN MY OWN AFTERNOON CHANGE, FOUND BY AUDITING IT. 18:30
+
+**Debugging Protocol rule 2: "audit my own recent changes as the prime suspect." Doing that found
+this.**
+
+At 16:12 I put `blink.save_video` ahead of the archive copy but **left `mode: queued, max: 10`.**
+CodeProject.AI fires **one event per object**, so the 17:08:36 driveway scan ran the archive
+**three queued times and called `blink.save_video` three times on the same camera, for the same
+clip, inside one second.**
+
+That is pointless Blink API traffic **on an account with a documented over-polling lockout**
+(#15 — the 08-19 auth code storm), and repeated copies of one clip is literally the #29
+duplicate-minting mechanism.
+
+✅ **`hcc_clip_archive` → `mode: single`.** One run per burst, which is correct — there is only ever
+one clip per motion event. **Trade-off accepted deliberately:** a SECOND camera detecting inside the
+same run gets its archive copy skipped. The archive is a convenience, not life-safety, and one clip
+beats five identical API calls. Verified live: `mode=single`, actions still
+`blink.save_video → delay 3s → shell_command.archive_clip`, three runs `finished` with `error=None`.
+
+### 🟡 HONEST LIMIT ON THE CLIP PRODUCER — it is proven on 2 of 4 cameras, not 4
+
+Read **locally** off HA (the Nabu Casa relay throws intermittent SSL EOF on these files — use
+`http://192.168.1.66:8123/local/...` for this check):
+
+| file | size | date | verdict |
+|---|---|---|---|
+| `301_driveway.mp4` | 1,180,887 | **09-10 17:08** | 🟢 refreshed on REAL motion |
+| `back_left.mp4` | 1,192,147 | **09-10 16:58** | 🟢 refreshed on REAL motion |
+| `front_right.mp4` | 1,966,208 | 08-15 | 🔴 unchanged |
+| `301_front_doorbell.mp4` | **40** | 08-19 | 🔴 still the #30 stub |
+
+🔴 **A SYNTHETIC EVENT CANNOT TEST THIS.** Fired one on `front_right` at 18:29:01: the automation ran
+`finished`, `error=None`, both `blink.save_video` and `shell_command.archive_clip` executed — **and
+the file did not move.** `save_video` can only save a clip that **already exists on the Sync
+Module's card**. Faking a detection does not make Blink record anything.
+
+**So the correct reading:** the producer works, and it works **on real motion where a clip exists**
+— proven twice. `front_right` and the doorbell have no recent clip on the card to fetch.
+
+⚠️ **The doorbell has its own upstream fault, in the log verbatim:**
+`blinkpy.auth — Connection error. Endpoint …/networks/228930/doorbells/96538/thumbnail possibly
+down or throttled` and `blinkpy.api — No network_id or id in response` (09-10 04:14:21).
+**The doorbell is a `doorbells/` endpoint, a different API path from the `cameras/` ones** — which
+is consistent with the standing record that the doorbell and front_right are the two cameras whose
+problems are *inside Blink*.
+
+⚠️ **Also logged, NOT mine and NOT diagnosed:** `Referenced entities camera.garage are missing or
+not currently available` ×7 between 10:24 and 13:00, alongside a Blink coordinator error at
+10:24:10. Observation only.
