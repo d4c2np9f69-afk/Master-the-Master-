@@ -1266,3 +1266,97 @@ two-stage gas — at **$2,870 over the Carrier**.
 
 **Unchanged and still the fork worth the most money:** Daniels says the ducts are sound apart from
 the supply; Derryberry quotes **$7,800** to replace the lot. Nobody has given a linear footage yet.
+
+---
+
+# ⚖️ HEAD TO HEAD — FINISHED JOB, NOT UNIT LINE. Jeff's framing, 2026-09-10 4:02 PM
+
+Jeff: *"Daniels' quote includes fixing the twist in the ductwork so that is basically a turnkey
+finish with a Carrier unit — cause that's the one I'll go with — versus the complete ductwork
+change out that Derryberry was insistent on doing plus the unit. That's the way I want you to
+look at it."*
+
+**🟢 CARRIER IS JEFF'S PICK. Compare total delivered cost.**
+
+## The two finished jobs
+
+| | **DANIELS + Carrier** | **DERRYBERRY Bronze** | **DERRYBERRY Silver** |
+|---|---|---|---|
+| Unit, net of discounts | $8,200 | $8,558 | $11,450 |
+| Labour to 10 years | +$800 | +$540 | +$420 |
+| Ductwork | **included** | +$7,500 *(after −$300 TVA)* | +$7,500 |
+| **TOTAL DELIVERED** | **$9,000** | **$16,598** | **$19,370** |
+| | | **+$7,598** | **+$10,370** |
+
+**Derryberry is $7,600 to $10,400 more for the finished job — 1.8× to 2.2× the Daniels price.**
+
+## What is actually in Daniels' "turnkey"
+
+New square-to-rounds · new flashing · **new flex for supply AND return** · new electrical whip ·
+new thermostat · new pad if needed · haul-away · all material and labour. **That is the twist fix**
+— supply straight out of the unit, return crossing over it ~5 ft out, which is what Ryan described
+on site. Existing branch runs, boots and registers stay.
+
+## What Derryberry's extra money buys — and the Bronze answer is uncomfortable
+
+**Bronze, +$7,598:** buys a complete duct change-out (main supply, return, leads, boots, registers,
+R8 flex) — **and a WORSE unit.** Same 13.4 SEER2, but a **10-year heat exchanger against the
+Carrier's LIFETIME**. So on the Bronze, the extra $7,598 buys ductwork *and takes warranty away.*
+
+**Silver, +$10,370:** buys the ductwork **plus a genuinely better machine** — 15.2 SEER2, two-stage
+compressor, two-stage gas, 20-yr HX, 12-yr compressor. That is a real upgrade, honestly priced.
+It is not a rip-off; it is simply a different, larger job.
+
+## 🔴 So the whole decision reduces to ONE question
+
+**Is a complete duct change-out worth $7,500 on this house?**
+
+**Against it:**
+- **Daniels put eyes on the ducts and said no** — sound apart from the supply, whose insulation is
+  damp. His new supply flex addresses exactly that.
+- The measurable precedent cuts the other way on value: the **07-25 duct-leak repair** saved
+  **441 kWh / 16.8% / ~$41 a month** of cooling. At $41/month, **$7,500 is a 15-year payback** —
+  and that $41 came from sealing a *leak*, not from replacing duct that was already sound.
+  **Replacing healthy duct saves nothing.**
+- The connection work at the unit is the hard-to-retrofit part, and **that is the part Daniels is
+  doing.** Branch runs can be replaced later, one at a time, if they ever prove to be the problem.
+- **$7,598 saved covers the crawl-space encapsulation ($600–950 in DIY materials) with ~$6,600
+  left over** — and encapsulation attacks the *cause* of the damp insulation, which neither
+  contractor's ductwork does.
+
+**For it:**
+- The branch runs are as old as the house. If they are leaking too, a new unit feeds tired duct.
+- Derryberry would be doing it once, with the unit out, which is the cheapest time to do it.
+
+## 🟢 THE TEST THAT SETTLES IT WITHOUT GUESSING
+
+**Static pressure, measured before and after.** If Daniels reads it and the numbers come back
+healthy, the ducts were fine and Derryberry's $7,500 would have been spent on nothing. If they come
+back bad, Jeff spends the money *then*, knowing why. It is also an **ACCA Quality Installation item
+and therefore a warranty condition** — so it is owed, not a favour.
+
+⚠️ **NO LINEAR FOOTAGE from Derryberry**, so $7,800 still cannot be checked against the
+**$35–55/lf Nashville** benchmark. It implies roughly **135–215 ft** to land in range.
+
+## 🔴 THE ONE THING TO NAIL DOWN BEFORE SIGNING DANIELS
+
+**The revised proposal DELETED the duct sizes.** The first version said *"New **16"** flex for
+supply / return"* and *"**16"–14" reducer**"* and *"CFM around 875."* The revision says only
+*"new flex."* **All three specs are gone.**
+
+The twist fix is the entire reason this counts as turnkey. **Get the diameters back in writing** —
+a quote that names no diameter cannot be held to one, and the 16→14 reducer was already the
+tightest point in the job (818 FPM against 627 FPM at 16").
+
+**Also still missing from Daniels:** the **40 A → 30 A breaker** change (the whip is now included,
+the breaker is not) and Manual J / S / D.
+
+## Verdict on Jeff's framing
+
+**Daniels + Carrier at $9,000 delivered is the strongest value on the table** — the only lifetime
+heat exchanger, the lower-GWP refrigerant, and $7,598 cheaper than the nearest complete-duct
+alternative, which happens to carry the worst warranty of the four.
+
+**The Derryberry Silver is the only proposal that is better rather than merely different**, and it
+costs $10,370 more. Whether two-stage comfort plus new ductwork is worth that is Jeff's call, not a
+technical one.
