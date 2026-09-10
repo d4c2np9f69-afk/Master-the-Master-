@@ -3845,3 +3845,86 @@ Jeff to confirm a TV popup using a test frame containing a CAR. Bad test design.
 `object_type: person` reaches Jeff's television. If a notify branch must be proven, prove it with a
 **template render** (which is how the animal floor and the mute exemption were verified), or wait
 for real motion. The one real push at 18:25 was already confirmation enough.
+
+---
+
+## #181 — 📋 ALL SIX PENDING UPDATES RESEARCHED. Release notes READ, not skimmed. 2026-09-10 18:40
+
+**This closes the homework owed since 09-04 and it follows #126's rule literally: read the notes and
+name which of Jeff's integrations each change touches. No update installed — that is his call.**
+
+| update | verdict | why |
+|---|---|---|
+| **HA Core 2026.9.0b1 → 2026.9.1** | 🟢 **TAKE** | pure patch, **no breaking changes**, and it gets him **off a BETA** |
+| **Mosquitto 7.1.0 → 7.1.1** | 🟢 **TAKE** | a **crash fix in the auth path** |
+| **Blitzortung v1.7.0 → v1.7.1** | 🟢 **TAKE** | an HA API migration — future-proofing |
+| **MercedesMe v0.39.1 → v0.40.0** | 🟢 **SAFE** | every change is EV-only; the GLE 350 is gas |
+| **Z2M 2.13.0-1 → 2.14.1-1** | 🔴 **HOLD** | **it can rename every contact sensor** |
+| **Traccar 0.26.1 → 0.26.2** | 🟡 **SKIP** | the add-on is **stopped**, `boot: manual` (#65) |
+
+### 🟢 HA Core 2026.9.1 — 22 fixes, and only TWO touch anything installed here
+Checked against `/api/config/config_entries/entry`, not entity names (the #48 lesson):
+- **`backup`** — two fixes: streaming reception, and **deadlocks in file utilities**. Directly
+  relevant after **#176**, where the off-site backup silently did not run.
+- **`hassio`** — a repair-flow warning about app data on removal.
+
+**Not installed here, so irrelevant:** SMTP · Miele · Roborock · **Vizio** · Amber Electric ·
+UniFi Protect · Daikin · Besen · Flo · Serial/USB · Environment Canada · Hot Spring · Samsung
+ExLink · KNX · MotionEye · Tradfri · Reolink · Litter Robot.
+⚠️ **Note `vizio` is NOT installed any more** — #48 recorded it as present on 08-23. That entry is stale.
+
+🔴 **The 09-04 Py3.14 fear does not apply.** 2026.9.0b1 **is already Python 3.14**, and both
+casualties are demonstrably fine on it right now: **blink is built-in and delivering motion**, and
+**alexa_media v5.15.7 / alexapy 1.29.25 has 5 Echo media_players all `idle`, none unavailable.**
+This is b1 → .1 inside the same major, not a version jump.
+
+### 🟢 Mosquitto 7.1.1 — worth taking on consequence alone
+Single change: *"Fix nil pointer dereference panic in go-auth ttlcache ACL check."* **A panic in the
+broker's ACL check takes MQTT down — and MQTT is Zigbee, the water meter and the gas meter.** That
+is the exact failure class of #31 and #44 (HA blind to Zigbee for 44 hours). No config change.
+
+### 🟢 Blitzortung v1.7.1 — and this CLOSES a gap in the record
+The 09-04 entry says *"Release notes could not be found; upstream documents only v1.7.0. Do not
+describe its contents."* **Found them.** One real change: **`async_get_device` →
+`async_get_device_by_identifier`** — migrating off an HA API that is being removed. Plus 21 dev-only
+dependency bumps. **No breaking changes, no config changes.** Requires **HA 2026.8+** — he is past it.
+**This is a compatibility fix; skipping it eventually breaks the integration.**
+
+### 🟢 MercedesMe v0.40.0 — safe, and it fixes a real annoyance
+New `charge_coupler_stop` action, charge-target fixes, deck-lid binary sensors — **all EV, all
+irrelevant to a gas GLE 350.** Nothing touches `engine_start`, `doors_lock`/`unlock`, `sigpos_start`,
+`windows_close`, `auxheat_start` or the Security PIN. Two general fixes that DO apply:
+**"Entities no longer set up twice after slow start"** and **"Window cover entities show correct
+position during airing."**
+
+### 🔴 Z2M 2.14.1 — HOLD, and now I can say exactly why
+The 09-04 homework said *"one relevant line — avoided duplicate door names for contact sensors."*
+**The actual PRs are worse than that summary:**
+- **`#32752` Home Assistant: avoid duplicate door names**
+- 🔴 **`#32850` Home Assistant: set contact name to `null` to avoid duplicate door**
+
+**Setting the contact entity's discovery name to `null` is what makes HA drop the `_contact`
+suffix.** Jeff's affected entities: `front_door_contact` · `back_deck_door_contact` ·
+`mailbox_contact` · `garage_man_door_contact` · `garage_door_down_contact` · `garage_door_up_contact`.
+
+**Referenced by exact name in:** the app (`binary_sensor.garage_door_down_contact` and
+`binary_sensor.mailbox_contact` are literal strings in `index.html`), `binary_sensor.garage_secure`,
+the mail-arrived automation, and the #83 availability watchdog.
+
+⚠️ **Honest limit: I cannot tell from release notes whether `unique_id` changes.** If it is stable,
+HA keeps the existing entity_ids and only friendly names move. If it changes, duplicates appear and
+the originals go `unavailable`. **That is not knowable without doing it.**
+
+🟢 **The mitigation already exists and I verified it:** `HCC-Scripts/zigbee_entity_baseline.txt`,
+**53 entities, captured 2026-09-04.** Diff against it immediately after any Z2M update.
+
+**Sequence unchanged (#84/#85/#86): do the update, the passive timeout 1500 → 720, and
+`last_seen: ISO_8601` in the SAME restart — and only once the mailbox repeater is in.**
+
+### Recommended order, if Jeff says go
+1. **Mosquitto 7.1.1** — smallest blast radius, biggest consequence if left
+2. **HA Core 2026.9.1** — then run `Verify-CameraStreams.ps1` **immediately** (an HA restart is the
+   documented way the 08-21 camera work gets silently undone)
+3. **Blitzortung** and **MercedesMe** — trivial
+4. **Z2M — NOT YET.** With the repeater, with the baseline diff, with #84/#85 in the same restart.
+5. **Traccar — skip.** It is stopped on purpose.
