@@ -1519,3 +1519,45 @@ criticism**, and the mitigation is the warranty registration, which is free and 
 [ACHR News — what comes after R-454B and R-32](https://www.achrnews.com/articles/165039-what-comes-after-r-454b-and-r-32) ·
 [HVAC Know It All — A2L sensor false alarms](https://hvacknowitall.com/blog/a2l-sensor-false-alarms-why-vocs-trigger-nuisance-lockouts-on-r-454b-systems) ·
 [AC Direct — R-454B 2026 homeowner guide](https://www.acdirect.com/blog/r454b-refrigerant-2026-homeowner-guide/)
+
+---
+
+## 🛑 JEFF 2026-09-10 5:40 PM — **THE 15.2 SEER SILVER IS OUT.** Do not re-pitch it.
+
+Jeff: *"I'm not going with the 15 seer."* The two-stage American Standard Silver
+($11,450 net, $11,870 with 10-yr labour, $19,370 with the duct change-out) is **off the table**.
+
+## The field is now THREE units, and the Goodman is out on material
+
+| | Daniels **Carrier** | Daniels **Goodman** | Derryberry **Am. Std** |
+|---|---|---|---|
+| model | **48NL-B300603** | GPGM33006031 | **5YCC4030A1070A** *(derived — confirm with Charlie)* |
+| net, 10-yr labour | **$9,000** | $8,600 | $9,098 |
+| SEER2 | 13.4 | 13.4 | **13.8** |
+| **gas heat** | 60,000 | 60,000 | **70,000** (old unit is 72,000) |
+| HX material | **stainless** | 🔴 **aluminized** | **stainless** |
+| HX warranty | **LIFETIME** | 20 yr | 20 yr |
+| **twist fix** | 🟢 **INCLUDED** | 🟢 included | 🔴 **NOT included** |
+
+🔴 **The Goodman is out** — it is the only aluminized heat exchanger of the three, on a unit that
+lives outdoors in a cabinet with documented water ingress.
+
+## So it is CARRIER vs AMERICAN STANDARD, and the ductwork decides it
+
+The American Standard genuinely beats the Carrier on two specs: **70,000 BTU heat vs 60,000**
+(closest of anything quoted to the existing 72,000) and **13.8 SEER2 vs 13.4**. Both real, both small.
+
+🔴 **But Derryberry's $9,098 does NOT fix the twist.** Their sheet ticks *"Reconnect to existing
+ductwork"*; *"Install new transitions to ductwork"* is **unchecked**. To get the twist fixed there,
+the only priced route on the sheet is the **$7,500 full duct replacement** — total **$16,598**.
+
+**Daniels' $9,000 includes it.** Same finished job, **$7,598 less**, and the only lifetime heat
+exchanger on the table.
+
+## 🔵 THE ONE QUESTION THAT COULD STILL CHANGE THIS
+
+**Ask Charlie what he would charge to fix the twist as a REPAIR, not a replacement.** His sheet
+already carries a **"Duct Repair $350 — add a lead to garage"** line, so Derryberry does price small
+duct work separately. If new transitions at the unit are a few hundred rather than $7,500, then the
+American Standard's extra 10,000 BTU of heat and 0.4 SEER2 come back into play at a comparable
+price. **If it is only offered as part of the $7,500, the Carrier wins on the finished job.**
