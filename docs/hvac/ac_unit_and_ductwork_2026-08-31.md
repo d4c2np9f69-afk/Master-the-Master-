@@ -1379,3 +1379,24 @@ does it.**
 retraction above and memory `user_jeff_profile`): **Jeff is the expert on the hardware and the
 buying. Bring him figures he cannot look up standing in his driveway — warranty clauses, GWP
 numbers, model cross-references, $/ft benchmarks. Do not bring him electrical chores.**
+
+---
+
+## ⏳ QUOTE #3 PENDING — PETITT, hand-delivering **Friday 2026-09-11 AM**
+
+**The number to beat: $9,000 delivered** (Daniels + Carrier 48NL-B300603, ductwork/twist fix
+included, 10-yr labour+freon). Jeff has already picked Carrier.
+
+**Two things make Petitt worth waiting a morning for:**
+1. 🟢 **They advertise 10-year parts AND LABOUR included on new installs.** If that is real and in
+   writing, they need **no $800 add-on** — so their sticker is directly comparable to Daniels'
+   $9,000, not to his $8,200.
+2. 🟢 **They do crawl-space encapsulation.** That is Phase 2, and it is the *cause* of the damp
+   supply insulation both other contractors are only treating downstream. One contractor could
+   carry both — sequencing rule unchanged: **ductwork first, liner last.**
+
+⚠️ **Their site names NO ductwork, sheet metal, package units, static pressure or load calcs.**
+Strongest reputation of the three (5.0/499, TN-64284 mech+plumbing+**gas**), least-proven fit for
+this exact scope. **The twist fix is the question to put to them**, same as the other two got.
+
+**Do NOT re-raise the breaker with them.** See the settled note above.
