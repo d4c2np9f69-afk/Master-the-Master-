@@ -859,3 +859,110 @@ certain to be A2L-tooled, but chain pricing. **Mike Cross** carries the most Yel
   and keep the friend-labour saving AND the lifetime-heat-exchanger warranty.
 - **Run the three researched companies in parallel** (Daniels / Petitt / Derryberry's) - Alpine's
   referral is by mail and slow, and its own list misses the best local firms entirely.
+
+---
+
+# 🟢 QUOTE VISIT 1 — DANIELS, 2026-09-10 AM. Jeff: *"I liked them."* No number yet.
+
+**First of the three. Jeff met them in person; Petitt and Derryberry's follow the same morning.
+Everything below is what Daniels said on site, recorded the same session per the standing rule.**
+
+## 1. 🟢 HIS FIX FOR THE 30-YEAR TWIST — no plenum box, and it is sound
+
+Jeff, relaying it: *"coming straight out with the supply line and about 5 ft out from the unit the
+return line goes on top of the supply line, therefore the cross is eliminated."*
+
+**Why this is a real fix and not a shortcut:**
+- **The cross was never the problem — the DEFORMATION was.** Two ducts crossing in *space* costs
+  nothing. Two ducts wrung around each other to *fit* costs static pressure, and doing it at the
+  equipment costs the most, because every cubic foot in the house passes through those two collars.
+  He converts the second into the first.
+- **The SUPPLY is left dead straight off the unit** — full opening area, clean developed run. That
+  is the correct duct to protect: it feeds all 7 registers.
+- **He gave the geometry problem to the RETURN instead**, which is the right choice *if* the return
+  can afford it — see the caution below.
+- The unit's openings are **multi-positional, side AND bottom**, so this freedom is real and
+  documented: supply side 13.44 × 14.32 / bottom 14.02 × 11.49; return side 13.44 × 17.07 /
+  bottom 16.77 × 11.49.
+
+🔴 **THE ONE THING TO WATCH — how the return CLIMBS.** The return is the tightest point in this
+whole system (one central return for 1,400 sq ft). Two shallow offsets cost almost nothing; a hard
+90 up and a hard 90 back over adds two sharp elbows to the one duct that can least afford them —
+that moves the restriction rather than removing it. **Ask him to describe the rise.**
+
+⚠️ **Three smaller checks on the stack:** (a) the return duct is physically LARGER than the supply,
+so confirm the vertical room is really there — **a flattened return is a twist by another name**;
+(b) both ducts get their own hangers, the return must not rest its weight on the supply over a
+5-ft run; (c) insulated both, no metal-to-metal contact — that is an outdoor sweat point.
+
+🟢 **This is consistent with why Daniels ranked #1 on capability before Jeff ever met them** — the
+only one of the three advertising in-house sheet-metal fabrication. He is thinking about airflow,
+not about selling a box.
+
+## 2. 🔴 SCOPE CHANGE — HE SAYS THE DUCTS ARE GOOD. ONLY THE SUPPLY NEEDS REPLACING.
+
+Jeff: *"He thinks the ducts are good he said the supply line is the only one that could use
+replacing the insulation is damp in that one from condensation."*
+
+**This supersedes the "complete new ductwork" assumption that every number in this file was built
+on.** Line B (`ductwork materials $787–$987`) and the $1,000–$5,000 contractor-ductwork benchmark
+both assumed **7 new branches + a new return**. If the job is now "replace the supply trunk," it is
+a materially smaller and cheaper job.
+
+🔴 **AND IT BREAKS THE COMPARISON.** Two different scopes are now on the table. If Daniels quotes
+*supply-trunk-only* and Petitt quotes *complete replacement*, the two numbers are not comparable and
+the cheaper one is not the better deal. **Every quote must state its duct scope explicitly.**
+
+⚠️ **"The supply line" is ambiguous and it matters to the price.** Given he contrasted it with "the
+return line", and this file already records *"both the main register line and the return line run
+down the centre of the house"*, it almost certainly means **the main supply TRUNK** — not the 7
+branch runs. **Confirm which. Ask whether the branch runs and register boots are in or out.**
+
+## 3. 🔴 DAMP INSULATION IS A DEW-POINT PROBLEM. THE DUCT IS THE VICTIM, NOT THE CAUSE.
+
+Insulation is damp because humid air is reaching a surface below the dew point. Replacing the duct
+without addressing *why* means **the new duct sweats too.** Causes, most likely first:
+
+1. **Failed vapor jacket** — a torn outer barrier or unsealed seams let humid air inside the
+   insulation to the cold core. This genuinely does ruin the duct, and replacement IS the right call.
+2. 🔴 **A HUMID CRAWL SPACE — and this collides with the sequencing rule already in this file.**
+   Phase 2 is crawl-space encapsulation ($600–$950 DIY materials). This document already says
+   **"SEQUENCE: DUCTWORK FIRST, ENCAPSULATION LAST"** because sheet metal and crawling puncture a
+   liner already down. **That order still holds — but the humidity is now a REASON, not just a
+   nice-to-have.** Encapsulation moved from "Phase 2, someday" to "the thing that protects the duct
+   you are about to pay for."
+3. **Air leakage** — the 07-25 duct-leak repair measured **441 kWh / 16.8% / ~$41 a month**. Escaping
+   cold supply air drives local condensation as well as costing money.
+4. **Low airflow / overcooling** — a restricted coil makes supply air colder than design, pushing
+   duct surfaces further below dew point. **The twist he is about to remove may itself be feeding
+   this**, which would make the two findings the same finding.
+
+🟢 **A FREE DIAGNOSTIC THAT SEPARATES THEM: is the damp LOCALISED or along the whole run?**
+Damp only near the unit points at leakage at the collar/transition. Damp along the entire run points
+at ambient crawl-space humidity. That one observation decides whether encapsulation is required or
+merely sensible — and it costs nothing but a look.
+
+⚠️ **Look at whether it is wet-and-clean or wet-and-growing.** Insulation damp long enough grows
+mould, and that changes both the urgency and whether that material should stay in the crawl space at
+all. Jeff's own eyes on it, his call.
+
+## 4. What this does to the rest of the plan
+
+- **The RETURN is now staying.** So the return's own limits stop being theoretical: this file's
+  warning still stands — *"the return is the tightest point in the whole system… check the GRILLE
+  FREE AREA, not just the duct. A starved return makes the equipment work harder no matter how good
+  the supply side is."*
+- **Static pressure before and after matters MORE now, not less** — it is the only thing that will
+  show whether keeping the old return was the right call. It is also an **ACCA Quality Installation
+  requirement and therefore a CONDITION of the Blueridge warranty**, not a favour.
+- **Nothing here changes the unit choice.** 2.5 ton / 54,000 BTU Blueridge BRP7GE1330E054P-01A,
+  $3,123 net, coupon dies **Mon 14 Sep**.
+
+## 5. 🔵 THE QUESTION TO PUT TO PETITT AND DERRYBERRY'S
+
+> *"Daniels says he can eliminate the cross by running the supply straight out of the unit and
+> crossing the return over the top of it about 5 ft out, with no plenum box. He also says the
+> ductwork is sound apart from the supply, which has damp insulation. How would you do it, and what
+> duct scope is in your number?"*
+
+**That single question makes all three quotes comparable and reveals how each one thinks.**
