@@ -3999,3 +3999,31 @@ preparation* — the ledger's own words from that day.
 2. **`OPEN_ITEMS #48` lists `vizio` as a loaded integration** (08-23). It is **not in the config
    entries any more** — checked today, 63 entries, 38 domains, no `vizio`. That entry is stale, and
    it means 2026.9.1's Vizio fix is irrelevant here.
+
+### ✅ VIZIO — CLOSED BY JEFF, 2026-09-10 6:44 PM. Not a fault, not a regression.
+
+Jeff, primary source: ***"Vizio is the sound bar and it was taken out."***
+
+**That is the reason. The integration is gone because the HARDWARE is gone.**
+
+**Measured the same minute:**
+```
+config entries: 63 across 38 domains   ·   'vizio' present? -> False
+media_player.aud_d426                  -> *** GONE - no such entity ***
+```
+
+⛔ **Do NOT re-add the `vizio` integration, do not report its absence as a finding, and do not
+"restore" `media_player.aud_d426`.** There is no soundbar to talk to.
+
+**Consequences that follow, so nobody re-derives them:**
+- 🔴 **`OPEN_ITEMS #48` is STALE.** It records vizio as *"1x loaded"* on 08-23 and used the Vizio
+  crash fix as the main argument for taking HA Core 2026.8.3 — *"the fix is literally 'Fix Vizio
+  media player crash when volume is missing from audio settings'… this release does fix something on
+  live hardware here."* **That argument is dead. There is no live hardware.**
+- **2026.9.1's Vizio fix** (`bumped vizaio to 0.6.1`) is likewise irrelevant here — which removes
+  one of the few reasons that release touched anything Jeff owns. It strengthens the **HOLD** in the
+  correction above, it does not weaken it.
+
+⚠️ **The lesson for me, not for Jeff:** I had the *fact* (queried, verified, correct) and reported it
+as a stale-record finding **without asking why**. Jeff knew in one sentence. **An integration
+disappearing is as likely to be a decision as a defect — ask before filing it as drift.**
