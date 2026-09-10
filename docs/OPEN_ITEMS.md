@@ -3676,3 +3676,34 @@ Current file state confirms nothing downstream has refreshed yet:
 
 **The next real detection is the test.** Success = those three stale files carry today's date and a
 new timestamped copy lands on `D:\HCC-Clip-Archive`.
+
+### ✅ #179 UPDATE — THE CLIP PRODUCER IS PROVEN. 2026-09-10 17:08
+
+**Feature-tested by a real motion event, not a hand-fired service call.**
+
+```
+16:58:35  back_left motion  -> scan -> back_left.mp4    rewritten 16:58:37
+17:08:35  driveway  motion  -> scan -> 301_driveway.mp4 rewritten 17:08:50
+```
+
+**Traces, all three queued runs `finished`:**
+`hcc_clip_archive` ran **`blink.save_video` → `shell_command.archive_clip`** in order.
+
+| file | before | after |
+|---|---|---|
+| `301_driveway.mp4` | **1,984,293 B, frozen 2026-08-21** | **1,180,887 B, 2026-09-10 17:08:50** |
+| `back_left.mp4` | 40 B stub, frozen 08-21 | 1,192,147 B, 2026-09-10 16:58:37 |
+
+Header check on the new driveway file: **`ftyp isom` — valid MP4**, not an error body.
+
+🟢 **This closes the mechanism in #29 / #61 / #172 BREAK #2.** For 20 days the archive minted
+timestamped copies of a file nothing ever refreshed. It now refreshes before it copies.
+**`shell_command.extract_clip_frame` is NOT called**, so the popup frames are untouched — the
+#61b constraint holds. `Verify-CameraStreams.ps1` **ALL GOOD 6/6 before and after**, same PID 3668.
+
+⏳ **Still to confirm tomorrow:** `Pull-ClipArchive.ps1` runs at **04:00**, so the new timestamped
+copies reach `D:\HCC-Clip-Archive` then. **Revert if ever needed:** original config saved at
+`HCC-Scripts/hcc_clip_archive.bak-20260910.json` — it is a single-action automation.
+
+⚠️ **`301_front_doorbell.mp4` is still the 40-byte stub from 08-19** — that camera has not had a
+detection since the change. Expected, not a fault; it will refresh on its next one.
