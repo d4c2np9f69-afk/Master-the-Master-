@@ -909,14 +909,38 @@ on.** Line B (`ductwork materials $787–$987`) and the $1,000–$5,000 contract
 both assumed **7 new branches + a new return**. If the job is now "replace the supply trunk," it is
 a materially smaller and cheaper job.
 
-🔴 **AND IT BREAKS THE COMPARISON.** Two different scopes are now on the table. If Daniels quotes
-*supply-trunk-only* and Petitt quotes *complete replacement*, the two numbers are not comparable and
-the cheaper one is not the better deal. **Every quote must state its duct scope explicitly.**
+🟢 **JEFF'S CALL, 2026-09-10, AND IT IS THE BETTER METHOD — THIS NOTE REPLACES MINE.**
+I wrote that two scopes "break the comparison." **Wrong.** Jeff, verbatim: *"It breaks nothing we
+will just look at it and see what they are proposing and adjust based on the proposal. I'm giving
+them the option to replace the ductwork that needs it — all we have to do is see how much each one
+is charging per foot and go from there."*
 
-⚠️ **"The supply line" is ambiguous and it matters to the price.** Given he contrasted it with "the
-return line", and this file already records *"both the main register line and the return line run
-down the centre of the house"*, it almost certainly means **the main supply TRUNK** — not the 7
-branch runs. **Confirm which. Ask whether the branch runs and register boots are in or out.**
+**He is right and the method is standard procurement:** let each contractor propose the scope they
+actually believe in, then normalise on **$ per linear foot**. That compares the UNIT RATE, so
+differing scopes stop mattering — and it also surfaces the contractor who inflates footage.
+Forcing all three into one fixed scope would have thrown away the useful information in the
+differences. **Do not re-raise "make them all quote the same scope."**
+
+⚠️ **Jeff has 30 years in sales and does his own work. Give him figures and findings, not
+procurement coaching.** This entry exists because a session gave him the latter.
+
+### The yardstick his method needs — already researched, in this file
+
+| benchmark (2026) | figure |
+|---|---|
+| Duct replacement, national | **$25–$55 per linear foot** |
+| Duct replacement, Nashville | **$35–$55/lf** (Nashville 10–15% over TN average) |
+| Typical single-family duct job | 30–90 lf → **$1,000–$5,000** |
+| **R8 flex MATERIALS, 7 in** | **$2.80/ft** ($69.99 per 25 ft roll) |
+| R8 flex materials, 8 in | $3.78/ft ($94.55/roll) — **35% jump for one inch** |
+| Register boots | $13.98–$16.98 each |
+
+**So the labour + overhead spread is roughly $22–$52 per foot on top of ~$3 of material.** That is
+the number a per-foot quote is really quoting.
+
+⚠️ **One thing to confirm per bidder, because it moves $/ft a lot:** does the per-foot price
+INCLUDE the takeoff collar, the boot and the register, or are those adders? Same rate with
+different inclusions is not the same price.
 
 ## 3. 🔴 DAMP INSULATION IS A DEW-POINT PROBLEM. THE DUCT IS THE VICTIM, NOT THE CAUSE.
 
