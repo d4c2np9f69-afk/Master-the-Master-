@@ -1926,6 +1926,19 @@ a tie by construction.
 
 ---
 
+# 📨 FINAL-OFFER EMAILS DRAFTED 2026-09-11 3:10 PM — Jeff's negotiation move
+
+Jeff: *"craft a post mortem email to each company without pricing… I want to see what else I can squeeze out."*
+- **Ryan (Daniels):** full-scope revised quote by **close of business today (Fri 11 Sep)** — every item Petitt's bid
+  includes (permit, disconnect, gravel pad + shroud, surge protector, thermostat wire + install Jeff's ecobee,
+  warranty registration, the drawing's ductwork with sizes written in), both unit connections rebuilt, the $800
+  warranty spelled out (labor/parts/freon, backer, deductible), service commitment, license number, start-up static
+  pressure + leak-system test. **No dollar figures in that email.**
+- **Logan (Petitt):** match **$9,000** (Jeff's number) for his scope + the drawing, model ending **AJA**, price fixed,
+  refrigerant covered — or Jeff goes with Daniels. Leans on Petitt's own advertised price-match guarantee.
+- Drafts saved to `Desktop\HCC AC Quotes\Final-offer emails - Daniels and Petitt.txt`. **Not sent** — Jeff sends
+  them himself. Logan's email address is not on the estimate.
+
 # 🔁 RE-RESEARCH 2026-09-11 2:15–2:45 PM — Jeff: "multiple sourced facts and cross checking… no agents"
 
 Done by hand (Chrome + Google, BBB, WebFetch), no agents. New or cross-checked:
