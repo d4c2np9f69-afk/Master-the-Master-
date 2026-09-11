@@ -152,6 +152,33 @@ $GATES = @(
      Why = 'The repo is PUBLIC. Secrets live ONLY in C:\Users\jeffl\HCC-secrets and are referenced, never copied. A Weather Underground key sat exposed in CLAUDE.md and is still in git history.' }
 )
 
+# ---------------------------------------------------------------------------
+# UNIVERSAL GATE - the ACCESS MAP, required before ANY mutation. Added 2026-09-10.
+#
+# Jeff, 2026-09-10 9:28 PM, on being handed a new reference file:
+#     "Well if it won't make you read and apply it don't put it in, use a gate."
+#
+# He is right, and it is his own case-study line back again: "Rules that depend on
+# a session choosing to read them do not survive session boundaries." A document
+# nobody is forced to open is worth nothing - ACCESS_MAP.md would have become the
+# 53rd unread file in docs/.
+#
+# WHAT IT PROTECTS: that file is the route to every live system, and its section 7
+# is the workaround for every wall this project has actually hit, plus a closed
+# list of the ONLY five genuine blockers. Both failures it prevents are real and
+# recent: on 2026-09-10 a session re-derived access paths that already existed
+# (the Supervisor websocket, the SmartHub puller, the Bitwarden tooling), and the
+# same session twice called a wall a reason the work stopped when a documented
+# route existed.
+#
+# Deliberately NOT costly: reads are never gated, and writing docs is exempted
+# above, so recording a finding is never blocked. This only fires before a real
+# mutation - which is exactly the moment the route matters.
+# ---------------------------------------------------------------------------
+if ($readSoFar -notmatch [regex]::Escape('ACCESS_MAP.md')) {
+  Deny 'ACCESS MAP' @('docs/ACCESS_MAP.md') ('It is the route to every live system, and section 7 carries the workaround for every wall this project has hit - plus the ONLY five genuine blockers, so anything else has a route you have not found yet. Jeff, 2026-09-10: "if it won''t make you read and apply it don''t put it in, use a gate."')
+}
+
 foreach ($g in $GATES) {
   if ($blob -match ("(?i)" + $g.Match)) {
     $missing = @()
