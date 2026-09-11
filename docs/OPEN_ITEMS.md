@@ -199,6 +199,43 @@ once through each natural tool. **No workaround was attempted.**
 Settings → Devices & Services → **Add Integration → Generic Camera**, paste those two URLs, name it
 `wx_warning`. Then it needs adding to the HomeKit bridge's include list to reach the Apple TV.
 
+### 🟢 BUILT 2026-09-10 10:18 PM — REAL NWS WARNINGS NOW POLL AND POP. AND IT IS *RUNNING*.
+
+**Jeff: *"you can fix the real weather warnings to pop on the Apple TV when they are issued."***
+**The "when they are issued" half is done.** Even the v2 automation only triggers on the *forecast
+condition* (`weather.forecast_home` → lightning/hail), which is **not** the same thing as a warning
+being issued.
+
+**`HCC-Scripts/HCC-WeatherWarning.py`** polls the National Weather Service for Jeff's **own zones,
+resolved from HA's real coordinates (36.4768, -86.6602), not guessed:**
+**forecast zone `TNZ007` · county `TNC147` · NWS office `OHX`.**
+On a **new** actionable warning it renders the **real NWS headline and instruction** into the
+4-frame card, rebuilds the looping clip, republishes the `wx_warning` stream, and pushes to
+**both phones + the Fire TV overlay + a persistent notification**.
+
+**Only these take over a screen** — a Watch or an Advisory does not, because alert fatigue is a
+documented failure here, not an annoyance: **Tornado · Severe Thunderstorm · Flash Flood · Extreme
+Wind · Dust Storm · Snow Squall Warning.** De-duplicated by NWS alert id in `wx-warning-state.json`,
+so a warning fires **once**, not once per poll.
+
+🔴 **IT IS SCHEDULED, NOT JUST WRITTEN — the #105 lesson applied on purpose.**
+Task **"HCC Severe Weather Warning"**, **runs as SYSTEM**, `MultipleInstances: IgnoreNew`,
+5-minute execution limit. **Two triggers, and the second one is load-bearing:** `AtStartup` survives
+a reboot, and a repeating `Once` trigger every **2 minutes** makes it actually run — *an AtStartup
+trigger alone schedules **no next run until the next boot**, which is the #147 failure shape.*
+**Proven: `LastTaskResult 0`, NextRun 22:20:09, and its own log line from the SYSTEM run —
+`22:18:44 no new actionable warning (active=0 actionable=0)`.** SYSTEM can read the token and
+reach the NWS.
+
+⚠️ **Honesty guard built in:** a test renders the footer **"HCC TEST - NOT AN ACTUAL WARNING"**;
+only a genuine NWS alert prints *"NATIONAL WEATHER SERVICE - IN EFFECT"*. **A screen that lies
+about its source is worse than no screen.** The alert tone is deliberately not the EAS signal, and
+the script never fires a synthetic `codeproject_ai.object_detected` event.
+**Test it any time: `python HCC-WeatherWarning.py --test` · check NWS: `--status`.**
+
+🔵 **The Apple TV is the ONLY remaining piece** — the two steps below. Everything upstream
+of it is now live and self-running.
+
 ### 🔑 THE APPLE TV ROUTE IS NOW FULLY MAPPED — Jeff: *"That is the only way Apple will show it"*
 
 **He is right, and the pattern already exists on this box seven times over. Read, not invented:**
