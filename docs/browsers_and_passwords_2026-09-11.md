@@ -88,7 +88,32 @@ It is his call, and the vault still holds the passphrase as the recovery path.
 
 ---
 
-## 5. 🟡 FIREFOX — do not delete it blind, it is the ad-blocker
+## 5. 🟢 FIREFOX IS ALREADY SET UP — and Jeff is using it RIGHT NOW
+
+**Jeff, 2026-09-11 00:39: *"I said I would use fox fire if you set it all up like edge and all my
+bookmarks and passwords and bitwarden worked properly."* Measured immediately after - it very
+nearly already is.**
+
+```
+Bitwarden Password Manager  {446900e4-71c2-419f-a6a7-df9c091e268b}  v2026.8.0  active=True userDisabled=False
+  extension storage          29 MB, modified 2026-09-11 00:32       <-- synced vault cache = LOGGED IN
+uBlock Origin               uBlock0@raymondhill.net  v1.74.0        active=True
+bookmarks                   132   (backup 2026-09-11)               <-- Edge has 126
+firefox.exe                 16 processes RUNNING at 00:40
+```
+
+🟢 **Bookmarks already migrated** - the backup filenames carry the count: **10** on
+2026-09-08, **132** on 2026-09-11. They came across in between.
+🟢 **Bitwarden is not merely installed, it is logged in** - 29 MB of synced vault cache
+touched seven minutes before this was written.
+
+**So only TWO things remain to make Firefox a full replacement:**
+1. **The default-browser association** (§1 above - `https` has no handler at all).
+2. **The PIN** (§4 above - not set in any client yet).
+
+---
+
+## 6. 🟡 DO NOT DELETE FIREFOX BLIND - it is the ad-blocker
 
 Jeff asked to remove Firefox and keep Edge, Tor and Chrome. **Measured first:**
 
