@@ -1926,6 +1926,28 @@ a tie by construction.
 
 ---
 
+# 🔴 CORRECTIONS 2026-09-11 2:00 PM — Jeff caught the Ruud heat exchanger. Full audit done.
+
+Jeff: *"Your wrong the Rudd's heat exchanger is stainless steel. WTF else have you gotten wrong in this?"*
+**He is right for his unit.** Ruud's own RGEAYB brochure (form M22-6532, 10/24,
+`media.ruud.com/.../Ruud-RGEAYB-R2d-Digital.pdf`): *"Stainless Steel Heat Exchanger: Yes (factory-installed
+option)"* · *"Stainless Steel Heat Exchanger (Residential) – Limited Lifetime (registration required)"* ·
+*"Factory Standard Heat Exchanger – 10 Years"* · cabinet *"powder coat paint system"*. Ruud's Endeavor page
+headlines *"10 Year Conditional Parts + Limited Lifetime Stainless Steel Heat Exchanger"*. The RGEAYB is sold
+both ways; the stainless build carries option code **`AJA`** (distributor listings, e.g.
+`RGEAYB024AJT061NAAJA … STAINLESS STEEL HT EXC`). **Petitt's contract must show a model ending in `AJA`.**
+With stainless, heat exchanger + its warranty are **TIES** — the "Carrier wins the heat exchanger" line was wrong.
+
+**Other errors found in the audit and fixed in revision 2 of the PDF:**
+1. Ruud standard `061` heat output is **48,000**, not 49,200 (49,200 is the Ultra-Low-NOx `06U` column).
+2. Ruud winter supply-air rise ≈ **58 °F**, not 60.
+3. Removed two Facebook quotes that could not be tied to the right company.
+4. Carrier dealer-locator listing is dated 2017 — now labelled.
+5. Petitt's 2016 bankruptcy appearance is as a party **owed** money; "personal bankruptcy" was an assumption — removed.
+6. Score now **Carrier 6 · Ruud 4 · tie 10** (was 8/4/7). Carrier still edges: rust-proof base, EER2, sound,
+   copper outdoor coil, CR owner ratings.
+Verified unchanged: every price, all Carrier figures, CR ratings, both warranty certificates, blower/duct numbers.
+
 # 🔍 FINE-TOOTH RESEARCH, 2026-09-11 1:00–1:20 PM — every item read from its source
 
 ## Carrier's ACTUAL warranty — "Limited Warranty for Small Packaged Products", SPP-C-01WAR, ed. 08/2026
