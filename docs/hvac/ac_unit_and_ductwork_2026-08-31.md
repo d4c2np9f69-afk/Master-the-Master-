@@ -1646,10 +1646,26 @@ source of the "requires login every time" bugs fixed twice in this record. **Ver
 through the same `haFetch()` path as every other card and that whole file goes away.
 
 ### The honest catch, and the hedge
-🔴 **The rich integration is CLOUD** — the same class of dependency that is failing on the LUX right
-now. **But the Premium is ALSO a Matter device** (the **Enhanced is not** — it must be the Premium).
-Pair it to the Matter Server already installed (#64, 08-24) and local basic control survives an
-ecobee cloud outage. Rich when the cloud is up, still a thermostat when it is not.
+🔴 **The rich integration is CLOUD** — the same class of dependency that is failing on the LUX right now.
+
+🔴🔴 **CORRECTED 2026-09-11 6:55 PM — "the Premium is ALSO a Matter device" WAS WRONG. Do not repeat it.**
+Checked three ways today:
+- **CSA (the body that certifies Matter): `csa-iot.org/csa-iot_products/?p_keywords=ecobee` returns
+  "No Entries Found."** The only ecobee pages on that site are the legacy Zigbee **ecobee Smart Si** and
+  a membership listing.
+- **ecobee's own support site search for "Matter" returns ONE article — "How to move your ecobee devices
+  and transfer ownership."** They document Apple Home extensively and Matter nowhere.
+- **Fort Worth Star-Telegram, 2026-07-27, still writes "Whether Ecobee adds Matter certification…"** —
+  i.e. an open question in July 2026, not a shipped feature.
+- Two blogs (yourmatterhome.com, getmysa.com) claim the Premium is Matter/Thread. **The certification
+  database beats a blog.** Treat ecobee as **NOT Matter** until ecobee itself says otherwise.
+
+🟢 **The local hedge still exists — it is APPLE HOMEKIT, not Matter.** ecobee supports HomeKit, and HA's
+**HomeKit Device integration is `Local Push`** (home-assistant.io/integrations/homekit_controller).
+⚠️ **But a HomeKit accessory pairs to ONE controller at a time.** HA's docs: *"If your device is in your
+network but is paired with an Apple device via HomeKit: Remove the device from the Apple Home app.
+Otherwise you won't be able to pair it with Home Assistant."* So it is **HA local OR Apple Home, not both**
+— and the rich sensors (VOC, CO₂, per-room) come from the cloud integration either way.
 
 ### Price — checked 2026-09-10, not from memory
 | | |
@@ -1662,6 +1678,56 @@ ecobee cloud outage. Rich when the cloud is up, still a thermostat when it is no
 
 💵 **AND DANIELS ALREADY HAS A THERMOSTAT IN HIS $8,200.** Ask Ryan to credit that line or fit this
 one instead — that is the real cost, not the sticker.
+
+## ✅ RE-CHECKED 2026-09-11 6:35–7:00 PM — Jeff: *"make sure it is the best choice for the money and its ability to integrate into our app and HCC"*
+
+### 1. The integration claim is now PROVEN FROM THE CODE, not from marketing
+Read straight out of Home Assistant's own `ecobee` component on GitHub (`dev` branch):
+- `sensor.py` `SENSOR_TYPES` creates **temperature, humidity, `co2PPM` (device class CO2),
+  `vocPPM` (device class VOLATILE_ORGANIC_COMPOUNDS) and `airQuality` (device class AQI)**, and it loops
+  `for sensor in data.ecobee.get_remote_sensors(index)` so **each SmartSensor gets its own entities**.
+- `binary_sensor.py` creates an **occupancy** binary sensor per remote SmartSensor
+  (`_attr_device_class = BinarySensorDeviceClass.OCCUPANCY`).
+**So the app's empty air-quality card and GUARDIAN's missing per-room occupancy both get real data.
+That was the whole reason for picking it, and it is now verified at the source.**
+
+### 2. 🟢 A SETUP OBSTACLE DISAPPEARED
+HA docs: *"Since version 2026.3, it is no longer required to get a developer API key to use this
+integration."* Prerequisite is now just **ecobee.com username and password**. (Worth knowing, because
+forum posts from early 2026 say ecobee cut off developer keys — that no longer blocks us.)
+
+### 3. The rivals, each checked against HA's own docs — none of them is close for THIS house
+| Option | What HA actually gets | Verdict |
+|---|---|---|
+| **Nest Learning 4th gen** ($279.99, $179.99 on the TVA marketplace) | climate + temperature/humidity. **"Additional Nest temperature sensors are not supported by the SDM API."** Needs a Google Cloud project, Pub/Sub **and a US$5 Device Access fee** | ❌ loses the per-room data outright |
+| **Honeywell Home T9/T10** (Total Connect Comfort) | climate + temp/humidity. Remote sensors are **not** exposed; docs warn *"Due to the instability of the Honeywell total connect system, actions within automations should repeat until success"* | ❌ no room sensors, flaky cloud |
+| **Zigbee, fully local (Centralite Pearl 3157100)** — supported by Z2M, would ride the existing mesh | setpoints, mode, running state, battery. **No humidity, no occupancy, no air quality** | ❌ and **Centralite wound down; it is eBay/Mercari used stock at $18–$55** |
+| **ecobee Enhanced** ($199.99) | same integration, but **no SmartSensor in the box and no air-quality sensor** (ecobee's own spec page lists only temperature and humidity) | ❌ $60 less, loses the two things we are buying it for |
+
+### 4. 💵 THE MONEY — and it is CHEAPER than the 09-10 note said
+| Source, checked 2026-09-11 | Price |
+|---|---|
+| ecobee.com | $259.99 |
+| Home Depot listing | $259.99 |
+| PCMag (19 Aug 2026), Amazon / Best Buy | **$229.99** |
+| **TVA EnergyRight Marketplace** (`energyright.efficientchoice.com/thermostats`, ecobee **EB-STATE6-01**) | **$259.99 → $159.99** after *"up to a $100 rebate"* |
+| Extra SmartSensors | ~$50 each, one included |
+
+🟢 **AND CEMC/TVA PAY ON TOP OF THAT.** *Smart Thermostat Rewards*: **$65 to enrol**, plus up to **$65/yr**
+for staying in (CEMC's own post: *"up to $130"*).
+⚠️ **The trade, in TVA's words:** *"you agree to small, automatic adjustments of up to four degrees"*
+during peak events — and **you can opt out of any event from the phone, browser or the thermostat.**
+Jeff's call, but a thermostat he can override is a different thing from one a utility controls.
+
+### 5. Verdict
+🟢 **The ecobee Smart Thermostat Premium stays the pick, and it is now the pick for a cheaper number.**
+Nothing else on the market gives this app per-room temperature, humidity AND occupancy plus VOC/CO₂
+through one HA integration. **Best price path: the TVA marketplace at ≈$159.99, then enrol for the $65.**
+⚠️ **Still ask Ryan to credit the thermostat that is already inside his $8,200** — that is the number that
+decides what this really costs.
+**Not verified this session:** today's Walmart price (the $189 in the 09-10 note is a day old), whether
+Emerson's Sensi Touch 2 ($209, $89 after rebate) has a supported HA integration, and whether the TVA
+marketplace price includes the rebate or is applied after purchase.
 
 ## Still to do
 - Confirm the colour→function map on the unit's own diagram at install time.
