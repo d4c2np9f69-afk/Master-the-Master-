@@ -409,6 +409,39 @@ and **244 entities are floored at that timestamp**, which makes every quiet devi
 dead. `last_triggered` survives a restart; `last_updated` does not. Fourth member of the
 #68 / #170 / #178 family. **It is also the whole explanation for #112's "moved" timestamp.**
 
+## 📍 WHERE THE LIST ACTUALLY STANDS - 2026-09-11 12:05 AM
+
+**192 numbered entries this morning. 28 live rows now, and every one has a named owner and a
+named reason.** 44 commits this session.
+
+🔴 **THERE ARE ZERO ROWS LEFT THAT ARE MINE AND UNBLOCKED.** That is the honest headline.
+Everything I could do without Jeff, I did.
+
+| what | rows | why it is not moving |
+|---|---|---|
+| 🔵 **His hands - proven, not assumed** | #3/#3b/#118 · #5 · #25 · #26 · #58/#58b · #112 · #119/#121/#122 | a master password on a zero-knowledge vault · a phone · an iPad tap · a purchase · HomeKit pairing is controller-initiated · a PC that is off the network · a wrench |
+| 🟡 **His GO** | #10 · #27 · #39 + alarms · #84/#85/#127 · #106 | one word each. #84/#85/#127 are **one Z2M restart**, held for the repeater |
+| 🛑 **Correctly held** | #109/#109b/#109c · #131 · #141 | his own irrigation hold, and the mower hard stop |
+| ⛔ **Blocked on a wall I hit** | **#28** · **#182** | both need a **go2rtc config edit with the process stopped**, and #28 also needs **Beehive file access** |
+| ✅ **Not work** | #1 · #2 · #4 | verified done, or rows inside other tables |
+
+### 🔑 THE ONE THING THAT UNLOCKS THE MOST
+
+**#28 and #182 are both stuck behind the same two doors**, and one of them is cheap to open:
+
+1. **A shell on the Beehive.** `Terminal & SSH` (`core_ssh`) is **installed and started but
+   unconfigured** - checked 2026-09-11: `authorized_keys` **0 entries**, `password` **not set**,
+   `22/tcp` **not exposed**. Its **web terminal IS reachable** through HA ingress (port 8099).
+   **Adding one authorized key, or opening the web terminal, gives file access to `/config`** -
+   which is what #28's folder move and #182's HomeKit line both need.
+2. **Stopping go2rtc to edit its config.** go2rtc **rewrites `go2rtc.yaml` from memory on every
+   restart**, so the edit only sticks while the process is down - and stopping it was refused by
+   the permission classifier.
+
+🔴 **#28 IS THE OLDEST UNFIXED P1 AND IT IS STILL LIVE** - re-tested 2026-09-10 23:26, the
+**garage interior** returns HTTP 200 with a valid JPEG to anyone on the internet, no credentials.
+**That is the one worth opening a door for.**
+
 ## 🚨 THE ONE BIG THING THAT IS GENUINELY NOT BUILT — THE ALARM SUBSYSTEM
 
 **Jeff, 2026-09-10 9:07 PM: *"Alarms not built !!!"*** He is right, and this file had it scattered
