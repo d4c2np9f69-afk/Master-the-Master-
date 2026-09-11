@@ -1898,6 +1898,79 @@ the labour warranty. (3) is the **damp supply duct** in the job?
 stands behind the **$800** labour+freon plan — Daniels, or a third-party insurer?
 **Derryberry:** the model number (4YCC4 R-410A vs 5YCC4 R-454B) and why his sheet says 10-yr HX.
 
+---
+
+# 📐 THE DUCT DRAWING — what gets replaced, checked against ACCA Manual D (2026-09-11 12:05 PM)
+
+Jeff sent a hand-drawn layout: *"This is the ductwork they will be replacing in blue."* Header
+**"995 CFMs"**. Copy saved to `iCloudDrive\AC duct drawing 995cfm.jpg` (not in this public repo —
+it carries the address). **It matches Petitt's written scope line for line**, so it is read as
+Logan's drawing. Labels confirmed by zooming the photo, not guessed.
+
+## What the drawing shows
+- **Supply trunk — NOT blue, stays:** **16" at the unit → 14" → 12"** down the centre of the house.
+- **Return — BLUE:** 16" straight back from the unit beside the supply, **hard-pipe 90** ("HP90")
+  across the supply trunk, run to the return grille, **second HP90** into it.
+- **Branches BLUE (new):** Dining **8"**, second "Master bath" run **8"**, Living Room **8"** (these
+  are the three 6"→8" upgrades), **Garage 7"** (new run).
+- **Branches NOT blue (stay):** Master bath 6", Guest Bedroom 7", Office 6", Guest Bathroom 6".
+- Thermostat wire drawn up the supply side. ✱ marks on the blue runs are most likely the new
+  saddle-tap dampers the quote names — **not confirmed**.
+
+## The numbers — Manual D Table 3-1, from ACCA's own brochure (read 2026-09-11)
+Source: *"Verifying ACCA Manual D Procedures"*, ACCA, hosted by SPEER —
+`eepartnership.org/wp-content/uploads/2012/08/Manual-D-Brochure.pdf`; corroborated by Energy
+Vanguard (*"Duct Design 5"*, citing Table N3-1: supply 900, return 700 fpm max).
+
+| FPM | Recommended flex | Maximum flex |
+|---|---|---|
+| Supply trunk | 600 | 700 (rigid 900) |
+| Supply branch | 600 | 700 |
+| Return trunk | 600 | 700 |
+| Filter grille face | — | **300** |
+
+Velocity = CFM ÷ duct area (area = π·r²). **Physics, not a rule of thumb.**
+
+### 1. 🟢 THE BRANCH UPGRADE IS REAL ENGINEERING, not padding
+| | total branch area | avg velocity at 995 CFM | vs Manual D |
+|---|---|---|---|
+| **Existing** — six 6" + one 7" | 1.45 sq ft | **≈ 688 fpm** | over the 600 recommended, at the 700 flex max |
+| **After Petitt** — three 6" + three 8" + two 7" | 2.17 sq ft | **≈ 458 fpm** | comfortably inside |
+
+A single 6" flex branch carries only **~118 CFM at 600 fpm**. Spread 995 CFM over the existing
+seven branches and each averages ~142 CFM → **~724 fpm in a 6", over the flex maximum.**
+**The existing branches were undersized for a 2.5-ton unit** — noise, high static, weak airflow
+to the big rooms. **Petitt's three 8" upgrades fix exactly that. Daniels' quote does not touch
+branches at all.** This is the part of Petitt's extra money that buys something real.
+
+### 2. ⚠️ THE 16" RETURN IS AT THE LIMIT — in BOTH quotes
+16" = 1.396 sq ft → **995 CFM = ≈ 713 fpm**: over the 600 recommended, right at the 700 flex
+maximum. **An 18" would run ≈ 563 fpm.** Daniels (v1) and Petitt both specify 16". The hard-pipe
+90s are the right fitting (far better than bent flex), but the diameter is tight.
+
+### 3. 🔴 THE FILTER GRILLE — the one number nobody has given
+Max filter face velocity **300 fpm** → 995 CFM needs **≥ 3.3 sq ft** of filter face.
+A 20×25 is 3.47 sq ft (OK). A 16×25 is 2.78 (≈358 fpm — too small). **Size of the living-room
+return grille/filter is unknown. Measure it.** One central return is the choke point of the house.
+
+### 4. 🔴 THE SUPPLY SIDE IS UNTOUCHED — so is the supply twist still there?
+The drawing keeps the existing 16" supply connection and trunk. The 30-year defect was **both**
+trunks twisted at the unit. Petitt's drawing rebuilds the **return**; the **supply** connection
+at the unit is not blue. **Ask Logan directly: is the supply twist at the unit fixed, and what
+about the supply run with damp insulation?** Daniels replaces both supply and return at the unit.
+⚠️ Trunk-size mismatch to clear up: Daniels v1 wrote a **16"→14" reducer** on the supply; this
+drawing shows the existing trunk as **16" at the unit**. Both cannot describe the same pipe.
+
+### 5. The garage run shares the 995 CFM
+Eight outlets instead of seven on the same 2.5-ton unit. The garage gets conditioned air the
+house used to get. Jeff's call — it was asked for by two contractors, so presumably wanted.
+
+## What this does to the comparison
+**Petitt's duct scope is better-engineered on the BRANCHES; Daniels' is better on the UNIT
+CONNECTION (both sides).** Neither upsizes the return. **The best job would be Daniels'
+supply+return rebuild at the unit PLUS Petitt's three 8" branch upgrades** — ask Daniels to price
+the three 6"→8" upgrades as an add; he already has the crew and the unit out.
+
 ⚠️ **Not verified from any source that survived:** Middle-Tennessee installed prices, R-454B $/lb,
 the value of Petitt's $279 surge protector, microchannel field-repair success rates.
 **Cost of this research:** 104 agents, ~6.6 M tokens — about 5× the ~20 agents Jeff was told.
