@@ -1539,6 +1539,13 @@ Jeff: *"I'm not going with the 15 seer."* The two-stage American Standard Silver
 | HX warranty | **LIFETIME** | 20 yr | 20 yr |
 | **twist fix** | 🟢 **INCLUDED** | 🟢 included | 🔴 **NOT included** |
 
+🔴 **CORRECTION 2026-09-11 — re-read off Charlie's own handwritten sheet
+(`quote-derryberrys-2026-09-10.jpg`):** the BRONZE line reads **Parts 10 · Labor 1 · Ht Exch 10 ·
+Comp 10**. **The HX warranty Derryberry is actually offering is 10 YEARS, not 20.** The "stainless /
+20 yr / 70,000 BTU / 13.8 SEER2" figures in the column above came from a model number a session
+*derived* (`5YCC4030A1070A`) — **never confirmed with Charlie, and the sheet itself says 13.4 SEER
+and names no model.** Treat that column as unverified until he supplies the model. The sheet wins.
+
 🔴 **The Goodman is out** — it is the only aluminized heat exchanger of the three, on a unit that
 lives outdoors in a cabinet with documented water ingress.
 
@@ -1724,6 +1731,28 @@ Heat matters: old Nordyne = 72,000; Carrier = 60,000; Am. Std = 70,000 (derived)
    1 yr maintenance · 12-hr service promise.
 5. **Petitt is the only quote that writes the return diameter down (16 in).** Daniels' revised
    proposal *deleted* its diameters — still owed.
+
+## 🔗 DANIELS — BOTH VERSIONS COMBINED (Jeff 2026-09-11: *"use both and combine information"*)
+
+Re-read 2026-09-11 from the **live Payzer pages** (comparison `PC-1211-1`, proposals `1211-1` Goodman
+and `1211-2` Carrier) **and** the 09-10 session transcript, which captured the FIRST version off the
+same pages before Daniels revised them in place. **Payzer now shows only the revised text** — the
+first version survives only in that transcript and in this file.
+
+**Daniels' complete scope = the union of both, identical for Goodman and Carrier:**
+- All material + labour to complete install · haul away all trash
+- **New thermostat** · new portable concrete pad (if needed) · new flashing
+- **New square-to-rounds**
+- **New 16" flex for RETURN** *(v1 — revision says only "new flex")*
+- **New 16" flex for SUPPLY** *(v1)* · **New 16"→14" reducer for supply pipe** *(v1, dropped in v2)*
+- **"CFM for 2.5 tons is around 875"** *(v1, dropped in v2)*
+- **New electrical whip** *(added in v2)*
+- 10-yr manufacturer parts · **option: $800 = all labour AND freon, 10 years**
+- Models *(v2)*: Goodman `GGPGM33006031` (sheet typo; real model GPGM33006031) · Carrier `48NL-B300603`
+
+**Side by side with Petitt on the duct work at the unit:** both use **16" flex on the return**.
+Daniels also replaces the **supply** (16" → 14" reducer); Petitt's sheet does not touch the supply
+but adds **three 6"→8" branch upgrades with dampers** and a **garage run**. Different jobs.
 
 ⏳ **Deep research launched 2026-09-11 ~10:50 AM on: the Ruud model + heat exchanger + warranty,
 the unit-vs-unit comparison, and fair price for each scope.** Results go in this file below.
