@@ -1,3 +1,75 @@
+# 🎯 THE ACTUAL LIST — rebuilt 2026-09-10 7:00 PM. READ ONLY THIS PART.
+
+**Jeff, 2026-09-10 6:59 PM: *"Why are there so many open items if none of them are relevant."***
+
+**He is right, and here is the measured answer. Of 192 numbered entries in this file:**
+
+| | count | share |
+|---|---|---|
+| **already DONE, never struck off** | **86** | **45%** |
+| **findings / lessons / warnings — NO work owed** | **26+** | 14%+ |
+| **JEFF's — a decision or his hands** | **30** | 16% |
+| blocked on hardware or sequence | 2 | 1% |
+
+🔴 **THIS FILE STOPPED BEING A TO-DO LIST AND BECAME A SESSION JOURNAL WITH TASK NUMBERS ON IT.**
+Entries like *"BLINK MOTION IS BACK"*, *"THE FIRE TV POPUP IS NOT BROKEN"*, *"THE STOVE IS
+ELECTRIC"*, *"THE ARITHMETIC IS THE LESSON"* are **conclusions and corrections**, numbered
+identically to actual work. That is why a session scanning for something to fix finds nothing
+relevant — it is drawing from a pile that is **45% finished work and 14% do-not-touch signs.**
+
+⚠️ **Nothing below this header has been deleted.** The history is worth keeping — it is what stops
+work being re-derived. **It is just no longer the list.**
+
+---
+
+## ✅ ACTUALLY OWED, UNBLOCKED, AND MINE — the whole list
+
+| # | what | why it is still here |
+|---|---|---|
+| **160** | **Jeff's location is still fully exposed** — fingerprinting ≠ IP geolocation | real, security, never actioned |
+| **155/156/157** | Ancestry: **279 duplicate people**, the DNA veto, and the sweep only seeing **58%** of the tree | genealogy, real work, needs a session with time |
+| **105b** | Dryer ground-truth: pull the **08-31 interval data** Jeff generated on purpose | he ran the dryer FOR this test and the data was never pulled |
+| **147** | HCC Kiosk Watcher — was dead 09-04→09-09, **running again now**; verify and close or fix | one check away from closing |
+
+**That is four. Not 192.**
+
+## 🔵 OWED, BUT WAITING ON JEFF — do not work these, do not nag
+
+**Decisions:** #22 Night Mode rooms · #61/#78 clip producer scope · #62 SMB share scoping ·
+#109 irrigation HOLD · #129 WiFi PSK rotation · the **HA core / Z2M updates** (#181) ·
+arming the **panic button** (#10).
+**His hands:** #2 backup key → Bitwarden · #4 Secure Boot for BitLocker · #5 password rotation ·
+#6/#7 backyard + front_right PIR aim · #3/#118 one `bw unlock` · #58 two HomeKit bridges ·
+#112 GaragePC off the LAN · #25 wall iPad.
+
+## ⛔ NOT WORK — these are STOP SIGNS wearing item numbers
+
+**#28** camera stills public *(P1, but a camera-stack change — Jeff's call, not a late-evening one)* ·
+**#13/#29/#30/#46/#61b** camera items explicitly parked by `CAMERAS_CLOSED_2026-08-22.md` ·
+**#141 the MOWER — hard stop, 2026-09-10** · **#68/#135/#170** measurement traps ·
+**#16/#70** "do not delete this yet" · **#149/#124** root-caused, no action ·
+**#107/#108/#120** lessons and self-corrections.
+
+## 🚧 BLOCKED, CORRECTLY
+
+**#84/#85/#86** Z2M passive timeout + `last_seen` + mailbox — all three sequenced into ONE Z2M
+restart, and blocked on the **repeater still in transit**. #132 proved #84 would false-page Jeff
+today (mailbox gap **18.52 h** vs the proposed 12 h limit).
+**#39/#10** door alerting and panic — **the alarm subsystem is not built yet**, and Jeff's own
+instruction is to build it as ONE subsystem, not as orphans.
+
+---
+
+## 🔴 THE RULE THIS HEADER EXISTS TO ENFORCE
+
+**A finding is not a task. A lesson is not a task. A correction is not a task.**
+Record them — they are why this project stops repeating itself — but **do not number them like work**,
+and **strike an item the moment it is done, in the same commit that does it.** The 08-20 audit found
+**five items that were already finished**, two of them closed inside commits whose subject line was
+about something else entirely. That is how 192 entries produce four real jobs.
+
+---
+
 # HCC — THE ONE OPEN-ITEMS LIST
 
 **Created 2026-08-19 23:20 CT because Jeff asked "Do you not have a list of all this shit that
