@@ -1900,6 +1900,93 @@ stands behind the **$800** labour+freon plan — Daniels, or a third-party insur
 
 ---
 
+# ✅ JEFF'S DECISIONS, 2026-09-11 1:01 PM — recorded the same session
+
+Jeff, verbatim: *"I'm definitely going with the carrier unit from Daniels. [Or] the Ruud from
+Petitt — Derryberry's is out ... they've agreed to match each other on the ductwork that will be
+done so the drawing is correct for both companies exactly as is."*
+
+1. **DERRYBERRY'S IS OUT.** Do not re-pitch the American Standard or the $7,800 duct replacement.
+2. **FINAL TWO: Daniels + Carrier 48NL-B300603 vs Petitt + Ruud RGEAYB.** Carrier is the lean.
+3. **DUCTWORK IS NOW IDENTICAL FOR BOTH — the 995-CFM drawing below, exactly as drawn.** Duct
+   scope is no longer a differentiator; the comparison is the unit, the warranty, the company, and
+   the price for that same scope. ⚠️ **A revised Daniels price for the drawing's scope has not been
+   recorded here** — the $8,200 was for his original scope.
+
+Jeff, same message: *"Is this all I get from your analysis what about the units. I told you I
+wanted this thing picked apart."* — the 12:05 duct-only answer was the wrong deliverable.
+
+**Jeff, 1:04 PM:** wants a **printable side-by-side comparison PDF** to go over with **Angela** —
+*"tons of detail on everything especially the unit which one wins out."*
+**Jeff, 1:06 PM:** *"Daniel's service plan is $800 in addition to the unit price for 10 years parts
+10 years labor."* (Payzer proposal wording: *"all labor and freon for 10 years"*.) He also wants
+reliability/complaint/service-history data, which refrigerant lasts longest, and which unit has
+the longest lifespan. **Refrigerant: both are R-454B** (Carrier 48NL-03PD; Ruud model code `Y`) —
+a tie by construction.
+
+---
+
+# 🔍 FINE-TOOTH RESEARCH, 2026-09-11 1:00–1:20 PM — every item read from its source
+
+## Carrier's ACTUAL warranty — "Limited Warranty for Small Packaged Products", SPP-C-01WAR, ed. 08/2026
+`brandportal.carrier.com/asset/a5233aff-fecd-4332-85d3-6036ba6867c8/SPP-C-01WAR.pdf` (linked from Carrier's
+own 48NL page). Read in full.
+| | Original owner | Subsequent owner |
+|---|---|---|
+| Parts | **10** (5 if not registered ≤90 days) | 5 |
+| Compressor | **10** (or 5) | 5 |
+| Stainless heat exchanger | **LIFE** (or 20) | 20 |
+Conditions: register ≤90 days · **installed by a licensed HVAC technician** · care/maintenance "in accordance
+with… Installation Instructions, Owner's Manual". Excludes: labour · **any refrigerant cost** · internet purchase ·
+corrosive environments/rust · faulty install · power problems. **No "documented annual maintenance" clause** —
+but the 48NL **owner's manual** (OM48NL-01) says *"Contact your dealer for the required annual maintenance"* and
+its checklist includes *"If unit is charged with R-454B refrigerant, inspect and test leak dissipation system"*
+yearly. Rheem cert 92-26150-10-41 also has no proof-of-maintenance clause. **Petitt's website claim that "most
+major manufacturers require documented annual maintenance" is not in either certificate.** Keep receipts anyway.
+⚠️ A first certificate pulled (39004DP565) was a **Carrier-family BOILER** warranty — discarded, not used.
+
+## Blower vs 995 CFM (size 30060 Carrier; RGEAYB030 1-ph Ruud)
+| ESP | Carrier Med-High (cool) | Carrier High | Ruud Tap 4 (AHRI cool) | Ruud Tap 5 |
+|---|---|---|---|---|
+| 0.3" | 1,095 | 1,181 | 1,144 | 1,463 |
+| 0.5" | 987 | 1,080 | 1,064 | 1,339 |
+| 0.7" | 877 | 978 | 966 | 1,161 |
+| 0.8" | 818 | 909 | 912 | 970 |
+Heating: Carrier Medium @0.5" 937 CFM, 48 °F rise (range 25–55). Ruud 060 Tap 2 @0.5" 764 CFM → ≈60 °F rise
+(range 40–70) — the Ruud blows warmer air in winter.
+
+## Cooling at heat-wave temps (80/67 indoor)
+Carrier **net** 950 CFM: 95 °F 28.8 · 105 °F 25.3 · 115 °F 23.6 kBtu/h · 1,125 CFM: 31.4 · 27.6 · 25.7.
+Ruud **gross** 1,050 CFM: 29.6 · 27.5 · 25.3 · 1,125: 30.0 · 27.9 · 25.7 (gross ≈ +0.9 vs net). **A tie.**
+Power at 95 °F: both 2.5 kW.
+
+## Reliability, supply, lawsuits
+- **Consumer Reports** (2020+2022 surveys, 18,172 systems, reproduced at reliablehvachelp.com): predicted
+  reliability **Carrier 4/5, Ruud 3/5**; owner satisfaction **Carrier 5/5, Ruud 3/5**. CR's Feb 2025 update
+  (13,306 members, 22 brands) is paywalled. Members expect a median **15-year** life.
+- **"NEMA"** — no HVAC reliability dataset exists under that name; CR, CPSC and BBB used instead.
+- **Parts/refrigerant supply:** the 2025 R-454B cylinder shortage hit the whole industry (Rheem raised factory
+  charge May 2025; Carrier claimed 2-week R-454B fulfilment Aug 2025; trade press May 2026: "stabilising").
+  No brand-specific edge.
+- **2026 federal price-fixing class action (Berg v. Bosch et al.)** names Carrier AND Rheem (plus Bosch, Trane,
+  Lennox, Daikin, AAON) — allegations, applies to both equally.
+
+## The companies — public records
+| | Daniels Heating & Air, Inc. | Petitt Heating & Cooling, LLC |
+|---|---|---|
+| BBB | not accredited · **Not Rated** · started 2001, file 2004, owner Troy Daniels, "sole proprietorship" | not accredited · **A+** (White House, Cottontown, Springfield) |
+| Reviews | Google 4.9 (749) · Birdeye 4.9 (938) · Yelp 4.0 (4) · Nextdoor "fair, honest" | Google 5.0 (494) · Yelp White House 5.0 (2), **Springfield 3.9 (7)** |
+| Licence | none published | TN-64284 (self-reported; verify.tn.gov blocks automation) |
+| Awards | Robertson Co. 2026 Main Street Awards finalist | White House Chamber; new Hendersonville location May 2026 |
+| Complaints | FB "The New Hip Springfield", ~2 wks ago: "Customer Warning DO NOT USE DANIEL'S HEATING AND AIR… They installed…" (full post unread); replies defend them | Yelp: "DO NOT trust them with your home" (Dec 2024 repair part) |
+| Courts | none found naming the company | listed as a **creditor** in a 2016 personal bankruptcy (3:16-bk-08624) — not a case against Petitt |
+| D&B | listed "Daniels Heating & Air, Inc." (figures paid) | no listing found |
+| Employees | hiring techs $21–31/hr; 4.8 employer rating (SimplyHired); no Glassdoor reviews | recruiting ads; no Glassdoor reviews |
+| Maint. plan | **$190/yr**, 2 cleanings, optional; service fee $90 | "as low as $12/mo", 2 visits, 10% parts, 5% new systems — **required** for its 10-yr labour |
+| Carrier tie | on Carrier's dealer locator (Greenbrier) | — |
+
+---
+
 # 📐 THE DUCT DRAWING — what gets replaced, checked against ACCA Manual D (2026-09-11 12:05 PM)
 
 Jeff sent a hand-drawn layout: *"This is the ductwork they will be replacing in blue."* Header
