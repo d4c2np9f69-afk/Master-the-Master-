@@ -96,10 +96,39 @@ is too long — that **it was never checked against the house.**
 
 | # | what | why it is still here |
 |---|---|---|
-| **160** | **Jeff's location is still fully exposed** — fingerprinting ≠ IP geolocation | real, security, never actioned |
 | **155/156/157** | Ancestry: **279 duplicate people**, the DNA veto, and the sweep only seeing **58%** of the tree | genealogy, real work, needs a session with time |
 
-**That is TWO. Not 192.** — #105b and #147 both closed 2026-09-10 and struck from this table.
+**That is ONE.** Everything else that was on this table has been verified and closed.
+
+## 📊 VERIFIED PASS — 2026-09-10 evening. 13 rows measured against the live box, not re-read.
+
+**Jeff: *"verify everything and then triple verify it before you mark something that isn't done…
+You can't just guess. Dig and find the answers then make a decision."***
+
+| # | verdict | what actually proved it |
+|---|---|---|
+| **147** | 🟢 **CLOSED** | logon-triggered task died with the session; +15-min repeat trigger, watcher alive `pid=6492` |
+| **105b** | 🟢 **CLOSED** | row said the data was never pulled — it was pulled **twice** and scored |
+| **57** | 🟢 **CLOSED** | 13 add-ons enumerated, **0 in Error**; neither add-on named is installed |
+| **76** | 🟢 **CLOSED** | night-sweep automation **off since 08-26**; premise superseded the same day |
+| **89** | 🟢 **CLOSED** | guard in code + in `HEAD` + **live on loewenhome.com**, and `system_log` invalid-auth = **0** |
+| **129** | 🟢 **scrub done** | `c4910656` added it, `77ea66f7` removed it; both public URLs serve **0 occurrences** |
+| **115** | 🟢 **answered** | Z2M calls the mailbox `online` **while it is not transmitting** — the suspicion was right |
+| **86** | 🟡 **outage over** | automation fired **09-09 09:28 CT**; still LQI 0, **no action until the repeater lands** |
+| **102 / 116** | 🔴 **superseded** | the beta is the **held last-known-good**; the stable is what broke the house on 09-04 |
+| **62** | 🔴 **open** | `Everyone: Full` stands — but **0 share accesses in 14 days**, so scoping breaks nothing |
+| **63** | 🟠 **open** | rejections stopped 18 d ago, but **SMB stopped entirely** — one question to Jeff decides it |
+| **112 / 85** | 🔴 **open** | unchanged and correctly blocked |
+
+🔑 **The pass also unlocked a capability and killed a wrong belief:** `HCC_ACCESS.md` said the
+Supervisor API is *"401 for long-lived tokens by design."* **Only the REST proxy is.** The
+**websocket** `supervisor/api` command works with the same token — add-on state, config and repair
+data are now readable from a session. *(Add-on **logs** are text/plain and still need the UI.)*
+
+🔴 **The trap that nearly produced two false verdicts tonight:** HA restarted **2026-09-09 18:45 CT**
+and **244 entities are floored at that timestamp**, which makes every quiet device look identically
+dead. `last_triggered` survives a restart; `last_updated` does not. Fourth member of the
+#68 / #170 / #178 family. **It is also the whole explanation for #112's "moved" timestamp.**
 
 ## 🔵 OWED, BUT WAITING ON JEFF — do not work these, do not nag
 
