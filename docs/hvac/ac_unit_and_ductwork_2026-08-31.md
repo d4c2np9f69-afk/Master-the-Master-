@@ -1938,6 +1938,11 @@ Jeff: *"craft a post mortem email to each company without pricing… I want to s
   refrigerant covered — or Jeff goes with Daniels. Leans on Petitt's own advertised price-match guarantee.
 - Drafts saved to `Desktop\HCC AC Quotes\Final-offer emails - Daniels and Petitt.txt`. **Not sent** — Jeff sends
   them himself. Logan's email address is not on the estimate.
+- **3:25 PM revisions (Jeff):** made firmer ("slanted, firm but nice"); **deadline moved to 5:00 PM Monday 14 Sep**;
+  **Facebook complaint removed** from the Daniels email. Each email attaches
+  `Carrier vs Ruud - bid comparison (no pricing).pdf` (3 pp, Desktop + iCloud) — companies anonymised as "Carrier
+  bid" / "Ruud bid", no bid prices, no company research (complaints, courts, owners), no negotiation notes.
+  Leak-scanned: no names, towns, licence number or bid dollars; only "$500" (Petitt's no-show guarantee).
 
 # 🔁 RE-RESEARCH 2026-09-11 2:15–2:45 PM — Jeff: "multiple sourced facts and cross checking… no agents"
 
