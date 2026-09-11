@@ -1926,6 +1926,35 @@ a tie by construction.
 
 ---
 
+# 🏁 THE BUYING DECISION — Jeff, 2026-09-11 6:07 PM
+
+Jeff, verbatim: *"We intend to buy the carrier from Danial's as long as they meet the requirements."*
+
+**So the job is Daniels + Carrier 48NL-B300603, conditional on Ryan's revised quote.** Petitt stays
+alive only as the fallback if Ryan will not meet the terms. Do not re-open the unit comparison, and
+do not re-pitch Derryberry's or the American Standard.
+
+## The acceptance checklist — what "meet the requirements" means
+Check Ryan's reply against these, in this order. Anything missing is a question to ask before signing,
+not a reason to start over.
+
+| # | Requirement | Why it matters |
+|---|---|---|
+| 1 | **Carrier 48NL-B300603** named on the quote, and **Daniels registers it within 90 days** | Registration is what turns 5/5/20 into **10/10/Life**. Certificate SPP-C-01WAR. |
+| 2 | **The $800 / 10-year coverage in writing:** labour, parts and refrigerant, who backs it, deductible or diagnostic fees, and what voids it | The Payzer wording is *"all labor and freon for 10 years."* Petitt's excludes freon and dies if a paid plan lapses — Daniels' terms must be on paper, not verbal. |
+| 3 | **The drawing's ductwork, with every diameter written on the quote** | 16" return + two sheet-metal 90s, three branches to 8", the 7" garage run. See `Duct layout - scope of work.pdf`. |
+| 4 | **Both connections at the unit rebuilt** — new square-to-rounds on supply AND return | This is the 30-year twist, the original reason for the whole job. |
+| 5 | **Return filter grille of at least 3.3 sq ft** (e.g. 20 × 25), and the **18" return priced as an option** | A 16" return runs 713 fpm, right at the flex maximum; the grille is the house's one choke point. |
+| 6 | **Permit pulled by Daniels, and his Tennessee licence number on the quote** | Neither has been produced yet. |
+| 7 | **Start-up readings on the invoice:** static pressure, dampers balanced, 995 CFM, leak-detection test | The only proof the installed system actually performs. |
+| 8 | The items Petitt included and Daniels has not quoted: **disconnect, gravel pad + shroud, surge protector, thermostat wire + installing Jeff's ecobee** | These are real money if they come later as extras. |
+
+## ⚠️ The one honest expectation to set on price
+**$8,200 + $800 = $9,000 was for Daniels' ORIGINAL scope**, not for this checklist. Items 3, 5 and 8
+are genuine added material and labour, so a revised number above $9,000 is not automatically a bad
+deal — **it is still well under Petitt's $13,000, and Petitt's ten-year cost is ≥ $14,296.** Judge the
+revised quote on whether every line above is in it, then on the number.
+
 # 📨 FINAL-OFFER EMAILS DRAFTED 2026-09-11 3:10 PM — Jeff's negotiation move
 
 Jeff: *"craft a post mortem email to each company without pricing… I want to see what else I can squeeze out."*
