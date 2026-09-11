@@ -1807,6 +1807,28 @@ not fix it.
 **Recommendation: Mullvad, one month, €5.** No subscription to cancel, and it proves whether a
 non-Tennessee exit actually unblocks his sites before committing to anything longer.
 
+### 🟢 2026-09-10 20:30 — THAT RECOMMENDATION IS SUPERSEDED. THE FIX IS ALREADY ON THE BOX, AT $0.
+
+**Re-measured tonight, exposure unchanged:**
+
+```
+warp-cli settings  ->  Mode: DnsOverHttps   Always On: false
+ipinfo.io          ->  White House, Tennessee, AS7018 AT&T
+windscribe-cli     ->  Login state: Logging in   Connect state: DISCONNECTED
+                       Public IP: 208.188.36.113   Firewall: Off
+```
+
+🔴 **Windscribe was installed on this PC on 2026-09-08 — two days before the Mullvad table above was written — and it was PROVEN to exit in Atlanta with the house still reachable** (killswitch ON, HA answering HTTP 200, router reachable). **Free tier. €0.** He is still in Tennessee tonight for one reason only: **the tunnel is not connected.** Do not price a VPN for this again — he owns one that works.
+
+**The sequence, from the verified 09-08 record — order matters:**
+1. `warp-cli --accept-tos disconnect` **FIRST.** 🔴 WARP's DoH resolvers routed into a Windscribe tunnel = every lookup times out (`ENOTFOUND`). **That is what killed the 09-04→09-08 session.** Fully reproducible.
+2. `windscribe-cli connect best` — `locations` returns empty on the free tier; `best` picked Atlanta.
+3. **Verify against `ipinfo.io`, never the app's own claim.**
+
+✅ *Allow LAN Traffic* is already ON (Jeff, 09-08 5:08 PM) so the killswitch no longer blocks HA — **do not turn the firewall off to 'fix' LAN issues.** ⛔ **Never set firewall mode 'Always On' / 'Always On+'** — those kill all internet whenever the VPN is down, stranding the PC that runs the house.
+
+⚠️ **NOT CONNECTED BY ME.** Turning on a tunnel changes his network and has taken the house offline once already — that is his call, not a late-evening one. ⚠️ **The free tier's data cap was NOT verified this session** — it decides whether this can stay on permanently or is a per-site tool. Check before advising always-on.
+
 ---
 
 ## #161 — 🟢 BITWARDEN AUTOFILL: it is a checkbox, off BY DESIGN 2026-09-08 12:50
