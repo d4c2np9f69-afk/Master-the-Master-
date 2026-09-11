@@ -1926,6 +1926,28 @@ a tie by construction.
 
 ---
 
+# 🔁 RE-RESEARCH 2026-09-11 2:15–2:45 PM — Jeff: "multiple sourced facts and cross checking… no agents"
+
+Done by hand (Chrome + Google, BBB, WebFetch), no agents. New or cross-checked:
+- **BBB, both read directly:** Daniels **0 complaints**, not rated. Petitt **A+, 0 complaints**, started 4/1/2010,
+  incorporated 11/14/2010, LLC, **Mike Petitt** President/CEO (website: founded 2010 by Mike & Trina Petitt).
+- **Consumer Reports cross-check:** Carrier satisfaction "Excellent" (5/5) in two sources; **Ruud satisfaction 3/5
+  in the reliablehvachelp reprint but "Very Good" (4/5) in CR's 2022 article** (quoted on HVAC-Talk + a FB post).
+  Reliability (Carrier 4, Ruud 3) remains single-reprint.
+- **Coil leaks:** 5+ r/HVAC / r/hvacadvice threads on Rheem/Ruud **microchannel** coil leaks, including a 2.5-ton
+  Rheem package (RGEA14…) at 6 yrs and a rooftop pack replaced twice in 5 yrs. RGEAYB is microchannel inside and out.
+  Anecdotal — scored as a Carrier edge, flagged.
+- **Stainless Ruud model confirmed:** `RGEAYB030AJT061NAAJA` "SS Exchanger" at Gemaire, Etna, ACR, Plimpton & Hills
+  — all "call for pricing". The $5,669 box benchmark is the PLAIN version.
+- **Petitt advertises a "Price Match Guarantee… for similar systems"** (own Instagram, 2 posts); not on website.
+  Website: $500 no-show guarantee, 12-hour priority response, TN-64284, "5.0 (1000+ reviews)".
+- **Awards:** both were Robertson Co. Main Street Awards finalists 2025; Daniels again 2026.
+- **Daniels:** Indeed employer 4.8 (5); dealer listings for Carrier (2017) and American Standard; D&B + Cortera
+  "Daniels Heating & Air, Inc."; Nextdoor "fair, honest pricing".
+- **Local parts:** Carrier Enterprise vs Rheem Pro Partner / Johnstone / Ed's Supply (Nashville) — tie.
+- **Unit score now Carrier 7 · Ruud 5 · tie 11** (adds coil-leak row → Carrier; resale row → Ruud; parts-supply
+  and tech-opinion rows → tie). Chart colours validated with the dataviz validator (blue #2a78d6 / orange #eb6834).
+
 # 🔴 CORRECTIONS 2026-09-11 2:00 PM — Jeff caught the Ruud heat exchanger. Full audit done.
 
 Jeff: *"Your wrong the Rudd's heat exchanger is stainless steel. WTF else have you gotten wrong in this?"*
