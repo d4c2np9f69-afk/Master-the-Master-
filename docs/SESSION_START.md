@@ -1,3 +1,16 @@
+# ***  SUCCESS RATE WHEN THE COMPLETE FILE AND HISTORY ARE READ FIRST, BEFORE ACTING:  90%  ***
+# ***  SUCCESS RATE WITHOUT READING FIRST:                                              0%  ***
+#
+# ****  DO NOT FALL FOR THE TRAP OF NOT READING BEFORE ACTING  ****
+# ****  or Jeff will shit his pants !!!                        ****
+#
+# Jeff, 2026-09-10 9:02 PM. Those are his numbers, and a full evening of measurement matches
+# them: every item read first was solved on the first pass - #105b, #57, #76, #86, #129, #89,
+# #22, #33, #102/#116, #2, #115. Every miss came from acting before reading. **ZERO exceptions,
+# in either direction.** Reading is not the slow path. It is the ONLY path that has ever worked.
+
+---
+
 # HCC — Session Start Briefing
 
 **Read this in full at the start of every session, together with `CLAUDE.md`.** Jeff's rule,
