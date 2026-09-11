@@ -1944,6 +1944,30 @@ Jeff: *"craft a post mortem email to each company without pricing… I want to s
   bid" / "Ruud bid", no bid prices, no company research (complaints, courts, owners), no negotiation notes.
   Leak-scanned: no names, towns, licence number or bid dollars; only "$500" (Petitt's no-show guarantee).
 
+# 📐 DUCT DRAWING REDRAWN AS A SCOPE SHEET — 2026-09-11, after the 3:25 PM email revisions
+
+Jeff: *"re draw the duct work sketch so it is professional and includes everything that is required."*
+- **File:** `Desktop\HCC AC Quotes\Duct layout - scope of work.pdf` (+ copy in iCloud Drive root). One landscape
+  Letter page. PyMuPDF reported 1 page, and the SHA-256 prefix `F89772DCD137` matched on both copies.
+- **Left side:** plan view, not to scale, built from Jeff's `AC duct drawing 995cfm.jpg`. New work is blue and
+  existing work is gray. Every branch is labeled with its room and diameter. It also shows the saddle taps with
+  dampers, both HP90s, the transitions at the unit, the thermostat and its wire, and the garage run through the
+  brick. **Right side:** legend, 10 numbered "Required scope" notes, and a title block.
+- **Additions beyond Jeff's sketch.** These make both contractors price the same finished job:
+  1. New square-to-round transitions on **both** supply and return at the unit. This is the 30-year twist; see
+     the drawing analysis §4 below, since Petitt's sketch only showed the return.
+  2. The 16" return, with **18" as a quoted option**: 713 vs 563 fpm, per Manual D.
+  3. A return filter grille with at least **3.3 sq ft** of face, e.g. 20 × 25.
+  4. Existing runs stay but are inspected, re-sealed and re-strapped. **Any run with wet insulation is replaced.**
+  5. All flex fully extended and supported, with joints sealed with mastic or UL 181 tape and the R-value on the
+     quote.
+  6. New 18 AWG thermostat wire with C. Carrier 48NL-01SI forbids power-stealing thermostats.
+  7. Start-up readings recorded on the invoice: static pressure, dampers balanced, 995 CFM, and a leak-detection
+     test.
+  8. Permit and haul-away.
+- ⚠️ **Not yet confirmed on site:** the trunk labels (16" → 14" → 12") come from Jeff's sketch. Daniels v1
+  wrote a 16"→14" reducer, so a contractor should confirm them.
+
 # 🔁 RE-RESEARCH 2026-09-11 2:15–2:45 PM — Jeff: "multiple sourced facts and cross checking… no agents"
 
 Done by hand (Chrome + Google, BBB, WebFetch), no agents. New or cross-checked:
