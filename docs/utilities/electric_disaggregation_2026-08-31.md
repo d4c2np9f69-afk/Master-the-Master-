@@ -878,3 +878,84 @@ assumption.** "06:00-06:30 baseline was 0.92-1.12 kW" was carried over from 08-3
 as a constant. It was a measurement of a different day. Had the prediction said *"if the
 pre-load baseline is not 0.9-1.3 kW, this test is void"*, the collapse would have been visible
 in one line instead of four criteria scored against a foundation that had already failed.
+
+---
+
+# 🟢 2026-09-10 20:20 — #105b CLOSED, AND THE ROOT CAUSE OF ALL THREE FAILURES FOUND
+
+**#105b read *"pull the 08-31 interval data Jeff generated on purpose — the data was never pulled."*
+That is FALSE and had been false for nine days.** Verified three ways before striking it:
+
+| check | result |
+|---|---|
+| 08-31 interval data pulled? | ✅ the morning profile table in this file — 15-min kW, 06:00→13:15 |
+| scored against a control? | ✅ the `08-31 minus 08-30` interval-by-interval diff, +2.67 kW over 4 consecutive intervals |
+| still blocked on Jeff's password? | ❌ **no** — `smarthub_pull.js` + `open_login_chrome.ps1` (both on disk, 2026-09-03) drive his already-logged-in Chrome over CDP. **No session types his password.** |
+
+**The row was stale in two independent ways**, and its "Needs Jeff logged into SmartHub" qualifier
+was keeping a finished item parked on a person who was never actually needed.
+
+## 🔴 THE ROOT CAUSE — measured tonight, and it is not a test-design problem
+
+Three tests, three failures, each blamed on a different local mistake: nameplate threshold too high,
+oven confounder, baseline wrong by 4×. **They share one cause.** Live query of Home Assistant,
+2026-09-10 20:15, 569 entities:
+
+```
+climate.* entities                     0
+thermostat entities                    0
+power / energy sensors                 1   <- sensor.electric_smarthub_..._monthly_usage
+                                            (a MONTHLY total, from the utility)
+```
+
+🔴 **THE HOUSE HAS NO INSTRUMENT THAT MEASURES THE CONFOUNDER.** No A/C duty signal, no
+real-time power anywhere. So in every test the A/C term could only ever be *assumed* — and
+assuming it is precisely what failed, three times running. The tests were not sloppy; they were
+**unfalsifiable by construction.**
+
+🔴 **AND THE THERMOSTAT IS NOT MISSING FROM HA — IT IS PHYSICALLY DEAD.** Jeff, 2026-09-10 20:16:
+*"There is no thermostat it is down that is what the new unit is being purchased for."* The zero
+above is not an integration gap to be closed with software; **the control itself is gone.** That is
+the reason the contactor is wedged and the disconnect is the only switch in the system — and it
+means no amount of HA work can instrument the A/C before the new unit goes in.
+
+### ⚠️ A CORRECTION TO §4 OF THIS FILE
+
+§4 states: *"What CT clamps would still add, and only this: separating two loads inside the same
+15-minute window… They would NOT improve 'is the dryer running'"* and *"Jeff's read that the clamps
+add little over this data is correct."*
+
+**Three subsequent failures contradict that.** Separating two loads inside one 15-minute window is
+not a marginal extra — **it is the exact thing that killed every attempt.** Recording the
+correction; **not re-pitching hardware, it is Jeff's call and there is a $0 path below.**
+
+## 🟢 THE $0 CLEAN TEST — available NOW, and the window is closing
+
+`automation.hcc_ac_manual_rig_pull_the_disconnect_at_72f`, read live tonight:
+
+> *"TEMPORARY while the contactor is wedged with a zip tie — **the coil is bypassed so nothing stops
+> the unit but Jeff.** … DELETE when the Blueridge goes in."*
+
+🔴 **That inverts the problem into a gift.** The A/C is no longer a load that cycles on a
+thermostat's whim — it is **binary and Jeff-controlled**. With the disconnect pulled, the A/C term
+is **zero by construction, not by assumption.** That is the one thing all three failed tests needed
+and none had.
+
+**Confirmed off right now:** indoor `3rd_all_devices_echo_dot_temperature` rose 72.7 → 76.8 °F
+through the evening while `backyard_temperature` sits at **71 °F**. Inside warmer than outside and
+still climbing — the unit is not running. *(Inference from temperature, not a direct sensor; there
+is no sensor on the unit.)*
+
+⏳ **This window closes when the new unit goes in.** After that the A/C cycles on its own again —
+though a HA-integrated thermostat would finally make duty measurable, which fixes it the other way.
+
+## ⛔ CLOSING THIS AS A SCIENCE QUESTION — it is not worth more of Jeff's time
+
+Three tests, three failures, and the root cause above says a fourth cannot be built honestly with
+the instruments this house has. **The energy is real and already measured** (08-31 carried 6.5–8.4
+kWh of genuine non-weather load); only the *attribution to the dryer specifically* is unproven, and
+nothing depends on it. **No further dryer tests. Do not ask Jeff to run a load for this.**
+
+If it ever matters again, the cheap way is the current rig: with the A/C disconnect pulled the A/C
+term is zero by construction rather than assumed, which is the one thing all three attempts lacked.
+That window closes when the new unit goes in. **Recording it, not proposing it.**
