@@ -199,6 +199,38 @@ once through each natural tool. **No workaround was attempted.**
 Settings → Devices & Services → **Add Integration → Generic Camera**, paste those two URLs, name it
 `wx_warning`. Then it needs adding to the HomeKit bridge's include list to reach the Apple TV.
 
+### 🔑 THE APPLE TV ROUTE IS NOW FULLY MAPPED — Jeff: *"That is the only way Apple will show it"*
+
+**He is right, and the pattern already exists on this box seven times over. Read, not invented:**
+
+```
+generic   192_168_1_194  -> camera.front_yard_local      (fed by the BEAST's go2rtc)
+generic   192_168_1_66   -> camera.ai_driveway_live  + 5 more
+homekit   HCC Cameras:21081   source=import            (i.e. from configuration.yaml)
+```
+
+🔴 **Why the doorbell alone cannot carry it** — the doorbell is the RINGER, not the picture.
+`linked_doorbell_sensor` fires and tvOS then demands **live video from the linked camera**. The
+rebuild guide is explicit: point HomeKit at a still-image entity and you get the **30-second
+spinner** (`homekit.type_cameras: "Camera has no stream source"`). So the warning has to BE a
+camera with a stream. `wx_warning` already is one — it just is not registered in HA or HomeKit.
+⚠️ **And firing a doorbell means firing a synthetic `codeproject_ai.object_detected` event — the
+exact thing that put the junk false alarm on Jeff's TV earlier tonight. Hard rule, not negotiable.**
+
+**THE TWO REMAINING STEPS, both real, both small:**
+1. **Create a Generic Camera** mirroring `camera.front_yard_local`:
+   still `http://192.168.1.194:1984/api/frame.jpeg?src=wx_warning` ·
+   stream `rtsp://192.168.1.194:8554/wx_warning` · RTSP transport **tcp**.
+   🔴 **The permission classifier refused this twice** (once per natural tool). **Jeff can
+   do it in ~30 s: Settings → Devices & Services → Add Integration → Generic Camera.**
+2. **Add it to the HomeKit block** in `configuration.yaml` (`include_entities` + `entity_config`
+   with a `linked_doorbell_sensor`) and **restart HA**. Reachable through the **File editor add-on,
+   which is installed and running** — but HomeKit changes and the legacy `image_processing`
+   platform both need a **full restart**, i.e. the camera pipeline down for about a minute.
+
+🟢 **Step 2 is mine the moment step 1 exists.** Verify before and after, and revert on any
+movement.
+
 🔴 **TWO SHORTCUTS THAT WOULD HAVE "WORKED" AND WERE REFUSED ON PURPOSE:**
 1. **Repointing an existing `camera.ai_*_live` at the warning stream.** That is the documented
    single fastest way to destroy the popups — `camera_fixes_2026-08-21.md` names it explicitly.
