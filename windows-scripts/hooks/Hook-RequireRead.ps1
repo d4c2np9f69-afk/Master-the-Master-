@@ -105,6 +105,13 @@ $GATES = @(
   @{ Name = 'CAMERAS / BLINK'
      Match = 'blink|camera|go2rtc|homekit|image_processing|pipup|clipframe|ai_snapshot|doorbell'
      Requires = @('CAMERAS_CLOSED_2026-08-22.md', 'camera_fixes_2026-08-21.md')
+     # 2026-09-11: this gate alone demands a RECENT read, not a once-per-session one.
+     # Earned the same night: camera_fixes was read at ~22:00, then at ~23:00 four go2rtc
+     # attempts were fired at the exact dead end it documents ("the ffmpeg: shorthand
+     # returned 'streams: unknown error'... the exec: form works"). The file was on the
+     # receipt and out of mind. An hour is long enough not to nag and short enough that
+     # the gotchas are still in front of you.
+     FreshMin = 60
      Why = 'Cameras are FROZEN. 2026-09-09 cost six hours because these went unread: the 307 ''System is busy'' over-polling lockout signature, and the DO-NOT-UNDO HomeKit repoint to the *_live entities.' }
   @{ Name = 'GARAGE DOOR'
      Match = 'garage|door_opener|cover\.garage|mini-?d'
@@ -182,8 +189,25 @@ if ($readSoFar -notmatch [regex]::Escape('ACCESS_MAP.md')) {
 foreach ($g in $GATES) {
   if ($blob -match ("(?i)" + $g.Match)) {
     $missing = @()
+    $now = [int][double]::Parse((Get-Date -UFormat %s))
     foreach ($doc in $g.Requires) {
-      if ($readSoFar -notmatch [regex]::Escape($doc)) { $missing += $doc }
+      if ($readSoFar -notmatch [regex]::Escape($doc)) { $missing += $doc; continue }
+      # Freshness, only where a gate asks for it. Receipt lines are "<epoch>|<path>";
+      # take the NEWEST stamp for this doc and require it inside the window.
+      if ($g.FreshMin) {
+        $newest = 0
+        foreach ($ln in ($readSoFar -split "`r?`n")) {
+          if ($ln -like ('*' + $doc + '*') -and $ln -match '^(\d{9,})\|') {
+            if ([int]$Matches[1] -gt $newest) { $newest = [int]$Matches[1] }
+          }
+        }
+        # A receipt with no timestamp is pre-2026-09-11 format - treat as unknown age and
+        # let it pass, so an old receipt can never lock Jeff out.
+        if ($newest -gt 0 -and (($now - $newest) / 60) -gt $g.FreshMin) {
+          $missing += ($doc + "   (read " + [math]::Round(($now - $newest) / 60) +
+                       " min ago - this gate needs it re-read within " + $g.FreshMin + " min)")
+        }
+      }
     }
     if ($missing.Count -gt 0) { Deny $g.Name $missing $g.Why }
   }

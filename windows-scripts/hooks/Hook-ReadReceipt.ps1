@@ -29,8 +29,18 @@ $sid = ($sid -replace '[^A-Za-z0-9\-_]', '')
 
 $receipt = Join-Path $env:TEMP ("hcc-read-" + $sid + ".txt")
 
+# Stamp every receipt line with unix epoch seconds.
+#
+# WHY (2026-09-11, Jeff): "Why don't you hold the same way to the read first rules?"
+# Fair. The gate only proved a file had been opened ONCE this session - so a read from
+# five hours ago still counted. That is how four go2rtc attempts got fired at a dead end
+# that camera_fixes_2026-08-21.md had already documented: the file was on the receipt,
+# just not in the session's head any more. A timestamp lets the gate demand a RECENT
+# read for the subsystems where being wrong is expensive.
+# The prefix is harmless to the old substring matching the gate already does.
+$stamp = [int][double]::Parse((Get-Date -UFormat %s))
 if ($path) {
-  try { Add-Content -LiteralPath $receipt -Value $path -Encoding UTF8 } catch { }
+  try { Add-Content -LiteralPath $receipt -Value ("$stamp|$path") -Encoding UTF8 } catch { }
 }
 
 # ---------------------------------------------------------------------------
@@ -68,7 +78,7 @@ if ($cmd) {
     if ($seg -notmatch $READ_VERB) { continue }
     foreach ($doc in $GATE_DOCS) {
       if ($seg -like ('*' + $doc + '*')) {
-        try { Add-Content -LiteralPath $receipt -Value ('[via-shell] ' + $doc) -Encoding UTF8 } catch { }
+        try { Add-Content -LiteralPath $receipt -Value ("$stamp|[via-shell] " + $doc) -Encoding UTF8 } catch { }
       }
     }
   }
