@@ -1734,10 +1734,18 @@ Heat matters: old Nordyne = 72,000; Carrier = 60,000; Am. Std = 70,000 (derived)
 
 ## 🔗 DANIELS — BOTH VERSIONS COMBINED (Jeff 2026-09-11: *"use both and combine information"*)
 
-Re-read 2026-09-11 from the **live Payzer pages** (comparison `PC-1211-1`, proposals `1211-1` Goodman
-and `1211-2` Carrier) **and** the 09-10 session transcript, which captured the FIRST version off the
-same pages before Daniels revised them in place. **Payzer now shows only the revised text** — the
-first version survives only in that transcript and in this file.
+**Daniels' quote existed in THREE states on 09-10 — every one read in full 2026-09-11, hash-checked:**
+
+| state | source | what it carries |
+|---|---|---|
+| **PDF v1** — created 09-10 **10:53 AM CT** | `iCloudDrive\PC-1211-1.pdf` (281,760 B, md5 `c14a28f4…`) | brand + price only: "2.5-ton gas package unit", all material + labour, haul-away, new thermostat, 10-yr parts, $800 option. **No models, no flex, no pad, no sizes.** |
+| **Payzer pages, mid-day** — read live ~11:30 AM CT by the 09-10 session | transcript `d8d2cd0f…jsonl` lines 1272/1295 | adds pad, square-to-rounds, flashing, **16" flex return + supply, 16"→14" reducer, ~875 CFM** |
+| **PDF v2** — created 09-10 **3:47 PM CT** | `iCloudDrive\PC-1211-12.pdf` = `docs/hvac/quote-daniels-revised-PC-1211-1.pdf` (md5 `e28243d5…`, identical) | adds **model numbers + electrical whip**; sizes/reducer/CFM **removed** |
+
+🔴 **The 16"/reducer/875-CFM detail was never in a PDF — only on the Payzer pages, which now show
+v2.** So the only written, holdable Daniels document names **no duct diameters**. Get them back
+in writing before signing. *(PDFs deliberately NOT copied into this repo — it is public and they
+carry Jeff's address and phone; they live in iCloud.)*
 
 **Daniels' complete scope = the union of both, identical for Goodman and Carrier:**
 - All material + labour to complete install · haul away all trash
