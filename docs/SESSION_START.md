@@ -64,6 +64,7 @@ not mean nothing is documented. Search for what the plan **is**, check file date
 
 | Need | File | Loaded? |
 |---|---|---|
+| 🔑 **HOW TO REACH ANY LIVE SYSTEM + every wall's workaround** | **`docs/ACCESS_MAP.md`** | **read it before saying you cannot do something** |
 | Standing rules, relationship, current state | `CLAUDE.md` | auto, every session |
 | This briefing | `docs/SESSION_START.md` | read at start |
 | Why a past decision was made | `docs/CHANGELOG_ARCHIVE.md` (179 KB, 98 entries) | **grep on demand** |
@@ -131,10 +132,17 @@ subsystem** — the answer is usually already in there, paid for in Jeff's time.
 
 ## 5. Open items — check status, don't assume
 
-- **Orbit anti-siphon valve** ordered 08-15, not yet installed. Daily 5 AM whole-house leak report
-  runs until it is; **revert that automation to alert-only once the valve is in and proven.**
-- **Backyard PIR still logs zero motion events** even overnight at 78 °F, while other cameras fire.
-  Heat explains the daytime misses; it does not explain the cool hours. Not yet root-caused.
-- **HA backup encryption key** still exists only on this PC — without it every iCloud backup is
-  undecryptable. Jeff needs a durable copy somewhere independent.
-- **Garage camera** reports no temperature or WiFi — likely unplugged, needs a physical look.
+🔴 **This section was STALE in four places until 2026-09-10. Corrected, and the lesson is the
+point: a doc that disagrees with reality makes the next session confidently wrong.**
+
+- **`docs/OPEN_ITEMS.md` is the list.** Its header carries the current verified triage — read that
+  part first, not the 3,100 lines below it.
+- ~~Orbit anti-siphon valve ordered, not yet installed~~ → **installed 2026-09-01.** What is open
+  now is #109's HOLD: observe irrigation pick back up against real water before changing a line.
+- ~~HA backup encryption key has no durable copy~~ → still single-copy, **but the key was PROVEN
+  to decrypt a real backup on 2026-09-10** (#2). That question is closed; only the second copy isn't.
+- ~~Backyard PIR logs zero motion~~ → **it logs motion.** 2 events in 12 h measured 09-10. Sparse,
+  not blind (#7). The 26-hour "zero" reading came from a history window wider than 24 h, which
+  under-reports to zero — see `ACCESS_MAP.md` §1.
+- **Garage camera** reports no temperature or WiFi — it is a **mains-powered Mini with no battery**;
+  that is documented-normal, **not a fault.** Do not report it as one.
