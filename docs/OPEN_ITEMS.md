@@ -113,6 +113,49 @@ is too long — that **it was never checked against the house.**
 
 **That is ONE.** Everything else that was on this table has been verified and closed.
 
+## ⛈ #182 — THE SEVERE WEATHER ALERT WAS DEAD TWO WAYS. FIXED 2026-09-10 9:55 PM.
+
+**Jeff asked whether a severe thunderstorm warning could be popped on screen. Testing it found the
+real one was never going to fire at all.**
+
+🔴 **`automation.hcc_severe_weather_alert` (`packages/hcc.yaml`) is broken TWO ways, and had
+never fired once — `last_triggered: None`:**
+1. **IT TRIGGERS ON AN ENTITY THAT DOES NOT EXIST.** Its trigger is **`weather.home`**. The only
+   weather entity on this box is **`weather.forecast_home`**, verified live. **The `None` was never
+   "no severe weather yet" — it was "wired to nothing".**
+2. **Even if it fired, it reaches nobody.** Its single action is `persistent_notification.create` —
+   a notice inside HA. **Identical defect to the panic button, #10.**
+
+🟢 **FIXED — `automation.hcc_severe_weather_alert_v2` built in `automations.yaml`**: triggers
+on the real entity, and delivers a time-sensitive push to **both phones** plus a **PiPup overlay**.
+`persistent_notification` runs FIRST (a failing notify aborts everything after it) and every
+delivery carries `continue_on_error`. 30-minute delay = rate limit. **Jeff confirmed the phone push
+live: *"It fired on my phone".*** No Alexa announce on purpose — `lightning-rainy` is common and
+alert fatigue is a documented failure here; it is one line to add.
+
+### 📺 Which screens can actually be reached — measured, not assumed
+- **Fire TV (viewing room): WORKS.** PiPup returned **HTTP 200**, `SYSTEM_ALERT_WINDOW: allow`,
+  service `nl.rogro82.pipup/.PiPupService` running, and a live overlay window was confirmed in
+  `dumpsys window`: `ty=APPLICATION_OVERLAY fmt=TRANSLUCENT`. **Jeff did not see it because he was
+  in the bedroom, not the viewing room.**
+- **Apple TV (bedroom): NO TEXT-POPUP PATH EXISTS.** The only thing that pops on an Apple TV is a
+  **HomeKit camera/doorbell notification** — which is exactly why the camera popups land there.
+- 🔴 **Jeff's idea — *"a doorbell alert with a severe weather clip"* — is architecturally
+  RIGHT and is the only route to the Apple TV. But make it a STILL, not a clip.** Video is already
+  researched and rejected TWICE: `homekit_capabilities_plan_2026-08-14.md:48` (*"Video clips in
+  HomeKit — researched, rejected: HA's ffmpeg camera on local MP4 is hanging/freezing"*) and
+  `camera_fixes_2026-08-21.md:414` (*"PiPup cannot render video on this build. The still is also
+  the FASTER path"*). A rendered warning **image** pushed through the doorbell path is how the
+  camera popups already work.
+- ⚠️ **That is a CAMERA-STACK change and cameras are FROZEN. It needs Jeff's explicit yes,
+  and it is not a late-evening job.**
+
+🔑 **HOW `packages/hcc.yaml` WAS READ — a route worth keeping.** It is invisible to the
+config API, and with the automation never having fired there was no trace to read either. **It was
+extracted from the encrypted nightly backup** using the key proven in #2: open the backup tar →
+`homeassistant.tar.gz` → `securetar` with the stored key → `data/packages/hcc.yaml`, 650 lines.
+**Read-only, no add-on, nothing from Jeff.** Added to `ACCESS_MAP.md`.
+
 ## 📦 THE LIST WAS COLLAPSED 2026-09-10 9:40 PM — 67 numbered rows → 28 real ones
 
 **38 rows were moved to `docs/OPEN_ITEMS_CLOSED.md`. Nothing was deleted — char count verified

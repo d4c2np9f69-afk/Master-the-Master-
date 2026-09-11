@@ -25,7 +25,7 @@ HA authorization header. Every script in `HCC-Scripts/` already does it — copy
 | Any state | `GET /api/states` |
 | Real clock (authoritative) | `POST /api/template` → `{{ now().strftime('%A %Y-%m-%d %I:%M %p %Z') }}` |
 | Automation config (read **and write**) | `GET`/`POST /api/config/automation/config/<id>` — **only for `automations.yaml`** |
-| Automations in `packages/hcc.yaml` | ❌ **invisible to the config API.** Read them out of a **trace** (`trace/list` → `trace/get`), which returns the full config with no file access |
+| Automations in `packages/hcc.yaml` | ❌ **invisible to the config API.** Read them out of a **trace** (`trace/list` → `trace/get`), which returns the full config with no file access | 🔑 **And if it never fired, there is no trace either — extract the file from the encrypted nightly backup** (`homeassistant.tar.gz` → `securetar` → `data/packages/hcc.yaml`). Read-only, needs nothing from Jeff. Proven 2026-09-10. |
 | **Add-ons, Supervisor, repairs** | 🔑 **WebSocket** `{"type":"supervisor/api","endpoint":"/addons","method":"get"}` |
 | Entity registry (disabled/hidden) | WS `config/entity_registry/list` |
 | Long-term statistics | WS `recorder/statistics_during_period` — **NOT** `history/…` |
