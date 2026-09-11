@@ -236,6 +236,44 @@ the script never fires a synthetic `codeproject_ai.object_detected` event.
 🔵 **The Apple TV is the ONLY remaining piece** — the two steps below. Everything upstream
 of it is now live and self-running.
 
+### 🔴 APPLE TV — ROOT CAUSE FOUND AND MEASURED 2026-09-10 10:34 PM. PARKED AT JEFF'S REQUEST.
+
+**Jeff: *"Let's try another time I would rather finish the outstanding items list."*** Parked with
+the answer in hand, not as an open question.
+
+🟢 **The Generic Camera form WAS reached and filled** — driven in the HA UI in Chrome
+(deep link `/config/integrations/dashboard/add?domain=generic`, which skips the Add-Integration
+search entirely). It failed on **"Timeout while loading URL"**, three times.
+
+🔴 **THE CAUSE, MEASURED, NOT GUESSED: a COLD RTSP start on `wx_warning` takes 12,269 ms.**
+HA's generic-camera validation gives up long before that. **It is not the network, not the
+firewall, and not HA** — the six working cameras use `stream_source: rtsp://192.168.1.194:8554/…`
+with `rtsp_transport: tcp`, read live out of their config entry diagnostics, so that exact path is
+proven good. **The still URL is innocent too: 0.6 s.**
+
+🟢 **THE FIX, and it is small:** the working cameras feed ffmpeg **a single JPEG** —
+`-f image2 -framerate 10 -i <one .jpg>` — which starts instantly. `wx_warning` feeds an **MP4**,
+which must spin up. **Point it at one JPEG using the identical camera pattern and the timeout goes
+away.** *(The edit to do this hit the `\` escape trap in a Bash heredoc and did not apply — see
+ACCESS_MAP §7. Redo it with `chr(92)` or a file-based script.)*
+
+🟢 **AND IT IS THE BETTER ARCHITECTURE FOR WHAT JEFF ACTUALLY WANTS.** He said: *"we could
+use that camera for all announcements… it could say water leak detected or irrigation is running."*
+**A single overwritable JPEG is exactly that** — one `announce.jpg`, any subsystem rewrites it, the
+stream never restarts and the Apple TV popup always has something live to show. The 4-frame animated
+version with the alert tone stays as its own stream for the Fire TV and browser.
+
+🟢 **CAMERA STACK VERIFIED CLEAN THROUGHOUT — three full runs tonight (22:09, 22:11, 22:28,
+22:31), every one ALL GOOD, all six streams at identical byte sizes.** go2rtc was restarted three
+times and came back in ~8 s each time. ⚠️ **One unintended edit was caught and reverted:** a
+`sed`-style replace added `-r 10` to **8** streams including the six cameras; the camera lines were
+restored from `go2rtc.yaml.bak-20260910-2227` and **verified byte-identical programmatically**, not
+by eye.
+
+🔑 **CORRECTION to an earlier claim in this row: go2rtc DOES persist API-added streams.**
+`wx_warning` and `love_angela` were written into `go2rtc.yaml` by go2rtc itself. The earlier
+"memory-only, lost on restart" caveat was **wrong**.
+
 ### 🔑 THE APPLE TV ROUTE IS NOW FULLY MAPPED — Jeff: *"That is the only way Apple will show it"*
 
 **He is right, and the pattern already exists on this box seven times over. Read, not invented:**
