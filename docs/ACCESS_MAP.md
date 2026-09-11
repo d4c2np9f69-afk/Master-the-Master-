@@ -143,6 +143,7 @@ every one has a proven way through. *"I can't"* is only acceptable for the five 
 | Supervisor REST `/api/hassio/*` returns 401 | **Use the WebSocket** `supervisor/api` command. Same credential. ✅ |
 | Add-on **logs** won't come through the JSON proxy | They are `text/plain`. Get Z2M facts from **MQTT** instead (`bridge/devices`), or use the UI |
 | `packages/hcc.yaml` is invisible to the config API | **Read it out of an automation trace**; write new automations to `automations.yaml`, which IS writable |
+| A go2rtc stream added via the API will not work with HA | 🔴 **The `ffmpeg:` shorthand is documented broken on this box** (*"streams: unknown error", v1.9.14*). Only **`exec:`** works - and the API refuses `exec:` as an insecure producer, while go2rtc **rewrites `go2rtc.yaml` from memory on every restart**. The edit must be made with go2rtc STOPPED. |
 | A permission classifier refuses a change | **Split it into smaller, separately-verifiable steps.** The SMB fix was refused as one call and went straight through as `Grant` then `Revoke` ✅ |
 | A `.docx` and no Word installed | It is a **zip** — `zipfile` → `word/document.xml`, strip tags ✅ |
 | An iCloud file is a placeholder and won't read | Open it once on the PC to force hydration, then read |

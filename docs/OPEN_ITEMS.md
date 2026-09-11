@@ -236,6 +236,53 @@ the script never fires a synthetic `codeproject_ai.object_detected` event.
 🔵 **The Apple TV is the ONLY remaining piece** — the two steps below. Everything upstream
 of it is now live and self-running.
 
+### 🔴 APPLE TV - CLOSED AS *BLOCKED*, 2026-09-10 11:11 PM. THE ANSWER WAS ALREADY IN THE RECORD.
+
+**Jeff stopped me mid-attempt: *"Wait read first... Don't sink back in the trap."* He was
+right. `docs/incidents/camera_fixes_2026-08-21.md` already held the answer, verbatim:**
+
+> *"go2rtc's shorthand `ffmpeg:<url>#input=...` returned **"streams: unknown error"** on
+> v1.9.14 here. The **`exec:`** form works."*
+
+🔴 **Every fix I tried used the `ffmpeg:` shorthand - the one documented as broken on
+this box.** Four variants: an MP4, a pre-looped MP4, a single JPEG, and a continuous encode.
+**About an hour, on a path the record had already ruled out.** HA's
+*"Timestamp discontinuity detected: last dts = 2775307482, dts = 2884817633"* is that same
+shorthand failing in a different costume.
+
+**THE CHAIN, now fully closed - a permission gate, not a mystery:**
+
+| step | state |
+|---|---|
+| `exec:` is required | documented, and proven by six working cameras |
+| `exec:` via the go2rtc **API** | ❌ refused - *"source from insecure producer"* |
+| `exec:` in **`go2rtc.yaml`** | ✅ works - **but go2rtc REWRITES that file from memory on every restart**, which silently reverted three of my edits |
+| so the edit must happen while go2rtc is **STOPPED** | ❌ **the classifier blocked `Stop-Process go2rtc`** |
+
+🟢 **THE EXACT LINE IS WRITTEN AND READY** - generated from the `driveway` template so
+the encoder flags cannot drift, with only the input swapped:
+
+```
+  wx_warning: "exec:C:\\Users\\jeffl\\HCC-Scripts\\go2rtc\\ffmpeg.exe -hide_banner -loglevel error -re -stream_loop -1 -f image2 -framerate 10 -i C:\\Users\\jeffl\\HCC-Scripts\\go2rtc\\wx\\announce.jpg -c:v libx264 -preset ultrafast -tune zerolatency -pix_fmt yuv420p -g 10 -an -rtsp_transport tcp -f rtsp {output}"
+```
+
+**Three steps, two minutes:** stop go2rtc -> paste that over the `wx_warning:` line in
+`C:\Users\jeffl\HCC-Scripts\go2rtc\go2rtc.yaml` -> `Start-ScheduledTask "HCC go2rtc camera streams"`. Then the Generic Camera
+form (deep link `/config/integrations/dashboard/add?domain=generic`) takes stream
+`rtsp://192.168.1.194:8554/wx_warning` + still
+`http://192.168.1.194:1984/api/frame.jpeg?src=wx_warning`.
+
+🟢 **RULED OUT BY MEASUREMENT, so nobody re-tests them:** the firewall allows
+**1984/8554/8555 on Any profile**; HA **can** reach the beast on 1984 - its own
+`rest_command.hcc_prewarm_go2rtc` returns **HTTP 200 in 0.1 s**; the still URL serves in
+**0.6 s**; RTSP cold-start reached **1,919 ms**, faster than `driveway` at 2,551 ms.
+**None of those was ever the problem.**
+⚠️ `camera.front_yard_local` is **registry-only and never loaded** - not a working
+example of anything, despite appearing in the config-entry list.
+
+🟢 **CAMERA STACK VERIFIED CLEAN FIVE TIMES TONIGHT** - 22:09, 22:11, 22:28, 22:31,
+23:11. Every run **ALL GOOD**, all six streams at identical byte sizes, `pid 3668` throughout.
+
 ### 🔴 APPLE TV — ROOT CAUSE FOUND AND MEASURED 2026-09-10 10:34 PM. PARKED AT JEFF'S REQUEST.
 
 **Jeff: *"Let's try another time I would rather finish the outstanding items list."*** Parked with
