@@ -1673,7 +1673,7 @@ Otherwise you won't be able to pair it with Home Assistant."* So it is **HA loca
 | MSRP | $259.99 |
 | ecobee direct | $229.99 |
 | Amazon | $226.99 |
-| **Walmart** | **from $189.00** (also listed $214.89) |
+| ~~**Walmart** — from $189.00 (also listed $214.89)~~ | 🔴 **RETRACTED 2026-09-11 6:55 PM — WALMART DOES NOT SELL IT.** Read live off walmart.com: *"0 results for 'ecobee smart thermostat premium'"*, and a brand search for "ecobee" returns **3 items only** — a SmartSensor 2-pack $89.99, an ecobee doorbell camera $119.99, and one **open-box, non-Premium** Smart Thermostat at $113.00 from a marketplace seller ("Only 1 left"). **Nothing in the record shows where $189.00 came from.** Buy from the TVA marketplace, ecobee, Amazon, Best Buy or Home Depot. |
 | extra SmartSensors | **$50** each · one is bundled |
 
 💵 **AND DANIELS ALREADY HAS A THERMOSTAT IN HIS $8,200.** Ask Ryan to credit that line or fit this
@@ -1725,9 +1725,14 @@ Nothing else on the market gives this app per-room temperature, humidity AND occ
 through one HA integration. **Best price path: the TVA marketplace at ≈$159.99, then enrol for the $65.**
 ⚠️ **Still ask Ryan to credit the thermostat that is already inside his $8,200** — that is the number that
 decides what this really costs.
-**Not verified this session:** today's Walmart price (the $189 in the 09-10 note is a day old), whether
-Emerson's Sensi Touch 2 ($209, $89 after rebate) has a supported HA integration, and whether the TVA
-marketplace price includes the rebate or is applied after purchase.
+🔴 **Walmart is OUT — checked live 6:55 PM and the $189 does not exist.** walmart.com returns
+**0 results** for "ecobee smart thermostat premium"; the whole "ecobee" brand search there is 3 items
+(SmartSensor 2-pack $89.99, doorbell camera $119.99, one open-box non-Premium thermostat $113.00).
+The 09-10 price table above has been struck through. **Lesson: that row went into the file without a
+page behind it — price rows get a source and a date or they do not go in.**
+
+**Still not verified:** whether Emerson's Sensi Touch 2 ($209, $89 after rebate) has a supported HA
+integration, and whether the TVA marketplace price is charged net or rebated after purchase.
 
 ## Still to do
 - Confirm the colour→function map on the unit's own diagram at install time.
