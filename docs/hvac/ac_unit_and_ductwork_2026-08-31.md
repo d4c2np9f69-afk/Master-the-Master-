@@ -1937,7 +1937,11 @@ Jeff: *"craft a post mortem email to each company without pricing… I want to s
 - **Logan (Petitt):** match **$9,000** (Jeff's number) for his scope + the drawing, model ending **AJA**, price fixed,
   refrigerant covered — or Jeff goes with Daniels. Leans on Petitt's own advertised price-match guarantee.
 - Drafts saved to `Desktop\HCC AC Quotes\Final-offer emails - Daniels and Petitt.txt`. **Not sent** — Jeff sends
-  them himself. Logan's email address is not on the estimate.
+  them himself. ~~Logan's email address is not on the estimate.~~ **Corrected 3:50 PM (Jeff: "it's on the email
+  with the quote"):** the estimate email *"Your Estimate from Petitt Heating and Cooling"* came from
+  **support@petittheatingandcooling.com**. I read it from the new Outlook app window by UI Automation, and it is
+  the only Petitt address in Outlook's local cache (9,344 files scanned). It's a shop inbox, not Logan
+  personally, so the draft now says "Attn: Logan" and advises replying to that email.
 - **3:25 PM revisions (Jeff):** made firmer ("slanted, firm but nice"); **deadline moved to 5:00 PM Monday 14 Sep**;
   **Facebook complaint removed** from the Daniels email. Each email attaches
   `Carrier vs Ruud - bid comparison (no pricing).pdf` (3 pp, Desktop + iCloud) — companies anonymised as "Carrier
