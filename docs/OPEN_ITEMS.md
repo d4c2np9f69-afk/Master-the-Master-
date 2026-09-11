@@ -1228,7 +1228,60 @@ and re-check LQI before assuming the sensor itself has failed.
 state read. Check device availability and the rest of the mesh before blaming the hardware you
 can see.
 
-## #147 — 🟡 "HCC Kiosk Watcher" has been dead since 09-04 and is UNDOCUMENTED 2026-09-06
+## #147 — ✅ CLOSED 2026-09-10 20:10. ROOT-CAUSED AND MADE SELF-HEALING.
+
+**It was a real fault, it was NOT what #147 thought, and the fix is a task config change — no
+house subsystem touched.**
+
+### The log settles what it was doing, and #147's own comparison was wrong
+
+`%LOCALAPPDATA%\HCC\kiosk-watcher.log`: **61 genuine kiosk opens** between 08-20 and
+**09-04 14:02:53**, then nothing. It restarted **09-10 06:52:53** and died again within the hour.
+
+🔴 **#147 said its "two sibling logon-triggered tasks started at the same 09-04 17:21 logon and are
+still Running." THAT COMPARISON IS FALSE — they are not siblings:**
+
+| task | principal | trigger | survives |
+|---|---|---|---|
+| `HCC go2rtc camera streams` | **SYSTEM** | **at BOOT** | ✅ |
+| `HCC UPS Guard` | **SYSTEM** | **at BOOT** | ✅ |
+| **`HCC Kiosk Watcher`** | **jeffl**, Limited | **at LOGON** | ❌ dies |
+
+The two that survive are **boot tasks running as SYSTEM**; they never started at that logon at all.
+**A user-session task dies when the session is torn down** — which is exactly what
+`LastTaskResult 0xC000013A` reports. The loop itself is innocent: `while ($true)` with a catch that
+swallows poll errors, so **it cannot exit on its own.**
+
+⛔ **AND IT CANNOT BE MOVED TO SYSTEM/BOOT.** It reads `GetLastInputInfo` for the console user and
+draws a visible window on Jeff's desktop — session 0 can do neither. **Do not "fix" it that way.**
+
+### The fix — durability, not behaviour
+
+```
+triggers          : AtLogon  +  MSFT_TaskTimeTrigger every 15 min, duration='' (INDEFINITE)
+MultipleInstances : IgnoreNew      <- the repeat can never stack duplicates
+ExecutionTimeLimit: PT0S
+RestartCount 3 / RestartInterval 1 min
+```
+
+⚠️ `-RepetitionDuration ([TimeSpan]::MaxValue)` is **rejected** by Task Scheduler
+(`P99999999DT23H59M59S` — out of range). **Setting `$trigger.Repetition.Duration = ''` is what
+means "indefinitely".** Worth knowing for any future repeating task.
+
+🟢 **VERIFIED, not asserted:** `State=Running`, `NextRun 20:17:00`, **real watcher process alive
+`pid 6492`**, log line `2026-09-10 20:08:31 watcher started`. A dead watcher now returns within
+**15 minutes** instead of staying dead for six days.
+
+🔴 **A MEASUREMENT TRAP I FELL INTO TWICE WHILE DOING THIS:** filtering
+`Win32_Process ... CommandLine -like '*HCCKioskWatcher*'` **matches the very PowerShell command
+doing the search**, because that string is in its own command line. I twice reported the watcher
+"RUNNING pid=8504" when nothing was running. **Exclude `$PID`, and match on `-File ...ps1`.**
+
+**To turn the kiosk off if it is ever unwanted:** `Disable-ScheduledTask -TaskName 'HCC Kiosk Watcher'`.
+
+<!-- original entry below, kept for the record -->
+
+### Original 2026-09-06 entry
 
     Task    : HCC Kiosk Watcher
     Descr   : "Opens the Loewen Home dashboard when the PC goes idle."
