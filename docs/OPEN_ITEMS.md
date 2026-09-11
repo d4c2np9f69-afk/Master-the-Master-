@@ -150,6 +150,41 @@ alert fatigue is a documented failure here; it is one line to add.
 - ⚠️ **That is a CAMERA-STACK change and cameras are FROZEN. It needs Jeff's explicit yes,
   and it is not a late-evening job.**
 
+### 🟢 BUILT 2026-09-10 10:03 PM — THE LOOPING WARNING PICTURE + ALERT TONE
+
+**Jeff: *"Severe thunderstorm picture on a loop… 3 or 4 frames looped… put an alert tone with it."***
+**Built and proven — a real frame was pulled back out of the live stream and visually checked.**
+
+| | |
+|---|---|
+| Frames | **4**, 1280x720, pulsing red/amber warning card, generated with Pillow |
+| Tone | 2 s alternating **1000/1250 Hz**, 10 ms fades. 🔴 **Deliberately NOT the 853/960 Hz EAS Attention Signal** — that one is restricted to real alerts |
+| Clip | `wx_warning.mp4` = 4 frames @2 fps + tone = **2 s loop** |
+| Stream | `wx_warning_loop.mp4` (5:03, h264 1280x720 + AAC) served by go2rtc as **`wx_warning`** |
+| View | `http://192.168.1.194:1984/stream.html?src=wx_warning` · RTSP `rtsp://192.168.1.194:8554/wx_warning` |
+
+🟢 **THE CAMERA STACK WAS NOT TOUCHED.** No edit to `go2rtc.yaml`, **no restart**, all 7
+camera streams left exactly as they were. Verified before and after: 7 streams → 8.
+
+🔴 **CAVEAT THAT MATTERS: an API-added stream is NOT persisted.** It lives in memory only —
+**a go2rtc restart or a reboot loses `wx_warning`.** Making it permanent means adding it to
+`go2rtc.yaml`, and that needs a go2rtc restart, which briefly drops the camera streams. **That is a
+frozen-stack change and it is Jeff's call.** The files themselves are permanent:
+`HCC-Scripts/go2rtc/wx/`.
+
+### 🔑 go2rtc API rules, measured — do not re-derive these
+- **`PUT /api/streams?name=X&src=Y` works. `POST` returns 400.**
+- **`exec:` sources are REJECTED via the API** — *"source from insecure producer"*. That is why the
+  cameras use `exec:` and work: they are in the **config file**, not API-added.
+- **Any source containing a SPACE is rejected** — *"source with spaces may be insecure"*. So
+  `#input=-re -stream_loop -1` cannot be passed. **The loop was baked into the file instead**
+  (`ffmpeg -stream_loop 149`), which is what makes the API route work at all.
+
+### 📺 Getting it onto the Apple TV — still the one unfinished step
+The stream exists and is HomeKit-shaped. Putting it on the **bedroom Apple TV** means exposing it as
+a camera to the HomeKit bridge — **a camera-stack change, frozen, needs Jeff's explicit yes.**
+The Fire TV already shows it via PiPup today.
+
 🔑 **HOW `packages/hcc.yaml` WAS READ — a route worth keeping.** It is invisible to the
 config API, and with the automation never having fired there was no trace to read either. **It was
 extracted from the encrypted nightly backup** using the key proven in #2: open the backup tar →
