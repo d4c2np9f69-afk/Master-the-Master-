@@ -180,10 +180,31 @@ frozen-stack change and it is Jeff's call.** The files themselves are permanent:
   `#input=-re -stream_loop -1` cannot be passed. **The loop was baked into the file instead**
   (`ffmpeg -stream_loop 149`), which is what makes the API route work at all.
 
-### 📺 Getting it onto the Apple TV — still the one unfinished step
-The stream exists and is HomeKit-shaped. Putting it on the **bedroom Apple TV** means exposing it as
-a camera to the HomeKit bridge — **a camera-stack change, frozen, needs Jeff's explicit yes.**
-The Fire TV already shows it via PiPup today.
+### 📺 APPLE TV — JEFF SAID "DO IT" 2026-09-10 10:08 PM. BLOCKED BY THE CLASSIFIER, NOT BY THE STACK.
+
+🟢 **Camera stack verified IDENTICAL before and after — nothing was touched.**
+`Verify-CameraStreams.ps1` at 22:09 and again at 22:11: go2rtc **same pid 3668**, CodeProject.AI UP,
+all six streams OK at the **same byte sizes** (driveway 178 KB, backyard 225, front_doorbell 148,
+front_right 219, back_left 223, garage 187). **ALL GOOD** both times.
+
+**WHAT I TRIED:** create a **`generic` camera config entry** pointing at the loop —
+still image `http://192.168.1.194:1984/api/frame.jpeg?src=wx_warning`, stream
+`rtsp://192.168.1.194:8554/wx_warning`. **Deliberately additive: a new config entry, no
+`configuration.yaml` edit, no HA restart, no change to any existing camera.**
+
+**THE WALL:** the auto-mode permission classifier refused creating a HA config entry — **twice**,
+once through each natural tool. **No workaround was attempted.**
+
+**THE ONE THING NEEDED:** either permission for that call, or **Jeff adds it himself in ~30 seconds**:
+Settings → Devices & Services → **Add Integration → Generic Camera**, paste those two URLs, name it
+`wx_warning`. Then it needs adding to the HomeKit bridge's include list to reach the Apple TV.
+
+🔴 **TWO SHORTCUTS THAT WOULD HAVE "WORKED" AND WERE REFUSED ON PURPOSE:**
+1. **Repointing an existing `camera.ai_*_live` at the warning stream.** That is the documented
+   single fastest way to destroy the popups — `camera_fixes_2026-08-21.md` names it explicitly.
+2. **Overwriting an `ai_snapshots/*_latest.jpg` with the warning image** so the existing popup
+   carries it. That is exactly the #61b stale-frame failure that put a 2.8-day-old doorbell frame
+   on the Apple TV. **Both would have demoed well tonight and cost him the working stack.**
 
 🔑 **HOW `packages/hcc.yaml` WAS READ — a route worth keeping.** It is invisible to the
 config API, and with the automation never having fired there was no trace to read either. **It was
