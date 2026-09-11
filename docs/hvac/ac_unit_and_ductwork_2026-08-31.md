@@ -1762,5 +1762,143 @@ carry Jeff's address and phone; they live in iCloud.)*
 Daniels also replaces the **supply** (16" → 14" reducer); Petitt's sheet does not touch the supply
 but adds **three 6"→8" branch upgrades with dampers** and a **garage run**. Different jobs.
 
-⏳ **Deep research launched 2026-09-11 ~10:50 AM on: the Ruud model + heat exchanger + warranty,
-the unit-vs-unit comparison, and fair price for each scope.** Results go in this file below.
+✅ **Deep research done 2026-09-11 11:12 AM — results in the next section.**
+
+---
+
+# 🔬 CARRIER 48NL-B300603 vs RUUD (Petitt) — every aspect, from the MANUFACTURERS' OWN DOCUMENTS
+
+Jeff 2026-09-11: *"I want the carrier and the rude really scrutinized because I want to know which
+unit is better, all out in every aspect."*
+
+**Sources — each downloaded and read in full locally, not summarised from a web page:**
+- Carrier Product Data **48NL-03PD** (ed. 04/25), 39 pp — `shareddocs.com/hvac/docs/1009/Public/01/48NL-03PD.pdf`
+- Rheem/Ruud **RGEAYB spec sheet R11-887 Rev.1**, 56 pp — `files.myrheem.com/webpartners/ProductDocuments/C0603016-4D77-4CB1-88D3-3892A95230E8.pdf`
+- Rheem **Limited Warranty 92-26150-10-41**, 4 pp (names Ruud and RGEAYB) — `files.myrheem.com/webpartners/ProductDocuments/BC65ABCA-1C62-4582-9891-1F127270D9F5.pdf`
+- Carrier **48NL-01SI** install manual p.14 — already recorded above (leak-dissipation behaviour, no power-stealing stats)
+
+## 🔴 WHICH RUUD IT IS — and a trap in the research
+Petitt's sheet names no model. The **only** current Ruud/Rheem 2.5-ton, 13.4 SEER2, R-454B,
+**single-phase** gas pack is **`RGEAYB030AJT` + `041` / `061` / `081`** (40k / 60k / 80k burner).
+In Rheem's model code the 7th block is voltage: **`J` = 1-phase 208/230**, `C` = 3-phase.
+🔴 **The research's example `RGEAYB030ACT041NA` is a THREE-PHASE chassis and cannot go on this
+house.** Stainless heat exchanger only if the model carries the **`AJA`** option suffix.
+Rheem codes the whole line **"B – Base Tier."** Carrier's 48NL is its **"Comfort"** line, below
+48NG "Performance." **Both are the entry tier of their brand — like for like.**
+
+## Head to head
+
+| | **Carrier 48NL-B300603** (Daniels) | **Ruud RGEAYB030AJT** (Petitt) |
+|---|---|---|
+| Cooling, AHRI net | 28,800 Btu/h @ 950 CFM | 28,400 Btu/h @ 980 CFM |
+| **EER2** / SEER2 | **11.05** / 13.4 | 10.6 / 13.4 |
+| **Gas heat in → out** | 60k → **49k** (only other choice at this size: 40k) | 061: 60k → 49.2k · **081: 80k → 65k** · 041: 40k → 32k |
+| AFUE | 81 | 81 |
+| **Heat exchanger** | **stainless steel, standard** (Turbo-tubular) | **"factory standard" — material not stated**; stainless is the paid `AJA` option |
+| **HX warranty** | 20 yr · **LIFETIME** registered ≤90 days | **standard HX 10 yr** · stainless option: 20 yr / lifetime registered |
+| Parts warranty | 5 yr · 10 yr registered ≤90 days | 5 yr · 10 yr registered ≤90 days |
+| **Compressor** | scroll · 5 yr · 10 yr registered | scroll · **10 yr residential, NO registration needed** |
+| Next owner | 5 yr (data sheet) | registered terms end; standard terms remain |
+| **Refrigerant metering** | fixed orifice | **TXV** |
+| Indoor coil | aluminum tube / aluminum fin, 3 rows, 3.7 sq ft | all-aluminum microchannel, 1 row, 3.54 sq ft |
+| **Outdoor coil** | **copper tube**, 1 row, 13.6 sq ft | all-aluminum microchannel, 1 row, 7.06 sq ft |
+| R-454B charge | **4.85 lb** | **2.9 lb** (46.4 oz) |
+| **Leak sensor** | **yes** — factory dissipation system; on a trip it blocks cooling, runs the fan | **none at 2.5 T** — under the 3.9 lb UL 60335-2-40 threshold |
+| Indoor blower | ECM, ½ hp | constant-torque (ECM-type), ½ hp |
+| Outdoor fan | PSC, 1/5 hp, 24 in | ⅓ hp, 22 in |
+| **Outdoor sound, AHRI 270** | **73 dBA** | **79 dB** (same test standard — note 5 of the Ruud sheet) |
+| **Base / cabinet** | **composite base pan — "will not rust"**; zinc-coated prepainted steel, **500-hr salt spray** | "rugged base rail"; **cabinet coating not stated** |
+| Cabinet (drawing) | ≈47 × 48 in footprint, 43 in tall, 337 lb | 47½ × 52 7/16 in, 35 15/16 in tall, 384–394 lb |
+
+## Who wins what — plainly
+
+**Carrier is stronger on the things that decide a 30-year life outdoors in a wet Tennessee yard:**
+1. 🟢 **Heat exchanger — the single biggest line.** Stainless as standard with lifetime cover,
+   against Ruud's standard exchanger at **10 years** unless Petitt is quoting the `AJA` option.
+   The old cabinet already shows water ingress and rust.
+2. 🟢 **Base that cannot rust + 500-hr salt-spray cabinet.** Ruud publishes no cabinet coating figure.
+3. 🟢 **~4% lower power at peak** (EER2 11.05 vs 10.6). Small, but every summer afternoon.
+4. 🟢 **6 dB quieter outside** on the same AHRI 270 test.
+5. 🟢 **Copper-tube outdoor coil** is ordinary brazing if it ever leaks. Microchannel repair is
+   disputed in the trade — some techs patch it with special methods, others replace the coil
+   (Kaltra, HVAC-Talk, r/HVAC threads seen 2026-09-11; not a manufacturer statement).
+
+**Ruud is genuinely better on four points — these are real, not consolation prizes:**
+1. 🟢 **TXV** instead of a fixed orifice — holds superheat across changing conditions.
+2. 🟢 **No leak sensor at all** — so the one documented first-gen R-454B nuisance (a sensor
+   lockout) cannot happen. Carrier's sensor reads the return air stream (48NL-01SI p.14).
+3. 🟢 **Compressor 10 years without registering.** Carrier needs registration for 10.
+4. 🟢 **An 80k burner (65k out) exists at 2.5 T** — more heat than the old Nordyne's ≈56k out.
+   Carrier tops out at 49k out. **Only matters if Petitt quotes the `081`.**
+
+**Tie:** SEER2 13.4, AFUE 81, single-stage scroll, R-454B, ½-hp ECM-class blower.
+
+🔵 **Verdict on the machine: the Carrier, unless Petitt's Ruud is the `AJA` stainless version.**
+With stainless the heat-exchanger gap closes and it becomes a close call decided on price.
+
+## 💵 PRICE — measured against real numbers, not guesses
+
+| benchmark | figure | source (read 2026-09-11) |
+|---|---|---|
+| **Ruud RGEAYB030AJT061NA, box only** | **$5,669**, in stock, factory-direct 4–6 wk | The AC Outlet product page, read in Chrome |
+| same, second retailer | $7,232.98, out of stock | Voomi Supply (search snippet) |
+| **Carrier 48NL-B300603 INSTALLED** | **$6,995** | Lansing Heating & A/C (Carrier factory-authorized), 11-25-25 — crane, gas, electrical, drain, start-up; permits extra |
+| same unit INSTALLED | **$8,236** | Van Drunen Heating, 12/3/2025 — crane, gas/elec/drain rework; mfr warranty + 1-yr labour |
+| "2.5T Carrier" INSTALLED | $9,999 | HVAC Masters, 12/31/2025 — crane, sheet metal, prevailing wage; permits extra |
+
+*The three installed bids are one public council packet (Village of Thornton, IL — rooftop, crane,
+tax-exempt, **no duct work**), read page by page from the scanned PDF. Different region and a
+commercial job, so a **reference band, not a Tennessee price**.*
+
+**What it says:**
+- **Daniels $8,200 for the Carrier sits inside the $6,995–$9,999 band** — and his includes the new
+  transitions and supply/return flex, which none of the Thornton bids do. **Fair.**
+- **Petitt's unit line is $12,721 for a box that retails at $5,669** — about **$7,050 over the box**
+  for labour, pad, duct upgrades, garage run and permit. Some of that is real extra work Daniels
+  does not do; **no source found puts that extra work anywhere near $4,000 over Daniels.** Petitt
+  would not itemise it, so this cannot be narrowed further. **High.**
+- ⚠️ Rheem's warranty **does not cover units sold online direct to the consumer** (cert
+  92-26150-10-41 p.1) — so the $5,669 box is a yardstick, not an owner-supply route.
+
+## True 10-year cost, with the conditions priced in
+
+| | sticker | labour 10 yr | **freon 10 yr** | condition | **10-yr floor** |
+|---|---|---|---|---|---|
+| **Daniels Carrier** | $8,200 | +$800 | ✅ included | none written | **$9,000** |
+| **Petitt Ruud** | $13,000 | included | ❌ **excluded** | paid plan, "as low as **$12/mo**" (Petitt site) → yrs 2–10 ≥ $1,296 | **≥ $14,296** |
+| Derryberry Am. Std | $8,558 | +$540 | not stated | — | $9,098 (twist **not** fixed) |
+
+**Petitt costs at least $5,296 more than Daniels over ten years**, with freon excluded and the
+labour cover void if the plan lapses. The missed-payment and cancellation terms are **not
+published anywhere** — only the $12/mo floor.
+
+## What the research ALSO settled (104 agents, 22 claims confirmed, 3 refuted)
+- **American Standard (Derryberry):** the manufacturer's heat-exchanger warranty on the 4YCC4/5YCC4
+  is **20 years, registered or not** (warranty GW-PKGD-2401A) — **not the 10 on Charlie's sheet.**
+  `5YCC4030A1070A` is real (Trane manual PKGR-SVX004D-EN, 04/2026): 13.8 SEER2, **70k only**,
+  6.97 lb R-454B, leak sensor + mitigation board (**sensor failure = no cooling**), 70 dB(A).
+  ⚠️ Charlie wrote "**13.4 SEER**", which matches the **R-410A 4YCC4**, not the 5YCC4 — **ask for
+  the model.** HX material is not stated in any American Standard document found.
+- **Goodman GPGM3:** R-32, **aluminized** heat exchanger (brochure PF-G_PKG_08-25). Already out.
+- **Recalls — none on any of the four units.** CPSC 25-369 (Jul 2025) is Trane/Am. Std **4YCZ5
+  two-stage** packs, not 5YCC and not 2.5 T. CPSC 24-260 (Jun 2024) Goodman packs — no GPGM.
+  Ruud's recall page: nothing relevant. **Carrier:** Google + CPSC turned up only WeatherExpert
+  commercial 6–23 ton units and PTACs — **nothing on the 48NL.**
+- **Independent reliability rankings: none survived verification.** The R-454B generation is a
+  2025 product — model-level field data does not exist yet for either unit. **Anyone quoting a
+  "reliability ranking" for these exact models is quoting the brand, not the model.**
+- **Refuted 0-3:** a claim that Petitt's website offers the 10-yr warranty unconditionally — the
+  written quote's maintenance condition governs.
+
+## The questions that actually move the decision — in writing
+**Petitt:** (1) the **exact model** — `041`/`061`/`081`, and **is it `AJA` stainless?** (2) the
+maintenance plan's **yearly price for years 2–10** and what a missed visit or payment does to
+the labour warranty. (3) is the **damp supply duct** in the job?
+**Daniels:** (1) the **16"/16"→14" duct sizes back in writing** (they vanished from v2). (2) who
+stands behind the **$800** labour+freon plan — Daniels, or a third-party insurer?
+**Derryberry:** the model number (4YCC4 R-410A vs 5YCC4 R-454B) and why his sheet says 10-yr HX.
+
+⚠️ **Not verified from any source that survived:** Middle-Tennessee installed prices, R-454B $/lb,
+the value of Petitt's $279 surge protector, microchannel field-repair success rates.
+**Cost of this research:** 104 agents, ~6.6 M tokens — about 5× the ~20 agents Jeff was told.
+
