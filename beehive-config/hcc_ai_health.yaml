@@ -1,0 +1,20 @@
+# Created 2026-08-23. Additive only - nothing here touches the camera stack.
+# WHY: automation.hcc_camera_ai_server_heartbeat_ai_down_alarm inferred "AI is dead"
+# from the ABSENCE of detections (hcc_clip_archive last_triggered > 6h) plus any PIR
+# motion. A genuinely quiet house produces that exact signature, so it false-fired on
+# 2026-08-22 and again 2026-08-23 13:30 CT while CodeProject.AI was UP and the
+# end-to-end camera feature test PASSED twice. Absence of evidence was being read as
+# evidence of failure. This sensor asks the AI host directly instead.
+#
+# SNAPSHOT of /config/packages/hcc_ai_health.yaml on Beehive. The LIVE file is
+# authoritative - see docs note about beehive-config/hcc.yaml having gone stale.
+binary_sensor:
+  - platform: rest
+    name: Camera AI Server Reachable
+    unique_id: hcc_camera_ai_server_reachable
+    resource: http://192.168.1.194:32168/v1/status/ping
+    method: GET
+    value_template: "{{ 'on' if value_json.success else 'off' }}"
+    device_class: connectivity
+    scan_interval: 300
+    timeout: 10

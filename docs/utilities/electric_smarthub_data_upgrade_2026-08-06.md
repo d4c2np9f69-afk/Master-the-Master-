@@ -1,0 +1,216 @@
+# Electric SmartHub — real data available, instructions for the app-side upgrade (2026-08-06)
+
+**Coworker verified this live** by logging into CEMC's SmartHub portal directly
+(`cemc.smarthub.coop`, account 4501007001) and checking Home Assistant's actual state/config for
+the already-installed `gagata/ha-smarthub-energy-sensor` integration (v2.2.0, HACS). All of this is
+real, confirmed capability — not guessed.
+
+## What the app currently does
+
+`Electric` card ("This Month" + "Est. Cost") reads a single entity,
+`sensor.electric_smarthub_energy_monthly_usage_4501007001_electric_smarthub_energy_monthly_usage_4501007001`
+— a monthly running total, polled every 6 hours (was HA default, see fix below). "Now"/"Today" are
+**estimated client-side** via a 24-bucket hour-of-day model seeded from HA recorder history
+(`index.html` ~line 8117-8329, `ELEC_BASE`/`ELEC_PER_KWH` constants, `electricDayDelta()` etc.) —
+SmartHub was assumed to expose no finer granularity. **That assumption is wrong.**
+
+**Verified tonight (app-side check, 2026-08-06): the This Month/Est. Cost numbers match HA exactly**
+(209 kWh, $63.04 — formula-verified: $39 base + 209 × $0.11504/kWh = $63.04). No bug in what's
+there now, just missing real data that's available for the taking.
+
+## 1. Real hourly + daily statistics already exist — no new integration needed
+
+Confirmed via the integration's own README (fetched directly, not guessed): *"The entity only
+stores the monthly value at the time it was polled. The integration also populates a historical
+`statistic` which aligns the time of use with the time the energy usage actually happened."* It
+explicitly creates **2 Statistics (daily, hourly)** in HA's long-term statistics database, separate
+from the single monthly entity's live `state`.
+
+**This should replace the current 24-bucket ESTIMATED Now/Today model with real data.** Query HA's
+Statistics API (`history/statistics_during_period` — WebSocket-only in most HA versions, proxy
+through the existing `haFetch()`/`/api/ha` pattern) for this entity's `hour` and `day` period
+statistics. This is the single highest-value change here — turns an estimate into ground truth,
+same upgrade class as the `irrGalFromHistory()` real-vs-estimated fix from yesterday.
+
+Also confirmed directly in SmartHub's own web UI (Usage Explorer → Interval dropdown: Monthly /
+Daily / Interval): real per-day kWh going back over a year, and real **hourly** kWh for a rolling
+30-day window (labeled "Interval" in their UI, `timeFrame=HOURLY` in the URL). Matches what the
+integration is already importing.
+
+### Concrete field spec — what to build
+
+Current stat row on the Electric card: `NOW | TODAY | THIS MONTH | EST. COST`. Proposed:
+
+- **TODAY** — replace the ≈modeled estimate with the real sum of today's hourly statistics
+  (local midnight → now). Drop the `≈`/EST chip once it's real data. Same cell, same label, just
+  swap the data source.
+- **YESTERDAY** *(new cell)* — sum of yesterday's real daily statistic (or sum of its 24 hourly
+  stats). Straightforward now that real daily data exists.
+- **PEAK HOUR** *(new cell)* — the single highest-usage hour in the last 24h, e.g. `"3-4 PM ·
+  2.1 kWh"`. Directly useful for the appliance-identification idea discussed tonight (AC/dryer/oven
+  cycles show up as clear hourly spikes).
+- **THIS MONTH** — unchanged, already real and already correct.
+- **EST. COST** — unchanged, already correct (computed from THIS MONTH × rate).
+- **NOW** — leave as `—` (disabled), and please don't fake/estimate it once hourly data lands.
+  SmartHub's finest real grain is hourly, not instantaneous — genuine "Now" can only come from the
+  future CT-clamp hardware build. Keep it honestly blank until that exists rather than papering
+  over it with another estimate.
+
+**New sub-panel below the stat row: "Last 7 Days"** — small table or sparkline of daily kWh for the
+past 7 days, source = the real daily statistics. Same visual pattern as the Water card's Billing
+History table (`.util-stat`/existing Section Kit classes — no new CSS module needed). Gives a
+quick usage-trend glance and sets up the appliance-identification testing Jeff wants to do next
+(spot a day that stands out, then go correlate with what ran that day).
+
+**Lower priority — account/billing fields** *(item 3 below, needs the "check attributes first"
+step)*: if buildable, add as either new stat cells or a small "Billing" sub-panel:
+- **BILL DUE** — `"$X.XX due Aug 21, 2026"` style
+- **LAST PAYMENT** — `"$557.07 paid Jul 31, 2026"` style
+- **VS LAST YEAR** — SmartHub's own live % figure, no baked-in explanatory caption (the duct-leak
+  explanation is specific to today's number, not evergreen — future spikes need their own
+  investigation, don't assume every future variance is explained the same way).
+
+## 2. Poll interval fixed tonight — was still on HA's 6-hour default
+
+Reconfigured live via Settings → Devices & Services → SmartHub Energy Integration → Reconfigure →
+`poll_interval` **360 → 30** (minutes). Confirmed `reconfigure_successful`, and a fresh poll landed
+immediately after (209 kWh, timestamped right at submit). SmartHub's own backend only actually
+refreshes every 15-60 min per the README, so 30 min is a sensible ceiling — no benefit going lower,
+real cost in extra API calls. App's "This Month" will now track much closer to real-time than the
+old 6-hour-stale cadence; worth revisiting any client-side cache/staleness assumptions tied to that
+old cadence if they exist.
+
+## 3. Additional real data on the SmartHub account page — not in HA at all yet
+
+Confirmed live in the portal (`cemc.smarthub.coop` Home page), none of this reaches HA currently:
+- Current bill amount + due date (currently shows Aug 21, 2026 due date on the account)
+- Last payment amount/date ($557.07 last payment, paid)
+- Year-over-year usage comparison (SmartHub's own computed "% higher/lower than last year" line —
+  **the 24.24%-higher figure shown right now is explained**: a real ductwork leak, since fixed by
+  Jeff, not a data/tracking issue, don't flag it as an anomaly if it comes up again this cycle)
+
+Check first whether the existing sensor already exposes any of this as `attributes` (cheap check
+before building anything new) before considering scraping — lower priority than item 1.
+
+## 4. Real current CEMC rate sheet, for the next cross-check
+
+`cemc.org/my-account/` → scroll to "Electric Rates" → **Current Rates** button (PDF), effective
+July 1, 2026. Same cross-check pattern as the other utilities: next time a real CEMC bill photo
+comes in, re-derive `ELEC_BASE`/`ELEC_PER_KWH` from it rather than trusting the constants are still
+current — the rate sheet is also directly fetchable now if a bill isn't handy.
+
+---
+
+## App-side implementation status (2026-08-06, cloud session)
+
+**Item 1 (real Today/Yesterday/Peak Hour + Last 7 Days panel): built.** New
+`functions/api/ha-stats.js` opens a one-shot outbound WebSocket to the same allow-listed Nabu Casa
+host `ha.js` already uses, authenticates with the browser's own token (nothing stored
+server-side — same pattern as `ha.js`), sends one `history/statistics_during_period` command
+(`types: ['change','sum','state']`, preferring `change` and falling back to `sum`/`state`), and
+returns the JSON result over normal HTTP — REST-only `haFetch()` genuinely cannot reach this
+command, there is no REST equivalent in HA. Client-side `loadElectricStats()`/`haStatsFetch()`
+(index.html) fetch a trailing 25h hourly window + trailing 8-day daily window, compute real
+TODAY/YESTERDAY/PEAK HOUR, and render the "Last 7 Days" sub-panel (`util-elec-history`, same
+visual pattern as Water's Billing History table). The old 24-bucket estimate stays as the fast
+fallback (shown with the `≈`/EST chip) until the real fetch resolves, then gets silently
+overwritten — matches the existing `putWaterCycle()`/`irrGalFromHistory()` real-vs-estimate
+pattern. **NOW is left permanently blank (—)** per this doc's explicit instruction — the old
+hour-of-day "Now" estimate was removed outright, not just deprioritized.
+
+**Verification done:** full `lint-app.js`/`smoke-test.js` regression clean; a dedicated
+Playwright test mocked `/api/ha-stats`'s hourly+daily responses and confirmed Today/Yesterday/Peak
+Hour/Last 7 Days compute and render correctly end-to-end, Now stays blank, and the chip flips to
+LIVE; a direct unit test of `ha-stats.js` confirmed its request validation (400/401) and that an
+unreachable WS fails cleanly with a 502 rather than hanging (so the client's `.catch()` falls back
+to the estimate instead of breaking). **Verification NOT possible from this sandbox:** the real
+WS round-trip against Jeff's actual HA/SmartHub — no network path exists here, same limitation as
+every other real-HA fix in this project's history. Concretely, the one unconfirmed assumption is
+which field (`change`, `sum`, or `state`) this specific integration/HA version actually populates
+in the `history/statistics_during_period` response — the code tries `change` first as the most
+direct "per-period delta" field, falling back to `sum` then `state`, but this needs a live check.
+**Ask for the coworker:** fire that WS command for
+`sensor.electric_smarthub_energy_monthly_usage_4501007001` from HA's own WS API/dev tools and
+confirm the field name. If Today/Yesterday/Peak Hour don't populate after this deploys (chip stays
+EST, cells stay blank/≈), that's the first thing to check.
+
+**Item 3 (Bill Due / Last Payment / vs Last Year): not attempted.** The doc's own instruction is
+to check the entity's `attributes` first — that needs live HA entity inspection, which this
+sandbox cannot do. Left for the coworker or a future session with real HA access.
+
+**Item 2 (poll interval) and item 4 (rate sheet):** no app-code changes needed — both already
+handled live by the coworker (poll interval reconfigured directly in HA; rate sheet is a
+reference source for the next bill cross-check, not something the app reads automatically).
+
+---
+
+## Coworker follow-up, live HA verification (2026-08-06, later)
+
+**Ran the exact WS command from `functions/api/ha-stats.js` directly against the live HA instance
+(via the browser's own authenticated `hass.connection`, not guessed) — found two real bugs. The
+built feature (Today/Yesterday/Peak Hour/Last 7 Days) is currently non-functional and silently
+falling back to the old estimate every time, even though the UI cells render.**
+
+**Bug 1 — wrong WS command name.** `history/statistics_during_period` returns
+`{"code":"unknown_command","message":"Unknown command."}` on this HA version (Core 2026.8.0). The
+real, working command is **`recorder/statistics_during_period`** — same params (`start_time`,
+`end_time`, `statistic_ids`, `period`), confirmed working and returning real data when called
+directly. This is presumably an HA-version naming change (some `history/*` statistics commands
+moved to `recorder/*` in recent Core versions) — `ha-stats.js` needs the command name changed.
+
+**Bug 2 — wrong field, even once the command name is fixed.** Queried a real 48-hour window for
+the SmartHub entity's hourly statistics: `state` moved 98→209 and `sum` moved 761→872 (both real,
+consistent +111 deltas — the underlying data genuinely changes). **But every single hourly
+bucket's `change` field reads exactly `0`, even ones spanning that real growth.** `ha-stats.js`
+currently tries `change` first per its own doc note — that field is not usable for this
+sensor/integration, it will always return 0 regardless of real usage. **Fix: compute each period's
+real usage as `sum` (or `state`) at the end of the period minus `sum`/`state` at the start** —
+i.e., a cumulative-delta calculation across period boundaries, not a per-bucket field read. This is
+the same "diff two cumulative readings" pattern already used everywhere else in this app
+(`irrGalFromHistory()`, the water meter billing-cycle math) — nothing exotic, just needs applying
+here too.
+
+**Raw verification data** (for whoever fixes this, so it's not re-derived from scratch):
+```
+recorder/statistics_during_period, period: hour, entity: sensor.electric_smarthub_energy_monthly_usage_4501007001_electric_smarthub_energy_monthly_usage_4501007001
+Sample buckets over a 48h window:
+  start=1785830400000  state=98   sum=761   change=0
+  ...(46 more hourly buckets, all change=0)...
+  start=1785981600000  state=209  sum=872   change=0
+Net real movement across the window: state +111, sum +111 — both real, "change" just never populates for this sensor.
+```
+
+**Item 3 (Bill Due / Last Payment / vs Last Year) — checked, confirmed not available without new
+scraping work.** Read the live entity's full `attributes` directly:
+`{"state_class":"total_increasing","account_id":"4501007001","location_id":"16290","last_reading_time":"...","meter_name":"145590962",...}`
+— no billing/payment/comparison data at all, just account/meter identifiers. Getting Bill
+Due/Last Payment/Vs Last Year into the app would require actually scraping SmartHub's account
+overview page (new work, not a quick add) — not just reading something already present.
+
+**Recommendation on item 3: low priority, probably skip.** This data is billing-convenience info,
+not something the sewer-overcharge case needs (the case rests on real kWh/gallons usage matching
+meter readings, which items 1+2 already cover once the two bugs above are fixed). Building a
+SmartHub-account scraper is real new surface area (another set of credentials/session handling,
+another thing that can break silently) for a "nice to have" display feature. Recommend skipping
+unless Jeff specifically wants it — items 1+2's bug fixes are the actual priority.
+
+---
+
+## App-side fix for both real bugs above (2026-08-06, cloud session)
+
+Both bugs found by the coworker's live WS trace above are fixed:
+
+1. **`functions/api/ha-stats.js`** now sends `recorder/statistics_during_period` instead of
+   `history/statistics_during_period`.
+2. **`index.html`'s `loadElectricStats()`** no longer reads a per-bucket `change` field at all
+   (dropped `change` from the `types` request too — confirmed dead weight for this sensor). It now
+   runs the raw hourly/daily arrays through `toDiffedSeries()`, which diffs each period's
+   cumulative `sum` (falling back to `state`) against the previous period's, clamped to 0 to guard
+   a meter reset — the same "diff two cumulative readings" pattern already used by
+   `irrGalFromHistory()`/the water billing math elsewhere in this file.
+
+Re-verified via a mocked Playwright test built from the coworker's exact real data shape (`sum`
+761→872 over 48h, `change` always 0, one clear 3-4pm peak) — Today/Yesterday/Peak Hour/Last 7 Days
+all compute correctly. `lint-app.js`/`smoke-test.js` clean. This sandbox still cannot fire the real
+WS command itself — the fix is verified against the coworker's real data shape, not against a live
+round-trip, so a final live confirmation after this deploys is still the right sanity check.

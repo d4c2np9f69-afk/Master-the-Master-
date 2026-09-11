@@ -1,0 +1,39 @@
+api:
+  listen: ":1984"
+rtsp:
+  listen: ":8554"
+ffmpeg:
+  bin: 'C:\Users\jeffl\HCC-Scripts\go2rtc\ffmpeg.exe'
+
+streams:
+  # --- existing (2026-08-15): Kiyo Pro USB webcam "front yard" feed for HA/meetings.
+  # Untouched. go2rtc opens a source only when a client connects, so the AI streams
+  # below do NOT hold the Kiyo busy.
+  front_yard: 'ffmpeg:device?video=USB Video Device&input_format=mjpeg&video_size=1920x1080#video=h264'
+
+  # ================= ADDED 2026-08-21 — the Apple TV HomeKit popup fix =================
+  # WHY: Apple TV answers a HomeKit doorbell ring by demanding a LIVE VIDEO STREAM.
+  # The camera.ai_* entities are local_file STILLS, so HA logged
+  #     homekit.type_cameras: "Camera has no stream source"
+  # tvOS then sat through a 30 s timeout (13:52:33 -> 13:53:03 in the log, exactly the
+  # 30 s Jeff sees) and fell back to a still with NO red boxes. That is the spinning
+  # circle and the missing boxes, and it had never been diagnosed before.
+  #
+  # These publish the ANNOTATED CodeProject.AI frames (the ones WITH the red boxes)
+  # as real H264 RTSP that HomeKit can actually play.
+  #
+  # HA serves /local/ with NO authentication (verified: HTTP 200, no token), so no
+  # long-lived token is needed and nothing secret lives in this file.
+  #
+  # -stream_loop -1 + -f image2 keeps emitting frames even when the JPEG has not
+  #   changed (it usually has not — the file is only rewritten on a real detection)
+  #   and re-reads it, so a detection mid-view is picked up.
+  # -pix_fmt yuv420p is REQUIRED: HomeKit renders black with other pixel formats.
+  # go2rtc's shorthand "ffmpeg:<url>#input=..." form returned "streams: unknown error"
+  #   on this build; the exec: form runs a command verified working by hand.
+  driveway: "exec:C:\\Users\\jeffl\\HCC-Scripts\\go2rtc\\ffmpeg.exe -hide_banner -loglevel error -re -stream_loop -1 -f image2 -framerate 10 -i http://192.168.1.66:8123/local/ai_snapshots/codeproject_ai_object_301_driveway_clipframe_latest.jpg -c:v libx264 -preset ultrafast -tune zerolatency -pix_fmt yuv420p -g 10 -an -rtsp_transport tcp -f rtsp {output}"
+  backyard: "exec:C:\\Users\\jeffl\\HCC-Scripts\\go2rtc\\ffmpeg.exe -hide_banner -loglevel error -re -stream_loop -1 -f image2 -framerate 10 -i http://192.168.1.66:8123/local/ai_snapshots/codeproject_ai_object_301_backyard_clipframe_latest.jpg -c:v libx264 -preset ultrafast -tune zerolatency -pix_fmt yuv420p -g 10 -an -rtsp_transport tcp -f rtsp {output}"
+  front_doorbell: "exec:C:\\Users\\jeffl\\HCC-Scripts\\go2rtc\\ffmpeg.exe -hide_banner -loglevel error -re -stream_loop -1 -f image2 -framerate 10 -i http://192.168.1.66:8123/local/ai_snapshots/codeproject_ai_object_301_front_doorbell_clipframe_latest.jpg -c:v libx264 -preset ultrafast -tune zerolatency -pix_fmt yuv420p -g 10 -an -rtsp_transport tcp -f rtsp {output}"
+  front_right: "exec:C:\\Users\\jeffl\\HCC-Scripts\\go2rtc\\ffmpeg.exe -hide_banner -loglevel error -re -stream_loop -1 -f image2 -framerate 10 -i http://192.168.1.66:8123/local/ai_snapshots/codeproject_ai_object_front_right_clipframe_latest.jpg -c:v libx264 -preset ultrafast -tune zerolatency -pix_fmt yuv420p -g 10 -an -rtsp_transport tcp -f rtsp {output}"
+  back_left: "exec:C:\\Users\\jeffl\\HCC-Scripts\\go2rtc\\ffmpeg.exe -hide_banner -loglevel error -re -stream_loop -1 -f image2 -framerate 10 -i http://192.168.1.66:8123/local/ai_snapshots/codeproject_ai_object_back_left_clipframe_latest.jpg -c:v libx264 -preset ultrafast -tune zerolatency -pix_fmt yuv420p -g 10 -an -rtsp_transport tcp -f rtsp {output}"
+  garage: "exec:C:\\Users\\jeffl\\HCC-Scripts\\go2rtc\\ffmpeg.exe -hide_banner -loglevel error -re -stream_loop -1 -f image2 -framerate 10 -i http://192.168.1.66:8123/local/ai_snapshots/codeproject_ai_object_garage_clipframe_latest.jpg -c:v libx264 -preset ultrafast -tune zerolatency -pix_fmt yuv420p -g 10 -an -rtsp_transport tcp -f rtsp {output}"

@@ -1,0 +1,21 @@
+{
+  "name": "Home Command Center",
+  "short_name": "HCC",
+  "description": "Monitor, manage and maintain your home — weather, irrigation, yard and smart home.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#04040a",
+  "theme_color": "#04040a",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

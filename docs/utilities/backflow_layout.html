@@ -1,0 +1,232 @@
+<title>Irrigation Backflow Layout — HCC</title>
+
+<style>
+  :root{
+    --paper:#F6F4EF; --card:#FFFFFF; --ink:#17181A; --soft:#5B5952; --faint:#8B887F;
+    --rule:#E0DACE; --water:#15618F; --water-soft:#CFE2EE; --brass:#8A6414;
+    --earth:#7C6647; --earth-soft:#DED2BE; --bad:#A32118; --good:#15683F; --air:#2E7D8F;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#131416; --card:#1C1E21; --ink:#EFEBE3; --soft:#A9A498; --faint:#847F74;
+      --rule:#2E3033; --water:#6FB6E0; --water-soft:#1E3A4C; --brass:#D9AE55;
+      --earth:#B39B76; --earth-soft:#2A2419; --bad:#E88C82; --good:#6FC79B; --air:#7FC6D4;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#131416; --card:#1C1E21; --ink:#EFEBE3; --soft:#A9A498; --faint:#847F74;
+    --rule:#2E3033; --water:#6FB6E0; --water-soft:#1E3A4C; --brass:#D9AE55;
+    --earth:#B39B76; --earth-soft:#2A2419; --bad:#E88C82; --good:#6FC79B; --air:#7FC6D4;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--paper); color:var(--ink); margin:0; padding:30px 18px 70px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:940px;margin:0 auto;display:flex;flex-direction:column;gap:26px;}
+  header{border-bottom:3px solid var(--water);padding-bottom:16px;}
+  .eyebrow{font-size:11.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--water);font-weight:700;margin:0 0 7px;}
+  h1{font-size:clamp(27px,4.6vw,38px);line-height:1.1;margin:0 0 9px;letter-spacing:-.02em;text-wrap:balance;}
+  .lede{margin:0;color:var(--soft);font-size:15.5px;max-width:64ch;}
+
+  .panel{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:20px 22px;break-inside:avoid;}
+  h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 14px;color:var(--water);font-weight:700;}
+
+  .figure{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:14px;overflow-x:auto;}
+  svg{display:block;width:100%;min-width:680px;height:auto;}
+  text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .lbl{font-size:12.5px;font-weight:600;fill:var(--ink);}
+  .sub{font-size:10.5px;fill:var(--soft);}
+  .tag{font-size:9.5px;letter-spacing:.11em;font-weight:700;text-transform:uppercase;}
+  .pipe{stroke:var(--water);stroke-width:8;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+  .pipe-thin{stroke:var(--water);stroke-width:4;fill:none;stroke-linecap:round;}
+  .dim{stroke:var(--soft);stroke-width:1.1;fill:none;}
+  .dimtxt{font-size:10.5px;fill:var(--soft);font-weight:600;}
+
+  .bill{width:100%;border-collapse:collapse;font-size:14px;}
+  .bill td{padding:9px 0;border-top:1px solid var(--rule);color:var(--soft);vertical-align:top;}
+  .bill tr:first-child td{border-top:none;}
+  .bill td:first-child{color:var(--ink);font-weight:600;width:44%;padding-right:16px;}
+  .bill td:last-child{text-align:right;white-space:nowrap;color:var(--ink);font-weight:600;}
+
+  ul.notes{margin:0;padding-left:19px;display:flex;flex-direction:column;gap:10px;font-size:14.5px;color:var(--soft);}
+  ul.notes b{color:var(--ink);font-weight:600;}
+  .limits{border-left:3px solid var(--bad);border-radius:0 8px 8px 0;padding:12px 16px;font-size:14px;color:var(--soft);}
+  .limits b{color:var(--ink);}
+
+  @media print{
+    body{background:#fff;color:#000;padding:0;}
+    .panel,.figure{border:1px solid #bbb;break-inside:avoid;}
+    svg{min-width:0;}
+  }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Home Command Center · Irrigation</p>
+    <h1>One valve, one elbow</h1>
+    <p class="lede">Orbit 3/4" electric anti-siphon valve — master valve and backflow protection in a single
+      body, $18.34. Replaces the plain Orbit already on the wall and reuses the B-Hyve wiring that's
+      already run to it.</p>
+  </header>
+
+  <div class="figure">
+    <svg viewBox="0 0 940 470" role="img" aria-label="Schematic: supply exits house wall, one 90 degree elbow turns it up, an anti-siphon valve sits at the top of the riser with its vent dome up, then the outlet drops straight down to 3/4 inch PEX running below grade to a check valve, six zone valves and the sprinkler heads.">
+
+      <!-- soil / grade -->
+      <rect x="0" y="322" width="940" height="148" fill="var(--earth-soft)"/>
+      <line x1="0" y1="322" x2="940" y2="322" stroke="var(--earth)" stroke-width="2"/>
+      <text x="864" y="339" class="tag" fill="var(--earth)">GRADE</text>
+
+      <!-- house -->
+      <rect x="0" y="18" width="112" height="304" fill="var(--water-soft)" opacity=".55"/>
+      <line x1="112" y1="18" x2="112" y2="322" stroke="var(--soft)" stroke-width="2"/>
+      <text x="14" y="44" class="tag" fill="var(--soft)">HOUSE</text>
+      <text x="14" y="62" class="sub">3/4" main</text>
+      <text x="14" y="77" class="sub">from street</text>
+
+      <!-- supply out of wall, ONE elbow turning up -->
+      <path class="pipe" d="M 18 254 L 176 254 L 176 150"/>
+      <circle cx="112" cy="254" r="9" fill="none" stroke="var(--soft)" stroke-width="2"/>
+      <text x="120" y="278" class="sub">old spigot penetration</text>
+      <circle cx="176" cy="254" r="15" fill="none" stroke="var(--good)" stroke-width="2.4"/>
+      <text x="198" y="246" class="tag" fill="var(--good)">3/4" PEX × MIP 90° ELBOW</text>
+      <text x="198" y="262" class="sub">PEX side clamps to the supply,</text>
+      <text x="198" y="276" class="sub">threaded side into the valve inlet</text>
+      <text x="198" y="292" class="sub">— the only elbow in the job</text>
+
+      <!-- ================= ANTI-SIPHON VALVE ================= -->
+      <!-- body spans the top: up the left leg, across, down the right leg -->
+      <path class="pipe" d="M 176 150 L 176 128 L 330 128 L 330 150"/>
+      <g>
+        <rect x="150" y="86" width="98" height="46" rx="8" fill="var(--card)" stroke="var(--brass)" stroke-width="2.5"/>
+        <text x="199" y="106" class="lbl" text-anchor="middle" font-size="11.5">VALVE +</text>
+        <text x="199" y="121" class="lbl" text-anchor="middle" font-size="11.5">SOLENOID</text>
+        <!-- vent dome, on top of the OUTLET side -->
+        <rect x="288" y="80" width="86" height="34" rx="8" fill="var(--card)" stroke="var(--air)" stroke-width="2.5"/>
+        <rect x="300" y="66" width="62" height="16" rx="6" fill="var(--air)" opacity=".85"/>
+        <text x="331" y="103" class="lbl" text-anchor="middle" font-size="11.5">VENT DOME</text>
+        <!-- air arrows -->
+        <path d="M 312 62 L 312 44" class="dim" stroke="var(--air)" stroke-width="1.6"/>
+        <path d="M 312 40 l -4 8 l 8 0 z" fill="var(--air)"/>
+        <path d="M 350 62 L 350 44" class="dim" stroke="var(--air)" stroke-width="1.6"/>
+        <path d="M 350 40 l -4 8 l 8 0 z" fill="var(--air)"/>
+        <text x="331" y="32" class="tag" text-anchor="middle" fill="var(--air)">AIR IN · DOME UP</text>
+      </g>
+      <text x="150" y="70" class="tag" fill="var(--good)">ORBIT 3/4" ANTI-SIPHON · $18.34</text>
+
+      <!-- wire to B-Hyve -->
+      <path d="M 199 86 C 199 40, 96 44, 96 96" fill="none" stroke="var(--soft)" stroke-width="1.6" stroke-dasharray="5 4"/>
+      <text x="24" y="112" class="sub">to B-Hyve</text>
+      <text x="24" y="126" class="sub">(wire already run)</text>
+
+      <!-- straight down to PEX -->
+      <path class="pipe" d="M 330 150 L 330 372"/>
+      <circle cx="330" cy="164" r="13" fill="none" stroke="var(--good)" stroke-width="2.4"/>
+      <text x="348" y="162" class="tag" fill="var(--good)">3/4" PEX × MIP ADAPTER</text>
+      <text x="348" y="177" class="sub">threads into the valve outlet,</text>
+      <text x="348" y="191" class="sub">clamps to the blue 3/4" PEX</text>
+      <text x="348" y="212" class="tag" fill="var(--water)">STRAIGHT DOWN TO THE PIT</text>
+
+      <!-- 6 inch dimension: dome down to head height -->
+      <line x1="424" y1="88" x2="424" y2="314" class="dim" stroke-dasharray="4 4"/>
+      <line x1="416" y1="88" x2="432" y2="88" class="dim"/>
+      <line x1="416" y1="314" x2="432" y2="314" class="dim"/>
+      <text x="440" y="192" class="dimtxt">6" MINIMUM</text>
+      <text x="440" y="207" class="sub">dome above highest head —</text>
+      <text x="440" y="222" class="sub">riser height covers this easily</text>
+
+      <!-- pit box -->
+      <rect x="292" y="352" width="616" height="98" rx="8" fill="var(--card)" stroke="var(--earth)" stroke-width="2" stroke-dasharray="7 5"/>
+      <text x="302" y="370" class="tag" fill="var(--earth)">VALVE PIT BOX (BELOW GRADE)</text>
+
+      <path class="pipe" d="M 330 405 L 404 405"/>
+      <g>
+        <rect x="404" y="388" width="76" height="34" rx="5" fill="var(--card)" stroke="var(--brass)" stroke-width="2.2"/>
+        <path d="M 428 398 l 16 7 l -16 7 z" fill="var(--brass)"/>
+        <text x="442" y="442" class="sub" text-anchor="middle">CHECK VALVE</text>
+      </g>
+      <path class="pipe" d="M 480 405 L 560 405"/>
+      <g>
+        <rect x="560" y="388" width="96" height="34" rx="5" fill="var(--card)" stroke="var(--water)" stroke-width="2.2"/>
+        <text x="608" y="410" class="lbl" text-anchor="middle" font-size="12">ZONES 1–6</text>
+        <text x="608" y="442" class="sub" text-anchor="middle">existing zone valves</text>
+      </g>
+      <path class="pipe-thin" d="M 656 405 L 908 405"/>
+
+      <!-- heads -->
+      <g>
+        <path class="pipe-thin" d="M 760 405 L 760 322"/>
+        <path class="pipe-thin" d="M 840 405 L 840 322"/>
+        <path class="pipe-thin" d="M 900 405 L 900 322"/>
+        <rect x="753" y="308" width="14" height="16" rx="3" fill="var(--water)"/>
+        <rect x="833" y="308" width="14" height="16" rx="3" fill="var(--water)"/>
+        <rect x="893" y="308" width="14" height="16" rx="3" fill="var(--water)"/>
+        <path class="dim" d="M 760 304 q 16 -20 34 -9" stroke="var(--water)" stroke-width="1.5"/>
+        <path class="dim" d="M 840 304 q 16 -20 34 -9" stroke="var(--water)" stroke-width="1.5"/>
+        <text x="830" y="294" class="tag" text-anchor="middle" fill="var(--water)">HEADS</text>
+      </g>
+
+    </svg>
+  </div>
+
+  <div class="panel">
+    <h2>What changed from the first drawing</h2>
+    <ul class="notes">
+      <li><b>One part, not two.</b> The anti-siphon valve is the master valve and the backflow device in a single
+        body. The earlier layout used your existing valve plus a separate breaker — two bodies, extra threads,
+        extra fittings between them.</li>
+      <li><b>One elbow, not three.</b> The valve carries the flow up its inlet leg, across, and back down its
+        outlet leg. Those turns happen inside the casting, so the only fitting you add is the 90 coming off
+        the wall.</li>
+      <li><b>The vent is downstream of the valve seat by design.</b> Close the valve and the breaker is
+        unpressurized — the continuous-pressure rule is satisfied by how the thing is built, not by arranging
+        parts in a particular order.</li>
+      <li><b>Drop-in.</b> It replaces the plain Orbit already on that stub, and the B-Hyve wiring is already run
+        to that exact spot for the existing solenoid.</li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <h2>Parts</h2>
+    <table class="bill">
+      <tr><td>Orbit 3/4" electric anti-siphon valve</td><td>$18.34</td></tr>
+      <tr><td>3/4" PEX × 3/4" MIP 90° elbow — inlet side</td><td>have it</td></tr>
+      <tr><td>3/4" PEX × 3/4" MIP adapter — outlet side</td><td>have it</td></tr>
+      <tr><td>Stainless cinch clamps (matches existing joints)</td><td>have it</td></tr>
+      <tr><td>Check valve — already in the pit</td><td>have it</td></tr>
+      <tr><td>Zone valves, B-Hyve, wiring</td><td>have it</td></tr>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2>Watch these four</h2>
+    <ul class="notes">
+      <li><b>Dome up, above grade.</b> Non-negotiable — the poppet has to fall open on gravity.</li>
+      <li><b>Follow the cast arrows.</b> Inlet leg from the riser, outlet leg down to the PEX. Backwards, it
+        won't protect anything.</li>
+      <li><b>Brace it.</b> The valve sits at the top of a riser and the PEX shouldn't carry its weight.</li>
+      <li><b>It's above ground.</b> Same freeze exposure as what's on that wall today, so treat it the same way
+        at winterization.</li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <h2>The one honest limit</h2>
+    <div class="limits">
+      <p style="margin:0;">Your six zone valves are still shutoff valves <b>downstream</b> of an atmospheric
+        breaker, which the standard doesn't strictly allow. That's unchanged from every layout we've looked at —
+        no better, no worse. The by-the-book alternative is a pressure vacuum breaker at roughly $80–150, plus
+        annual testing by a licensed tester, which is exactly the attention you're trying not to attract.
+        The <b>check valve in the pit</b> is a useful second layer but isn't a listed preventer on its own.</p>
+    </div>
+  </div>
+
+  <p style="color:var(--faint);font-size:12.5px;margin:0;border-top:1px solid var(--rule);padding-top:13px;">
+    Revised 15 August 2026 · not to scale · supersedes the two-part layout drawn earlier the same day.
+  </p>
+
+</div>

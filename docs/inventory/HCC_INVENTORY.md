@@ -1,0 +1,280 @@
+# HCC Hardware Inventory — Master Register
+
+**Standing job (Jeff, 2026-08-13):** *"make sure we stay on top of the inventory
+that's coming in, what we buy from now on... really make sure that we're adding to
+the system rather than taking away from it. It's all got to be tracked meticulously."*
+
+Every session that buys, receives, installs, retires or repurposes hardware updates
+this file. A phone-readable copy lives at `iCloudDrive/HCC Inventory.md` — keep the
+two in sync whenever this changes.
+
+Status legend: **ORDERED** → **ON HAND** → **INSTALLED** · plus **RETIRED** / **RESALE**
+
+---
+
+## Zigbee layer
+
+| Item | Qty | Status | Cost | Location / Notes |
+|---|---|---|---|---|
+| Haozee Zigbee 3.0 dongle (CC2652P1, +20dBm) | 1 | **ON HAND 08-15** (photo) | $8.92 | Coordinator. USB extension cable ON HAND. Z2M, not ZHA. SMA antenna in box. |
+| Tuya Zigbee door/window sensor (Excellux 2-pc) | 2 pks | **ON HAND 08-15** (photo) | $9.58 ×2 | battery end devices |
+| Zigbee door/window sensor (Coolo 2-pc) | 1 pk | **ON HAND 08-15** (photo) | $6.39 | battery |
+| Zigbee door/window sensor (Excellux 1-pc) | 1 | **ON HAND 08-15** (photo) | $2.79 | battery |
+| Zigbee water leak sensor (Haozee) | 2 | **ON HAND 08-15** (photo) | $5.09 ea | battery |
+| Zigbee water leak sensor (Gleco, probe cable) | 1 | **ON HAND 08-15** (photo) | $4.40 | battery — probe-cable unit visible in photo |
+| Zigbee water leak sensor (Gleco **Z2M-only**) | 1 | **ON HAND 08-15** (photo, TZ-SJ-SD_E) | $4.62 | ⚠️ no ZHA — this locked the Z2M decision |
+| Zigbee water detector (Excellux) | 1 | **ON HAND 08-15** (photo) | $6.19 | battery |
+| ⚠️ Tuya **WiFi** water sensor (Qianhong "WiFi-Shuijin-1") | 1 | **ON HAND 08-15** (photo) | $5.68 | NOT Zigbee — wrong variant. Smart Life or shelf. |
+
+**INSTALL STATUS 2026-08-17 (Zigbee network went LIVE today — Z2M, channel 25, dongle on extension):**
+- **INSTALLED door/window (3 of 7):** Back Deck Door (verified open/close ×2), Front Door,
+  Mailbox (inside the METAL box at the street — works, LQI at floor until a plug routes it).
+  Z2M identifies these as SONOFF SNZB-04 (white-label Tuya clones of it).
+- **INSTALLED leak (3 of 5):** Guest Bath (⚠️ 30% part-used cell — swap), Kitchen Refrigerator (80%),
+  Kitchen Sink (80%). All three wired into `automation.hcc_water_leak_alarm` same day.
+- **REMAINING: 4 door + 2 leak — PAUSED, out of AAA batteries. More AAAs ORDERED, arrive 2026-08-18.**
+- Wet-rag alarm test still owed on all 3 leak sensors; one open/close owed on Front Door.
+
+**Mesh status: zero routers.** Every device above is battery = end device. First
+routers will be the mains-powered light switches. Until then all devices connect
+directly to the dongle (CC2652P handles ~50 direct children — the reason not to
+swap to a ZBDongle-E, decided 2026-08-13).
+
+## Lighting project
+
+| Item | Qty | Status | Cost | Notes |
+|---|---|---|---|---|
+| Kasa HS220 dimmer, single-pole (WiFi, 150 W LED) | **2** | **INSTALLED** | — | **#1 living room** (`light.livingroom_cans`, installed 08-13/14). **#2 kitchen/dining, INSTALLED 2026-08-17** (`light.kitchen_dining_room`, 192.168.1.179, fw 240802 — this one REQUIRED TP-Link cloud login at HA add; creds now stored in HA, future Kasa auto-adds). Both verified dimming live, auto-update OFF on both. ✅ **08-19 'kitchen switch errors' INVESTIGATED AND CLOSED — the switch is healthy.** The 93
+`Cannot connect to host 192.168.1.179:80 — Network unreachable` errors all fell inside **one
+90-second window, 02:08:56–02:10:23 AM CT on 08-19**, with **zero recurrence in the 17 hours
+since**. It was not the kitchen unit: the **living room dimmer dropped in the same second**
+(unavailable 07:09:07Z, back 07:10:23Z; kitchen 07:09:06Z→07:10:24Z) and the **Blink cameras
+went down at 07:08:53Z** too — a ~80-second house network blip, self-recovered. Kitchen
+`signal_level` slipped 3→2 seven seconds before the drop. Verified from this PC 08-19: .179
+pings, port 80 open, correct MAC `ac:a7:f1:a2:5e:61`. **Seven-day check found NO pattern** —
+only 2 isolated drops (08-15 11:54:37Z, 08-19 07:09:07Z), nothing nightly or scheduled. Stale
+log entries cleared. **Standing note:** kitchen runs at `signal_level` 2 vs bedroom's 3 and is
+the documented farthest mesh point — if drops ever become frequent, the fix is AP/mesh
+placement, NOT the switch. Bedroom = the used 3rd unit below. **#3 BEDROOM: INSTALLED + LIVE 2026-08-19 6:58 PM** — `light.bedroom_cans`, 192.168.1.180, MAC 58:04:4f:ea:27:90, fw 1.1.1 Build 240802 (same as the other two), area Main Bedroom (2). Needed the TP-Link cloud login (port 9999 CLOSED / 80 OPEN = KLAP). **Dimming verified live 08-19: driven 1% -> 50% -> back.** Auto-update was ON out of the box and has been **turned OFF**. Exposed to Alexa + voice. It was NOT still bound to the previous owner — no factory reset was needed. |
+| ~~Inovelli Blue 2-1 VZM31-SN (Zigbee)~~ | 0 | **🔴 SCRAPPED — DO NOT BUY (Jeff, on price)** | ~~~$60 ea~~ | **Jeff rejected these early on and it was never written down: *"I was not paying $120 for a freaking dimmer switch."* Recorded 2026-08-16 after a session re-proposed them. A budget router/dimmer alternative is still UNCHOSEN — research real prices in-session, cheapest-first, and lead with the $0 option (Kasa HS220 ×2 + MOES module already on hand).** Old plan kept below only for the wiring context: | **#1 = KITCHEN, dimmer mode** — far-point router + the dimming test. **#2 = GARAGE man-door, On/Off mode + "3-Way Dumb" type** — the existing kitchen 3-way toggle KEEPS WORKING, no dummy switch needed. Mesh chain: dongle → kitchen → garage, landing a router on top of the door relay + sensors. (Corrected 08-13: the 2-1 manual is titled "On-Off or Dimmer" — it does both modes.) |
+| **Ecoeler YM2108T 3-way PIR occupancy sensor switch** | 1 | ON HAND — **ASSIGNED: GARAGE MAN DOOR (Jeff, 08-17)** | $0 (found new in Jeff's supplies) | **Closes the garage two-location question — no HS200/HS210 purchase.** Sensor at man door (MASTER, needs the LOAD-side box), existing kitchen toggle stays as 3-way auxiliary. LED-OK, neutral required (present). Settings + manual scans: `docs/lighting/ecoeler_ym2108t_garage_2026-08-17.md` |
+| **Kasa HS210 3-way switch (WiFi)** | 1 | **INSTALLED 2026-08-19 — MASTER BATH CANS** | — | `switch.masterbath_cans`, 192.168.1.181, MAC 20:e1:5d:ce:bb:9c. Added to HA 08-19, **no TP-Link credentials needed** (legacy firmware, port 9999 generation — keep it that way). ⚠️ **HS210 IS ON/OFF ONLY — IT CANNOT DIM.** Verified in HA: the device exposes only `switch`, `switch.*_led` and `cloud_connection` — no brightness entity, and no auto-update entity either. Master bath is **single-pole** (Jeff, 08-19), so dimming there needs an **HS220** (~$16–17 new, ~$14 used Amazon Resale) and this HS210 goes to the spares shelf. Exposed to Alexa + voice to match the other cans. |
+| Leviton Decora E5603-SW 3-way (dumb) | 1 | ON HAND — companion/spare | — | Use as a fresh dumb companion in the kitchen 3-way position if the existing toggle is worn; else shelf |
+| GE UltraPro paddle, single-pole (dumb) | 1 | ON HAND | — | bedroom repurposed-receptacle position |
+| MOES single-gang dimmer module (the beige box) | 1 | ON HAND | — | **ASSIGNED: single LED over kitchen sink (~12 W** vs 100 W/gang limit — finally a load it fits). ⚠️ needs a MOMENTARY push-button at the wall, not a standard toggle (toggles cause continuous-ramp misbehavior, researched 08-06). Confirm protocol from label: WM- prefix = WiFi/Tuya, ZM- = Zigbee |
+| Lepro 14 W LED downlights w/ j-boxes | several | ON HAND — **SPARES ONLY** | — | replacements for existing fixtures, NOT expansion (Jeff 08-13) |
+
+**Mesh geometry (Jeff 08-13):** kitchen is the FARTHEST point needing mesh; living
+room is ~12 ft from the dongle. Router priority is therefore kitchen first — not
+living room as originally assumed.
+
+## Wiring consumables & tools (from bin photos — no purchases needed for install work)
+
+12/2 NM cable (yellow, good length) · Wago-style lever connectors (45-pc kit + loose) ·
+old-work boxes, single-gang boxes, misc plates · NM staples · structured-wiring plates ·
+multimeter · wire strippers/cutters · headlamp · screwdrivers · Energetic recessed fixture
+
+## Irrigation
+
+| Item | Qty | Status | Cost | Notes |
+|---|---|---|---|---|
+| 3/4" Orbit valve (zone-1 replacement) | 1 | ON HAND | — | install tomorrow — zone 1 diaphragm leak (~3.8 gal/hr, confirmed by meter) |
+| 3/4" spare valves | several | ON HAND | — | one becomes the **master valve** → PUMP + COM |
+| Spare wire runs, manifold → controller | plenty | IN PLACE | — | confirmed by Jeff |
+
+## Mower / sensor
+
+| Item | Qty | Status | Cost | Notes |
+|---|---|---|---|---|
+| ESP32-D on screw-terminal breakout | 1 | INSTALLED | — | fw 1.4.0, OTA-ready pending private hosting |
+| Spare ESP32 | 1 | TO ORDER (~$9) | — | Jeff committed 08-11 — flash + bench-soak on arrival; unblocks OTA proof + watchdog test |
+
+## Garage door
+
+| Item | Qty | Status | Cost | Notes |
+|---|---|---|---|---|
+| SONOFF MINI-D (Matter, dry contact) | 1 | ON HAND | — | wire + eWeLink Inching + Matter-commission (Pending Item 1) |
+| Garage door position: **2× contact sensors** (from inbound stock) | 2 | plan | — | **#1 at CLOSED position** (bottom of track/frame), **#2 at FULLY-OPEN position** (overhead track where the door rests when up). Template sensor derives 3 states: CLOSED / OPEN / **PARTIAL** — covers Jeff's hot-day "cracked open" venting. Possible later automation: pulse-wait-pulse for a repeatable vent stop |
+| MyQ hub + sensor | 1 set | RESALE | — | eBay when Jeff gets to it |
+
+## Network
+
+| Item | Qty | Status | Cost | Notes |
+|---|---|---|---|---|
+| MoCA adapter set | 1 pr | ON HAND — SHELF | — | Garage WiFi measured ADEQUATE 08-13 (mower box, last 50 uploads: mean −71.5 dBm, worst −76, zero buffered uploads ever; GaragePC + Tuya plug also clean). **Trigger to deploy:** if the Matter garage relay feels laggy once installed → MoCA backhaul + AP in garage. Needs coax at garage — unverified. |
+
+**ISP (confirmed by photo 08-13):** AT&T Fiber, gateway **BGW320-500** (integrated ONT,
+WiFi 6). Admin UI at `http://192.168.1.254` — login uses the Device Access Code printed
+on the unit's label. LAN is 192.168.1.x (matches Beehive at .66). Household WiFi SSID
+in use is `Loewen301`, NOT the factory SSID on the label. The old Xfinity notes refer
+to Jeff's *email/mail*, not current internet service.
+If true mesh WiFi is ever wanted: AT&T's All-Fi/Smart WiFi extenders pair with this
+gateway, or the MoCA + AP route above — decision deferred since garage WiFi measured fine.
+
+## Other on-hand (from CLAUDE.md spare inventory, unchanged)
+
+KESU 500GB USB drive (FREED 08-27 - AirTV Anywhere has 1TB built in and takes no external drive; now GaragePC storage) · Lenovo B570 (kiosk candidate) · Delam XLR mic
+(GaragePC voice) · WD 320GB bare HDD (Mint test drive) · HDMI-005 Miracast stick ·
+HDMI→USB capture stick (kitchen TV chain) · AirTV **Anywhere** (arrived 08-27, substituted for the AirTV 2 - 4 tuners, 1TB built in; MAC 88:B6:EE:C7:06:E5) · GaragePC HP
+TouchSmart 520
+
+---
+
+## 🔴 BLINK CAMERA HARDWARE — READ BEFORE REPORTING A CAMERA "FAULT" (added 2026-08-19)
+
+**Models, straight from HA's device registry — not inferred:**
+
+| camera | model | power | battery entity |
+|---|---|---|---|
+| **Garage** | **`mini`** | **MAINS / USB — NO BATTERY AT ALL** | phantom, DISABLED 08-19 |
+| 301 Front Doorbell | `doorbell` | battery | real |
+| 301 Driveway · Front Right · Back Left · 301 Backyard | Blink Outdoor | battery | real |
+
+**⚠️ `binary_sensor.garage_battery` WAS A LIE AND IS NOW DISABLED.** Blink's API returns a battery
+field for every camera and blinkpy creates the entity regardless of hardware, so on the mains-powered
+Mini it sat permanently at `on` = LOW. On 2026-08-19 a session reported that to Jeff as a genuine
+"LOW battery — needs new batteries" finding. **It has no batteries.** Jeff had to explain this again:
+*"It is plugged in, that Mini camera doesn't even have a battery."* Disabling the entity stops it
+lying to any future session and stops it feeding the low-battery alert automation.
+
+**⚠️ THE GARAGE CAMERA BEING DISARMED IS NOT A FAULT — IT IS JEFF'S DECISION.**
+`eba1648` / `docs/beehive/alert_fatigue_fix_2026-08-14.md`, 2026-08-14, verbatim:
+*"Garage motion detection turned OFF permanently. Jeff: **'I don't need motion in the garage at
+all'** — the camera is **mains-powered** so it ran constantly and fired 6 times in 7 minutes while
+he was simply working in there."*
+**Do not "fix" it. Do not call it a security gap. Do not try `switch.turn_on`** (attempted 08-19,
+returned HTTP 200, correctly stayed `off`).
+
+**INFERRED, not proven:** Garage (`mini`) and Front Doorbell (`doorbell`) are the only two
+non-Outdoor models and the only two reporting `temp`/`wifi` as `unknown`. Different hardware
+probably reports different telemetry — so `unknown` there is likely normal, not a fault.
+
+## Rules for maintaining this
+
+1. **Log at order time**, not arrival — ORDERED with ETA, promote to ON HAND when
+   Jeff confirms the box.
+2. **Nothing gets bought twice** because nobody checked this file. Check here first.
+3. **Retired ≠ deleted** — mark RETIRED/RESALE with a reason, keep the row.
+4. **Wrong-variant purchases get flagged loudly** (see the Qianhong WiFi sensor) so
+   the lesson survives: *verify the protocol variant in the listing before ordering.*
+5. Sync the iCloud copy after every edit.
+
+## 2026-08-13 — Sylvania WiFi plugs (4, living room lamps)
+**STATUS: ON HAND, working, but VENDOR LOCKED — cannot enter Home Assistant.**
+- Tuya hardware (port 6668 confirmed) at .199/.200/.202/.205, but Sylvania locked the product ID
+  so ONLY the "SYLVANIA Smart WiFi" app accepts them. Proven 08-13: Smart Life DETECTS a reset plug
+  then rejects it — "This device is not supported by this app."
+- Sylvania app CAN scan HA's Tuya QR but Tuya blocks the confirm step ("use the designated APP").
+- Only remaining route = LocalTuya with hand-extracted local keys. NOT attempted, not worth it.
+- **DECISION: replace with Zigbee plugs when the dongle arrives.** Keep these on Sylvania+Alexa meanwhile.
+- DO NOT re-attempt the Smart Life path — this is settled.
+
+## ZIGBEE MESH PLUGS — selected 2026-08-14
+**BUY: THIRDREALITY Zigbee Smart Plug 4-Pack — ASIN B09KNHWF7L (~$50).** Listing MUST say
+"Zigbee Repeater" and "Requires ZigBee Hub". Z2M page 3RSP019BZ verified CLEAN — no routing
+warnings (contrast: Enbrighten 43080 warns it stops relaying for child devices). Tested better
+range than SONOFF S40 Lite (+5 ft through 2 walls) and zero dropouts over 14 days.
+
+**⚠️ SHIPS IN BLE MODE — must be manually switched to Zigbee mode before it will pair.**
+Out of the box it looks dead to the coordinator. Find the exact button sequence at pairing time.
+
+**⚠️ DO NOT BUY the lookalikes:**
+- THIRDREALITY "Smart Plug M3" B0FJRNW7YS = Matter over **WiFi**, not Zigbee.
+- SONOFF "S40 Lite" exists in BOTH Zigbee (B09XMH3X3G, currently OOS) and WiFi (B09LV7K4DH) versions,
+  same product name. Zigbee one says "Hub Needed"; WiFi one says "No Hub Required".
+**RULE: "Requires a hub" = the Zigbee one. "No hub required" = WiFi, useless for the mesh.**
+
+Quantity needed: 5 — four to replace the vendor-locked Sylvania living-room plugs, one for the
+garage as the relay to the door sensors.
+
+## ORDER 2026-08-14 — arriving 4-8 AM Fri 8/15 (~$33.83)
+| Item | For | Cost | Status |
+|---|---|---|---|
+| **Orbit 57280 3/4" FPT L-Series** auto valve | **MASTER VALVE** — the reason today's valve work slipped | $13.58 | ORDERED |
+| **Kasa HS220** dimmer (Amazon Resale, **USED - Mint**) | 3rd dimmer — bedroom/kitchen/living room now all covered | $13.86 | ORDERED |
+| Leviton 3-Gang Decora/GFCI wall plate | one of the new multi-gang boxes | $1.82 | ORDERED |
+| Leviton F-Connector Decora insert | coax feed into a Decora plate | $4.57 | ORDERED |
+
+**Kasa switch count now 3** (2 on hand + this one) = bedroom, kitchen/dining, living room all covered.
+~~Still needed for lighting: 1x HS200 (garage) — plus the garage 2-location decision (HS210 kit vs cap one position).~~
+**RESOLVED 08-17 at $0: garage gets the Ecoeler YM2108T motion sensor switch Jeff found in his supplies (see Lighting table above). Nothing left to buy for lighting.**
+
+**⚠️ The HS220 is USED/refurb.** Before install: FACTORY RESET it (hold the button ~10 s until the LED
+blinks amber/green) so it is not still bound to the previous owner's TP-Link account, THEN disable
+auto-firmware-update, THEN pair. A used smart switch that is still claimed will silently refuse to pair.
+
+**Orbit 57280 is 3/4" FPT** — matches the existing 3/4" irrigation pipe. Installs below the hose-spigot
+tee, between the red winterization ball valve and the manifold; wires to PUMP + COMMON at the controller.
+
+## BACKFLOW / IRRIGATION CONNECTION — 2026-08-15
+
+**Finding:** the valve on the wall stub (old spigot penetration, 3/4" PEX from the main) is a plain
+Orbit valve with a **solid jar-top bonnet — no vent openings**. It is NOT a backflow device. The system
+has been running with **no backflow protection at the point of connection.**
+
+| Item | Role | Cost | Status |
+|---|---|---|---|
+| **Orbit 3/4" electric anti-siphon valve** | **DECIDED 8/15** — master valve **+** backflow in one body, on the wall stub | $18.34 | to order |
+| *old plain Orbit wall valve (jar-top, no vent)* | **BEING REMOVED ENTIRELY** — was never a backflow device | — | remove |
+| **Orbit 57280** 3/4" FPT L-Series valve | bought 8/14 as the master — **redundant now.** Becomes the **SPARE ZONE VALVE.** | $13.58 | HAVE |
+| **T&S B-969** 1/2" AVB (ASSE 1001, bronze) | too small — 1/2" chokes the 3/4" line. Not for this job. | — | have, unusable here |
+| 3/4" check valve | in the pit with the zone valves | — | installed |
+
+**Orbit 51059** (3/4" FTP brass AVB, $18.49) was looked at and NOT bought — the combined anti-siphon
+valve does the same job plus the master-valve function for the same money and fewer fittings.
+
+**The 57280 is not wasted.** Once the anti-siphon valve is the master, the 57280 becomes the spare zone
+valve — genuinely worth having, since a failed zone-1 diaphragm is exactly what caused the ~88 gal/day
+leak found 2026-08-13. Only ONE valve needs to be wired as the master; don't wire both in series.
+
+**Layout if the anti-siphon valve is used** (diagram: `docs/utilities/backflow_layout.html` + PDF):
+wall stub → ONE 90° elbow turning up → anti-siphon valve straddling the riser, **vent dome UP**, cast
+flow arrows followed → straight down into the blue 3/4" PEX → pit box (check valve → zones 1-6 → heads).
+The valve provides the up/across/down turns internally, so only one elbow is added.
+
+**Rules that govern the device:** dome up and above grade; critical level **6" min above the highest
+head** (wall height covers this easily); never more than 12 h under continuous pressure — satisfied
+because the vent sits downstream of the valve seat, so closing the valve unloads it.
+
+**Honest limit, unchanged by any option considered:** the six zone valves are shutoff valves DOWNSTREAM
+of an atmospheric breaker, which the standard does not strictly permit. The by-the-book fix is a
+pressure vacuum breaker (ASSE 1020, ~$80-150) **plus annual testing by a licensed tester** — which is
+exactly the utility attention Jeff is avoiding. Decision made knowingly.
+
+**Replacement strategy (Jeff's call, and it is the right one):** an AVB fails SILENTLY — a stiff poppet
+looks fine and simply doesn't open when needed. So swap the cheap valve on a schedule rather than pay
+~9x for bronze. Target: spring startup, every 1-2 years. **TODO: add a yearly HA reminder** in the
+alert batch.
+
+(Zigbee arrival 2026-08-15 is logged in the **Zigbee layer** table at the top of this file —
+all rows promoted to ON HAND, photo-confirmed, not unboxed per Jeff's order.)
+
+## AliExpress haul — ORDERED 2026-08-18 (delivery ~Aug 25–30)
+| Item | Price | Purpose |
+|---|---|---|
+| Tuya Zigbee USB signal repeater ×2 | $4.48 ea ($9.84) | Mesh routers — front window (mailbox) + midpoint. ⚠️ Only 2 ordered (plan said 4) — judge coverage when installed, reorder if needed |
+| Tuya Zigbee Alarm SIREN (Zigbee version) | $14.59 | **The Guardian panic-alarm siren** — unblocks Pending Item 4 |
+| Zigbee 3.0 door/window sensor (RightSitu, 1pc) | $2.59 | 8th door sensor |
+| 16A/20A WiFi mini smart switch module 2-way | $3.39 | spare/project relay |
+| Tuya WiFi smart plug US 10A | $5.19 | general |
+| ELM327 OBD2 Bluetooth V2.1 mini | $2.59 | **F-250 OBD project (Pending Item 3) — replaces the ~$30 Veepeak idea at 1/10 price** |
+| ESP32 30-pin expansion/terminal board | $2.39 | DIY bench — Guardian Air Station candidate |
+| 20-pin Dupont jumpers 10cm M-F | $1.39 | DIY bench |
+| T-type 2-pin wire connectors 10pcs | $1.39 | DIY bench |
+| Wire welding clamp | $0.99 | DIY bench |
+| Soldering cleaning ball | $1.39 | DIY bench |
+| 6-in-1 car charger 3.1A dual USB-C | $1.99 | truck |
+
+**Total haul ≈ $47.** DIY-bench buildout + Guardian siren + mesh routers + F-250 OBD reader.
+
+## Next order — planned 2026-08-18 (one AliExpress cart + one store run)
+| Item | Qty | Est. | For |
+|---|---|---|---|
+| PMS5003 + MH-Z19B + ZE07-CO + MQ-4 + BME280 | 1 ea | ~$40–50 | Guardian Air Station (see docs/guardian/air_station_plan_2026-08-18.md; brain = Jeff's spare ESP32, $0) |
+| Zigbee leak pucks | 3 | ~$15 | master vanity ×2 + dishwasher (Jeff 08-18). Irrigation-box puck DECLINED — meter LTS covers irrigation, box too damp for electronics |
+| Kidde SM120X relay (store) | 1 | $18.99 | wired-alarm interconnect → air station GPIO |
+| 3M VHB tape roll (store) | 1 | ~$10 | re-mount door sensors (front door fell 2:12 AM 08-18 — stock adhesive fails on 2×AA weight); body-on-door, magnet-on-molding |
+| Radon test kit (store) | 1 | ~$15 | measure BEFORE any $97 RD200 buy |
+
+**Probe-style leak sensor assignments (Jeff 08-18): water heater drip pan + washing machine.**
+(HVAC pan not needed — package unit, everything outside.)
