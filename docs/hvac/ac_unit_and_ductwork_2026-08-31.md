@@ -1659,3 +1659,71 @@ one instead — that is the real cost, not the sticker.
 ## Still to do
 - Confirm the colour→function map on the unit's own diagram at install time.
 - Decide how many SmartSensors ($50/room) — the answer probably comes from which rooms run cold.
+
+---
+
+# 💵 QUOTE #3 IN — PETITT, received 2026-09-11 ~10:40 AM CT. **$13,000.**
+
+**Source:** PDF Jeff uploaded 2026-09-11 (`247977d0-pdf.pdf`, 3 pages, Chromium print of Petitt's
+web estimate; page 3 blank). Text extracted with PyMuPDF and both pages **rendered and looked at** —
+not summarised from a preview. Estimate **#122034117**, job **#121965139**, technician **Logan P.**,
+estimate date **9/10/2026**. **Nothing signed.** The sheet says *"THIS IS NOT A GUARANTEE OF THE
+FINAL PRICE"* — it is a good-faith estimate, not a fixed price.
+
+## The numbers, verbatim
+
+| line | price |
+|---|---|
+| "RUUD 2.5 ton 14seer gas pack" | **$12,721.00** |
+| 10 YEAR LABOR WARRANTY | $0.00 (included) |
+| Package install kit | $0.00 (included) |
+| Surge Protector | **$279.00** |
+| **Total Due** | **$13,000.00** · deposit $0 |
+
+Header: *"RUUD 2.5 ton 13.4 seer2 gas pack with ductwork modifications."* "14 SEER" and "13.4 SEER2"
+are the same rating expressed in the old and new test standards, so the sheet is not
+self-contradictory there.
+
+🔴 **NO MODEL NUMBER. NO HEAT BTU. NO REFRIGERANT NAMED.** Same gap Daniels' first proposal had.
+Heat matters: old Nordyne = 72,000; Carrier = 60,000; Am. Std = 70,000 (derived). **Get the model.**
+
+## Scope, verbatim from the sheet
+
+- *"10 YEAR PARTS AND LABOR WARRANTY. **DOES NOT INCLUDE FREON.** \*\*CUSTOMER MUST MAINTAIN
+  SEMI-ANNUAL MAINTENANCE AGREEMENT WITH PETITT"* · *"ONE YEAR FREE MAINTENANCE"*
+- Print warranty certificate · **register manufacturer warranty**
+- Connect to existing duct work · **permit fees** · connect to existing gas line · connect to
+  existing electrical
+- **Install new outdoor disconnect, breaker style**
+- **Install new outdoor pad with gravel support and new shroud**
+- 🟢 **Return:** *"new 16 inch return flex running straight back with 16 inch pipe 90 going over
+  towards return filter with another 16 inch 90"* — **a stated diameter, in writing**
+- 🟢 *"Upgrade THREE 6 inch flex runs to 8 inch with new saddle taps with dampers and floor boots"*
+- 🟢 *"New 7 inch flex line in GARAGE with brown register, boot and saddle tap — will need to knock
+  out brick"*
+- **Run new thermostat wire and install CUSTOMER-PROVIDED thermostat** (fits the ecobee plan above)
+- Remove/haul old equipment · explain system operation
+- *"The Petitt Promise":* **$500 off** if they miss the promised install date; **service within
+  12 hours** if it breaks down in the 10-year warranty
+
+## Read against the other quotes — facts only, research still running
+
+1. 🔴 **THE SUPPLY SIDE IS NOT MENTIONED.** Only the return gets new flex. Daniels replaces supply
+   AND return flex, and the supply is the run with the **damp insulation** (Daniels' own finding,
+   09-10). Petitt's sheet says only "connect to existing duct work" for the supply. **Ask Logan.**
+2. 🔴 **THE 10-YEAR LABOUR IS CONDITIONAL.** It needs a **paid semi-annual maintenance agreement
+   with Petitt**; year 1 is free. The agreement's price is **not on the sheet**, so the real
+   10-year cost is $13,000 **plus years 2–10 of that agreement**. Daniels' $800 covers labour
+   **and freon**, with no maintenance condition written on it. **Petitt's excludes freon.**
+3. **On the like-for-like line (unit + 10-yr labour): Petitt $13,000 vs Daniels Carrier $9,000 —
+   $4,000 more** before the maintenance agreement. Take out the $279 surge protector and it is
+   $3,721.
+4. **What Petitt includes that Daniels' sheet does not name:** permit fees · new disconnect · pad
+   with gravel + shroud · three 6→8 in branch upgrades with dampers · new garage run (Derryberry
+   priced a garage lead at **$350**) · thermostat wire · warranty registration done for Jeff ·
+   1 yr maintenance · 12-hr service promise.
+5. **Petitt is the only quote that writes the return diameter down (16 in).** Daniels' revised
+   proposal *deleted* its diameters — still owed.
+
+⏳ **Deep research launched 2026-09-11 ~10:50 AM on: the Ruud model + heat exchanger + warranty,
+the unit-vs-unit comparison, and fair price for each scope.** Results go in this file below.
