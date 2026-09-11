@@ -45,6 +45,11 @@ cannot carry them — that one still needs the UI.
 - **`/api/history/period` silently under-reports past ~24 h.** Same entity, same minute: 12 h → 15
   events, 24 h → 15, **36 h → 0, 48 h → 0**, while row counts *grew*. **Never judge a sensor dead
   from a window wider than 24 h.**
+- **`media_position` is a FROZEN SNAPSHOT, not a live counter.** Proven 2026-09-10 by sampling a playing
+  Apple TV for a minute: the value sat at **909** while `media_position_updated_at` aged **28 → 53 s**.
+  Comparing a fresh post-seek value against a stale pre-seek one reported a **356 s** skip that was really
+  **279 s**. 🔴 **TRUE position = `media_position` + (now − `media_position_updated_at`).** Use it for
+  both the seek target and any before/after measurement, or you will report a failure that is not real.
 - **`last_updated` is floored by an HA restart.** On 2026-09-09 18:45 CT a restart stamped **244
   entities** with one identical timestamp, making every quiet device look identically dead.
   **`last_triggered` survives a restart; `last_updated` does not.**
