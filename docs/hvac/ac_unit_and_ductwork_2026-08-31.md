@@ -1788,6 +1788,25 @@ raise the credit again, this IS the credit.**
 4. ⚠️ **Terminations:** the 48NL is a **splice box with six colour-coded pigtails, not a terminal strip.**
    Colours get confirmed against the unit's own wiring diagram at install — see the thermostat section above.
 
+## ✅ ECOBEE × CARRIER 48NL COMPATIBILITY — CHECKED AGAINST BOTH MANUFACTURERS, 2026-09-11 7:15 PM
+Jeff: *"I need you to make sure it will work with the Carrier."* Four checks, all from the makers' own documents.
+
+| # | Question | Answer, and the source |
+|---|---|---|
+| 1 | Is the 48NL the kind of system ecobee supports? | 🟢 **Yes.** Carrier's own product data describes a plain 24 V conventional sequence: *"On a call for heating, terminal **W** of the thermostat is energized"*; *"When the system thermostat calls for cooling, 24 V is supplied to the **“Y” and “G”** terminals."* ecobee's compatibility article: *"compatible with most **24-volt** residential heating and cooling systems… including gas"*, **Conventional (furnace and air conditioning), supports up to 2 stages of heat and cool** — this unit is single-stage, well inside that. |
+| 2 | Is it one of ecobee's incompatible types? | 🟢 **No.** Their exclusions are high-voltage (120/240 V, L1/L2), millivolt, DC/RV, proprietary (terminals labelled 1-2-3-4 or A-B-C-D) and solid-fuel. The 48NL is none of those. |
+| 3 | Power — the Carrier rule that kills most thermostats | 🟢 **Satisfied.** 48NL-01SI p.14: *"Do not use any type of POWER-STEALING thermostat."* ecobee is the opposite of power-stealing — it **requires** a dedicated 24 VAC common. Jeff has a C wire today (the LUX runs on it) and **Ryan is running new wire with C anyway**, so the PEK in the box will not be needed. |
+| 4 | 🔴 Carrier's anti-short-cycle note — the one real catch | 🟢 **Satisfied, but it must be set.** Product data, *Thermostat controls*: *"Time Guard® II anti-short cycle protection circuitry. If a non-corporate thermostat without anti-short cycle protection is used the Time Guard II field-installed anti-short cycle kit is recommended."* **ecobee has this built in** — its Threshold settings include **"Compressor Min Cycle Off Time: Specifies the time the compressor remains off between cycles"** and **Compressor Min On Time** (ecobee support, *Threshold settings for ecobee thermostats*). **So no Time Guard II kit is needed — but confirm the off time is set (5 minutes is the usual default) at start-up.** ⚠️ Thresholds can only be changed **on the thermostat itself, not in the app**: Main Menu ▸ General ▸ Settings ▸ Installation Settings ▸ Thresholds. |
+
+**Wiring that results:** R, C, W, Y, G — five conductors, which is why the new wire should have **a couple of spares**.
+⚠️ **ecobee's own warning, worth heeding at install:** *"Do not rely on the colour of a wire to determine its
+function."* That matches the 48NL being a **splice box of coloured pigtails** — go by the unit's wiring diagram.
+🟢 **Bonus for later:** the Premium supports a **dual accessory** (humidifier/dehumidifier/ventilator) through the
+"Pro" setup, so a whole-house dehumidifier stays possible without changing thermostats.
+
+**Verdict: the ecobee Smart Thermostat Premium works with the Carrier 48NL-B300603. No adapter, no kit, no
+workaround — just the C wire Ryan is already running, and the compressor off-time set at start-up.**
+
 ## Still to do
 - Confirm the colour→function map on the unit's own diagram at install time.
 - ~~Decide how many SmartSensors ($50/room)~~ ✅ **SETTLED 2026-09-11 7:08 PM — Jeff: *"I only need one
