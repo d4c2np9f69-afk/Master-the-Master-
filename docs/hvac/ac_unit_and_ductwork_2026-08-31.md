@@ -1719,6 +1719,33 @@ for staying in (CEMC's own post: *"up to $130"*).
 during peak events — and **you can opt out of any event from the phone, browser or the thermostat.**
 Jeff's call, but a thermostat he can override is a different thing from one a utility controls.
 
+### 4b. 🔴 NO UTILITY CONTROL — Jeff, 2026-09-11 6:56 PM: *"I'm not letting CEMC control my thermostat. Find me the cheapest price."*
+
+**The TVA/CEMC money is therefore DEAD, and here is the proof it could not be kept without the strings:**
+energyright.com/residential/rebates — *"Enroll your existing thermostat and receive a $65 enrollment
+rebate"*; if you buy new, *"receive a rebate of up to $100 **when you enroll**"*; *"Participants will
+receive a $20–$65 annual participation rebate."* Every dollar is tied to enrolment, and enrolment is
+*"small, automatic adjustments of up to four degrees."* **So the $159.99 path is off the table. Do not
+re-pitch it.**
+
+### 4c. 💵 CHEAPEST PRICES WITHOUT ANY UTILITY PROGRAM — every line read live 2026-09-11, 7:00–7:20 PM
+| Where | Price | Condition and terms |
+|---|---|---|
+| ecobee.com · Best Buy · Home Depot · Apple · Amazon | **$259.99** | New. Best Buy read live tonight at $259.99 (**not** the $229.99 PCMag printed in August). |
+| 🏆 **ecobee Certified Refurbished** — `ecobee.com/en-us/smart-thermostats/refurbished-smart-thermostat-premium/` | **$219.99** (from $259.99) | *"3-year limited warranty"*, *"Return within 30 days for full refund"*, free shipping. Box: *"1 × Smart Thermostat Premium, 1 × SmartSensor, 1 × Trim plate, 1 × Power Extender Kit."* Refurb process: *"inspected and tested by ecobee engineers… must pass the same quality assurance test as a brand-new ecobee."* |
+| Amazon `B0C5P9QZQX` "EB-STATE6P-01", sold by **MD2 Family** | $189.99 | ⚠️ **Refurbished, not new** — the listing says *"manufacturer refurbished… plus a **90-day** limited hardware warranty."* |
+| Amazon Resale, Used – Like New | $169.09 | Used. |
+| **Costco Plus Pack** `EB-STATE6VP-01` (thermostat + **2× SmartSensor** + PEK), item 1741947 | **"Members Only · Sign In for Price"** | Price trackers put it at **$229.99–$239.99**, with a $199.99 sale seen on Slickdeals. Unverified — needs Jeff's Costco login. |
+| Ace Hardware | $269.99 | Highest. |
+| Walmart | — | **Does not sell it** (see the retraction above). |
+
+🟢 **BEST BUY FOR THE MONEY, NO STRINGS: ecobee's own Certified Refurbished at $219.99.** Same 3-year
+warranty as new, same contents in the box, $40 under every new price, and bought straight from ecobee
+rather than a marketplace seller. **The $189.99 Amazon unit saves $30 more but drops the warranty from
+3 years to 90 days** — on a device that has to run a $9,000 system, that is the wrong trade.
+⚠️ **If Jeff wants room sensors anyway, price the Costco Plus Pack first** — two SmartSensors alone are
+$99.99, so even $239.99 for the bundle beats $219.99 + $99.99.
+
 ### 5. Verdict
 🟢 **The ecobee Smart Thermostat Premium stays the pick, and it is now the pick for a cheaper number.**
 Nothing else on the market gives this app per-room temperature, humidity AND occupancy plus VOC/CO₂
