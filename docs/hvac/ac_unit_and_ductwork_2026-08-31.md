@@ -1764,7 +1764,10 @@ integration, and whether the TVA marketplace price is charged net or rebated aft
 
 ## Still to do
 - Confirm the colour→function map on the unit's own diagram at install time.
-- Decide how many SmartSensors ($50/room) — the answer probably comes from which rooms run cold.
+- ~~Decide how many SmartSensors ($50/room)~~ ✅ **SETTLED 2026-09-11 7:08 PM — Jeff: *"I only need one
+  sensor."*** One SmartSensor **ships in the box** with the Premium, new or Certified Refurbished, so this
+  costs **$0 extra and there is nothing more to buy.** With the thermostat's own built-in sensor that is
+  two rooms measured. (A 2-pack is $99.99 if it ever changes — do not pre-buy it.)
 
 ---
 
