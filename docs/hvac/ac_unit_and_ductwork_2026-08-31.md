@@ -1807,6 +1807,21 @@ function."* That matches the 48NL being a **splice box of coloured pigtails** �
 **Verdict: the ecobee Smart Thermostat Premium works with the Carrier 48NL-B300603. No adapter, no kit, no
 workaround — just the C wire Ryan is already running, and the compressor off-time set at start-up.**
 
+## 📄 THE UNIT'S OWN PAPERWORK — pulled and saved 2026-09-11 7:20 PM
+Jeff: *"Do you have a pdf brochure for the Carrier unit I'm getting… I haven't even looked at the unit."*
+
+All four are in **`Desktop\HCC AC Quotes\`**, and the brochure + product data are mirrored to iCloud Drive:
+
+| File | What it is |
+|---|---|
+| `Carrier 48NL - brochure.pdf` | The homeowner brochure, 2.27 MB. Pulled from Carrier's own brand portal (`01-850-451-01.pdf`) after the site's download button did nothing — the link's real URL had to be read out of the page. |
+| `Carrier 48NL - product data (the unit I am getting).pdf` | The 39-page engineering book: capacities, dimensions, airflow and static-pressure tables, sequence of operation, wiring. **This is the one that answers real questions.** |
+| `Carrier 48NL - owners manual.pdf` | `OM48NL-01` — what Jeff and Angela actually live with, including the maintenance schedule. |
+| `Carrier - warranty certificate SPP-C-01WAR.pdf` | The 10/10/Life terms and the 90-day registration deadline. |
+
+Carrier's document page, if newer revisions are ever needed:
+`carrier.com/us/en/residential/combined-heating-cooling/48nl/` → Documents.
+
 ## Still to do
 - Confirm the colour→function map on the unit's own diagram at install time.
 - ~~Decide how many SmartSensors ($50/room)~~ ✅ **SETTLED 2026-09-11 7:08 PM — Jeff: *"I only need one
