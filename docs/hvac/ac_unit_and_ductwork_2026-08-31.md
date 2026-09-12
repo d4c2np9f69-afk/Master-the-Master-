@@ -1762,6 +1762,32 @@ page behind it — price rows get a source and a date or they do not go in.**
 **Still not verified:** whether Emerson's Sensi Touch 2 ($209, $89 after rebate) has a supported HA
 integration, and whether the TVA marketplace price is charged net or rebated after purchase.
 
+## 🤝 THE THERMOSTAT TRADE — SETTLED 2026-09-11 7:09 PM
+Jeff: *"Ryan's running a new wire in exchange for the thermostat."*
+
+**Daniels drops the thermostat that was inside his $8,200 and runs the new thermostat wire instead;
+Jeff supplies the ecobee.** That closes the "ask Ryan to credit the thermostat line" item — **do not
+raise the credit again, this IS the credit.**
+
+🟢 **Why this is the better half of the trade for Jeff:**
+- The **C-wire is mandatory on this unit** — Carrier 48NL-01SI p.14: *"Do not use any type of
+  POWER-STEALING thermostat."* The wire is the part that is miserable to add later; the thermostat is a
+  ten-minute swap Jeff can do himself.
+- He ends up with **the thermostat he actually chose** instead of whatever builder-grade unit was in the
+  bid, and the ecobee is what feeds the app its air-quality and per-room occupancy data.
+- A contractor-supplied stat would not have been an ecobee, so the credit would never have been worth
+  its retail value anyway.
+
+### 🔴 Put these on the revised quote in writing
+1. **"Thermostat by owner"** stated explicitly, so no stat is billed and none is left out of the scope by accident.
+2. **New thermostat wire from the unit to the thermostat location, with a C-wire** — state the **gauge and
+   conductor count** (a spare conductor or two costs almost nothing now and saves a re-pull later).
+   ⚠️ Carrier's manual specifies **No. 18 AWG up to 100 ft, No. 16 AWG beyond that** — the quote should
+   match whichever the run needs.
+3. **Installation and start-up of the owner-supplied ecobee** included, not a return trip.
+4. ⚠️ **Terminations:** the 48NL is a **splice box with six colour-coded pigtails, not a terminal strip.**
+   Colours get confirmed against the unit's own wiring diagram at install — see the thermostat section above.
+
 ## Still to do
 - Confirm the colour→function map on the unit's own diagram at install time.
 - ~~Decide how many SmartSensors ($50/room)~~ ✅ **SETTLED 2026-09-11 7:08 PM — Jeff: *"I only need one
