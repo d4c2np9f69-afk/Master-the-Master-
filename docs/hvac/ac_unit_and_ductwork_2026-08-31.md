@@ -1810,7 +1810,8 @@ workaround — just the C wire Ryan is already running, and the compressor off-t
 ## 📄 THE UNIT'S OWN PAPERWORK — pulled and saved 2026-09-11 7:20 PM
 Jeff: *"Do you have a pdf brochure for the Carrier unit I'm getting… I haven't even looked at the unit."*
 
-All four are in **`Desktop\HCC AC Quotes\`**, and the brochure + product data are mirrored to iCloud Drive:
+All four are in **`iCloudDrive\HCC AC Quotes\`** (everything was consolidated there at 7:25 PM — see *WHERE THE A/C
+PAPERWORK LIVES* below):
 
 | File | What it is |
 |---|---|
@@ -1821,6 +1822,22 @@ All four are in **`Desktop\HCC AC Quotes\`**, and the brochure + product data ar
 
 Carrier's document page, if newer revisions are ever needed:
 `carrier.com/us/en/residential/combined-heating-cooling/48nl/` → Documents.
+
+## 📁 WHERE THE A/C PAPERWORK LIVES — consolidated 2026-09-11 7:25 PM
+🔴 **Jeff's rule, verbatim: *"Put all the AC stuff in a folder in iCloud and clean up all the stuff everywhere
+else. If it's not in iCloud I will never find it."* Every A/C document from now on goes to
+`C:\Users\jeffl\iCloudDrive\HCC AC Quotes\` — not the Desktop, not the iCloud root.**
+
+What was done: the 13-file Desktop folder `Desktop\HCC AC Quotes\` was **moved** into iCloud, the loose A/C files
+in the iCloud root joined it, and **6 root duplicates were deleted only after a hash match proved the folder copy
+was byte-identical.** The empty Desktop folder was removed and replaced with a shortcut,
+`Desktop\HCC AC Quotes (iCloud).lnk`, pointing at the iCloud folder. **14 files** ended up in the folder; the
+iCloud root now holds no loose A/C files except the one below.
+
+⚠️ **One straggler could not be moved: `duct-repair-home-depot-list.pdf` (July 25, the old duct-repair shopping
+list).** It is a **cloud-only placeholder** and iCloud for Windows timed out twice trying to hydrate it
+(*"The cloud operation was not completed before the time-out period expired"*). It is still in the iCloud root,
+not lost. Fix it from the Finder/iPhone, or right-click ▸ *Always keep on this device* in Explorer and then move it.
 
 ## Still to do
 - Confirm the colour→function map on the unit's own diagram at install time.
@@ -2127,7 +2144,7 @@ Jeff: *"craft a post mortem email to each company without pricing… I want to s
   pressure + leak-system test. **No dollar figures in that email.**
 - **Logan (Petitt):** match **$9,000** (Jeff's number) for his scope + the drawing, model ending **AJA**, price fixed,
   refrigerant covered — or Jeff goes with Daniels. Leans on Petitt's own advertised price-match guarantee.
-- Drafts saved to `Desktop\HCC AC Quotes\Final-offer emails - Daniels and Petitt.txt`. **Not sent** — Jeff sends
+- Drafts saved to `iCloudDrive\HCC AC Quotes\Final-offer emails - Daniels and Petitt.txt`. **Not sent** — Jeff sends
   them himself. ~~Logan's email address is not on the estimate.~~ **Corrected 3:50 PM (Jeff: "it's on the email
   with the quote"):** the estimate email *"Your Estimate from Petitt Heating and Cooling"* came from
   **support@petittheatingandcooling.com**. I read it from the new Outlook app window by UI Automation, and it is
@@ -2142,7 +2159,7 @@ Jeff: *"craft a post mortem email to each company without pricing… I want to s
 # 📐 DUCT DRAWING REDRAWN AS A SCOPE SHEET — 2026-09-11, after the 3:25 PM email revisions
 
 Jeff: *"re draw the duct work sketch so it is professional and includes everything that is required."*
-- **File:** `Desktop\HCC AC Quotes\Duct layout - scope of work.pdf` (+ copy in iCloud Drive root). One landscape
+- **File:** `iCloudDrive\HCC AC Quotes\Duct layout - scope of work.pdf`. One landscape
   Letter page. PyMuPDF reported 1 page, and the SHA-256 prefix `F89772DCD137` matched on both copies.
 - **Left side:** plan view, not to scale, built from Jeff's `AC duct drawing 995cfm.jpg`. New work is blue and
   existing work is gray. Every branch is labeled with its room and diameter. It also shows the saddle taps with
