@@ -1735,7 +1735,8 @@ re-pitch it.**
 | 🏆 **ecobee Certified Refurbished** — `ecobee.com/en-us/smart-thermostats/refurbished-smart-thermostat-premium/` | **$219.99** (from $259.99) | *"3-year limited warranty"*, *"Return within 30 days for full refund"*, free shipping. Box: *"1 × Smart Thermostat Premium, 1 × SmartSensor, 1 × Trim plate, 1 × Power Extender Kit."* Refurb process: *"inspected and tested by ecobee engineers… must pass the same quality assurance test as a brand-new ecobee."* |
 | Amazon `B0C5P9QZQX` "EB-STATE6P-01", sold by **MD2 Family** | $189.99 | ⚠️ **Refurbished, not new** — the listing says *"manufacturer refurbished… plus a **90-day** limited hardware warranty."* |
 | Amazon Resale, Used – Like New | $169.09 | Used. |
-| **Costco Plus Pack** `EB-STATE6VP-01` (thermostat + **2× SmartSensor** + PEK), item 1741947 | **"Members Only · Sign In for Price"** | Price trackers put it at **$229.99–$239.99**, with a $199.99 sale seen on Slickdeals. Unverified — needs Jeff's Costco login. |
+| ~~**Costco Plus Pack** `EB-STATE6VP-01` (thermostat + 2× SmartSensor + PEK), item 1741947~~ | **OUT** | Price is members-only, and **Jeff is not a Costco member (his words, 09-11 7:07 PM)**. Do not raise it again. |
+| Amazon Resale, **Used – Like New**, on that same refurb listing | **$169.09** | ⚠️ **Used copy of an already-refurbished unit.** Sold and shipped by Amazon, so 30-day returns apply, but **no stated warranty**. |
 | Ace Hardware | $269.99 | Highest. |
 | Walmart | — | **Does not sell it** (see the retraction above). |
 
