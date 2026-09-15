@@ -2347,8 +2347,29 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
       </div>
     </div>
 
-    <!-- LUX THERMOSTAT (moved here from GUARDIAN 08-03, right under cameras) -->
-    <div class="card" id="luxCard">
+    <!-- A/C RELAY — 2026-09-15. The LUX died in a power surge. Until the ecobee is installed,
+         a SONOFF MINI-D (switch.ac_relay) closes the cooling call, run by the HA automation
+         automation.hcc_ac_relay_thermostat off the master BEDROOM Echo Dot + an offset helper.
+         Read-only on purpose: a manual button here would fight the automation.
+         The 71/73 band below is display text — keep it in step with the automation.
+         OPEN_ITEMS #185. Remove this card (and set LUX_RETIRED false or delete the LUX card)
+         when the ecobee goes in. -->
+    <div class="card" id="acCard">
+      <div class="card-title">&#10052;&#65039; A/C &mdash; Master Bedroom <span id="acConn" class="irr-conn"></span></div>
+      <div id="acBanner" class="wx-banner wx-load">&#128260; Loading A/C&hellip;</div>
+      <ul class="spec-list">
+        <li><span class="sk">Bedroom</span><span class="sv" id="acTemp">--</span></li>
+        <li><span class="sk">A/C</span><span class="sv" id="acState">--</span></li>
+        <li><span class="sk">Holds</span><span class="sv">Off at 71&deg; &bull; On at 73&deg;</span></li>
+        <li><span class="sk">Automatic</span><span class="sv" id="acAuto">--</span></li>
+        <li><span class="sk">Echo sensor</span><span class="sv" id="acEcho">--</span></li>
+      </ul>
+    </div>
+
+    <!-- LUX THERMOSTAT (moved here from GUARDIAN 08-03, right under cameras)
+         2026-09-15: HIDDEN — the LUX died in a power surge (see acCard above). Markup and
+         loadClimate() kept intact so scripts/creds-gate-test.js still covers them. -->
+    <div class="card" id="luxCard" style="display:none">
       <div class="card-title">&#127777;&#65039; LUX Thermostat <span id="luxConn" class="irr-conn"></span></div>
       <div id="luxBanner" class="wx-banner wx-load">&#128260; Loading thermostat&hellip;</div>
 
@@ -2407,7 +2428,7 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
     </div>
 
     <!-- LUX ACCOUNT SETUP CARD -->
-    <div class="card" id="luxSetupCard">
+    <div class="card" id="luxSetupCard" style="display:none">
       <div class="card-title">&#9881; LUX Account</div>
       <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px">Enter your LUX Connected Home login to enable thermostat control from this app.</div>
       <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
@@ -6522,6 +6543,110 @@ function luxSendControl(action,opts){
     });
 }
 
+// ── A/C RELAY CARD (2026-09-15) ──────────────────────────────────────────────────────
+// The LUX died in a power surge. While LUX_RETIRED, every automatic caller of loadClimate()
+// (boot, opening HOME, the 60 s self-heal) goes through loadThermostat() and draws the A/C
+// card instead — so no more failing /api/climate round trips against the Cloudflare budget
+// (OPEN_ITEMS #183). loadClimate() itself is untouched so creds-gate-test.js still covers it.
+//
+// ONE request per refresh: a single HA template returns every field as JSON, the same
+// POST /api/template pattern the lightning card already uses. Four haFetch state reads would
+// be four Pages Function requests a minute per open client.
+//
+// The Echo entity id starts with a digit, so `states.sensor.3rd_…` is a template syntax error;
+// it must be `states.sensor['3rd_…']`. Verified against live HA 2026-09-15 16:08.
+var LUX_RETIRED = true;
+function loadThermostat(){ if (LUX_RETIRED) loadAcRelay(); else loadClimate(); }
+
+var AC_TPL = "{%- set e = states.sensor['3rd_all_devices_echo_dot_temperature'] -%}"
+  + "{%- set r = states.switch.ac_relay -%}"
+  + "{%- set a = states.automation.hcc_ac_relay_thermostat -%}"
+  + "{{ {'echo': e.state if e else 'missing', 'echo_reported': e.last_reported.isoformat() if e else none,"
+  + " 'offset': states('input_number.bedroom_echo_temp_offset'),"
+  + " 'relay': r.state if r else 'missing', 'relay_changed': r.last_changed.isoformat() if r else none,"
+  + " 'auto': a.state if a else 'missing'} | tojson }}";
+
+function acClock(iso){
+  try{ return new Date(iso).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}); }catch(e){ return ''; }
+}
+function acAgo(iso){
+  var t = Date.parse(iso); if (!isFinite(t)) return '';
+  var m = Math.max(0, Math.round((Date.now() - t) / 60000));
+  if (m < 1) return 'just now';
+  if (m < 60) return m + ' min ago';
+  var h = Math.floor(m / 60); return h + ' h ' + (m % 60) + ' min ago';
+}
+
+// Pure renderer — takes the template's JSON object, touches only the A/C card.
+function acRender(d){
+  var set = function(id, html, color){
+    var el = document.getElementById(id); if (!el) return;
+    el.innerHTML = html; el.style.color = color || '';
+  };
+  var b = document.getElementById('acBanner');
+  var echo = parseFloat(d && d.echo);
+  var off = parseFloat(d && d.offset); if (!isFinite(off)) off = 0;
+  var haveTemp = isFinite(echo);
+  var room = haveTemp ? (echo + off) : null;
+
+  set('acTemp', haveTemp ? room.toFixed(1) + '&deg;F' : 'no reading', haveTemp ? '' : 'var(--bad)');
+
+  var relay = d && d.relay;
+  if (relay === 'on' || relay === 'off') {
+    set('acState', (relay === 'on' ? 'ON' : 'OFF') + (d.relay_changed ? ' since ' + acClock(d.relay_changed) : ''),
+        relay === 'on' ? 'var(--info)' : '');
+  } else {
+    set('acState', 'OFFLINE', 'var(--bad)');
+  }
+
+  var auto = d && d.auto;
+  if (auto === 'on') set('acAuto', 'Active', 'var(--ok)');
+  else set('acAuto', auto === 'off' ? 'OFF &mdash; nothing is controlling the A/C' : 'missing', 'var(--bad)');
+
+  set('acEcho', haveTemp
+      ? echo.toFixed(1) + '&deg; raw ' + (off <= 0 ? '&minus;' : '+') + Math.abs(off).toFixed(1) + '&deg;'
+        + (d.echo_reported ? ' &bull; ' + acAgo(d.echo_reported) : '')
+      : (d && d.echo ? String(d.echo) : 'missing'), haveTemp ? '' : 'var(--bad)');
+
+  var conn = document.getElementById('acConn');
+  if (conn) { conn.innerHTML = ' &#9679; LIVE'; conn.style.color = 'var(--ok)'; }
+
+  if (!b) return;
+  if (relay !== 'on' && relay !== 'off') {
+    b.className = 'wx-banner wx-no'; b.innerHTML = '&#9888;&#65039; A/C relay offline &mdash; HA cannot control the A/C';
+  } else if (!haveTemp) {
+    b.className = 'wx-banner wx-no'; b.innerHTML = '&#9888;&#65039; Bedroom temperature missing';
+  } else if (auto !== 'on') {
+    b.className = 'wx-banner wx-no'; b.innerHTML = '&#9888;&#65039; Automatic control is OFF &bull; A/C ' + relay.toUpperCase();
+  } else if (relay === 'on') {
+    b.className = 'wx-banner wx-caution'; b.innerHTML = '&#10052;&#65039; Cooling &bull; bedroom ' + room.toFixed(1) + '&deg;';
+  } else {
+    b.className = 'wx-banner wx-go'; b.innerHTML = '&#10003; Resting &bull; bedroom ' + room.toFixed(1) + '&deg;';
+  }
+}
+
+function loadAcRelay(){
+  var b = document.getElementById('acBanner'); if (!b) return;
+  if (!getHaToken()) {
+    b.className = 'wx-banner wx-load'; b.innerHTML = '&#127968; Connect Beehive to see the A/C';
+    return;
+  }
+  haFetch('/api/template', {method:'POST', headers:{'Content-Type':'application/json'},
+                            body: JSON.stringify({template: AC_TPL})})
+    .then(function(r){ if (!r.ok) throw new Error('ha ' + r.status); return r.text(); })
+    .then(function(body){
+      var d;
+      try { d = JSON.parse(body); } catch (e) { throw new Error('bad reply'); }
+      acRender(d);
+    })
+    .catch(function(err){
+      b.className = 'wx-banner wx-no';
+      b.innerHTML = '&#9888;&#65039; A/C status unavailable: ' + (err && err.message || 'network');
+      var conn = document.getElementById('acConn');
+      if (conn) { conn.innerHTML = ' &#9679; OFFLINE'; conn.style.color = 'var(--bad)'; }
+    });
+}
+
 // Orbit B-hyve irrigation — live zones/photos/status from /api/irrigation (worker proxy)
 function loadIrrigation(){
   var card=document.getElementById('irrigationCard'); if(!card) return;
@@ -7406,7 +7531,10 @@ setInterval(function(){
 // boot — so hccSection('home')'s own loadClimate()/loadStation() calls never fire on a
 // normal app open (only on manual nav away-and-back). Load it directly here too, same
 // as loadWeather()/loadIrrigation() above, so it's populated the moment the app opens.
-loadClimate();
+// 2026-09-15: loadThermostat() (A/C relay card while LUX_RETIRED). Deferred with setTimeout
+// because it uses haFetch(), and HA_BASE is only assigned much further down this script —
+// called synchronously here it would read HA_BASE as undefined.
+setTimeout(loadThermostat, 0);
 loadStation();
 loadAlerts();
 acctRefreshStatus();
@@ -8588,7 +8716,7 @@ function hccSection(id, btn) {
   if (id === 'irrigation') { window._irrLoaded = true; loadIrrigation(); }
   if (id === 'home') {
     if (!window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
-    loadUtilities(); loadCameras(); loadHomeStatus(); loadClimate(); loadStation();
+    loadUtilities(); loadCameras(); loadHomeStatus(); loadThermostat(); loadStation();
   }
   if (id === 'guardian') { loadGuardian(); loadLights(); loadGarage(); loadMail(); loadVacuum(); }
   if (id === 'car') { carSwitchVehicle(_activeVehicle); }
@@ -9821,7 +9949,7 @@ setTimeout(function() {
 // momentarily-quiet meter) recovers on its own — no manual refresh. Guarded to token.
 setInterval(function(){
   mowerSync(false);
-  loadClimate(); loadStation();
+  loadThermostat(); loadStation();
   if (getHaToken()) { checkBeehive(false); loadCameras(); loadUtilities(); loadGuardian(); loadLights(); loadGarage(); loadMail(); loadVacuum(); loadCar(); }
 }, 60000);
 setInterval(loadWeather, 5*60*1000);
