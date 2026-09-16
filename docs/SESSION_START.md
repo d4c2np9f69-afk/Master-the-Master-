@@ -121,6 +121,59 @@ subsystem** — the answer is usually already in there, paid for in Jeff's time.
 - **Studio Code Server's editor works but is fiddly.** Verify every edit by zooming on the result;
   a selection one character too wide silently broke YAML on 08-16.
 
+## 3b. 🔴 EVERY MISTAKE GETS A TEST, THE SAME SESSION (Jeff's rule, 2026-09-16 00:10)
+
+> *"Every mistake you make gets a test in the gate that fails on exactly that mistake, written the
+> same session you made it. Not an apology, not a note — a test. If it was 'edited without
+> reading', the session-gate hooks catch it. If it was wrong logic, the test catches it. If you
+> make the SAME mistake twice, that means the first test was missing or too weak, and fixing it is
+> the new first task. **Your mistakes are not a character issue. They are missing coverage.**"*
+
+**This replaces apologising as the response to an error.** A written apology protects nothing; the
+next session never reads it. A test runs whether or not anyone remembers.
+
+**Two conditions on the test, both learned the same night it was written:**
+1. 🔴 **Prove it FAILS on the actual mistake before believing it.** A check that cannot fail is not
+   a check — that is this project's oldest lesson (the stream check that printed `ALL GOOD`
+   eleven minutes after the popups died). Re-introduce the fault, watch the test go red, remove it,
+   watch it go green.
+2. 🔴 **A test that cries wolf gets ignored, which is worse than no test.** Two written on 09-16
+   produced false failures on their first run — one searched an archived `<details>` block, another
+   flagged `CONF_PASSWORD = "password"` (a field NAME) as a credential. Both were tightened the
+   same hour. Tune it until every failure it reports is real.
+
+**RUN THE WHOLE GATE WITH ONE COMMAND. Do not hand-pick from a list.**
+
+```
+node scripts/run-all-gates.js                       every static gate
+node scripts/run-all-gates.js --live --states=<f>   everything, nothing skipped
+.\windows-scripts\hooks\Test-ReadGate.ps1           the read gate still blocks
+```
+
+🔴 **Why this replaced the hand-written list, 2026-09-16.** The list that used to sit here named
+**7 gates. There are 20.** On 2026-09-15 I ran my own chosen subset, reported **"13/13 green"**,
+and shipped a boot crash that left Guardian and the whole weather station blank. Jeff found it at
+02:27 the next morning. When the runner was written it immediately failed **4 gates nobody had
+run.** *A gate list kept in a session's head is not a list, and a subset you picked yourself is
+not a gate.*
+
+`--states=<file>` is a live `/api/states` dump, needed by `doors-entity-test.js` and
+`garage-entity-test.js` — they assert against real entities and can prove nothing without one.
+Get it the way `ACCESS_MAP.md` §1 documents; every script in `HCC-Scripts/` already has the
+pattern. Without the flag the runner **skips them and says so** — a skip is not a pass.
+
+**Last full run: 20/20, exit 0, 2026-09-16 03:4x.**
+
+Nearly every gate exists because of one specific failure, named in that file's header. Two worth
+knowing before you trust a green result:
+- `smoke-test.js` ran **logged out** for its whole life, so every token-gated path — most of the
+  house — was untested. That is exactly how the boot crash walked through it.
+- `weather-tiles-test.js` asserted on a Blitzortung tier it had **locked itself out of** by never
+  seeding a token, and had been failing 2 cases against a perfectly correct app.
+
+**Both are fixed. The lesson is the same one: a test that cannot reach the code it names is worse
+than no test, because it reports green.**
+
 ## 4. How to work (the two rules Jeff added on 08-16)
 
 - **Don't tunnel.** Enumerate options before committing, including ones that make the current
