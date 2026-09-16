@@ -2362,7 +2362,7 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
         <li><span class="sk">A/C</span><span class="sv" id="acState">--</span></li>
         <li><span class="sk">Holds</span><span class="sv">Off at 71&deg; &bull; On at 73&deg;</span></li>
         <li><span class="sk">Automatic</span><span class="sv" id="acAuto">--</span></li>
-        <li><span class="sk">Echo sensor</span><span class="sv" id="acEcho">--</span></li>
+        <li><span class="sk">Sensor</span><span class="sv" id="acEcho">--</span></li>
       </ul>
     </div>
 
@@ -2787,6 +2787,24 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
            here as a comment so it's obvious where they went, not duplicated. -->
       <div id="wxStationNote" class="wx-note"></div>
       <button class="btn-full btn-gray" onclick="loadWeather()">&#128260; Refresh Weather</button>
+    </div>
+
+    <!-- MY STATION — 2026-09-15. Jeff's Ambient Weather console (KTNWHITE21) was NEVER in Home
+         Assistant: until tonight its data only reached this app second-hand through Weather
+         Underground's public API, which carries no INDOOR readings at all. The ambient_station
+         integration now pulls the console direct, so these are his own instrument's numbers.
+         Fed by the same single template call as the A/C card — see loadLive(). -->
+    <div class="card cat-weather" id="stationCard">
+      <div class="card-title">&#128225; My Station &bull; KTNWHITE21 <span id="stConn" class="irr-conn"></span></div>
+      <div id="stBanner" class="wx-banner wx-load">&#128260; Loading station&hellip;</div>
+      <ul class="spec-list">
+        <li><span class="sk">Indoor</span><span class="sv" id="stIndoor">--</span></li>
+        <li><span class="sk">Outdoor</span><span class="sv" id="stOutdoor">--</span></li>
+        <li><span class="sk">Wind</span><span class="sv" id="stWind">--</span></li>
+        <li><span class="sk">Rain today</span><span class="sv" id="stRain">--</span></li>
+        <li><span class="sk">Pressure</span><span class="sv" id="stPressure">--</span></li>
+        <li><span class="sk">Sun</span><span class="sv" id="stSun">--</span></li>
+      </ul>
     </div>
 
     <!-- SPOTTER NETWORK -->
@@ -6558,11 +6576,26 @@ function luxSendControl(action,opts){
 var LUX_RETIRED = true;
 function loadThermostat(){ if (LUX_RETIRED) loadAcRelay(); else loadClimate(); }
 
-var AC_TPL = "{%- set e = states.sensor['3rd_all_devices_echo_dot_temperature'] -%}"
+// 2026-09-15 9:25 PM — the A/C moved off the Echo Dot onto Jeff's OWN weather station.
+// The Echo read up to 4 F high and the error DRIFTED (-3.2 in the afternoon, -4.0 at night), so any
+// fixed offset was wrong within hours and the A/C was shutting off early. The Ambient console
+// (KTNWHITE21) is now in HA and is the control sensor — no offset, same number as the display.
+// This ONE template also feeds the station card on WEATHER, so both cards cost a single request.
+var AC_TPL = "{%- set i = states.sensor.my_weather_station_inside_temperature -%}"
   + "{%- set r = states.switch.ac_relay -%}"
   + "{%- set a = states.automation.hcc_ac_relay_thermostat -%}"
-  + "{{ {'echo': e.state if e else 'missing', 'echo_reported': e.last_reported.isoformat() if e else none,"
-  + " 'offset': states('input_number.bedroom_echo_temp_offset'),"
+  + "{{ {'indoor': i.state if i else 'missing', 'indoor_reported': i.last_reported.isoformat() if i else none,"
+  + " 'indoor_hum': states('sensor.my_weather_station_humidity_indoor'),"
+  + " 'out_temp': states('sensor.my_weather_station_temperature'),"
+  + " 'out_hum': states('sensor.my_weather_station_humidity'),"
+  + " 'feels': states('sensor.my_weather_station_feels_like'),"
+  + " 'wind': states('sensor.my_weather_station_wind_speed'),"
+  + " 'gust': states('sensor.my_weather_station_wind_gust'),"
+  + " 'wind_dir': states('sensor.my_weather_station_wind_direction'),"
+  + " 'rain_today': states('sensor.my_weather_station_daily_rain'),"
+  + " 'pressure': states('sensor.my_weather_station_relative_pressure'),"
+  + " 'uv': states('sensor.my_weather_station_uv_index'),"
+  + " 'solar': states('sensor.my_weather_station_irradiance'),"
   + " 'relay': r.state if r else 'missing', 'relay_changed': r.last_changed.isoformat() if r else none,"
   + " 'auto': a.state if a else 'missing'} | tojson }}";
 
@@ -6584,10 +6617,8 @@ function acRender(d){
     el.innerHTML = html; el.style.color = color || '';
   };
   var b = document.getElementById('acBanner');
-  var echo = parseFloat(d && d.echo);
-  var off = parseFloat(d && d.offset); if (!isFinite(off)) off = 0;
-  var haveTemp = isFinite(echo);
-  var room = haveTemp ? (echo + off) : null;
+  var room = parseFloat(d && d.indoor);
+  var haveTemp = isFinite(room);
 
   set('acTemp', haveTemp ? room.toFixed(1) + '&deg;F' : 'no reading', haveTemp ? '' : 'var(--bad)');
 
@@ -6603,10 +6634,11 @@ function acRender(d){
   if (auto === 'on') set('acAuto', 'Active', 'var(--ok)');
   else set('acAuto', auto === 'off' ? 'OFF &mdash; nothing is controlling the A/C' : 'missing', 'var(--bad)');
 
+  // Source row: this is the console's own reading, so there is no correction to show any more.
   set('acEcho', haveTemp
-      ? echo.toFixed(1) + '&deg; raw ' + (off <= 0 ? '&minus;' : '+') + Math.abs(off).toFixed(1) + '&deg;'
-        + (d.echo_reported ? ' &bull; ' + acAgo(d.echo_reported) : '')
-      : (d && d.echo ? String(d.echo) : 'missing'), haveTemp ? '' : 'var(--bad)');
+      ? 'Weather station' + (d.indoor_hum && isFinite(parseFloat(d.indoor_hum)) ? ' &bull; ' + Math.round(parseFloat(d.indoor_hum)) + '% RH' : '')
+        + (d.indoor_reported ? ' &bull; ' + acAgo(d.indoor_reported) : '')
+      : (d && d.indoor ? String(d.indoor) : 'missing'), haveTemp ? '' : 'var(--bad)');
 
   var conn = document.getElementById('acConn');
   if (conn) { conn.innerHTML = ' &#9679; LIVE'; conn.style.color = 'var(--ok)'; }
@@ -6625,10 +6657,41 @@ function acRender(d){
   }
 }
 
+// The station card on WEATHER, drawn from the SAME payload as the A/C card (one request, two cards).
+// These are Jeff's own instrument readings — the rest of the WEATHER section still comes from
+// Weather Underground's relay of this station plus Open-Meteo forecast, which is why this card is
+// labelled with the station id rather than blended into those tiles.
+function stRender(d){
+  var set = function(id, html){ var el = document.getElementById(id); if (el) el.innerHTML = html; };
+  var n = function(v, dp){ var x = parseFloat(v); return isFinite(x) ? x.toFixed(dp == null ? 1 : dp) : null; };
+  var b = document.getElementById('stBanner');
+  var ind = n(d && d.indoor), indH = n(d && d.indoor_hum, 0);
+  var out = n(d && d.out_temp), outH = n(d && d.out_hum, 0), feels = n(d && d.feels);
+  set('stIndoor',  ind != null ? ind + '&deg;F' + (indH != null ? ' &bull; ' + indH + '% RH' : '') : '--');
+  set('stOutdoor', out != null ? out + '&deg;F' + (outH != null ? ' &bull; ' + outH + '% RH' : '')
+                                 + (feels != null && Math.abs(feels - out) >= 2 ? ' &bull; feels ' + feels + '&deg;' : '') : '--');
+  var w = n(d && d.wind), g = n(d && d.gust), wd = n(d && d.wind_dir, 0);
+  set('stWind', w != null ? (w * 1 === 0 && (g == null || g * 1 === 0) ? 'Calm' : w + ' mph' + (g != null && g * 1 > 0 ? ' &bull; gust ' + g : '') + (wd != null ? ' &bull; ' + wd + '&deg;' : '')) : '--');
+  var r = n(d && d.rain_today, 2);
+  set('stRain', r != null ? (r * 1 === 0 ? 'None' : r + ' in') : '--');
+  var p = n(d && d.pressure, 2);
+  set('stPressure', p != null ? p + ' inHg' : '--');
+  var uv = n(d && d.uv, 0), sol = n(d && d.solar, 0);
+  set('stSun', (uv != null ? 'UV ' + uv : '') + (sol != null ? (uv != null ? ' &bull; ' : '') + sol + ' W/m&sup2;' : '') || '--');
+  var conn = document.getElementById('stConn');
+  if (conn) { conn.innerHTML = ' &#9679; LIVE'; conn.style.color = 'var(--ok)'; }
+  if (!b) return;
+  if (ind == null && out == null) { b.className = 'wx-banner wx-no'; b.innerHTML = '&#9888;&#65039; Station not reporting'; }
+  else { b.className = 'wx-banner wx-go';
+         b.innerHTML = '&#128225; Live from your own console' + (d && d.indoor_reported ? ' &bull; ' + acAgo(d.indoor_reported) : ''); }
+}
+
 function loadAcRelay(){
   var b = document.getElementById('acBanner'); if (!b) return;
   if (!getHaToken()) {
     b.className = 'wx-banner wx-load'; b.innerHTML = '&#127968; Connect Beehive to see the A/C';
+    var sb0 = document.getElementById('stBanner');
+    if (sb0) { sb0.className = 'wx-banner wx-load'; sb0.innerHTML = '&#127968; Connect Beehive to see the station'; }
     return;
   }
   haFetch('/api/template', {method:'POST', headers:{'Content-Type':'application/json'},
@@ -6638,12 +6701,15 @@ function loadAcRelay(){
       var d;
       try { d = JSON.parse(body); } catch (e) { throw new Error('bad reply'); }
       acRender(d);
+      stRender(d);          // same payload draws the station card on WEATHER
     })
     .catch(function(err){
       b.className = 'wx-banner wx-no';
       b.innerHTML = '&#9888;&#65039; A/C status unavailable: ' + (err && err.message || 'network');
       var conn = document.getElementById('acConn');
       if (conn) { conn.innerHTML = ' &#9679; OFFLINE'; conn.style.color = 'var(--bad)'; }
+      var sb = document.getElementById('stBanner');
+      if (sb) { sb.className = 'wx-banner wx-no'; sb.innerHTML = '&#9888;&#65039; Station unavailable: ' + (err && err.message || 'network'); }
     });
 }
 
@@ -7521,11 +7587,22 @@ setInterval(function(){
       try{ if (document.hidden) return; if (typeof window[fn] === 'function') window[fn](); }catch(e){}
     }, ms);
   }
+  // 🔴 2026-09-14 — THE KIOSK IS AN ALWAYS-VISIBLE CLIENT, so the document.hidden guard above
+  // never fires for it: it polls flat out, 24 h a day. Measured cost: this loop plus the batch
+  // at the bottom of the file is ~12-14 Pages Function requests a minute, ≈18k/day PER open
+  // client, against a 100k/day plan — Cloudflare emailed Jeff at 75% on 2026-09-14.
+  // A wall panel is GLANCED at, not worked, so 5 min is plenty there.
+  // Phone/desktop deliberately keep the original 60 s — this changes the kiosk only.
+  function kioskNow(){
+    try{ return /(^|[?&])kiosk=1(&|$)/.test(location.search) || location.hash === '#kiosk'; }
+    catch(e){ return false; }
+  }
+  window.hccKioskMode = kioskNow;   // defined here so the loop at the end of the file reuses it
   poll('loadLightning',   2*60*1000);   // storms move; 2 min
   poll('loadFire',        5*60*1000);
   poll('loadAirQuality',  5*60*1000);
   poll('loadWatering',    5*60*1000);
-  poll('loadHomeStatus',  60*1000);     // HA state, same cadence as the other HA cards
+  poll('loadHomeStatus',  kioskNow() ? 5*60*1000 : 60*1000);  // HA state; slower on the kiosk
 })();
 // LUX lives on HOME (moved 08-03), which is already the active section by default on
 // boot — so hccSection('home')'s own loadClimate()/loadStation() calls never fire on a
@@ -9947,11 +10024,30 @@ setTimeout(function() {
 }, 800);
 // Self-heal: re-check Beehive + re-read the meters every 60s, so an HA restart (or a
 // momentarily-quiet meter) recovers on its own — no manual refresh. Guarded to token.
-setInterval(function(){
+// 🔴 2026-09-14 — cadence is KIOSK-AWARE. This single callback fires ~10 loaders and most of
+// them are separate haFetch calls, which makes it the biggest consumer of the Cloudflare
+// free-plan request budget. On the always-on kiosk panel it runs every 5 min; phone and
+// desktop keep the original 60 s. Reasoning in full by the loadHomeStatus poll above.
+// 🔴 2026-09-15 (#183) — two more request leaks fixed here, measured in the code:
+//  1. checkBeehive() -> beehiveOnline() ALREADY calls loadCameras/loadHomeStatus/loadUtilities/
+//     loadGuardian. This tick then called loadCameras/loadUtilities/loadGuardian AGAIN, so the
+//     heaviest cards loaded twice a minute. They are no longer repeated below.
+//  2. Unlike poll(), this tick had NO document.hidden guard — a phone in a pocket or a background
+//     browser tab kept polling. It now skips while hidden and catches up the moment the app is
+//     visible again, so reopening the app never shows minute-old data.
+var HCC_TICK_MS = (window.hccKioskMode && window.hccKioskMode()) ? 5*60*1000 : 60000;
+var _hccLastTick = Date.now();
+function hccTick(){
+  if (document.hidden) return;
+  _hccLastTick = Date.now();
   mowerSync(false);
   loadThermostat(); loadStation();
-  if (getHaToken()) { checkBeehive(false); loadCameras(); loadUtilities(); loadGuardian(); loadLights(); loadGarage(); loadMail(); loadVacuum(); loadCar(); }
-}, 60000);
+  if (getHaToken()) { checkBeehive(false); loadLights(); loadGarage(); loadMail(); loadVacuum(); loadCar(); }
+}
+setInterval(hccTick, HCC_TICK_MS);
+document.addEventListener('visibilitychange', function(){
+  if (!document.hidden && Date.now() - _hccLastTick >= HCC_TICK_MS) hccTick();
+});
 setInterval(loadWeather, 5*60*1000);
 
 // ── HA TOKEN & HOME DATA ─────────────────────────────────────────────────
@@ -10022,7 +10118,73 @@ function haNoTokenResponse() {
   ));
 }
 
+// ── SHARED /api/states (OPEN_ITEMS #183, 2026-09-15) ──────────────────────────────────
+// 17 loaders each fetched the WHOLE house state list separately, and every fetch is its own
+// Cloudflare Pages Function request. One 60 s tick fired ~10 identical downloads seconds apart.
+// Now a plain GET of '/api/states' shares ONE in-flight/recent download for STATES_TTL_MS.
+// Each caller still gets its own fresh Response object, so r.ok / r.status / r.json() behave
+// exactly as before. Failures are never cached. ANY write through haFetch (POST — a service
+// call, a template, a webhook) clears the cache first, so a card re-read after Jeff presses a
+// button can never show the pre-press state.
+//
+// The same cache also covers the two other repeat offenders, MEASURED live 2026-09-15 at
+// ~49 requests/min per open screen (≈71k/day, matching Cloudflare's own meter):
+//   18.0/min  /api/history/period/<billing-cycle start>  — whole-cycle history for the utility
+//             card, re-downloaded every minute. It only grows by minutes; 5 min is plenty.
+//    6.0/min  /api/ha-stats (hourly/daily electric long-term statistics) — HA compiles these
+//             HOURLY, so re-reading them every minute can never show anything new.
+//   15.8/min  /api/states — see above.
+// Transport only: no calculation that consumes this data changed (the #109 irrigation/sewer
+// HOLD covers that logic and it is untouched). A template POST is a READ, so it does not clear
+// the states cache (the A/C and lightning cards post one every minute and would defeat it).
+//
+// 🔴 THE UTILITY HALF IS SHIPPED OFF. Jeff, 2026-09-15: "Do not fuck with the utilities and make
+// sure you freaking [read] because obviously you have not before you touch any of it." The two
+// caches below that feed the WATER / GAS / ELECTRIC cards — /api/history/period/ and /api/ha-stats
+// — are written, tested and DISABLED until he says yes out loud. Flip this one flag to turn them
+// on; nothing else needs editing. The /api/states share and the document.hidden tick guard are
+// live, and between them they are the bulk of the measured 49 req/min.
+var CACHE_UTILITY_READS = false;
+var STATES_TTL_MS  = 20000;
+var HISTORY_TTL_MS = 5 * 60 * 1000;
+var _haShared = {};   // key -> { at: ms, p: Promise<{status, statusText, text}> }
+function haStatesInvalidate(){ delete _haShared['/api/states']; }
+function haShared(key, ttl, makeRequest) {
+  var now = Date.now(), entry = _haShared[key];
+  if (!entry || now - entry.at > ttl) {
+    entry = { at: now, p: null };
+    var mine = entry;
+    entry.p = makeRequest().then(function (r) {
+      return r.text().then(function (t) {
+        if (!r.ok && _haShared[key] === mine) delete _haShared[key];   // never cache a failure
+        return { status: r.status, statusText: r.statusText, text: t };
+      });
+    }, function (err) {
+      if (_haShared[key] === mine) delete _haShared[key];
+      throw err;
+    });
+    _haShared[key] = entry;
+  }
+  return entry.p.then(function (x) {
+    return new Response(x.text, { status: x.status, statusText: x.statusText,
+                                  headers: { 'Content-Type': 'application/json' } });
+  });
+}
 function haFetch(path, opts) {
+  opts = opts || {};
+  var method = (opts.method || 'GET').toUpperCase();
+  if (method !== 'GET' && method !== 'HEAD' && path !== '/api/template') haStatesInvalidate();
+  if (method === 'GET' && getHaToken()) {
+    if (path === '/api/states') {
+      return haShared(path, STATES_TTL_MS, function () { return haFetchRaw(path, { signal: AbortSignal.timeout(25000) }); });
+    }
+    if (CACHE_UTILITY_READS && path.indexOf('/api/history/period/') === 0) {
+      return haShared(path, HISTORY_TTL_MS, function () { return haFetchRaw(path, { signal: AbortSignal.timeout(20000) }); });
+    }
+  }
+  return haFetchRaw(path, opts);
+}
+function haFetchRaw(path, opts) {
   opts = opts || {};
   var base = localStorage.getItem('ha_base') || HA_BASE;
   var token = getHaToken();
@@ -10052,7 +10214,16 @@ function haStatsFetch(statisticId, startIso, endIso, period) {
     + '&start_time=' + encodeURIComponent(startIso)
     + '&end_time=' + encodeURIComponent(endIso)
     + '&period=' + encodeURIComponent(period);
-  return fetch('/api/ha-stats' + qs, { headers: headers, signal: AbortSignal.timeout(20000) });
+  // #183 (2026-09-15): shared for HISTORY_TTL_MS. HA compiles these statistics HOURLY, so a
+  // re-read inside 5 min cannot return anything new. The key is the statistic + period + the
+  // window START truncated to the hour — the end time is always "now" and would never match,
+  // while the start is what distinguishes the 25 h / 8 day / billing-cycle windows.
+  var key = 'stats|' + statisticId + '|' + period + '|' + String(startIso).slice(0, 13);
+  var go = function () {
+    return fetch('/api/ha-stats' + qs, { headers: headers, signal: AbortSignal.timeout(20000) });
+  };
+  if (!CACHE_UTILITY_READS) return go();   // OFF until Jeff approves — see CACHE_UTILITY_READS
+  return haShared(key, HISTORY_TTL_MS, go);
 }
 
 function saveHaToken() {
