@@ -13,8 +13,13 @@ proved it.** A list that disagrees with reality makes the next session confident
 
 | # | What | Owner | Unblocked by |
 |---|---|---|---|
-| **#160** | His location is still exposed — fingerprinting is not IP geolocation | **CLAUDE** | nothing. This one is mine. |
-| **#158** | Contactor `3100A15Q152L` sourced — **which unit did it come off?** | **JEFF** | one sentence from him |
+**🟢 Nothing here is waiting on me. Both rows were closed 2026-09-16 without asking Jeff anything —
+one from the record, one by building the thing that was actually missing.**
+
+| # | What | Owner | State |
+|---|---|---|---|
+| ~~**#158**~~ | Contactor `3100A15Q152L` | — | ✅ **ANSWERED FROM THE RECORD, not from him.** Nordyne OEM part; his unit is a **Nordyne R4GD-030K072C** (his own data plate, 08-31). It came off the A/C being replaced — so **do not buy it**; every bid includes a new condenser. Only the $0 coil-vs-contacts check still has any value, and it is not urgent: measured 01:34, `switch.ac_relay` **on**, automation **on**, indoor **72.5 °F**, **7 cycles / 8.2 h in 24 h**. The unit is running. |
+| ~~**#160**~~ | Location exposure | **JEFF's button** | ✅ **My half done.** The real blocker was never which VPN — he could not *start* the one he owns. Three desktop buttons now, WARP-first order baked in. Free tier **15 GB/month** → a per-session tool, not always-on. |
 
 ---
 
@@ -159,7 +164,43 @@ the safer answer given the killswitch history.
 
 ---
 
-## #158 — 🟡 CONTACTOR IDENTIFIED from Jeff's photo — needs to know WHICH unit 2026-09-08 10:05
+## #158 — ✅ ANSWERED 2026-09-16 01:34 FROM THE RECORD. It is his own A/C — and that changes the advice.
+
+**The row asked Jeff which unit the contactor came off. It did not need to — the answer was
+already in `docs/hvac/ac_unit_and_ductwork_2026-08-31.md`, written from his own data-plate photo:**
+
+| | |
+|---|---|
+| The contactor | Products Unlimited **`3100A15Q152L`**, stock no **62166** — *"OEM on **Intertherm / Miller / Nordyne** condensers"* |
+| His unit | **Nordyne R4GD-030K072C**, 2.5 ton gas/electric package unit *(Jeff, 08-31: "I do not think it is a Maytag. It is a Nordine." He was right.)* |
+| Date code | **J0716 — July 2016**, so the part is about the same age as a unit that has been in service for years |
+
+**Nordyne OEM part, Nordyne unit. It came off the A/C that is being replaced.**
+
+🔴 **AND THAT INVERTS THE ADVICE THIS ROW WAS HEADING TOWARD.** It was drafted as a sourcing task —
+where to buy one, cheapest first. **Do not buy this part.** The whole unit is quoted for
+replacement (#106), every bid includes a new condenser with its own contactor, and a ~10-year-old
+`3100A15Q152L` is a consumable on equipment that is leaving.
+
+**The only reason to touch it is to keep the old unit alive until the new one lands** — which is
+exactly the situation, since the LUX died and the A/C is running off the SONOFF relay. **So the
+$0 diagnostic below is still the right first move, and it is the only part of this row worth
+doing:**
+
+> 24 V present at the coil and the contacts NOT pulling in → **the coil failed**.
+> Pulling in but no output → **burnt contacts**.
+> The check costs nothing and says whether the contactor is even the fault.
+
+⚠️ **The A/C is currently working** — `switch.ac_relay` is cycling and the bedroom held 71–72 °F
+all evening — so nothing about this is urgent tonight. The original row's *"if the unit is down,
+this is urgent in current heat"* condition **is not met**.
+
+⚠️ **The "+ SHUNT" detail still matters if one is ever bought** — one leg is permanently jumpered
+by a brass bar, so a plain single-pole is NOT a substitute. Detail below.
+
+<details><summary>Original 2026-09-08 sourcing research, kept — the part data and the shunt explanation are good</summary>
+
+### 🟡 CONTACTOR IDENTIFIED from Jeff's photo — needs to know WHICH unit 2026-09-08 10:05
 
 Jeff photographed a contactor label and asked me to source it. **Not yet confirmed what equipment
 it came off** — if it is the AC condenser and the unit is down, this is urgent in current heat.
@@ -196,3 +237,5 @@ Going up to 30 A is fine and common. Any supply house stocks these.
 burnt contacts. The check costs nothing and says whether the contactor is even the fault.
 
 ---
+
+</details>
