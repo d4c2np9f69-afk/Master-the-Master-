@@ -11148,12 +11148,47 @@ function loadGuardian(){
     else grdSet('grd-people', '—', 'hs-dim');
 
     // WATER — leak sensor trips red; else a live water meter reads NORMAL
-    if (onState('leak', 'water') || onState('water', 'water') && hasSensor('moisture')) { grdSet('grd-water', 'LEAK', 'hs-red'); alertReasons.push('Water leak'); }
+    // 2026-09-16: this used to be `onState('leak') || onState('water') && hasSensor('moisture')`,
+    // a SUBSTRING match on the entity id. It read LEAK permanently off
+    // `binary_sensor.water_monitor_upstream_sensors_health` - device_class
+    // `connectivity`, whose `on` means HEALTHY. All three real moisture sensors
+    // (guest bath, kitchen sink, kitchen refrigerator) were `off` at the time.
+    // A permanent false LEAK is worse than no chip: it teaches Jeff to ignore the
+    // one alert in this house that has already cost him real money. It was
+    // invisible until tonight only because Guardian never finished loading.
+    // The device_class IS the answer - 'moisture' is the flood-sensor class.
+    var wetSensor = states.filter(function(s){
+      return s.entity_id.indexOf('binary_sensor.') === 0
+          && s.attributes && s.attributes.device_class === 'moisture'
+          && s.state === 'on';
+    });
+    if (wetSensor.length) {
+      var wetName = (wetSensor[0].attributes && wetSensor[0].attributes.friendly_name) || wetSensor[0].entity_id;
+      grdSet('grd-water', 'LEAK', 'hs-red');
+      alertReasons.push('Water leak: ' + wetName);
+    }
     else if (hasSensor('water_meter')) grdSet('grd-water', 'NORMAL', 'hs-ok');
     else grdSet('grd-water', 'Sensor pending', 'hs-dim');
 
     // GAS — smoke/CO/gas alarm trips red; else a live gas meter reads NORMAL
-    if (onState('gas', '') || onState('smoke', '') || onState('carbon', '')) { grdSet('grd-gas', 'ALERT', 'hs-red'); alertReasons.push('Gas / smoke alarm'); }
+    // 2026-09-16: hardened the same way as WATER above, and for the same reason -
+    // this was a substring match on 'gas'/'smoke'/'carbon' against ANY binary_sensor
+    // that happened to be `on`. It is not misfiring today, but it is the identical
+    // defect, and a false fire alarm is the worst possible chip to cry wolf on.
+    // NOTE: the record is clear that NO smoke/CO detector exists on this mesh yet
+    // (OPEN_ITEMS, alarm subsystem). A green 'NORMAL' here has never meant fire
+    // detection is covered - it means a gas METER is reporting.
+    var fireCls = { gas: 1, smoke: 1, carbon_monoxide: 1 };
+    var firing = states.filter(function(s){
+      return s.entity_id.indexOf('binary_sensor.') === 0
+          && s.attributes && fireCls[s.attributes.device_class]
+          && s.state === 'on';
+    });
+    if (firing.length) {
+      var fName = (firing[0].attributes && firing[0].attributes.friendly_name) || firing[0].entity_id;
+      grdSet('grd-gas', 'ALERT', 'hs-red');
+      alertReasons.push('Gas / smoke alarm: ' + fName);
+    }
     else if (hasSensor('gas_meter')) grdSet('grd-gas', 'NORMAL', 'hs-ok');
     else grdSet('grd-gas', 'Sensor pending', 'hs-dim');
 
