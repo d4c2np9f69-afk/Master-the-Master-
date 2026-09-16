@@ -19,9 +19,15 @@ catch (e) { ({ chromium } = require('playwright')); }
 
 const FILE_URL = 'file://' + path.join(__dirname, '..', 'index.html').replace(/\\/g, '/');
 const now = new Date().toISOString();
+// 2026-09-16: extended after an audit found the app was fetching 12 of the station's 21 sensors,
+// and NONE of the four A/C history_stats helpers Jeff asked for. Every field below is a real key
+// the live template returns — verified against HA before this test was touched.
 const LIVE = { auto: 'on', indoor: '71.4', indoor_reported: now, indoor_hum: '62',
   out_temp: '82.0', out_hum: '76', feels: '87.8', wind: '0.0', gust: '0.0', wind_dir: '223',
   rain_today: '0.00', pressure: '30.17', uv: '0', solar: '0.00',
+  dew: '71.54', max_gust: '2.2', rain_rate: '0', rain_week: '0', rain_month: '1.05',
+  rain_last: '2026-09-12T13:59:00+00:00', lux: '0', abs_pressure: '29.37', rain_life: '197.53',
+  cyc_today: '1', cyc_24h: '5', run_today: '0.461757969326443', run_24h: '7.64325340853797',
   relay: 'on', relay_changed: now };
 
 let fails = 0;
@@ -66,6 +72,8 @@ async function run(browser, { payload, token = true, status = 200 }) {
       temp: txt('acTemp'), state: txt('acState'), auto: txt('acAuto'), echo: txt('acEcho'),
       stBanner: txt('stBanner'), stIndoor: txt('stIndoor'), stOutdoor: txt('stOutdoor'),
       stWind: txt('stWind'), stRain: txt('stRain'), stPressure: txt('stPressure'), stSun: txt('stSun'),
+      stDew: txt('stDew'), stRainHist: txt('stRainHist'), stLastRain: txt('stLastRain'),
+      acCycles: txt('acCycles'), acRuntime: txt('acRuntime'),
       stCardShown: shown('stationCard'),
       acCallsBoot: acCalls,
       acCallsAfterRefresh: window.__calls.filter((c) => c.body.indexOf('ac_relay') >= 0).length,
@@ -97,11 +105,25 @@ async function run(browser, { payload, token = true, status = 200 }) {
   check('station card is shown', r.stCardShown, true);
   check('station indoor', /^71\.4°F • 62% RH/.test(r.stIndoor), true);
   check('station outdoor with feels-like', /^82\.0°F • 76% RH • feels 87\.8°/.test(r.stOutdoor), true);
-  check('station wind calm', r.stWind, 'Calm');
+  // These two expectations were updated 2026-09-16 when max-gust and absolute pressure were added
+  // to their rows. The old assertions FAILED on the new output, which is exactly what they are for.
+  check('station wind calm', r.stWind, 'Calm • max 2.2');
   check('station rain none', r.stRain, 'None');
-  check('station pressure', r.stPressure, '30.17 inHg');
+  check('station pressure', r.stPressure, '30.17 inHg • 29.37 abs');
   check('station sun', r.stSun, 'UV 0 • 0 W/m²');
   check('station banner says live', /Live from your own console/.test(r.stBanner), true);
+
+  // ── the nine sensors that were live in HA and invisible in the app until 2026-09-16 ──
+  check('dew point, with the comfort word', r.stDew, '71.5°F • muggy');
+  check('rain week and month', r.stRainHist, '0.00 in wk • 1.05 in mo');
+  check('last rain, dated and aged', /^Sep 12 • \d+d ago$/.test(r.stLastRain), true);
+  check('max gust folded into the wind row', /max 2\.2/.test(r.stWind), true);
+  check('absolute pressure alongside relative', /30\.17 inHg • 29\.37 abs/.test(r.stPressure), true);
+
+  // ── the A/C statistics Jeff asked for, built the same night and never surfaced ──
+  check('cycle count, today and 24 h', r.acCycles, '1 today • 5 in 24 h');
+  // 0.461757969 h = 27.7 min, which rounds to 28 — my first expectation said 27 and was wrong.
+  check('runtime with a duty cycle', r.acRuntime, '28 m today • 7 h 39 m in 24 h (32% duty)');
   check('boot made exactly ONE A/C request', r.acCallsBoot, 1);
   check('a refresh adds exactly ONE request', r.acCallsAfterRefresh - r.acCallsBoot, 1);
   check('no /api/climate calls any more', r.climateCalls, 0);
