@@ -3283,7 +3283,50 @@ detection since the change. Expected, not a fault; it will refresh on its next o
 
 ---
 
-## #181 — 📋 ALL SIX PENDING UPDATES RESEARCHED. Release notes READ, not skimmed. 2026-09-10 18:40
+## #181 — 🟡 RE-CHECKED 2026-09-16 00:42. HALF THE BLOCKER HAS CLEARED. One specific check left, then it is Jeff's call.
+
+**This row's HOLD rested on one fact, and that fact has changed.** It said:
+*"`alexa_media_player` v5.15.7 is the newest release there is (2026-07-23) and it pins
+`alexapy==1.29.25`… the component has not adopted it. **The unblock is not available yet.**"*
+
+**Measured tonight from the GitHub releases API, not from memory:**
+
+| release | published | what it does |
+|---|---|---|
+| `alexa_media_player` **v5.16.1** | **2026-09-13** | **bumps `alexapy` to 1.30.1** |
+| v5.16.0 | 2026-09-12 | bumps `alexapy` to 1.30.0 |
+| v5.15.7 | 2026-07-23 | the version this row was written against |
+
+**So the Alexa half of the 09-04 breakage is addressed** — the component has adopted the `alexapy`
+line that classifies Python 3.14. Two releases landed in the five days after this row was written.
+
+🔴 **THE BLINK HALF IS NOT CONFIRMED, AND IT IS THE SAME IMPORT.** `COST_LEDGER` names the real
+mechanism: the newer `aiofiles` removed `aiofiles.base.wrap`, **which `blinkpy` AND `alexapy` both
+import** — Python was the ride, not the reason. `blinkpy`'s newest release is still **v0.25.9
+(2026-07-21)**, which is the version already installed here, and its notes say only *"Relax
+aiofiles requirement to >=23.1.0"* — that widens what it accepts, it does not prove the import was
+fixed. **No blinkpy release mentions Python 3.14 at all.**
+
+**THE ONE CHECK THAT SETTLES IT** — read the installed component's own source and see whether the
+import is still there, rather than inferring it from release notes:
+
+```
+/config/custom_components/blink/…  →  does anything still import aiofiles.base.wrap?
+```
+
+Reachable read-only through the File editor add-on over HA ingress — the recipe is in
+`ACCESS_MAP.md` §1 ("READING ANY FILE ON THE BEEHIVE"), and paths there are **relative to
+/config**.
+
+🛑 **NOTHING WAS UPDATED AND NOTHING SHOULD BE UNTIL THAT CHECK IS DONE.** The standing rule from
+the 09-04 incident is explicit: read the release notes, name which of Jeff's integrations each
+breaking change touches, and treat a Python-runtime change as an automatic stop. **A backup is a
+rollback plan, not research.** This row now carries current facts instead of a stale blocker; the
+go/no-go stays Jeff's.
+
+<details><summary>Original 2026-09-10 research, still valid on the other five updates</summary>
+
+### 📋 ALL SIX PENDING UPDATES RESEARCHED. Release notes READ, not skimmed. 2026-09-10 18:40
 
 **This closes the homework owed since 09-04 and it follows #126's rule literally: read the notes and
 name which of Jeff's integrations each change touches. No update installed — that is his call.**
@@ -3368,6 +3411,7 @@ the originals go `unavailable`. **That is not knowable without doing it.**
 
 **Jeff: *"You need to double check all that crap with the record."* He was right, and checking it
 reversed the answer.**
+</details>
 
 ## What I said, and why it was wrong
 
