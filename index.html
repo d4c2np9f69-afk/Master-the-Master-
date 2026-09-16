@@ -4312,6 +4312,45 @@ if (typeof AbortSignal.timeout !== 'function') {
     return ctrl.signal;
   };
 }
+
+// ---------------------------------------------------------------------------
+// SHARED-FETCH CACHE STATE - MUST BE INITIALISED HERE, AT THE TOP OF THE SCRIPT.
+//
+// 2026-09-16 02:34, found live by Jeff: "it is not loading the sensors in the
+// guardian section and I don't see the new sensor readings in the weather".
+// ONE bug caused both. These four values used to be declared at line ~10240,
+// but the top-level boot sequence calls loadIrrigation() / loadGuardian() at
+// line ~7639 - about 2,600 lines EARLIER. `var` hoists the NAME but not the
+// ASSIGNMENT, so _haShared was still `undefined` when haShared() indexed it:
+//
+//     TypeError: Cannot read properties of undefined (reading '/api/states')
+//         at haShared -> haFetch -> loadIrrigationFromHA -> loadIrrigation -> (top level)
+//
+// An uncaught throw at top level ABORTS THE REST OF THE SCRIPT. Every function
+// below it still existed (declarations hoist), so the page looked fine - but no
+// loader after that line ever ran. Guardian stayed on placeholders and the
+// station / A/C cards sat on "Loading..." forever.
+//
+// Why it is not obvious: the failure is invisible unless you open the console.
+// The card shows its loading state, not an error. Verified by loadAcRelay()
+// filling every field correctly the moment it was called by hand.
+//
+// RULE: anything the boot sequence can reach must be initialised ABOVE it.
+// Guarded by scripts/init-order-test.js, which fails on exactly this.
+// ---------------------------------------------------------------------------
+// The utility half stays OFF. Jeff, 2026-09-15: "Do not fuck with the utilities
+// and make sure you freaking [read] because obviously you have not before you
+// touch any of it." Moving this declaration does NOT change its value.
+var CACHE_UTILITY_READS = false;
+var STATES_TTL_MS  = 20000;
+var HISTORY_TTL_MS = 5 * 60 * 1000;
+var _haShared = {};   // key -> { at: ms, p: Promise<{status, statusText, text}> }
+
+// The HA base URL is read by haFetchRaw() on the very first boot call, so it has
+// to exist by now too. It used to be declared ~2,300 lines below its first use.
+var HA_NABU = 'https://kmtpozwheqwww9t5uxhhvzzso1tvagro.ui.nabu.casa';
+var HA_BASE = localStorage.getItem('ha_base') || HA_NABU;
+
 // STATE
 var DEFAULT_STATE = {
   "hours": 5.9,
@@ -8881,6 +8920,11 @@ function hccSection(id, btn) {
   if (id === 'yard') { mowerSync(false); }
   if (id === 'weather') {
     loadWeather();
+    // 2026-09-16: the station card (dew point, rain week/month, last rain, gust,
+    // pressure) LIVES on this tab but was only ever refreshed by the HOME branch
+    // and the boot call - so opening WEATHER showed whatever was fetched at
+    // start-up. Same lesson as the irrigation note above: always refetch on open.
+    loadThermostat(); loadStation();
     if (!window._forecastLoaded) { window._forecastLoaded = true; loadForecast(); }
     if (!window._droughtLoaded) { window._droughtLoaded = true; loadDrought(); }
     // Auto-request notification permission on first WEATHER tab visit (this tap IS a user gesture)
@@ -9997,8 +10041,11 @@ function hccPanic() {
 // makes the app reach HA from anywhere: the app is an https page and browsers block it
 // from fetching the local http HA (mixed content), so we go through this https URL.
 // Access still requires the long-lived token (stored only in this browser's localStorage).
-var HA_NABU = 'https://kmtpozwheqwww9t5uxhhvzzso1tvagro.ui.nabu.casa';
-var HA_BASE = localStorage.getItem('ha_base') || HA_NABU;
+// 2026-09-16: HA_NABU / HA_BASE moved to the top of the script - they were
+// declared HERE and read by haFetchRaw() during boot, ~2,300 lines earlier, so
+// HA_BASE was `undefined` on every start-up call and the X-HA-Base header was
+// silently dropped. Not a crash, so nothing ever surfaced it. Found by
+// scripts/init-order-test.js while fixing the _haShared abort. Do not move back.
 var HA_IP   = 'http://192.168.1.66:8123';
 
 function copyCmd(el, text) {
@@ -10234,10 +10281,12 @@ function haNoTokenResponse() {
 // — are written, tested and DISABLED until he says yes out loud. Flip this one flag to turn them
 // on; nothing else needs editing. The /api/states share and the document.hidden tick guard are
 // live, and between them they are the bulk of the measured 49 req/min.
-var CACHE_UTILITY_READS = false;
-var STATES_TTL_MS  = 20000;
-var HISTORY_TTL_MS = 5 * 60 * 1000;
-var _haShared = {};   // key -> { at: ms, p: Promise<{status, statusText, text}> }
+//
+// 2026-09-16: CACHE_UTILITY_READS, STATES_TTL_MS, HISTORY_TTL_MS and _haShared were
+// DECLARED HERE and that is precisely what broke the app - the boot sequence reaches
+// haFetch() ~2,600 lines above this point, so _haShared was still undefined and the
+// whole script aborted on an uncaught TypeError. They now live at the TOP of the
+// script, next to the AbortSignal polyfill. Do not move them back down here.
 function haStatesInvalidate(){ delete _haShared['/api/states']; }
 function haShared(key, ttl, makeRequest) {
   var now = Date.now(), entry = _haShared[key];
