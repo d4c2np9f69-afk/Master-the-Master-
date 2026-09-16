@@ -73,6 +73,51 @@ directly comparable to the five new bids. **When either one replies, send the up
 | Lead time | ask | ask | | | |
 | Thermostat line credited? | **$?** — his $8,200 includes a t-stat Jeff is not using | | | | |
 
+## 🪪 LICENCE CHECK — done 2026-09-16 01:40 from public sources, no contractor contacted
+
+The bid email asks every bidder for *"the permit, and your Tennessee license number."* Here is how
+to read the answers, because **the licence classes are not interchangeable and the cheapest bidder
+may simply hold a smaller licence.**
+
+| bidder | licence given | class | verified |
+|---|---|---|---|
+| **Callon Mechanical** | **CMC #81530** | **CMC — full Mechanical Contractor** | ✅ **Confirmed on their own site** — *"Tennessee State CMC Contractor License #81530"*, 108 Wilmington Ct, Hendersonville, owner **Willy Callon**, 20+ years |
+| **Chilly Ben's** | **HM04997** | **HM = Home Improvement**, a *different and smaller* class | ⚪ number not independently confirmed |
+| Peters · KB's · Hunter · Haskins | none given yet | — | **chase the number when they quote** |
+
+### 🔴 THE THRESHOLD THAT DECIDES WHETHER THAT MATTERS
+
+**Tennessee requires a state contractor licence (CMC or CMC-C) for projects of $25,000 and up**,
+materials and labour included. **This job is $9,000–$13,000, so it sits below that line** — the
+state CMC is *not legally required*, and work under $25,000 falls to **local jurisdiction**
+licensing plus, in certain counties, the **Home Improvement** licence ($3,000–$24,999).
+
+⚠️ **Robertson County IS on the Home Improvement county list** (with Davidson, Sumner-adjacent
+Rutherford, Knox, Shelby and others). **White House straddles Robertson and Sumner** — the permit
+office decides which applies, and **the permit is the real check**: they verify the licence before
+issuing, which is exactly why "pull the permit" is in the scope.
+
+### What this means when the numbers come in
+
+- **Do NOT reject a bidder for holding HM rather than CMC** — for a sub-$25k job that can be the
+  correct class. It is not a red flag by itself.
+- **DO treat CMC as a signal of scale**, not of legality: a CMC holder is cleared for mechanical
+  work far larger than this, which says something about the size of outfit you are dealing with.
+- 🔴 **A bidder who will not give a licence number, or who says a permit is not needed, fails the
+  gate.** The scope requires the permit pulled, and the start-up static pressures recorded on the
+  invoice — a contractor avoiding the permit is avoiding the inspection.
+- Every TN licence also carries a **monetary limit** (10× the lesser of working capital or net
+  worth). A very small limit on a CMC is worth knowing if the duct work pushes the total up.
+
+*Sources: [Tennessee Board for Licensing Contractors](https://www.tn.gov/commerce/regboards/contractors.html) ·
+[verify.tn.gov](https://verify.tn.gov/) · [search.cloud.commerce.tn.gov](https://search.cloud.commerce.tn.gov/) ·
+[Callon Mechanical](https://callonmechanical.com/) · [ServiceTitan TN HVAC licensing guide](https://www.servicetitan.com/licensing/hvac/tennessee)*
+⚠️ `verify.tn.gov` and the state search portal are **JavaScript-only** and returned nothing to a
+plain fetch — the two numbers above were corroborated from the contractors' own published details,
+not from the state database. **Re-verify at the permit stage**, where it is checked for real.
+
+---
+
 **Benchmarks to judge a duct number:** national duct replacement **$25–$55/lf**, Nashville **$35–$55/lf**;
 R8 7" flex material is **$2.80/ft**, 8" **$3.78/ft** — so labour+overhead is roughly **$22–$52/ft**.
 **Installed-price band for this Carrier (public bids, other region): $6,995–$9,999.**
