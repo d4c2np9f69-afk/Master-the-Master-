@@ -138,6 +138,49 @@ send the bid to"* and *"They need email so we can send them the information."*
 | **Goodlettsville Heating & Cooling** | **contact@goodlettsvillehandc.com** | 615-479-0886 | 🪪 **TN CMC #072333** — full Mechanical Contractor | Small family shop, owner "Bill", **explicitly lists White House** in its service area. Best licence of the new names. |
 | **Star Heat & Air** (Hendersonville) | **office@starheatandair.com** | (615) 824-3533 · 180 Commerce Dr, Hendersonville 37075 | ⚠️ site shows only an **EPA # 575042531810**, NOT a TN contractor licence — **ask for it** | 40+ yrs family owned. **Installs Rheem** — the same family as the Ruud we want, so the `AJA` stainless option code is in their catalogue. |
 
+### 🔎 BUTLER HEATING & AIR, GALLATIN — researched in depth 2026-09-16 10:30 at Jeff's request
+
+**Jeff was right about the name: the owner is Mr. TERRY BUTLER.** Confirmed on the BBB profile.
+
+| | |
+|---|---|
+| **Owner** | **Mr. Terry Butler** — listed as *Owner*; BBB records the business as a **Sole Proprietorship** |
+| **Legal name** | BBB: *Butler Heating & Air* · BuildZoom: *Butler Heating & Air Conditioning Service Inc* (the "Inc" and the sole-proprietor listing disagree — worth one question) |
+| **Physical** | **834 Dobbins Pke, Gallatin, TN 37066** |
+| **Mailing** | P.O. Box 1344, Gallatin, TN 37066 |
+| **Phone** | **(615) 451-0178** · Fax (615) 451-3978 |
+| **Hours** | Mon–Fri 7:30 AM – 4:00 PM · closed weekends (⚠️ but American Standard lists 24/7 emergency service) |
+| **In business** | **31 years — started 1 January 1995** |
+| **Email / website** | ❌ **NONE PUBLISHED ANYWHERE.** BBB, Yellow Pages, Manta, American Standard and the Chamber all list phone only. **Must be obtained by calling.** |
+
+**Brand and credentials**
+- **American Standard dealer** — directly relevant: American Standard is already one of the four
+  options Tyler put on the table, so Butler can be compared like-for-like.
+- **NATE certified** technicians (North American Technician Excellence).
+
+**Reputation** — consistently good, and notably clean:
+- **BBB: 0 complaints in 3 years.** Not BBB-accredited and *"Not Rated"* — which is an absence of a
+  rating, **not** a bad one. A 31-year sole proprietor who never paid for accreditation is ordinary.
+- **Angi 4.9/5** · another aggregator 4.8/5 · **51 reviews** on Birdeye · recommended on Nextdoor.
+
+🔴 **THE ONE THING THAT NEEDS CHECKING — THE LICENCE**
+BuildZoom lists **licence 80826**, *"Contractors And Ltd Licensed Plumbers"*, and **contradicts
+itself**: the status field says *Active* while the page text says *"Inactive when we last checked"*.
+It gives an **expiry of April 2026 — which has already passed.**
+⚠️ **I COULD NOT CONFIRM THIS AT THE OFFICIAL SOURCE.** `verify.tn.gov` redirects to
+`search.cloud.commerce.tn.gov`, which would not render its search form in the browser this session.
+**So treat the licence as UNVERIFIED — not as bad. Ask Terry for his licence number directly**, the
+same question being put to every other bidder.
+🟢 **And keep it in proportion: this job is $9–13k, below Tennessee's $25,000 threshold**, so a
+state contractor licence is not legally required for it anyway.
+
+⚠️ **Service area:** American Standard lists Butler's ZIPs as **37022, 37031, 37048, 37066, 37075,
+37077, 37119, 37148**. **White House 37188 is NOT among them** — though Portland (37148) and
+Hendersonville (37075) both are, and White House sits between them. **Ask whether he'll come to
+37188 before sending anything.**
+
+---
+
 **🟡 NO PUBLISHED EMAIL — phone first, get their address, then send**
 
 | Company | Phone | Licence | Notes |
