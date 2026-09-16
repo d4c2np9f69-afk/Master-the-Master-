@@ -372,9 +372,17 @@ html,body{
    photo, no per-cell boxes, fixed light-on-dark colours (the overlay sits on
    a permanently dark-graded photo in both themes). */
 .wx-hero-readout{
-  margin-top:auto;display:grid;grid-template-columns:repeat(4,1fr);
-  gap:clamp(3px,.9vw,11px) 0;
-  padding:clamp(6px,1.6vw,16px) clamp(4px,1.2vw,13px);
+  /* 2026-09-16: 4 columns -> 6, and 3 rows -> 4 (24 cells), so every reading from
+     the station lives on the photo and nowhere else. Jeff: "2 can be added on each
+     end and another row added to the top row and the size of the cells made smaller
+     so they all fit and look nice." The whole grid therefore gets tighter type and
+     tighter gaps below, not just more cells.
+     6 across only works on a wide screen. The media queries further down step it to
+     4 and then 3 columns so the panel never squeezes a value into an ellipsis on the
+     iPad or the phone - 24 cells at 3 across is 8 rows, which still fits the frame. */
+  margin-top:auto;display:grid;grid-template-columns:repeat(6,1fr);
+  gap:clamp(2px,.55vw,7px) clamp(1px,.3vw,4px);
+  padding:clamp(5px,1.15vw,12px) clamp(4px,1vw,11px);
   border-radius:clamp(12px,3.4vw,32px);
   background:rgba(16,14,12,.16);
   backdrop-filter:blur(9px) saturate(150%) brightness(.98);-webkit-backdrop-filter:blur(9px) saturate(150%) brightness(.98);
@@ -386,13 +394,27 @@ html,body{
      capping out around 800px viewport -- everything else in the app (nav,
      card titles) already scales up to 1920/2560px via media queries below;
      these clamp()-only overlays were the one piece that didn't. */
-  font-size:clamp(6.6px,1.45vw,18px);font-weight:700;letter-spacing:.5px;text-transform:uppercase;
-  color:rgba(247,229,196,.72);text-shadow:0 1px 6px rgba(0,0,0,.7);line-height:1.2;
+  /* Sized DOWN 2026-09-16 for the 6-wide/24-cell grid. Labels lost the letter
+     spacing that was pushing "Lightning" and "Heat Stress" into an ellipsis at
+     six across, and they are allowed to sit on one tight line. */
+  font-size:clamp(5.4px,.92vw,12px);font-weight:700;letter-spacing:.2px;text-transform:uppercase;
+  color:rgba(247,229,196,.72);text-shadow:0 1px 6px rgba(0,0,0,.7);line-height:1.15;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .wx-hero-val{
-  font-size:clamp(11.5px,2.2vw,30px);font-weight:600;margin-top:2px;line-height:1.15;
+  font-size:clamp(9px,1.45vw,21px);font-weight:600;margin-top:1px;line-height:1.12;
   color:#f7f1e7;text-shadow:0 2px 10px rgba(0,0,0,.75);font-variant-numeric:tabular-nums;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+/* 24 cells at 6 across needs real width. Step down rather than shrink to unreadable:
+   tablet/split-screen -> 4 columns (6 rows), phone -> 3 columns (8 rows). */
+@media (max-width:1000px){
+  .wx-hero-readout{grid-template-columns:repeat(4,1fr)}
+}
+@media (max-width:620px){
+  .wx-hero-readout{grid-template-columns:repeat(3,1fr);gap:2px 2px;padding:6px 5px}
+  .wx-hero-lbl{font-size:6.4px;letter-spacing:.1px}
+  .wx-hero-val{font-size:11px}
 }
 /* max-height:none for the same reason as the car hero — the inlaid panel is
    positioned as a percentage of the container, so any clamp would make
@@ -2133,23 +2155,50 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
            "Weather yes add the feels like wind chill all that can go in").
            These are MOVED from the Weather Conditions card, not copied — the
            ids must stay unique for loadStation()/loadWeather() to find them. -->
+      <!-- 24 CELLS, 6 WIDE x 4 ROWS — rebuilt 2026-09-16 06:12.
+           Jeff: "I want those new real sensor readings all on the Hero picture, 2 can
+           be added on each end and another row added to the top row and the size of
+           the cells made smaller so they all fit and look nice." Then, decisively:
+           "I don't want to look in two places for those readings."
+
+           So the station card that used to sit below this photo is GONE, and every
+           one of the 21 sensors on his Ambient Weather console is here instead —
+           plus Heat Stress (derived from the station's own feels-like) and the two
+           readings the station cannot take, Air Quality and Lightning.
+
+           Row 1 is the new top row: the indoor pair, then the four comfort numbers.
+           Row 2 is wind and pressure. Row 3 is the whole rain story. Row 4 is light.
+           Every value is written by stRender() from the console on the pole — see
+           STATION_HA_LIVE. Nothing on this panel comes from a forecast model. -->
       <div class="wx-hero-readout" id="wxHeroReadout">
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Indoor</div><div class="wx-hero-val" id="wxInTemp">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Indoor RH</div><div class="wx-hero-val" id="wxInHum">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Temp</div><div class="wx-hero-val" id="wxTemp">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Feels Like</div><div class="wx-hero-val" id="wxFeels">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Dew Point</div><div class="wx-hero-val" id="wxDew">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Humidity</div><div class="wx-hero-val" id="wxHumidity">--</div></div>
-        <div class="wx-hero-cell"><div class="wx-hero-lbl">Wind</div><div class="wx-hero-val" id="wxWindDir">--</div></div>
-        <div class="wx-hero-cell"><div class="wx-hero-lbl">UV Index</div><div class="wx-hero-val" id="wxUV">--</div></div>
+
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Wind</div><div class="wx-hero-val" id="wxWindSpd">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Direction</div><div class="wx-hero-val" id="wxWindDir">--</div></div>
+        <!-- Gust and Max Gust share one cell as "now / max" — they are the same
+             reading at two timescales, and merging them freed the slot for the clock.
+             Jeff, 2026-09-16 06:15: "If there is an extra one put in the time" / "12hr time". -->
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Gust / Max</div><div class="wx-hero-val" id="wxHeroGust">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Pressure</div><div class="wx-hero-val" id="wxPressure">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Abs Press</div><div class="wx-hero-val" id="wxAbsPress">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Updated</div><div class="wx-hero-val" id="wxObsTime">--</div></div>
+
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Rain Today</div><div class="wx-hero-val" id="wxRainDay">--</div></div>
-        <!-- THIRD ROW, added 2026-08-20. Jeff: "in the hero pic another whole row of data
-             would fit if it's a single reading and doesn't have a chart or map with it."
-             So: four single values only. Rain Today and Gust were already being fetched
-             from his own station and thrown away (precipTotal, windGust); Air Quality and
-             Lightning are the two new live readings. Nothing here needs a chart or a map
-             to make sense — the AQI chart and the strike map stay down in the YARD card. -->
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Rain Rate</div><div class="wx-hero-val" id="wxRainRate">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Rain 7 Days</div><div class="wx-hero-val" id="wxHeroRain7d">--</div></div>
-        <div class="wx-hero-cell"><div class="wx-hero-lbl">Gust</div><div class="wx-hero-val" id="wxHeroGust">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Rain Month</div><div class="wx-hero-val" id="wxRainMonth">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Last Rain</div><div class="wx-hero-val" id="wxLastRain">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">All Time</div><div class="wx-hero-val" id="wxRainLife">--</div></div>
+
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">UV Index</div><div class="wx-hero-val" id="wxUV">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Solar</div><div class="wx-hero-val" id="wxSolarRad">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Lux</div><div class="wx-hero-val" id="wxLux">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Heat Stress</div><div class="wx-hero-val" id="wxHeroHeat">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Air Quality</div><div class="wx-hero-val" id="wxHeroAir">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Lightning</div><div class="wx-hero-val" id="wxHeroLtg">--</div></div>
       </div>
@@ -2796,21 +2845,17 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
          Underground's public API, which carries no INDOOR readings at all. The ambient_station
          integration now pulls the console direct, so these are his own instrument's numbers.
          Fed by the same single template call as the A/C card — see loadLive(). -->
-    <div class="card cat-weather" id="stationCard">
-      <div class="card-title">&#128225; My Station &bull; KTNWHITE21 <span id="stConn" class="irr-conn"></span></div>
-      <div id="stBanner" class="wx-banner wx-load">&#128260; Loading station&hellip;</div>
-      <ul class="spec-list">
-        <li><span class="sk">Indoor</span><span class="sv" id="stIndoor">--</span></li>
-        <li><span class="sk">Outdoor</span><span class="sv" id="stOutdoor">--</span></li>
-        <li><span class="sk">Wind</span><span class="sv" id="stWind">--</span></li>
-        <li><span class="sk">Dew point</span><span class="sv" id="stDew">--</span></li>
-        <li><span class="sk">Rain today</span><span class="sv" id="stRain">--</span></li>
-        <li><span class="sk">Rain week / month</span><span class="sv" id="stRainHist">--</span></li>
-        <li><span class="sk">Last rain</span><span class="sv" id="stLastRain">--</span></li>
-        <li><span class="sk">Pressure</span><span class="sv" id="stPressure">--</span></li>
-        <li><span class="sk">Sun</span><span class="sv" id="stSun">--</span></li>
-      </ul>
-    </div>
+    <!-- THE STATION CARD WAS HERE AND IS DELETED. 2026-09-16 06:12.
+         Jeff: "I don't want to look in two places for those readings."
+         It duplicated, row for row, what the hero readout above now shows - all 21
+         sensors off the console, plus the observation clock. Keeping a second copy
+         was the whole complaint: two panels, same instrument, numbers that did not
+         match because they were rendered at different moments.
+         The station's health now reads off the hero: the Updated cell is the
+         station's OWN observation time, so if the console stops uploading, that
+         clock freezes and says so without a banner.
+         stRender() still writes the st* ids defensively - they simply no longer
+         exist, and set() no-ops on a missing element. Do not re-add this card. -->
 
     <!-- SPOTTER NETWORK -->
     <div class="card cat-weather" id="wxSpotterCard">
@@ -6852,33 +6897,69 @@ function stRender(d){
       var el = document.getElementById(id);
       if (el) { el.innerHTML = html; if (color != null) el.style.color = color; }
     };
+    // ROW 1 — indoor pair, then the four comfort numbers.
+    if (ind   != null) hset('wxInTemp',   Math.round(ind) + '&deg;F');
+    if (indH  != null) hset('wxInHum',    Math.round(indH) + '%');
     if (out   != null) hset('wxTemp',     Math.round(out) + '&deg;F');
-    if (outH  != null) hset('wxHumidity', Math.round(outH) + '%');
-    if (dew   != null) hset('wxDew',      Math.round(dew) + '&deg;F');
     if (feels != null) hset('wxFeels',    Math.round(feels) + '&deg;F',
                             feels >= 103 ? '#ff6262' : feels >= 90 ? '#ff8c42' : '');
-    if (feels != null) {
-      var hl = feels < 80 ? ['LOW','#22c55e'] : feels < 90 ? ['MODERATE','#ffd24a']
-             : feels < 103 ? ['HIGH','#ff8c42'] : ['EXTREME','#ff6262'];
-      hset('wxHeatStress', hl[0], hl[1]);
-    }
+    if (dew   != null) hset('wxDew',      Math.round(dew) + '&deg;F');
+    if (outH  != null) hset('wxHumidity', Math.round(outH) + '%');
+
+    // ROW 2 — wind and pressure.
+    if (w != null) hset('wxWindSpd', w * 1 === 0 ? 'Calm' : w + ' mph');
     if (wd != null) {
       var CARD16 = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
       hset('wxWindDir', Math.round(wd) + '&deg; ' + CARD16[Math.round((wd % 360) / 22.5) % 16]);
     }
-    if (g != null) hset('wxHeroGust', g * 1 === 0 ? 'Calm' : Math.round(g) + ' mph');
+    // Gust now / max today in one cell - same reading, two timescales.
+    if (g != null || mg != null) {
+      hset('wxHeroGust', (g == null ? '--' : (g * 1 === 0 ? 'Calm' : g))
+                       + (mg != null ? ' / ' + mg : '') + ' mph');
+    }
+    if (p  != null) hset('wxPressure', p + ' inHg');
+    if (ap != null) hset('wxAbsPress', ap + ' inHg');
+    // The clock is the station's OWN observation time, not the phone's - if the
+    // console stops uploading, this freezes and that is the tell. 12-hour, Jeff's ask.
+    hset('wxObsTime', (function(){
+      var v = d && d.indoor_reported;
+      var ms = v ? Date.parse(v) : NaN;
+      if (!isFinite(ms)) return '--';
+      return new Date(ms).toLocaleTimeString([], {hour:'numeric', minute:'2-digit', hour12:true});
+    })());
+
+    // ROW 3 — the whole rain story, which is what decides whether the yard needs water.
+    if (r    != null) hset('wxRainDay',  Number(r).toFixed(2) + '"', r * 1 > 0 ? 'var(--info)' : '');
+    if (rate != null) hset('wxRainRate', Number(rate).toFixed(2) + ' in/h', rate * 1 > 0 ? 'var(--info)' : '');
+    // Turf needs 1.0-1.5 in/week - Jeff's own threshold for whether to water.
+    if (rw   != null) hset('wxHeroRain7d', Number(rw).toFixed(2) + '"',
+                           rw < 0.75 ? 'var(--bad)' : rw < 1.0 ? 'var(--warn)' : 'var(--ok)');
+    if (rm   != null) hset('wxRainMonth', Number(rm).toFixed(2) + '"');
+    hset('wxLastRain', (function(){
+      var v = d && d.rain_last;
+      if (!v || v === 'unknown' || v === 'unavailable') return '--';
+      var ms = Date.parse(v);
+      if (!isFinite(ms)) return '--';
+      return new Date(ms).toLocaleDateString([], {month:'short', day:'numeric'});
+    })());
+    if (rl != null) hset('wxRainLife', Number(rl).toFixed(2) + '"');
+
+    // ROW 4 — light, heat, and the two readings the station cannot take.
     if (uv != null) {
       var uvN = uv * 1;
-      hset('wxUV', uvN + ' &bull; ' + (uvN < 3 ? 'Low' : uvN < 6 ? 'Moderate' : uvN < 8 ? 'High'
-                                     : uvN < 11 ? 'Very High' : 'Extreme'),
+      hset('wxUV', uvN + ' ' + (uvN < 3 ? 'Low' : uvN < 6 ? 'Mod' : uvN < 8 ? 'High'
+                              : uvN < 11 ? 'V.High' : 'Extreme'),
            uvN < 3 ? '#22c55e' : uvN < 6 ? '#ffd24a' : uvN < 8 ? '#f97316'
          : uvN < 11 ? '#ff6262' : '#8b5cf6');
     }
-    if (p  != null) hset('wxPressure', p + ' inHg');
-    if (r  != null) hset('wxRainDay',  Number(r).toFixed(2) + '"', r * 1 > 0 ? 'var(--info)' : '');
-    // Turf needs 1.0-1.5 in/week - Jeff's own threshold for whether to water.
-    if (rw != null) hset('wxHeroRain7d', Number(rw).toFixed(2) + '"',
-                         rw < 0.75 ? 'var(--bad)' : rw < 1.0 ? 'var(--warn)' : 'var(--ok)');
+    if (sol != null) hset('wxSolarRad', sol + ' W/m&sup2;');
+    if (lux != null) hset('wxLux', Number(lux) >= 1000 ? Number(lux).toLocaleString() : String(lux));
+    if (feels != null) {
+      var hl = feels < 80 ? ['LOW','#22c55e'] : feels < 90 ? ['MODERATE','#ffd24a']
+             : feels < 103 ? ['HIGH','#ff8c42'] : ['EXTREME','#ff6262'];
+      hset('wxHeroHeat', hl[0], hl[1]);
+      hset('wxHeatStress', hl[0], hl[1]);   // the YARD card's copy, same instrument
+    }
     // Mirror onto the LUX card's outdoor patch, same instrument, same numbers.
     if (out   != null) hset('luxOutTemp',   Math.round(out) + '&deg;');
     if (feels != null) hset('luxFeelsLike', Math.round(feels) + '&deg;');
