@@ -1,0 +1,173 @@
+# 🧾 A/C BID TRACKER — the single source of truth for who bid what
+
+**Created 2026-09-15 6:13 PM at Jeff's instruction:** *"compiling all the data from the bids that come in
+and tracking everything in an organized meticulous fashion… so we don't let these bids get out of hand so
+that we don't know what's what and who's who."*
+
+🔴 **RULES FOR EVERY SESSION**
+1. **Every bid, reply, phone call or text goes in the LOG at the bottom the same day, with the date and time.**
+2. **Never compare sticker prices.** Compare the **10-YEAR COST** line: price + labour cover + refrigerant +
+   any required maintenance plan. That is what caught Petitt at ≥$14,296 against a $13,000 sticker.
+3. **A number nobody has written down is not a bid.** Verbal figures go in the log marked VERBAL.
+4. **Quote the source.** Written quote > email > phone. If it is not on their paper, it is not in the deal.
+5. **Do not send any bidder another bidder's name, price or paperwork.** The 3-bid comparison PDF contains
+   Derryberry's figures — it does NOT go to the new three (checked 2026-09-15).
+6. Scope asked of everyone, so the numbers are comparable: twist removed at the unit **both sides** · three
+   6"→8" branches (dining, master bedroom, living) · new 7" garage run · new 16" return (18" priced as an
+   option) · existing 20×25 filter grille stays · **existing duct STAYS — inspect, re-strap, seal/tape what
+   leaks** · start-up static pressures recorded · permit pulled.
+   🔴 **NOT asking anyone to replace duct for damp insulation.** Jeff, 2026-09-15 6:32 PM: *"in the summertime
+   in Tennessee all of them are damp from condensation. Once we get it sealed up it should dry out."*
+   A bidder who quotes duct replacement on damp insulation is padding, and that is now the test.
+
+---
+
+## THE FIELD
+
+| # | Company | Contact | Sent | Status |
+|---|---|---|---|---|
+| 1 | **Daniels Heating & Air** (Greenbrier) | Ryan · (615) 804-1078 | 09-11 email, 09-14 re-send | 🔴 **NO REPLY** since 09-11. Missed the 5 PM Mon 09-14 deadline |
+| 2 | **Derryberry's** (Gallatin) | Charles Brady · Charles.b@derryberryac.com | **09-14 4:52 PM**, 2 PDFs attached | 🟠 awaiting revised quote at **$9,500 all-in** target |
+| 3 | **Petitt** (White House) | Logan · support@ / logan@petittheatingandcooling.com | 09-11, re-sent 09-14 | ⛔ **WITHDREW** after being refused Daniels' quote |
+| 4 | **Chilly Ben's** (116 Portland Rd, **White House**) | ben@chillybens.com · (270) 776-3691 · lic HM04997 | **09-15 ~7:10 PM** | 🟢 SENT, awaiting reply |
+| 5 | **Peters Heating & Air** (Hendersonville) | **Tyler Oberry** · toberry@petershvac.net · **direct/text 629-292-1310** · **Carrier Factory Authorized** | 09-15 7:13 PM | 🟢 **REPLIED 7:26 PM — 13 minutes.** Can do the job TOMORROW; wants to meet first. No number yet |
+| 6 | **KB's HVAC** (Portland) | gallatinheatingandcooling@gmail.com · (615) 300-5283 | **09-15 7:15 PM** | 🟢 SENT, awaiting reply |
+| 7 | **Callon Mechanical** (Hendersonville) | service@callonmechanical.com · (615) 953-9788 · TN CMC #81530 | **09-15 7:16 PM** | 🟢 SENT, awaiting reply |
+| 8 | **Hunter Heating & Air** (Hendersonville) | info@huntertn.com · (615) 714-6200 | 09-15 7:16 PM composed | 🟠 on screen, Jeff to send |
+
+| 9 | **Haskins Heating & Cooling** (Joelton + Springfield) | web form · (615) 346-8178 / 615-746-6390 · **Carrier Factory Authorized, award winner, 4.5★/122** | 09-15 7:21 PM web form | 🟠 form submitted, **confirmation NOT seen — call to confirm** |
+
+🛑 **NO FURTHER CONTACT WITH DANIELS OR DERRYBERRY UNTIL THEY REACH OUT FIRST.** Jeff, 2026-09-15 7:23 PM:
+*"I think if we send them anything else without them reaching out to us first it makes us look weak, so let's hold off."*
+Ryan has been silent since 09-11; Charlie has had the $9,500 target since 09-14. **The next move is theirs.**
+⚠️ **KNOWN CONSEQUENCE, manage it at reply time:** both were sent the OLD scope. They have NOT been told about the
+**stainless-steel deal breaker**, the **base closure**, the **owner-supplied UV light installed free**, the
+**ecobee + new C-wire**, or the **static-pressure reason** for the 6"→8" branches. Their numbers are therefore NOT
+directly comparable to the five new bids. **When either one replies, send the updated scope THEN and re-price.**
+
+**Deadline asked of the new bidders: THURSDAY 17 SEPTEMBER.** (Jeff 09-15 6:41 PM: the first round all visited in one day, so no reason to stretch it.)
+
+---
+
+## THE COMPARISON GRID — fill one column per bidder, never skip a row
+
+| Row | Daniels | Derryberry | Chilly Ben's | Peters | KB's |
+|---|---|---|---|---|---|
+| **Unit price (sticker)** | $8,200 | $8,958 list − $400 = $8,558 | | | |
+| **+ labour cover to 10 yr** | +$800 | +$540 ($60/yr) | | | |
+| **Refrigerant covered?** | ✅ included | not stated | | | |
+| **Required maintenance plan?** | no ($190/yr optional) | not stated | | | |
+| **🔴 10-YEAR COST** | **$9,000** | **$9,098** (twist NOT fixed) | | | |
+| Model number | Carrier 48NL-B300603 | no model given | | | |
+| Gas in → out | 60k → 49k | 70k input claimed | | | |
+| Heat exchanger material | stainless (documented) | stainless (dealer's word only) | | | |
+| HX warranty | **lifetime** (reg ≤90 d) | 20 yr per mfr GW-PKGD-2401A (his sheet says 10) | | | |
+| Parts / compressor | 10 / 10 registered | 10 / 10 | | | |
+| **Twist fixed BOTH sides?** | ✅ yes | ❌ not on the sheet | | | |
+| Three 6"→8" branches | ❌ not in v1/v2 | ❌ | | | |
+| Garage 7" run | ❌ | $350 duct-repair line exists | | | |
+| Return 16" (18" option?) | 16" | not stated | | | |
+| Duct $ per linear foot | not given | $7,800 lump, no footage | | | |
+| Permit + TN licence # | ask | ask | | | |
+| Start-up static pressures | ask | ask | | | |
+| Lead time | ask | ask | | | |
+| Thermostat line credited? | **$?** — his $8,200 includes a t-stat Jeff is not using | | | | |
+
+**Benchmarks to judge a duct number:** national duct replacement **$25–$55/lf**, Nashville **$35–$55/lf**;
+R8 7" flex material is **$2.80/ft**, 8" **$3.78/ft** — so labour+overhead is roughly **$22–$52/ft**.
+**Installed-price band for this Carrier (public bids, other region): $6,995–$9,999.**
+
+---
+
+## LOG — append, never overwrite
+
+| When | Who | What happened |
+|---|---|---|
+| 2026-09-11 | Daniels, Petitt | Final-offer emails sent with 2 PDFs |
+| 2026-09-14 12:46–13:05 PM | Daniels, Petitt | Re-sent; Logan also sent to his direct address |
+| 2026-09-14 ~4:52 PM | Derryberry (Charles) | Counter-offer sent, **$9,500 all-in**, 2 PDFs incl. the CORRECTED drawing |
+| 2026-09-14 5:00 PM | Daniels | Deadline passed with no reply → Jeff added $500 to the Charles target |
+| 2026-09-15 4:52 PM | — | Jeff: *"None of the contractors have sent anything back so I have to find 3 more"* |
+| 2026-09-15 5:00 PM | — | Scope loosened then re-widened: Jeff wants **all** upgrades included |
+| 2026-09-15 5:52 PM | — | Filter grille confirmed **20×25** → requirement dropped from the ask |
+| 2026-09-15 6:13 PM | Chilly Ben's, Peters, KB's | Bid-request launchers built on the desktop; **not sent yet** |
+| 2026-09-15 6:30–7:10 PM | — | Email rewritten: stainless HX as a DEAL BREAKER (Ruud needs the `AJA` option code, verified in Rheem form R11-887 Rev.1) · base closure at the pad · owner-supplied REKO R2000 UV light installed at no extra labour · owner-supplied ecobee EB-STATE6P-01 + new 18 AWG with C wire · the 6"→8" upgrade justified by static pressure (690–720 fpm vs Manual D max) · full grammar pass · signature with photo |
+| **2026-09-15 ~7:10 PM** | **Chilly Ben's** | 🟢 **BID REQUEST SENT** — duct layout + unit worksheet attached. Visit window Wed 09-16 8 AM–6 PM, number due Thu 09-17 |
+| **2026-09-15 7:13 PM** | **Peters** | 🟢 BID REQUEST SENT |
+| **2026-09-15 7:15 PM** | **KB's HVAC** | 🟢 BID REQUEST SENT |
+| **2026-09-15 7:16 PM** | **Callon Mechanical** | 🟢 BID REQUEST SENT |
+| **2026-09-15 7:16 PM** | **Hunter Heating & Air** | 🟢 BID REQUEST SENT |
+| 2026-09-15 7:21 PM | Haskins Heating & Cooling | Web contact form filled with the full request and submitted. **Success message never seen — unconfirmed.** Call 615-746-6390 to confirm |
+| **2026-09-15 7:23 PM** | Daniels, Derryberry | 🛑 **Jeff's call: HOLD. No further contact until they reach out.** Old-scope gap noted above |
+| **2026-09-15 7:26 PM** | **Peters (Tyler Oberry)** | 🟢 **FIRST REPLY, 13 minutes after sending.** Verbatim: *"Jeff, I can complete this tomorrow! Please allow me to come meet with you and take a look at where we will be chasing into the garage and how the thermostat pull will be."* Offers **4 equipment options: Carrier · Goodman · Ruud/Rheem (that line was partly cut on screen) · American Standard**. Pitches **15.2 SEER2 2-stage** with TVA rebate + AHRI certification. *"I can pull a permit for this when job is awarded."* Direct line/text **629-292-1310**. 🔴 **NO PRICE = NOT A BID YET.** 2 attachments on his reply (my own PDFs bounced back). |
+
+---
+
+## 📅 APPOINTMENTS — site visits
+
+**Jeff, 2026-09-15 6:19 PM: *"they can call but they need to email everything so you can track it."*
+Phone calls are fine — but the QUOTE and the VISIT TIME must also arrive by email, or it cannot be tracked.
+🔴 If Jeff takes a number or a time by phone, it goes in the LOG marked VERBAL and is chased in writing.**
+**All new site visits: WEDNESDAY 16 SEPTEMBER, any time 8:00 AM – 6:00 PM** (Jeff opened it to the full day 09-15 6:52 PM so five bidders fit).
+
+| Company | Requested | Confirmed time | Visited | Notes |
+|---|---|---|---|---|
+| Chilly Ben's | Wed 09-16 8–6 offered | — | — | |
+| Peters | Wed 09-16 8–6 offered | — | — | |
+| KB's HVAC | Wed 09-16 8–6 offered | — | — | |
+| Callon Mechanical (Hendersonville) | Wed 09-16 8–6 offered | — | — | service@callonmechanical.com · TN CMC #81530 |
+| Hunter Heating & Air (Hendersonville) | Wed 09-16 8–6 offered | — | — | info@huntertn.com · since 2014 |
+| Derryberry (Charles) | — | — | ✅ **09-10** | already walked the job; has the corrected drawing |
+| Daniels (Ryan) | — | — | ✅ **09-10 AM** | already walked the job |
+| Petitt (Logan) | — | — | ✅ 09-10 | withdrew 09-14 |
+
+🔴 **A visit is not a bid.** A company that comes out and does not send a written number by the Thursday
+17 September deadline gets logged as NO BID, same as Daniels' silence.
+
+## 📥 HOW REPLIES GET HANDLED
+
+1. **Everything lands in Jeff's Comcast inbox** (`jeff.loewen@comcast.net`, new Outlook).
+2. **Claude reads them in Outlook on the Beast** — ask Jeff first, then read from the Outlook window itself.
+   🔴 **Do NOT trust the Olk local-cache scan.** It produced **three false negatives on 2026-09-14**, including
+   on a message visible on screen. **Outlook's own Sent Items / Inbox view is the only authority.**
+3. **Every reply is logged the same day** in the LOG above: who, when, what they said, and what is still missing.
+4. **Each quote is then entered row by row into the COMPARISON GRID** — no summarising, no rounding, and any row
+   they did not answer is left blank and chased.
+5. **Jeff is told the 10-year cost**, not the sticker, whenever two bids are compared.
+
+---
+
+## 🎯 HOW THIS GETS RUN — the standard, set 2026-09-15 7:28 PM
+
+Jeff: *"We really need to get this nailed down and get somebody that can do this job cheaply, reliably and
+cost-effectively, and I really need you managing it as tightly as possible like a professional."*
+
+**1. INTAKE — same day, every time.** Every reply, call or text is logged in the LOG with the timestamp and
+the source. A quote goes into the GRID row by row, in the bidder's own words. Nothing is summarised,
+rounded, or "about". A row they did not answer stays blank and gets chased by name.
+
+**2. THE NUMBER IS THE 10-YEAR COST, never the sticker.** Price + labour cover to 10 years + refrigerant +
+any required maintenance plan. Petitt looked like $13,000 and was ≥$14,296. That is the whole reason this
+rule exists.
+
+**3. FOUR PASS/FAIL GATES — a bid that misses one is not cheap, it is a different job:**
+   - **Stainless steel heat exchanger**, model number proving it (Ruud must end `AJA`)
+   - **Twist removed at the unit on BOTH supply and return**
+   - **The three 6"→8" branches + the 7" garage run + the new 16" return**
+   - **Start-up static pressure recorded on the invoice**
+
+**4. RED FLAGS I REPORT THE MOMENT I SEE THEM:** no model number · "factory standard" heat exchanger ·
+duct quoted as a lump with no linear footage · labour warranty tied to a maintenance plan · refrigerant
+excluded · a price that moves after the visit · duct replacement quoted over damp insulation (padding —
+Jeff's own test) · permit or licence number missing.
+
+**5. CHASING.** A bidder who visits and misses the Thursday deadline gets ONE written chase, then is logged
+NO BID. 🛑 Daniels and Derryberry are exempt — Jeff's hold stands until they make the first move.
+
+**6. WHAT I WILL NEVER DO:** send any bidder another bidder's name, price or paperwork · state a figure I
+have not read off their quote · let a verbal number enter the grid unmarked · recommend the cheapest
+number without showing what it leaves out.
+
+**7. THE DECISION PACK Jeff gets when the bids are in:** every bidder ranked on 10-year cost, the four
+gates as pass/fail, what each one is missing, the two or three questions that would move the money, and a
+single recommendation with the reason stated in one line.

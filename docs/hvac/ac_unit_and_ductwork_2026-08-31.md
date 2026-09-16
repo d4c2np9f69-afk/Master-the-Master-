@@ -1546,6 +1546,30 @@ Comp 10**. **The HX warranty Derryberry is actually offering is 10 YEARS, not 20
 *derived* (`5YCC4030A1070A`) — **never confirmed with Charlie, and the sheet itself says 13.4 SEER
 and names no model.** Treat that column as unverified until he supplies the model. The sheet wins.
 
+🔴 **CORRECTION TO THE CORRECTION, 2026-09-14 — "the sheet wins" was the wrong call, and it was
+MINE.** Jeff caught this: *"Don't forget you were the one that looked it up and confirmed it Friday
+after he called me you looked it up and confirmed it."* He is right, and `Search-HCC.ps1` confirms
+it — on **09-11, the same day** I wrote the downgrade above, my own research pass had already found
+**American Standard warranty `GW-PKGD-2401A`: the 4YCC4/5YCC4 heat exchanger is 20 YEARS,
+registered or not** (it is still recorded that way further down this file). **I downgraded a finding
+I had personally verified, hours earlier, on the strength of a handwritten sales sheet.** That is
+exactly the "a local note beats a search I didn't run" failure, run in reverse.
+
+**What is actually true, separated by how strong the evidence is:**
+- **20-year heat exchanger — DOCUMENTED.** American Standard's own published warranty form
+  `GW-PKGD-2401A`. Charlie's sheet saying "Ht Exch 10" is the *dealer's* handwriting, not the
+  manufacturer's term. A sales sheet does not shorten a manufacturer warranty.
+- **Stainless heat exchanger — CHARLIE'S WORD, and that is a real source.** He phoned Jeff
+  unprompted, said he had not remembered the material, looked it up, and confirmed stainless.
+  ⚠️ Be honest about the limit: **no American Standard document found in any search states the HX
+  material for this family.** So this rests on the dealer's own lookup, not on paper.
+- **Neither is written on the quote**, which is the only reason it is still an open item.
+
+**Action already taken:** the 09-14 Derryberry email (`scratchpad\derryberry-body.txt`, item 2)
+asks Charlie to put *both* on the revised quote — the stainless material in writing, and the
+warranty term corrected from his 10 to the manufacturer's 20. **Do not re-downgrade this row from
+the handwritten sheet again.**
+
 🔴 **The Goodman is out** — it is the only aluminized heat exchanger of the three, on a unit that
 lives outdoors in a cabinet with documented water ingress.
 
@@ -2360,3 +2384,175 @@ the three 6"→8" upgrades as an add; he already has the crew and the unit out.
 the value of Petitt's $279 surge protector, microchannel field-repair success rates.
 **Cost of this research:** 104 agents, ~6.6 M tokens — about 5× the ~20 agents Jeff was told.
 
+
+# 💵 JEFF'S CALL 2026-09-14 5:00 PM — THE $500, AND WHY RYAN'S SILENCE CAUSED IT
+
+**Jeff, verbatim:** *"I have the extra $500 to Charlie on the bid because I feel if Danial's did
+not get back to me then I was too low or something happened ether way I have room with Danial's
+is needed."*
+
+**The reasoning, which is the part worth keeping:** the 5 PM Mon 14 Sep deadline passed with **no
+reply from Ryan at Daniels**. Two readings of that silence — either **$9,000 was too low to be
+real**, or something went wrong on his end. Jeff is treating both as pointing the same way: the
+target number needed headroom, so Charles was given an extra **$500**.
+
+✅ **CONFIRMED FROM THE SENT MESSAGE, read in Outlook 2026-09-14 5:0x PM.** The email reads,
+verbatim: *"The number to beat is **$9,500 all-in** for a 2.5-ton gas/electric package unit with
+labor taken [to 10 years]… number has to include the ductwork on the attached drawing."*
+**So the $500 went INTO the stated target — it was not held back as reserve.** The draft in
+`scratchpad\derryberry-body.txt` still says $9,000; **the sent message is the authority, not the
+draft.** Sent **4:52 PM**, subject **"A/C replacement at 301 S Aztec Dr"**, to
+`Charles.b@derryberryac.com`.
+
+**What the $500 does to the field, on either reading:**
+- Daniels **Carrier 48NL-B300603 at $9,000** is still the standing pick and still the cheapest
+  13.4 SEER2 option with a lifetime stainless heat exchanger.
+- If Charles comes in at **$9,500 for the drawing as drawn**, he is **$500 above** Daniels for a
+  unit whose heat-exchanger terms are still not in writing — so Daniels keeps the edge unless
+  Ryan's revised number lands above $9,500.
+- **Jeff has explicitly said he has room with Daniels too.** So a revised Daniels quote above
+  $9,000 does not automatically lose; it gets measured against Charles's number.
+
+**What is now owed:**
+1. **Ryan has not responded to a deadline that has passed.** That is a fact about the vendor, not
+   just a scheduling miss — it goes in the file because it is the reason the number moved.
+2. Charles's reply, with the eight written items the email demands (model number, stainless + the
+   20-yr term, R-454B, new electrical, venting, the drawing AS DRAWN, permit + licence, start-up
+   readings, no $300 restock).
+3. ✅ **ATTACHMENTS CONFIRMED CORRECT — 2 attachments, 675 KB:** `Three bid comparison - Carrier …`
+   (415 KB) and `Duct layout - scope of work.pdf` (260 KB). **Both came from `HCC AC Quotes`, not
+   the iCloud root** — proven by the filename: the stale root copy carries an `AC - ` prefix and
+   the attached one does not. So Charles has the **corrected** drawing, the one that labels the
+   long 8" run **Master bedroom**. ⚠️ Byte sizes cannot distinguish them (265,621 vs 265,763 —
+   both round to 260 KB); **the filename prefix is the only reliable tell.**
+
+# 🌡️ THERMOSTAT PURCHASE — JEFF'S CALL 2026-09-14 6:49 PM: **THE $161.81 USED UNIT**
+
+**Jeff, verbatim: *"I want the 161"*** — after being shown the warranty trade in full. **This
+supersedes the 09-11 "$219.99 ecobee Certified Refurbished" recommendation. Do not re-pitch the
+$219.99 unit.**
+
+**What he is buying,** read live off Amazon in Edge 2026-09-14 6:47 PM:
+| | |
+|---|---|
+| Model | **`EB-STATE6P-01`** — ✅ the **6P = Premium**, the model WITH the onboard VOC / CO₂ / AQI sensors |
+| Condition | **Used – Like New** (a used copy of an already-refurbished unit) |
+| Price | **$161.81** · financing shown as $16.26/mo × 12 |
+| Listing note | *"No packaging damage observed during inspection. Item will come in original packaging."* |
+| Sold/shipped | **Amazon** (so Amazon's 30-day return window applies) |
+
+**What the $58 saving gives up, stated plainly so nobody re-discovers it later:**
+- ecobee's own Certified Refurbished at $219.99 carries a **3-year limited warranty**. This used
+  listing has **no stated warranty** — 30-day Amazon returns are the only cover.
+- The same page's "Buy New $189.99" from **MD2 Family** is *not* new either — it is
+  *"manufacturer refurbished… 90-day limited hardware warranty."* Jeff passed on that too.
+
+🔴 **THE ONE THING TO CHECK THE DAY IT ARRIVES — SmartSensor in the box.**
+The ecobee refurb box is documented as *1 × Smart Thermostat Premium, 1 × SmartSensor,
+1 × Trim plate, 1 × Power Extender Kit.* **A used listing does not guarantee the SmartSensor.**
+Jeff needs exactly one (his call, 09-11: *"I only need one sensor"*) — it is what drives the
+**per-room occupancy** entities in GUARDIAN. **If it is missing, the $58 saving is wiped out**:
+a SmartSensor 2-pack is **$99.99** on that same Amazon page. Open the box and confirm inside the
+30-day window, while a return is still possible.
+
+**Unaffected by this choice:** the integration. `EB-STATE6P-01` is the Premium either way, so the
+`co2PPM` / `vocPPM` / `airQuality` entities and the per-SmartSensor occupancy all still land in HA
+exactly as verified from the component source (see § "RE-CHECKED 2026-09-11").
+
+---
+
+# 🔎 MARKET SWEEP 2026-09-15 4:43–5:00 PM — "what other units are better than Carrier for the same class"
+
+Jeff: *"Do a deep search what other units out there are better than carrier for the same class unit"* then
+*"Now how do they compare for the money?"* Class = 2.5 T single-phase gas/electric package unit, entry tier.
+Done by hand, no agents. **Every figure below was read from the manufacturer's own page or technical guide
+this session unless marked otherwise.** Yardstick is the Carrier 48NL-B300603 (figures earlier in this file,
+from Carrier 48NL-03PD).
+
+| | **Carrier 48NL-B300603** | **York PG3E30L07** (Coleman/Luxaire twins) | **Tempstar PGB4** (Heil/Comfortmaker twins, ICP = Carrier-owned) | Lennox LRP13GNK30-054 | Daikin DP3GM30 | Trane A5PG3030A1070A |
+|---|---|---|---|---|---|---|
+| Refrigerant | R-454B | R-454B | R-454B | R-454B | 🔴 **R-32** | R-454B |
+| EER2 | 11.05 | **11.0** | 11 (series page) | 10.6 | 10.6 | not found |
+| Heat out | 49k | 🟢 **60k** (75k input) or 40k | 40–130k input range (2.5 T options not read) | 54k input | 48.6k | 70k input |
+| Heat exchanger | stainless · LIFETIME reg | stainless · **LIFETIME reg** | stainless · **LIFETIME reg** | stainless · 🔴 20 yr | stainless · lifetime reg | 20 yr · material not published |
+| Parts / compressor | 10 / 10 reg | **10 / 10 reg** | 10 reg + 🟢 **3-yr No Hassle unit replacement** (compressor, coil, HX) | 5 / 10 reg | 🟢 12 yr parts reg (60 days) + unit replacement w/ annual maint | 10 / 10 reg |
+| Compressor | scroll | 🔴 **rotary** (24/30/36) | scroll | rotary (LennoxPros) vs scroll (lennox.com) — conflicting | scroll | not found |
+| Metering | fixed orifice | 🟢 **TXV** | not stated | not stated | piston | not found |
+| Outdoor coil | copper tube | 🔴 aluminum microchannel | "corrosion-resistant aluminum" | copper tube | copper tube | not found |
+| Sound | 73 dBA | **73 dBA** | "as low as 70" (size not stated) | 74 dB | 76 dB | not found |
+| Cabinet | composite base "will not rust", 500-hr salt spray | G90 galvanized + powder paint | hail guard, corrosion-resistant finish | steel, base rails | base rails | not found |
+| Leak sensor | yes | 🟢 **none** (charge 2 lb 11 oz; sensor only >4 lb) | not stated | not stated | n/a R-32 | not found |
+
+**Verdict:** only **York PG3** and **Tempstar PGB4** are credible "better than Carrier" candidates.
+- **York PG3E30L07** beats Carrier on heat (60k vs 49k out), TXV, no leak sensor to nuisance-trip; ties on
+  EER2, sound, lifetime SS HX, 10/10 warranty. Loses on rotary compressor + aluminum microchannel outdoor
+  coil + no rust-proof base.
+- **Tempstar PGB4** matches Carrier and adds a 3-yr unit-replacement warranty, but its 2.5 T sheet (heat
+  options, coil, sound, sensor) was **not** read — unverified at model level.
+- Lennox (20-yr HX, 10.6 EER2), Daikin (R-32 — Jeff's refrigerant call 09-09), Trane (HX material/specs not
+  published online) are **not better**.
+
+**Money:** Carrier, York, Tempstar, Lennox and Daikin publish **no online price** — dealer/distributor only
+(Tempstar retailer: *"doesn't allow us to publish our lowest price online"*). Carrier and Rheem warranty
+certificates exclude internet purchases (recorded earlier). Only real numbers in hand remain the installed
+quotes: **Daniels Carrier $9,000** (10-yr labour+freon) · **Derryberry Am. Std target $9,500** (sent 09-14,
+no reply recorded) · Petitt Ruud $13,000 (withdrew). A York or Tempstar number needs a quote from a local
+dealer of that brand; **none identified near 37188 this session.**
+Sources: lennoxpros.com LRP13GNK30 · lennox.com LRP13GNK · tempstar.com PGB4 · JCI Technical Guide PG3
+208/230-1 (2025-02-12, fife.yorknow.com) · Daikin SS-DP3GM/DP3UM-R32 (11/24) · trane.com packaged-units-warranty
+
+---
+
+# 📇 THREE MORE CONTRACTORS — 2026-09-15 4:51–5:05 PM
+
+Jeff 4:52 PM: *"None of the contractors have sent anything back so I have to find 3 more."* Ask: contractors selling
+a unit **equal or better than the Carrier**, competitive with the current three. Public-record research only —
+🔴 **NOBODY CONTACTED.** Screened against the 09-09 exclusions (lead farms, T.A. Kaiser, Murfreesboro shops, Hiller).
+
+| # | Company | Brand to ask for | Evidence read 09-15 |
+|---|---|---|---|
+| **1** | **Haskins Heating & Cooling Inc** · 5470 Hwy 41A, Joelton 37080 (also a Springfield location) · **(615) 346-8178** · haskinsheating.com | **Carrier 48NL-B300603 — the SAME unit as Daniels** → a direct price check | carrier.com lists it **Factory Authorized Dealer, Award Winner, 4.5★ / 122 Google**; since 1986; service list names Springfield, Greenbrier, Goodlettsville, Hendersonville (White House not named — confirm) |
+| **2** | **Roger Denton Heating & Cooling** · 1726 US-31W, Goodlettsville 37072 · **615-392-4473** · rogerdentonhvac.com | **Tempstar PGB4** (also sells American Standard, Rheem) | own site: **White House named**, Robertson + Sumner; "10 Year Labor & Parts Warranty"; gas piping; 30+ yrs · Birdeye **4.8★ / 64** |
+| **3** | **H. Brown & Son / Brown And Son Company** · Portland 37148 (Yelp/Birdeye: 1208 N Church St; site: 109 S Broadway — confirm) · **(615) 325-2624** · hbrownhvac.com | **Tempstar PGB4** (Tempstar Elite Dealer; also Trane) | own site: White House page, **License #62850**; BBB **A+**, ~66 yrs; Google **4.84★ / 42** |
+
+**Alternate:** Extreme Heating & Cooling LLC · 855 Springfield Hwy Ste 101, Goodlettsville · installs Carrier, Trane,
+Lennox, Rheem · TN licence #77796 · names White House (review count not read; site 403s to fetch).
+**Dropped, with reason:** Boyd Heating & Air, Portland — carrier.com lists it, but **its own site says "American
+Standard Customer Care dealer"** at a different address → stale Carrier listing, same brand as Derryberry.
+Peters Heating & A/C (carrier.com "Hendersonville") — **901 = Memphis area code**, stale. Mike Cross (La Vergne) and
+Cumberland Cooling (East Nashville) — too far.
+
+🟢 **Also worth one question to Daniels:** the 09-09 research lists Daniels as **"York Comfort Certified"** — they may be
+able to price the **York PG3E30L07** (60k heat out, TXV, no leak sensor; see MARKET SWEEP above) against their Carrier.
+
+⚠️ **Not verified for ANY of the three:** package-unit experience, sheet-metal transitions, A2L/R-454B tooling, or that
+they will quote the attached duct drawing as drawn. Use the 09-09 call script + the 8-point acceptance checklist.
+Review counts are well below Daniels (4.9/749) and Petitt (5.0/494) — smaller shops, not a quality verdict.
+Sources: carrier.com dealer pages (Joelton, Portland, Hendersonville, Greenbrier) · rogerdentonhvac.com ·
+reviews.birdeye.com (Roger Denton) · hbrownhvac.com · BBB / Birdeye / Yelp search snippets (Brown & Son, Boyd, Haskins) ·
+boydheatingandair.com · extremehvacpro.com (search snippets)
+
+## ✅ FILTER GRILLE ANSWERED — Jeff, 2026-09-15 5:52 PM: *"It is 20x25 filters"*
+
+Closes the 09-11 open item (§ THE DUCT DRAWING #3, *"Size of the living-room return grille/filter is unknown.
+Measure it."*). **20 × 25 = 3.47 sq ft ≥ the 3.3 sq ft needed; 995 CFM ÷ 3.47 = ≈ 287 fpm, inside the ACCA
+Manual D 300 fpm filter-face maximum.** The return grille is NOT the choke point. **Drop "filter grille of at
+least 3.3 sq ft" from the contractor asks** — it already complies.
+⚠️ Margin is only ~4%, and nominal size ignores louver blockage, so: keep a **low-pressure-drop filter** (pleated
+MERV 8-11). A dense 1" MERV 13 can cost more static pressure than the twist fix recovers.
+
+## 🔄 SCOPE RE-THINK — Jeff, 2026-09-15 ~5:00 PM: *"Maybe we are being too rigid in the duct build all we need is the twist fixed"*
+
+**Agreed, and it is the better negotiating position** (nobody had replied to the as-drawn scope by 4:52 PM).
+Split the ask into DEFECT vs UPGRADE:
+- **MUST (the actual defect):** (1) twist eliminated at the unit on **BOTH** supply and return — Daniels' method
+  (supply dead straight, return crossing over ~5 ft out, no plenum box) is sound *if* the return is not flattened
+  and both ducts are hung separately and insulated; (2) replace the **damp supply section** (localised → collar/
+  transition leak; whole-run → crawl humidity, and new duct would sweat too); (3) **static pressure before AND
+  after**, recorded — the only proof the fix worked, and an ACCA QI condition.
+- **PRICE SEPARATELY (upgrades, not defects):** the three 6"→8" branch upgrades (real Manual D engineering —
+  existing ≈688-724 fpm vs 700 flex max — but 30 years lived-with, and they can be done later without touching
+  the unit connection); the **garage 7" run** (a want; it also takes CFM from the house); an **18" return**.
+- **Dropped:** filter grille requirement (see above).
+**Why it helps:** simpler scope = more bidders answer; Derryberry's sheet already carries a **$350 duct-repair**
+line, so a twist-fix-as-repair could come in far below his $7,500 full replacement.

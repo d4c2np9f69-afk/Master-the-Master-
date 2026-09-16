@@ -113,6 +113,176 @@ is too long — that **it was never checked against the house.**
 
 **That is ONE.** Everything else that was on this table has been verified and closed.
 
+## ☁️ #183 — CLOUDFLARE PAGES FUNCTIONS OVER THE 100k/day FREE CAP. OPEN, NOT FIXED. (logged 2026-09-15 3:20 PM)
+
+**Cloudflare emailed Jeff at 75% on 09-14. The 09-14 session measured it, wrote a partial fix, and
+never put it on this list — this row is that hand-off, made properly.**
+
+Measured 09-15 via GraphQL `pagesFunctionsInvocationsAdaptiveGroups` (token in `HCC_ACCESS.md`
+§Cloudflare now carries Account Analytics:Read). Daily UTC requests: **09-02 122,642 · 09-03 117,764 ·
+09-04 119,618 · 09-05→09-10 ≈64k · 09-11 118,419 · 09-12 108,757 · 09-13 122,495.** Over cap 6 of the
+last 14 days; `errors` stayed ~0 on those days, so nothing was observed failing.
+
+🔴 **THE CAUSE IS THE KIOSK WINDOW ON THE BEAST — correlated to the hour, three times:**
+| event | request rate |
+|---|---|
+| Beast rebooted 09-14 21:56 CT (kiosk window died) | 22:00 CT hour → **36/hr**, overnight 19–42/hr |
+| watcher log `09-15 09:13:41 opening kiosk` | 09:00 hour **2,381**, then **~3,100/hr** |
+| Beast rebooted 09-15 15:00 CT | 15:00 hour → **9** |
+And the high-day blocks match the watcher log: kiosk opens 09-01→09-04 and 09-10→09-11; **#147 (watcher
+dead 09-04→09-10) is exactly the ≈64k plateau.**
+
+⚠️ **Two 09-14 conclusions were WRONG — do not reuse them:** (1) *"13k → 64k step on 09-07"* — 09-06 was
+really **63,736**; that was a partial-window query. (2) *"kiosk theory is dead, the watcher log stops at
+09-11 12:03"* — the log records **launches**; one window opened then and left up IS the 09-11→09-14 load.
+
+**Why one client costs ~3,000/hr, not the ~750/hr the code comment estimates:** kiosk rotation
+(`index.html` ~8738, every 60 s) clicks a nav button and `hccSection()` fires that section's loaders
+(HOME 5, GUARDIAN 5) **on top of** the 60 s batch at ~9837. Exact per-loader call count NOT measured yet.
+
+**Also seen, unexplained:** `exceededResources` (CPU limit) ~20–26/hr 09-14 16:00→22:00 CT.
+
+### 🟡 09-15 ~9:45 PM — HALF THE FIX IS LIVE AND MEASURED. The other half is waiting on Jeff.
+
+Shipped in commit `56f8ebf` (SW **hcc-v110**), both transport-only — no calculation that consumes
+this data changed:
+1. **`/api/states` is shared for 20 s.** 17 loaders each downloaded the whole house state list
+   separately; one 60 s tick fired ~10 identical downloads seconds apart. Failures are never
+   cached, and any non-template POST clears it first, so a card re-read after Jeff presses a
+   button cannot show the pre-press state.
+2. **The 60 s tick no longer runs while the page is hidden** (`document.hidden`), with a
+   catch-up on `visibilitychange` so a phone coming out of a pocket is current immediately.
+
+**MEASURED ON THE LIVE SITE, load burst excluded, 4 clean minutes, real token, 09-15 9:44 PM:**
+
+| | before (09-15 measurement) | now |
+|---|---|---|
+| whole page | **49–53 req/min** | **27.2 req/min** (≈39,200/day per always-open screen) |
+| `/api/states` | 15.8/min | **1.2/min** |
+
+**THE SINGLE BIGGEST REMAINING ITEM IS THE UTILITY HISTORY, AND IT IS DELIBERATELY OFF:**
+`/api/history/period/…` **9.0/min** + `/api/ha-stats` **3.0/min** = **12.0 of the remaining
+27.2 req/min (44%)**. The billing-cycle history only grows by minutes, and HA compiles those
+statistics **hourly**, so a 5-minute share cannot show anything staler than the data already is.
+The code is written, tested and gated behind **`CACHE_UTILITY_READS = false`** in `index.html` —
+one word turns it on, ~16,700 requests/day per screen saved.
+
+🔴 **It is off because of Jeff's own rule, 09-15: _"Do not fuck with the utilities and make sure
+you freaking [read] because obviously you have not before you touch any of it."_ Those two calls
+feed the WATER / GAS / ELECTRIC cards. It ships only when he says yes out loud.**
+| owner: me · **blocked on Jeff's word for the utility half only**
+
+## 🔓 #184 — `/api/climate` POST CAN CHANGE THE THERMOSTAT WITH NO PASSWORD (logged 2026-09-15 3:20 PM)
+
+`functions/api/climate.js:315-316` uses `env.LUX_EMAIL || body.email` / `env.LUX_PASSWORD ||
+body.password`, and **both env vars ARE set in production** (names read from the Pages project API
+09-15, values not read). So by the code, an unauthenticated `POST /api/climate
+{"action":"set_mode","value":"off"}` to loewenhome.com switches Jeff's LUX. **NOT proven live on
+purpose** — a test POST would change his real thermostat. Fix pattern already exists in the repo:
+require the family password / `auth.js` hash (as `hours.js` control does). | owner: me · Jeff's go
+⚠️ **2026-09-15 3:15 PM — Jeff: *"The lux went down with a power surge."*** The LUX CS1-DD-FB is DEAD,
+so the exposed endpoint currently has no device to act on (lower urgency), and the app's LUX card will
+error until the ecobee (`EB-STATE6P-01`, bought 09-14, see #106) replaces it. The surge left a **scorch
+mark at the subbase wire entry** (Jeff's photo) — the 24 VAC circuit/transformer is a suspect.
+
+## ❄️ #185 — TEMPORARY A/C CONTROL: SONOFF MINI Dry + Echo Dot temperature, until the ecobee lands (2026-09-15)
+
+Jeff is running the A/C with red jumped to blue (alligator clips) since the LUX died. Plan being
+discussed: the relay replaces the jumper, HA switches it on a temperature.
+- **Wiring:** red → **COM**, blue → **NO** (no thermostat now, so NO = a dead SONOFF leaves the A/C OFF
+  rather than running forever). Power: N/L 100–240 VAC **or DC+/DC− 12–48 V DC** (per
+  `beehive/garage_door_sonoff_mini_dry_setup_2026-08-06.md`) — **the thermostat's 24 V is AC, never
+  feed it to DC+/DC−.**
+- **Sensor measured 09-15, 12 h window:** `sensor.3rd_all_devices_echo_dot_temperature` changes in
+  **0.54 °F steps** (0.3 °C), recorded at **10-min multiples, median gap 20 min, one 140-min gap**
+  (12:44→15:04). A 71 °F cut-off will overshoot — the automation needs a ≥2 °F band, a minimum
+  compressor off-time, and a fail-safe if the sensor goes unavailable (alexa_media broke 09-04).
+- **Room of that Echo Dot: NOT known.** Ask, don't assume.
+Status: advice given, **nothing built.** | owner: Jeff wiring · me automation on his go
+- **09-15 3:42 PM — Matter Server add-on option `ble_proxy: true` SET (was absent) + add-on restarted**,
+  so HA can commission over its own Bluetooth (add-on DOCS.md: *"drive BLE commissioning through Home
+  Assistant's bluetooth stack"*; `bluetooth_adapter_id` is deprecated). Jeff said *"You fucking add it"*.
+  Garage opener verified back in 20 s (`switch.garage_garage_door_opener` off, `cover.garage_door` open,
+  same as before). **This non-default option is deliberate — do not "tidy" it.**
+- **It IS a Matter device** — HA's device registry: the garage MINI-D (S/N 25482400105228) is in via
+  integration `matter`, identifiers `matter/serial_…`. Jeff believed it was not; evidence shown to him.
+  Commissioning still needs the unit's **pairing code (QR / 11-digit)** — physical label.
+- ✅ **09-15 3:47 PM — COMMISSIONED FROM HA, no phone.** MINI-D S/N **25517000035042**, code from Jeff's
+  label photo. Route: WS `matter/set_wifi_credentials` (house SSID/PSK from `HCC_ACCESS.md` §WiFi line 74,
+  never printed) → WS `matter/commission {code, network_only:false}` → success in **27 s**, device count
+  100→101. Renamed device **"A/C Relay"**, entity **`switch.ac_relay`** (was `switch.wifi_smart_switch`;
+  no "garage" in the name on purpose — the 08-26 `*garage*` match bug). State `off`.
+  `select.wifi_smart_switch_power_on_behavior` = **off** (after a power cut the A/C stays off until HA
+  turns it on). Firmware v1.0 = latest.
+- ✅ **09-15 3:48:58–3:49:05 PM — RELAY PROVEN, UNWIRED.** `switch.turn_on` → device reported `on` in
+  0.5 s; 5 s later `turn_off` → `off` in 0.5 s. **Jeff heard both clicks** ("Got the click"). Contacts
+  not yet meter-tested. **Next: Jeff wires red→COM, blue→NO; then run it for real; then the automation.**
+- ~~Echo Dot room = MASTER BATHROOM~~ → 🔴 **CORRECTED by Jeff 4:03 PM: the Echo is in the MASTER
+  BEDROOM.** (The bathroom/one-register caveat is void.)
+- 🌡️ **OFFSET — Jeff's bedside thermometer 72 °F vs Echo 75.2 °F at 16:03 → `input_number.bedroom_echo_temp_offset`
+  = −3.2 °F** (helper created 09-15, adjustable, retriggers the automation on change). ⚠️ **The 75.2 was
+  59 min old** (last_reported 15:04:53, before the A/C started 15:59) — the offset is an ESTIMATE; re-check
+  with a fresh Echo report + a thermometer read at the same minute.
+- **09-15 4:06 PM — automation UPDATED to use the corrected temperature**, entity renamed to
+  **`automation.hcc_ac_relay_thermostat`**, `initial_state` removed (it is live). validate_config all True;
+  dry run echo 75.2 + −3.2 = **72.0** → no change, correct; automation `on`, relay `on`. Effective Echo
+  thresholds: OFF at Echo ≤ 74.2, ON at Echo ≥ 76.2.
+- 🔕 **09-15 4:06 PM — Jeff: *"I don't need a bunch of warnings coming across my phone. Warn me if
+  something bad goes wrong."*** The **2-hour-running push is REMOVED — do not re-add it.** The ONLY two
+  pushes: (1) Echo temp unavailable 15 min → A/C OFF + push; (2) **`switch.ac_relay` unavailable 15 min
+  → push** (HA can't control the A/C). Both fault-only. Re-validated, dry run unchanged (72.0, no action),
+  automation `on`, relay `on`.
+- 📱 **09-15 ~4:35 PM — IN THE APP, LIVE. Commit `c259a57`** (Jeff: *"Show it in the app"*). New read-only
+  **A/C — Master Bedroom** card on HOME in the LUX card's place: corrected temp, A/C on/off + since, 71/73
+  band, automation Active/OFF, Echo raw + offset + age; banner warns on relay offline / temp missing /
+  automation off. **One HA `/api/template` POST per refresh** (#183 budget). LUX card + LUX login card
+  hidden; boot/HOME/60 s go through `loadThermostat()` (`LUX_RETIRED = true`) so `/api/climate` is no
+  longer called; `loadClimate()` untouched so `creds-gate-test.js` still passes. SW **hcc-v109**.
+  **Proof:** new `scripts/ac-card-test.js` (7 states) pass · lint clean · creds-gate pass · smoke pass
+  (374/0/0) · image-fit 216 PASS · Cloudflare deployment `3299e267` **deploy=success**, commit c259a57 ·
+  **live loewenhome.com driven in Playwright with real HA data at 1536x864 AND 390 dark:** "Cooling •
+  bedroom 72.0°", ON since 3:59 PM, Active, 75.2° raw −3.2°, 1 request, 0 page errors.
+  ⚠️ **Deployed as a commit built directly on origin tip eb1a0f8** so the 22 local HVAC doc commits (contractor
+  negotiation figures) were NOT published; local branch rebased onto c259a57, still ahead 22, unpushed.
+  The 09-14 kiosk throttle (#183) is again uncommitted in the working tree, NOT live.
+  🔴 The "Holds 71/73" row is display text — change it if the automation band changes.
+- ✅ **09-15 ~9:45 PM — THE ECHO DOT IS OUT OF THE LOOP. The A/C now reads Jeff's own weather
+  station, and the station has its own card in WEATHER.** Commit `56f8ebf`, SW **hcc-v110**.
+  **Why:** the Echo's error was never a constant — it ran **−3.2 °F in the afternoon and −4.0 °F at
+  night**, and recalibrating the offset off one ambiguous "73" left Jeff's bedroom warm for an hour
+  (*"the AC is at 73 in the bedroom and it's warm"*). That was my error, and the offset is now
+  **gone**, not retuned: the card and the automation both read
+  `sensor.my_weather_station_inside_temperature` directly. Jeff: *"The indoor number I'm giving you
+  is the weather station inside number if you can pull that one."*
+  **The automation** `automation.hcc_ac_relay_thermostat` was switched the same evening to that
+  sensor, band **70.5 off / 72.5 on**, no offset — verified live (indoor 71.4 °F, relay on since
+  8:03 PM). Jeff, after the switch: *"the AC feels much better bedside temp is 71.6."*
+  **WEATHER gained a station card** — indoor, outdoor + feels-like, wind/gust/direction, rain today,
+  pressure, sun/UV — fed by **the same single template call the A/C card already makes, so it adds
+  ZERO requests** (#183 budget). Jeff: *"Why wasn't all this data put into the weather section this
+  is some good stuff."*
+  **Proof, in order:** the app's own `AC_TPL` extracted from `index.html` and POSTed to live
+  Beehive returned **all 16 fields, none missing/unknown** (indoor 71.4, out 81.7, pressure 30.17) ·
+  `ac-card-test.js` 37/37 · lint clean · creds-gate pass · smoke 374/0/0 · image-fit 216 PASS ·
+  **live loewenhome.com driven in Playwright with a real token:** A/C card *"❄️ Cooling • bedroom
+  71.4°"*, sensor row *"Weather station • 62% RH • just now"*, station card *"📡 Live from your own
+  console"* / 71.4 °F 62% RH / 81.5 °F feels 86.9° / Calm / None / 30.18 inHg / UV 0 · **0 page
+  errors, no horizontal overflow at 390 px.**
+  ⚠️ Deployed again as a commit built **directly on origin tip `c259a57`** so the 22 local HVAC doc
+  commits (contractor figures) stayed unpublished.
+- 🟡 **09-15 3:52 PM — AUTOMATION BUILT, SAVED OFF.** `automations.yaml` id `hcc_ac_relay_thermostat`,
+  entity `automation.hcc_a_c_relay_thermostat_master_bath_echo_71_off_73_on_temporary_until_ecobee`,
+  `initial_state: false`, verified `off`, `last_triggered None`. Logic: OFF ≤71 °F if on · ON ≥73 °F if
+  off ≥5 min · sensor unavailable/unknown 15 min → OFF + time-sensitive push · on 2 h → push. Triggers:
+  temp change, every 5 min, HA start. `validate_config` all True; template dry-run at 75.2 °F correctly
+  gave WANT_ON=False (relay off only 2.3 min). **Enable ONLY after Jeff wires it and the go-test starts
+  the unit.** Delete when the ecobee is installed.
+- ✅ **09-15 3:59:18 PM — LIVE.** Jeff wired red→COM, blue→NO. `switch.turn_on` → `on`; **Jeff: "It's
+  running the Ac is on."** Automation turned **ON at 4:00 PM**; a manual run at 16:00:30 CT finished with
+  no error and correctly took no action (trace walked every branch, stopped at the ON branch's
+  relay-off check; relay stayed `on`, bath 75.2 °F). **NOT yet seen: a real 71 °F cut-off or a 73 °F
+  restart** — first real test is when the bath reaches 71. Check the trace then.
+
 ## ⛈ #182 — THE SEVERE WEATHER ALERT WAS DEAD TWO WAYS. FIXED 2026-09-10 9:55 PM.
 
 **Jeff asked whether a severe thunderstorm warning could be popped on screen. Testing it found the
@@ -1245,7 +1415,7 @@ everything else so you can see these errors as they happen ... I would like a 24
 
 | # | Item | Owner | Age | Notes |
 |---|---|---|---|---|
-| 106 | 🟢 **A/C UNIT + COMPLETE DUCTWORK — LIVE JOB, Jeff is about to do this.** Unit is **SETTLED: Alpine 2.5–3 ton**, free shipping, all components included — **do NOT re-shop it or propose other brands.** Existing system is a **package unit** (all outdoors, no indoor air handler, Jeff 08-18). Layout confirmed 08-31: **7 registers, one per room, ONE return in the living room.** Ductwork materials priced by real search 08-31: **$790–$990** (flex R8 7in $69.99/25ft roll, boots $13.98–16.98, foil tape $27.98). Jeff will work alongside his A/C friend on the ductwork to cut labor. **STILL OPEN: what to pay the friend (NOT researched, deliberately not guessed), the Alpine unit price, and the current unit's tonnage off the data plate.** 🔴 **KNOWN DEFECT TO FIX: the main supply trunk AND the return both run down the CENTRE of the house and are TWISTED where they meet the unit** (Jeff 08-31) — a restriction at the one point all the air passes through; needs proper sheet-metal transitions at the unit on both, not flex twisted onto the collar. Full detail + assumptions that change the number: `docs/hvac/ac_unit_and_ductwork_2026-08-31.md`. ⚠️ **The earlier version of this conversation was LOST** — exhaustive search of the record, all 35 session transcripts and the filesystem found nothing; it happened in a cloud session this machine cannot read. **Put every new number in that file, not in chat.** | Jeff + me | 0d | Baseline the before/after from CEMC 15-min data so the improvement is measured, like the 07-25 duct repair (441 kWh, 16.8%). |  <br>🔄 **2026-09-11: THE PLAN ABOVE IS SUPERSEDED — WENT TO CONTRACTORS 09-09, ALL THREE QUOTES ARE IN.** Daniels **Carrier 48NL-B300603 $9,000** delivered (10-yr labour+freon, twist fix + supply/return flex) · Derryberry **Am. Std $9,098** (twist NOT fixed; $16,598 with ducts) · Petitt **Ruud (no model) $13,000**, labour conditional on a paid plan, freon excluded → **≥$14,296 over 10 yrs**. Carrier vs Ruud compared line by line from both manufacturers' own spec sheets and warranty: **Carrier wins on stainless/lifetime heat exchanger, rust-proof base, EER2, 6 dB quieter; Ruud wins on TXV, no leak sensor, compressor 10 yr unregistered, 80k burner option.** Jeff's standing pick: Carrier through Daniels. **Owed before signing:** Daniels' duct diameters in writing; Petitt's exact model (`AJA` stainless?). Full detail: `docs/hvac/ac_unit_and_ductwork_2026-08-31.md` § "CARRIER vs RUUD". <br>📐 **09-11 PM:** duct sketch redrawn as a one-page scope sheet, `iCloudDrive\HCC AC Quotes\Duct layout - scope of work.pdf`. It adds both unit transitions, an 18" return option, a filter grille of at least 3.3 sq ft, and start-up readings. **Still owed:** Daniels' price for that exact scope, and replies from Ryan and Logan by **5 PM Mon 14 Sep**. <br>🏁 **Jeff 09-11 6:07 PM: "We intend to buy the carrier from Danial's as long as they meet the requirements."** Petitt is the fallback only. **8-point acceptance checklist** (registration in 90 days, $800 warranty in writing, duct diameters, both unit transitions, ≥3.3 sq ft grille + 18" option, permit + licence number, start-up readings, disconnect/pad/surge/t-stat wire) is in the hvac file § "THE BUYING DECISION". A revised price above $9,000 is expected — that number was for the original scope. <br>🌡️ **Thermostat re-verified 09-11 PM: ecobee Smart Thermostat Premium CONFIRMED as the pick** — HA's own `ecobee` source creates CO2/VOC/AQI sensors + per-SmartSensor temp/humidity/occupancy (feeds the app's empty air-quality card); no developer API key needed since HA 2026.3. 🔴 **CORRECTION: ecobee is NOT Matter** (CSA database: no entries; ecobee support: no Matter article) — the local hedge is **Apple HomeKit**, and HomeKit pairs to only ONE controller. 💵 **TVA EnergyRight Marketplace $259.99 → ≈$159.99** after up to $100 rebate, plus **CEMC $65 enrolment (+ up to $65/yr)**, in exchange for peak adjustments of up to 4 °F that Jeff can opt out of per event. Nest loses per-room sensors (SDM API), Honeywell exposes none, Zigbee-local Centralite is discontinued. |
+| 106 | 🟢 **A/C UNIT + COMPLETE DUCTWORK — LIVE JOB, Jeff is about to do this.** Unit is **SETTLED: Alpine 2.5–3 ton**, free shipping, all components included — **do NOT re-shop it or propose other brands.** Existing system is a **package unit** (all outdoors, no indoor air handler, Jeff 08-18). Layout confirmed 08-31: **7 registers, one per room, ONE return in the living room.** Ductwork materials priced by real search 08-31: **$790–$990** (flex R8 7in $69.99/25ft roll, boots $13.98–16.98, foil tape $27.98). Jeff will work alongside his A/C friend on the ductwork to cut labor. **STILL OPEN: what to pay the friend (NOT researched, deliberately not guessed), the Alpine unit price, and the current unit's tonnage off the data plate.** 🔴 **KNOWN DEFECT TO FIX: the main supply trunk AND the return both run down the CENTRE of the house and are TWISTED where they meet the unit** (Jeff 08-31) — a restriction at the one point all the air passes through; needs proper sheet-metal transitions at the unit on both, not flex twisted onto the collar. Full detail + assumptions that change the number: `docs/hvac/ac_unit_and_ductwork_2026-08-31.md`. ⚠️ **The earlier version of this conversation was LOST** — exhaustive search of the record, all 35 session transcripts and the filesystem found nothing; it happened in a cloud session this machine cannot read. **Put every new number in that file, not in chat.** | Jeff + me | 0d | Baseline the before/after from CEMC 15-min data so the improvement is measured, like the 07-25 duct repair (441 kWh, 16.8%). |  <br>🔄 **2026-09-11: THE PLAN ABOVE IS SUPERSEDED — WENT TO CONTRACTORS 09-09, ALL THREE QUOTES ARE IN.** Daniels **Carrier 48NL-B300603 $9,000** delivered (10-yr labour+freon, twist fix + supply/return flex) · Derryberry **Am. Std $9,098** (twist NOT fixed; $16,598 with ducts) · Petitt **Ruud (no model) $13,000**, labour conditional on a paid plan, freon excluded → **≥$14,296 over 10 yrs**. Carrier vs Ruud compared line by line from both manufacturers' own spec sheets and warranty: **Carrier wins on stainless/lifetime heat exchanger, rust-proof base, EER2, 6 dB quieter; Ruud wins on TXV, no leak sensor, compressor 10 yr unregistered, 80k burner option.** Jeff's standing pick: Carrier through Daniels. **Owed before signing:** Daniels' duct diameters in writing; Petitt's exact model (`AJA` stainless?). Full detail: `docs/hvac/ac_unit_and_ductwork_2026-08-31.md` § "CARRIER vs RUUD". <br>📐 **09-11 PM:** duct sketch redrawn as a one-page scope sheet, `iCloudDrive\HCC AC Quotes\Duct layout - scope of work.pdf`. It adds both unit transitions, an 18" return option, a filter grille of at least 3.3 sq ft, and start-up readings. **Still owed:** Daniels' price for that exact scope, and replies from Ryan and Logan by **5 PM Mon 14 Sep**. <br>🏁 **Jeff 09-11 6:07 PM: "We intend to buy the carrier from Danial's as long as they meet the requirements."** Petitt is the fallback only. **8-point acceptance checklist** (registration in 90 days, $800 warranty in writing, duct diameters, both unit transitions, ≥3.3 sq ft grille + 18" option, permit + licence number, start-up readings, disconnect/pad/surge/t-stat wire) is in the hvac file § "THE BUYING DECISION". A revised price above $9,000 is expected — that number was for the original scope. <br>🌡️ **Thermostat re-verified 09-11 PM: ecobee Smart Thermostat Premium CONFIRMED as the pick** — HA's own `ecobee` source creates CO2/VOC/AQI sensors + per-SmartSensor temp/humidity/occupancy (feeds the app's empty air-quality card); no developer API key needed since HA 2026.3. 🔴 **CORRECTION: ecobee is NOT Matter** (CSA database: no entries; ecobee support: no Matter article) — the local hedge is **Apple HomeKit**, and HomeKit pairs to only ONE controller. 💵 **TVA EnergyRight Marketplace $259.99 → ≈$159.99** after up to $100 rebate, plus **CEMC $65 enrolment (+ up to $65/yr)**, in exchange for peak adjustments of up to 4 °F that Jeff can opt out of per event. Nest loses per-room sensors (SDM API), Honeywell exposes none, Zigbee-local Centralite is discontinued. <br>♻️ **2026-09-14 — DERRYBERRY'S IS BACK IN, by Jeff's own reversal of his 09-11 "Derryberry's is OUT".** Jeff: *"We never even let them come back with anything."* Logan (Petitt) withdrew after asking for Daniels' quote and being refused, so the field needed a third body. Counter-offer drafted to **Charles Brady, Charles.b@derryberryac.com**, target **$9,000 all-in**, source `scratchpad\derryberry-body.txt`. It demands, in writing: the **model number** (his sheet carries none) + gas in/out Btu · **stainless HX and the 20-yr term** · R-454B · **new** electrical not "reconnect" · venting (neither box ticked) · **the attached drawing quoted AS DRAWN** instead of his $7,800 lump full-replacement · thermostat by owner with new 18 AWG + C-wire · permit + TN licence number · start-up readings at 995 CFM · no $300 restock, fixed price. <br>📐 **DRAWING CORRECTED 09-14 — Jeff caught a labelling error that would have gone to a bidder.** The long right-side 8" run feeds the **MASTER BEDROOM**, not the "Master bath (2nd run)" a session had labelled it. **The master bath has ONE 6" register and that is all it needs.** Fixed in `duct-layout.html`, re-rendered, verified in the PDF text (says "Master bedroom", no longer says "2nd run"), and `derryberry-body.txt` item 3 updated to match so the email and the drawing agree. <br>🔴 **HEAT-EXCHANGER CORRECTION REVERSED — the 09-11 downgrade was MINE and it was wrong.** I had personally verified American Standard warranty `GW-PKGD-2401A` (**HX 20 years, registered or not**) on 09-11, then hours later downgraded it to 10 on the strength of Charlie's handwritten sheet and wrote *"the sheet wins."* Jeff caught it. Full correction block now in `docs/hvac/ac_unit_and_ductwork_2026-08-31.md` § the 09-11 CORRECTION. **Stainless rests on Charlie's own phone call to Jeff — no American Standard document states the material — so the email asks him to put both on the quote.** Do not re-downgrade this row from the sheet again. <br>📊 **Comparison PDF rebuilt as THREE columns** (Carrier / Ruud / American Standard), no pricing, in `iCloudDrive\HCC AC Quotes\`. 🔴 **An unsourced "Owner reliability 4 of 5 (Consumer Reports)" cell in the American Standard column was REMOVED, not shipped** — the session's web-search budget was exhausted (200/200) so it could not be verified, and it was cited to CR in a document going to a contractor. The sourced Carrier-vs-Ruud CR rows are untouched. <br>⏳ **OWED, and both are Jeff's hands:** (1) **attach the two PDFs and send** — Outlook attach automation failed 6× across 3 approaches (menu inconsistent, no file dialog), so this is manual; (2) ⚠️ **a STALE duplicate of the duct layout sits loose in the iCloud ROOT as `AC - Duct layout - scope of work.pdf` (260 KB, 09-11) — that is the PRE-correction drawing. Attach the one in `HCC AC Quotes\` (259 KB, 09-14), not the root copy.** 16 such `AC - *` root duplicates exist alongside the folder; cleanup awaiting Jeff's go. <br>📤 **2026-09-14 ≈4:5x PM — THE CHARLES EMAIL IS SENT.** Verified in Outlook's own **Sent Items**, top row under Today: to `Charles.b@der…`, subject "A/C replacement at 3…", preview *"Charlie, Below is the bottom…"*. 🔴 **The Olk local-cache scan returned ZERO hits for it and was WRONG** — the same scan also returned zero for `danielsheating`, whose forward is visibly in that same Sent list. **That method produces false negatives on mail that demonstrably sent; it is not evidence of a non-send.** Third time this session it misled; use Outlook's own Sent folder, not the cache. ✅ **ATTACHMENTS CONFIRMED: 2 attachments, 675 KB** — `Three bid comparison - Carrier …` (415 KB) + `Duct layout - scope of work.pdf` (260 KB), **both from `HCC AC Quotes` not the root**, proven by the missing `AC - ` filename prefix. Charles has the CORRECTED drawing. 🔴 **My "no paperclip" alarm was WRONG** — a "Flag this message" tooltip was covering that spot in the first capture; and the byte sizes (265,621 vs 265,763) both round to 260 KB, so size can never tell the two duct PDFs apart. **Only the `AC - ` prefix distinguishes them.** <br>💵 **JEFF'S CALL, same time — +$500 TO CHARLES, because Ryan blew the deadline.** The 5 PM Mon 14 Sep deadline passed with **no reply from Daniels**. Jeff: *"if Danial's did not get back to me then I was too low or something happened ether way I have room with Danial's is needed."* ✅ **FIGURE CONFIRMED FROM THE SENT MESSAGE: $9,500 all-in.** Verbatim: *"The number to beat is $9,500 all-in for a 2.5-ton gas/electric package unit with labor taken [to 10 years]… number has to include the ductwork on the attached drawing."* **The $500 went INTO the target, not held back.** Sent 4:52 PM, subject "A/C replacement at 301 S Aztec Dr". ⚠️ `scratchpad\derryberry-body.txt` still reads $9,000 — **the sent message is the authority, not the draft.** **Either way Daniels' Carrier at $9,000 remains the standing pick**, and Jeff has said he has room with Ryan too — so a revised Daniels number above $9,000 is not an automatic loss, it gets measured against Charles. Full reasoning: `docs/hvac/ac_unit_and_ductwork_2026-08-31.md` § "JEFF'S CALL 2026-09-14 5:00 PM". <br>🌡️ **THERMOSTAT BOUGHT — Jeff 2026-09-14 6:49 PM: *"I want the 161"*.** Amazon **`EB-STATE6P-01`** (✅ **6P = Premium**, the model that carries the onboard VOC/CO₂/AQI sensors), **Used – Like New, $161.81**, sold and shipped by Amazon. **This SUPERSEDES the 09-11 $219.99 ecobee Certified Refurbished pick — do not re-pitch it.** He was shown the trade and took it: the $219.99 unit has a **3-yr warranty**, this one has **no stated warranty** (30-day Amazon returns only). The same page's "Buy New $189.99" from MD2 Family is *also* only *"manufacturer refurbished, 90-day warranty"* — passed on as well. 🔴 **ACTION ON ARRIVAL: confirm a SmartSensor is in the box.** A used listing does not guarantee it; Jeff needs exactly one (*"I only need one sensor"*, 09-11) and it is what produces the **per-room occupancy** entities for GUARDIAN. **Missing = the $58 saving is gone** (2-pack is $99.99). Check inside the 30-day return window. Integration is unaffected — it is the Premium, so `co2PPM`/`vocPPM`/`airQuality` still land in HA as verified from the component source. |
 | 109 | 🛑 **HOLD — DO NOT TOUCH THE IRRIGATION / SEWER-OVERCHARGE CODE. Jeff's explicit instruction, 2026-08-31 16:22.** The Orbit anti-siphon valve **arrived in the mail and goes in 2026-09-01**. Once water is back on, real gallons start flowing again and the system must be observed picking back up **as currently built**, against real water, before anything is changed. Jeff: *"don't change what's in there because it needs to pick back up reading it like it's set up to be because there's no gallon for minute flow other than what we get off of the meter to show other than the zones running."* **He is right and it is the whole design:** B-Hyve says WHICH zone and HOW LONG; the water meter is the ONLY source of HOW MUCH. `IRR_FLOW={1:8.78,2:10.09,5:4.4}` was itself derived FROM the meter (isolated single-zone runs, 08-06). ✅ **Confirmed 08-31: today's two deployed commits (dde13d2 gas/electric cycles, 8b406ac sewer City cycle) touched ZERO lines of this path** — no `functions/` files, 0 deletions across `irrGal`/`sewerWaste`/`water_billing_history`/`IRR_FLOW`/`whudCycleKey`. A paginated deep-history fetch for `functions/api/irrigation/index.js` was written and then **REVERTED unpushed** on Jeff's instruction; the approach is recorded below, re-apply only when he says. | Jeff → me | 0d | 🟢 **IT SELF-CORRECTS — this is the key thing.** The guard `if (totalGal <= 0) return;` only blocks while there is NO water. The moment a real run lands, `totalGal > 0`, the guard passes, and `irrGalFromHistory()` overwrites the phantom 5,098 with the real number automatically. Nothing needs changing for that to happen. |
 | 109b | 📋 **VERIFY-AFTER-VALVE CHECKLIST — run this once irrigation resumes (from 2026-09-01). Do NOT change code before working through it.** (1) B-Hyve cloud logs the run — `/api/irrigation` `history[]` shows station + run_time. (2) Water meter shows a matching delta in that window — **this is the only proof water actually moved**; a valve can run with the supply off and the model would invent gallons. (3) `water_billing_history` current row flips off **5,098** to a real number. (4) The two sources agree. **Baseline already measured 08-12, both sources, water confirmed flowing:** B-Hyve 362.1 gal modelled (st1 20min×8.78 + st2 15min×10.09 + st5 8min×4.40) vs meter 416.2 gal over 13:02→15:01 UTC — excess is household, model runs ~10% UNDER measured (conservative, good for the claim). | me | 0d | **Known gaps to raise only AFTER the checklist, not before:** (a) HA's switch history is a LOSSY mirror — on 08-12 it reported st1 at 35 min and **missed st2 entirely**; B-Hyve cloud is authoritative. (b) `irrigation_gallons_model.md` step 3 specifies *"prefer the measured meter delta during the run; fall back to the GPM model"* and *"Never show a model as a measurement"* — **the code is model-only and never reads the meter during a run.** (c) Zones 3/4/6 have no `IRR_FLOW` GPM, so real watering there is invisible (undercount). (d) B-Hyve `/watering_events/{id}` is PAGINATED and the app takes only `slice(0,10)` — the multi-year runtime archive Orbit holds has never been pulled. (e) The two existing history rows still hold 5,098. |  <br>🟢 **CHECKLIST WORKED 2026-09-10 23:18 - ITEMS (1) AND (3) ARE ANSWERED, AND (3) FAILS FOR A REASON NOBODY HAD FOUND.** Read-only throughout; **no code touched, the #109 HOLD stands.** **(1) B-Hyve DOES log the runs ✅** - `/api/irrigation` `history[]` returns **10 runs, 2026-09-05 through 09-09**, with station and run_time. Irrigation genuinely resumed after the 2026-09-01 valve install, so the hold's observation condition has been met. **(3) The phantom 5,098 has NOT flipped ❌ - and it CANNOT.** `irrGalFromHistory()` derives gallons from **HA switch history**, and that history contains **ZERO `on` states for every zone**. Measured on `switch.z2_front_left` across four window widths: 12 h → 1 row, 24 h → 3, 72 h → 7, **19 days (the real cycle window) → 49 rows - and ON states = 0 in every one.** Rows grow correctly, so this is **not** the >24 h history artifact from #68/#170/#178; **HA simply never records these switches as `on`.** B-Hyve runs are 14-43 min and HA polls the cloud on an interval, so the `on` window is missed. 🔴 **So the guard `if (totalGal <= 0) return;` fires every time and the current cycle's entry is never overwritten. #109's claim that *"it self-corrects automatically"* is FALSE as built** - it depends on a signal that does not exist. This is exactly known-gap (a) in this row's own notes - *"HA's switch history is a LOSSY mirror... B-Hyve cloud is authoritative"* - now proven to be total, not partial.
 | 109c | 🟡 **PENDING ON THE VALVE — then OMIT the valve-out window and the number is correct. Jeff's instruction, 2026-08-31 16:23:** *"once it goes in we need to check all this and make sure that it squares itself back up once that irrigation system starts running again and then what we can do is omit the amount of time that the valve was out and the number should be correct."* **This is the right call for the claim** — a period when the system was physically down must not appear as irrigation, and omitting it is defensible in a way that a modelled guess is not. **THE OMIT WINDOW, measured not guessed: last real B-Hyve run 2026-08-12 14:36 UTC → valve install 2026-09-01.** B-Hyve shows ZERO runs in that span and the meter confirms no irrigation-shaped draw. | Jeff → me | 0d | **The two stored rows and what each should become:** `whud-2026-7` (cycle 07-22→08-22) **contains REAL runs** — 08-06 and 08-12 — so its phantom 5,098 gets replaced with the real total, **not** omitted. Floor computed from the 10 events the API currently returns: 08-06 st1 42min + st2 42.23min + st5 30min = 926.9 gal; 08-12 st1 20 + st2 15 + st5 8 = 362.2 gal; **≥1,289 gal** — a FLOOR, because `slice(0,10)` truncates and earlier runs in that cycle were never fetched. `whud-2026-8` (08-22→now) contains **zero** runs and is entirely inside the valve-out window → **0 gal / $0**, or omitted. |  <br>💰 **THE REAL NUMBER, COMPUTED 2026-09-10 23:18 - AND THE TRACKED FIGURE IS 2.3x TOO HIGH.** Using this project's own measured GPM (`IRR_FLOW = {1:8.78, 2:10.09, 5:4.4}`, `index.html:6106`, calibrated from isolated single-zone runs on 08-06) against the 10 real B-Hyve runs inside the current cycle:

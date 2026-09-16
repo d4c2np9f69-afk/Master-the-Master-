@@ -19,7 +19,10 @@ catch (e) { ({ chromium } = require('playwright')); }
 
 const FILE_URL = 'file://' + path.join(__dirname, '..', 'index.html').replace(/\\/g, '/');
 const now = new Date().toISOString();
-const LIVE = { auto: 'on', echo: '75.2', echo_reported: now, offset: '-3.2', relay: 'on', relay_changed: now };
+const LIVE = { auto: 'on', indoor: '71.4', indoor_reported: now, indoor_hum: '62',
+  out_temp: '82.0', out_hum: '76', feels: '87.8', wind: '0.0', gust: '0.0', wind_dir: '223',
+  rain_today: '0.00', pressure: '30.17', uv: '0', solar: '0.00',
+  relay: 'on', relay_changed: now };
 
 let fails = 0;
 function check(name, got, want) {
@@ -61,6 +64,9 @@ async function run(browser, { payload, token = true, status = 200 }) {
     return new Promise((res) => setTimeout(() => res({
       banner: txt('acBanner'), bannerClass: (document.getElementById('acBanner') || {}).className,
       temp: txt('acTemp'), state: txt('acState'), auto: txt('acAuto'), echo: txt('acEcho'),
+      stBanner: txt('stBanner'), stIndoor: txt('stIndoor'), stOutdoor: txt('stOutdoor'),
+      stWind: txt('stWind'), stRain: txt('stRain'), stPressure: txt('stPressure'), stSun: txt('stSun'),
+      stCardShown: shown('stationCard'),
       acCallsBoot: acCalls,
       acCallsAfterRefresh: window.__calls.filter((c) => c.body.indexOf('ac_relay') >= 0).length,
       climateCalls: window.__calls.filter((c) => c.url.indexOf('/api/climate') >= 0).length,
@@ -82,22 +88,30 @@ async function run(browser, { payload, token = true, status = 200 }) {
   check('A/C card is shown', r.acCardShown, true);
   check('dead LUX card is hidden', r.luxCardShown, false);
   check('LUX login card is hidden', r.luxSetupShown, false);
-  check('corrected bedroom temp = 75.2 - 3.2', r.temp, '72.0°F');
+  check('indoor temp straight from the station', r.temp, '71.4°F');
   check('banner says Cooling', /Cooling/.test(r.banner), true);
   check('banner is the caution style', r.bannerClass, 'wx-banner wx-caution');
   check('A/C row says ON', /^ON since/.test(r.state), true);
   check('Automatic row says Active', r.auto, 'Active');
-  check('Echo row shows raw and correction', /^75\.2° raw −3\.2°/.test(r.echo), true);
+  check('sensor row names the weather station', /^Weather station • 62% RH/.test(r.echo), true);
+  check('station card is shown', r.stCardShown, true);
+  check('station indoor', /^71\.4°F • 62% RH/.test(r.stIndoor), true);
+  check('station outdoor with feels-like', /^82\.0°F • 76% RH • feels 87\.8°/.test(r.stOutdoor), true);
+  check('station wind calm', r.stWind, 'Calm');
+  check('station rain none', r.stRain, 'None');
+  check('station pressure', r.stPressure, '30.17 inHg');
+  check('station sun', r.stSun, 'UV 0 • 0 W/m²');
+  check('station banner says live', /Live from your own console/.test(r.stBanner), true);
   check('boot made exactly ONE A/C request', r.acCallsBoot, 1);
   check('a refresh adds exactly ONE request', r.acCallsAfterRefresh - r.acCallsBoot, 1);
   check('no /api/climate calls any more', r.climateCalls, 0);
   check('no page errors', r.errors, []);
 
   console.log('\n  RESTING (relay off)');
-  r = await run(browser, { payload: Object.assign({}, LIVE, { relay: 'off', echo: '74.1' }) });
+  r = await run(browser, { payload: Object.assign({}, LIVE, { relay: 'off', indoor: '70.9' }) });
   check('banner says Resting', /Resting/.test(r.banner), true);
   check('banner is the go style', r.bannerClass, 'wx-banner wx-go');
-  check('temp 74.1 - 3.2 = 70.9', r.temp, '70.9°F');
+  check('indoor 70.9 shown as-is', r.temp, '70.9°F');
   check('A/C row says OFF', /^OFF since/.test(r.state), true);
 
   console.log('\n  RELAY OFFLINE');
@@ -112,7 +126,7 @@ async function run(browser, { payload, token = true, status = 200 }) {
   check('Automatic row warns', /OFF/.test(r.auto), true);
 
   console.log('\n  ECHO SENSOR UNAVAILABLE');
-  r = await run(browser, { payload: Object.assign({}, LIVE, { echo: 'unavailable' }) });
+  r = await run(browser, { payload: Object.assign({}, LIVE, { indoor: 'unavailable' }) });
   check('banner warns temperature missing', /temperature missing/.test(r.banner), true);
   check('temp row says no reading', r.temp, 'no reading');
   check('no page errors', r.errors, []);

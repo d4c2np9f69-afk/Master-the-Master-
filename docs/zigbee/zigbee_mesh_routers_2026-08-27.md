@@ -156,3 +156,39 @@ and silent since 08-23.
 🟠 **NOT FEATURE-TESTED YET.** Creating it is not proof it fires. The real test is opening the
 mailbox door and confirming both the announcement and the push. **A component check here would be
 worthless** — the 08-21 stream check printed ALL GOOD eleven minutes after the popups were dead.
+
+---
+
+## 📡 COORDINATOR ANTENNA MOVED — 2026-09-15 (Jeff)
+
+**What he did:** replaced the antenna cord with a **10-foot** one and moved the antenna **closer to the window**
+to reach the mailbox. Then at ~7:43 PM he raised it **higher** and **pointed it toward the kitchen**.
+
+⚠️ **The move knocked Zigbee2MQTT over.** Unplugging the stick left the add-on in `error` state at 16:32 and
+**every Zigbee device went unavailable for ~65 minutes**. Restarting the add-on (16:37:46) fixed it — the USB
+stick was present the whole time at `/dev/serial/by-id/usb-1a86_USB_Serial-if00-port0`, exactly where the config
+expects it. **If Zigbee ever goes dark after touching the antenna, check the add-on state first.**
+
+### MEASURED — run 1, 16:40–19:41 CT (window position), first live message per device
+
+| Device | 08-27 baseline | 09-15 run 1 | |
+|---|---|---|---|
+| Back Deck Door | 83 | **91–98** | better |
+| Spare Contact 1 | 120 | **138** | better |
+| Garage Man Door | 83 | 72 | slightly down |
+| Kitchen Sink Leak | 91 | 65 | down |
+| Kitchen Refrigerator Leak | 83 | 61–65 | down |
+| Garage Door Down | 83 | 36–61 | down |
+| Front Door | 65 | 43–47 | down |
+| Guest Bath Leak | 80 | 40–43 | down |
+| **Mailbox** | 76 | **0–21** | worst — but **transmitting again** after being unavailable since 09-13 17:01 |
+| Garage Repeater · Floating Repeater · 301 Alarm | — | no live message in 3 h | normal: mains routers publish on change only |
+
+**Run 2 started 19:42 CT** (higher + aimed at the kitchen) for a like-for-like comparison. Method:
+`scratchpad/z2m_watch.py` subscribes to `zigbee2mqtt/<device>` over HA's WebSocket `mqtt/subscribe` and logs only
+**non-retained** messages — Z2M republishes cached state at startup and those are NOT fresh readings (08-24 rule).
+
+🔴 **RF NOTE WORTH KEEPING: you do not aim a whip antenna like a flashlight.** A quarter-wave whip radiates in a
+doughnut *perpendicular* to its axis, with a **null off the tip**. Tilting it toward the kitchen aims the weakest
+part of the pattern at the kitchen. **Vertical is what gives even coverage across a single floor**; height and
+getting clear of metal/appliances are the levers that actually help.
