@@ -1506,7 +1506,31 @@ new `scripts/weather-emergency-test.js`. The app only goes live on a push to
 
 ---
 
-## 🔴 MY MISS — THE NIGHT WATCH RAN 10 HOURS AND NEVER SAW THE DEAD VACUUM (#94–#95)
+## ✅ #94/#95 — CLOSED 2026-09-16 00:38. The rule it earned is now MECHANICAL, not remembered.
+
+This item is a lesson, not a task, and the lesson has been implemented in code — which is the only
+form of a rule that survives a session boundary.
+
+**The rule:** *"Before reporting a monitoring result, state what the check DID NOT cover. A
+watcher that prints a clean verdict without naming its own scope is worse than no watcher, because
+it converts 'nobody looked' into 'everything is fine.'"*
+
+**Where it now lives, verified by reading the source tonight:** `HCC-Scripts/HCC-Audit.py` has a
+`cover(area, what)` call on every check, and where a check cannot run it records
+**`NOT VERIFIED`** rather than silence — e.g. `cover("tasks", "NOT VERIFIED - could not read
+Windows Task Scheduler")` and `cover("zigbee", "NOT VERIFIED - no availability topics received")`.
+A failed instrument now reports as unknown instead of passing.
+
+**Proven in use the same night:** `HCC Whole-Stack Audit` ran 09-15 23:00 with result 0, and #176
+was closed off the scheduled-task check that this rule produced.
+
+The same discipline now runs in the app gate: `live-e2e-test.js` states in its header exactly what
+the other seven scripts do NOT cover (none of them load the deployed page), which is the reason it
+exists.
+
+<details><summary>Original 2026-08-29 entry</summary>
+
+### 🔴 MY MISS — THE NIGHT WATCH RAN 10 HOURS AND NEVER SAW THE DEAD VACUUM (#94–#95)
 
 **Jeff, 2026-08-29 07:32: *"Why didn't all that show in your report I thought you were watching
 everything for failures wasn't that the whole point of the night watch ???"* He is right.**
@@ -1521,6 +1545,7 @@ prints a clean verdict without naming its own scope is worse than no watcher, be
 too narrow to be reported as a verdict.
 
 ---
+</details>
 
 ## 🔘 BUTTON SWEEP + THE BRAVES ANSWER — 2026-08-29 (#96–#98)
 
@@ -1768,7 +1793,40 @@ about a leak.* The informative datum today was the **0.5 gal hour at 13:01** —
 leak cannot produce a near-zero hour, and before the main was closed there was not one such
 hour in four. **Quiet minutes are the evidence, not big numbers.**
 
-## #146 — 🟡 Mailbox contact has hung OPEN twice in three days 2026-09-05
+## #146 — ✅ CLOSED 2026-09-16 00:32. The mailbox recovered. It is MARGINAL, not faulty — and the fix is a repeater, not the sensor.
+
+**Verified the way this item's own lesson demands — availability and the whole mesh, not a single
+state read, because *"stuck in one state"* and *"stopped transmitting"* look identical from one:**
+
+| | |
+|---|---|
+| any mailbox entity `unavailable` | **No** — all five healthy |
+| `binary_sensor.mailbox_contact` | `off`, reported **5.4 h ago** |
+| battery / voltage | **100% / 3000 mV** — the cell was never the problem |
+| link quality | **LQI 18, reported 1.3 h ago** — transmitting |
+
+**It is the weakest device on the mesh by a clear margin.** All twelve, tonight:
+
+```
+mailbox   18   |   21  36  36  43  65  72  72  76  83  131  142
+```
+
+🔴 **So the 09-06 "fully offline" event was real, and the cause stands as diagnosed — a radio
+failure, not the magnet — but the device recovered on its own and is reporting now.** Nothing was
+done to it. At LQI 18 it will drop out again; that is what the bottom of a mesh looks like.
+
+**THE DURABLE FIX IS THE REPEATER AND IT IS STILL IN TRANSIT** (AliExpress, weeks not days — see
+the COST_LEDGER entry about *ordered* vs *owns*, which is exactly this part). Re-measure after it
+is plugged in; do not re-diagnose the sensor before then.
+
+⚠️ **Tonight's antenna work did NOT help the mailbox** — measured run 1 and run 2 both put it at
+0–21. What the antenna move actually changed is in
+`docs/zigbee/zigbee_mesh_routers_2026-08-27.md`: tilting the whip toward the kitchen made the
+kitchen worse, because a whip's null is off its tip. **Stand it back vertical.**
+
+<details><summary>Original 2026-09-05 / 09-06 investigation, kept — the reasoning in it is good</summary>
+
+### 🟡 Mailbox contact has hung OPEN twice in three days 2026-09-05
 
 `binary_sensor.mailbox_contact` went **`on` at 11:40:24 on 09-05 and was still `on` 8h 27m
 later** at 20:07. Measured against the previous four days:
@@ -1793,6 +1851,7 @@ re-seat the magnet (VHB 5952; prep is 90% of the bond). Jeff notified 20:08.
 ⚠️ **This is the one entity where "no state change" is NOT the benign change-driven-sensor
 case** — a contact sensor that never closes is either a real open door or a broken mount.
 Do not dismiss it the way `battery_low = off` should be dismissed.
+</details>
 
 ## Sensor sweep 2026-09-05 20:05 — 🟢 nothing else wrong, and here is the proof
 
