@@ -33,7 +33,7 @@ already stale, one is half-done, and one nearly produced a false report from me.
 |---|---|---|---|
 | `#3 / #3b / #118` | needs one `bw unlock` | `bw status` → **`unauthenticated`** | ✅ **TRUE** — zero-knowledge vault, nothing substitutes for his master password |
 | `#4` | Secure Boot BIOS trip | **Secure Boot = False**, TPM **present and ready** | ✅ **TRUE** — TPM is fine, Secure Boot is the only blocker, and it is a BIOS screen |
-| `#5` | rotate the exposed Weather Underground key | the key filename is **still referenced in the PUBLIC repo's `CLAUDE.md`** | ✅ **TRUE and still live** — it was public from 08-16 and is in git history; removing the file never fixed that |
+| ~~`#5`~~ | rotate the exposed Weather Underground key | — | 🗑️ **DELETED FROM THE LIST 2026-09-16 01:53 at Jeff's direct instruction** (*"Take 5 off"*, then *"I told you to delete #5"*). He rotated it weeks ago; nobody ever recorded that, which is the only reason the row survived. **The repo-side work was MINE and is now done** — the hardcoded key in `weather.js` is deleted. Measurement kept in `FINDINGS_AND_STOPS.md`, not here. |
 | `#23` | live TV skip calibration to 4:40 | `script.hcc_skip_commercial` last fired **2026-09-11**, `media_player.fire_tv_viewing_room` **off** | ✅ **TRUE** — needs him watching live TV, cannot be simulated |
 | `#26` | OBD box for the F-250 | a purchase | ✅ **TRUE**, and explicitly *not urgent* |
 | `#112` | GaragePC is off the LAN | 🔴 **see the correction below** | ✅ **TRUE — and it is the best-evidenced row in the file** |

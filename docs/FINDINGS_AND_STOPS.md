@@ -492,6 +492,48 @@ disappearing is as likely to be a decision as a defect — ask before filing it 
 
 ---
 
+# 🔑 #5 — THE WEATHER UNDERGROUND KEY. Closed 2026-09-16, and why it survived so long.
+
+**Jeff, 01:48: *"Take 5 off, it's supposed to be off weeks ago."*** Then 01:53: ***"I told you to
+delete #5."*** Done — it is off the todo list.
+
+**Why it sat there for a month:** `Search-HCC.ps1` returns the whole history of this item and
+**every single hit is a session flagging it to him** — 2026-08-16 08:59: *"I found an exposed
+credential… I flagged it rather than fix it silently because rotating is your call."* Then again.
+Then again. **There is no entry anywhere recording that he rotated it.** He did; nobody wrote it
+down. The row outlived the work because the record captures what we ASK far better than what he
+DOES — the same gap that left #91 marked "not deployed" for 18 days and #158 listed after the part
+had already been swapped.
+
+**🔴 THE HALF THAT WAS ACTUALLY OURS, AND IT WAS NEVER HIS TO DO:**
+`functions/api/weather.js:16` carried a **hardcoded fallback key in the public repo**. Measured
+2026-09-16 01:48 before removing it:
+
+| check | result |
+|---|---|
+| key in `weather.js` vs key in `HCC-secrets` | **byte-identical** (sha256 prefix `2f2c9065a860`, 32 chars — compared by hash, neither ever printed) |
+| that key against `api.weather.com` | **HTTP 200**, station KTNWHITE21, observation 2026-09-16 01:48 |
+
+So it was a **live** key in a public repo — not the dead one the old comment implied when it said
+*"it is NOT a secret any more."* **And the comment directly above it said "DELETE the fallback
+below."** Nobody did, for 28 days, while the row kept telling Jeff to go rotate something.
+
+**Deleted 2026-09-16.** Safe because `WU_API_KEY` is set on the production Pages project; the live
+endpoint was re-checked afterwards and still returns real observations. The silent fall-through was
+replaced with an explicit `wu_key_not_configured` 500 so a missing env var surfaces at once instead
+of quietly degrading for weeks.
+
+⚠️ **What no one can undo:** the key is in public git history from at least 08-16. Rotation is the
+only thing that ever closed that, and Jeff did it. **Do not re-open this row.**
+
+🔴 **MY OWN CHECK HERE WAS ALSO WRONG AND IS WORTH THE LESSON.** Earlier the same night I "verified"
+#5 by grepping the repo for the *filename* `weather_underground_api_key` and reported *"still in
+the PUBLIC repo: True."* That filename is a **pointer** and proves nothing. **A proxy for the
+question is not the question.** The real question was *"is a working key published"*, and answering
+it needed the key tested and the source read — which is what found the thing that actually mattered.
+
+---
+
 # ⚠️ STALENESS CROSS-CHECK OF THE HEADER BELOW — run 2026-09-16 01:22 against the LIVE system
 
 Jeff: *"make sure they are not stale and obsolete, cross check them against the record."* Right to
