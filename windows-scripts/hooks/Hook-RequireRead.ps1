@@ -182,8 +182,38 @@ $GATES = @(
 # above, so recording a finding is never blocked. This only fires before a real
 # mutation - which is exactly the moment the route matters.
 # ---------------------------------------------------------------------------
-if ($readSoFar -notmatch [regex]::Escape('ACCESS_MAP.md')) {
-  Deny 'ACCESS MAP' @('docs/ACCESS_MAP.md') ('It is the route to every live system, and section 7 carries the workaround for every wall this project has hit - plus the ONLY five genuine blockers, so anything else has a route you have not found yet. Jeff, 2026-09-10: "if it won''t make you read and apply it don''t put it in, use a gate."')
+#
+# 2026-09-15 23:30 - WIDENED FROM ONE FILE TO THREE, at Jeff's instruction:
+#     "the not reading the files has got to stop some how it's wasting my time and money"
+#
+# Cross-checked against a proposed replacement gate the same night. Everything in
+# that proposal already existed here EXCEPT this: the universal gate demanded only
+# ACCESS_MAP.md, so a session could change anything that did not happen to match one
+# of the 12 topic patterns below WITHOUT EVER OPENING THE RULES OR THE OPEN LIST.
+# That is the actual hole, and it is the one Jeff keeps paying for.
+#
+# Why these three specifically, and nothing more (the SHORT-LIST rule above still
+# stands - a gate nobody can satisfy gets deleted):
+#   ACCESS_MAP.md    - the route to every system + the workaround for every wall.
+#   SESSION_START.md - the briefing. Its section 5 is titled "check status, don't
+#                      assume" and was itself STALE in four places until 09-10.
+#   OPEN_ITEMS.md    - THE list of what is not done. On 2026-09-15 a measurement
+#                      found 17 of 61 items marked finished and never struck, while
+#                      OPEN_ITEMS_CLOSED.md held only 12. A session that never opens
+#                      the list re-does finished work and abandons unfinished work -
+#                      which is the exact complaint that produced this edit.
+#
+# Cost of satisfying it: three Read calls. Reads are never blocked, so this can
+# always be cleared immediately, and writing docs stays exempt (above), so recording
+# a finding is never gated. HCC-OVERRIDE still stands it all down.
+#
+$UNIVERSAL = @('ACCESS_MAP.md', 'SESSION_START.md', 'OPEN_ITEMS.md')
+$missingUniversal = @()
+foreach ($u in $UNIVERSAL) {
+  if ($readSoFar -notmatch [regex]::Escape($u)) { $missingUniversal += ('docs/' + $u) }
+}
+if ($missingUniversal.Count -gt 0) {
+  Deny 'READ-FIRST (rules, briefing, open list)' $missingUniversal ('These three are the standing context for every change: the route to every system and the workaround for every wall (ACCESS_MAP), the briefing and hard-won invariants (SESSION_START), and THE list of what is not done (OPEN_ITEMS). Jeff, 2026-09-15: "the not reading the files has got to stop some how it''s wasting my time and money." Reads are never blocked - open them and continue.')
 }
 
 foreach ($g in $GATES) {
