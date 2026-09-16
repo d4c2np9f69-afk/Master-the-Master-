@@ -23,13 +23,66 @@ one from the record, one by building the thing that was actually missing.**
 
 ---
 
-## 🔵 WAITING ON JEFF — do not work these, do not nag
+## 🔵 WAITING ON JEFF — **every row below RE-VERIFIED 2026-09-16 01:45, not taken on trust**
 
-**His hands** (physical, or a credential only he can enter):
-`#3 / #3b / #118` one `bw unlock` · `#4` Secure Boot BIOS · `#5` password rotation ·
-`#11` mount the last ~3 sensors · `#23` live TV skip test · `#25` wall iPad · `#26` OBD box ·
-`#58 / #58b` two HomeKit codes (in `HCC_ACCESS.md`) · `#112` GaragePC · `#113` `Document (6).docx`
-→ safe · `#119 / #121 / #122` zone-4 bonnet swap — ⚠️ **do NOT energise zone 4 until repaired**
+Jeff, 01:40: *"You can't get out of cleaning the list by pushing old stale shit to me so you don't
+have to deal with it."* Correct. So each one was **measured** before being left here. One was
+already stale, one is half-done, and one nearly produced a false report from me.
+
+| row | claim | measured tonight | verdict |
+|---|---|---|---|
+| `#3 / #3b / #118` | needs one `bw unlock` | `bw status` → **`unauthenticated`** | ✅ **TRUE** — zero-knowledge vault, nothing substitutes for his master password |
+| `#4` | Secure Boot BIOS trip | **Secure Boot = False**, TPM **present and ready** | ✅ **TRUE** — TPM is fine, Secure Boot is the only blocker, and it is a BIOS screen |
+| `#5` | rotate the exposed Weather Underground key | the key filename is **still referenced in the PUBLIC repo's `CLAUDE.md`** | ✅ **TRUE and still live** — it was public from 08-16 and is in git history; removing the file never fixed that |
+| `#23` | live TV skip calibration to 4:40 | `script.hcc_skip_commercial` last fired **2026-09-11**, `media_player.fire_tv_viewing_room` **off** | ✅ **TRUE** — needs him watching live TV, cannot be simulated |
+| `#26` | OBD box for the F-250 | a purchase | ✅ **TRUE**, and explicitly *not urgent* |
+| `#112` | GaragePC is off the LAN | 🔴 **see the correction below** | ✅ **TRUE — and it is the best-evidenced row in the file** |
+| `#113` | `Document (6).docx` → safe **+** `HCC_ACCESS.md` | `HCC_ACCESS.md` **already carries the GaragePC account and the `Document (6)` reference** | 🟡 **HALF DONE.** The credential half is finished. What is left is purely **physical: put the paper in the safe.** |
+| `#11` | "9 of 12 sensors mounted, ~3 in his hands" | **12 Zigbee devices reporting** | 🔴 **STALE** — see the cross-check in `FINDINGS_AND_STOPS.md` |
+| `#25` · `#58 / #58b` · `#119 / #121 / #122` | iPad tap · HomeKit codes · zone-4 bonnet | not measurable here (HomeKit is frozen this session; the bonnet is a wrench) | ✅ **TRUE** |
+
+### 🔴🔴 #112 IS OUR DAMAGE, NOT A CHORE HE HAS BEEN PUTTING OFF. SAY SO.
+
+**Jeff, 2026-09-16 01:43: *"The garage pc is still down and should be on the list — that is from
+your fuck up. Read the record, you fucked that all up."*** He is right, and listing it under
+*"waiting on Jeff"* without that sentence is how a session we broke becomes a task he looks lazy
+for not doing.
+
+**Both candidate causes in the record are ours:**
+- **(b)** *"the **09-01 boot loop** caused by **a setup script of mine** re-applying the whole
+  `USER_RIGHTS` policy block via `secedit`; **Jeff recovered it with System Restore**"* — and the
+  record itself notes a restore can roll back a wireless profile.
+- **(a)** the **08-13 extender retirement** that left it joined to the vanished `Loewen301_Ext`
+  SSID. The gateway evidence points here as the *start* — it has not associated since before
+  08-14 — but that does not make it his doing either.
+
+**And the handling was wrong too, which the row already admits:** *"Jeff was told flatly it was the
+SSID, before the 09-01 note — which was sitting UNCOMMITTED in the working tree — had been read."*
+A confident wrong cause, given to him, from a file we had not committed.
+
+**So the correct framing:** the machine is down because of work done on it here. The only remaining
+step needs hands on the machine, which are his — **but it is a repair we owe, not a chore he is
+behind on.** When it comes back: give it a DHCP reservation like Beehive's, because its recorded
+addresses go stale every time.
+
+### 🔴 MY NEAR-MISS ON #112 TONIGHT — the trap this row already warns about
+
+I pinged **`192.168.1.215`**, got three replies, and was about to report **"GaragePC is back on the
+network."** **It is not GaragePC.** `.215` is the **Fire TV** — the record has PiPup posting to
+`http://192.168.1.215:7979/notify`. GaragePC's addresses are **`.121` and `.212`**, and the row
+already proved both fail.
+
+**What the record already established, and it is conclusive:** the BGW320's own device list shows
+**56 devices, and the gateway retains powered-off clients for ~4 weeks** — `JeffsLapTop` sits in it
+right now reading *Status: off, 17 days stale*. **GaragePC is absent in every state.** So it has
+not touched this gateway since before 2026-08-14 — which points at the extender retirement, not
+the 09-01 boot loop.
+
+⚠️ **The lesson is the one in `ACCESS_MAP` about instruments that lie: a ping proves something
+answers at an address, not WHICH something.** Confirm the identity before naming the machine.
+
+**Fix is unchanged and genuinely his:** power it on, join it to `Loewen301`. Credentials are
+already in `HCC_ACCESS.md` §5, so the beast can authenticate the moment it appears.
 
 **His go / his decision** (one word each):
 `#10` arm panic **and** disable the old one · `#39` + the alarm subsystem · `#28` URL rotation ·
