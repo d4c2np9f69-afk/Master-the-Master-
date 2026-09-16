@@ -121,6 +121,42 @@ subsystem** — the answer is usually already in there, paid for in Jeff's time.
 - **Studio Code Server's editor works but is fiddly.** Verify every edit by zooming on the result;
   a selection one character too wide silently broke YAML on 08-16.
 
+## 3b. 🔴 EVERY MISTAKE GETS A TEST, THE SAME SESSION (Jeff's rule, 2026-09-16 00:10)
+
+> *"Every mistake you make gets a test in the gate that fails on exactly that mistake, written the
+> same session you made it. Not an apology, not a note — a test. If it was 'edited without
+> reading', the session-gate hooks catch it. If it was wrong logic, the test catches it. If you
+> make the SAME mistake twice, that means the first test was missing or too weak, and fixing it is
+> the new first task. **Your mistakes are not a character issue. They are missing coverage.**"*
+
+**This replaces apologising as the response to an error.** A written apology protects nothing; the
+next session never reads it. A test runs whether or not anyone remembers.
+
+**Two conditions on the test, both learned the same night it was written:**
+1. 🔴 **Prove it FAILS on the actual mistake before believing it.** A check that cannot fail is not
+   a check — that is this project's oldest lesson (the stream check that printed `ALL GOOD`
+   eleven minutes after the popups died). Re-introduce the fault, watch the test go red, remove it,
+   watch it go green.
+2. 🔴 **A test that cries wolf gets ignored, which is worse than no test.** Two written on 09-16
+   produced false failures on their first run — one searched an archived `<details>` block, another
+   flagged `CONF_PASSWORD = "password"` (a field NAME) as a credential. Both were tightened the
+   same hour. Tune it until every failure it reports is real.
+
+**The gate as it stands** (from the repo root; exit 0 is the only pass):
+
+```
+node scripts/lint-app.js            source anti-patterns
+node scripts/smoke-test.js          the app, local file + mocked data
+node scripts/image-fit-audit.js     every photo at 14 device sizes
+node scripts/creds-gate-test.js     the APP never holds credentials
+node scripts/auth-gate-test.js      the SERVER gates every control endpoint   (#184/#186)
+node scripts/package-gate-test.js   the handoff package never ships a credential
+node scripts/live-e2e-test.js       the DEPLOYED app, real data (needs HCC_HA_TOKEN)
+.\windows-scripts\hooks\Test-ReadGate.ps1   the read gate still blocks
+```
+
+The last four all exist because of a specific failure, named in each file's header.
+
 ## 4. How to work (the two rules Jeff added on 08-16)
 
 - **Don't tunnel.** Enumerate options before committing, including ones that make the current

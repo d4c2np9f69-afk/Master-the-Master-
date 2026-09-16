@@ -22,6 +22,34 @@ ftp           -> MSEdgeHTM      OK
 gets clicked. The `UserChoice` key exists but its `ProgId` value is blank. **Firefox is NOT the
 handler for http or https** — it is not stealing anything.
 
+> 🔴 **CORRECTED 2026-09-16 00:05 — THE TWO BOLD CLAIMS ABOVE ARE WRONG. DO NOT ACT ON THEM.**
+>
+> **Firefox IS the https handler.** Windows Settings → Default apps → **Choose defaults by link
+> type** shows the row verbatim:
+>
+> ```
+> HTTPS, Firefox, Firefox URL
+> ```
+>
+> **Why the original reading said "EMPTY":** `HKCU:\…\UrlAssociations\https\UserChoice` is
+> **ACL-protected**. Reading it returns nothing and writing it returns *"Attempted to perform an
+> unauthorized operation"* — measured both ways on 09-16. The `http` key next to it reads
+> `ProgId=MSEdgeHTM, Hash=ttHcapkjlL0=` normally, which is what made the empty https read look like
+> a real empty value rather than a blocked one. **An empty read from a protected key is not
+> evidence of an empty value.**
+>
+> 🔴 **CONSEQUENCE THAT NEARLY COST SOMETHING: `https` must be reassigned to Edge BEFORE Firefox is
+> uninstalled.** Removing Firefox first leaves every https link pointing at a program that is gone.
+> On 09-16 an uninstall was started on the strength of the sentence above and had to be cancelled.
+> See `COST_LEDGER.md`, entry 2026-09-16.
+>
+> **Routes tried for setting it, so nobody repeats them:**
+> | route | result |
+> |---|---|
+> | `msedge.exe --make-default-browser` | ignored — just opens a tab (removed in Win10+) |
+> | direct registry write of `ProgId` | **refused**, unauthorized operation (ACL) |
+> | Settings → Choose defaults by link type → HTTPS | **this is the surface that works** — the list is virtualised, so filter it with its own *"Search for a link type"* box, not the global *"Find a setting"* box |
+
 ⚠️ **This cannot be fixed by writing the registry.** Windows protects `UserChoice` with a
 per-user validation hash; a hand-written `ProgId` is rejected or silently reverted on next logon.
 **It must be set through Settings → Apps → Default apps → Edge → "Set default", or Edge's own

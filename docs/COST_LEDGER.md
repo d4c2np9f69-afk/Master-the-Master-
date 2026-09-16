@@ -369,3 +369,42 @@ Depth of research is not the same as answering the question. The question was ne
 `COST_LEDGER` 09-04 claims the 2026.9.0 update "moves the container to Python 3.14" — b1 already
 was, proven by today's live tracebacks. And `OPEN_ITEMS #48` still lists `vizio` as installed; it is
 not in the config entries any more.
+
+## 2026-09-16 00:05 — I TRIED TO UNINSTALL THE PROGRAM THAT OWNS `https`, ON A DOC'S SAY-SO
+
+**Cost: ~20 minutes, and a `Mozilla Firefox Uninstall` dialog left sitting on Jeff's screen.**
+Caught before anything was removed. Class B — *the file WAS read, and the file was wrong.*
+
+**What I did.** Acting on Jeff's 09-11 instruction *"get rid of Firefox and keep Edge, Tor and
+Chrome"*, I ran `winget uninstall --id Mozilla.Firefox`. I had read
+`docs/browsers_and_passwords_2026-09-11.md` first and taken its conclusion at face value:
+> *"`https` -> (ProgId EMPTY) <-- THE BUG … **Firefox is NOT the handler for http or https** — it
+> is not stealing anything."*
+
+**That conclusion is wrong.** Windows Settings → Default apps → *Choose defaults by link type*
+shows the row verbatim as **`HTTPS, Firefox, Firefox URL`**. **Firefox owns https.** The registry
+read that produced "EMPTY" came back empty because `UserChoice` is **ACL-protected** — a direct
+write returns *"Attempted to perform an unauthorized operation"* — not because the value is unset.
+**An empty read from a protected key is not evidence of an empty value.**
+
+**So the uninstall would have removed the handler for every https link on the machine** — strictly
+worse than the state it was meant to improve.
+
+**Two things stopped it, and only one of them was me.**
+1. `winget` printed **"Successfully uninstalled"** and removed nothing. It had spawned the NSIS GUI
+   uninstaller, which sat on its "Refresh Firefox Instead?" page waiting for a click. 🔴 **A package
+   manager's success message is not proof of removal — check for the binary.** I only looked
+   because the next command needed the file gone.
+2. Enumerating the open windows for another reason showed both the stray dialog **and** that
+   Firefox was holding Jeff's live *"Ambient Weather — Original profile"* session from tonight's
+   weather-station work. Cancelled the dialog with `WM_CLOSE`; Firefox, its session and Tor all
+   verified intact afterwards.
+
+🔴 **THE ORDER MATTERS AND IT IS NOT OBVIOUS: reassign `https` to Edge FIRST, then uninstall
+Firefox.** Doing it the other way round leaves the association pointing at a program that no longer
+exists.
+
+**Rules reinforced:** *(a)* when a doc states a fact about live system state, re-measure it before
+acting destructively on it — especially when the doc's own evidence came from a protected or
+filtered read; *(b)* the ledger's own 09-04 lesson, again — I trusted a derived artifact instead of
+the authoritative instrument. Settings was the honest instrument here and it was one click away.
