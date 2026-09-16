@@ -6309,18 +6309,27 @@ function getLuxCreds(){ return {email:localStorage.getItem('lux_email')||'',pass
 // Two benefits from doing it this way round: a device with no saved login just works, and
 // Jeff's password stops riding in a query string (URLs get logged and kept in history) —
 // local creds are now only ever sent if the SERVER says it has none of its own.
+// #186 (2026-09-15): credentials ride in the x-hcc-creds HEADER, never the URL. A query string
+// is written to Cloudflare's access logs and kept in the browser's history; a header is not.
+// The two-step shape is unchanged: try with nothing first, and only send this device's own login
+// if the server says it has none of its own — so on the normal path no credential is sent at all.
 function fetchWithCreds(path, creds, extra){
   var sep = path.indexOf('?') >= 0 ? '&' : '?';
-  return fetch(path + (extra ? sep + extra : ''), {cache:'no-store'})
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      if(d && d.error === 'credentials_not_provided' && creds && creds.email && creds.pass){
-        var q = sep + 'e=' + encodeURIComponent(creds.email)
-              + '&p=' + encodeURIComponent(creds.pass) + (extra ? '&' + extra : '');
-        return fetch(path + q, {cache:'no-store'}).then(function(r2){ return r2.json(); });
-      }
-      return d;
-    });
+  var url = path + (extra ? sep + extra : '');
+  function go(withCreds){
+    var opts = {cache:'no-store'};
+    if(withCreds){
+      opts.headers = { 'x-hcc-creds': btoa(JSON.stringify({
+        email: encodeURIComponent(creds.email), pass: encodeURIComponent(creds.pass) })) };
+    }
+    return fetch(url, opts).then(function(r){ return r.json(); });
+  }
+  return go(false).then(function(d){
+    if(d && d.error === 'credentials_not_provided' && creds && creds.email && creds.pass){
+      return go(true);
+    }
+    return d;
+  });
 }
 // True only when BOTH the server and this device are out of credentials.
 function credsTrulyMissing(d){ return !!(d && d.error === 'credentials_not_provided'); }

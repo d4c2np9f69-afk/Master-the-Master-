@@ -309,10 +309,29 @@ function parseThermostat(state, deviceId, deviceName) {
   };
 }
 
+// #186, 2026-09-15: a caller's login arrives in the `x-hcc-creds` HEADER, never a query
+// string. Query strings are written to CDN access logs and kept in browser history; the
+// project's own rule has always been that no credential travels in a URL, and the code had
+// stopped following it. base64(JSON) only — this is transport, not secrecy: it keeps the value
+// out of logs, it does not encrypt it (the whole request is already inside TLS).
+function credsFromHeader(request) {
+  const raw = request.headers.get('x-hcc-creds');
+  if (!raw) return { email: '', password: '' };
+  try {
+    const d = JSON.parse(atob(raw));
+    return { email: decodeURIComponent(d.email || ''), password: decodeURIComponent(d.pass || '') };
+  } catch (_) {
+    return { email: '', password: '' };   // a malformed header is simply no credential
+  }
+}
+
 export async function onRequestGet({ request, env }) {
-  const url = new URL(request.url);
-  const email    = env.LUX_EMAIL    || url.searchParams.get('e') || '';
-  const password = env.LUX_PASSWORD || url.searchParams.get('p') || '';
+  // 🔴 PRECEDENCE IS DELIBERATE AND IS **NOT** THE SAME AS irrigation/index.js.
+  // Here the deployment credential wins; there the caller's does. Do not "harmonise" them —
+  // the irrigation order was set after a stale env var masked a correct login. See #186.
+  const req = credsFromHeader(request);
+  const email    = env.LUX_EMAIL    || req.email    || '';
+  const password = env.LUX_PASSWORD || req.password || '';
   if (!email || !password) return Response.json({ ok: false, error: 'credentials_not_provided' }, { status: 400 });
 
   try {

@@ -72,37 +72,36 @@ for (const [name, src] of [['climate.js', climate], ['control.js', control]]) {
     'a missing KV key could otherwise authorise');
 }
 
-// ── 4 + 5. credentials in URLs — TRACKED, NOT YET ENFORCED (OPEN_ITEMS #186)
-// These are REAL and they are not fixed. They are reported every run and do not
-// fail the build, for one reason that is written down rather than assumed:
-// fixing them means editing functions/api/irrigation/index.js, which is inside
-// the #109 HOLD ("Do NOT change code before working through it") — a hold tied
-// to the sewer-overcharge claim against the City of White House.
+// ── 4 + 5. no credential may travel in a URL — ENFORCED as of 2026-09-15 23:40 (#186)
+// These three were TRACKED-not-enforced for about twenty minutes, deferred because the fix
+// touches functions/api/irrigation/index.js and that file sits inside the #109 HOLD.
+// They are enforced now because the fix turned out not to need anything the hold protects:
+// moving a credential from a query string to the `x-hcc-creds` header is pure transport and
+// goes nowhere near the watering/gallons logic the hold exists to guard.
 //
-// The precedence there is also load-bearing and REVERSED from climate.js:
-// irrigation takes the REQUEST credential first and env second, because the old
-// env-first order let a stale deployment variable mask the correct login and
-// produced "not authorized" for an account whose phone app was working fine.
-// Any move to a header must preserve that order exactly, per endpoint.
-//
-// Severity, honestly: a query string leaks a credential into CDN logs and
-// browser history. That is bad. It is NOT the same class as the write paths
-// above, which let a stranger run the sprinklers. Those are enforced; this is
-// queued behind a hold that is Jeff's to lift.
-// 🔴 WHEN #109 CLEARS: delete this block's `tracked()` calls and restore them as
-// check() — the assertions themselves are already correct as written.
-function tracked(name, ok, evidence) {
-  console.log((ok ? '  PASS  ' : '  TRACKED (#186, not enforced)  ') + name +
-    (!ok && evidence ? '   [' + evidence + ']' : ''));
-}
+// 🔴 THE PART THAT MUST NOT BE "TIDIED": the two endpoints have OPPOSITE precedence, on purpose.
+//   climate.js            env FIRST,     then the caller's credential
+//   irrigation/index.js   REQUEST FIRST, then env
+// The irrigation order was set after a stale deployment variable masked a correct login and
+// produced "not authorized" for an account whose phone app was working fine. Both orders survived
+// this change unchanged. If a future session "harmonises" them, it re-breaks irrigation.
 for (const [name, src] of [['climate.js', climate], ['irrigation/index.js', irrIndex]]) {
   const hits = src.match(/searchParams\.get\(\s*['"][ep]['"]\s*\)/g) || [];
-  tracked(name + ' never reads a credential from the URL', hits.length === 0,
+  check(name + ' never reads a credential from the URL', hits.length === 0,
     hits.length + ' x searchParams ?e/?p — query strings are logged by the CDN');
+  check(name + ' reads the credential from the x-hcc-creds header instead',
+    /x-hcc-creds/.test(src), 'no header read found');
 }
-tracked('index.html never puts a password in a query string',
+check('index.html never puts a password in a query string',
   !/['"&?]p=['"]?\s*\+\s*encodeURIComponent/.test(app),
   "found '?p=' concatenation");
+check('index.html sends credentials in the header',
+  /x-hcc-creds/.test(app), 'fetchWithCreds is not using the header');
+// precedence guards — each endpoint keeps its own order
+check('climate.js keeps env-first precedence',
+  /env\.LUX_EMAIL\s*\|\|\s*req\.email/.test(climate));
+check('irrigation/index.js keeps REQUEST-first precedence (the stale-env bug)',
+  /reqEmail\s*\|\|\s*env\.BHYVE_EMAIL/.test(irrIndex));
 
 // ── 6. the family can still get in ────────────────────────────────────────
 check('/api/auth mints a ctrl_token at family login', /ctrl_token/.test(authFn));
