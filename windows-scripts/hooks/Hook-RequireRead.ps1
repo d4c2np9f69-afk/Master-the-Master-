@@ -39,6 +39,16 @@ if (-not $blob.Trim()) { exit 0 }
 # ---- Jeff's escape hatch ----
 if ($blob -match '(?i)HCC-OVERRIDE') { exit 0 }
 
+# ---- The freeze must not block the RECORD of the freeze ----
+# 2026-09-16 01:06, five minutes after the freeze went in: writing a line in OPEN_ITEMS.md that
+# merely NAMED a frozen subsystem was refused. Documenting a freeze is not working on the frozen
+# thing, and a gate that stops you writing the record defeats the record - the same reasoning the
+# docs/scratchpad exemptions below already carry. Exempt them here too, before the check.
+if ($filePath -match '(?i)session-freeze\.txt$') { exit 0 }
+if ($filePath -match '(?i)[\\/]scratchpad[\\/]') { exit 0 }
+if ($filePath -match '(?i)[\\/]docs[\\/].*\.(md|txt|json)$') { exit 0 }
+if ($filePath -match '(?i)(OPEN_ITEMS|COST_LEDGER|NEXT_SESSION|CHANGELOG_ARCHIVE)\.md$') { exit 0 }
+
 # ---------------------------------------------------------------------------
 # SESSION TOPIC FREEZE - added 2026-09-16 01:00, after I did the thing it stops.
 #

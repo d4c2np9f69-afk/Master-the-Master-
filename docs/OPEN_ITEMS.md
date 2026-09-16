@@ -272,7 +272,41 @@ Status: advice given, **nothing built.** | owner: Jeff wiring · me automation o
 
 #68 / #170 / #178 family. **It is also the whole explanation for #112's "moved" timestamp.**
 
-## 📍 WHERE THE LIST ACTUALLY STANDS - 2026-09-11 12:05 AM
+## 📍 WHERE THE LIST ACTUALLY STANDS — 2026-09-16 01:08 AM
+
+**Tonight: 24 rows closed, each verified against the live house or the source before it was
+struck. 61 numbered items → 31. This file: 3,601 → ~2,000 lines.**
+
+🔴 **THE 09-11 HEADLINE BELOW — "ZERO ROWS LEFT THAT ARE MINE AND UNBLOCKED" — WAS WRONG, and
+tonight disproved it four times.** Each of these was mine, unblocked, and sitting here while the
+header said there was nothing left to do:
+
+| found tonight | what it actually was |
+|---|---|
+| **#184** | an **unauthenticated write path to the live sprinklers**. `BHYVE_PASSWORD` is set in production; a POST carrying no credential reached the action check. Proven **400 → 401**. |
+| **#186** | credentials travelling in URLs, into CDN logs. Fixed and verified with no irrigation regression. |
+| **13 sensors** | four A/C statistics Jeff **asked for**, and nine station sensors — built, live in HA, **never put on a card**. |
+| **#91–#93** | marked **"NOT DEPLOYED — Jeff's call"** for **18 days**. It had shipped, and its own test passes. |
+
+**Why the old headline was wrong, and this is the lesson:** it was written from the ROWS. No row
+says *"the thing I describe was finished two weeks ago"*, and no row says *"the sensor you built
+never reached the app"*. **A list can only report what somebody wrote into it.** All four of those
+came from measuring the live system and comparing it against the file — not from reading the file
+harder.
+
+🔴 **So the honest headline is the inverse of the old one: assume there ARE rows that are mine, and
+go measure.** That is now automatic rather than remembered — `sensor-coverage-test.js` fails when
+something we built is not visible in the app, `package-gate-test.js` fails when the handoff goes
+stale, `live-e2e-test.js` drives the DEPLOYED app instead of a mock, and `encoding-gate-test.js`
+caught 427 corrupted characters that had been loading into every turn for weeks.
+
+**What genuinely remains below is almost entirely Jeff's** — his hands, his go, his two holds —
+plus two subsystems closed for this session by his instruction, recorded in
+`.claude\session-freeze.txt` and enforced by the gate rather than by memory.
+
+<details><summary>The superseded 09-11 header — its OWNER table is still accurate and worth keeping</summary>
+
+### WHERE THE LIST ACTUALLY STANDS - 2026-09-11 12:05 AM
 
 **192 numbered entries this morning. 28 live rows now, and every one has a named owner and a
 named reason.** 44 commits this session.
@@ -304,6 +338,7 @@ Everything I could do without Jeff, I did.
 🔴 **#28 IS THE OLDEST UNFIXED P1 AND IT IS STILL LIVE** - re-tested 2026-09-10 23:26, the
 **garage interior** returns HTTP 200 with a valid JPEG to anyone on the internet, no credentials.
 **That is the one worth opening a door for.**
+</details>
 
 ## 🚨 THE ONE BIG THING THAT IS GENUINELY NOT BUILT — THE ALARM SUBSYSTEM
 
