@@ -51,27 +51,27 @@ directly comparable to the five new bids. **When either one replies, send the up
 
 ## THE COMPARISON GRID — fill one column per bidder, never skip a row
 
-| Row | Daniels | Derryberry | Chilly Ben's | Peters | KB's |
+| Row | **PETERS (quoted 09-16)** | Daniels (old scope) | ~~Derryberry~~ OUT | Butler (Thu) | Goodlettsville (Thu) |
 |---|---|---|---|---|---|
-| **Unit price (sticker)** | $8,200 | $8,958 list − $400 = $8,558 | | | |
-| **+ labour cover to 10 yr** | +$800 | +$540 ($60/yr) | | | |
-| **Refrigerant covered?** | ✅ included | not stated | | | |
-| **Required maintenance plan?** | no ($190/yr optional) | not stated | | | |
-| **🔴 10-YEAR COST** | **$9,000** | **$9,098** (twist NOT fixed) | | | |
-| Model number | Carrier 48NL-B300603 | no model given | | | |
-| Gas in → out | 60k → 49k | 70k input claimed | | | |
-| Heat exchanger material | stainless (documented) | stainless (dealer's word only) | | | |
-| HX warranty | **lifetime** (reg ≤90 d) | 20 yr per mfr GW-PKGD-2401A (his sheet says 10) | | | |
-| Parts / compressor | 10 / 10 registered | 10 / 10 | | | |
-| **Twist fixed BOTH sides?** | ✅ yes | ❌ not on the sheet | | | |
-| Three 6"→8" branches | ❌ not in v1/v2 | ❌ | | | |
-| Garage 7" run | ❌ | $350 duct-repair line exists | | | |
-| Return 16" (18" option?) | 16" | not stated | | | |
-| Duct $ per linear foot | not given | $7,800 lump, no footage | | | |
-| Permit + TN licence # | ask | ask | | | |
-| Start-up static pressures | ask | ask | | | |
-| Lead time | ask | ask | | | |
-| Thermostat line credited? | **$?** — his $8,200 includes a t-stat Jeff is not using | | | | |
+| **Unit price (sticker)** | **$8,520** unit only | $8,200 | ~~$8,558~~ | pending | pending |
+| **+ labour cover to 10 yr** | ⚠️ **NOT OFFERED — only 2 yr workmanship. ASK WHAT 10 YR COSTS** | +$800 | ~~+$540~~ | pending | pending |
+| **Refrigerant covered?** | ⚠️ not stated — ASK | ✅ included | ~~not stated~~ | pending | pending |
+| **Required maintenance plan?** | none stated | no ($190/yr optional) | — | pending | pending |
+| **🔴 10-YEAR COST** | **$11,270 all-in inc. ALL duct work** · less $300 TVA = **$10,970** · ⚠️ labour cover only 2 yr | **$9,000** but duct work NOT comparable | ~~$9,098~~ WITHDREW | pending | pending |
+| Model number | 🟢 **Carrier 48NL-B300603** (exact match) | Carrier 48NL-B300603 | no model given | pending | pending |
+| Gas in → out | 60,000 BTU input stated | 60k → 49k | 70k input claimed | pending | pending |
+| Heat exchanger material | ⚠️ **NEVER WRITES "STAINLESS" — only "LIFETIME HEAT EXCHANGER" as a warranty term. GET IT IN WRITING** | stainless (documented) | stainless (dealer's word) | pending | pending |
+| HX warranty | 🟢 **LIFETIME** | **lifetime** (reg ≤90 d) | 20 yr per mfr | pending | pending |
+| Parts / compressor | 🟢 10 / 10 | 10 / 10 registered | 10 / 10 | pending | pending |
+| **Twist fixed BOTH sides?** | ⚠️ says "square to round ducting transitions" — does NOT say supply AND return. CONFIRM | ✅ yes | ❌ not on the sheet | pending | pending |
+| Three 6"→8" branches | 🟢 **ALL THREE** — dining, living, master | ❌ not in v1/v2 | ❌ | pending | pending |
+| Garage 7" run | quoted — "12in hard pipe … 7in supply lead … condition a small portion of the garage area" | ❌ | $350 duct-repair line | pending | pending |
+| Return 16" (18" option?) | 🟢 16" trunk + (2) 16" 90s · **18" priced at +$160** ⚠️ 90s described inside a FLEX line, spec said sheet metal | 16" | not stated | pending | pending |
+| Duct $ per linear foot | not given as $/ft, but **fully itemised**: materials $1,475 + seal $325 + misc $350 | not given | $7,800 lump | pending | pending |
+| Permit + TN licence # | 🟢 **permit included, $95 line item** · 🔴 **NO TN LICENCE NUMBER — asked for by name, not supplied** | ask | ask | pending | pending |
+| Start-up static pressures | 🟢🟢 **IN WRITING: "TECHS WILL RECORD A STATIC PRESSURE READING AT COMPLETION"** — first bidder to commit | ask | ask | pending | pending |
+| Lead time | 🟢 **can start Tue 22 Sept** | ask | ask | Thu night quote | onsite Thu 9–10 AM |
+| Thermostat line credited? | t-stat **wire pull** $295; ⚠️ does NOT say he installs/starts the ecobee, and **no mention of the REKO UV light at all** | **$?** — his $8,200 includes a t-stat Jeff is not using | | | |
 
 ## 🪪 LICENCE CHECK — done 2026-09-16 01:40 from public sources, no contractor contacted
 
