@@ -18,7 +18,7 @@ one from the record, one by building the thing that was actually missing.**
 
 | # | What | Owner | State |
 |---|---|---|---|
-| ~~**#158**~~ | Contactor `3100A15Q152L` | — | ✅ **ANSWERED FROM THE RECORD, not from him.** Nordyne OEM part; his unit is a **Nordyne R4GD-030K072C** (his own data plate, 08-31). It came off the A/C being replaced — so **do not buy it**; every bid includes a new condenser. Only the $0 coil-vs-contacts check still has any value, and it is not urgent: measured 01:34, `switch.ac_relay` **on**, automation **on**, indoor **72.5 °F**, **7 cycles / 8.2 h in 24 h**. The unit is running. |
+| ~~**#158**~~ | Contactor `3100A15Q152L` | — | ✅ **FULLY CLOSED 2026-09-16 01:35. The part was ALREADY REPLACED on the old unit** — Jeff, verbatim: *"That has already been replaced on the old unit."* Nothing to source, nothing to diagnose. The record had already identified it as a **Nordyne OEM** part matching his **Nordyne R4GD-030K072C**; what the record did NOT have was that the swap was done. Consistent with the live reading at 01:34 — relay **on**, automation **on**, indoor **72.5 °F**, **7 cycles / 8.2 h in 24 h**: the unit is running because it was *fixed*, not because the fault never existed. |
 | ~~**#160**~~ | Location exposure | **JEFF's button** | ✅ **My half done.** The real blocker was never which VPN — he could not *start* the one he owns. Three desktop buttons now, WARP-first order baked in. Free tier **15 GB/month** → a per-session tool, not always-on. |
 
 ---
