@@ -1838,8 +1838,22 @@ import** — Python was the ride, not the reason. `blinkpy`'s newest release is 
 aiofiles requirement to >=23.1.0"* — that widens what it accepts, it does not prove the import was
 fixed. **No blinkpy release mentions Python 3.14 at all.**
 
-**THE ONE CHECK THAT SETTLES IT** — read the installed component's own source and see whether the
-import is still there, rather than inferring it from release notes:
+### ⛔ PARKED 2026-09-16 01:00 — the remaining half runs through the cameras, and Jeff said no cameras tonight.
+
+**Read-only observation made before stopping, worth keeping because it may remove the blocker
+entirely:** `custom_components/` on the Beehive contains **`DISABLED-blink-20260909`** — the Blink
+*custom* component is disabled, and has been since 09-09. It contains **zero** `aiofiles`
+references. **The `blinkpy` pin that this row treats as the blocker belongs to a component that is
+not loaded.** If Blink is running from HA's built-in integration instead, the built-in ships with
+HA and is maintained against whatever Python HA runs — which would mean both halves of the 09-04
+blocker are gone.
+
+🔴 **NOT CONFIRMED, and deliberately not chased.** Establishing which integration is actually
+serving Blink is camera work. **Resume only when Jeff opens the cameras back up.** Nothing was
+changed; the only actions taken were reading a directory listing and grepping files.
+
+**THE CHECK, when it resumes** — read the installed component's own source rather than inferring
+it from release notes:
 
 ```
 /config/custom_components/blink/…  →  does anything still import aiofiles.base.wrap?

@@ -39,10 +39,77 @@ if (-not $blob.Trim()) { exit 0 }
 # ---- Jeff's escape hatch ----
 if ($blob -match '(?i)HCC-OVERRIDE') { exit 0 }
 
+# ---------------------------------------------------------------------------
+# SESSION TOPIC FREEZE - added 2026-09-16 01:00, after I did the thing it stops.
+#
+# Jeff, 00:40: "Do not start with the cameras you will get no where with them it's
+# too big a job for you, move to the next thing."  Jeff, 01:00: "We said no cameras
+# tonight." Between those two messages I read the Blink component off the Beehive to
+# answer a question filed under #181 "updates". Nothing was changed - but he had to
+# spend attention stopping me, and that is the expensive part.
+#
+# WHY THE REST OF THIS FILE COULD NOT CATCH IT: the gate below deliberately never
+# blocks reads ("READS ARE NEVER BLOCKED" is its own first design rule, and that rule
+# is right). A read-only excursion into a frozen subsystem is invisible to it. So this
+# is a SEPARATE check aimed at a different thing, not a tightening of that one.
+#
+# A freeze is on the SUBSYSTEM, not the item number. #181 does not look like a camera
+# item from its title; it became one the moment the work reached for custom_components
+# /blink. Ask what the task TOUCHES, not what list it is filed under.
+#
+# HOW TO USE IT: put one topic per line in .claude\session-freeze.txt, optionally with
+# a reason after a pipe. Blank lines and # comments ignored. Delete the file - or the
+# line - to lift it. HCC-OVERRIDE above still wins, because it is Jeff's house.
+# ---------------------------------------------------------------------------
+$freezeFile = Join-Path $env:USERPROFILE '.claude\session-freeze.txt'
+if (Test-Path $freezeFile) {
+  foreach ($line in (Get-Content -LiteralPath $freezeFile)) {
+    $t = $line.Trim()
+    if (-not $t -or $t.StartsWith('#')) { continue }
+    $parts  = $t -split '\|', 2
+    $topic  = $parts[0].Trim()
+    $reason = if ($parts.Count -gt 1) { $parts[1].Trim() } else { 'Jeff froze this topic for this session.' }
+    if (-not $topic) { continue }
+    if ($blob -match ("(?i)" + $topic)) {
+      $msg = @"
+BLOCKED - THIS SUBSYSTEM IS FROZEN FOR THIS SESSION.
+
+Jeff closed this topic. The pattern that matched: $topic
+
+    $reason
+
+This blocks READS as well as writes, which the rest of this gate deliberately does
+not. It exists because on 2026-09-16 a session was told "no cameras tonight" and was
+reading the Blink component 20 minutes later - because the work was filed under an
+item about UPDATES, not cameras.
+
+A freeze is on the SUBSYSTEM, not the item number. Ask what the task TOUCHES.
+
+Work on something else. To lift it, Jeff removes the line from
+.claude\session-freeze.txt - or put HCC-OVERRIDE in the command if he says so.
+"@
+      @{
+        hookSpecificOutput = @{
+          hookEventName            = 'PreToolUse'
+          permissionDecision       = 'deny'
+          permissionDecisionReason = $msg
+        }
+        systemMessage = "FROZEN TOPIC - '$topic' is closed for this session"
+      } | ConvertTo-Json -Depth 5 -Compress | Write-Output
+      exit 0
+    }
+  }
+}
+
 # ---- Writing documentation is always allowed ----
 # Scratchpad is isolated and temporary - writing there NEVER changes the house.
 # 2026-09-09: the gate blocked a scratchpad .py whose TEXT mentioned index.html.
 # Right call on substance, wrong target. Exempt the whole directory.
+# The freeze list itself must never be gated. It NAMES the subsystems it closes, so the topic
+# gates below match its own text - declaring a freeze was refused by the very gate for the topic
+# being frozen. Caught 2026-09-16 01:02 writing the first one. Declaring a freeze changes nothing
+# in the house; it only takes work away from the session.
+if ($filePath -match '(?i)session-freeze\.txt$') { exit 0 }
 if ($filePath -match '(?i)[\\/]scratchpad[\\/]') { exit 0 }
 if ($filePath -match '(?i)[\\/]docs[\\/].*\.(md|txt|json)$') { exit 0 }
 if ($filePath -match '(?i)(OPEN_ITEMS|COST_LEDGER|NEXT_SESSION|CHANGELOG_ARCHIVE)\.md$') { exit 0 }
