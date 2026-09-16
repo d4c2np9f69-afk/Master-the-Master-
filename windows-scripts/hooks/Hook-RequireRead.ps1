@@ -76,7 +76,12 @@ if (Test-Path $freezeFile) {
   foreach ($line in (Get-Content -LiteralPath $freezeFile)) {
     $t = $line.Trim()
     if (-not $t -or $t.StartsWith('#')) { continue }
-    $parts  = $t -split '\|', 2
+    # 🔴 The delimiter is ' :: ', NOT a pipe. It was a pipe for the first fifteen minutes, and
+    # that is a collision: the pipe is also regex ALTERNATION, so a multi-alternative pattern was
+    # split at its first alternative and the freeze silently narrowed to that one term - it
+    # stopped matching nearly everything it was written to stop. Caught by Test-SessionFreeze.ps1,
+    # which is the entire argument for writing the test alongside the feature.
+    $parts  = $t -split '\s::\s', 2
     $topic  = $parts[0].Trim()
     $reason = if ($parts.Count -gt 1) { $parts[1].Trim() } else { 'Jeff froze this topic for this session.' }
     if (-not $topic) { continue }

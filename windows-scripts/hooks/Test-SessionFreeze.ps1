@@ -1,4 +1,4 @@
-# Feature-test the session topic freeze. Negative control included: a check that cannot fail is
+﻿# Feature-test the session topic freeze. Negative control included: a check that cannot fail is
 # not a check. Uses throwaway session ids so the live receipt is untouched.
 $HOOK = 'C:\Users\jeffl\Documents\GitHub\master-the-master-\windows-scripts\hooks\Hook-RequireRead.ps1'
 $pass = 0; $fail = 0
@@ -23,7 +23,7 @@ $o = Run $s 'PowerShell' 'Get-Content C:\config\custom_components\blink\manifest
 Check 'blocks a READ-ONLY command on a frozen topic' ($o -match 'FROZEN|BLOCKED') $o
 
 # 2. The reason Jeff wrote must be shown, not a generic refusal.
-Check '  and shows the reason from the freeze file' ($o -match 'too big a job tonight')
+Check '  and shows the reason from the freeze file' ($o -match 'too big a job for you')
 
 # 3. The second frozen topic works too.
 $s='fz-gen'; Receipt $s $ALL
