@@ -1,20 +1,34 @@
 // /api/weather — proxies Weather Underground PWS KTNWHITE21 real-station data
 // Falls back to Open-Meteo grid if WU is unavailable
 export async function onRequestGet({ env } = {}) {
-  // 2026-08-19: this key was HARDCODED here and also sat in CLAUDE.md in a PUBLIC
-  // repo. Flagged as exposed on 08-16 and still exposed three days later. Prefer the
-  // Cloudflare Pages env var so rotation is ONE edit in one place instead of hunting
-  // three files.
+  // 🔴 2026-09-16: THE HARDCODED FALLBACK KEY IS GONE. It should have been removed on
+  // 2026-08-19 and was not — the comment that used to sit here even said "DELETE the
+  // fallback below" and then nobody did, for 28 days.
   //
-  // The literal below is a deliberate TEMPORARY fallback so the weather card does not
-  // go dark before the env var exists — it is NOT a secret any more: it has been
-  // public in git history since at least 08-16 and cannot be un-published.
+  // What was actually true, measured tonight: the literal here was BYTE-IDENTICAL to the
+  // key in HCC-secrets, and that key returned HTTP 200 from api.weather.com at 01:48.
+  // So a LIVE key was sitting in a public repo — not a dead one, as the old comment's
+  // "it is NOT a secret any more" implied. Removing it from CLAUDE.md on 08-19 achieved
+  // nothing while this copy remained.
   //
-  // TO FINISH (Jeff): rotate at wunderground.com -> Member Settings -> My Profile ->
-  // API Keys, put the NEW key in Cloudflare Pages as WU_API_KEY, then DELETE the
-  // fallback below. Details: HCC-secrets/weather_underground_api_key.txt
-  const WU_KEY = (env && env.WU_API_KEY) || '0e87ee079c0147a787ee079c01d7a75d';
+  // Safe to delete: WU_API_KEY is SET on the toro1 production Pages project (verified via
+  // the Cloudflare API, names read, values never read), so the live card reads the env var
+  // and never reached this literal.
+  //
+  // ⚠️ STILL OWED, and only Jeff can do it: the key is in the PUBLIC git history from at
+  // least 08-16 and cannot be un-published. Rotate at wunderground.com → Member Settings →
+  // My Profile → API Keys, then update WU_API_KEY in Cloudflare Pages. Deleting this line
+  // stops NEW exposure; it does not undo the old one.
+  const WU_KEY = env && env.WU_API_KEY;
   const WU_STATION = (env && env.WU_STATION) || 'KTNWHITE21';
+  // No key configured is a real failure, not a silent fall-through to Open-Meteo that
+  // would hide a broken env var for weeks.
+  if (!WU_KEY) {
+    return Response.json(
+      { ok: false, error: 'wu_key_not_configured',
+        hint: 'Set WU_API_KEY in the Cloudflare Pages project' },
+      { status: 500 });
+  }
 
   // Cardinal direction lookup (16-point compass)
   const DIRS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
