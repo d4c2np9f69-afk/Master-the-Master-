@@ -492,6 +492,30 @@ disappearing is as likely to be a decision as a defect — ask before filing it 
 
 ---
 
+# ⚠️ STALENESS CROSS-CHECK OF THE HEADER BELOW — run 2026-09-16 01:22 against the LIVE system
+
+Jeff: *"make sure they are not stale and obsolete, cross check them against the record."* Right to
+ask — tonight had already caught two false claims in this same header (*"zero rows left that are
+mine"*, and **#91 "NOT DEPLOYED"** which had shipped **18 days** earlier).
+
+**Reference material that disagrees with reality is worse than none.** Measured, not assumed:
+
+| claim in the header | measured tonight | verdict |
+|---|---|---|
+| **#39** *"nothing alerts on a door opening. 43 automations enumerated — not one is triggered by a contact sensor"* | **62 automations**, and **three** are contact-driven: `hcc_mail_arrived_mailbox_door_opened` (fired 00:05), `hcc_mail_evidence_capture_carrier_or_jeff` (00:07), `hcc_garage_secure_at_10_pm_door_fan_man_door` (03:00) | 🔴 **STALE AS WRITTEN.** Opening the mailbox **does** announce on the Echos and push to his phone. What is still true is narrower: **the front door, back deck door and garage man door have no alerting.** The perimeter is the gap, not "nothing". |
+| **#11** *"9 of 12 mounted; ~3 still in Jeff's hands"* | **12 Zigbee devices reporting link quality** — 5 contact sensors (front, back deck, garage door, garage man, mailbox) + 1 spare + 3 leak sensors + 2 mains routers + the siren | 🟠 **LIKELY STALE.** Twelve devices are on the mesh and reporting. Whether any remain in a drawer is Jeff's knowledge, but the fleet is not 9. |
+| **#141** never write `input_number.mower_hours` | the entity exists, reads `0.0` | ✅ **STANDS.** A stop sign does not go stale. |
+| **#84/#85/#86** held for the repeater still shipping | 2 mains routers on the mesh (LQI 131, 142); the mailbox is still bottom at **18** | ✅ **STANDS** — whether a NEW repeater has landed is Jeff's to say, and the mailbox still needs one. |
+| Terminal & SSH unconfigured, `22/tcp` closed | not re-checked tonight | ⚪ **UNVERIFIED** — stated as unknown rather than carried forward as fact. |
+| **#28** garage interior reachable unauthenticated | not re-checked — it is camera work, frozen this session | ⚪ **UNVERIFIED, and still the oldest P1.** Re-test the moment cameras re-open. |
+
+🔴 **The pattern in both stale entries is the same and it is worth naming: each was TRUE when
+written and nobody re-measured it.** #39 was written against 43 automations; there are 62 now.
+That is why this cross-check exists as a dated block rather than an edit — the original wording
+stays visible so the drift is legible.
+
+---
+
 # 📜 THE OLD OPEN_ITEMS TRIAGE HEADER (superseded 2026-09-16)
 
 Kept because its owner tables and its reasoning about why 192 entries produced four
