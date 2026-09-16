@@ -2362,6 +2362,8 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
         <li><span class="sk">A/C</span><span class="sv" id="acState">--</span></li>
         <li><span class="sk">Holds</span><span class="sv">Off at 71&deg; &bull; On at 73&deg;</span></li>
         <li><span class="sk">Automatic</span><span class="sv" id="acAuto">--</span></li>
+        <li><span class="sk">Cycles</span><span class="sv" id="acCycles">--</span></li>
+        <li><span class="sk">Run time</span><span class="sv" id="acRuntime">--</span></li>
         <li><span class="sk">Sensor</span><span class="sv" id="acEcho">--</span></li>
       </ul>
     </div>
@@ -2801,7 +2803,10 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
         <li><span class="sk">Indoor</span><span class="sv" id="stIndoor">--</span></li>
         <li><span class="sk">Outdoor</span><span class="sv" id="stOutdoor">--</span></li>
         <li><span class="sk">Wind</span><span class="sv" id="stWind">--</span></li>
+        <li><span class="sk">Dew point</span><span class="sv" id="stDew">--</span></li>
         <li><span class="sk">Rain today</span><span class="sv" id="stRain">--</span></li>
+        <li><span class="sk">Rain week / month</span><span class="sv" id="stRainHist">--</span></li>
+        <li><span class="sk">Last rain</span><span class="sv" id="stLastRain">--</span></li>
         <li><span class="sk">Pressure</span><span class="sv" id="stPressure">--</span></li>
         <li><span class="sk">Sun</span><span class="sv" id="stSun">--</span></li>
       </ul>
@@ -6608,6 +6613,27 @@ var AC_TPL = "{%- set i = states.sensor.my_weather_station_inside_temperature -%
   + " 'pressure': states('sensor.my_weather_station_relative_pressure'),"
   + " 'uv': states('sensor.my_weather_station_uv_index'),"
   + " 'solar': states('sensor.my_weather_station_irradiance'),"
+  // 2026-09-16 00:45 — the other NINE station sensors. Audited them against HA and the app was
+  // fetching 12 of 21: dew point, max gust, the weekly/monthly/last-rain trio, precipitation
+  // intensity, illuminance, absolute pressure and lifetime rain were all live in HA and invisible
+  // in the app. Rain history in particular is what decides whether the yard needs watering.
+  + " 'dew': states('sensor.my_weather_station_dew_point'),"
+  + " 'max_gust': states('sensor.my_weather_station_max_gust'),"
+  + " 'rain_rate': states('sensor.my_weather_station_precipitation_intensity'),"
+  + " 'rain_week': states('sensor.my_weather_station_weekly_rain'),"
+  + " 'rain_month': states('sensor.my_weather_station_monthly_rain'),"
+  + " 'rain_last': states('sensor.my_weather_station_last_rain'),"
+  + " 'lux': states('sensor.my_weather_station_illuminance'),"
+  + " 'abs_pressure': states('sensor.my_weather_station_absolute_pressure'),"
+  + " 'rain_life': states('sensor.my_weather_station_lifetime_rain'),"
+  // The A/C statistics Jeff asked for: "set up a way to track how many times it cycles on and off
+  // and other statistics that would help us." The history_stats helpers were BUILT the same night
+  // and then never surfaced — live in HA, invisible in the app, which is the same failure as the
+  // nine above. They cost nothing extra here: this is one template call for both cards.
+  + " 'cyc_today': states('sensor.a_c_relay_a_c_cycles_today'),"
+  + " 'cyc_24h': states('sensor.a_c_relay_a_c_cycles_24h'),"
+  + " 'run_today': states('sensor.a_c_relay_a_c_runtime_today'),"
+  + " 'run_24h': states('sensor.a_c_relay_a_c_runtime_24h'),"
   + " 'relay': r.state if r else 'missing', 'relay_changed': r.last_changed.isoformat() if r else none,"
   + " 'auto': a.state if a else 'missing'} | tojson }}";
 
@@ -6652,6 +6678,25 @@ function acRender(d){
         + (d.indoor_reported ? ' &bull; ' + acAgo(d.indoor_reported) : '')
       : (d && d.indoor ? String(d.indoor) : 'missing'), haveTemp ? '' : 'var(--bad)');
 
+  // Jeff, 2026-09-15: "you could probably also set up a way to track how many times it cycles on
+  // and off and other statistics that would help us." The four history_stats helpers were built
+  // that night and were never put on the card — live in HA, invisible here. Duty cycle is the
+  // number that actually means something: a unit running much over ~50% in this heat is either
+  // undersized, low on charge, or fighting the duct problem the new system is meant to fix.
+  var num = function(v){ var x = parseFloat(v); return isFinite(x) ? x : null; };
+  var ct = num(d && d.cyc_today), c24 = num(d && d.cyc_24h);
+  set('acCycles', (ct != null || c24 != null)
+    ? (ct != null ? ct + ' today' : '--') + (c24 != null ? ' &bull; ' + c24 + ' in 24 h' : '') : '--');
+  var rt = num(d && d.run_today), r24 = num(d && d.run_24h);
+  var fmtH = function(h){
+    var mins = Math.round(h * 60);
+    return mins >= 60 ? Math.floor(mins / 60) + ' h ' + (mins % 60) + ' m' : mins + ' m';
+  };
+  set('acRuntime', (rt != null || r24 != null)
+    ? (rt != null ? fmtH(rt) + ' today' : '--')
+      + (r24 != null ? ' &bull; ' + fmtH(r24) + ' in 24 h (' + Math.round(r24 / 24 * 100) + '% duty)' : '')
+    : '--');
+
   var conn = document.getElementById('acConn');
   if (conn) { conn.innerHTML = ' &#9679; LIVE'; conn.style.color = 'var(--ok)'; }
 
@@ -6682,14 +6727,35 @@ function stRender(d){
   set('stIndoor',  ind != null ? ind + '&deg;F' + (indH != null ? ' &bull; ' + indH + '% RH' : '') : '--');
   set('stOutdoor', out != null ? out + '&deg;F' + (outH != null ? ' &bull; ' + outH + '% RH' : '')
                                  + (feels != null && Math.abs(feels - out) >= 2 ? ' &bull; feels ' + feels + '&deg;' : '') : '--');
-  var w = n(d && d.wind), g = n(d && d.gust), wd = n(d && d.wind_dir, 0);
-  set('stWind', w != null ? (w * 1 === 0 && (g == null || g * 1 === 0) ? 'Calm' : w + ' mph' + (g != null && g * 1 > 0 ? ' &bull; gust ' + g : '') + (wd != null ? ' &bull; ' + wd + '&deg;' : '')) : '--');
-  var r = n(d && d.rain_today, 2);
-  set('stRain', r != null ? (r * 1 === 0 ? 'None' : r + ' in') : '--');
-  var p = n(d && d.pressure, 2);
-  set('stPressure', p != null ? p + ' inHg' : '--');
-  var uv = n(d && d.uv, 0), sol = n(d && d.solar, 0);
-  set('stSun', (uv != null ? 'UV ' + uv : '') + (sol != null ? (uv != null ? ' &bull; ' : '') + sol + ' W/m&sup2;' : '') || '--');
+  var w = n(d && d.wind), g = n(d && d.gust), wd = n(d && d.wind_dir, 0), mg = n(d && d.max_gust);
+  set('stWind', w != null ? (w * 1 === 0 && (g == null || g * 1 === 0) ? 'Calm' : w + ' mph' + (g != null && g * 1 > 0 ? ' &bull; gust ' + g : '') + (wd != null ? ' &bull; ' + wd + '&deg;' : ''))
+                            + (mg != null && mg * 1 > 0 ? ' &bull; max ' + mg : '') : '--');
+  // Dew point is the honest comfort number — it is why 79°F can feel like 80°F here. Above ~70 is
+  // the "sticky" threshold, which is exactly when the A/C is working hardest.
+  var dew = n(d && d.dew);
+  set('stDew', dew != null ? dew + '&deg;F' + (dew >= 70 ? ' &bull; muggy' : dew >= 60 ? ' &bull; humid' : ' &bull; comfortable') : '--');
+  // Rain: today, plus the live rate when it is actually raining. A rate of 0 is not worth a row.
+  var r = n(d && d.rain_today, 2), rate = n(d && d.rain_rate, 2);
+  set('stRain', r != null ? ((r * 1 === 0 && (rate == null || rate * 1 === 0)) ? 'None'
+                             : r + ' in' + (rate != null && rate * 1 > 0 ? ' &bull; ' + rate + ' in/h NOW' : '')) : '--');
+  // Week and month are what actually decide whether the yard needs watering.
+  var rw = n(d && d.rain_week, 2), rm = n(d && d.rain_month, 2);
+  set('stRainHist', (rw != null || rm != null)
+      ? (rw != null ? rw + ' in wk' : '--') + ' &bull; ' + (rm != null ? rm + ' in mo' : '--') : '--');
+  set('stLastRain', (function(){
+    var v = d && d.rain_last;
+    if (!v || v === 'unknown' || v === 'unavailable') return '--';
+    var t = Date.parse(v);
+    if (!isFinite(t)) return String(v);
+    var days = Math.floor((Date.now() - t) / 86400000);
+    return new Date(t).toLocaleDateString([], {month:'short', day:'numeric'})
+           + (days >= 0 ? ' &bull; ' + (days === 0 ? 'today' : days + 'd ago') : '');
+  })());
+  var p = n(d && d.pressure, 2), ap = n(d && d.abs_pressure, 2);
+  set('stPressure', p != null ? p + ' inHg' + (ap != null ? ' &bull; ' + ap + ' abs' : '') : '--');
+  var uv = n(d && d.uv, 0), sol = n(d && d.solar, 0), lux = n(d && d.lux, 0);
+  set('stSun', (uv != null ? 'UV ' + uv : '') + (sol != null ? (uv != null ? ' &bull; ' : '') + sol + ' W/m&sup2;' : '')
+               + (lux != null && lux * 1 > 0 ? ' &bull; ' + Number(lux).toLocaleString() + ' lx' : '') || '--');
   var conn = document.getElementById('stConn');
   if (conn) { conn.innerHTML = ' &#9679; LIVE'; conn.style.color = 'var(--ok)'; }
   if (!b) return;
