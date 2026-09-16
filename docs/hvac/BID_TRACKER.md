@@ -124,6 +124,35 @@ R8 7" flex material is **$2.80/ft**, 8" **$3.78/ft** — so labour+overhead is r
 
 ---
 
+## 🆕 REPLACEMENT BIDDERS — researched 2026-09-16 10:25, nobody contacted yet
+
+**Why: the field collapsed this morning.** Haskins declined · Derryberry out (wants a full duct
+replacement) · Petitt out (verbal) · Daniels silent since 09-14. That leaves **Peters visiting this
+afternoon and three who have never replied.** Jeff: *"I need you to find me some more companies to
+send the bid to"* and *"They need email so we can send them the information."*
+
+**🟢 HAVE A PUBLISHED EMAIL — can be sent the package immediately**
+
+| Company | Email | Phone | Licence | Why them |
+|---|---|---|---|---|
+| **Goodlettsville Heating & Cooling** | **contact@goodlettsvillehandc.com** | 615-479-0886 | 🪪 **TN CMC #072333** — full Mechanical Contractor | Small family shop, owner "Bill", **explicitly lists White House** in its service area. Best licence of the new names. |
+| **Star Heat & Air** (Hendersonville) | **office@starheatandair.com** | (615) 824-3533 · 180 Commerce Dr, Hendersonville 37075 | ⚠️ site shows only an **EPA # 575042531810**, NOT a TN contractor licence — **ask for it** | 40+ yrs family owned. **Installs Rheem** — the same family as the Ruud we want, so the `AJA` stainless option code is in their catalogue. |
+
+**🟡 NO PUBLISHED EMAIL — phone first, get their address, then send**
+
+| Company | Phone | Licence | Notes |
+|---|---|---|---|
+| **Brown and Son Company** | (615) 325-2624 · alt (615) 325-2059 · 109 S. Broadway, Portland 37148 | 🪪 **Licence #62850** | **Tempstar Elite Dealer + Trane dealer.** Serves White House, Springfield, Gallatin, Portland. Mon–Fri 7:30–4, 24 h emergency. |
+| **Covenant Heating and Cooling** | 615-829-9699 · 176-A Molly Walton Dr, Hendersonville 37075 | 🪪 **Mechanical #64341** + Electrical LDC 1127 | 15+ yrs. **Web form only** — no email published. |
+| **Bolen HVAC** | 629-273-8582 · 2306 Memorial Blvd, Springfield 37172 | not published — **ask** | Family owned, 10+ yrs, serves Robertson County / White House / Portland. |
+| **Hoffmann Brothers** | (615) 515-3015 · 45 Willow St, Nashville 37210 | not published — **ask** | Large multi-trade outfit, 40+ yrs. Nashville-based, covers Hendersonville. |
+
+🔴 **Every one of these was pulled from the company's own website this session — no number or address
+is from memory.** Where a licence is not shown above, the site did not publish one; **ask for it**,
+the same as with Tyler.
+
+---
+
 ## LOG — append, never overwrite
 
 | When | Who | What happened |
@@ -146,6 +175,8 @@ R8 7" flex material is **$2.80/ft**, 8" **$3.78/ft** — so labour+overhead is r
 | **2026-09-15 7:23 PM** | Daniels, Derryberry | 🛑 **Jeff's call: HOLD. No further contact until they reach out.** Old-scope gap noted above |
 | **2026-09-15 7:26 PM** | **Peters (Tyler Oberry)** | 🟢 **FIRST REPLY, 13 minutes after sending.** Verbatim: *"Jeff, I can complete this tomorrow! Please allow me to come meet with you and take a look at where we will be chasing into the garage and how the thermostat pull will be."* Offers **4 equipment options: Carrier · Goodman · Ruud/Rheem (that line was partly cut on screen) · American Standard**. Pitches **15.2 SEER2 2-stage** with TVA rebate + AHRI certification. *"I can pull a permit for this when job is awarded."* Direct line/text **629-292-1310**. 🔴 **NO PRICE = NOT A BID YET.** 2 attachments on his reply (my own PDFs bounced back). |
 
+| **2026-09-16 ~10:22** | ⛔ **Derryberry (Charlie) — OUT, SECOND TIME** | Called Jeff. **Will not do the job without a COMPLETE DUCT REPLACEMENT.** Jeff: *"they wouldn't do it with the not doing a complete duck replacement so he's out again so you can scratch him off the list."* 🔴 **Keep the technical point, not just the refusal:** the scope on the table is duct MODIFICATION — twist out at the unit, three 6"→8" branches, 7" garage run, new 16" return. A contractor who has actually walked this job (09-10) says that is not enough. That is either an upsell or a real finding, and **it is worth putting to Tyler and the others directly: "one contractor says these ducts need full replacement — what do you see?"** His $9,500 counter is withdrawn with him. |
+| **2026-09-16 ~10:23** | ⛔ **Petitt (Logan) — OUT, VERBALLY** | Jeff: *"Petitt is out he told me verbally he was out."* Supersedes his Monday 6:25 PM *"SCOPE OF WORK"* email asking to see a competitor's proposal. **Do not send him another bidder's numbers.** |
 | **2026-09-16 10:22** | ✅ **MAIL ACCESS SOLVED — XFINITY WEBMAIL, NO PASSWORD NEEDED** | Jeff: *"Well check it in xfinity I don't care how you check it."* He was right and I had given up too early. **Going to `xfinity.com/email` first rides his existing Xfinity SSO session straight into `connect.xfinity.com` already logged in** — the direct webmail URL shows a login form, the SSO path does not. This is now THE route: full search across All Folders, every folder readable, no UI Automation, no focus fights. |
 | **2026-09-16 10:22** | 🔴 **DERRYBERRY — DEFINITIVE: THE EMAIL IS NOT IN THE MAILBOX** | Searched **"derryberry" across ALL FOLDERS in Xfinity webmail → 0 results.** Spam read in full (26 items, none), Inbox read, Trash read. Charlie believes he sent it; it never landed. **Ask him what address he used** — ours for him is `Charles.b@derryberryac.com`. |
 | **2026-09-16 10:22** | 🧹 **SPAM FOLDER CLEARED — 3 REAL EMAILS RESCUED FIRST** | Jeff: *"While you are in there clean out the junk."* **Rescued to Inbox and marked NOT SPAM (which also trains the filter): Hunter's bid reply, a Cloudflare alert about his own app, and a PayPal receipt.** Then deleted 23 junk items → **Trash, recoverable. Trash was NOT emptied.** Spam 26 → 0. |
