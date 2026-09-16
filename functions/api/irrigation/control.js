@@ -1,6 +1,46 @@
 // /api/irrigation/control — POST: controls B-Hyve zones (start/stop/rain_delay)
-// Body: { pin, action, station?, minutes?, hours? }
+// Body: { action, station?, minutes?, hours?, ctrl_token | password | token }
 const API_BASE = 'https://api.orbitbhyve.com/v1';
+
+// ── CONTROL AUTHORISATION — OPEN_ITEMS #184's twin, closed 2026-09-15 ────────
+// VERIFIED LIVE, not assumed: the Cloudflare Pages API reports BHYVE_EMAIL and
+// BHYVE_PASSWORD both SET on the toro1 production deployment. Until this gate
+// existed, an unauthenticated POST to this endpoint would log in with those
+// deployment credentials and start a zone, stop a zone, or set a rain delay on
+// the real controller — from anywhere, with no password.
+//
+// Same shape as ctrlAuthorised() in functions/api/hours.js, deliberately: one
+// pattern for every control-class endpoint. Accepts the maintenance token, the
+// ctrl_token minted by /api/auth at family login, or the family password itself.
+// The length check comes first so a missing or blank KV value can never
+// authorise — that is the trap hours.js already documents.
+//
+// This cannot break the irrigation UI: the app drives zones through
+// /api/irrigation's session-token + browser WebSocket path and never posts here.
+// This endpoint is the direct-POST door, and it is the one that was standing open.
+async function sha256Hex(s) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function ctrlAuthorised(env, body) {
+  const kv = env.HCC_KV || env.MOWER_KV || null;
+  if (!kv) return false;
+  const { password, token, ctrl_token } = body || {};
+  if (typeof token === 'string' && token) {
+    const want = await kv.get('mower_ctrl_token');
+    if (want && want.length >= 16 && token === want) return true;
+  }
+  if (typeof ctrl_token === 'string' && ctrl_token) {
+    const want = await kv.get('ctrl_token');
+    if (want && want.length >= 16 && ctrl_token === want) return true;
+  }
+  if (typeof password === 'string' && password) {
+    const stored = await kv.get('auth_hash');
+    if (stored && (await sha256Hex(password)) === stored) return true;
+  }
+  return false;
+}
 
 const LOGIN_HEADERS = {
   'Accept': 'application/json, text/plain, */*',
@@ -152,6 +192,12 @@ export async function onRequestPost({ request, env }) {
 
   if (!email || !password) {
     return Response.json({ ok: false, error: 'credentials_not_provided' }, { status: 400 });
+  }
+
+  // Gate BEFORE anything reaches B-Hyve. Nothing above this line touches the
+  // controller, so a refused caller never causes a login attempt either.
+  if (!(await ctrlAuthorised(env, body))) {
+    return Response.json({ ok: false, error: 'not_authorised' }, { status: 401 });
   }
 
   const { action, station, minutes, hours } = body;

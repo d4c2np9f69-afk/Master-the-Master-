@@ -6535,6 +6535,9 @@ function luxSendControl(action,opts){
   // on the normal path.
   var payload=Object.assign({action:action,device_id:LUX_STATE.device_id},opts||{});
   if(creds.email&&creds.pass){ payload.email=creds.email; payload.password=creds.pass; }
+  // #184: the server will not act on its own stored credentials without proof of
+  // a family login. Send the control token minted by /api/auth.
+  var ct=getCtrlToken(); if(ct){ payload.ctrl_token=ct; }
   if(action==='set_sp'){payload.cool_sp=LUX_STATE.cool_sp;payload.heat_sp=LUX_STATE.heat_sp;}
   fetch('/api/climate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
     .then(function(r){return r.json();})
@@ -7482,6 +7485,9 @@ function splashLogin(){
     .then(function(res){
       if(res.data.ok&&res.data.ha_token){
         safeSetItem('ha_token',res.data.ha_token);
+        // #184: the control token proves this device's owner typed the family
+        // password. /api/climate POST and /api/irrigation/control demand it.
+        if(res.data.ctrl_token){ safeSetItem('ctrl_token',res.data.ctrl_token); }
         localStorage.setItem('hcc_theme','dark');
         document.documentElement.classList.remove('light');
         syncThemeBtn();
@@ -10053,6 +10059,15 @@ setInterval(loadWeather, 5*60*1000);
 // ── HA TOKEN & HOME DATA ─────────────────────────────────────────────────
 function getHaToken() {
   return localStorage.getItem('ha_token') || '';
+}
+
+// Control token — minted by /api/auth at family login (#184, 2026-09-15). The
+// control-class endpoints (/api/climate POST, /api/irrigation/control) require
+// it: it is the proof that whoever is driving the house typed the family
+// password at least once on this device. A device that logged in before
+// 2026-09-15 has no ctrl_token and re-logs in once at the splash screen.
+function getCtrlToken() {
+  return localStorage.getItem('ctrl_token') || '';
 }
 
 // Route every HA call through our own /api/ha proxy (same-origin → no CORS, no
