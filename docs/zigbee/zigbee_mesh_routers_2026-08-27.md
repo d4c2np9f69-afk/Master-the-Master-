@@ -192,3 +192,36 @@ expects it. **If Zigbee ever goes dark after touching the antenna, check the add
 doughnut *perpendicular* to its axis, with a **null off the tip**. Tilting it toward the kitchen aims the weakest
 part of the pattern at the kitchen. **Vertical is what gives even coverage across a single floor**; height and
 getting clear of metal/appliances are the levers that actually help.
+
+### MEASURED — run 2, 19:42–21:38 CT (higher, tilted toward the kitchen)
+
+| Device | 08-27 | run 1 (window, vertical) | run 2 (higher, tilted) | run 2 vs run 1 |
+|---|---|---|---|---|
+| Front Door | 65 | 43–47 | **76** | **+31** |
+| Guest Bath Leak | 80 | 40–43 | **69–76** | **+30** |
+| Mailbox | 76 | 0–21 | 21 | +10 |
+| Kitchen Sink Leak | 91 | 65 | 51–54 | −13 |
+| Garage Door Down | 83 | 36–61 | 29–40 | −14 |
+| Spare Contact 1 | 120 | 138 | 105–131 | −20 |
+| Back Deck Door | 83 | 91–98 | 65 | −30 |
+| Kitchen Refrigerator Leak | 83 | 61–65 | 21–32 | **−36** |
+| Garage Man Door | 83 | 72 | 25–29 | **−45** |
+
+**Net: −9.6 LQI average across the 9 devices. Run 2 is WORSE overall than run 1.**
+
+🔴 **And the split is not random — it is the antenna pattern, confirming the RF note above.**
+Everything that improved is at the **FRONT** of the house (front door, guest bath). Everything that
+dropped is in the **KITCHEN, GARAGE and BACK** — including **both kitchen sensors**, the two nearest
+the direction the antenna was aimed. That is the null off the tip doing exactly what physics says it
+does: **aiming the whip at the kitchen pointed the weakest part of the pattern at the kitchen**, and
+swung the strong lobe around to the front of the house.
+
+✅ **RECOMMENDATION: stand the antenna back up VERTICAL, keep the new height and the window
+position.** The height and the 10-foot cord are real gains worth keeping; the tilt is what cost the
+kitchen and garage. Vertical at this height should hold the front-of-house improvement without
+giving back the rest.
+
+⚠️ **Caveat kept honest:** LQI is a single-packet snapshot and a body near a sensor absorbs 2.4 GHz,
+so individual numbers move a few points between reads. The −45/−36 on the garage man door and the
+refrigerator leak, and the matching front-of-house gains, are far larger than that noise and all
+point the same way. Run 2's window closes 22:42; later packets only add repeats.
