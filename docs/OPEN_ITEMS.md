@@ -2338,7 +2338,56 @@ windscribe-cli     ->  Login state: Logging in   Connect state: DISCONNECTED
 
 ---
 
-## #162 — 🟡 BROWSER CONSOLIDATION: Firefox in, Brave/Tor out 2026-09-08 12:50
+## #162 / #164 / #165 — ✅ RESOLVED 2026-09-15 11:56 PM. They contradicted each other; the newest source settles it.
+
+**These three items disagreed, and a session reading them in order would have been confidently
+wrong whichever one it stopped at:**
+
+| item | time | says |
+|---|---|---|
+| #162 | 09-08 12:50 | Firefox **in**, Brave **and Tor** out |
+| #164 | 09-08 **13:47** | Firefox migration **ABANDONED**, Jeff stays on Edge |
+| #165 | 09-08 **13:55** | *"Jeff decided to stay with Firefox after all"* |
+
+🔴 **All three are superseded by `docs/browsers_and_passwords_2026-09-11.md`, which is three days
+newer and quotes him directly:** *"Edge is supposed to be my default browser… get rid of Firefox
+and keep Edge, Tor and Chrome."*
+
+**So the settled state is: EDGE is the daily browser. Keep Edge, Tor and Chrome. Firefox goes.**
+Note this also reverses #162 on Tor — #162 listed Tor for removal; Jeff kept it.
+**Do not re-pitch a Firefox migration** (#164's warning stands), and #165's App-Bound-Encryption
+wall is moot — nothing needs importing out of Edge if Edge is where he stays.
+
+### 🟠 The one action that is still outstanding, and why it was NOT forced tonight
+
+**Measured 11:54 PM: Firefox is still installed** (`C:\Program Files\Mozilla Firefox`, v155.0.1 via
+winget, 259 MB profile). Chrome, Edge and Tor present; **Brave already gone.** The 09-11
+instruction was never carried out.
+
+An uninstall was attempted and **`winget` printed "Successfully uninstalled" while removing
+nothing** — binary, 13 processes and the winget entry all still present afterwards. 🔴 **That is a
+false success from a package manager; verify a removal by looking for the binary, not by reading
+the exit message.**
+
+**It did not remove because Firefox is RUNNING — and it is running something of Jeff's:** one
+visible window, **"Ambient Weather — Original profile"**, open since 15:01, with a 322 KB session
+file. That is the weather-station account page from tonight's station work.
+
+⚠️ **Deliberately not forced.** #164 records that *repeated force-kills of Firefox corrupted
+`profiles.ini`*, and killing it would also drop that session. **The uninstall is a two-minute job
+the next time that window is not needed:**
+
+```
+winget uninstall --id Mozilla.Firefox --exact
+```
+
+Reversible with `winget install Mozilla.Firefox`. The profile at `%APPDATA%\Mozilla\Firefox`
+(259 MB) is left in place either way — decide separately whether to delete it, since it holds the
+saved session and a stray unconfirmed account on a typo'd address (`jeffery.loewen@`, per #165).
+
+<details><summary>Original #162 entry</summary>
+
+### 🟡 BROWSER CONSOLIDATION: Firefox in, Brave/Tor out 2026-09-08 12:50
 
 Jeff: *"I mainly use edge but if foxfire is the one I need so be it I just need all my stuff moved
 to it... all the other stuff can go if it's taking up space or slowing me down."*
@@ -2378,7 +2427,11 @@ delete it until the full MEMORY.DMP is read, or the evidence goes with it.
 
 ---
 
-## #164 — ⛔ FIREFOX MIGRATION ABANDONED. Jeff stays on Edge. 2026-09-08 13:47
+</details>
+
+## #164 — ✅ CORRECT AND CONFIRMED by the 09-11 source. See the consolidated entry at #162. Original below.
+
+### ⛔ FIREFOX MIGRATION ABANDONED. Jeff stays on Edge. 2026-09-08 13:47
 
 **Jeff: *"I don't want to have to do all this."* He is right, and this is the correct outcome.**
 
@@ -2423,7 +2476,14 @@ on Edge — no migration, no clicks.
 
 ---
 
-## #165 — 🔴 EDGE APP-BOUND ENCRYPTION BLOCKS ALL PASSWORD IMPORT. Hard wall. 2026-09-08 13:55
+## #165 — ✅ MOOT. The wall is real but nothing needs importing — Jeff stays on Edge (see #162). Original below.
+
+🔴 **Keep the measurement, discard the premise.** App-Bound Encryption genuinely does block every
+external password import from Edge — verified with Edge fully closed, 11 processes killed, a
+passwords-only import: still 0. **Do not retry it.** But that only mattered while a migration TO
+Firefox was planned, and the 09-11 source ends that. The 313 passwords stay where they already are.
+
+### 🔴 EDGE APP-BOUND ENCRYPTION BLOCKS ALL PASSWORD IMPORT. Hard wall. 2026-09-08 13:55
 
 Jeff decided to stay with Firefox after all (*"I will use Foxfire, but I need you to clean it all
 up and make it work right - that's why I never used brave, because it was never fixed correctly"*).
@@ -2910,7 +2970,32 @@ PUBLIC — #99). Backups: `HCC-Audit.py.bak-20260909-2145`.
 
 ---
 
-## #176 — 🔴 FIVE DAILY JOBS SILENTLY SKIPPED TODAY, INCLUDING THE OFF-SITE BACKUP. 2026-09-10 07:53
+## #176 — ✅ CLOSED 2026-09-15 11:53 PM. All five recovered, and the detector that was built is live.
+
+**Verified live tonight with `Get-ScheduledTaskInfo` — the same instrument that found the fault:**
+
+| task | last run | result |
+|---|---|---|
+| HCC Beehive Backup Sync *(the off-site backup)* | **09-15 15:09** | **0** |
+| HCC Master Record Update | 09-15 15:09 | 0 |
+| HCC Utility Billing Cycle | 09-15 15:09 | 0 |
+| HCC Clip Archive Pull | 09-15 15:09 | 0 |
+| HCC Clip Archive Purge | 09-15 15:09 | 0 |
+
+All five are running on schedule with a clean exit. The 48-hour skip was caused by a single
+TrustedInstaller reboot pushing every `MSFT_TaskDailyTrigger` out a full interval — it recovered
+on its own once the interval came round.
+
+**The durable half is the part that matters, and it exists:** `check_scheduled()` +
+`_task_table()` in `HCC-Scripts/HCC-Audit.py` (lines ~858–886) read Task Scheduler directly and
+FAIL on a stale heartbeat, a deleted task or a disabled task, WARN on a non-zero exit, and print
+**`NOT VERIFIED`** rather than implying a pass when the scheduler cannot be read at all. That last
+behaviour is the whole point — the original failure was silence being mistaken for health.
+`HCC Whole-Stack Audit` itself ran **09-15 23:00, result 0**, so the detector is actually running.
+
+<details><summary>Original 2026-09-10 investigation</summary>
+
+### 🔴 FIVE DAILY JOBS SILENTLY SKIPPED TODAY, INCLUDING THE OFF-SITE BACKUP. 2026-09-10 07:53
 
 **Found by the whole-stack audit Jeff asked for. Nothing in the house said a word.**
 
@@ -2971,6 +3056,8 @@ the real 09-10 five-job miss → **5 FAILs naming all five**; go2rtc stopped →
 heartbeat 3.3 h stale → FAIL; a task deleted → FAIL; a task disabled → FAIL; non-zero exit → WARN;
 scheduler unreadable → WARN **and** coverage prints `NOT VERIFIED` rather than implying a pass.
 **Task Scheduler, HA and CodeProject.AI were never touched by the test.**
+
+</details>
 
 ---
 
