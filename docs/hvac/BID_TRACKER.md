@@ -141,10 +141,14 @@ R8 7" flex material is **$2.80/ft**, 8" **$3.78/ft** — so labour+overhead is r
 | **2026-09-15 7:13 PM** | **Peters** | 🟢 BID REQUEST SENT |
 | **2026-09-15 7:15 PM** | **KB's HVAC** | 🟢 BID REQUEST SENT |
 | **2026-09-15 7:16 PM** | **Callon Mechanical** | 🟢 BID REQUEST SENT |
-| **2026-09-15 7:16 PM** | **Hunter Heating & Air** | 🟢 BID REQUEST SENT |
+| **2026-09-15 7:17 PM** | **Hunter Heating & Air** | 🟢 BID REQUEST SENT — ✅ **CONFIRMED IN SENT ITEMS 2026-09-16 09:08**, `info@huntertn.com`, with attachments. The "composed but maybe never sent" worry is **CLOSED** |
 | 2026-09-15 7:21 PM | Haskins Heating & Cooling | Web contact form filled with the full request and submitted. **Success message never seen — unconfirmed.** Call 615-746-6390 to confirm |
 | **2026-09-15 7:23 PM** | Daniels, Derryberry | 🛑 **Jeff's call: HOLD. No further contact until they reach out.** Old-scope gap noted above |
 | **2026-09-15 7:26 PM** | **Peters (Tyler Oberry)** | 🟢 **FIRST REPLY, 13 minutes after sending.** Verbatim: *"Jeff, I can complete this tomorrow! Please allow me to come meet with you and take a look at where we will be chasing into the garage and how the thermostat pull will be."* Offers **4 equipment options: Carrier · Goodman · Ruud/Rheem (that line was partly cut on screen) · American Standard**. Pitches **15.2 SEER2 2-stage** with TVA rebate + AHRI certification. *"I can pull a permit for this when job is awarded."* Direct line/text **629-292-1310**. 🔴 **NO PRICE = NOT A BID YET.** 2 attachments on his reply (my own PDFs bounced back). |
+
+| **2026-09-16 ~09:55** | **Peters (Tyler Oberry)** | 🟢🟢 **APPOINTMENT SET — HE IS COMING THIS AFTERNOON.** Jeff phoned him. Verbatim: *"I called Tayler at Peter's and he is coming this afternoon."* ⚠️ **VERBAL** — per the standing rule this gets chased in writing. **Exact clock time not yet captured.** First and so far ONLY site visit booked out of the five. |
+| **2026-09-16 ~09:55** | **Haskins Heating & Cooling** | ⛔ **OUT — DECLINED.** Jeff: *"Haskins is out they can't quote at this time."* Not a no-reply and not a chase target — they answered and said no. **Remove from the field; stop chasing the unconfirmed web form.** Field drops 6 → 5. |
+| **2026-09-16 09:08** | **MAILBOX SWEEP — first one of the morning** | Jeff, 09:01: *"Are you checking the email for emails from the bidders? You have to track this and let me know the time of the appointments."* **I had not been — that is on me.** Read via UI Automation on the new Outlook (`Outlook Host`); Xfinity webmail wants a password and classic Outlook's store is empty (0 items), so neither was usable. **RESULT: ZERO new bidder mail.** Newest item in the inbox is 12:39 AM (PayPal). The only bidder message in the box is still Tyler's from Tue 7:26 PM. ✅ **Sent Items proves all five requests left**: Chilly Ben's 7:13, Peters 7:14, KB's 7:15, Callon 7:16, **Hunter 7:17** — all with attachments. 🔴 **NOT ONE APPOINTMENT TIME HAS BEEN CONFIRMED BY ANYONE.** |
 
 ---
 
@@ -155,13 +159,20 @@ Phone calls are fine — but the QUOTE and the VISIT TIME must also arrive by em
 🔴 If Jeff takes a number or a time by phone, it goes in the LOG marked VERBAL and is chased in writing.**
 **All new site visits: WEDNESDAY 16 SEPTEMBER, any time 8:00 AM – 6:00 PM** (Jeff opened it to the full day 09-15 6:52 PM so five bidders fit).
 
+### AS OF 2026-09-16 09:59 — **ONE VISIT BOOKED. HASKINS IS OUT. FOUR STILL SILENT.**
+
+**Jeff phoned Tyler at Peters and he is coming THIS AFTERNOON** — the first and so far only site
+visit booked out of the five. **Haskins declined outright**, so the field is 5, not 6.
+🔴 **The remaining four have still not replied, 14+ hours after confirmed delivery.**
+
 | Company | Requested | Confirmed time | Visited | Notes |
 |---|---|---|---|---|
-| Chilly Ben's | Wed 09-16 8–6 offered | — | — | |
-| Peters | Wed 09-16 8–6 offered | — | — | |
-| KB's HVAC | Wed 09-16 8–6 offered | — | — | |
-| Callon Mechanical (Hendersonville) | Wed 09-16 8–6 offered | — | — | service@callonmechanical.com · TN CMC #81530 |
-| Hunter Heating & Air (Hendersonville) | Wed 09-16 8–6 offered | — | — | info@huntertn.com · since 2014 |
+| **Peters (Tyler Oberry)** | Wed 09-16 8–6 offered | 🟢 **TODAY, AFTERNOON** — ⚠️ verbal, exact clock time not captured | pending | **Booked by phone 09-16 ~09:55.** Replied in 13 min Tue. **Still owes a PRICE and a TN licence number.** Text/call **629-292-1310** |
+| Chilly Ben's | Wed 09-16 8–6 offered | 🔴 none | — | Silent 14 h · ben@chillybens.com · (270) 776-3691 · HM04997 |
+| KB's HVAC | Wed 09-16 8–6 offered | 🔴 none | — | Silent 14 h · (615) 300-5283 |
+| Callon Mechanical (Hendersonville) | Wed 09-16 8–6 offered | 🔴 none | — | Silent 14 h · (615) 953-9788 · TN CMC #81530 |
+| Hunter Heating & Air (Hendersonville) | Wed 09-16 8–6 offered | 🔴 none | — | Silent 14 h · (615) 714-6200 · send CONFIRMED 7:17 PM |
+| ~~Haskins (Joelton/Springfield)~~ | web form 09-15 7:21 PM | ⛔ **DECLINED 09-16** | — | *"Can't quote at this time."* **Answered and said no — closed, not a chase target.** |
 | Derryberry (Charles) | — | — | ✅ **09-10** | already walked the job; has the corrected drawing |
 | Daniels (Ryan) | — | — | ✅ **09-10 AM** | already walked the job |
 | Petitt (Logan) | — | — | ✅ 09-10 | withdrew 09-14 |
