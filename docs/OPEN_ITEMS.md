@@ -2473,7 +2473,32 @@ Settings -> Account and sync clears it. Harmless but should go.
 
 ---
 
-## #171 — 🔴🔴 BLINK MOTION HAS NOT REACHED HA IN 5 DAYS. NOT DIAGNOSED. NOTHING CHANGED. 2026-09-09 16:45
+## #171 — ✅ CLOSED 2026-09-15 11:50 PM. The outage ended, root-caused in #173, re-verified live tonight.
+
+**Closing evidence, read from the live house at 11:48 PM — not from the 09-10 note, because a
+note that was true once is not evidence that it is true now:**
+
+| instrument | reading |
+|---|---|
+| `automation.hcc_snapshot_frame_on_motion_no_subscription_path` | state `on`, **last_triggered 3.9 h ago** |
+| all six `binary_sensor.*_motion` | present, `off`, **last_changed 0.8 h ago** — they are cycling, not frozen |
+| `automation.hcc_clip_archive` | last_triggered 3.9 h ago |
+
+The five-day outage (09-04 11:51 → 09-10 06:16) is over. **#173 found the root cause and it was
+not Home Assistant**: motion can only ever be set from the Sync Module's local-storage manifest,
+and that manifest stopped advancing. **#174 built the check that makes a repeat visible in one
+line** instead of a half-day investigation — that check is live and it is what made the recovery
+legible on 09-10.
+
+⚠️ **Read-only verification.** Nothing was triggered, polled or changed: `CAMERAS_CLOSED_2026-08-22.md`
+records that polling Blink harder caused the 08-19 auth code-storm, so this read HA's own recorded
+state and never touched a camera.
+
+Closes **#171, #172, #173 and BREAK #1** — they are four descriptions of one outage.
+
+<details><summary>Original 2026-09-09 investigation, kept in full</summary>
+
+### 🔴🔴 BLINK MOTION HAS NOT REACHED HA IN 5 DAYS. NOT DIAGNOSED. NOTHING CHANGED. 2026-09-09 16:45
 
 Jeff, live: *"I'm getting no camera reports at all on the Apple TV or fire tv or phone."*
 He then said: ***"Make sure you read the whole file before changing or fixing anything!!!!!"***
@@ -2620,7 +2645,7 @@ override becomes the prime suspect.
 
 ---
 
-## #172 — 🔴 CAMERA ALERTING: WHAT IS ACTUALLY BROKEN, MEASURED 2026-09-09 EVENING
+## #172 — ✅ CLOSED with #171. Its "PROVEN WORKING" list is still true and is worth keeping.
 
 Jeff: *"I'm getting no camera reports at all on the Apple TV or fire tv or phone."*
 Then: *"it is supposed to be pulling clips from the beast"* and *"it's supposed to capture a small
@@ -2637,11 +2662,48 @@ Also verified: Blink's cloud is healthy — all six **thumbnail timestamps curre
 and a `trigger_camera` moved Back Left's thumbnail within 30 s. Auth, sync module, network, account
 are fine. `alarm_control_panel.blink_loewen301` = `armed_away`, 5/6 cameras armed.
 
+</details>
+
+### ✅ BREAK #1 — CLOSED with #171 above. Motion has been flowing since 09-10 06:16; verified again 09-15 11:48 PM.
+
+<details><summary>Original</summary>
+
 ### 🔴 BREAK #1 — BLINK MOTION HAS NOT REACHED HA SINCE 09-04 11:51 (see #171)
 
 92 events over 08-26→09-04 (~9/day), then **zero for 5 days**. Survives everything tried:
 hourly reloads, custom→built-in, blinkpy 0.25.6→0.25.9, HA restarts. **Nothing downstream can
 fire without it.** Jeff walked to the back deck at 18:16 — no event.
+
+</details>
+
+### ⛔ BREAK #2 — RESOLVED AS *NOT FIXABLE*, 2026-09-15 11:52 PM. The proposed fix would have re-created the bug.
+
+🔴 **This item asks to re-enable `automation.ai_camera_scan_on_motion` because it was "the ONLY
+caller of `blink.save_video`". Doing that would not restore video. It would start minting 40-byte
+stubs again — the exact artefact this same item complains about.** Confirmed live at 11:48 PM:
+that automation is still `off`, and it should stay off.
+
+**Why, cross-checked against three documents that each say it independently:**
+
+- `docs/incidents/camera_fixes_2026-08-21.md` — it was turned off deliberately: *"the legacy
+  `blink.save_video` → ffmpeg chain the 2026-08-19 snapshot work replaced, and it fails by design
+  with no Blink subscription."*
+- `docs/CAMERAS_CLOSED_2026-08-22.md` — **Blink gives ONE STILL per event and there is no local
+  feed.** There is no video to pull.
+- **OPEN_ITEMS Pending Item 12** — with no subscription `save_video` downloads
+  `{"message":"Media not found","code":700}` and **blinkpy writes that error body into the .mp4**
+  (`video_to_file` checks only `response is None`, never `response.status`). **That is precisely
+  where the 40-byte `back_left.mp4` came from**, and where the byte-identical 1,984,293-byte
+  driveway duplicates came from.
+
+**So B does not gate A, as this item claims — A is unreachable at any price short of a Blink
+subscription.** The still-image path that replaced it is the one that works, and it is what feeds
+the Apple TV popup with red boxes today.
+
+**Nothing changed.** The camera stack is frozen and `Verify-CameraStreams.ps1` has not failed.
+This item is closed as **bounded by the documented Blink ceiling**, not as fixed.
+
+<details><summary>Original 2026-09-09 investigation, kept in full — the measurements in it are good</summary>
 
 ### 🔴 BREAK #2 — THE CLIP PRODUCER HAS BEEN OFF SINCE 2026-08-21 12:43
 
@@ -2705,9 +2767,17 @@ That answers the open question in **#78** ("whether clips now arrive at all"): *
 
 🔴 **B GATES A.** No motion → no scan → no clip → nothing on the video player.
 
+</details>
+
+*(Superseded 2026-09-15: B is done — motion has been flowing since 09-10 and was re-verified live
+tonight. A is unreachable without a Blink subscription, so "B gates A" was true but incomplete:
+A was never on the other side of that gate.)*
+
 ---
 
-## #173 — 🔴🔴 ROOT CAUSE FOUND 2026-09-09 20:40 — THE SYNC MODULE HAS RECORDED NOTHING SINCE 09-04 11:49. HOME ASSISTANT IS INNOCENT.
+## #173 — ✅ CLOSED with #171 — root cause found and the watchdog for it is live (#174). Original below.
+
+### 🔴🔴 ROOT CAUSE FOUND 2026-09-09 20:40 — THE SYNC MODULE HAS RECORDED NOTHING SINCE 09-04 11:49. HOME ASSISTANT IS INNOCENT.
 
 **Every HA-side theory in #171 and #172 is dead. So is my own "Blink is throttling us / we are
 over-polling the manifest" conclusion from earlier tonight. Read this before touching anything.**
