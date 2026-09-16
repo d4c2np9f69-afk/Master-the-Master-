@@ -2208,7 +2208,49 @@ burnt contacts. The check costs nothing and says whether the contactor is even t
 
 ---
 
-## #159 — 🔴 THE 0xEF CRASH IS NOT FIXED. It recurred 08-28, and was never logged. 2026-09-08 12:25
+## #159 — 🟢 DOWNGRADED 2026-09-16 00:38. Nineteen days clean. The remaining analysis is impossible — the evidence is gone.
+
+**Measured tonight from the Windows System log, the same instrument that found it:**
+
+| | |
+|---|---|
+| Last bugcheck (Event 1001) | **2026-08-28 02:09** |
+| Any Event 41 / 1001 / 6008 since | **NONE — 19 days** |
+| Minidumps on disk | **ZERO.** `C:\Windows\Minidump` is empty |
+| `C:\Windows\MEMORY.DMP` | **absent** |
+
+🔴 **BOTH REMAINING NEXT STEPS IN THIS ROW CANNOT BE DONE.** They were "resolve
+`00007ff9e9925497` to a module from the full `MEMORY.DMP`" and "compare against the two 08-20
+minidumps". **Every dump has been deleted.** Not by us — `Clean-Beast.ps1` contains no
+`Minidump` / `MEMORY.DMP` / `cleanmgr` reference, checked tonight. Windows or a disk-cleanup pass
+took them. **The address can never be resolved now; do not re-open this row to try.**
+
+🟢 **THE NEXT ONE WILL BE CAPTURABLE — verified, not assumed:**
+
+```
+CrashDumpEnabled  2      (kernel dump)
+MinidumpDir       C:\WINDOWS\Minidump
+DumpFile          C:\WINDOWS\MEMORY.DMP
+AutoReboot        1
+pagefile          D:\pagefile.sys  19,456 MB   — ample for a kernel dump
+```
+
+**So the instrumentation is armed and the fault has not recurred in nineteen days.** That is not
+the same as fixed, and this row does not claim it is. What it means practically: there is nothing
+left to analyse and nothing to act on until it happens again.
+
+**🔴 IF IT CRASHES AGAIN, DO THIS FIRST, BEFORE ANYTHING ELSE:** copy
+`C:\Windows\Minidump\*.dmp` and `C:\Windows\MEMORY.DMP` somewhere safe **the same day**. That is
+the whole lesson of this row — the 08-28 dump was read in time and gave the answer
+(`csrss.exe`, `c0000005` ACCESS_VIOLATION); the 08-20 pair never was, and now never will be.
+
+⚠️ **The last untested variable is unchanged and is still NOT installed:** NVIDIA 582.53, 870 MB,
+signature Valid, sitting in `Downloads\`. It resets the display when it installs. With the fault
+dormant for nineteen days there is no longer a diagnostic reason to rush it.
+
+<details><summary>Original investigation — the dump analysis is still the good part</summary>
+
+### 🔴 THE 0xEF CRASH IS NOT FIXED. It recurred 08-28, and was never logged. 2026-09-08 12:25
 
 Found while answering "what needs to be fixed on the computer". **This was not in OPEN_ITEMS at all** —
 the crash investigation lived only in a memory file, so the recurrence went unrecorded for 11 days.
@@ -2311,6 +2353,7 @@ that was wrong.
    NVIDIA Corporation). Not installed — it resets the display and Jeff is mid-AC-repair.
 
 ---
+</details>
 
 ## #160 — 🔴 HIS LOCATION IS STILL FULLY EXPOSED. Fingerprinting != IP geolocation. 2026-09-08 12:38
 
