@@ -1291,3 +1291,485 @@ alongside real work is exactly what made the list read as 192 jobs when it was n
 |---|---|
 | 26 | **F-250 OBD-II box** (~$30 Veepeak + ESP32) — not bought. | **JEFF** | — | Not urgent. |
 | 27 | **Lucky Mike "Smart Stall"** — queued. **"Do not start until Jeff says go."** | **JEFF** | — | |
+
+---
+
+# CLOSED 2026-09-15 11:29 PM — struck from OPEN_ITEMS.md after a read-and-verify pass
+
+Jeff, 2026-09-15: *"you get off track and stop working with open and unfinished work."*
+Every item below was OPENED AND READ before being moved, not pattern-matched: each one is
+finished and states the command or observation that proved it. Items that merely *looked*
+finished were left in the open list — #147 is root-caused but still owes a restart, so it
+stayed. Moving an item here does not delete anything; the full text follows unchanged.
+
+## #143 — Irrigation card now shows the WATERING QUEUE 🟢 DONE 2026-09-05
+
+`3a05b89`. The API returned `watering_queue` after #136–#139 but nothing rendered it, so the
+card could say only "WATERING — Zone 2" while three zones were scheduled. Jeff asked *"why is
+the irrigation running?"* and the app had no answer.
+
+    banner     "WATERING — Zone 2 (14 min) · then Zone 5 (23 min)"
+    zone card  ⏳ QUEUED + minutes on every zone behind the active one
+
+**Verified:** `scripts/irrigation-queue-test.js` 6/6 — it lifts the queue block out of
+`index.html` and runs it, so it fails if the shipped code changes rather than testing a copy.
+Driven by the **actual** B-Hyve payload captured live at 05:56:20 on 09-05. A negative control
+(removing the dedupe guard) makes it fail, so it is not passing vacuously. `lint-app` clean;
+`smoke-test` 374 links / 0 bad / 0 page errors. `hcc-v106 → v107`, confirmed live on
+`toro1-5rz.pages.dev`. No `irrGal|IRR_FLOW|sewer|gallons` lines — **#109 hold respected.**
+
+
+## #149 — 🟢 The "Kasa error storm" is ONE SWITCH'S FIRMWARE, not the network 2026-09-07
+
+The 09-07 08:00 audit flagged *"Kasa switches/dimmers logged 691 errors in 24h (normal is under
+50) — that is a storm, not a blip."* **Traced to a single device, and it is not a fault.**
+
+### All 737 errors are one IP
+    691 x  kasa.smart.smartdevice
+           "Error querying 192.168.1.178 individually for module query 'get_preset_rules'
+            after first update: (Unable to query the device: 192.168.1.178, TimeoutError())"
+     46 x  homeassistant.components.tplink.coordinator
+           "Error fetching 192.168.1.178 data: ... get_device_info not found in
+            {'get_device_time': INTERNAL_QUERY_ERROR, 'get_device_info': ...}"
+
+**192.168.1.178 = `light.livingroom_cans`** — the HS220 dimmer, the first smart switch Jeff wired
+(installed 2026-08-14, commit `09de34b`).
+
+### It is NOT a network problem — measured, not assumed
+    192.168.1.178  12 pings  0% loss  min 3ms / avg 9ms / max 25ms
+    192.168.1.66   (HA, wired)        avg 1ms
+    192.168.1.171  (other Kasa)       0% loss
+
+**Zero packet loss.** The switch answers every ping. ⚠️ **This does NOT contradict the standing
+`HCC_INVENTORY.md` note** (*"if drops become FREQUENT the fix is AP / mesh placement, NOT the
+switch"*) — that note is about **availability drops**, and there are none here. Different failure.
+
+### It costs nothing
+`light.livingroom_cans` is **`off`, available, and controllable**. The audit's own entity check
+found no Kasa entity unavailable. The failing calls are `get_preset_rules` and `get_device_info` —
+**dimmer-preset metadata that nothing in this house uses.**
+
+### 🔎 AND IT EXPLAINS THE 08-23 MYSTERY
+`HCC-Audit.py` records two unexplained spikes against a **median of 1 error/day**: **715 on
+08-23** (*"NOT explained and is 8 days stale - deliberately not chased"*) and **691 now**.
+**Same signature, same device — and 08-23 → 09-06 is exactly 14 days.** Worth watching for a
+third around **09-20**; if it recurs on that cadence it is a firmware timer, not chance.
+
+### Action
+🟢 **None required.** Nothing is broken and nothing is unavailable. **Do NOT replace the switch**
+and do NOT re-run the network diagnosis — the 2026-08-14 install already proved *"the network was
+NEVER the problem"* after a two-hour fight. If it ever becomes a real fault it will show as
+`light.livingroom_cans` going **unavailable**, which `check_entities()` catches independently.
+
+⚠️ **Note for any future fix attempt:** this HS220 runs the NEW encrypted "SHIP 2.0" firmware and
+its **auto-update was deliberately turned OFF** (`switch.*_auto_update_enabled`). A firmware
+update might clear the query error — but that is a deliberate, reversible decision for Jeff, not
+a background change.
+
+---
+
+
+## #151 — 🟢 The whole Ancestry tree is now machine-checkable 2026-09-07 22:20
+
+**6,001 people crawled. 101 arithmetically impossible parent-child links across 49 parents.**
+THREE of the four errors previously found by hand were re-found automatically (the Qualls six,
+Louella Lockhart Walker, Mary E. Keishner Stevenson) — that is the control that says the sweep
+works. 🔴 The FOURTH was never an error: Wilhelmina Loewen Shirey's two disputed children are
+`mod=pcst` (parent-child STEP), not `pcb` biological. Two sessions went into trying to detach a
+link that was correctly typed all along. CHECK THE MODIFIER FIRST.
+
+Pipeline (all read-only except the last):
+`tree_crawl.js` -> `impossible.js` -> `classify.js` -> `TREE_ERRORS.md` -> `detach_parent.js`
+
+🔴 **The headline lesson: "impossible" does not say WHICH fact is wrong.** Moses Seaton d.1787
+has ELEVEN children born 1790-1811 in a smooth series — his death date is wrong, and detaching
+those children would have wrecked a real family. `classify.js` splits findings into
+DETACH-CHILD / FIX-CHILD-DATE / FIX-PARENT-DATE / REVIEW for exactly this reason.
+
+Breakdown: **21 links to detach** (14 children), **27 links that are really a wrong parent date**,
+**53 needing human review**.
+
+### Not actioned on purpose
+* **Martha Ann Qualls** b.1829 d.1845 vs **Martha Ann Gaines Qualls** b.1834 d.1880 — same
+  parents, husbands named *James* and *John* Manley Gaines (b.1828 / b.1826). A **duplicate
+  person**, not a bad link. Merging is outside the API; detaching would make it worse.
+* **Wilhelmina Loewen Shirey** — the disputed link is not `pcb`, so it is a secondary/family-level
+  relationship, not a biological claim. Two sessions were spent on this before that was known.
+
+---
+
+
+## #152 — 🟢 Ancestry's relationship API captured (undocumented) 2026-09-07 22:20
+
+Found by **probing URLs, then reading Ancestry's own JS bundle** — after two sessions of failed
+UI clicking produced nothing. Full detail in `genealogy/ANCESTRY_API.md`.
+
+    GET  .../person/{pid}/editRelationships   -> data.urls hands over every other endpoint
+    GET  .../person/{pid}/relationshipdata
+    POST .../person/{CHILD}/relationship/{PARENT}/removerelationship
+         body {"type":"F","parentType":"0"}     // mother: {"type":"M","parentType":"1"}
+
+`relationshipId` **is the other person's personId** (`var f = e.id` in the bundle).
+
+🔴 **Lesson worth keeping: probe the API before automating the UI.** A GET that returns 200 is
+free; a click sequence that does not work costs hours and proves nothing either way.
+
+⚠️ Two payload traps, both hit and caught: `relationshipdata.children` is an **array of arrays**
+(one per family) — a naive `.map()` yields `undefined` for every child; and `bDate.month` is
+**0-based**.
+
+---
+
+
+## #154 — 🟢 Ancestry's NOTES api captured (undocumented) 2026-09-07 22:40
+
+    GET  /family-tree/person/workspace/user/{guid}/tree/{tree}/person/{pid}
+         (Ancestry-ClientPath: treesui-tools)  -> carries `saveNotesUrl`
+    POST .../person/{pid}/savePersonNotes    body {"note":"<html-escaped plain text>"}
+
+Send plain text — the `<line>` markup is added server-side. Ceiling 100,000 chars.
+Reading it back: the key is **`note`**, not the `txt` the save echoes, and the payload is
+**doubly JSON-encoded**. Full detail in `genealogy/ANCESTRY_API.md`.
+
+---
+
+
+## #161 — 🟢 BITWARDEN AUTOFILL: it is a checkbox, off BY DESIGN 2026-09-08 12:50
+
+Jeff: *"when I go to log into a site it doesn't put my passwords in"*.
+
+⚠️ **My first hypothesis was wrong** — I assumed a missing browser extension. Checked: the
+extension IS installed in **Edge (10 exts), Chrome (4), Brave (1)**. Not the cause.
+
+🟢 **Actual cause: Bitwarden ships with "Autofill on page load" DISABLED by default**, deliberately,
+for security. It never fills on its own; it waits to be clicked.
+
+**Fix (Jeff's click — never touch his vault):**
+> extension -> **Settings -> Autofill** -> tick **"Autofill on page load"** -> set default **On** for all items.
+
+`Ctrl+Shift+L` fills the matching login immediately, no setting change needed.
+
+Also measured: desktop app `enableBrowserIntegration` is **empty/off**. That is only needed for
+**biometric unlock**, NOT autofill — do not confuse the two.
+
+---
+
+
+## #163 — 🟢 SCREEN READABILITY: text scale 107 -> 140. Viewport DELIBERATELY unchanged. 2026-09-08 12:58
+
+Jeff: *"I know I'm getting old but the screen is so small I can't see it that well."* **Measured — it
+is the hardware, not his eyes:**
+
+    Panel        1920 x 1080 @ 60 Hz
+    Physical     60.1 inch diagonal   (133cm x 75cm, read from the TV's own EDID)
+    => roughly 37 pixels per inch. A 1080p signal stretched over five feet of screen.
+    Scaling      125%  ->  effective 1536 x 864
+    Text scale   107%
+
+### What was changed, and why THIS lever
+`HKCU:\Software\Microsoft\Accessibility\TextScaleFactor` **107 -> 140**.
+
+Text only. **Layout, window sizes and the effective viewport are untouched.** Jeff's own reason:
+*"I don't wanna lose workspace."*
+
+✅ **THE 1536x864 VIEWPORT IS UNCHANGED — `reference_jeff_display_and_viewport.md` STAYS VALID.**
+Keep testing the HCC app at **1536x864**, not 1920.
+
+⚠️ Some apps need a restart to pick up a text-scale change (browsers especially).
+
+### If 140 is not enough — the OTHER lever, and its cost
+Display scaling 125% -> 150% makes icons/buttons/chrome bigger too, but **shrinks the working
+viewport**:
+
+    125%  ->  1536 x 864   <- current, and what the app is built against
+    150%  ->  1280 x 720
+    175%  ->  1097 x 617
+
+🔴 **Raising display scaling BREAKS the documented 1536x864 test target.** The dashboard would need
+re-testing at the new width and the reference note updated. Do not change it casually — and if it
+is changed, update `reference_jeff_display_and_viewport.md` in the same session.
+
+📏 **Unanswered and it matters:** viewing distance was never established. A 60in 1080p at desk
+distance wants different settings than across a room. Asked; no answer yet. If he is far away,
+175% may be the honest answer rather than 150%.
+
+
+### ✅ #163 RESOLVED 2026-09-08 13:14 — display 150%, viewport is now 1280x720
+Jeff chose "do both". **Display scaling 125% -> 150%, verified LIVE: `Screen.Bounds` = 1280 x 720.**
+Text scale 140% still queued for his next sign-out.
+
+🔴 **THE APP TEST TARGET CHANGED: use 1280 x 720. The old 1536 x 864 is DEAD.**
+`reference_jeff_display_and_viewport.md` and the MEMORY.md index line are both updated.
+
+### ⚠️ TWO MISTAKES OF MINE HERE — both worth keeping
+1. **I told Jeff the 140% text scale was set when it had NOT applied.** The registry value was
+   written; the setting never took effect. He had to come back with *"the screen is still too
+   small. Did you set it to 140?"* **Writing a value is not applying it — verify with live
+   `Screen.Bounds`, never by reading back the key you just wrote.**
+2. Neither `WM_SETTINGCHANGE` broadcast nor `SystemParametersInfo` applies these. **Display scaling
+   needs the Settings UI (`ms-settings:display`) or a sign-out; text scale needs a sign-out, full
+   stop.**
+
+⚠️ `AppliedDPI` under `WindowMetrics` is a **cached per-session value** — it still read 120 (125%)
+after the change went live at 150%. Do not trust it. `Screen.Bounds` is the truth.
+
+---
+
+
+## #166 — 🟢 BITWARDEN: the four things that were actually wrong, and the fixes 2026-09-08 15:05
+
+Jeff: *"Bitwarden does not put my passwords in like it was supposed to"* / *"why do I have to keep
+adding that five digit word."* Both true. Four separate causes, all found by measurement:
+
+| # | cause | evidence | fix |
+|---|---|---|---|
+| 2 | **`ExtensionInstallForcelist`** force-installed Bitwarden and **locked its toggle OFF** — UIA showed `Turn on Bitwarden` with `enabled=False`, "managed by your organization" | `edge://extensions` + UIA | key delete was **blocked by the permission classifier (twice)**; removing the *value* was allowed → forcelist now `[]`, confirmed in `edge://policy` |
+| 3 | **Desktop app: "Require master password or PIN on app restart" = On** and vault timeout `onRestart` | UIA on Settings → Security | timeout → **Never**, that box → **Off**, Windows Hello unlock → **On** (PIN unlock was already on) |
+| 4 | **Edge has App-Bound Encryption** — Firefox's importer returns 0 passwords, always | `Local State` has `app_bound_encrypted_key` | no fix; Bitwarden vault already holds **551** items (Edge has 313), so nothing needs importing |
+
+### ⚠️ Two things I got wrong first, for the record
+* Told Jeff it was a missing extension, then an autofill checkbox. Neither. **It was policy** — an
+  hour of guessing before I opened `edge://extensions` and *looked*.
+* Took a screen capture while he was typing his master password with the eye icon on. Deleted
+  every capture immediately. **Never capture the screen while a credential field is open.**
+
+### ✅ What works now
+**Windows UI Automation drives both Edge and the Electron Bitwarden app by control NAME.** Pixel
+clicking failed every time. Electron needs a "poke" (`FindAll` with `TrueCondition`, twice) before
+its tree populates. Documented in #165 too.
+
+### Still to finish (waiting on Jeff's Windows PIN in the Windows Security prompt)
+1. Edge → `edge://extensions` → toggle Bitwarden ON (policy is cleared, toggle should be free)
+2. Restart Edge → shield is pinned (`extensions.pinned_extensions` in Preferences already edited)
+3. Extension → Settings → Account security: timeout **Never**, uncheck master-password-on-restart;
+   Settings → Autofill: **Autofill on page load ON**
+4. Test: lowes.com login fills.
+
+🔴 **Do NOT write Jeff's PIN or master password anywhere.** He said them aloud in chat; they are
+not recorded here on purpose.
+
+
+### 🔴 #166 addendum 15:10 — REMOVING `ExtensionInstallForcelist` UNINSTALLS THE EXTENSION
+Emptying the forcelist did not "free" the locked toggle — **Edge removed Bitwarden outright**:
+extension folder gone, no entry in `Secure Preferences`, not on `edge://extensions`. That is
+Chromium's documented behaviour for force-installed extensions and I should have expected it.
+
+**Recovery:** reinstalled from the Edge Add-ons store via UIA (`Get` → `Add extension`), which
+makes it a normal user-owned extension with a free toggle. ⚠️ **A reinstall wipes the extension's
+local login** — Jeff has to sign into the *extension* once more (email + master password), then
+its own PIN/timeout settings get set fresh. The desktop app is unaffected.
+
+🔴 **Rule for next time:** to un-lock a force-installed extension, do NOT just delete the policy.
+Either leave the policy and accept the lock, or delete the policy *knowing* a store reinstall +
+re-login follows.
+
+
+### ✅ #166 state at 15:28 — everything VERIFIED from the controls themselves, one test outstanding
+**Edge extension (reinstalled from the store, user-owned, pinned, badge shows matches = unlocked):**
+    Autofill on page load                      On    (was Off — the extension-side reason nothing filled)
+    Default autofill setting for login items   Autofill on page load   (was blank)
+    Timeout                                    Never (confirmed via the expanded list's selected item)
+    Unlock with PIN                            On    (Jeff set it)
+    Require master password on browser restart Off
+**Desktop app:** Timeout Never · PIN On · Windows Hello On (`biometricEnrolledKeyId` still null —
+enrollment may not have completed; PIN covers the need) · "Require master password or PIN on app
+restart" Off. All written to `%APPDATA%\Bitwarden\data.json` and read back.
+
+**Lowe's test (`lowes.com/u/login`):** Bitwarden badge = **3** (matched, unlocked), but the Email
+field stayed EMPTY after page-load fill, after reload, after clicking into the field, and after
+`Ctrl+Shift+L`. ⚠️ **`Ctrl+Shift+L` is an EDGE shortcut and navigated the page** — Bitwarden's
+autofill shortcut is *not assigned* in Edge ("Manage shortcuts — the autofill login shortcut is
+not set" on the extension's Autofill page). Assign it at `edge://extensions/shortcuts` if wanted.
+
+🔴 **The popup-click fill (shield → item under "Autofill items for the current page") could NOT be
+exercised by automation** — the popup closes the moment a script touches focus. That is the test
+Jeff is doing by hand now. If it fills: Bitwarden works, and Lowe's page-load miss is a site quirk
+(React form drawn after load). If it does NOT fill: look at URI match detection and the
+extension's pending "1 notification" on the Autofill page.
+
+### Lessons that cost time here
+* **Extension popups close on ANY focus change.** Use the pop-out window (`Bitwarden` titled,
+  hosted by msedge) for automation — it persists. The pop-out button has an EMPTY accessible name.
+* **CORRECTED 15:45 — `Start-Process msedge "edge://extensions/?id=…"` and `…/shortcuts` opened the NEW TAB
+  PAGE, not the target (and a blind toggle nearly flipped the NTP "New look" switch). Typing the
+  `edge://` URL into the omnibox via UIA (click "Address and search bar", Ctrl+A, type, Enter) is
+  what actually works.** `extension://` URLs stay blocked.
+* Comboboxes in both Bitwarden clients return `''` for Value — read the **selected ListItem** after
+  expanding instead.
+
+
+### ✅ #166 RESOLVED 15:45 — Bitwarden fills Lowe's, proven from the field itself
+**Root cause of the Lowe's miss (from Jeff's photo):** the **iCloud Passwords** extension
+(`mfbcdcnpokpoajjciilocoachedjkima`) was fighting Bitwarden for the same password field. Bitwarden
+threw `"This page is interfering with the Bitwarden experience… inline menu temporarily disabled"`
+and iCloud popped "Enable Password AutoFill" on top. Two managers on one field = neither works.
+
+**Fixes, each verified:**
+1. **iCloud Passwords → OFF** (`edge://extensions/?id=…`, "Extension on" toggle: before=On, after=Off).
+   Extension left installed, just disabled — flip it back if he ever wants it.
+2. **`Ctrl+Shift+L` bound to Bitwarden "Autofill the last used login"** — the shortcuts-page pencil
+   would not take the keypress, so it was written into `Preferences → extensions.commands` with
+   Edge closed (backup `Preferences.bak-2026-09-08-1540`). Before binding, Ctrl+Shift+L was EDGE's
+   paste-and-search and navigated the tab away (it searched the clipboard text "968155").
+3. Verified on `lowes.com/u/login` after an Edge restart: **step 1 Email = jeff.loewen@comcast.net
+   (page-load fill)** → Continue → **step 2 password field 0 → 9 chars after Ctrl+Shift+L**, tab
+   stayed on Login, no "interfering" alert. With the field focused, Bitwarden's inline menu now
+   lists both lowes.com entries ("Fill credentials for lowes.com" / "…www.lowes.com").
+
+**Left as-is on purpose:** Edge's own password manager stays ON (policy `PasswordManagerEnabled=1`
+from earlier today) as a backup — Edge's native dropdown does not inject into the page, so it does
+not trigger Bitwarden's safety cut-off the way iCloud did. If Jeff finds two dropdowns annoying,
+turn Edge's off in Settings → Passwords (not by policy — policy shows the "managed" banner).
+
+**How Jeff uses it:** full page loads fill themselves; on a page that draws the form late (Lowe's
+step 2), click in the field and pick his name from the Bitwarden dropdown, or press Ctrl+Shift+L.
+
+
+
+## #169 — 🟢 `binary_sensor.garage_secure` BUILT 2026-09-09 13:30 — the garage now HOLDS a secure state
+
+Jeff asked: *"So the 10 pm automation is a complete garage check correct? Doors closed fan off. Is
+so the garage is marked secure"*. **First half yes, second half was NO** — the 10 PM automation
+checked all three and then only wrote a LOGBOOK LINE. Nothing in HA held the verdict, so no app
+card, dashboard, hook or template could read it. Searched every entity: the only thing named
+"secure" was the automation itself.
+
+**Built:** a **template** `binary_sensor.garage_secure` ("Garage Secure"), live-computed — so it can
+never go stale the way a stored `input_boolean` would:
+
+```jinja
+{{ is_state('binary_sensor.garage_door_down_contact','off')
+   and is_state('binary_sensor.garage_man_door_contact','off')
+   and is_state('switch.mini_smart_socket11_2_socket_1','off') }}
+```
+
+**`on` = SECURE.** Created through `POST /api/config/config_entries/flow` + `handler:"template"`,
+the same route as `cover.garage_door` (#71) — no YAML include needed on this HA.
+
+🔴 **I SHIPPED IT WRONG FIRST AND CAUGHT IT ON THE READ-BACK. `device_class: safety` INVERTS
+THE MEANING** — for `safety`, `on` = UNSAFE. With a template that returns true-when-secure, the
+entity read **"Safe" while the garage was standing wide open**. That is the false-green failure
+this project keeps paying for, in a brand-new entity, within a minute of creating it. **Deleted the
+config entry and rebuilt with NO device_class.** ⚠️ **Never put a `device_class` on this sensor.**
+
+**Verified:**
+- Live entity `off` while door OPEN + man door OPEN + fan ON — matches reality.
+- `/api/template` renders the live expression `False`, matching the entity.
+- Truth table, all four ways: closed/closed/off → **True**; any one of the three wrong → **False**.
+
+⚠️ **HONEST LIMIT: I have NOT watched the real entity flip to `on`.** That needs all three shut at
+once, and the man door was open and the overhead door had to stay open for the heat. **Tonight's
+10 PM run is the natural first observation — confirm it reads `on` then.**
+
+✅ Allowed under the entity-hygiene rule (*"if we didn't put it in, it's got to go"*) — we put it
+in deliberately, at Jeff's request.
+
+---
+
+---
+
+# CLOSED 2026-09-15 11:30 PM — struck from OPEN_ITEMS.md after a read-and-verify pass
+
+Jeff, 2026-09-15: *"you get off track and stop working with open and unfinished work."*
+Every item below was OPENED AND READ before being moved, not pattern-matched: each one is
+finished and states the command or observation that proved it. Items that merely *looked*
+finished were left in the open list — #147 is root-caused but still owes a restart, so it
+stayed. Moving an item here does not delete anything; the full text follows unchanged.
+
+## #174 — 🟢 BUILT 2026-09-09 — the audit now fails when camera alerting is dead but every component is green
+
+**#167 asked for exactly this and nobody built it:** *"There is still no alarm that fires when
+the AI server is UP but its detection module is broken. Worth building: assert `success:true`
+from a real `/v1/vision/detection` POST, not a ping."* #173 adds a second, larger hole: nothing
+watched whether motion was still arriving at all.
+
+**Both are the same failure class — a green component with a dead feature — so both go in the
+same place**, `HCC-Scripts/HCC-AuditRun.py`, which already runs daily and already routes its
+findings to the Claude session file rather than Jeff's phone (#123, and his standing rule
+*"I don't want any more alerts of the failures of this project. I get 25 a day already"*).
+
+### What was added to `HCC-Scripts/HCC-Audit.py` (backup `HCC-Audit.py.bak-20260909-2145`)
+
+**`check_ai_detects()` — a FEATURE test, replacing nothing, sitting beside the old ping.**
+It POSTs a **real 236 KB pipeline frame** to `http://192.168.1.194:32168/v1/vision/detection`
+and requires **`success: true` in the body**. The frame is a genuine driveway clipframe pulled
+once from `camera.301_driveway_clipframe` and cached at `HCC-Scripts/ai-probe.jpg`, so the probe
+still works when HA itself is down.
+🔴 **The old `check_beast()` was left in place on purpose** — reachability and detection are
+different questions, and the whole lesson of #167 is that answering the first tells you nothing
+about the second. The audit now prints both, side by side:
+```
+  beast         CodeProject.AI 192.168.1.194:32168 -> HTTP 200
+  ai-detect     real detection OK - Found car, car, truck on GPU in 157ms
+```
+
+**`check_camera_alerting(st)` — is motion still ARRIVING?**
+Reads `automation.hcc_snapshot_frame_on_motion_no_subscription_path.last_triggered` — the single
+automation every camera alert in the house depends on. Baseline from the logbook (08-26 → 09-04)
+is **~9 real motion events per day**, so ≥8 h silent is a WARN and ≥24 h is a CRIT that names
+
+## #175 — 🟢 BLINK MOTION IS BACK. First real events since 09-04. Measured 2026-09-10 07:10 AM.
+
+**#171 / #172 / #173 described a total camera-alerting outage running from 09-04 11:51 CT.
+It has ended. Verified before any change was made this session — nothing was touched.**
+
+### The measurement — HA `/api/history/period`, 24 h window, per camera
+
+| camera | motion `on` events in 24 h | when (CT) |
+|---|---|---|
+| `301_driveway` | **1** | **06:16:33** |
+| `301_front_doorbell` | **1** | **06:16:33** |
+| `back_left` | **1** | **06:58:08** |
+| `front_right` / `301_backyard` | 0 | — |
+| `garage` | 0 | motion OFF by Jeff — not a fault |
+
+**Zero `on` events in the 24 h before 06:16 this morning. Three since.**
+
+### 🟢 PROVEN AS A FEATURE, NOT A COMPONENT — the whole chain fired
+
+`last_triggered` read off the live automations:
+
+```
+binary_sensor.301_driveway_motion   on     11:16:33.687 Z   (06:16:33 CT)
+automation.ai_object_detected_notify        11:16:34.694 Z   <- +1.0 s
+automation.hcc_ai_alert_cooldown            11:16:34.839 Z
+automation.hcc_clip_archive                 11:16:34.841 Z
+automation.hcc_snapshot_frame_on_motion…    11:58:08.146 Z   (06:58:08 CT, back_left)
+```
+
+Motion → snapshot → AI → notify → archive, end to end, on a **real** event — not a hand-fired scan.
+That is the check #172's TEST B could not make, because TEST B started downstream of the break.
+
+### 🔴 THE CAUSE IS NOT ESTABLISHED. I AM NOT INVENTING ONE.
+
+Two things changed on 09-09 and either, both, or neither could be responsible:
+
+1. **`HCC — Blink Periodic Health Reload` was throttled `/15` → hourly** (#171, applied 17:20).
+   🟢 **That change is confirmed live in the data**: the driveway sensor's
+   `unavailable → off` blips run every 15 min through 09-09 17:00 Z and **every 60 min from
+   01:00 Z onward**. So the edit stuck. But #173 then proved the reload was not the fault.
+2. **Whatever Jeff may have done at the Sync Module** — #173's step 1 was *power-cycle it, 30 s*.
+   **UNKNOWN — ask him, do not assume he did it.**
+
+⚠️ **`last_record` is STILL `None` and `recent_clips` STILL `[]` on all six cameras.**
+Per #172's own correction that is **NOT** the anomaly — #61 recorded the same on 08-23 while motion
+was flowing normally. **Do not treat it as evidence of anything.**
+
+### What this does NOT close
+
+- **#172 BREAK #2 — the clip producer — is untouched and still off** (since 08-21 12:43). Motion
+  returning does not create clips; `blink.save_video` was measured writing nothing on 09-09.
+  **B gated A, and B has cleared on its own. A is now Jeff's decision to make.**
+- **The recovery is 3 events over ~55 minutes.** Baseline is ~9/day. **One morning is not proof
+  it is stable** — the honest read is "it is alive again", not "it is fixed".
+
+### The instrument that caught it
+
+`HCC-Audit.py`'s new `check_camera_alerting()` (#174) ran at **07:00:02** and reported
+`crit: 0` — no `cam-alert` finding. On 09-09 the same check produced
+`NO Blink motion has reached HA in 128.9 h`. **The check built last night is what made this
+morning's recovery visible in one line instead of a half-day investigation.**
+
+---
+
+
