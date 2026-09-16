@@ -123,7 +123,37 @@ windscribe-cli     ->  Login state: Logging in   Connect state: DISCONNECTED
 
 ✅ *Allow LAN Traffic* is already ON (Jeff, 09-08 5:08 PM) so the killswitch no longer blocks HA — **do not turn the firewall off to 'fix' LAN issues.** ⛔ **Never set firewall mode 'Always On' / 'Always On+'** — those kill all internet whenever the VPN is down, stranding the PC that runs the house.
 
-⚠️ **NOT CONNECTED BY ME.** Turning on a tunnel changes his network and has taken the house offline once already — that is his call, not a late-evening one. ⚠️ **The free tier's data cap was NOT verified this session** — it decides whether this can stay on permanently or is a per-site tool. Check before advising always-on.
+⚠️ **NOT CONNECTED BY ME.** Turning on a tunnel changes his network and has taken the house offline once already — that is his call, not a late-evening one.
+
+### ✅ 2026-09-16 01:31 — THE REAL BLOCKER WAS NOT THE VPN. HE COULD NOT TURN IT ON.
+
+**Jeff, 01:29: *"There is no icon to turn Windscribe on, it's worthless to me if I can't turn it
+on."*** Every previous note on this row argued about *which* VPN. None of them checked whether he
+could start the one he owns.
+
+**Measured:** `Windscribe.exe` was **already running, PID 24892**, with a live window handle — a
+**tray app whose icon was hidden in the notification overflow**. A shortcut existed only on the
+*Public* desktop, not his. So the software was installed, working, and effectively invisible.
+
+**FIXED — three buttons on his own desktop**, because hunting a tray icon is not a user interface:
+
+| button | what it does |
+|---|---|
+| **VPN ON (hide my location)** | `warp-cli disconnect` **first**, then `windscribe-cli connect best`, then verifies against **ipinfo.io** and checks HA still answers |
+| **VPN OFF** | disconnects, re-checks location and the house |
+| **Windscribe window** | opens the app window when the tray icon hides again |
+
+`HCC-Scripts\VPN-On.cmd` / `VPN-Off.cmd`. **The WARP-first step is encoded in the button**, so the
+failure that killed the 09-04→09-08 session — WARP's DoH resolvers inside the tunnel, every lookup
+`ENOTFOUND` — cannot be repeated by forgetting the order. It reports the city from ipinfo.io and
+says plainly *"STILL IN TENNESSEE — the tunnel did NOT take"* rather than trusting the app.
+
+🟢 **DATA CAP ANSWERED — Jeff, 2026-09-16: 15 GB/month** on the free tier (it was 10 GB when the
+earlier note was written). **Enough for browsing and account work; not for streaming or large
+downloads.** So this is a per-session tool he switches on, not an always-on tunnel — which is also
+the safer answer given the killswitch history.
+
+**What remains on this row is his to press.** The exposure is unchanged until he clicks the button.
 
 ---
 
