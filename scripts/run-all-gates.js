@@ -30,6 +30,16 @@ const LIVE_GATES = new Set(['live-e2e-test.js']);
 const ARG_GATES = new Set(['doors-entity-test.js', 'garage-entity-test.js']);
 const statesArg = (process.argv.find((a) => a.startsWith('--states=')) || '').slice(9);
 
+// Some gates need HCC_HA_TOKEN and EXIT 0 WITH A "SKIPPED" MESSAGE without it.
+// Reasonable on its own - a missing local secret is not a broken app - but it meant
+// sensor-coverage-test.js reported `pass` in 0.1s while asserting NOTHING, and that
+// false pass went into a "20/20" reported to Jeff. A skip is not a pass: the runner
+// now detects the word SKIPPED in a gate's own output and labels it SKIP.
+// Set the token from the location ACCESS_MAP.md section 1 documents before running:
+//   PowerShell: $env:HCC_HA_TOKEN = (Get-Content <path from HCC_ACCESS.md §1> -Raw).Trim()
+// It is deliberately NOT read here - this file is in the public repo.
+const HAVE_HA_TOKEN = !!(process.env.HCC_HA_TOKEN || '').trim();
+
 // Audits that report rather than assert pass/fail - not run as gates.
 const NOT_GATES = new Set(['run-all-gates.js', 'button-audit.js', 'contrast-check.js',
   'image-fit-audit.js', 'mower-hours-test.mjs']);
@@ -59,6 +69,12 @@ for (const g of gates) {
   const r = spawnSync(process.execPath, argv, { encoding: 'utf8', timeout: 180000 });
   const ms = Date.now() - t0;
   const code = r.status === null ? 1 : r.status;
+  // A gate that exits 0 saying SKIPPED has asserted nothing. Never call that a pass.
+  const selfSkipped = code === 0 && /\bSKIPPED\b/.test(String(r.stdout || ''));
+  if (selfSkipped) {
+    results.push({ gate: g, code: null, ms, note: 'skipped (gate needs HCC_HA_TOKEN)' });
+    continue;
+  }
   if (code !== 0) failed++;
   results.push({
     gate: g, code, ms,

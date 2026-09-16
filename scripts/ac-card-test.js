@@ -74,6 +74,16 @@ async function run(browser, { payload, token = true, status = 200 }) {
       stWind: txt('stWind'), stRain: txt('stRain'), stPressure: txt('stPressure'), stSun: txt('stSun'),
       stDew: txt('stDew'), stRainHist: txt('stRainHist'), stLastRain: txt('stLastRain'),
       acCycles: txt('acCycles'), acRuntime: txt('acRuntime'),
+      // The hero readout must come from THE STATION, not from Weather Underground's
+      // relay or an Open-Meteo forecast. Jeff, 2026-09-16 05:32, looking at the app:
+      // "There are duplicate readings for the same thing ... I don't want it coming
+      // from a source that is not real from the weather station." The hero read
+      // dew 72F while the card below read 71.5F off the same instrument, and the
+      // hero's dew point was not even measured - it was temp-((100-RH)/5).
+      heroTemp: txt('wxTemp'), heroDew: txt('wxDew'), heroHum: txt('wxHumidity'),
+      heroFeels: txt('wxFeels'), heroWind: txt('wxWindDir'), heroGust: txt('wxHeroGust'),
+      heroPressure: txt('wxPressure'), heroRainDay: txt('wxRainDay'),
+      heroRain7d: txt('wxHeroRain7d'), heroUV: txt('wxUV'),
       stCardShown: shown('stationCard'),
       acCallsBoot: acCalls,
       acCallsAfterRefresh: window.__calls.filter((c) => c.body.indexOf('ac_relay') >= 0).length,
@@ -115,7 +125,21 @@ async function run(browser, { payload, token = true, status = 200 }) {
 
   // ── the nine sensors that were live in HA and invisible in the app until 2026-09-16 ──
   check('dew point, with the comfort word', r.stDew, '71.5°F • muggy');
-  check('rain week and month', r.stRainHist, '0.00 in wk • 1.05 in mo');
+  check('rain week and month', r.stRainHist, '0.00 in wk • 1.05 in mo • 197.53 all-time');
+
+  // ── the hero readout must agree with the card, because it is the same instrument ──
+  // LIVE payload: out_temp 82.0, dew 71.54, out_hum 76, feels 87.8, wind_dir 223,
+  // gust 0.0, pressure 30.17, rain_today 0.00, rain_week 0, uv 0.
+  check('hero Temp from the station',      r.heroTemp,     '82°F');
+  check('hero Dew Point from the station', r.heroDew,      '72°F');
+  check('hero Humidity from the station',  r.heroHum,      '76%');
+  check('hero Feels Like from the station', r.heroFeels,   '88°F');
+  check('hero Wind from the station',      r.heroWind,     '223° SW');
+  check('hero Gust from the station',      r.heroGust,     'Calm');
+  check('hero Pressure from the station',  r.heroPressure, '30.17 inHg');
+  check('hero Rain Today from the station', r.heroRainDay, '0.00"');
+  check('hero Rain 7 Days from the station', r.heroRain7d, '0.00"');
+  check('hero UV from the station',        r.heroUV,       '0 • Low');
   check('last rain, dated and aged', /^Sep 12 • \d+d ago$/.test(r.stLastRain), true);
   check('max gust folded into the wind row', /max 2\.2/.test(r.stWind), true);
   check('absolute pressure alongside relative', /30\.17 inHg • 29\.37 abs/.test(r.stPressure), true);

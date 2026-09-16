@@ -4351,6 +4351,13 @@ var _haShared = {};   // key -> { at: ms, p: Promise<{status, statusText, text}>
 var HA_NABU = 'https://kmtpozwheqwww9t5uxhhvzzso1tvagro.ui.nabu.casa';
 var HA_BASE = localStorage.getItem('ha_base') || HA_NABU;
 
+// True once stRender() has drawn the hero readout from the console on the pole.
+// While true, loadStation() (Weather Underground's relay) and loadWeather()
+// (Open-Meteo forecast) are BLOCKED from overwriting any cell the station
+// measures itself. See stRender() for the whole reason. Declared up here because
+// loadWeather()/loadStation() can both run before stRender() on a cold boot.
+var STATION_HA_LIVE = false;
+
 // STATE
 var DEFAULT_STATE = {
   "hours": 5.9,
@@ -5526,8 +5533,12 @@ function loadWeather(){
       else if(dew>=Math.round(c.temperature_2m)-7) dewOnGrass='LIGHT';
       function set(id,val){ var e=document.getElementById(id); if(e) e.innerHTML=val; }
       function setc(id,val,color){ var e=document.getElementById(id); if(e){ e.innerHTML=val; e.style.color=color||''; } }
-      set('wxTemp',Math.round(c.temperature_2m)+'&#176;F');
-      set('wxDew',dew+'&#176;F');
+      // 2026-09-16: these two used to write the hero's Temp and Dew Point from
+      // OPEN-METEO — a forecast model, not an instrument — and the dew point was
+      // not even measured, it was the rule of thumb temp-((100-RH)/5). Jeff has a
+      // real station that reports both directly. Removed; stRender() owns them.
+      // `dew` is still computed below for the DEW ON GRASS mowing verdict, which
+      // is a forecast question, not a current-conditions reading.
       setc('wxRisk',risk+'%',risk>60?'#ff6262':risk>30?'#ffd24a':'#22c55e');
       setc('wxSoil',soil,soil==='FIRM'?'#22c55e':soil==='MOIST'?'#ffd24a':'#ff6262');
       set('wxSoilTemp',soilT!==null?soilT+'&#176;F':'--');
@@ -5645,8 +5656,24 @@ function loadStation(){
     .then(function(s){
       if(!s||s.error) return;
       STATION=s;
-      function set(id,val){var e=document.getElementById(id); if(e) e.innerHTML=val;}
-      function setc(id,val,color){var e=document.getElementById(id); if(e){e.innerHTML=val; e.style.color=color||'';}}
+      // ── WU IS A RELAY, NOT THE INSTRUMENT ────────────────────────────────────
+      // Jeff, 2026-09-16 05:32: "I don't want it coming from a source that is not
+      // real from the weather station." These cells are all things the console on
+      // the pole measures itself. When the direct HA feed has drawn them, this
+      // cloud copy must not overwrite it: WU rounds to whole numbers and lags a
+      // round-trip, which is why the hero read dew 72F while the card below read
+      // 71.5F off the same instrument. Worse, /api/weather silently falls back to
+      // OPEN-METEO when the PWS is unreachable (see isReal below) - so without this
+      // guard a model could quietly replace a real reading and look identical.
+      // This stays as the FALLBACK: if HA is down, a slightly stale real reading
+      // from his own station beats an empty cell.
+      var STATION_CELLS = { wxTemp:1, wxFeels:1, wxDew:1, wxHumidity:1, wxWindDir:1,
+                            wxUV:1, wxPressure:1, wxRainDay:1, wxHeroRain7d:1,
+                            wxHeroGust:1, wxHeatStress:1, wxStationNote:1,
+                            luxOutTemp:1, luxFeelsLike:1 };
+      function blocked(id){ return STATION_HA_LIVE && STATION_CELLS[id]; }
+      function set(id,val){ if(blocked(id)) return; var e=document.getElementById(id); if(e) e.innerHTML=val;}
+      function setc(id,val,color){ if(blocked(id)) return; var e=document.getElementById(id); if(e){e.innerHTML=val; e.style.color=color||'';}}
       // Temps
       if(s.temp!=null)  set('wxTemp',  Math.round(s.temp)+'&#176;F');
       if(s.dewpt!=null) set('wxDew',   Math.round(s.dewpt)+'&#176;F');
@@ -6778,9 +6805,15 @@ function stRender(d){
   set('stRain', r != null ? ((r * 1 === 0 && (rate == null || rate * 1 === 0)) ? 'None'
                              : r + ' in' + (rate != null && rate * 1 > 0 ? ' &bull; ' + rate + ' in/h NOW' : '')) : '--');
   // Week and month are what actually decide whether the yard needs watering.
-  var rw = n(d && d.rain_week, 2), rm = n(d && d.rain_month, 2);
+  var rw = n(d && d.rain_week, 2), rm = n(d && d.rain_month, 2), rl = n(d && d.rain_life, 2);
+  // 2026-09-16: rain_life was FETCHED EVERY CYCLE AND NEVER RENDERED - the one
+  // station sensor out of 21 that reached the app and then went nowhere. Jeff,
+  // 05:25: "Where are the new sensor readings for the weather section". Exactly
+  // the defect the sensor sweep was supposed to end. Now guarded by
+  // sensor-coverage-test.js, which fails on any AC_TPL key no renderer reads.
   set('stRainHist', (rw != null || rm != null)
-      ? (rw != null ? rw + ' in wk' : '--') + ' &bull; ' + (rm != null ? rm + ' in mo' : '--') : '--');
+      ? (rw != null ? rw + ' in wk' : '--') + ' &bull; ' + (rm != null ? rm + ' in mo' : '--')
+        + (rl != null ? ' &bull; ' + rl + ' all-time' : '') : '--');
   set('stLastRain', (function(){
     var v = d && d.rain_last;
     if (!v || v === 'unknown' || v === 'unavailable') return '--';
@@ -6795,6 +6828,65 @@ function stRender(d){
   var uv = n(d && d.uv, 0), sol = n(d && d.solar, 0), lux = n(d && d.lux, 0);
   set('stSun', (uv != null ? 'UV ' + uv : '') + (sol != null ? (uv != null ? ' &bull; ' : '') + sol + ' W/m&sup2;' : '')
                + (lux != null && lux * 1 > 0 ? ' &bull; ' + Number(lux).toLocaleString() + ' lx' : '') || '--');
+
+  // ── THE HERO READOUT IS THE INSTRUMENT'S, NOT A RELAY'S ─────────────────────
+  // Jeff, 2026-09-16 05:32: "There are duplicate readings for the same thing. I
+  // would like to get rid of any sensor reading that is not listing live data from
+  // the real weather station ... I don't want it coming from a source that is not
+  // real from the weather station."
+  //
+  // He was looking at THREE sources writing the same twelve cells: Open-Meteo
+  // forecast estimates, Weather Underground's relay of his own station, and this
+  // function. They disagreed on screen - hero Dew Point 72F vs card 71.5F, temp
+  // 76 vs 76.3, humidity 86 vs 85 - because WU rounds to whole numbers and lags a
+  // cloud round-trip. The hero's dew point was worse than rounded: until today it
+  // came from Open-Meteo as temp-((100-RH)/5), a rule of thumb, while a real
+  // hygrometer 40 feet away was reporting the measured value.
+  //
+  // The console on the pole is the instrument. It owns every cell it measures.
+  // AIR QUALITY and LIGHTNING are deliberately NOT in this list - the station has
+  // no sensor for either, so they keep their own sources and are not duplicates.
+  STATION_HA_LIVE = (out != null || dew != null);
+  if (STATION_HA_LIVE) {
+    var hset = function(id, html, color){
+      var el = document.getElementById(id);
+      if (el) { el.innerHTML = html; if (color != null) el.style.color = color; }
+    };
+    if (out   != null) hset('wxTemp',     Math.round(out) + '&deg;F');
+    if (outH  != null) hset('wxHumidity', Math.round(outH) + '%');
+    if (dew   != null) hset('wxDew',      Math.round(dew) + '&deg;F');
+    if (feels != null) hset('wxFeels',    Math.round(feels) + '&deg;F',
+                            feels >= 103 ? '#ff6262' : feels >= 90 ? '#ff8c42' : '');
+    if (feels != null) {
+      var hl = feels < 80 ? ['LOW','#22c55e'] : feels < 90 ? ['MODERATE','#ffd24a']
+             : feels < 103 ? ['HIGH','#ff8c42'] : ['EXTREME','#ff6262'];
+      hset('wxHeatStress', hl[0], hl[1]);
+    }
+    if (wd != null) {
+      var CARD16 = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+      hset('wxWindDir', Math.round(wd) + '&deg; ' + CARD16[Math.round((wd % 360) / 22.5) % 16]);
+    }
+    if (g != null) hset('wxHeroGust', g * 1 === 0 ? 'Calm' : Math.round(g) + ' mph');
+    if (uv != null) {
+      var uvN = uv * 1;
+      hset('wxUV', uvN + ' &bull; ' + (uvN < 3 ? 'Low' : uvN < 6 ? 'Moderate' : uvN < 8 ? 'High'
+                                     : uvN < 11 ? 'Very High' : 'Extreme'),
+           uvN < 3 ? '#22c55e' : uvN < 6 ? '#ffd24a' : uvN < 8 ? '#f97316'
+         : uvN < 11 ? '#ff6262' : '#8b5cf6');
+    }
+    if (p  != null) hset('wxPressure', p + ' inHg');
+    if (r  != null) hset('wxRainDay',  Number(r).toFixed(2) + '"', r * 1 > 0 ? 'var(--info)' : '');
+    // Turf needs 1.0-1.5 in/week - Jeff's own threshold for whether to water.
+    if (rw != null) hset('wxHeroRain7d', Number(rw).toFixed(2) + '"',
+                         rw < 0.75 ? 'var(--bad)' : rw < 1.0 ? 'var(--warn)' : 'var(--ok)');
+    // Mirror onto the LUX card's outdoor patch, same instrument, same numbers.
+    if (out   != null) hset('luxOutTemp',   Math.round(out) + '&deg;');
+    if (feels != null) hset('luxFeelsLike', Math.round(feels) + '&deg;');
+    var hnote = document.getElementById('wxStationNote');
+    if (hnote) hnote.textContent = '📡 KTNWHITE21 · live from the console'
+      + (d && d.indoor_reported ? ' · ' + acAgo(d.indoor_reported) : '');
+  }
+
   var conn = document.getElementById('stConn');
   if (conn) { conn.innerHTML = ' &#9679; LIVE'; conn.style.color = 'var(--ok)'; }
   if (!b) return;
