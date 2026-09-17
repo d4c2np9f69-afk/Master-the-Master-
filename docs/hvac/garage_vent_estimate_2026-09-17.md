@@ -39,6 +39,46 @@ makes 84 feel better than 94.
 - The garage has no return, so the 125 CFM pressurises it and leaks out around the
   door - that is the right direction (garage air pushed out, not pulled in).
 
+## If the garage attic gets insulated (asked 4:19 PM)
+
+Where the 390 Btu/h-per-degree comes from on a hot afternoon, sized to match the
+94 F / 80 F measurement (attic runs ~120 F+ over an uninsulated ceiling, so the ceiling
+sees a 40 F difference while the walls see 14 F):
+
+| Path | Share of the heat coming in |
+|---|---|
+| **Ceiling from the hot attic (288 sq ft, uninsulated)** | **~2/3** |
+| Uninsulated walls | ~1/5 |
+| Air leakage | ~1/10 |
+| Insulated door | ~1% |
+
+**R-38 over the garage ceiling cuts the ceiling path by about 90%**, so the garage's
+overall leak drops from ~390 to **~145 Btu/h per degree**, and the garage without any
+AC would sit closer to ~90 F instead of 94.
+
+| Setup, WITH the attic insulated | Garage settles at |
+|---|---|
+| Nothing | ~90 F |
+| **7" vent alone** | **~74-75 F** (was ~84) |
+| LG alone | reaches its setpoint and CYCLES for the first time - low-to-mid 70s |
+| Vent + LG | wherever you set it; the LG mostly idles |
+
+So attic insulation is worth **about 10 F on top of the vent** - it roughly doubles
+what the vent does, and it is the difference between "takes the edge off" and "a
+room you can work in all afternoon".
+
+**Cost, DIY blown-in (verified 09-17):** 288 sq ft at R-38 is about **10 bags** of
+GreenFiber-type cellulose at $11-15 a bag = **$120-150 in material**; Home Depot /
+Lowe's lend the blower free with 20+ bags (10 at some stores), otherwise a day's
+rental. Call it **$150-250 all in, an afternoon's work**. Contractor-installed runs
+$1.80-3.50/sq ft = $520-1,000 for this ceiling.
+Sources: [Angi](https://www.angi.com/articles/blown-in-insulation-cost.htm),
+[HomeGuide](https://homeguide.com/costs/blown-in-insulation-cost),
+[InsulationRValues.com](https://www.insulationrvalues.com/attic-insulation-cost).
+Two things to check first: (1) is there a ceiling (drywall) over the garage, or open
+rafters - blown-in needs a ceiling to sit on; (2) keep the insulation clear of any
+recessed lights and the opener's ceiling bracket area.
+
 ## If you ever want more than "take the edge off"
 The door is already insulated, so the 390 Btu/h-per-degree leak is coming through
 the **uninsulated walls and the ceiling/attic** - that is where the heat is getting
