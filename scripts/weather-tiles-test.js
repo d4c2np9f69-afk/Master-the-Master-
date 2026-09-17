@@ -118,6 +118,21 @@ async function main() {
 
   for (const c of CASES) {
     const page = await browser.newPage();
+    // 2026-09-16: WITHOUT A TOKEN THE BLITZORTUNG TIER CANNOT RUN AT ALL.
+    // It reads HA through haFetch -> haFetchRaw, which returns haNoTokenResponse()
+    // immediately when there is no token - so the `blitz:` route stub below was
+    // never reached and the two cases asserting on it could never pass. The tile
+    // silently fell through to the METAR tier every time, which is why
+    // 'nearest strike wins' read NONE and 'genuinely quiet' read OVERHEAD.
+    // The app was right; the harness was testing a path it had locked itself out of.
+    // Same defect as smoke-test.js, found the same night: a gate that runs logged
+    // out cannot exercise token-gated code, and reports green for the half nobody uses.
+    await page.addInitScript(() => {
+      try {
+        localStorage.setItem('ha_token', 'weather-tiles-test-token-not-a-real-credential');
+        localStorage.setItem('ha_base', 'https://weather-tiles-test.invalid');
+      } catch (_) {}
+    });
     const errors = [];
     const routed = [];
     page.on('pageerror', (e) => errors.push(e.message));

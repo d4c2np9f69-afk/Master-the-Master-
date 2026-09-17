@@ -371,10 +371,29 @@ html,body{
    Same glass language as the utility readouts: one soft blurred field of the
    photo, no per-cell boxes, fixed light-on-dark colours (the overlay sits on
    a permanently dark-graded photo in both themes). */
+/* Radar layer switcher — the map Jeff likes, with more to show. Scrolls sideways on
+   a phone rather than wrapping into a second row and shoving the map down. */
+.wx-layers{display:flex;gap:6px;margin:10px 0 8px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  padding-bottom:2px;scrollbar-width:none}
+.wx-layers::-webkit-scrollbar{display:none}
+.wx-layer{flex:0 0 auto;padding:7px 13px;border-radius:999px;font-size:12px;font-weight:700;
+  letter-spacing:.4px;border:1px solid var(--border);background:transparent;color:var(--muted);
+  cursor:pointer;white-space:nowrap;transition:background .15s,color .15s,border-color .15s}
+.wx-layer:hover{border-color:rgba(220,195,145,.3);color:var(--text)}
+.wx-layer.on{background:var(--sky);border-color:var(--sky);color:#04212e}
+
 .wx-hero-readout{
-  margin-top:auto;display:grid;grid-template-columns:repeat(4,1fr);
-  gap:clamp(3px,.9vw,11px) 0;
-  padding:clamp(6px,1.6vw,16px) clamp(4px,1.2vw,13px);
+  /* 2026-09-16: 4 columns -> 6, and 3 rows -> 4 (24 cells), so every reading from
+     the station lives on the photo and nowhere else. Jeff: "2 can be added on each
+     end and another row added to the top row and the size of the cells made smaller
+     so they all fit and look nice." The whole grid therefore gets tighter type and
+     tighter gaps below, not just more cells.
+     6 across only works on a wide screen. The media queries further down step it to
+     4 and then 3 columns so the panel never squeezes a value into an ellipsis on the
+     iPad or the phone - 24 cells at 3 across is 8 rows, which still fits the frame. */
+  margin-top:auto;display:grid;grid-template-columns:repeat(6,1fr);
+  gap:clamp(2px,.55vw,7px) clamp(1px,.3vw,4px);
+  padding:clamp(5px,1.15vw,12px) clamp(4px,1vw,11px);
   border-radius:clamp(12px,3.4vw,32px);
   background:rgba(16,14,12,.16);
   backdrop-filter:blur(9px) saturate(150%) brightness(.98);-webkit-backdrop-filter:blur(9px) saturate(150%) brightness(.98);
@@ -386,13 +405,27 @@ html,body{
      capping out around 800px viewport -- everything else in the app (nav,
      card titles) already scales up to 1920/2560px via media queries below;
      these clamp()-only overlays were the one piece that didn't. */
-  font-size:clamp(6.6px,1.45vw,18px);font-weight:700;letter-spacing:.5px;text-transform:uppercase;
-  color:rgba(247,229,196,.72);text-shadow:0 1px 6px rgba(0,0,0,.7);line-height:1.2;
+  /* Sized DOWN 2026-09-16 for the 6-wide/24-cell grid. Labels lost the letter
+     spacing that was pushing "Lightning" and "Heat Stress" into an ellipsis at
+     six across, and they are allowed to sit on one tight line. */
+  font-size:clamp(5.4px,.92vw,12px);font-weight:700;letter-spacing:.2px;text-transform:uppercase;
+  color:rgba(247,229,196,.72);text-shadow:0 1px 6px rgba(0,0,0,.7);line-height:1.15;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .wx-hero-val{
-  font-size:clamp(11.5px,2.2vw,30px);font-weight:600;margin-top:2px;line-height:1.15;
+  font-size:clamp(9px,1.45vw,21px);font-weight:600;margin-top:1px;line-height:1.12;
   color:#f7f1e7;text-shadow:0 2px 10px rgba(0,0,0,.75);font-variant-numeric:tabular-nums;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+/* 24 cells at 6 across needs real width. Step down rather than shrink to unreadable:
+   tablet/split-screen -> 4 columns (6 rows), phone -> 3 columns (8 rows). */
+@media (max-width:1000px){
+  .wx-hero-readout{grid-template-columns:repeat(4,1fr)}
+}
+@media (max-width:620px){
+  .wx-hero-readout{grid-template-columns:repeat(3,1fr);gap:2px 2px;padding:6px 5px}
+  .wx-hero-lbl{font-size:6.4px;letter-spacing:.1px}
+  .wx-hero-val{font-size:11px}
 }
 /* max-height:none for the same reason as the car hero — the inlaid panel is
    positioned as a percentage of the container, so any clamp would make
@@ -2133,23 +2166,50 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
            "Weather yes add the feels like wind chill all that can go in").
            These are MOVED from the Weather Conditions card, not copied — the
            ids must stay unique for loadStation()/loadWeather() to find them. -->
+      <!-- 24 CELLS, 6 WIDE x 4 ROWS — rebuilt 2026-09-16 06:12.
+           Jeff: "I want those new real sensor readings all on the Hero picture, 2 can
+           be added on each end and another row added to the top row and the size of
+           the cells made smaller so they all fit and look nice." Then, decisively:
+           "I don't want to look in two places for those readings."
+
+           So the station card that used to sit below this photo is GONE, and every
+           one of the 21 sensors on his Ambient Weather console is here instead —
+           plus Heat Stress (derived from the station's own feels-like) and the two
+           readings the station cannot take, Air Quality and Lightning.
+
+           Row 1 is the new top row: the indoor pair, then the four comfort numbers.
+           Row 2 is wind and pressure. Row 3 is the whole rain story. Row 4 is light.
+           Every value is written by stRender() from the console on the pole — see
+           STATION_HA_LIVE. Nothing on this panel comes from a forecast model. -->
       <div class="wx-hero-readout" id="wxHeroReadout">
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Indoor</div><div class="wx-hero-val" id="wxInTemp">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Indoor RH</div><div class="wx-hero-val" id="wxInHum">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Temp</div><div class="wx-hero-val" id="wxTemp">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Feels Like</div><div class="wx-hero-val" id="wxFeels">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Dew Point</div><div class="wx-hero-val" id="wxDew">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Humidity</div><div class="wx-hero-val" id="wxHumidity">--</div></div>
-        <div class="wx-hero-cell"><div class="wx-hero-lbl">Wind</div><div class="wx-hero-val" id="wxWindDir">--</div></div>
-        <div class="wx-hero-cell"><div class="wx-hero-lbl">UV Index</div><div class="wx-hero-val" id="wxUV">--</div></div>
+
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Wind</div><div class="wx-hero-val" id="wxWindSpd">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Direction</div><div class="wx-hero-val" id="wxWindDir">--</div></div>
+        <!-- Gust and Max Gust share one cell as "now / max" — they are the same
+             reading at two timescales, and merging them freed the slot for the clock.
+             Jeff, 2026-09-16 06:15: "If there is an extra one put in the time" / "12hr time". -->
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Gust / Max</div><div class="wx-hero-val" id="wxHeroGust">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Pressure</div><div class="wx-hero-val" id="wxPressure">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Abs Press</div><div class="wx-hero-val" id="wxAbsPress">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Updated</div><div class="wx-hero-val" id="wxObsTime">--</div></div>
+
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Rain Today</div><div class="wx-hero-val" id="wxRainDay">--</div></div>
-        <!-- THIRD ROW, added 2026-08-20. Jeff: "in the hero pic another whole row of data
-             would fit if it's a single reading and doesn't have a chart or map with it."
-             So: four single values only. Rain Today and Gust were already being fetched
-             from his own station and thrown away (precipTotal, windGust); Air Quality and
-             Lightning are the two new live readings. Nothing here needs a chart or a map
-             to make sense — the AQI chart and the strike map stay down in the YARD card. -->
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Rain Rate</div><div class="wx-hero-val" id="wxRainRate">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Rain 7 Days</div><div class="wx-hero-val" id="wxHeroRain7d">--</div></div>
-        <div class="wx-hero-cell"><div class="wx-hero-lbl">Gust</div><div class="wx-hero-val" id="wxHeroGust">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Rain Month</div><div class="wx-hero-val" id="wxRainMonth">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Last Rain</div><div class="wx-hero-val" id="wxLastRain">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">All Time</div><div class="wx-hero-val" id="wxRainLife">--</div></div>
+
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">UV Index</div><div class="wx-hero-val" id="wxUV">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Solar</div><div class="wx-hero-val" id="wxSolarRad">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Lux</div><div class="wx-hero-val" id="wxLux">--</div></div>
+        <div class="wx-hero-cell"><div class="wx-hero-lbl">Heat Stress</div><div class="wx-hero-val" id="wxHeroHeat">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Air Quality</div><div class="wx-hero-val" id="wxHeroAir">--</div></div>
         <div class="wx-hero-cell"><div class="wx-hero-lbl">Lightning</div><div class="wx-hero-val" id="wxHeroLtg">--</div></div>
       </div>
@@ -2362,6 +2422,8 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
         <li><span class="sk">A/C</span><span class="sv" id="acState">--</span></li>
         <li><span class="sk">Holds</span><span class="sv">Off at 71&deg; &bull; On at 73&deg;</span></li>
         <li><span class="sk">Automatic</span><span class="sv" id="acAuto">--</span></li>
+        <li><span class="sk">Cycles</span><span class="sv" id="acCycles">--</span></li>
+        <li><span class="sk">Run time</span><span class="sv" id="acRuntime">--</span></li>
         <li><span class="sk">Sensor</span><span class="sv" id="acEcho">--</span></li>
       </ul>
     </div>
@@ -2676,6 +2738,23 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
             src="https://embed.windy.com/embed2.html?lat=36.477&lon=-86.66&detailLat=36.477&detailLon=-86.66&zoom=8&level=surface&overlay=radar&product=radar&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=mph&metricTemp=%C2%B0F&radarRange=-1"
             style="width:100%;height:360px;border:0;display:block;background:#0b0f14"></iframe>
         </div>
+        <!-- LAYER SWITCHER, 2026-09-16 08:53. Jeff: "I love the radar because it's
+             interactive and has the lightning data - that's what everything else needs."
+             So rather than build a second map, the map he already likes gets more to
+             show. Same pinch-zoom, same embed, one parameter swapped.
+             Overlay names VERIFIED this session against Windy's own URL-parameter and
+             overlay-description docs - not recalled. `thunder` is NOT a valid embed
+             overlay, so lightning is NOT offered here; real strike data comes from
+             Blitzortung and is plotted on its own card. -->
+        <div class="wx-layers" id="wxLayers">
+          <button class="wx-layer on" data-ov="radar"    onclick="setRadarLayer(this,'radar')">&#128225; Radar</button>
+          <button class="wx-layer"    data-ov="rain"     onclick="setRadarLayer(this,'rain')">&#127783;&#65039; Rain</button>
+          <button class="wx-layer"    data-ov="wind"     onclick="setRadarLayer(this,'wind')">&#128168; Wind</button>
+          <button class="wx-layer"    data-ov="gust"     onclick="setRadarLayer(this,'gust')">&#127788;&#65039; Gusts</button>
+          <button class="wx-layer"    data-ov="temp"     onclick="setRadarLayer(this,'temp')">&#127777;&#65039; Temp</button>
+          <button class="wx-layer"    data-ov="pressure" onclick="setRadarLayer(this,'pressure')">&#128202; Pressure</button>
+          <button class="wx-layer"    data-ov="clouds"   onclick="setRadarLayer(this,'clouds')">&#9729;&#65039; Clouds</button>
+        </div>
         <div class="wx-show-btns">
           <button class="btn-full btn-gray" style="flex:1" onclick="refreshRadar()">&#128260; Refresh Radar</button>
           <a href="https://radar.weather.gov/station/KOHX/standard" target="_blank" rel="noopener" class="btn-full btn-gray" style="flex:1;display:block;text-align:center;text-decoration:none">&#128225; NWS Radar &#8599;</a>
@@ -2794,18 +2873,17 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
          Underground's public API, which carries no INDOOR readings at all. The ambient_station
          integration now pulls the console direct, so these are his own instrument's numbers.
          Fed by the same single template call as the A/C card — see loadLive(). -->
-    <div class="card cat-weather" id="stationCard">
-      <div class="card-title">&#128225; My Station &bull; KTNWHITE21 <span id="stConn" class="irr-conn"></span></div>
-      <div id="stBanner" class="wx-banner wx-load">&#128260; Loading station&hellip;</div>
-      <ul class="spec-list">
-        <li><span class="sk">Indoor</span><span class="sv" id="stIndoor">--</span></li>
-        <li><span class="sk">Outdoor</span><span class="sv" id="stOutdoor">--</span></li>
-        <li><span class="sk">Wind</span><span class="sv" id="stWind">--</span></li>
-        <li><span class="sk">Rain today</span><span class="sv" id="stRain">--</span></li>
-        <li><span class="sk">Pressure</span><span class="sv" id="stPressure">--</span></li>
-        <li><span class="sk">Sun</span><span class="sv" id="stSun">--</span></li>
-      </ul>
-    </div>
+    <!-- THE STATION CARD WAS HERE AND IS DELETED. 2026-09-16 06:12.
+         Jeff: "I don't want to look in two places for those readings."
+         It duplicated, row for row, what the hero readout above now shows - all 21
+         sensors off the console, plus the observation clock. Keeping a second copy
+         was the whole complaint: two panels, same instrument, numbers that did not
+         match because they were rendered at different moments.
+         The station's health now reads off the hero: the Updated cell is the
+         station's OWN observation time, so if the console stops uploading, that
+         clock freezes and says so without a banner.
+         stRender() still writes the st* ids defensively - they simply no longer
+         exist, and set() no-ops on a missing element. Do not re-add this card. -->
 
     <!-- SPOTTER NETWORK -->
     <div class="card cat-weather" id="wxSpotterCard">
@@ -4307,6 +4385,52 @@ if (typeof AbortSignal.timeout !== 'function') {
     return ctrl.signal;
   };
 }
+
+// ---------------------------------------------------------------------------
+// SHARED-FETCH CACHE STATE - MUST BE INITIALISED HERE, AT THE TOP OF THE SCRIPT.
+//
+// 2026-09-16 02:34, found live by Jeff: "it is not loading the sensors in the
+// guardian section and I don't see the new sensor readings in the weather".
+// ONE bug caused both. These four values used to be declared at line ~10240,
+// but the top-level boot sequence calls loadIrrigation() / loadGuardian() at
+// line ~7639 - about 2,600 lines EARLIER. `var` hoists the NAME but not the
+// ASSIGNMENT, so _haShared was still `undefined` when haShared() indexed it:
+//
+//     TypeError: Cannot read properties of undefined (reading '/api/states')
+//         at haShared -> haFetch -> loadIrrigationFromHA -> loadIrrigation -> (top level)
+//
+// An uncaught throw at top level ABORTS THE REST OF THE SCRIPT. Every function
+// below it still existed (declarations hoist), so the page looked fine - but no
+// loader after that line ever ran. Guardian stayed on placeholders and the
+// station / A/C cards sat on "Loading..." forever.
+//
+// Why it is not obvious: the failure is invisible unless you open the console.
+// The card shows its loading state, not an error. Verified by loadAcRelay()
+// filling every field correctly the moment it was called by hand.
+//
+// RULE: anything the boot sequence can reach must be initialised ABOVE it.
+// Guarded by scripts/init-order-test.js, which fails on exactly this.
+// ---------------------------------------------------------------------------
+// The utility half stays OFF. Jeff, 2026-09-15: "Do not fuck with the utilities
+// and make sure you freaking [read] because obviously you have not before you
+// touch any of it." Moving this declaration does NOT change its value.
+var CACHE_UTILITY_READS = false;
+var STATES_TTL_MS  = 20000;
+var HISTORY_TTL_MS = 5 * 60 * 1000;
+var _haShared = {};   // key -> { at: ms, p: Promise<{status, statusText, text}> }
+
+// The HA base URL is read by haFetchRaw() on the very first boot call, so it has
+// to exist by now too. It used to be declared ~2,300 lines below its first use.
+var HA_NABU = 'https://kmtpozwheqwww9t5uxhhvzzso1tvagro.ui.nabu.casa';
+var HA_BASE = localStorage.getItem('ha_base') || HA_NABU;
+
+// True once stRender() has drawn the hero readout from the console on the pole.
+// While true, loadStation() (Weather Underground's relay) and loadWeather()
+// (Open-Meteo forecast) are BLOCKED from overwriting any cell the station
+// measures itself. See stRender() for the whole reason. Declared up here because
+// loadWeather()/loadStation() can both run before stRender() on a cold boot.
+var STATION_HA_LIVE = false;
+
 // STATE
 var DEFAULT_STATE = {
   "hours": 5.9,
@@ -5482,8 +5606,12 @@ function loadWeather(){
       else if(dew>=Math.round(c.temperature_2m)-7) dewOnGrass='LIGHT';
       function set(id,val){ var e=document.getElementById(id); if(e) e.innerHTML=val; }
       function setc(id,val,color){ var e=document.getElementById(id); if(e){ e.innerHTML=val; e.style.color=color||''; } }
-      set('wxTemp',Math.round(c.temperature_2m)+'&#176;F');
-      set('wxDew',dew+'&#176;F');
+      // 2026-09-16: these two used to write the hero's Temp and Dew Point from
+      // OPEN-METEO — a forecast model, not an instrument — and the dew point was
+      // not even measured, it was the rule of thumb temp-((100-RH)/5). Jeff has a
+      // real station that reports both directly. Removed; stRender() owns them.
+      // `dew` is still computed below for the DEW ON GRASS mowing verdict, which
+      // is a forecast question, not a current-conditions reading.
       setc('wxRisk',risk+'%',risk>60?'#ff6262':risk>30?'#ffd24a':'#22c55e');
       setc('wxSoil',soil,soil==='FIRM'?'#22c55e':soil==='MOIST'?'#ffd24a':'#ff6262');
       set('wxSoilTemp',soilT!==null?soilT+'&#176;F':'--');
@@ -5601,8 +5729,24 @@ function loadStation(){
     .then(function(s){
       if(!s||s.error) return;
       STATION=s;
-      function set(id,val){var e=document.getElementById(id); if(e) e.innerHTML=val;}
-      function setc(id,val,color){var e=document.getElementById(id); if(e){e.innerHTML=val; e.style.color=color||'';}}
+      // ── WU IS A RELAY, NOT THE INSTRUMENT ────────────────────────────────────
+      // Jeff, 2026-09-16 05:32: "I don't want it coming from a source that is not
+      // real from the weather station." These cells are all things the console on
+      // the pole measures itself. When the direct HA feed has drawn them, this
+      // cloud copy must not overwrite it: WU rounds to whole numbers and lags a
+      // round-trip, which is why the hero read dew 72F while the card below read
+      // 71.5F off the same instrument. Worse, /api/weather silently falls back to
+      // OPEN-METEO when the PWS is unreachable (see isReal below) - so without this
+      // guard a model could quietly replace a real reading and look identical.
+      // This stays as the FALLBACK: if HA is down, a slightly stale real reading
+      // from his own station beats an empty cell.
+      var STATION_CELLS = { wxTemp:1, wxFeels:1, wxDew:1, wxHumidity:1, wxWindDir:1,
+                            wxUV:1, wxPressure:1, wxRainDay:1, wxHeroRain7d:1,
+                            wxHeroGust:1, wxHeatStress:1, wxStationNote:1,
+                            luxOutTemp:1, luxFeelsLike:1 };
+      function blocked(id){ return STATION_HA_LIVE && STATION_CELLS[id]; }
+      function set(id,val){ if(blocked(id)) return; var e=document.getElementById(id); if(e) e.innerHTML=val;}
+      function setc(id,val,color){ if(blocked(id)) return; var e=document.getElementById(id); if(e){e.innerHTML=val; e.style.color=color||'';}}
       // Temps
       if(s.temp!=null)  set('wxTemp',  Math.round(s.temp)+'&#176;F');
       if(s.dewpt!=null) set('wxDew',   Math.round(s.dewpt)+'&#176;F');
@@ -6309,18 +6453,27 @@ function getLuxCreds(){ return {email:localStorage.getItem('lux_email')||'',pass
 // Two benefits from doing it this way round: a device with no saved login just works, and
 // Jeff's password stops riding in a query string (URLs get logged and kept in history) —
 // local creds are now only ever sent if the SERVER says it has none of its own.
+// #186 (2026-09-15): credentials ride in the x-hcc-creds HEADER, never the URL. A query string
+// is written to Cloudflare's access logs and kept in the browser's history; a header is not.
+// The two-step shape is unchanged: try with nothing first, and only send this device's own login
+// if the server says it has none of its own — so on the normal path no credential is sent at all.
 function fetchWithCreds(path, creds, extra){
   var sep = path.indexOf('?') >= 0 ? '&' : '?';
-  return fetch(path + (extra ? sep + extra : ''), {cache:'no-store'})
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      if(d && d.error === 'credentials_not_provided' && creds && creds.email && creds.pass){
-        var q = sep + 'e=' + encodeURIComponent(creds.email)
-              + '&p=' + encodeURIComponent(creds.pass) + (extra ? '&' + extra : '');
-        return fetch(path + q, {cache:'no-store'}).then(function(r2){ return r2.json(); });
-      }
-      return d;
-    });
+  var url = path + (extra ? sep + extra : '');
+  function go(withCreds){
+    var opts = {cache:'no-store'};
+    if(withCreds){
+      opts.headers = { 'x-hcc-creds': btoa(JSON.stringify({
+        email: encodeURIComponent(creds.email), pass: encodeURIComponent(creds.pass) })) };
+    }
+    return fetch(url, opts).then(function(r){ return r.json(); });
+  }
+  return go(false).then(function(d){
+    if(d && d.error === 'credentials_not_provided' && creds && creds.email && creds.pass){
+      return go(true);
+    }
+    return d;
+  });
 }
 // True only when BOTH the server and this device are out of credentials.
 function credsTrulyMissing(d){ return !!(d && d.error === 'credentials_not_provided'); }
@@ -6535,6 +6688,9 @@ function luxSendControl(action,opts){
   // on the normal path.
   var payload=Object.assign({action:action,device_id:LUX_STATE.device_id},opts||{});
   if(creds.email&&creds.pass){ payload.email=creds.email; payload.password=creds.pass; }
+  // #184: the server will not act on its own stored credentials without proof of
+  // a family login. Send the control token minted by /api/auth.
+  var ct=getCtrlToken(); if(ct){ payload.ctrl_token=ct; }
   if(action==='set_sp'){payload.cool_sp=LUX_STATE.cool_sp;payload.heat_sp=LUX_STATE.heat_sp;}
   fetch('/api/climate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
     .then(function(r){return r.json();})
@@ -6596,6 +6752,27 @@ var AC_TPL = "{%- set i = states.sensor.my_weather_station_inside_temperature -%
   + " 'pressure': states('sensor.my_weather_station_relative_pressure'),"
   + " 'uv': states('sensor.my_weather_station_uv_index'),"
   + " 'solar': states('sensor.my_weather_station_irradiance'),"
+  // 2026-09-16 00:45 — the other NINE station sensors. Audited them against HA and the app was
+  // fetching 12 of 21: dew point, max gust, the weekly/monthly/last-rain trio, precipitation
+  // intensity, illuminance, absolute pressure and lifetime rain were all live in HA and invisible
+  // in the app. Rain history in particular is what decides whether the yard needs watering.
+  + " 'dew': states('sensor.my_weather_station_dew_point'),"
+  + " 'max_gust': states('sensor.my_weather_station_max_gust'),"
+  + " 'rain_rate': states('sensor.my_weather_station_precipitation_intensity'),"
+  + " 'rain_week': states('sensor.my_weather_station_weekly_rain'),"
+  + " 'rain_month': states('sensor.my_weather_station_monthly_rain'),"
+  + " 'rain_last': states('sensor.my_weather_station_last_rain'),"
+  + " 'lux': states('sensor.my_weather_station_illuminance'),"
+  + " 'abs_pressure': states('sensor.my_weather_station_absolute_pressure'),"
+  + " 'rain_life': states('sensor.my_weather_station_lifetime_rain'),"
+  // The A/C statistics Jeff asked for: "set up a way to track how many times it cycles on and off
+  // and other statistics that would help us." The history_stats helpers were BUILT the same night
+  // and then never surfaced — live in HA, invisible in the app, which is the same failure as the
+  // nine above. They cost nothing extra here: this is one template call for both cards.
+  + " 'cyc_today': states('sensor.a_c_relay_a_c_cycles_today'),"
+  + " 'cyc_24h': states('sensor.a_c_relay_a_c_cycles_24h'),"
+  + " 'run_today': states('sensor.a_c_relay_a_c_runtime_today'),"
+  + " 'run_24h': states('sensor.a_c_relay_a_c_runtime_24h'),"
   + " 'relay': r.state if r else 'missing', 'relay_changed': r.last_changed.isoformat() if r else none,"
   + " 'auto': a.state if a else 'missing'} | tojson }}";
 
@@ -6640,6 +6817,25 @@ function acRender(d){
         + (d.indoor_reported ? ' &bull; ' + acAgo(d.indoor_reported) : '')
       : (d && d.indoor ? String(d.indoor) : 'missing'), haveTemp ? '' : 'var(--bad)');
 
+  // Jeff, 2026-09-15: "you could probably also set up a way to track how many times it cycles on
+  // and off and other statistics that would help us." The four history_stats helpers were built
+  // that night and were never put on the card — live in HA, invisible here. Duty cycle is the
+  // number that actually means something: a unit running much over ~50% in this heat is either
+  // undersized, low on charge, or fighting the duct problem the new system is meant to fix.
+  var num = function(v){ var x = parseFloat(v); return isFinite(x) ? x : null; };
+  var ct = num(d && d.cyc_today), c24 = num(d && d.cyc_24h);
+  set('acCycles', (ct != null || c24 != null)
+    ? (ct != null ? ct + ' today' : '--') + (c24 != null ? ' &bull; ' + c24 + ' in 24 h' : '') : '--');
+  var rt = num(d && d.run_today), r24 = num(d && d.run_24h);
+  var fmtH = function(h){
+    var mins = Math.round(h * 60);
+    return mins >= 60 ? Math.floor(mins / 60) + ' h ' + (mins % 60) + ' m' : mins + ' m';
+  };
+  set('acRuntime', (rt != null || r24 != null)
+    ? (rt != null ? fmtH(rt) + ' today' : '--')
+      + (r24 != null ? ' &bull; ' + fmtH(r24) + ' in 24 h (' + Math.round(r24 / 24 * 100) + '% duty)' : '')
+    : '--');
+
   var conn = document.getElementById('acConn');
   if (conn) { conn.innerHTML = ' &#9679; LIVE'; conn.style.color = 'var(--ok)'; }
 
@@ -6670,14 +6866,136 @@ function stRender(d){
   set('stIndoor',  ind != null ? ind + '&deg;F' + (indH != null ? ' &bull; ' + indH + '% RH' : '') : '--');
   set('stOutdoor', out != null ? out + '&deg;F' + (outH != null ? ' &bull; ' + outH + '% RH' : '')
                                  + (feels != null && Math.abs(feels - out) >= 2 ? ' &bull; feels ' + feels + '&deg;' : '') : '--');
-  var w = n(d && d.wind), g = n(d && d.gust), wd = n(d && d.wind_dir, 0);
-  set('stWind', w != null ? (w * 1 === 0 && (g == null || g * 1 === 0) ? 'Calm' : w + ' mph' + (g != null && g * 1 > 0 ? ' &bull; gust ' + g : '') + (wd != null ? ' &bull; ' + wd + '&deg;' : '')) : '--');
-  var r = n(d && d.rain_today, 2);
-  set('stRain', r != null ? (r * 1 === 0 ? 'None' : r + ' in') : '--');
-  var p = n(d && d.pressure, 2);
-  set('stPressure', p != null ? p + ' inHg' : '--');
-  var uv = n(d && d.uv, 0), sol = n(d && d.solar, 0);
-  set('stSun', (uv != null ? 'UV ' + uv : '') + (sol != null ? (uv != null ? ' &bull; ' : '') + sol + ' W/m&sup2;' : '') || '--');
+  var w = n(d && d.wind), g = n(d && d.gust), wd = n(d && d.wind_dir, 0), mg = n(d && d.max_gust);
+  set('stWind', w != null ? (w * 1 === 0 && (g == null || g * 1 === 0) ? 'Calm' : w + ' mph' + (g != null && g * 1 > 0 ? ' &bull; gust ' + g : '') + (wd != null ? ' &bull; ' + wd + '&deg;' : ''))
+                            + (mg != null && mg * 1 > 0 ? ' &bull; max ' + mg : '') : '--');
+  // Dew point is the honest comfort number — it is why 79°F can feel like 80°F here. Above ~70 is
+  // the "sticky" threshold, which is exactly when the A/C is working hardest.
+  var dew = n(d && d.dew);
+  set('stDew', dew != null ? dew + '&deg;F' + (dew >= 70 ? ' &bull; muggy' : dew >= 60 ? ' &bull; humid' : ' &bull; comfortable') : '--');
+  // Rain: today, plus the live rate when it is actually raining. A rate of 0 is not worth a row.
+  var r = n(d && d.rain_today, 2), rate = n(d && d.rain_rate, 2);
+  set('stRain', r != null ? ((r * 1 === 0 && (rate == null || rate * 1 === 0)) ? 'None'
+                             : r + ' in' + (rate != null && rate * 1 > 0 ? ' &bull; ' + rate + ' in/h NOW' : '')) : '--');
+  // Week and month are what actually decide whether the yard needs watering.
+  var rw = n(d && d.rain_week, 2), rm = n(d && d.rain_month, 2), rl = n(d && d.rain_life, 2);
+  // 2026-09-16: rain_life was FETCHED EVERY CYCLE AND NEVER RENDERED - the one
+  // station sensor out of 21 that reached the app and then went nowhere. Jeff,
+  // 05:25: "Where are the new sensor readings for the weather section". Exactly
+  // the defect the sensor sweep was supposed to end. Now guarded by
+  // sensor-coverage-test.js, which fails on any AC_TPL key no renderer reads.
+  set('stRainHist', (rw != null || rm != null)
+      ? (rw != null ? rw + ' in wk' : '--') + ' &bull; ' + (rm != null ? rm + ' in mo' : '--')
+        + (rl != null ? ' &bull; ' + rl + ' all-time' : '') : '--');
+  set('stLastRain', (function(){
+    var v = d && d.rain_last;
+    if (!v || v === 'unknown' || v === 'unavailable') return '--';
+    var t = Date.parse(v);
+    if (!isFinite(t)) return String(v);
+    var days = Math.floor((Date.now() - t) / 86400000);
+    return new Date(t).toLocaleDateString([], {month:'short', day:'numeric'})
+           + (days >= 0 ? ' &bull; ' + (days === 0 ? 'today' : days + 'd ago') : '');
+  })());
+  var p = n(d && d.pressure, 2), ap = n(d && d.abs_pressure, 2);
+  set('stPressure', p != null ? p + ' inHg' + (ap != null ? ' &bull; ' + ap + ' abs' : '') : '--');
+  var uv = n(d && d.uv, 0), sol = n(d && d.solar, 0), lux = n(d && d.lux, 0);
+  set('stSun', (uv != null ? 'UV ' + uv : '') + (sol != null ? (uv != null ? ' &bull; ' : '') + sol + ' W/m&sup2;' : '')
+               + (lux != null && lux * 1 > 0 ? ' &bull; ' + Number(lux).toLocaleString() + ' lx' : '') || '--');
+
+  // ── THE HERO READOUT IS THE INSTRUMENT'S, NOT A RELAY'S ─────────────────────
+  // Jeff, 2026-09-16 05:32: "There are duplicate readings for the same thing. I
+  // would like to get rid of any sensor reading that is not listing live data from
+  // the real weather station ... I don't want it coming from a source that is not
+  // real from the weather station."
+  //
+  // He was looking at THREE sources writing the same twelve cells: Open-Meteo
+  // forecast estimates, Weather Underground's relay of his own station, and this
+  // function. They disagreed on screen - hero Dew Point 72F vs card 71.5F, temp
+  // 76 vs 76.3, humidity 86 vs 85 - because WU rounds to whole numbers and lags a
+  // cloud round-trip. The hero's dew point was worse than rounded: until today it
+  // came from Open-Meteo as temp-((100-RH)/5), a rule of thumb, while a real
+  // hygrometer 40 feet away was reporting the measured value.
+  //
+  // The console on the pole is the instrument. It owns every cell it measures.
+  // AIR QUALITY and LIGHTNING are deliberately NOT in this list - the station has
+  // no sensor for either, so they keep their own sources and are not duplicates.
+  STATION_HA_LIVE = (out != null || dew != null);
+  if (STATION_HA_LIVE) {
+    var hset = function(id, html, color){
+      var el = document.getElementById(id);
+      if (el) { el.innerHTML = html; if (color != null) el.style.color = color; }
+    };
+    // ROW 1 — indoor pair, then the four comfort numbers.
+    if (ind   != null) hset('wxInTemp',   Math.round(ind) + '&deg;F');
+    if (indH  != null) hset('wxInHum',    Math.round(indH) + '%');
+    if (out   != null) hset('wxTemp',     Math.round(out) + '&deg;F');
+    if (feels != null) hset('wxFeels',    Math.round(feels) + '&deg;F',
+                            feels >= 103 ? '#ff6262' : feels >= 90 ? '#ff8c42' : '');
+    if (dew   != null) hset('wxDew',      Math.round(dew) + '&deg;F');
+    if (outH  != null) hset('wxHumidity', Math.round(outH) + '%');
+
+    // ROW 2 — wind and pressure.
+    if (w != null) hset('wxWindSpd', w * 1 === 0 ? 'Calm' : w + ' mph');
+    if (wd != null) {
+      var CARD16 = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+      hset('wxWindDir', Math.round(wd) + '&deg; ' + CARD16[Math.round((wd % 360) / 22.5) % 16]);
+    }
+    // Gust now / max today in one cell - same reading, two timescales.
+    if (g != null || mg != null) {
+      hset('wxHeroGust', (g == null ? '--' : (g * 1 === 0 ? 'Calm' : g))
+                       + (mg != null ? ' / ' + mg : '') + ' mph');
+    }
+    if (p  != null) hset('wxPressure', p + ' inHg');
+    if (ap != null) hset('wxAbsPress', ap + ' inHg');
+    // The clock is the station's OWN observation time, not the phone's - if the
+    // console stops uploading, this freezes and that is the tell. 12-hour, Jeff's ask.
+    hset('wxObsTime', (function(){
+      var v = d && d.indoor_reported;
+      var ms = v ? Date.parse(v) : NaN;
+      if (!isFinite(ms)) return '--';
+      return new Date(ms).toLocaleTimeString([], {hour:'numeric', minute:'2-digit', hour12:true});
+    })());
+
+    // ROW 3 — the whole rain story, which is what decides whether the yard needs water.
+    if (r    != null) hset('wxRainDay',  Number(r).toFixed(2) + '"', r * 1 > 0 ? 'var(--info)' : '');
+    if (rate != null) hset('wxRainRate', Number(rate).toFixed(2) + ' in/h', rate * 1 > 0 ? 'var(--info)' : '');
+    // Turf needs 1.0-1.5 in/week - Jeff's own threshold for whether to water.
+    if (rw   != null) hset('wxHeroRain7d', Number(rw).toFixed(2) + '"',
+                           rw < 0.75 ? 'var(--bad)' : rw < 1.0 ? 'var(--warn)' : 'var(--ok)');
+    if (rm   != null) hset('wxRainMonth', Number(rm).toFixed(2) + '"');
+    hset('wxLastRain', (function(){
+      var v = d && d.rain_last;
+      if (!v || v === 'unknown' || v === 'unavailable') return '--';
+      var ms = Date.parse(v);
+      if (!isFinite(ms)) return '--';
+      return new Date(ms).toLocaleDateString([], {month:'short', day:'numeric'});
+    })());
+    if (rl != null) hset('wxRainLife', Number(rl).toFixed(2) + '"');
+
+    // ROW 4 — light, heat, and the two readings the station cannot take.
+    if (uv != null) {
+      var uvN = uv * 1;
+      hset('wxUV', uvN + ' ' + (uvN < 3 ? 'Low' : uvN < 6 ? 'Mod' : uvN < 8 ? 'High'
+                              : uvN < 11 ? 'V.High' : 'Extreme'),
+           uvN < 3 ? '#22c55e' : uvN < 6 ? '#ffd24a' : uvN < 8 ? '#f97316'
+         : uvN < 11 ? '#ff6262' : '#8b5cf6');
+    }
+    if (sol != null) hset('wxSolarRad', sol + ' W/m&sup2;');
+    if (lux != null) hset('wxLux', Number(lux) >= 1000 ? Number(lux).toLocaleString() : String(lux));
+    if (feels != null) {
+      var hl = feels < 80 ? ['LOW','#22c55e'] : feels < 90 ? ['MODERATE','#ffd24a']
+             : feels < 103 ? ['HIGH','#ff8c42'] : ['EXTREME','#ff6262'];
+      hset('wxHeroHeat', hl[0], hl[1]);
+      hset('wxHeatStress', hl[0], hl[1]);   // the YARD card's copy, same instrument
+    }
+    // Mirror onto the LUX card's outdoor patch, same instrument, same numbers.
+    if (out   != null) hset('luxOutTemp',   Math.round(out) + '&deg;');
+    if (feels != null) hset('luxFeelsLike', Math.round(feels) + '&deg;');
+    var hnote = document.getElementById('wxStationNote');
+    if (hnote) hnote.textContent = '📡 KTNWHITE21 · live from the console'
+      + (d && d.indoor_reported ? ' · ' + acAgo(d.indoor_reported) : '');
+  }
+
   var conn = document.getElementById('stConn');
   if (conn) { conn.innerHTML = ' &#9679; LIVE'; conn.style.color = 'var(--ok)'; }
   if (!b) return;
@@ -7482,6 +7800,9 @@ function splashLogin(){
     .then(function(res){
       if(res.data.ok&&res.data.ha_token){
         safeSetItem('ha_token',res.data.ha_token);
+        // #184: the control token proves this device's owner typed the family
+        // password. /api/climate POST and /api/irrigation/control demand it.
+        if(res.data.ctrl_token){ safeSetItem('ctrl_token',res.data.ctrl_token); }
         localStorage.setItem('hcc_theme','dark');
         document.documentElement.classList.remove('light');
         syncThemeBtn();
@@ -8800,6 +9121,12 @@ function hccSection(id, btn) {
   if (id === 'yard') { mowerSync(false); }
   if (id === 'weather') {
     loadWeather();
+    // 2026-09-16: the station card (dew point, rain week/month, last rain, gust,
+    // pressure) LIVES on this tab but was only ever refreshed by the HOME branch
+    // and the boot call - so opening WEATHER showed whatever was fetched at
+    // start-up. Same lesson as the irrigation note above: always refetch on open.
+    loadThermostat(); loadStation();
+    if (!window._layerRestored) { window._layerRestored = true; restoreRadarLayer(); }
     if (!window._forecastLoaded) { window._forecastLoaded = true; loadForecast(); }
     if (!window._droughtLoaded) { window._droughtLoaded = true; loadDrought(); }
     // Auto-request notification permission on first WEATHER tab visit (this tap IS a user gesture)
@@ -9862,6 +10189,33 @@ function refreshRadar(){
   setTimeout(function(){ f.src=s; }, 60);
 }
 
+// Swap the Windy overlay in place. Jeff, 2026-09-16: the radar is the piece of this
+// section he actually likes, because he can move it and it has live data on it. The
+// cheapest way to give him more of that is more layers on the SAME map, not a new one.
+// Every value here was verified against Windy's published parameter list this session.
+// The last choice is remembered so the map opens on whatever he was looking at.
+function setRadarLayer(btn, overlay){
+  var f=document.getElementById('wxRadarFrame'); if(!f) return;
+  var src=f.getAttribute('src')||'';
+  // radar is its own product; the forecast overlays all ride on product=ecmwf
+  var product = (overlay==='radar') ? 'radar' : 'ecmwf';
+  src = src.replace(/([?&])overlay=[^&]*/, '$1overlay=' + overlay)
+           .replace(/([?&])product=[^&]*/, '$1product=' + product);
+  f.setAttribute('src', src); f.src = src;
+  var box=document.getElementById('wxLayers');
+  if(box){ [].forEach.call(box.querySelectorAll('.wx-layer'), function(b){
+    b.classList.toggle('on', b === btn); }); }
+  try{ localStorage.setItem('wx_layer', overlay); }catch(_){}
+}
+// Restore the layer he last used, so the map is where he left it.
+function restoreRadarLayer(){
+  var ov=null; try{ ov=localStorage.getItem('wx_layer'); }catch(_){}
+  if(!ov || ov==='radar') return;
+  var box=document.getElementById('wxLayers'); if(!box) return;
+  var btn=box.querySelector('.wx-layer[data-ov="'+ov+'"]'); if(!btn) return;
+  setRadarLayer(btn, ov);
+}
+
 function hccPanic() {
   // SAFETY: the app is public (anyone can open the web address), so the alarm
   // must only be armable on a device that's connected to Jeff's Beehive (his,
@@ -9916,8 +10270,11 @@ function hccPanic() {
 // makes the app reach HA from anywhere: the app is an https page and browsers block it
 // from fetching the local http HA (mixed content), so we go through this https URL.
 // Access still requires the long-lived token (stored only in this browser's localStorage).
-var HA_NABU = 'https://kmtpozwheqwww9t5uxhhvzzso1tvagro.ui.nabu.casa';
-var HA_BASE = localStorage.getItem('ha_base') || HA_NABU;
+// 2026-09-16: HA_NABU / HA_BASE moved to the top of the script - they were
+// declared HERE and read by haFetchRaw() during boot, ~2,300 lines earlier, so
+// HA_BASE was `undefined` on every start-up call and the X-HA-Base header was
+// silently dropped. Not a crash, so nothing ever surfaced it. Found by
+// scripts/init-order-test.js while fixing the _haShared abort. Do not move back.
 var HA_IP   = 'http://192.168.1.66:8123';
 
 function copyCmd(el, text) {
@@ -10055,6 +10412,15 @@ function getHaToken() {
   return localStorage.getItem('ha_token') || '';
 }
 
+// Control token — minted by /api/auth at family login (#184, 2026-09-15). The
+// control-class endpoints (/api/climate POST, /api/irrigation/control) require
+// it: it is the proof that whoever is driving the house typed the family
+// password at least once on this device. A device that logged in before
+// 2026-09-15 has no ctrl_token and re-logs in once at the splash screen.
+function getCtrlToken() {
+  return localStorage.getItem('ctrl_token') || '';
+}
+
 // Route every HA call through our own /api/ha proxy (same-origin → no CORS, no
 // mixed content, server-side timeout). The browser passes its token + chosen base;
 // the Function relays server-to-server to Nabu Casa. This is why irrigation/weather
@@ -10144,10 +10510,12 @@ function haNoTokenResponse() {
 // — are written, tested and DISABLED until he says yes out loud. Flip this one flag to turn them
 // on; nothing else needs editing. The /api/states share and the document.hidden tick guard are
 // live, and between them they are the bulk of the measured 49 req/min.
-var CACHE_UTILITY_READS = false;
-var STATES_TTL_MS  = 20000;
-var HISTORY_TTL_MS = 5 * 60 * 1000;
-var _haShared = {};   // key -> { at: ms, p: Promise<{status, statusText, text}> }
+//
+// 2026-09-16: CACHE_UTILITY_READS, STATES_TTL_MS, HISTORY_TTL_MS and _haShared were
+// DECLARED HERE and that is precisely what broke the app - the boot sequence reaches
+// haFetch() ~2,600 lines above this point, so _haShared was still undefined and the
+// whole script aborted on an uncaught TypeError. They now live at the TOP of the
+// script, next to the AbortSignal polyfill. Do not move them back down here.
 function haStatesInvalidate(){ delete _haShared['/api/states']; }
 function haShared(key, ttl, makeRequest) {
   var now = Date.now(), entry = _haShared[key];
@@ -11009,12 +11377,47 @@ function loadGuardian(){
     else grdSet('grd-people', '—', 'hs-dim');
 
     // WATER — leak sensor trips red; else a live water meter reads NORMAL
-    if (onState('leak', 'water') || onState('water', 'water') && hasSensor('moisture')) { grdSet('grd-water', 'LEAK', 'hs-red'); alertReasons.push('Water leak'); }
+    // 2026-09-16: this used to be `onState('leak') || onState('water') && hasSensor('moisture')`,
+    // a SUBSTRING match on the entity id. It read LEAK permanently off
+    // `binary_sensor.water_monitor_upstream_sensors_health` - device_class
+    // `connectivity`, whose `on` means HEALTHY. All three real moisture sensors
+    // (guest bath, kitchen sink, kitchen refrigerator) were `off` at the time.
+    // A permanent false LEAK is worse than no chip: it teaches Jeff to ignore the
+    // one alert in this house that has already cost him real money. It was
+    // invisible until tonight only because Guardian never finished loading.
+    // The device_class IS the answer - 'moisture' is the flood-sensor class.
+    var wetSensor = states.filter(function(s){
+      return s.entity_id.indexOf('binary_sensor.') === 0
+          && s.attributes && s.attributes.device_class === 'moisture'
+          && s.state === 'on';
+    });
+    if (wetSensor.length) {
+      var wetName = (wetSensor[0].attributes && wetSensor[0].attributes.friendly_name) || wetSensor[0].entity_id;
+      grdSet('grd-water', 'LEAK', 'hs-red');
+      alertReasons.push('Water leak: ' + wetName);
+    }
     else if (hasSensor('water_meter')) grdSet('grd-water', 'NORMAL', 'hs-ok');
     else grdSet('grd-water', 'Sensor pending', 'hs-dim');
 
     // GAS — smoke/CO/gas alarm trips red; else a live gas meter reads NORMAL
-    if (onState('gas', '') || onState('smoke', '') || onState('carbon', '')) { grdSet('grd-gas', 'ALERT', 'hs-red'); alertReasons.push('Gas / smoke alarm'); }
+    // 2026-09-16: hardened the same way as WATER above, and for the same reason -
+    // this was a substring match on 'gas'/'smoke'/'carbon' against ANY binary_sensor
+    // that happened to be `on`. It is not misfiring today, but it is the identical
+    // defect, and a false fire alarm is the worst possible chip to cry wolf on.
+    // NOTE: the record is clear that NO smoke/CO detector exists on this mesh yet
+    // (OPEN_ITEMS, alarm subsystem). A green 'NORMAL' here has never meant fire
+    // detection is covered - it means a gas METER is reporting.
+    var fireCls = { gas: 1, smoke: 1, carbon_monoxide: 1 };
+    var firing = states.filter(function(s){
+      return s.entity_id.indexOf('binary_sensor.') === 0
+          && s.attributes && fireCls[s.attributes.device_class]
+          && s.state === 'on';
+    });
+    if (firing.length) {
+      var fName = (firing[0].attributes && firing[0].attributes.friendly_name) || firing[0].entity_id;
+      grdSet('grd-gas', 'ALERT', 'hs-red');
+      alertReasons.push('Gas / smoke alarm: ' + fName);
+    }
     else if (hasSensor('gas_meter')) grdSet('grd-gas', 'NORMAL', 'hs-ok');
     else grdSet('grd-gas', 'Sensor pending', 'hs-dim');
 

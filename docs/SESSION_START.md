@@ -142,20 +142,37 @@ next session never reads it. A test runs whether or not anyone remembers.
    flagged `CONF_PASSWORD = "password"` (a field NAME) as a credential. Both were tightened the
    same hour. Tune it until every failure it reports is real.
 
-**The gate as it stands** (from the repo root; exit 0 is the only pass):
+**RUN THE WHOLE GATE WITH ONE COMMAND. Do not hand-pick from a list.**
 
 ```
-node scripts/lint-app.js            source anti-patterns
-node scripts/smoke-test.js          the app, local file + mocked data
-node scripts/image-fit-audit.js     every photo at 14 device sizes
-node scripts/creds-gate-test.js     the APP never holds credentials
-node scripts/auth-gate-test.js      the SERVER gates every control endpoint   (#184/#186)
-node scripts/package-gate-test.js   the handoff package never ships a credential
-node scripts/live-e2e-test.js       the DEPLOYED app, real data (needs HCC_HA_TOKEN)
-.\windows-scripts\hooks\Test-ReadGate.ps1   the read gate still blocks
+node scripts/run-all-gates.js                       every static gate
+node scripts/run-all-gates.js --live --states=<f>   everything, nothing skipped
+.\windows-scripts\hooks\Test-ReadGate.ps1           the read gate still blocks
 ```
 
-The last four all exist because of a specific failure, named in each file's header.
+🔴 **Why this replaced the hand-written list, 2026-09-16.** The list that used to sit here named
+**7 gates. There are 20.** On 2026-09-15 I ran my own chosen subset, reported **"13/13 green"**,
+and shipped a boot crash that left Guardian and the whole weather station blank. Jeff found it at
+02:27 the next morning. When the runner was written it immediately failed **4 gates nobody had
+run.** *A gate list kept in a session's head is not a list, and a subset you picked yourself is
+not a gate.*
+
+`--states=<file>` is a live `/api/states` dump, needed by `doors-entity-test.js` and
+`garage-entity-test.js` — they assert against real entities and can prove nothing without one.
+Get it the way `ACCESS_MAP.md` §1 documents; every script in `HCC-Scripts/` already has the
+pattern. Without the flag the runner **skips them and says so** — a skip is not a pass.
+
+**Last full run: 20/20, exit 0, 2026-09-16 03:4x.**
+
+Nearly every gate exists because of one specific failure, named in that file's header. Two worth
+knowing before you trust a green result:
+- `smoke-test.js` ran **logged out** for its whole life, so every token-gated path — most of the
+  house — was untested. That is exactly how the boot crash walked through it.
+- `weather-tiles-test.js` asserted on a Blitzortung tier it had **locked itself out of** by never
+  seeding a token, and had been failing 2 cases against a perfectly correct app.
+
+**Both are fixed. The lesson is the same one: a test that cannot reach the code it names is worse
+than no test, because it reports green.**
 
 ## 4. How to work (the two rules Jeff added on 08-16)
 

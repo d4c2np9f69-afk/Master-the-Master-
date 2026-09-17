@@ -464,3 +464,95 @@ exists.
 acting destructively on it — especially when the doc's own evidence came from a protected or
 filtered read; *(b)* the ledger's own 09-04 lesson, again — I trusted a derived artifact instead of
 the authoritative instrument. Settings was the honest instrument here and it was one click away.
+
+---
+
+## 2026-09-16 02:27 - I SHIPPED A BOOT CRASH AND REPORTED THE SESSION 13/13 GREEN
+
+**Jeff found it, not me, and not a test.** Verbatim: *"Did you check the app it is not loading the
+sensors in the guardian section and I dont see the new sensor readings in the weather"* - then,
+immediately: *"Already a mistake log it."*
+
+**One bug caused both symptoms.** The #183 shared-fetch cache declared its state at line ~10240:
+
+    var _haShared = {};
+
+The top-level boot sequence reaches it at line ~7639 - about 2,600 lines EARLIER. `var` hoists the
+NAME but never the ASSIGNMENT, so it was still `undefined` when indexed:
+
+    TypeError: Cannot read properties of undefined (reading '/api/states')
+        at haShared -> haFetch -> loadIrrigationFromHA -> loadIrrigation -> (top level)
+
+**An uncaught throw at top level aborts the rest of the script.** Function declarations hoist, so
+every function still existed and the page looked completely normal - hero, nav, theme, all fine.
+But no loader below that line ever ran. Guardian sat on placeholders. The station and A/C cards sat
+on "Loading..." forever. The data was never the problem: the template returns all 29 fields at HTTP
+200, and calling `loadAcRelay()` by hand filled every one correctly on the first try.
+
+### Why the gate did not catch it - this is the part that matters
+
+`smoke-test.js` DOES fail on a pageerror, and it reported `pageErrors: []`. It was not lying. It
+loads the app with **no HA token**, and both crashing paths are token-gated:
+
+    loadGuardian()       -> if (!getHaToken()) { grdPlaceholder(); return; }
+    loadIrrigationFromHA -> only called `if (haToken && haBase)`
+
+**The entire logged-in half of the app had never been exercised by any test.** The crash was
+unreachable in the gate and guaranteed in Jeff's browser. "13/13 green" was true and worthless -
+I measured the half of the app that nobody uses.
+
+### Three near-misses inside the diagnosis, all from guessing instead of measuring
+
+1. Grepped the deployed file for `dewPoint` / `rainWeek` - **camelCase names I invented** - got 0
+   hits and was one sentence from telling Jeff the weather work was never deployed. The real ids
+   are `stDew` / `stRainHist`. It was deployed the whole time.
+2. Compared local HEAD against origin and printed *** NOT PUSHED *** for six files. Wrong
+   comparison: the app-only commit flow pushes the WORKING TREE to origin without moving local
+   HEAD. Working tree vs origin was byte-identical. **Nearly reported a live open write path to
+   the sprinklers that was in fact closed** - the probe returned 401, gate live.
+3. Read a 401 from `/api/ha` as evidence of a break. It was my own anonymous curl with no
+   Authorization header. Same shape as the `.215` Fire TV near-miss five hours earlier.
+
+### What it cost, honestly
+
+Jeff was awake at 02:27 after saying he was going to bed on the night before the A/C site visits,
+and he is the one who found it. The app was broken for him for roughly **two hours** after I
+reported it finished.
+
+### Two regressions I also shipped tonight, found in the same diff
+
+- A **UTF-8 BOM** prepended to `service-worker.js` (`EF BB BF`, confirmed live).
+- The em dash in its comment **double-encoded into mojibake again** - the same corruption class I
+  spent part of the evening repairing elsewhere.
+
+### The rule, and the test that now enforces it
+
+**Anything the boot sequence can reach must be initialised ABOVE it.** And: **a gate that only
+tests the logged-out app is not a gate.**
+
+`scripts/init-order-test.js` - written the same session, per Jeff's standing rule that every
+mistake gets a test that fails on exactly that mistake:
+- **PART A (static):** rejects any top-level statement that reaches a `var` initialised below it.
+- **PART B (runtime):** boots the app **with a token present** and every `/api` call stubbed, and
+  fails on any uncaught exception, plus asserts the script actually ran to completion.
+
+**Negative control, run against the deployed file: 7 failures, including Jeff's exact error
+string.** It also found a latent second case - `HA_BASE` was `undefined` during boot, so the
+`X-HA-Base` header was silently dropped on every start-up call. Both moved to the top.
+
+**The gate's OWN first version passed that negative control** - `/^var\s+(.*)$/` matched nothing
+because the file is CRLF and in JS `.` does not match `\r` and `$` will not match before it. It
+reported "0 top-level vars" and declared itself clean. **A test is not trustworthy until it has
+been made to fail on the real bug.** Fixed and documented inside the file.
+
+### One more thing the fix uncovered
+
+With Guardian finally loading, its water chip immediately read **LEAK**. There was no leak - all
+three moisture sensors were `off`. It matched the substring "water" against
+`binary_sensor.water_monitor_upstream_sensors_health`, device_class `connectivity`, whose `on`
+means HEALTHY. A working monitor rendered as a flood, permanently. Both that chip and the gas chip
+now key off `device_class`. **A permanent false LEAK is worse than no chip - it trains the one
+alert in this house that has already cost real money to be ignored.**
+
+**Commits:** `08c4b38` (boot fix + gate), `c6e7ce0` (Guardian chips). Verified on a clean load with
+the service worker unregistered and caches cleared, with nothing called by hand.

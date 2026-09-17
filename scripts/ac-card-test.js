@@ -70,10 +70,28 @@ async function run(browser, { payload, token = true, status = 200 }) {
     return new Promise((res) => setTimeout(() => res({
       banner: txt('acBanner'), bannerClass: (document.getElementById('acBanner') || {}).className,
       temp: txt('acTemp'), state: txt('acState'), auto: txt('acAuto'), echo: txt('acEcho'),
-      stBanner: txt('stBanner'), stIndoor: txt('stIndoor'), stOutdoor: txt('stOutdoor'),
-      stWind: txt('stWind'), stRain: txt('stRain'), stPressure: txt('stPressure'), stSun: txt('stSun'),
-      stDew: txt('stDew'), stRainHist: txt('stRainHist'), stLastRain: txt('stLastRain'),
       acCycles: txt('acCycles'), acRuntime: txt('acRuntime'),
+      // 2026-09-16: the station CARD is deleted. Jeff: "I don't want to look in two
+      // places for those readings." All 21 sensors are on the hero readout now, so
+      // that is what gets asserted. stationCard must STAY gone - see the last check.
+      stationCardGone: document.getElementById('stationCard') === null,
+      // The hero readout must come from THE STATION, not from Weather Underground's
+      // relay or an Open-Meteo forecast. Jeff, 2026-09-16 05:32, looking at the app:
+      // "There are duplicate readings for the same thing ... I don't want it coming
+      // from a source that is not real from the weather station." The hero read
+      // dew 72F while the card below read 71.5F off the same instrument, and the
+      // hero's dew point was not even measured - it was temp-((100-RH)/5).
+      heroInTemp: txt('wxInTemp'), heroInHum: txt('wxInHum'),
+      heroTemp: txt('wxTemp'), heroFeels: txt('wxFeels'), heroDew: txt('wxDew'),
+      heroHum: txt('wxHumidity'),
+      heroWindSpd: txt('wxWindSpd'), heroWind: txt('wxWindDir'), heroGust: txt('wxHeroGust'),
+      heroPressure: txt('wxPressure'), heroAbsPress: txt('wxAbsPress'), heroObsTime: txt('wxObsTime'),
+      heroRainDay: txt('wxRainDay'), heroRainRate: txt('wxRainRate'),
+      heroRain7d: txt('wxHeroRain7d'), heroRainMonth: txt('wxRainMonth'),
+      heroLastRain: txt('wxLastRain'), heroRainLife: txt('wxRainLife'),
+      heroUV: txt('wxUV'), heroSolar: txt('wxSolarRad'), heroLux: txt('wxLux'),
+      heroHeat: txt('wxHeroHeat'),
+      heroCellCount: document.querySelectorAll('#wxHeroReadout .wx-hero-cell').length,
       stCardShown: shown('stationCard'),
       acCallsBoot: acCalls,
       acCallsAfterRefresh: window.__calls.filter((c) => c.body.indexOf('ac_relay') >= 0).length,
@@ -102,23 +120,42 @@ async function run(browser, { payload, token = true, status = 200 }) {
   check('A/C row says ON', /^ON since/.test(r.state), true);
   check('Automatic row says Active', r.auto, 'Active');
   check('sensor row names the weather station', /^Weather station • 62% RH/.test(r.echo), true);
-  check('station card is shown', r.stCardShown, true);
-  check('station indoor', /^71\.4°F • 62% RH/.test(r.stIndoor), true);
-  check('station outdoor with feels-like', /^82\.0°F • 76% RH • feels 87\.8°/.test(r.stOutdoor), true);
-  // These two expectations were updated 2026-09-16 when max-gust and absolute pressure were added
-  // to their rows. The old assertions FAILED on the new output, which is exactly what they are for.
-  check('station wind calm', r.stWind, 'Calm • max 2.2');
-  check('station rain none', r.stRain, 'None');
-  check('station pressure', r.stPressure, '30.17 inHg • 29.37 abs');
-  check('station sun', r.stSun, 'UV 0 • 0 W/m²');
-  check('station banner says live', /Live from your own console/.test(r.stBanner), true);
+  // ── ONE PLACE, NOT TWO ──────────────────────────────────────────────────────
+  // Jeff, 2026-09-16 06:12: "I don't want to look in two places for those readings."
+  // The station card that used to duplicate this panel row-for-row is deleted. If a
+  // future session re-adds it, this fails - that is the point.
+  check('station card stays deleted', r.stationCardGone, true);
+  check('hero readout is 24 cells', r.heroCellCount, 24);
 
-  // ── the nine sensors that were live in HA and invisible in the app until 2026-09-16 ──
-  check('dew point, with the comfort word', r.stDew, '71.5°F • muggy');
-  check('rain week and month', r.stRainHist, '0.00 in wk • 1.05 in mo');
-  check('last rain, dated and aged', /^Sep 12 • \d+d ago$/.test(r.stLastRain), true);
-  check('max gust folded into the wind row', /max 2\.2/.test(r.stWind), true);
-  check('absolute pressure alongside relative', /30\.17 inHg • 29\.37 abs/.test(r.stPressure), true);
+  // ── all 21 station sensors, on the photo, from the console on the pole ───────
+  // LIVE payload: indoor 71.4 / 62%, out_temp 82.0, out_hum 76, feels 87.8,
+  // dew 71.54, wind 0.0, dir 223, gust 0.0, max_gust 2.2, pressure 30.17,
+  // abs 29.37, rain_today 0.00, rate 0, week 0, month 1.05, last Sep 12,
+  // life 197.53, uv 0, solar 0, lux 0.
+  check('hero Indoor',      r.heroInTemp,    '71°F');
+  check('hero Indoor RH',   r.heroInHum,     '62%');
+  check('hero Temp',        r.heroTemp,      '82°F');
+  check('hero Feels Like',  r.heroFeels,     '88°F');
+  check('hero Dew Point',   r.heroDew,       '72°F');
+  check('hero Humidity',    r.heroHum,       '76%');
+  check('hero Wind',        r.heroWindSpd,   'Calm');
+  check('hero Direction',   r.heroWind,      '223° SW');
+  check('hero Gust / Max',  r.heroGust,      'Calm / 2.2 mph');
+  check('hero Pressure',    r.heroPressure,  '30.17 inHg');
+  check('hero Abs Press',   r.heroAbsPress,  '29.37 inHg');
+  check('hero Rain Today',  r.heroRainDay,   '0.00"');
+  check('hero Rain Rate',   r.heroRainRate,  '0.00 in/h');
+  check('hero Rain 7 Days', r.heroRain7d,    '0.00"');
+  check('hero Rain Month',  r.heroRainMonth, '1.05"');
+  check('hero Last Rain',   r.heroLastRain,  'Sep 12');
+  check('hero All Time',    r.heroRainLife,  '197.53"');
+  check('hero UV Index',    r.heroUV,        '0 Low');
+  check('hero Solar',       r.heroSolar,     '0 W/m²');
+  check('hero Lux',         r.heroLux,       '0');
+  check('hero Heat Stress', r.heroHeat,      'MODERATE');
+  // The clock is the STATION's observation time, 12-hour per Jeff's ask. The payload
+  // stamps it at "now", so assert the shape, not a frozen value.
+  check('hero Updated is 12-hour', /^\d{1,2}:\d{2}\s?(AM|PM)$/i.test(r.heroObsTime), true);
 
   // ── the A/C statistics Jeff asked for, built the same night and never surfaced ──
   check('cycle count, today and 24 h', r.acCycles, '1 today • 5 in 24 h');

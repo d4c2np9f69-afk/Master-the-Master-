@@ -89,9 +89,24 @@ export async function onRequestGet({ env, request }) {
   // the correct credentials the app was sending on every request — which is exactly
   // how this endpoint ended up reporting "not authorized" for an account whose
   // password had never changed and whose phone app was working fine.
-  const email = url.searchParams.get('e') || env.BHYVE_EMAIL || '';
-  const password = url.searchParams.get('p') || env.BHYVE_PASSWORD || '';
-  const credSource = url.searchParams.get('e') ? 'request' : 'env';
+  //
+  // #186, 2026-09-15: the caller's login now arrives in the `x-hcc-creds` HEADER instead of
+  // ?e=/?p=, because query strings are written to CDN access logs and kept in browser history.
+  // 🔴 THE ORDER ABOVE IS UNCHANGED AND MUST STAY UNCHANGED — request first, env second. Only
+  // the transport moved. Nothing in the watering/gallons path was touched, so the #109 HOLD
+  // stands: no `irrGal`, no `IRR_FLOW`, no sewer or gallons logic is in this diff.
+  let reqEmail = '', reqPass = '';
+  const credsHdr = request.headers.get('x-hcc-creds');
+  if (credsHdr) {
+    try {
+      const d = JSON.parse(atob(credsHdr));
+      reqEmail = decodeURIComponent(d.email || '');
+      reqPass  = decodeURIComponent(d.pass  || '');
+    } catch (_) { /* a malformed header is simply no credential */ }
+  }
+  const email = reqEmail || env.BHYVE_EMAIL || '';
+  const password = reqPass || env.BHYVE_PASSWORD || '';
+  const credSource = reqEmail ? 'request' : 'env';
 
   if (!email || !password) {
     return Response.json({ ok: false, error: 'credentials_not_provided' }, { status: 400 });

@@ -39,8 +39,12 @@ const OURS = [
 
 // Excused, each with the reason. An empty reason is not allowed.
 const EXCUSED = {
-  'sensor.my_weather_station_lifetime_rain':
-    'trivia — 197 in since the station was installed; no decision depends on it',
+  // 2026-09-16 05:25 — lifetime_rain WAS excused here as "trivia, no decision depends
+  // on it". That was my judgement call overriding Jeff's actual instruction:
+  // "all the sensors we opened up on the Ambient Weather site should now be in the app."
+  // He asked where the new readings were and it was the one of 21 that went nowhere.
+  // It is now on the Rain week/month row as "all-time". The excuse is gone, not reworded.
+  // If a sensor is genuinely not worth showing, that is HIS call to make, not mine.
 };
 
 (async () => {

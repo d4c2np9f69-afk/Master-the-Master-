@@ -87,7 +87,22 @@ export async function onRequestPost({ request, env }) {
   }
 
   const ha_token = await kv.get('auth_ha_token') || '';
-  return new Response(JSON.stringify({ ok: true, ha_token }), { headers: cors });
+
+  // Control token (#184, 2026-09-15): minted at the first family login and
+  // returned on every login after. The control-class endpoints — /api/climate
+  // POST and /api/irrigation/control — require it, so only someone who has
+  // actually typed the family password can change the house.
+  //
+  // Deliberately NOT rotated on re-login: a second phone or the wall kiosk
+  // logging in must never silently break control on the first one. To rotate
+  // it on purpose, delete `ctrl_token` from KV; every device then re-logs in.
+  let ctrl_token = await kv.get('ctrl_token');
+  if (!ctrl_token) {
+    ctrl_token = crypto.randomUUID() + '-' + crypto.randomUUID();
+    await kv.put('ctrl_token', ctrl_token);
+  }
+
+  return new Response(JSON.stringify({ ok: true, ha_token, ctrl_token }), { headers: cors });
 }
 
 export async function onRequestOptions() {

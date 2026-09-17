@@ -12,6 +12,37 @@ const B2C_BASE = 'https://connecteddevicesjci.b2clogin.com';
 const API_BASE = 'https://www.myluxstat.io/api';
 
 const MODE_MAP = { 0: 'off', 1: 'heat', 2: 'cool', 3: 'auto' };
+
+// ── CONTROL AUTHORISATION — OPEN_ITEMS #184, closed 2026-09-15 ──────────────
+// LUX_EMAIL and LUX_PASSWORD are both SET on the production deployment (read
+// from the Cloudflare Pages API 2026-09-15, values never read). Without this
+// gate an unauthenticated POST here changes the thermostat using Jeff's own
+// stored credentials. The LUX died in a power surge on 09-15 so there is no
+// device to act on today — but the ecobee replaces it, and the hole would have
+// been waiting when it did. Same pattern as hours.js / irrigation control.
+async function sha256Hex(s) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function ctrlAuthorised(env, body) {
+  const kv = env.HCC_KV || env.MOWER_KV || null;
+  if (!kv) return false;
+  const { password, token, ctrl_token } = body || {};
+  if (typeof token === 'string' && token) {
+    const want = await kv.get('mower_ctrl_token');
+    if (want && want.length >= 16 && token === want) return true;
+  }
+  if (typeof ctrl_token === 'string' && ctrl_token) {
+    const want = await kv.get('ctrl_token');
+    if (want && want.length >= 16 && ctrl_token === want) return true;
+  }
+  if (typeof password === 'string' && password) {
+    const stored = await kv.get('auth_hash');
+    if (stored && (await sha256Hex(password)) === stored) return true;
+  }
+  return false;
+}
 const MODE_TO_INT = { off: 0, heat: 1, cool: 2, auto: 3 };
 
 // KV binding: same dual-name fallback as functions/api/hours.js
@@ -278,10 +309,29 @@ function parseThermostat(state, deviceId, deviceName) {
   };
 }
 
+// #186, 2026-09-15: a caller's login arrives in the `x-hcc-creds` HEADER, never a query
+// string. Query strings are written to CDN access logs and kept in browser history; the
+// project's own rule has always been that no credential travels in a URL, and the code had
+// stopped following it. base64(JSON) only — this is transport, not secrecy: it keeps the value
+// out of logs, it does not encrypt it (the whole request is already inside TLS).
+function credsFromHeader(request) {
+  const raw = request.headers.get('x-hcc-creds');
+  if (!raw) return { email: '', password: '' };
+  try {
+    const d = JSON.parse(atob(raw));
+    return { email: decodeURIComponent(d.email || ''), password: decodeURIComponent(d.pass || '') };
+  } catch (_) {
+    return { email: '', password: '' };   // a malformed header is simply no credential
+  }
+}
+
 export async function onRequestGet({ request, env }) {
-  const url = new URL(request.url);
-  const email    = env.LUX_EMAIL    || url.searchParams.get('e') || '';
-  const password = env.LUX_PASSWORD || url.searchParams.get('p') || '';
+  // 🔴 PRECEDENCE IS DELIBERATE AND IS **NOT** THE SAME AS irrigation/index.js.
+  // Here the deployment credential wins; there the caller's does. Do not "harmonise" them —
+  // the irrigation order was set after a stale env var masked a correct login. See #186.
+  const req = credsFromHeader(request);
+  const email    = env.LUX_EMAIL    || req.email    || '';
+  const password = env.LUX_PASSWORD || req.password || '';
   if (!email || !password) return Response.json({ ok: false, error: 'credentials_not_provided' }, { status: 400 });
 
   try {
@@ -315,6 +365,12 @@ export async function onRequestPost({ request, env }) {
   const email    = env.LUX_EMAIL    || body.email    || '';
   const password = env.LUX_PASSWORD || body.password || '';
   if (!email || !password) return Response.json({ ok: false, error: 'credentials_not_provided' }, { status: 400 });
+
+  // Gate BEFORE any B2C login or device write. #184.
+  if (!(await ctrlAuthorised(env, body))) {
+    return Response.json({ ok: false, error: 'not_authorised' }, { status: 401 });
+  }
+
   const { action, cool_sp, heat_sp, value } = body;
   if (!action) return Response.json({ ok: false, error: 'missing_action' }, { status: 400 });
 
