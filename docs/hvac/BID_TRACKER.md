@@ -21,7 +21,7 @@ the option code (a Ruud RGEAYB must end in **AJA**).
 
 | Contractor | Contact | State as of 09-17 09:2x | Owed by whom |
 |---|---|---|---|
-| **Peters H&A** — Tyler O'Berry, Manager/Sales | `TOberry@petershvac.net` · Office **(615) 757-5497** · Cell **(629) 292-1310** · 208 Louise Ave, Hendersonville TN 37075 | ✅✅ **REVISED PROPOSAL RECEIVED 2026-09-17 09:13 AM CDT** — attachment `JEFF LOEWEN REPLACEMENT CARRIER WITH DUCTING 2.pdf`. First proposal was 13.4 SEER2 single stage, 2-yr workmanship, 16" **FLEX** return with two 16" 90s (Jeff asked for **sheet metal**), "lifetime heat exchanger" with **material not stated**, 18/8 wire pull $295. UV light confirmed **no additional cost**; 2-stage would add **$1,200–1,500**. | **JEFF — open the PDF.** The revised numbers are not in this tracker because the attachment is ~700 KB of base64 and cannot be pulled inline. |
+| **Peters H&A** — Tyler O'Berry | `TOberry@petershvac.net` · Office **(615) 757-5497** · Cell **(629) 292-1310** · TN LIC **#81099 MECHANICAL** | ✅ **REVISED PROPOSAL IN, 09-17 09:13 AM — $8,520 unit + $2,750 ducting = $11,270.00** (no printed grand total; arithmetic checks two ways). **STAINLESS in writing twice.** LIFETIME HX + 10 yr parts + 10 yr compressor + **5 yr labour included** (+$500 → 10 yr). Adders: 18" return +$160, TVA rebate −$300. | **THEM** — 3 gaps, below |
 | **Goodlettsville H&C** — Bill | `Bill.ghandc@gmail.com` · **615-479-0886** (Candy Faulkner) | 🔵 **ONSITE 09-17, 9:00–10:00 AM.** Jeff confirmed quote expected **this afternoon**. | **THEM** — quote this afternoon |
 | **Butler A/C** — Aaron | `butleracservice@yahoo.com` · `Alee772b@yahoo.com` | ⚠️ Out of town until **evening 09-17**, no copier/scanner. Will quote **without the garage duct**. Says branching a duct into the garage is a **code violation** (fume backfeed) and *"we will not be able to do the job"* with it included. | **THEM** — tonight |
 | **Hunter** — Mark / Daniel | `info@huntertn.com` | 🟡 Acknowledged 09-16 AM. Numbers due today. | **THEM** |
@@ -121,3 +121,61 @@ human read it — chase by phone if nothing comes back.
 **`bid/BID_COMPARISON.xlsx`** — landscape, fits one page wide, header row repeats on every page.
 Rows are Jeff's own spec from the bid letter, columns are the bidders. Yellow = fill in at the
 table · blue = already confirmed in writing · red = the stainless heat exchanger, the deal breaker.
+
+
+---
+
+# 2026-09-17 — PETERS PROPOSAL READ IN FULL (all 3 pages, real text layer)
+
+Extracted from the emailed PDF (`messageFormat: RAW` → decode MIME → pypdf), **in an isolated
+subagent so 479 KB of base64 never entered the main session's context.** Word 2016, author
+"Gabe Peters", created 2026-09-17 09:11:29 −05:00.
+
+## The money
+
+| | |
+|---|---|
+| Replacement (Carrier) | **$8,520.00** |
+| Ducting modification | **$2,750.00** |
+| **Combined** | **$11,270.00** |
+
+🔴 **There is NO printed grand total in the document.** $11,270 is arithmetic, confirmed two
+independent ways: `8,520 + 2,750`, **and** the page-3 breakdown — unit w/ pad $6,260 · labour
+$2,470 · ducting materials $1,475 · duct seal $325 · misc $350 · permit $95 · t-stat wire $295 —
+sums to exactly $11,270. Both sections state the total includes all sales tax.
+
+**Adders, not in that figure:** 10-yr workmanship **+$500** · 18" return **+$160** · TVA rebate **−$300**.
+
+## 🔴 THE TWO TOTALS ARE NOT THE SAME JOB — do not compare them straight
+
+Daniels' **$9,000** = unit + twist fix + new supply/return flex, with 10-yr labour & freon already in.
+Peters' **$11,270** ALSO carries three 6"→8" branch upgrades, the 7" garage run, a new 16" return
+trunk with sheet-metal 90s, a full mastic duct seal, new sheet metal return panning, microbial
+treatment, the **permit**, and six months of filters.
+
+**Like for like on labour term:** Peters needs +$500 to match Daniels' 10 years → **$11,770**,
+less the $300 TVA rebate. **Compare scope before price.**
+
+## ✅ What Peters now satisfies that was open
+
+- **STAINLESS STEEL, in writing, twice** — *"HEAT EXCHANGER WILL BE STAINLESS STEEL PER CUSTOMER REQUEST"* and *"LIFETIME HEAT EXCHANGER (STAINLESS STEEL)"*. Jeff's one deal breaker, closed.
+- **TN licence #81099, MECHANICAL** — was missing from the first proposal.
+- **Labour 2 yr → 5 yr included.**
+- **The twist:** *"run the new R/A trunk line directly on one side of the pillars in a strait shot to eliminate the existing cross over/twist"* + square-to-round take-offs **on both return and supply**.
+- **UV light and ecobee both installed at no charge**, lamps facing the coil, set-up and programming included.
+- **Static pressure recorded at completion.**
+
+## ⚠️ Still owed BY PETERS — three gaps
+
+1. **The 15.2 SEER2 two-stage question is unanswered.** `"15.2"` and `"two stage"` appear **zero** times. Jeff asked for the price difference *and* which Tyler would put in his own house. Neither is in the document.
+2. **Gas BTU input vs output not split** — only a single "60,000 BTU" figure. The words *input*, *output* and *AFUE* appear nowhere.
+3. **The 16" return TRUNK is still FLEX.** The **90s are** galvanized sheet metal as asked, but the trunk is not. That is the remaining miss against item 4 of the request.
+
+## ⚠️ One contract oddity worth a single question
+
+The *"Notice to Owner"* / *"Consent of Owner"* boilerplate cites **Missouri** lien law —
+*"Chapter 429, RSMO"* and *"RSMO 429.013(2)"* — in a **Tennessee** contract. Almost certainly a
+template leftover, but it is in the document Jeff would sign.
+
+Proposal dated 9/17/2026, **valid 90 days**, prepared by Tyler O'Berry. Payment due 30 days after
+completion; 2% surcharge on card payments of $1,000 or more.
