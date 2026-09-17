@@ -21,7 +21,7 @@ the option code (a Ruud RGEAYB must end in **AJA**).
 
 | Contractor | Contact | State as of 09-17 09:2x | Owed by whom |
 |---|---|---|---|
-| **Peters HVAC** — Tyler Oberry | `TOberry@petershvac.net` | ✅ **Proposal in.** Replied 09-16 23:20: *"let me get this all fixed in the AM!"* **UV light at no additional cost**, being added to scope. 2-stage option would add **$1,200–1,500**. | **THEM** — revised sheet this morning |
+| **Peters H&A** — Tyler O'Berry, Manager/Sales | `TOberry@petershvac.net` · Office **(615) 757-5497** · Cell **(629) 292-1310** · 208 Louise Ave, Hendersonville TN 37075 | ✅✅ **REVISED PROPOSAL RECEIVED 2026-09-17 09:13 AM CDT** — attachment `JEFF LOEWEN REPLACEMENT CARRIER WITH DUCTING 2.pdf`. First proposal was 13.4 SEER2 single stage, 2-yr workmanship, 16" **FLEX** return with two 16" 90s (Jeff asked for **sheet metal**), "lifetime heat exchanger" with **material not stated**, 18/8 wire pull $295. UV light confirmed **no additional cost**; 2-stage would add **$1,200–1,500**. | **JEFF — open the PDF.** The revised numbers are not in this tracker because the attachment is ~700 KB of base64 and cannot be pulled inline. |
 | **Goodlettsville H&C** — Bill | `Bill.ghandc@gmail.com` · **615-479-0886** (Candy Faulkner) | 🔵 **ONSITE 09-17, 9:00–10:00 AM.** Jeff confirmed quote expected **this afternoon**. | **THEM** — quote this afternoon |
 | **Butler A/C** — Aaron | `butleracservice@yahoo.com` · `Alee772b@yahoo.com` | ⚠️ Out of town until **evening 09-17**, no copier/scanner. Will quote **without the garage duct**. Says branching a duct into the garage is a **code violation** (fume backfeed) and *"we will not be able to do the job"* with it included. | **THEM** — tonight |
 | **Hunter** — Mark / Daniel | `info@huntertn.com` | 🟡 Acknowledged 09-16 AM. Numbers due today. | **THEM** |
@@ -29,8 +29,8 @@ the option code (a Ruud RGEAYB must end in **AJA**).
 | **Gallatin H&C** | `gallatinheatingandcooling@gmail.com` | ⚪ Chased 09-16 20:32. Silent. | **THEM** |
 | **Chilly Ben's** — Ben | `ben@chillybens.com` | ⚪ Chased 09-16 20:32. Silent. | **THEM** |
 | **Star Heat & Air** | `office@starheatandair.com` | ⚪ Sent 09-16 16:10. Silent, no bounce. | **THEM** |
-| **Covenant H&C** | ❌ email dead — **CALL (615) 829-9699** | ❌ Both addresses bounced. Never received the request. | **US — phone them** |
-| **H Brown / Brown & Son** — Cory/Corey | ❌ `Cory@` bounced — **CALL (615) 325-2624** | ❌ `Cory@hbrownhvac.com` blocked. `Corey@hbrownhvac.com` sent 17:04 with **no bounce** — may have landed, unconfirmed. | **US — phone them** |
+| **Covenant H&C** | ✅ **`office@covenantheatingandcooling.com`** · (615) 829-9699 | ☎️ Jeff called 09-16 (content not recorded). **REACHED BY EMAIL 09-17 15:10** — sent to `info@` + `office@`; the bounce named **`info@` ONLY**, so `office@` was accepted by their Barracuda. **Dead addresses: `ntagel@`, `facebook@`, `info@`. Use `office@`.** | **THEM** — quote |
+| **Brown & Son** — Corey | `Corey@hbrownhvac.com` · (615) 325-2624 · 109 S Broadway, Portland TN 37148 | ☎️ **Jeff called 09-16** (content not recorded). `Cory@` (one e) is blocked; **`Corey@` has never bounced**, so it almost certainly landed — silent, not unreached. Follow-up sent 09-17 15:1x. | **THEM** |
 
 ---
 
@@ -57,8 +57,17 @@ What bounced was **outbound Gmail → contractor**, four addresses, three distin
 ago is a *separate* event and has **not** been verified — nobody can see inside the Comcast
 inbox from here. Do not write it off; do not restate it as fact either.
 
-🔴 **The fix for a 550 is a phone call, not another email.** Sending again to an address a
-Barracuda already rejected produces another bounce. Verified numbers are in the board above.
+🔴 **Never re-send to an address that already 550'd — guaranteed to bounce again. A DIFFERENT
+address at the same company is always worth one attempt.**
+
+✅ **PROVEN 2026-09-17 15:10, and it corrected my own theory.** I reasoned that two identical
+`550`s across two different local parts pointed at a **sender-level block** — meaning nothing
+from that Gmail would ever reach Covenant. **Wrong.** The retry to `info@` + `office@` produced
+a bounce naming **`info@` only**; `office@` was accepted. So Covenant's filter rejects
+**per address**, and three of their four published addresses are simply dead.
+
+**The lesson is the cheap test, not the clever theory:** one send to two candidate addresses
+settled in 44 seconds what an argument from the bounce pattern got backwards.
 
 ---
 
@@ -69,7 +78,9 @@ rule never to state a number from memory:
 - **Covenant Heating & Cooling** — (615) 829-9699, 176-A Molly Walton Dr, Hendersonville TN 37075, open 24 h
 - **Brown & Son Company** (`hbrownhvac.com`) — (615) 325-2624, 109 S Broadway, Portland TN 37148, Mon–Fri 7:30–4:00 + 24 h emergency
 
-Neither has been dialled. They are verified as *published*, not as *reached*.
+**Jeff dialled BOTH on 2026-09-16.** What was said is not recorded anywhere readable — see the
+09-17 note at the foot of this file. The numbers are verified as *published* and **confirmed as
+dialled by Jeff**; what they produced is the one thing still missing from this board.
 
 ---
 
@@ -82,3 +93,31 @@ the entire reason the $9,000 counts as turnkey. Recorded 09-10 as
 
 ⏳ **Registration clock:** the Carrier lifetime stainless heat exchanger must be registered within
 **90 days** of install or it drops to 20 years.
+
+---
+
+## 2026-09-17 — WHAT I GOT WRONG, AND THE GAP THAT CAUSED IT
+
+I put *"call Covenant and Brown & Son"* on the list as owed work. **Jeff had already called both
+on 09-16.** I could not see that because **a phone call leaves no trace anywhere I can read** —
+nothing has been committed to the repo since `8daa9d9` (09-16 11:07), and Gmail only holds email.
+
+That is the *"a decision Jeff makes in conversation goes into a file THE SAME SESSION"* rule
+failing, and the cost landed on the one person who should never have to repeat himself.
+
+🔴 **STANDING FIX: when Jeff phones a contractor, one line goes in this file — who, when, and what
+came of it.** A bid process tracked only in email is blind to half of how bids actually get made.
+
+**Emails sent 09-17 15:10** (from `jeff.loewen792@gmail.com`, CC Comcast, both referencing his call):
+- Covenant → `info@` + `office@covenantheatingandcooling.com` — ✅ **`office@` ACCEPTED**, `info@` bounced
+- Brown & Son → `Corey@hbrownhvac.com` — ✅ **no bounce**
+
+Both carry the full scope and the two PDF links. **Both companies now have the request in
+writing.** Absence of a bounce is strong evidence of acceptance at the SMTP layer, not proof a
+human read it — chase by phone if nothing comes back.
+
+## The printable sheet
+
+**`bid/BID_COMPARISON.xlsx`** — landscape, fits one page wide, header row repeats on every page.
+Rows are Jeff's own spec from the bid letter, columns are the bidders. Yellow = fill in at the
+table · blue = already confirmed in writing · red = the stainless heat exchanger, the deal breaker.
