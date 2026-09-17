@@ -4,7 +4,7 @@ Thu 2026-09-17 4:15 PM. Prepared for Jeff Loewen, 301 S Aztec Dr.
 
 ## The garage, from the record
 - 12 x 24 = **288 sq ft**, 10 ft ceiling = 2,880 cu ft (Jeff, 2026-09-01 + 2026-09-17)
-- Uninsulated walls, big steel door in the sun, unconditioned on the other side
+- Uninsulated walls; **garage door IS insulated** (Jeff, 2026-09-17 4:16 PM); unconditioned on the other side
 - **Measured by Jeff:** on a hot day it sits at **94 F with no AC**; the LG LP0818WNR portable (5,500 Btu/h SACC) holds it at **about 80 F**
 
 That measurement is the calibration. 5,500 Btu/h buys 14 F, so the garage leaks
@@ -40,10 +40,10 @@ makes 84 feel better than 94.
   door - that is the right direction (garage air pushed out, not pulled in).
 
 ## If you ever want more than "take the edge off"
-The lever is not a bigger duct - it is the door. An insulated garage door
-(R-12 to R-18) cuts the biggest single leak; the same 125 CFM would then hold the
-garage in the high 70s on its own. Not priced, not researched - only worth doing
-if the garage matters more later.
+The door is already insulated, so the 390 Btu/h-per-degree leak is coming through
+the **uninsulated walls and the ceiling/attic** - that is where the heat is getting
+in now. The lever would be wall/ceiling insulation, not a bigger duct. Not priced,
+not researched - only worth doing if the garage matters more later.
 
 *Numbers: Manual D branch airflow, sensible-heat equation 1.08 x CFM x dT, and Jeff's
 own 94 F / 80 F measurement with the LG's SACC rating from the 09-01 record. It is an
