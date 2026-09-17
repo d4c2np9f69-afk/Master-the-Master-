@@ -56,7 +56,15 @@ function hourly(soilMoist, soilMoistSurf) {
 function minutely(amt, prob) {
   const times = [];
   const now = new Date();
-  now.setMinutes(Math.floor(now.getMinutes() / 15) * 15, 0, 0);
+  // Start at the NEXT 15-minute boundary, not the current one. The app picks the first step
+  // whose time is >= now and sums 6 of them; flooring to the CURRENT boundary puts step 0 in
+  // the past, so the app correctly skipped it and only 5 of the 6 rain-bearing steps fell
+  // inside its 90-minute window — 0.05" against an expected 0.06". That was a harness bug
+  // reporting a failure against correct app code, and it was flaky by construction: it could
+  // only pass when the suite happened to run exactly on a :00/:15/:30/:45 boundary.
+  // Same defect class as the blitz: stub found on 2026-09-16 (a197132) — a gate that cannot
+  // reach the code it names is worse than no gate.
+  now.setMinutes(Math.floor(now.getMinutes() / 15) * 15 + 15, 0, 0);
   for (let i = 0; i < 8; i++) times.push(new Date(now.getTime() + i * 900e3).toISOString().slice(0, 16));
   return {
     time: times,

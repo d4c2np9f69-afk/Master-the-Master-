@@ -1,3 +1,13 @@
+# PROJECT_REFERENCE.md — the pre-trim CLAUDE.md, preserved verbatim
+
+**This file exists so the trim is never a deletion.** `docs/docs-size-gate-test.js` requires it.
+Everything below is `CLAUDE.md` exactly as it stood at 890 lines / 85 KB on 2026-09-16, before
+the dated changelog one-liners and the finished Pending Items were moved out of the file that
+loads into every single turn. Nothing here was thrown away — it was moved off the hot path.
+
+Full per-change detail also lives in `docs/CHANGELOG_ARCHIVE.md`.
+
+---
 # ***  SUCCESS RATE WHEN THE COMPLETE FILE AND HISTORY ARE READ FIRST, BEFORE ACTING:  90%  ***
 # ***  SUCCESS RATE WITHOUT READING FIRST:                                              0%  ***
 #
@@ -637,9 +647,104 @@ Moved 2026-08-16 07:18: the Change Log had reached 177 KB, 68% of this file, and
 file is injected into every message. **Keep it that way — new sessions append ONE LINE here and
 the detail goes in the archive.**
 
-- **The 98 dated one-line entries were moved out 2026-09-16.** They are preserved verbatim in
-  `docs/PROJECT_REFERENCE.md`; the full per-change detail has always lived in
-  `docs/CHANGELOG_ARCHIVE.md`. Add a line here only when the detail is already in the archive.
+- 08-15 evening (coworker — full-stack audit + the backyard camera root cause, latest)
+- 08-11 evening (coworker — mower box made maintainable; 6 real bugs, all found by running it against hardware, latest)
+- 08-11 10:05 PM CDT (full diagnostic sweep on Jeff's orders — closed Pending Item 17, the light-mode contrast bug class, latest)
+- 08-11 9:15 PM CDT (my own hero fix cut Jeff's head off the yard photo — fixed)
+- 08-11 (proactive audit for more storage time bombs + deterministic hero sizing)
+- 08-10 7:10 PM CDT (🚨 MY BUG — the coverage map I built blew out localStorage and reset Jeff's hour meter to the 5.9 default; fixed + made unrepeatable)
+- 08-10 6:45 PM CDT (GPS track smoothing + a forgot-to-resume safety net for the pause workflow)
+- 08-10 6:25 PM CDT (Jeff's question exposed a real design flaw — coverage now counts VISITS, so the map genuinely sharpens instead of bloating)
+- 08-10 6:05 PM CDT (✅ CONFIRMED WORKING ON JEFF'S REAL DEVICE — satellite yard map verified live)
+- 08-10 5:50 PM CDT ("blurry as shit" + wrong framing — two real bugs, plus a sharper imagery source)
+- 08-10 5:25 PM CDT (true-north confirmed + GPS outlier rejection + the Fort Worth simulator bug)
+- 08-10 5:05 PM CDT (REAL satellite basemap — the yard map is now genuinely georeferenced, manual alignment eliminated)
+- 08-10 4:35 PM CDT (raw-payload logging — a real whitelist bug found and fixed; nothing the box sends can be dropped)
+- 08-10 4:20 PM CDT (GPS coverage moved SERVER-SIDE so it records automatically — no buttons, no app open; + pause toggle; + coworker firmware hand-off)
+- 08-10 3:55 PM CDT (yard map rebuilt: found the REAL reason the track sprayed across the road/house, + cumulative coverage that builds over every mow)
+- 08-08 (mower sensor: full raw reading-by-reading log added — every field, every point in time)
+- 08-08 (mower sensor: real permanent mow-to-mow history built)
+- 08-08 (mower sensor: heartbeat was silently erasing the whole mow's data — fixed with a merge instead of overwrite)
+- 08-08 (wall-iPad "stuck sideways" — root cause found for real: it was MY OWN hero max-height/CSS edit from earlier today, reverted)
+- 08-08 (wall-iPad "stuck sideways" — auto-rotate CSS reverted, still UNSOLVED)
+- 08-08 (wall-iPad "stuck sideways" root-caused to Guided Access/rotation-lock freezing the layout viewport in portrait + a self-healing CSS auto-rotate a...
+- 08-08 (Braves Vision quick-action chip added to Guardian)
+- 08-08 (irrigation: dropped the watering-verdict banner, fixed idle status showing as a yellow caution)
+- 08-08 (Ford F-250 hero — Mercedes dashboard readout no longer bleeds onto the truck photo, latest)
+- 08-08 (B-Hyve Intelligence + Lawn Water Need merged into one card, latest)
+- 08-08 (irrigation hero panel sizing aligned to match the other hero readouts, latest)
+- 08-08 (Smart Zones added to the irrigation hero panel, latest)
+- 08-08 (irrigation hero panel widened to full-width bottom bar, matching the other heroes, latest)
+- 08-08 (irrigation hero panel repositioned to bottom-right per Jeff's follow-up, latest)
+- 08-08 (irrigation hero panel moved off Jeff, latest)
+- 08-08 (iPad-landscape hero-photo sizing fix, shipped then reverted — see the top entry above)
+- 08-08 (camera fresh-picture check + Refresh All fixed to report real per-camera failures, latest)
+- 08-08 (garage door app-side work done ahead of the hardware, latest)
+- 08-08 (Watch Sling chip added to Guardian, latest)
+- 08-08 (irrigation zone cards: fixed Garden's missing live photo + made zone cards responsive; found all 6 zone photos carry the same fake-ad frame as th...
+- 08-08 (coworker's photo-overlay readouts fixed to scale correctly on web/TV, latest)
+- 08-06 (MyQ getting sold, door position sensor now in scope)
+- 08-06 (Garage door SONOFF MINI DRY arrived, full setup plan researched and written)
+- 08-06 (Smart Lighting plan logged)
+- 08-06 (coworker — utility card text moved ONTO the photo)
+- 08-06 (coworker — the three utility photos REGENERATED with the fake marketing copy removed; image-gen API now available, latest)
+- 08-06 (coworker — utility readouts: boxes removed, numbers in a blurred field, logos kept; PC toolchain fixed, latest)
+- 08-06 (coworker — utility cards rebuilt to match the LUX card, latest)
+- 08-06 (coworker — Luxury Glass Overlay redesign, second attempt, DONE and visually verified against real live data, latest)
+- 08-06 (LUX finally "stays logged in" — refresh token was requested but never used)
+- 08-06 (LUX "requires login every time" — real root cause found, second time)
+- 08-06 (removed the single-cycle "Sewer overcharge" note from the Water card)
+- 08-06 (Luxury Glass Overlay redesign — attempted, then fully reverted per Jeff)
+- 08-06 (Irrigation GPM calibrated to real measured data)
+- 08-06 (Electric SmartHub real bugs found + fixed via live coworker verification)
+- 08-06 (full cross-format QA pass)
+- 08-06 (deploy-branch mystery resolved)
+- 08-06 (Electric SmartHub real data)
+- 08-04 (LUX + Utility card buttons/text too small on iPad, latest)
+- 08-04 (LUX never loaded on app open — real root cause found)
+- 08-04 (Connected Accounts modal — duplicate IDs fixed)
+- 08-04 (LUX "requires login every time" fixed)
+- 08-03 (System Health merged + Fitness removed)
+- 08-03 (merged mow-readiness cards)
+- 08-03 (LUX all-in-photo + real weather)
+- 08-03 (LUX photo redesign)
+- 08-03 (LUX photo inlay)
+- 08-03 (LUX moved, latest)
+- 08-03 (camera order, latest)
+- 08-03 (camera views fixed, latest)
+- 08-03 (serial confirmed, latest)
+- 08-03 (coworker, later, latest): Fixed Alexa fast-forward via native phrasing (not a Routine), started calibrating skip distance; researched and deliver...
+- 08-03 (coworker): Fixed the Fire TV PiP popup showing the wrong/blank/stale frame — real fix, verified live twice with Jeff watching the actual TV.
+- 08-03 (link audit)
+- 08-03 (later, latest)
+- 08-03 (latest)
+- 08-02 (coworker, latest)
+- 08-02 (coworker)
+- 08-01 (coworker)
+- 08-01 (coworker)
+- 08-01 (coworker)
+- 08-01 (latest)
+- 08-01 (later)
+- 08-01 (coworker, latest)
+- 08-01
+- 08-01 (coworker)
+- 08-01 (coworker, later)
+- 08-01 (coworker)
+- 07-31 (later)
+- 07-31 (coworker, latest)
+- 07-31 (coworker, later)
+- 07-31 (coworker)
+- 07-31
+- 07-28
+- 07-26
+- 07-24
+- 07-23
+- 07-22
+- 07-21
+- 07-16
+- 07-09 → 07-15
+- 07-01 → 07-07
+- 06-23 → 06-29
 
 ## Beehive / Home Assistant Integration — MOVED
 
@@ -650,6 +755,46 @@ Read it when you touch this area. Moved 2026-08-16 07:46 (23 KB).
 
 ## Pending Items (Next Session Should Address These)
 
+0c. **✅ RECORDER RETENTION — THE "PURGED DAILY" ALARM WAS FALSE. MEASURED AND DISPROVEN 2026-08-19.**
+*Nothing has been purged. No data has been lost. Do NOT re-raise this as an emergency.*
+**Proof (measured live against Beehive, not inferred):** long-term statistics are never touched by
+`purge_keep_days`, and `recorder/statistics_during_period` returns **23 unbroken daily buckets for
+`sensor.water_gallons` and `sensor.gas_ccf`, oldest 2026-07-28, newest today.** The states table
+cuts off at the *same* point — 22 days back returns 7 datapoints, 24 days back returns 0. If a
+10-day purge were running nightly, states would stop at 10 days while LTS continued to 07-28.
+**They stop together, which means no purge has ever run on this data.** The ~23-day horizon is
+simply when this recorder database began, not a purge boundary.
+**AND THE FOLLOW-UP WAS WRONG TOO — corrected 2026-08-20.** This item previously said to "add an
+explicit `recorder: purge_keep_days: 45`" because retention was surviving "by the happy accident of
+purging not firing." **It is not an accident. `configuration.yaml` lines 120-121 already read
+`recorder:` / `purge_keep_days: 45`** — verified in the live file. Nothing is being purged because
+retention is set to 45 days and the database is only 23 days old. Nothing to do. Needs Studio Code Server or the Terminal
+add-on. **Anything before 2026-07-28 never existed in this database** — it predates it, so it was
+never lost to a purge.
+0b. **✅ BACKYARD AI THRESHOLDS — ALREADY FIXED. VERIFIED IN THE LIVE FILE 2026-08-19.**
+*This item sat marked "a real security gap, one edit away" and "a person in the back yard at
+night is currently undetectable" long after the edit had actually been made. It is NOT open.*
+
+Read directly from `/config/configuration.yaml` (Studio Code Server, 08-19 8:00 PM), the
+backyard scanner at lines 40-52 already carries **all three** prescribed changes:
+- `confidence: 25` (was 60 — the value that was throwing away `person 25.5%` / `sheep 27.4%`)
+- `roi_x_min: 0.15` — the LEFT crop that removes the distant porch light which had
+  false-positived as `car: 61.7%`
+- `targets: [{ target: person }, { target: animal }]` — **`vehicle` is dropped**
+
+Contrast the driveway scanner immediately below (lines 53-64): `confidence: 45`, `vehicle`
+still present, no `roi_x_min`. The backyard is the only camera carrying the tuned config, which
+is exactly what the fix called for.
+
+**Where the scanners actually live: `configuration.yaml`, NOT `packages/hcc.yaml`.** The old
+note sent people to hcc.yaml and cost a search. Also note `beehive-config/hcc.yaml` in this repo
+is a **stale one-time snapshot** — it does not contain the scanner block at all. Always read the
+live file.
+
+**What remains for the backyard is the PIR, and it is physics, not config:** the camera's own
+sensor reads 104-113 °F in daytime and PIR needs thermal contrast. At night it triggers fine.
+Do not re-tune sliders at the daytime misses.
+
 0. **HA backup encryption key — needs a durable copy outside this one PC (Jeff's call on where).** All Beehive backups are encrypted (HA default). Retrieved the real key live via the backup config API (`backup/config/info`) and saved it to `C:\Users\jeffl\HCC-secrets\ha_backup_encryption_key.txt` — but that's the same single PC as everything else backup-related, so it's not yet truly independent. Without this key, the `.tar` archives in `HCC-Beehive-Backups\` (iCloud) are undecryptable, so it's the single most load-bearing secret in the whole disaster-recovery system. **Never put the raw key in this git repo (public).** Jeff should save a copy somewhere durable and independent of this PC — password manager, printed + physical safe, etc. — next session should confirm he's done this.
 1. **SONOFF MINI DRY** — Jeff/coworker to wire + power + eWeLink-pair (Inching Mode) + Matter-commission into HA (see Garage Door above and the setup doc). App side is fully done as of 08-08 and will auto-detect the switch entity by name the moment it's paired — no entity ID hand-off needed.
 2. **iPad Air 2 wall-display** — Safari-15 polyfill deployed and working; HA token persistence + "Add to Home Screen" + Guided Access still need final confirmation.
@@ -657,7 +802,11 @@ Read it when you touch this area. Moved 2026-08-16 07:46 (23 KB).
 4. **Panic automation (HA side)** — app already fires webhook `hcc-panic-button`; HA automation pending Zigbee hardware (coordinator stick + siren + sensors). See `docs/beehive/panic_alarm_automation.md`.
 5. **Lighthouse score — basic wins done 07-31, full minification still pending (deliberately out of scope).** Recompressed every JPEG to quality 80 (images/ 12MB → 7.1MB, ~41% smaller, visually verified no quality loss), deleted 6 confirmed-dead image files + fixed service-worker.js's stale precache list (was still referencing 2 of those deleted files, was missing the current hero image — bumped hcc-v11→v12), trimmed the Google Fonts request from 6 weights×2 families down to only the 4-5 weights actually used, and added `loading="lazy"` to every below-the-fold/hidden-section image — then caught and fixed a real CLS regression that lazy-loading introduced (utility meter photos + Dispatch card had no reserved `aspect-ratio`, so the page jumped when they loaded in; fixed by reserving each image's real aspect ratio). Verified honestly via a controlled before/after Lighthouse A/B run in the same sandboxed environment (not a real device, not the live Cloudflare-CDN'd site — absolute numbers aren't directly comparable to a real Lighthouse run against the deployed URL): total page weight down ~56%, LCP nearly halved, CLS held steady/improved slightly, composite score unchanged. **What's left (explicitly out of scope, would need restructuring):** minifying the actual JS/CSS inside the single `index.html` file, and/or splitting the inline `<script>` into an external deferred file — those are the two biggest remaining Lighthouse opportunities (`unused-javascript` ~235 KiB, `unminified-javascript` ~71 KiB) per the local audit. For a trustworthy real score, run Lighthouse against the live `toro1-5rz.pages.dev` URL (Chrome DevTools or PageSpeed Insights), not a local file.
 6. **Lucky Mike "Smart Stall"** — queued, plans in `docs/lucky-mike/` (read `INTEGRATION_NOTES.md` first). New "STABLE" section, `--a-stable` accent. **Do not start until Jeff says go.**
+7. ~~Desktop-wide-browser layout gap~~ — **FIXED 08-06.** Jeff asked for a full cross-format pass (phone/iPad/web/TV); reproduced this at 1024px+ and root-caused it precisely: `.house-hero`/`.sec-hero*` used `height:auto`+`aspect-ratio`+`max-height` with no `width` set, so once the aspect-ratio-driven height would exceed `max-height`, the browser shrank the *width* to keep both constraints satisfied — leaving blank space next to the hero instead of just cropping more of the image. Fixed with one added rule: `width:100%` on all 7 hero classes (`.house-hero`, `.sec-hero`, `.sec-hero-weather/-irr/-yard/-guardian/-car`) — forces full-bleed width at every size, image crops top/bottom instead. Verified via Playwright screenshots at phone(390)/iPad-portrait(768)/iPad-landscape(1024)/web(1440)/TV(1920): zero gap at every size, all 6 section heroes checked individually for the baked-in titles (Yard/Car/Guardian have photo-baked text) — none cropped. Also confirmed zero horizontal page overflow at 1920px across every section + every YARD/CAR sub-tab. `lint-app.js`/`smoke-test.js` clean throughout.
 8. **Zigbee alarm hardware — Jeff purchasing 07-31.** Bare-bones parts list (coordinator, door sensors, siren) plus the full Guardian safety-layer wishlist (smoke, water leak, freeze, water-main shutoff) researched and handed to Jeff as a downloadable file this session — real current products verified via web search, not guessed. Once hardware arrives and is paired in HA, item 4 (Panic automation) becomes buildable — `docs/beehive/panic_alarm_automation.md` already has the automation YAML ready, just needs real entity ids swapped in.
+9. ~~`zone.work` centered on the office instead of the actual parking garage~~ — **FIXED 08-01.** Jeff gave the real garage address (310 Commerce St, Nashville, TN); geocoded to 36.1624877, -86.7776215 (icon changed to `mdi:parking`), applied via `zone.reload`, confirmed live via `/api/states/zone.work`. Note: this address is only ~90m from the original office coordinates, not the ~0.4mi Jeff estimated earlier — flagged to him, not fully reconciled, but he gave the address directly so it took priority. ~~Also: Angela's phone tracker unreliability~~ — **FIXED 08-01, see Change Log** — real cause was an empty/stale Push ID in the app's own Notifications settings (not the iOS permissions, though those got fixed too along the way), confirmed via a genuine organic background update after the reset.
+10. ~~Water meter pit radio fault, call WHUD~~ — **RETRACTED same day, no call needed.** Live-tested further (IDM protocol probe + longer observation window): the meter and pit radio are both healthy. Root cause of the original "stuck" reading was `rtlamr2mqtt`'s own `-unique=true` flag only re-publishing when the decoded value changes, combined with this meter batching its own broadcast updates (every ~20 min to ~3 hours observed, not continuous) rather than any hardware fault. See 08-01 Change Log correction entry for the full trail.
+11. ~~Leak-detection automation~~ — **BOTH pieces built and live 08-01, see Change Log.** (a) `HCC — Possible Water Leak (Idle Flow)` — fast, custom automation, live. (b) `Water-Monitor` HACS integration — installed and connected, but its low-flow/tank-refill detector thresholds are still on defaults, not tuned for this meter's batched (~20min-3hr gap) reporting cadence. **Remaining follow-up, low priority:** revisit Water-Monitor's options (seed/persistence duration for the low-flow detector) once there's a few days of real data to judge whether defaults are too slow/twitchy.
 12. **Fire TV PiP popup — THE "NOT FIXABLE FROM HA" CONCLUSION WAS WRONG. CORRECTED 2026-08-19.**
 *The old text blamed the remaining lag on "Blink's own cloud motion-detection latency — upstream of
 HA entirely, not something more polling/automation logic can shorten." That closed the question and
@@ -682,7 +831,39 @@ the snapshot to the same path the pipeline already reads, so nothing downstream 
 frames refreshed and verified valid. **Removing the download + ffmpeg steps should also cut the
 latency this item wrongly closed — worth a live re-test.**
 Full detail: `docs/incidents/blink_stale_frames_no_subscription_2026-08-19.md`.
+13. ~~Blink motion filtering for phone notifications~~ — **already existed, nothing to build (08-02).** `AI Object Detected Notify` already does this exactly: filters through CodeProject.AI, branches on person/vehicle/animal, sends distinct pushes with a 15-min per-camera mute button, confirmed live and covering all 6 cameras.
+14. ~~Rain-skip irrigation automation~~ — **NOT NEEDED, confirmed via research 08-02.** Jeff's B-Hyve WeatherSense already does real weather-adaptive watering (rain-skip + temp/wind adjustment), and genuinely supports a personal weather station (PWSWeather.com/Aeris) as Jeff described. Independent testing showed 100% skip reliability on any 0.2"+ rain day. An HA-side duplicate would be strictly worse (no wind/temp handling). Not building this.
+15. ~~Daily Morning Digest~~ — **BUILT AND TESTED 08-02, see Change Log.** `HCC — Morning Digest` (7am push + persistent notification, weather/vacuum/car/utility status/Blink health) is live. Caught and fixed a real bug during testing: the "active alerts" count silently always returned 0 (persistent notifications have been unreadable from templates since HA 2023.6 — confirmed via research, not a local misconfiguration) — removed that metric rather than ship a false "all clear."
 16. **"Alexa, fast forward the commercials" — WORKING via native phrasing (08-03), skip distance still needs calibration to 4:40.** Root cause (found earlier 08-03, still valid): "fast forward" is an Alexa-reserved phrase that never reaches a custom Routine (HA's own Alexa Smart Home skill also has no `FastForward`/`Rewind` handler at all — home-assistant/core#87327). Angela tried creating a Routine with a fresh phrase and got total silence — turned out no Routine had actually been saved yet for it. **Real fix that works, found live:** skip Routines entirely — since `script.hcc_skip_commercial` (friendly name "FF the Commercials") is already exposed to Alexa (`cloud.alexa.should_expose: true`, confirmed via entity registry), Alexa's native **"Alexa, turn on FF the Commercials"** phrasing reaches HA directly and reliably fires the script — confirmed twice live (script `last_triggered` updated within ~1s of the phrase both times). Also confirmed via live test: the Fire TV/ADB link itself is healthy (`media_player.fire_tv_viewing_room` responds to `adb_command` immediately). **Remaining real issue, not yet solved:** the skip distance is wrong — the original 3× `keyevent 90` (1.2s apart) skipped "way too far" in Sling specifically (media apps often ramp fast-forward speed with rapid repeated presses, non-linearly). Reduced live to a single `keyevent 90` press as a starting point (`packages/hcc.yaml`, `script.hcc_skip_commercial`) — **not yet re-tested against Jeff's actual target of exactly 4:40 (280s)**; next session should fire it live, get real seconds-skipped feedback, and iterate the press-count/delay until it lands on 4:40. No Alexa Routine needed for this at all going forward — the native "turn on <name>" phrasing is the whole fix. **Separately, worth knowing for any future custom voice command:** HA's own local Assist (bundled with Nabu Casa) doesn't have Alexa's reserved-phrase problem — a better long-term path than fighting Alexa Routines each time this class of issue comes up.
+17. ~~App-wide hardcoded-hex-instead-of-theme-token pattern~~ — **CLOSED 08-11, and it was a real bug, not cosmetic.** The 08-03 note guessed "most are probably fine (many sit on dark surfaces)" — measurement disagreed. Built a contrast auditor that composites every translucent ancestor to get each element's REAL painted background, ran it in the states a user actually reaches, and found **19 genuine failures on light surfaces**, worst being the credential save/error messages at **1.09-2.9:1** ("Wrong password", "Save failed — storage full" — invisible in light mode). Fixed 36 light-surface sites to tokens; the ones on genuinely dark surfaces (splash login, irrigation rain delay, LUX fan badge) **deliberately keep their bright hexes** — a light-mode token there would go dark-on-dark, which is exactly why each site had to be measured rather than bulk-replaced. Also darkened two tokens that failed on their own (`--warn` →#96600f, `--ok` →#137534) and root-caused three dark-panel-on-white-surface components (`.acct-form`, `#mapAlignPad`, the 6 credential inputs whose placeholder sat at 1.6:1). **Verified 0 remaining failures in both themes.** **Two lessons worth keeping:** (a) a background set in an `style=` attribute beats any selector however specific — move it into CSS rather than fighting it (cost a debug cycle here and on 08-01); (b) a contrast checker that only reads `backgroundColor` silently lies about any element using a `linear-gradient` — it must read `backgroundImage` too, or it invents failures that do not exist.
+18. ~~Electric SmartHub real-data upgrade — needs live confirmation~~ — **FIXED 08-06, real bugs found + fixed same day.** The coworker fired the exact WS command from `ha-stats.js` against Jeff's real HA (Core 2026.8.0) and found the feature was silently non-functional despite the UI cells rendering: (1) `history/statistics_during_period` doesn't exist on this HA version — real command is **`recorder/statistics_during_period`**, fixed in `functions/api/ha-stats.js`. (2) The `change` field always read `0` for this sensor even across confirmed real usage growth (`sum` moved 761→872 over 48h while every `change` was 0) — `loadElectricStats()` now computes each period's usage as a real **diff of consecutive cumulative `sum`/`state` readings** (`toDiffedSeries()`) instead of trusting a per-bucket field, same pattern as `irrGalFromHistory()`. Re-verified via a mocked Playwright test built from the coworker's exact real data shape — Today/Yesterday/Peak Hour/Last 7 Days all compute correctly now. **Item 3 (Bill Due/Last Payment/vs-Last-Year): checked live by the coworker, confirmed NOT available as attributes** (`account_id`/`meter_name`/etc. only) — would need a new SmartHub-account scraper, real new surface area for a nice-to-have. Recommend skip unless Jeff wants it. **Still true either way: this cloud session cannot test the real WS round-trip itself (no network path), so any future change to this code needs the same live-fire verification pattern before trusting it's actually working.**
+20. **✅ IRRIGATION ZONE PHOTOS — ALREADY CLEAN. VERIFIED BY OPENING ALL SIX 2026-08-20.**
+*This item claimed all 6 `images/zones/zone-N.jpg` carry "the same fake gold-frame/title/tagline
+marketing overlay that the utility meter photos had". They do not. Not one of them does.*
+
+Opened every one: zone-1 (front yard + the 301 mailbox), zone-2 (tree/flower bed), zone-3 and
+zone-4 (back lawn + fire pit), zone-5 (side bed), zone-6 (raised vegetable garden). **No frame,
+no title, no tagline on any of them** — clean photographs, warmly graded, nothing printed on top.
+
+`git log --follow` gives the date: commit **`6913393`, 2026-08-11**, subject *"Mower sensor: fix
+the hour meter at the source; **clean the zone photos**"*. Written 08-08, fixed 08-11, and left
+sitting here as an open question for Jeff for **9 more days**.
+
+**The contradiction this item created is therefore closed, and it closes the safe way:** the
+PROTECTED photo note above — *"REAL PHOTOGRAPHS OF JEFF'S ACTUAL YARD… Do not regenerate or
+replace these"* — is the operative rule. **There is nothing to strip and nothing to ask Jeff.
+Do not touch these files.**
+
+⚠️ **Why it hid for 9 days, worth learning from:** the fix shipped inside a commit whose subject
+line was about the mower hour meter. Closing a tracked item has to be visible in the commit
+subject *or* struck off in `docs/OPEN_ITEMS.md` the same session — otherwise it stays "open"
+forever while actually being done.
+
+19. **RESOLVED 2026-08-17, $0, NOTHING TO BUY — garage gets the Ecoeler YM2108T.** Jeff found a brand-new Ecoeler YM2108T 3-way PIR occupancy sensor switch in his own supplies and assigned it to the garage man door (auto-on when walking in — better than a smart switch there, his call). It is 3-way capable, so the kitchen toggle stays live as the auxiliary; the HS200/HS210 question is dead. LED-OK, neutral-powered (neutrals confirmed present in every box). Wiring roles (sensor = MASTER, must sit in the LOAD-side box), dial settings, and the archived manual scans: `docs/lighting/ecoeler_ym2108t_garage_2026-08-17.md`. Garage lights are deliberately dumb/local — not in HA. *(Old open question kept below for history only.)* ~~**Garage two-location switching — STILL OPEN, Jeff's call before ordering.** ⚠️ *I briefly wrote that Inovelli's "3-Way Dumb" closed this. It does not — **Inovelli is scrapped on price**, so that answer went with it.* Per `docs/lighting/HCC_Lighting_Plan.html`, a single **Kasa HS200 cannot serve two switch positions** — the second position goes dead. Two options, both cheap: **(a) HS210 matched kit** so both the kitchen and garage positions stay live, or **(b) single HS200 at the garage door and repurpose the kitchen position** for something else — the same trick already used on the two bedroom toggles. **Neutrals and box fill ARE closed** (Jeff pulled dedicated LED circuits + multi-gang boxes; fans are on separate circuits).
+    - *Enbrighten 43080 stays rejected regardless — Z2M documents that it stops relaying for child devices.* The lighting plan (`docs/lighting/`) has the garage light controlled from 2 physical locations (kitchen box + garage box) but only 1 Kasa **HS200** on the shopping list. Verified via research: a lone HS200 in that setup leaves the OTHER switch location dead/non-functional — it's a single-pole device, not designed for 2-location control. Jeff needs to pick one: (a) swap to the **HS210 kit** (matched WiFi-coordinated pair, keeps both the kitchen and garage positions fully working, no traveler-wire rewiring needed) if he wants real control from both spots, or (b) keep the single HS200 and consciously cap/repurpose the kitchen position (same pattern already used for the bedroom's middle/bedside switches — turn it into a dumb switch for something else, e.g. a receptacle) if garage-only control is fine. Not yet resolved — flag it to Jeff before he buys the HS200. Everything else in the plan (wattage math for the HS220 dimmers, box redesign, device choice over MOES/Shelly) checked out fine on review.
+
+---
+
 ## LUX Thermostat — API Reference (DO NOT CHANGE UNLESS BROKEN)
 
 **Auth flow** (4 steps, in `functions/api/climate.js`):
