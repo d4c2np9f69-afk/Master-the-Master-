@@ -7836,7 +7836,55 @@ function splashStatus(){
 
 // Service worker registration — updateViaCache:'none' forces the browser to always
 // check the network for SW updates, bypassing any CDN/HTTP cache on the JS file.
-if('serviceWorker' in navigator){navigator.serviceWorker.register('/service-worker.js',{updateViaCache:'none'});}
+//
+// 🔴 2026-09-17: registering alone was NOT enough, and this is the bug class it closes.
+// An installed PWA that is resumed from the app switcher never re-navigates, so it never
+// checks for a new worker — it can sit on a cached index.html for days. That is only
+// cosmetic until the CLIENT and the SERVER change together, and on 2026-09-15 they did:
+// v111 locked the control endpoints and v112 moved credentials out of the query string
+// into the x-hcc-creds HEADER, in functions/api/climate.js and irrigation/index.js, with
+// NO query-param fallback left behind. Cloudflare Functions deploy the instant the push
+// lands; index.html does not — it waits for the service worker. So a device pinned on a
+// pre-v112 build sends credentials the server no longer reads, and the A/C card and
+// Irrigation break on that device alone while everything else looks fine. An internet
+// outage makes it worse by guaranteeing the worker cannot update.
+//
+// Fix the CLASS, not the symptom: check for a new worker on load AND every time the app
+// comes back to the foreground, then reload once when a new worker actually takes over.
+// Do NOT "solve" this by re-accepting credentials in a URL — that was #186, and query
+// strings land in Cloudflare access logs and browser history.
+if('serviceWorker' in navigator){
+  // Was a worker already in control when this page loaded? If not, the first
+  // controllerchange is just the initial install and must NOT trigger a reload.
+  var hadController = !!navigator.serviceWorker.controller;
+  var swReloaded = false;
+  navigator.serviceWorker.register('/service-worker.js',{updateViaCache:'none'}).then(function(reg){
+    var checkForNewBuild = function(){ try{ reg.update(); }catch(e){} };
+    checkForNewBuild();
+    // An installed PWA resumed from the app switcher fires this and nothing else.
+    document.addEventListener('visibilitychange', function(){
+      if(!document.hidden) checkForNewBuild();
+    });
+  }).catch(function(){ /* registration failure must never block boot */ });
+  navigator.serviceWorker.addEventListener('controllerchange', function(){
+    if(!hadController || swReloaded) return;   // first install, or already reloaded once
+    swReloaded = true;
+    // NEVER yank the page out from under someone mid-entry. The splash login, SET HOURS
+    // and the credential fields are all plain inputs; a reload there loses what was typed
+    // and reads as the app crashing. Wait until focus leaves, or the app is backgrounded.
+    var isTyping = function(){
+      var el = document.activeElement; if(!el) return false;
+      var t = (el.tagName || '').toUpperCase();
+      return t === 'INPUT' || t === 'TEXTAREA' || t === 'SELECT' || el.isContentEditable === true;
+    };
+    var go = function(){ location.reload(); };
+    if(!isTyping()){ go(); return; }
+    document.addEventListener('visibilitychange', function(){ if(document.hidden) go(); });
+    document.addEventListener('focusout', function(){
+      setTimeout(function(){ if(!isTyping()) go(); }, 0);
+    });
+  });
+}
 
 // INIT
 applyHeroGrades();
