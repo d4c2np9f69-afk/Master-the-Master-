@@ -18,7 +18,7 @@ $STAGE = [ordered]@{
 $rows = @(
  @('Peters Heating & Air','Tyler O''Berry, Manager/Sales','629-292-1310 cell / 615-757-5497','toberry@petershvac.net','QUOTE IN HAND','$11,270 = $8,520 unit + $2,750 duct, less $300 TVA rebate','$11,770 w/ 10-yr labour (+$500); $11,470 after TVA','GOLD STANDARD. Nothing owed. Can start Tue 22 Sept.','Revised proposal 09-17 09:13. ALL FOUR GATES PASS: stainless HX in writing, twist out BOTH sides, 3x 6"->8", 7" garage run, 16" return w/ sheet-metal 90s, static pressure recorded on the invoice. UV light + ecobee installed free. 5-yr labour standard. 2-stage 15.2 SEER2 would add $1,200-1,500; 18" return +$160.','TN #81099 Mechanical'),
  @('Covenant Heating & Cooling','Nathan Pagel, Project Advisor','615-388-9102 cell / 615-829-9699 office','NPagel@covenantheatingandcooling.com','QUOTING','','','Quote promised FRI 18 SEPT. Chase Fri afternoon.','Visited 09-17 ~12:45 PM. Has both PDFs (attached, Outlook 1:01 PM) and the Rev C drawing. 176-A Molly Walton Dr, Hendersonville.',''),
- @('Goodlettsville Heating & Cooling','Bill / Candy Faulkner (office)','615-479-0886','Bill.ghandc@gmail.com','ON SITE','','','Quote promised THIS AFTERNOON (Thu).','Bill on site 09-17 9-10 AM, booked by Candy 09-16 1:42 PM.',''),
+ @('Goodlettsville Heating & Cooling','Bill / Candy Faulkner (office)','615-479-0886','Bill.ghandc@gmail.com','QUOTE IN HAND','$9,760 = $7,960 unit + $1,800 duct. Permit NOT included. Valid 15 days.','$11,354 w/ 10-yr labour (+$1,594, excludes refrigerant); + permit = ~$11,450. Within ~$100 of Peters.','Quote #1820 in 09-17 1:56 PM. Gaps to close: twist both sides, sheet-metal 90s, static pressure on invoice, TN licence #, permit.','Tempstar PGB430060K000B, 2.5 ton, 14 SEER, 60K BTU. Includes t-stat wire, ecobee install, UV install. Warranty: 3-yr no-hassle, lifetime HX, 10-yr parts (registered), 1-yr labour; 2-yr +$550, 5-yr +$864, 10-yr +$1,594. Duct line is ONE sentence: replace return, upsize runs per drawing, add garage run - not itemised. Stainless HX per Candy / submittal p1.',''),
  @('Butler Heat & Air','Terry Butler (owner) / Aaron Lee','615-451-0178','butleracservice@yahoo.com','QUOTING','','','Quote TONIGHT (Thu) - without the garage duct.','Owner emailing personally from out of town (no copier/scanner till Thu evening). Will not include the garage run.',''),
  @('Hunter Heating & Air','Mark Wilburn / Daniel Hunter','615-714-6200','info@huntertn.com','QUOTING','','','Numbers due today. No reply since Wed.','Acknowledged 09-16 07:41 (landed in Comcast spam). Nudged 09-16 6:02 PM from Gmail.',''),
  @('Brown and Son (Portland)','Corey','615-325-2624','Corey@hbrownhvac.com','SENT - SILENT','','','Waiting. Call if nothing by Fri.','Sent 09-16, re-sent 09-17 10:10 AM after the phone call. Cory@ (one e) bounces - use Corey@.',''),
@@ -99,9 +99,13 @@ Finish $ws 7 $last 6 @(30, 34, 15, 30, 30, 34) 12 'BID BOARD - &D &T - page &P o
 
 # ================= SHEET 2: DETAIL =================
 $s2 = $wb.Worksheets.Add([Type]::Missing, $ws); $s2.Name = 'DETAIL'
-Title $s2 'A/C REPLACEMENT - BIDDER DETAIL' ('what each one has said, in their own words - working document, add to it as things land - ' + (Get-Date -Format 'ddd d MMM yyyy h:mm tt')) 'D'
-Header $s2 @('Company','Email','Where it stands','Licence') 4
-$r = 5
+Title $s2 'BIDDER DETAIL  (tapes to the right of the BOARD - same rows, same order)' ('what each one has said, in their own words - working document, add to it as things land - ' + (Get-Date -Format 'ddd d MMM yyyy h:mm tt')) 'D'
+# row 4 on the BOARD is the legend; keep a matching row here so the header lands on the same line
+$s2.Cells.Item(4,1).Value2 = 'Row order and heights match the BOARD sheet exactly - tape this page to the right edge of the BOARD.'
+$s2.Cells.Item(4,1).Font.Italic = $true; $s2.Cells.Item(4,1).Font.Size = 9; $s2.Cells.Item(4,1).Font.Color = $MUTED
+$s2.Range('A4:D4').Merge() | Out-Null; $s2.Rows.Item(4).RowHeight = 18; $s2.Rows.Item(5).RowHeight = 6
+Header $s2 @('Company','Email','Where it stands','Licence') 6
+$r = 7
 foreach ($row in $rows) {
   $st = [string]$row[4]
   $s2.Cells.Item($r,1).Value2 = ($row[0] + "`n" + $st); $s2.Cells.Item($r,1).Font.Bold = $true
@@ -112,7 +116,16 @@ foreach ($row in $rows) {
   $r++
 }
 $last2 = $r - 1
-Finish $s2 5 $last2 4 @(30, 36, 100, 22) 11 'BIDDER DETAIL - &D &T - page &P of &N' 0
+Finish $s2 7 $last2 4 @(28, 34, 91, 20) 11 'BIDDER DETAIL - &D &T - tape to the right of the BOARD' 1
+# ---- make BOARD and DETAIL line up row-for-row: same height on every row (max of the two), same top block
+$ws.Rows.Item(5).RowHeight = 6   # BOARD row 5 is the spacer under the legend, DETAIL row 5 is its spacer too
+foreach ($rr in 1..$last) {
+  $hA = $ws.Rows.Item($rr).RowHeight; $hB = $s2.Rows.Item($rr).RowHeight
+  $h = [Math]::Max($hA, $hB); $ws.Rows.Item($rr).RowHeight = $h; $s2.Rows.Item($rr).RowHeight = $h
+}
+$ws.PageSetup.FitToPagesTall = 1; $s2.PageSetup.FitToPagesTall = 1
+# identical margins + no vertical centering so the top edges match; same zoom on both so the scale matches
+foreach ($sh in @($ws, $s2)) { $sh.PageSetup.CenterHorizontally = $false; $sh.PageSetup.CenterVertically = $false; $sh.PageSetup.LeftMargin = 28; $sh.PageSetup.RightMargin = 28; $sh.PageSetup.TopMargin = 32; $sh.PageSetup.BottomMargin = 32 }
 
 # ================= SHEET 3: SCOPE + GATES =================
 $s3 = $wb.Worksheets.Add([Type]::Missing, $s2); $s3.Name = 'SCOPE + GATES'
@@ -140,9 +153,12 @@ Finish $s3 4 $last3 2 @(24, 120) 12 'SCOPE + THE FOUR GATES - &D &T' 1
 
 $ws.Activate()
 $wb.SaveAs($xlsx, 51)
-$wb.ExportAsFixedFormat(0, $pdf) | Out-Null
-Write-Output ("saved: " + $xlsx); Write-Output ("pdf:   " + $pdf)
+# Jeff 09-17 2:11 PM: the SCOPE sheet stays in the workbook but is NOT part of the printable file - "I know the job".
+$wb.Worksheets.Item('BOARD').Select(); $wb.Worksheets.Item('DETAIL').Select($false)
+$xl.ActiveSheet.ExportAsFixedFormat(0, $pdf) | Out-Null
+Write-Output ("saved: " + $xlsx); Write-Output ("pdf (BOARD + DETAIL only): " + $pdf)
 if ($env:NOPRINT -eq '1') { Write-Output "NOPRINT set - not printed" }
-else { $printer=(Get-CimInstance Win32_Printer | Where-Object Default).Name; Write-Output ("printing to: " + $printer); $wb.PrintOut() | Out-Null; Write-Output "sent to printer" }
+else { $printer=(Get-CimInstance Win32_Printer | Where-Object Default).Name; Write-Output ("printing BOARD + DETAIL to: " + $printer); $xl.ActiveSheet.PrintOut() | Out-Null; Write-Output "sent to printer" }
+$ws.Select()
 $wb.Close($false); $xl.Quit()
 [System.Runtime.InteropServices.Marshal]::ReleaseComObject($xl) | Out-Null
