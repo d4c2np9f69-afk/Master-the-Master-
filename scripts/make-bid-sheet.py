@@ -1,29 +1,41 @@
 #!/usr/bin/env python3
 """Build bid/BID_COMPARISON.xlsx - the printable HVAC bid comparison.
 
-Rows are Jeff's OWN spec, taken from the bid request he sent contractors on 2026-09-16.
-Columns are the bidders. Regenerate with:  python3 scripts/make-bid-sheet.py
+Jeff, 2026-09-17: "I need that excell file formatted to print on one page and fit landscape,"
+then: "The excell sheet can have more then one sheet as long as I can tape them together."
 
-Filled cells are BLUE and come from a written quote or email - nothing here is from memory.
-Empty cells are YELLOW: fill them in at the table. RED rows are deal breakers.
+So: LANDSCAPE, fitToWidth=1 (never splits sideways - the columns always stay together), and
+fitToHeight=0 so it runs onto as many pages DOWN as it needs at a readable 10pt. The header row
+repeats on every page, so the taped-together sheets each carry their own column titles.
+
+Long explanatory notes live on a second tab, out of the printed grid.
+Full wording of every finding is in docs/hvac/BID_TRACKER.md.
+
+Rows are Jeff's OWN spec from the bid request he sent on 2026-09-16. Columns are the bidders.
+Blue = taken from a written quote or email. Yellow = fill in at the table. Red = deal breaker.
+
+Regenerate:  python3 scripts/make-bid-sheet.py
+NOTE: soffice cannot convert ANY xlsx in this sandbox (a one-cell test file fails the
+same way), so page count is NOT verified by render here - only the page-setup flags are.
 """
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
 F = "Arial"
-wb = Workbook(); ws = wb.active; ws.title = "Bid Comparison"
+wb = Workbook()
+ws = wb.active
+ws.title = "Bid Comparison"
 
-hdr  = Font(name=F, size=11, bold=True, color="FFFFFF")
-secf_font = Font(name=F, size=10, bold=True, color="FFFFFF")
-bod  = Font(name=F, size=9)
-red  = Font(name=F, size=9, bold=True, color="C00000")
-blue = Font(name=F, size=9, color="0000FF")
+hdr_f  = Font(name=F, size=11, bold=True, color="FFFFFF")
+sec_f  = Font(name=F, size=10, bold=True, color="FFFFFF")
+bod_f  = Font(name=F, size=10)
+red_f  = Font(name=F, size=10, bold=True, color="C00000")
+blue_f = Font(name=F, size=10, color="0000FF")
 
 navy   = PatternFill("solid", fgColor="1F3864")
 secfil = PatternFill("solid", fgColor="4472C4")
 yellow = PatternFill("solid", fgColor="FFFF00")
-grey   = PatternFill("solid", fgColor="F2F2F2")
 pink   = PatternFill("solid", fgColor="FFD9D9")
 
 thin = Side(style="thin", color="BFBFBF")
@@ -32,128 +44,160 @@ wrap = Alignment(wrap_text=True, vertical="top")
 ctr  = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
 BIDDERS = ["Daniels\n(benchmark)", "Peters H&A\n(Tyler O'Berry)", "Goodlettsville\n(Bill)",
-           "Butler A/C\n(Aaron)", "Hunter\n(Mark/Daniel)", "______________"]
+           "Butler A/C\n(Aaron)", "Hunter\n(Mark/Daniel)", "____________"]
 N = 1 + len(BIDDERS)
 r = 1
 
-def merged(text, font, fill=None, h=None):
-    global r
-    c = ws.cell(r, 1, text); c.font = font; c.alignment = wrap
-    if fill: c.fill = fill
-    for i in range(1, N): ws.cell(r, 1 + i).fill = fill or PatternFill()
-    ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=N)
-    if h: ws.row_dimensions[r].height = h
-    r += 1
+# ---- title + legend, two rows only -------------------------------------------------
+c = ws.cell(r, 1, "HVAC BID COMPARISON  -  301 S Aztec Dr, White House TN 37188   |   "
+                  "2.5-ton gas/electric package, R-454B, 995 CFM   |   quotes due Thu 2026-09-17")
+c.font = Font(name=F, size=11, bold=True)
+ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=N); r += 1
 
-merged("HVAC BID COMPARISON  —  301 S Aztec Dr, White House TN 37188", Font(name=F, size=14, bold=True))
-merged("2.5-ton gas/electric package unit · R-454B · 995 CFM design airflow · quotes due Thu 2026-09-17", Font(name=F, size=9, italic=True))
-r += 1
-merged("LEGEND:   yellow = fill in at the table    ·    blue = taken from a written quote or email    ·    RED = hard requirement, a 'no' disqualifies",
-       Font(name=F, size=9, bold=True), grey)
-r += 1
+c = ws.cell(r, 1, "BLUE = confirmed in writing    YELLOW = fill in at the table    RED = deal breaker"
+                  "        Full detail + every caveat: docs/hvac/BID_TRACKER.md")
+c.font = Font(name=F, size=8, italic=True)
+ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=N); r += 1
 
 hrow = r
-c = ws.cell(r, 1, "REQUIREMENT"); c.font = hdr; c.fill = navy; c.alignment = ctr; c.border = box
+c = ws.cell(r, 1, "REQUIREMENT"); c.font = hdr_f; c.fill = navy; c.alignment = ctr; c.border = box
 for i, b in enumerate(BIDDERS):
-    c = ws.cell(r, 2 + i, b); c.font = hdr; c.fill = navy; c.alignment = ctr; c.border = box
-ws.row_dimensions[r].height = 32
+    c = ws.cell(r, 2 + i, b); c.font = hdr_f; c.fill = navy; c.alignment = ctr; c.border = box
+ws.row_dimensions[r].height = 34
 r += 1
+
 
 def section(t):
     global r
-    c = ws.cell(r, 1, t); c.font = secf_font; c.fill = secfil; c.alignment = wrap; c.border = box
+    c = ws.cell(r, 1, t); c.font = sec_f; c.fill = secfil; c.alignment = wrap; c.border = box
     for i in range(1, N):
         cc = ws.cell(r, 1 + i); cc.fill = secfil; cc.border = box
-    ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=N); r += 1
+    ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=N)
+    ws.row_dimensions[r].height = 18
+    r += 1
+
 
 def row(label, vals=None, hard=False, h=None):
     global r
-    c = ws.cell(r, 1, label); c.font = red if hard else bod; c.alignment = wrap; c.border = box
+    c = ws.cell(r, 1, label); c.font = red_f if hard else bod_f; c.alignment = wrap; c.border = box
     if hard: c.fill = pink
     vals = vals or {}
     for i in range(len(BIDDERS)):
         cell = ws.cell(r, 2 + i, vals.get(i, "")); cell.border = box; cell.alignment = wrap
-        if vals.get(i): cell.font = blue
-        else: cell.font = bod; cell.fill = yellow
-    if h: ws.row_dimensions[r].height = h
+        if vals.get(i): cell.font = blue_f
+        else: cell.font = bod_f; cell.fill = yellow
+    ws.row_dimensions[r].height = h or 30
     r += 1
 
-OK = "YES - "
 
 section("WHO THEY ARE")
-row("Contact / title", {1: "Tyler O'Berry, Manager/Sales", 2: "Bill (office: Candy Faulkner)", 3: "Aaron Lee", 4: "Mark / Daniel"})
-row("Phone", {1: "Office (615) 757-5497\nCell (629) 292-1310", 2: "(615) 479-0886"})
-row("Email", {1: "TOberry@petershvac.net", 2: "bill.ghandc@gmail.com", 3: "butleracservice@yahoo.com", 4: "info@huntertn.com"})
-row("TN LICENSE NUMBER", {1: "#81099 - MECHANICAL"}, hard=True)
+row("Contact", {1: "Tyler O'Berry, Mgr/Sales", 2: "Bill (ofc: Candy Faulkner)", 3: "Aaron Lee", 4: "Mark / Daniel"})
+row("Phone", {1: "615-757-5497 / c 629-292-1310", 2: "615-479-0886"})
+row("Email", {1: "TOberry@petershvac.net", 2: "bill.ghandc@gmail.com", 3: "butleracservice@yahoo.com", 4: "info@huntertn.com"}, h=36)
+row("TN LICENCE NUMBER", {1: "#81099 MECHANICAL"}, hard=True)
 
 section("THE UNIT")
-row("Exact model number", {0: "Carrier 48NL-B300603", 1: "Carrier 48NL-B300603"})
-row("Tonnage / gas BTU input / output", {0: "2.5 ton - 60,000 BTU", 1: "2.5 ton - 60,000 BTU gas.  INPUT vs OUTPUT still not split"})
-row("SEER2", {0: "13.4", 1: "13.4"})
-row("Single stage or 2-stage", {0: "single", 1: "single, ECM blower.  The 15.2 SEER2 2-stage question is STILL UNANSWERED - no price, no recommendation"}, h=40)
+row("Model number", {0: "Carrier 48NL-B300603", 1: "Carrier 48NL-B300603"})
+row("Tonnage / gas BTU", {0: "2.5 ton / 60,000", 1: "2.5 ton / 60,000 - in vs out NOT split"}, h=33)
+row("SEER2 / stages", {0: "13.4 single", 1: "13.4 single, ECM - 15.2 2-stage question UNANSWERED"}, h=36)
 row("Refrigerant", {0: "R-454B"})
-row("HEAT EXCHANGER MATERIAL - MUST BE STAINLESS STEEL", {0: "lifetime stainless", 1: "STAINLESS STEEL, in writing TWICE: 'heat exchanger will be stainless steel per customer request' and 'LIFETIME HEAT EXCHANGER (STAINLESS STEEL)'"}, hard=True, h=52)
-row("Heat exchanger / parts / compressor warranty", {0: "lifetime HX (register in 90 days or drops to 20 yr)", 1: "LIFETIME HX + 10 yr parts + 10 yr compressor"}, h=34)
-row("Labor warranty - term", {0: "10 yr", 1: "5 yr INCLUDED (was 2 yr on the first proposal)"})
-row("Labor warranty - cost to reach 10 yr", {0: "$800", 1: "+$500.00"})
-row("Labor warranty - what it covers", {0: "all labour + freon", 1: "all labour on warranty parts repairs, priority service, discounted maintenance"}, h=34)
+row("HEAT EXCHANGER = STAINLESS STEEL", {0: "lifetime stainless", 1: "STAINLESS - in writing TWICE"}, hard=True, h=33)
+row("HX / parts / compressor warranty", {0: "lifetime HX (register in 90 days)", 1: "LIFETIME HX + 10yr parts + 10yr compr"}, h=36)
+row("Labour warranty term", {0: "10 yr", 1: "5 yr incl (was 2 yr)"})
+row("Labour cost to reach 10 yr", {0: "$800", 1: "+$500"})
+row("Labour covers", {0: "all labour + freon", 1: "warranty-parts labour, priority svc, disc. maint"}, h=36)
 
-section("DUCTWORK - every item below is IN the price")
-row("1. Twist at unit REMOVED, new square-to-round on BOTH supply and return", {0: "included", 1: OK + "'run the new R/A trunk in a strait shot to ELIMINATE the existing cross over/twist' + square-to-round take-offs on BOTH return and supply"}, hard=True, h=52)
-row("2. Dining / master / living upgraded 6\" to 8\" (saddle tap, damper, boot)", {1: OK + "all three, with dampers on every new/modified lead for balancing"}, h=34)
-row("3. New 7\" run to garage, cored through brick and sealed, brown register", {1: OK + "7\" lead + a few ft of 12\" hard pipe, chased through the brick, metal critter guard inside the crawlspace", 3: "REFUSES - says a branch duct into a garage violates code (fume backfeed) and they will not do the job"}, h=52)
-row("4. New 16\" return with BOTH sheet-metal 90s", {1: "PARTIAL - the (2) 16\" 90s ARE galvanized sheet metal, but the TRUNK is 16\" FLEX, not sheet metal"}, h=40)
-row("4b. 18\" return priced as a SEPARATE option", {1: "+$160.00"})
-row("5. Return filter grille 20x25 STAYS", {0: "n/a - stays", 1: "stays, plus 6 months of 20x25x1 pleated filters free"})
-row("6. Existing duct inspected, re-strapped, sealed (NOT replaced for damp insulation)", {1: OK + "full mastic seal, mastic-backed metal tape, re-strapped high and tight, NEW sheet metal return panning sealed + insulated, return cavity sealed, microbial spray"}, h=52)
-row("7. Unit base closed off at the pad - rodent / snake / weather", {1: OK + "new shroud, critter guards, sealed to the structure, PVC drain with P-trap, new plastic pad"}, h=40)
-row("8. UVC REKO R2000 (Jeff supplies) installed + wired, lamps facing coil, no extra labour", {1: OK + "installed facing the coil, NO additional charge"}, h=34)
-row("9. ecobee EB-STATE6P-01 (Jeff supplies): new 18 AWG + C wire, install + start-up", {1: OK + "install, set-up AND programming at no cost. 18/8 wire pull is $295"}, h=40)
+section("DUCTWORK - all of it IN the price")
+row("1. Twist REMOVED, sq-to-round BOTH supply + return", {0: "included", 1: "YES - 'eliminate the existing cross over/twist', take-offs both sides"}, hard=True, h=42)
+row("2. Dining / master / living  6\" -> 8\"", {1: "YES - all 3, dampers on each"}, h=30)
+row("3. New 7\" garage run, cored + sealed", {1: "YES - 7\" + 12\" hard pipe, crawlspace critter guard", 3: "REFUSES - says garage branch violates code"}, h=42)
+row("4. New 16\" return, BOTH sheet-metal 90s", {1: "PARTIAL - 90s ARE sheet metal, TRUNK still FLEX"}, h=33)
+row("4b. 18\" return as separate option", {1: "+$160"})
+row("5. 20x25 filter grille stays", {0: "stays", 1: "stays + 6 mo of filters free"})
+row("6. Existing duct sealed / re-strapped, NOT replaced", {1: "YES - mastic seal, new return panning, microbial"}, h=36)
+row("7. Unit base closed off at pad", {1: "YES - shroud, critter guards, sealed, P-trap"}, h=33)
+row("8. UVC REKO R2000 installed (Jeff supplies)", {1: "YES - facing coil, no charge"}, h=30)
+row("9. ecobee installed, new 18AWG + C wire", {1: "YES - install+setup free; wire pull $295"}, h=30)
 
-section("COMMERCIAL TERMS")
-row("Ductwork itemised on the quote", {1: OK + "3-page proposal with a full line-item breakdown"})
+section("COMMERCIAL")
+row("Ductwork itemised", {1: "YES - full line-item breakdown"})
 row("Price per linear foot")
-row("Permit included", {1: "$95.00"})
-row("Start-up readings ON THE INVOICE: static pressure + airflow set to 995 CFM", {1: "Static pressure recorded at completion.  '995 CFM' appears NOWHERE in the document"}, h=40)
+row("Permit included", {1: "$95"})
+row("Static pressure + 995 CFM on invoice", {1: "static pressure YES - '995 CFM' NOT in document"}, h=33)
 row("How soon could you start")
 
 section("PRICE")
-row("Equipment + install", {0: "$8,200", 1: "$8,520.00"})
-row("Ductwork", {0: "included in $9,000", 1: "$2,750.00"})
-row("Options / add-ons", {0: "+$800 = 10-yr labour & freon", 1: "+$500 10-yr labour | +$160 18\" return | -$300 TVA rebate"}, h=34)
+row("Equipment + install", {0: "$8,200", 1: "$8,520"})
+row("Ductwork", {0: "incl in $9,000", 1: "$2,750"})
+row("Options", {0: "+$800 = 10yr labour+freon", 1: "+$500 10yr | +$160 18\" | -$300 TVA"}, h=33)
 tot = r
-row("TOTAL DELIVERED", {0: "$9,000 delivered", 1: "$11,270.00  (8,520 + 2,750)"})
+row("TOTAL DELIVERED", {0: "$9,000", 1: "$11,270"}, h=25)
 for i in range(N):
-    ws.cell(tot, 1 + i).font = Font(name=F, size=11, bold=True)
+    ws.cell(tot, 1 + i).font = Font(name=F, size=10, bold=True)
 
-r += 1
-section("READ THIS BEFORE COMPARING THE TOTALS")
-for n in [
-    "THE TWO TOTALS ARE NOT THE SAME JOB. Daniels' $9,000 covers the unit, the twist fix and new supply/return flex. Peters' $11,270 ALSO includes three 6\"-to-8\" branch upgrades, the 7\" garage run, a new 16\" return trunk with sheet-metal 90s, a full mastic duct seal, new sheet metal return panning, microbial treatment, the permit and six months of filters. Compare scope before price.",
-    "Peters has NO printed grand total. $11,270.00 is arithmetic, and it checks two independent ways: 8,520 + 2,750 = 11,270, and the page-3 breakdown (6,260 unit w/ pad + 2,470 labour + 1,475 ducting materials + 325 duct seal + 350 misc + 95 permit + 295 t-stat wire) sums to exactly 11,270. Both sections state the total includes all sales tax.",
-    "LIKE FOR LIKE ON LABOUR: Daniels $9,000 already has 10-yr labour+freon. Peters needs +$500 to reach 10 yr, so the comparable Peters figure is $11,770 before the -$300 TVA rebate.",
-    "STILL OWED BY DANIELS, logged 2026-09-10 and still open: the flex diameters IN WRITING. The revised proposal deleted the 16\" flex supply/return, the 16\"-14\" reducer and the 875 CFM line. That connection work is the entire reason $9,000 counts as turnkey. Do not sign without it.",
-    "STILL OWED BY PETERS: the 15.2 SEER2 two-stage price and his recommendation (asked, not answered); gas BTU input vs output; and whether the 16\" return TRUNK can be sheet metal rather than flex.",
-    "MINOR BUT IT IS IN THE CONTRACT YOU WOULD SIGN: Peters' 'Notice to Owner' boilerplate cites MISSOURI lien law (Chapter 429, RSMO) in a Tennessee contract. Almost certainly a template leftover - worth one question.",
-    "Peters proposal dated 9/17/2026, valid 90 days, prepared by Tyler O'Berry. Payment due 30 days after completion; 2% surcharge on card payments of $1,000 or more.",
-    "Carrier lifetime stainless heat exchanger must be REGISTERED WITHIN 90 DAYS of install or it drops to 20 years.",
-]:
-    c = ws.cell(r, 1, "- " + n); c.font = Font(name=F, size=8); c.alignment = wrap
-    ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=N)
-    ws.row_dimensions[r].height = 30; r += 1
+# ---- the one caveat that must never be separated from the totals -------------------
+c = ws.cell(r, 1, "NOT THE SAME JOB: Daniels $9,000 = unit + twist + flex, 10-yr labour already in.  "
+                  "Peters $11,270 ALSO has 3 branch upsizes, the garage run, a new 16\" return, full mastic duct seal, "
+                  "new return panning, microbial, the permit and 6 mo of filters.  Like-for-like on labour Peters = $11,770 less the $300 TVA rebate.  "
+                  "COMPARE SCOPE BEFORE PRICE.")
+c.font = Font(name=F, size=8, bold=True); c.alignment = wrap; c.fill = PatternFill("solid", fgColor="FFF2CC"); c.border = box
+ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=N)
+ws.row_dimensions[r].height = 30
+last = r
 
-ws.column_dimensions['A'].width = 46
+ws.column_dimensions['A'].width = 44
 for i in range(len(BIDDERS)):
-    ws.column_dimensions[get_column_letter(2 + i)].width = 25
-ws.freeze_panes = "B%d" % (hrow + 1)
-ws.print_title_rows = "%d:%d" % (hrow, hrow)
-ws.page_setup.orientation = "landscape"
-ws.page_setup.fitToWidth = 1
-ws.page_setup.fitToHeight = 0
-ws.sheet_properties.pageSetUpPr.fitToPage = True
-ws.page_margins.left = ws.page_margins.right = 0.25
-ws.page_margins.top = ws.page_margins.bottom = 0.35
+    ws.column_dimensions[get_column_letter(2 + i)].width = 27
 
-out = "bid/BID_COMPARISON.xlsx"
-wb.save(out)
-print("WROTE", out)
+ws.freeze_panes = "B%d" % (hrow + 1)
+ws.print_area = "A1:%s%d" % (get_column_letter(N), last)
+ws.print_title_rows = "%d:%d" % (hrow, hrow)   # header repeats on every taped-on page
+ws.page_setup.orientation = "landscape"
+ws.page_setup.paperSize = ws.PAPERSIZE_LETTER
+ws.page_setup.fitToWidth = 1
+ws.page_setup.fitToHeight = 0          # multi-page down is fine - Jeff tapes them together
+ws.sheet_properties.pageSetUpPr.fitToPage = True
+ws.page_margins.left = ws.page_margins.right = 0.2
+ws.page_margins.top = ws.page_margins.bottom = 0.25
+
+# ---- tab 2: the notes, kept OFF the printed page -----------------------------------
+n = wb.create_sheet("Notes")
+n.column_dimensions['A'].width = 120
+notes = [
+    ("PETERS - $11,270 is ARITHMETIC. The PDF has no printed grand total.", True),
+    ("   It checks two ways: 8,520 + 2,750 = 11,270, AND the page-3 breakdown", False),
+    ("   (unit w/pad 6,260 + labour 2,470 + ducting materials 1,475 + duct seal 325", False),
+    ("   + misc 350 + permit 95 + t-stat wire 295) = exactly 11,270. Both sections", False),
+    ("   state the total includes all sales tax.", False),
+    ("", False),
+    ("STILL OWED BY PETERS - three gaps:", True),
+    ("   1. The 15.2 SEER2 two-stage price AND his recommendation. Jeff asked both.", False),
+    ("      '15.2' and 'two stage' appear ZERO times in the proposal.", False),
+    ("   2. Gas BTU input vs output - only one 60,000 figure; no input/output/AFUE.", False),
+    ("   3. The 16\" return TRUNK is still FLEX. Only the (2) 90s are sheet metal.", False),
+    ("", False),
+    ("STILL OWED BY DANIELS - logged 2026-09-10, still open 7 days later:", True),
+    ("   The flex diameters IN WRITING. The revised proposal deleted the 16\" flex", False),
+    ("   supply/return, the 16\"-14\" reducer and the 875 CFM line. That connection", False),
+    ("   work is the entire reason $9,000 counts as turnkey. DO NOT SIGN WITHOUT IT.", False),
+    ("", False),
+    ("CONTRACT ODDITY - Peters' 'Notice to Owner' boilerplate cites MISSOURI lien law", True),
+    ("   (Chapter 429, RSMO) inside a Tennessee contract. Likely a template leftover,", False),
+    ("   but it is in the document Jeff would sign. Worth one question.", False),
+    ("", False),
+    ("Peters proposal dated 9/17/2026, valid 90 days, prepared by Tyler O'Berry.", False),
+    ("Payment due 30 days after completion; 2% surcharge on card payments >= $1,000.", False),
+    ("Carrier lifetime stainless HX must be REGISTERED WITHIN 90 DAYS of install or it", False),
+    ("   drops to 20 years.", False),
+    ("", False),
+    ("NEVER REACHED BY EMAIL until 09-17: Covenant - use office@covenantheatingand", False),
+    ("   cooling.com ONLY (ntagel@, facebook@ and info@ all bounce 550). (615) 829-9699.", False),
+    ("Brown & Son - Corey@hbrownhvac.com (Cory@ with one 'e' bounces). (615) 325-2624.", False),
+]
+for i, (txt, bold) in enumerate(notes, start=1):
+    c = n.cell(i, 1, txt)
+    c.font = Font(name=F, size=10, bold=bold)
+n.page_setup.orientation = "landscape"
+
+wb.save("bid/BID_COMPARISON.xlsx")
+print("WROTE bid/BID_COMPARISON.xlsx   grid rows 1-%d" % last)
