@@ -75,24 +75,21 @@ $1.80-3.50/sq ft = $520-1,000 for this ceiling.
 Sources: [Angi](https://www.angi.com/articles/blown-in-insulation-cost.htm),
 [HomeGuide](https://homeguide.com/costs/blown-in-insulation-cost),
 [InsulationRValues.com](https://www.insulationrvalues.com/attic-insulation-cost).
-**Jeff, 4:25 PM: it is OPEN RAFTERS - no ceiling.** So blown-in is off the table
-unless a ceiling gets built. That changes the options (roof area is bigger than
-the floor: ~300-330 sq ft of rafter bay for a 12 ft span at 4/12-6/12):
+**Jeff, 4:27 PM: DRYWALL CEILING at 10 ft, attic above** (an earlier "open rafters"
+was a mis-send). So the blown-in plan above is the one: **~10 bags of cellulose
+on the attic floor over the garage, $120-150 material, blower free/rented, an
+afternoon.** Cheapest option there is and the right one - nothing else comes close
+per dollar.
 
-| Option | Cost (verified 09-17) | Garage with the vent | Notes |
-|---|---|---|---|
-| **A. Radiant-barrier foil stapled to the UNDERSIDE of the rafters** | **~$50-80** - Reflectix perforated 500 sq ft roll ~$78 at Home Depot ($0.16/sq ft); 1-2 hours | **~80 F** (vent alone was ~84) | Cuts roof heat gain 26-50% (RIMA / ASHRAE research). Summer-only benefit - fine for a garage. MUST be perforated (moisture) and MUST have an air gap to the deck - stapling under the rafters gives it. |
-| **B. Batts between the rafters** | **~$490-535** - Owens Corning R-30 kraft $1.62/sq ft x ~300-330 sq ft, plus baffles | **~74-76 F** | Rafter depth decides the R: 2x6 = R-19/21, 2x8 = R-25, 2x10 = R-30. If the roof has soffit/ridge vents, keep a baffle channel under the deck. **Exposed kraft facing is a fire-code problem (IRC R302.10) - use FSK foil-faced batts or cover them.** |
-| **C. Build a ceiling, then blow in** | ~$150 insulation + the ceiling material (OSB/drywall - NOT priced) | **~74-75 F** | Only possible if there are ceiling joists / truss bottom chords at ~10 ft to hang it on. Best finished result. |
+Before blowing: check whether anything is already up there (a few inches of old
+insulation changes nothing about the plan, just top it up to ~12-13 in for R-38);
+keep it clear of any can lights, the opener's ceiling bracket area and the attic
+hatch; and if the garage attic connects to the house attic, no dam is needed - it
+is all the same conditioned-side boundary.
 
-Sources: [Home Depot R-30 8-bag](https://www.homedepot.com/p/Owens-Corning-R-30-Kraft-Faced-Fiberglass-Insulation-Batt-24-in-x-48-in-8-Bags-E56/202744531)
-- [insulationreport.com radiant barrier cost](https://insulationreport.com/cost/radiant-barrier-cost/)
-- [Angi radiant barrier](https://www.angi.com/articles/radiant-barrier-cost.htm)
-- [RIMA radiant barrier research](https://rimainternational.org/radiant-barriers/).
-
-**Still needed to pick:** rafters straight to the ridge, or joists/chords at 10 ft?
-Rafter size (2x6 / 2x8 / 2x10)? Soffit or ridge vents?
-Keep any insulation clear of lights and the opener's ceiling bracket.
+A radiant-barrier foil stapled under the rafters above it (~$50-80, Reflectix
+perforated roll) would add a little more on top, but with R-38 on the floor the gain
+is small - not worth doing first.
 
 ## If you ever want more than "take the edge off"
 The door is already insulated, so the 390 Btu/h-per-degree leak is coming through
