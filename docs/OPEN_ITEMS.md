@@ -110,8 +110,13 @@ is too long — that **it was never checked against the house.**
 | # | what | why it is still here |
 |---|---|---|
 | **155/156/157** | Ancestry: **279 duplicate people**, the DNA veto, and the sweep only seeing **58%** of the tree | genealogy, real work, needs a session with time |
+| **187** | 🔴 **DEPLOY `hcc-v120` — the stale-build fix (`46ef4fe`).** Root cause of Jeff's *"internet went out and several things in the app are not working"*: v111/v112 on 09-15 moved credentials into the `x-hcc-creds` header **with no query-param fallback**, Functions deploy instantly, `index.html` waits on the service worker — so a device on a pre-v112 cached build breaks **exactly the A/C card and Irrigation** and nothing else. Now the app re-checks for a new worker on load *and* on every return to the foreground, with a reload that will not fire while an input is focused. **14/14 gates pass.** | **JEFF'S CALL** — it changes real app bytes and the deploy branch auto-publishes to loewenhome.com in 60 s. ⚠️ It cannot un-stick an ALREADY-stuck device (that device runs the old code): those need **one** full close-and-reopen of the PWA, once. |
+| **188** | ☎️ **CALL Covenant (615) 829-9699 and Brown & Son (615) 325-2624.** Both never received the bid request — `550` rejections, not a Comcast fault. **Emailing again just bounces again.** Numbers verified by search 09-17, published-not-reached. | **JEFF** — a phone call is the only route that works |
+| **189** | 📄 **Daniels still owes the flex diameters IN WRITING.** The revised proposal deleted the *16" flex supply/return*, the *16"–14" reducer* and the *875 CFM* line. Logged **09-10** as *"THE ONLY THING STILL OWED BEFORE SIGNING"* — that connection work is the entire reason $9,000 counts as turnkey. | **JEFF** — 7 days open. Do not sign without it. |
 
-**That is ONE.** Everything else that was on this table has been verified and closed.
+**That is FOUR** — one genealogy job of mine, and three on Jeff that are each one action.
+Everything else that was on this table has been verified and closed.
+**Live bid board: `docs/hvac/BID_TRACKER.md`.**
 
 ## ⛈ #182 — THE SEVERE WEATHER ALERT WAS DEAD TWO WAYS. FIXED 2026-09-10 9:55 PM.
 
