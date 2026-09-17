@@ -288,10 +288,10 @@ a session re-proposed the Inovelli dimmers he had already killed — because nob
 > **📄 THE AUTHORITATIVE DOCUMENT IS `docs/lighting/HCC_Lighting_Plan.html` (+ PDF), Rev. Aug 13 2026.**
 > Printable, with wiring diagrams and the device map — Jeff asked for it specifically to hang in the
 > workshop. **Read it before proposing anything about lighting or mesh.** Its whole thesis:
-> *"Job 1 Â· Light Switches â†’ Wi-Fi (Kasa). Job 2 Â· Mesh Range â†’ Zigbee Plugs. Why not a $46 mesh
+> *"Job 1 · Light Switches → Wi-Fi (Kasa). Job 2 · Mesh Range → Zigbee Plugs. Why not a $46 mesh
 > dimmer: the switch was only being asked to repeat the mesh — a job a $10 plug does better."*
 >
-> **Shopping list from that doc, ~$104 total:** 2 Ã— Kasa HS220 **on hand ($0)** Â· 3rd HS220 only if a
+> **Shopping list from that doc, ~$104 total:** 2 × Kasa HS220 **on hand ($0)** · 3rd HS220 only if a
 > 3rd room is wanted ($15) · Kasa HS200 for the garage ($15) · **Zigbee plug 4-pack ($40 — replaces
 > the vendor-locked Sylvanias AND routes the mesh)** · 1 garage plug ($10) · 2 Zigbee contact sensors
 > for garage door CLOSED + FULLY-OPEN ($24) · dongle already owned.
@@ -502,7 +502,7 @@ Custom ESP32 running Arduino `.ino` firmware (NOT the ESPHome YAML in `beehive/e
 
 **Fields read from `/api/hours` GET:** `hours, battery/voltage variants, rpm_peak/avg, dist_total_m, dist_session_m, speed/gps_speed, lat/lon/has_fix/track[], pitch/roll/vibration, shock_events, wifi_rssi, esp_temp_f, mpu_ok, gps_rx, source, lastSync, engine_running`
 
-**Status messages:** `source==='stub'` â†’ orange "not connected yet"; `source==='heartbeat'`/`engine_running===false` â†’ green "Engine off Â· Box connected"; else â†’ gray live telemetry line.
+**Status messages:** `source==='stub'` → orange "not connected yet"; `source==='heartbeat'`/`engine_running===false` → green "Engine off · Box connected"; else → gray live telemetry line.
 
 ---
 

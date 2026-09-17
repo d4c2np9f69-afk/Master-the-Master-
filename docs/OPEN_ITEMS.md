@@ -122,15 +122,14 @@ the gate blocks these, so it is not a matter of remembering.
 ## 📚 WHERE EVERYTHING ELSE WENT
 
 | what | where |
-|---|---|
-| Findings, records and stop signs (`#99` `#129` `#136` `#141` `#181`) | `docs/FINDINGS_AND_STOPS.md` |
-| Genealogy backlog (`#150` `#153` `#155` `#156` `#157`) | `docs/genealogy/OPEN_GENEALOGY.md` |
-| **Everything ever closed, in full** | `docs/OPEN_ITEMS_CLOSED.md` |
-| What an error cost and the rule it broke | `docs/COST_LEDGER.md` |
-| How to reach any live system | `docs/ACCESS_MAP.md` |
+| # | what | why it is still here |
+|---|---|---|
+| **155/156/157** | Ancestry: **279 duplicate people**, the DNA veto, and the sweep only seeing **58%** of the tree | genealogy, real work, needs a session with time |
+| **187** | 🔴 **DEPLOY `hcc-v120` — the stale-build fix (`46ef4fe`).** Root cause of Jeff's *"internet went out and several things in the app are not working"*: v111/v112 on 09-15 moved credentials into the `x-hcc-creds` header **with no query-param fallback**, Functions deploy instantly, `index.html` waits on the service worker — so a device on a pre-v112 cached build breaks **exactly the A/C card and Irrigation** and nothing else. Now the app re-checks for a new worker on load *and* on every return to the foreground, with a reload that will not fire while an input is focused. **14/14 gates pass.** | **JEFF'S CALL** — it changes real app bytes and the deploy branch auto-publishes to loewenhome.com in 60 s. ⚠️ It cannot un-stick an ALREADY-stuck device (that device runs the old code): those need **one** full close-and-reopen of the PWA, once. |
+| **188** | ~~CALL Covenant and Brown & Son~~ — ✅ **JEFF ALREADY CALLED BOTH ON 09-16.** 🔴 **I asked him to redo it because THE CALLS ARE IN NO RECORD.** Checked 09-17: nothing committed to the repo since `8daa9d9` (09-16 11:07), and a phone call leaves no trace in Gmail. This is the *"a decision made in conversation goes into a file THE SAME SESSION"* rule failing, and the cost was a redundant ask to the one person who should never have to repeat himself. **Written emails sent 09-17 15:1x instead:** Covenant `info@` + `office@`, and Brown & Son `Corey@` (the spelling that did NOT bounce). ⏳ **Still owed by JEFF, and only he has it: what did those two calls produce — a quote, a site visit, a working email address?** | **JEFF** — one line each, then this closes |
+| **189** | 📄 **Daniels still owes the flex diameters IN WRITING.** The revised proposal deleted the *16" flex supply/return*, the *16"–14" reducer* and the *875 CFM* line. Logged **09-10** as *"THE ONLY THING STILL OWED BEFORE SIGNING"* — that connection work is the entire reason $9,000 counts as turnkey. | **JEFF** — 7 days open. Do not sign without it. |
+| **190** | 🔴 **JEFF'S EMAIL — not bouncing, he cannot SEE it.** The **2026-08-19 Comcast password reset to 32 random chars** (recorded in `password_and_data_security_plan_2026-08-19.md` line 126) left every desktop mail client holding the OLD password. SMTP auth fails → **mail piles up unsent and blinks**; IMAP auth fails → **nothing new downloads**, so contractors' replies sit on Comcast's server unread. **Proof inbound is fine: all 13 bid emails CC'd the Comcast address on 09-16 and ZERO bounced.** Fix in `docs/EMAIL_FAULT_2026-09-17.md`: (1) read `connect.xfinity.com` webmail FIRST — quotes may be sitting there since 08-19; (2) tick **Settings → Security → Third Party Access Security**, off by default and it blocks every client; (3) new password + `imap.comcast.net:993 SSL` / `smtp.comcast.net:587 STARTTLS`, username = FULL address. | **JEFF** — I cannot see that PC |
 
-**2026-09-16: this file went from 3,601 lines to this.** 24 rows closed against live evidence, the
-reference material filed where it belongs, and the remainder is two action items. Nothing was
-deleted — every moved section is in the files above, in full.
-
----
+**That is FOUR** — one genealogy job of mine, and three on Jeff that are each one action.
+Everything else that was on this table has been verified and closed.
+**Live bid board: `docs/hvac/BID_TRACKER.md`.**
