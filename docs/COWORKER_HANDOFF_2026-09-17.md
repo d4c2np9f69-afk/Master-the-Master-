@@ -203,7 +203,7 @@ SESSION"* rule failing, landing on the one person who should never have to repea
 
 | | |
 |---|---|
-| **Mojibake** | `CLAUDE.md` + `WHERE_THE_HISTORY_LIVES.md` repaired with `ftfy`. His own words in "Jeff's Message" were rendering as `Ã°Å¸â€™Â¯`. encoding-gate clean. |
+| **Mojibake** | `CLAUDE.md` + `WHERE_THE_HISTORY_LIVES.md` repaired with `ftfy`. His own words in "Jeff's Message" were rendering as a 7-character mojibake blob instead of the emoji he actually typed. (The literal bytes are NOT reproduced here on purpose - the encoding gate correctly cannot tell an example from real corruption, and this file failed that gate until the example was removed.) encoding-gate clean. |
 | **The trim that was written up but never done** | `docs/docs-size-gate-test.js` claimed CLAUDE.md "was trimmed to 726" and that `PROJECT_REFERENCE.md` held the original. **Neither was true** — it was 891 lines and that file had never existed in git history. Now actually done: 891 → 720, and PROJECT_REFERENCE.md exists. **All 17 Mandatory Rules and the full Debugging Protocol verified intact.** |
 | **A gate that lied** | `weather-tiles-test.js` reported `0.05"` vs `0.06"` against **correct app code** — its fixture floored the first bucket to the *current* 15-min boundary, which is in the past, so the app correctly skipped it. It could only ever pass if run exactly on a :00/:15/:30/:45. Fixture fixed. |
 | **Stale-build class** | JOB 2 above. |
