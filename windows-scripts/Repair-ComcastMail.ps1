@@ -24,6 +24,9 @@
       powershell -NoProfile -ExecutionPolicy Bypass -File .\windows-scripts\Repair-ComcastMail.ps1
       ...            -SendTest      also sends ONE test message to himself to prove sending works
 
+  COMPATIBILITY: written to the Windows PowerShell 5.1 / PowerShell 7 INTERSECTION, because
+  `powershell.exe` (5.1) is what the HCC hooks invoke. No ternary, no ?? , no try-as-expression.
+
   EXIT 0 = both IMAP and SMTP authenticated. Anything else = the verdict block says what to do.
 #>
 param(
@@ -77,7 +80,12 @@ try {
       $i++; if ($i -gt 10) { Say "      ... (more)"; break }
       # SentOn throws on an item that has never actually been sent - which is every item
       # in an Outbox. Fall back to CreationTime, which is what we actually want anyway.
-      $when = try { $m.CreationTime.ToString('yyyy-MM-dd HH:mm') } catch { '(no date)' }
+      # NOTE: written the long way ON PURPOSE. `$x = try {} catch {}` is PowerShell 7 ONLY
+      # and is a hard SYNTAX ERROR on Windows PowerShell 5.1 - which is what `powershell.exe`
+      # is, and what every hook in windows-config/claude-settings.json invokes. The whole
+      # script would have failed to parse on the one machine it was written for.
+      $when = '(no date)'
+      try { $when = $m.CreationTime.ToString('yyyy-MM-dd HH:mm') } catch { }
       Say ("      " + $when + "  to " + $m.To + "  |  " + $m.Subject)
     }
     Say "      ^ the OLDEST date here should be on or after 2026-08-19 if the password is the cause."
