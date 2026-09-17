@@ -123,3 +123,5 @@ tells you a session happened; this tells you what was learned.
 
 ---
 
+
+- 2026-09-17 1:50 PM (beast) — PRINTER PRINTED BLACK-AND-WHITE: the HP OfficeJet 4650 native driver queue (hpygid20) has PageOutputColor=Monochrome baked into its printing-shortcut ticket; Set-PrintConfiguration, -Color, and System.Printing all read back Monochrome. Ink was fine (CMY 40%, K 80% via http://192.168.1.208/DevMgmt/ConsumableConfigDyn.xml). FIX (Jeff: "yes fix it"): HKCU LegacyDefaultPrinterMode 0->1 (Windows no longer auto-manages the default), default printer -> "HP444BD6 (HP OfficeJet 4650 series) (Copy 1)" (Microsoft IPP Class Driver, PageOutputColor=AutoSelect). The HP-driver queue is untouched. To revert: set the HP queue default again and LegacyDefaultPrinterMode=0.
