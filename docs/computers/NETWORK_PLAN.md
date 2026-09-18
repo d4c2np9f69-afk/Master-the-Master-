@@ -67,13 +67,26 @@ Generate one key pair **on the Beast**, put the public half on each machine. Aft
 `ssh jeffl@192.168.1.176` and I'm in — no password prompt, nothing stored in plain text, and you
 are never in the loop typing anything.
 
-## 🔴 The security call — and the record says you already made it
-Jeff, on opening the machines to each other: *"I don't care if it's wide open as long as it's behind
-the network who cares it's just Angela and I here."*
+## 🛑 STANDING DECISION — THE ROUTER IS THE SECURITY BOUNDARY, NOT THE MACHINES
 
-That stays **inside the house**. Nothing here opens a port to the internet, and nothing here is
-reachable from outside the gateway. If that ever needs to change, it changes deliberately, not by
-accident.
+**Jeff, 2026-09-18 12:07 PM, verbatim:**
+> *"I don't need a bunch of security on any of this it needs to be open I want the network and
+> router to be my safety point"*
+
+Consistent with what he said before: *"I don't care if it's wide open as long as it's behind the
+network who cares it's just Angela and I here."*
+
+**What that means in practice, and it is binding on every future session:**
+- **Inside the house: open.** Do not add logins, prompts, passphrases or approval steps between
+  machines Jeff owns. Friction inside the LAN is not security here, it is just friction.
+- **The gateway is the wall.** Nothing gets a port forwarded, nothing is published to the internet.
+  The single firewall rule this plan adds is `-RemoteAddress 192.168.1.0/24` — that *is* the
+  router-is-the-boundary model, not an exception to it.
+- 🔴 **Do not "harden" any of this later without asking him.** A future session tightening these
+  machines because it looks loose would be undoing a decision he made deliberately, twice.
+
+**The SSH key is not a security measure — it is the opposite.** Without it every connection prompts
+for a password. With it, nobody types one, ever. Keys have no passphrase for the same reason.
 
 ---
 

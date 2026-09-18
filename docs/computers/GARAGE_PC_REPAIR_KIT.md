@@ -40,105 +40,76 @@ This is a repair we owe. Not a chore he is behind on.
 
 ---
 
-## THE DECISION — ALREADY MADE, NOT A NEW PROPOSAL
+## 🔴🔴 I WAS WRONG THIS MORNING — CORRECTED 2026-09-18 11:30 AM
 
-**Jeff, 2026-09-01 01:31 PM CT, verbatim:**
-> *"I put that stick in the Beast check it and make sure I have everything I need for the Garage
-> computer on there and the tell me step-by-step what I need to do on the garage computer to get it
-> switched over to the mint"*
+**At 10:45 AM I wrote in this file that the stick did not exist and that step one had never been
+done. Both statements were false.** Jeff plugged the stick in and the truth is the opposite: **the
+entire kit was built on 2026-09-01 and it is thorough.**
 
-So the target is **Linux Mint**, and it was decided over two weeks ago.
+What happened: I ran `Win32_LogicalDisk`, saw only C: and D:, and reported "no stick." **The stick
+simply was not plugged in at that moment.** I checked an empty USB port and called it a missing
+deliverable — which is exactly the *"an empty result is not evidence of absence"* trap this project
+has a rule about. Leaving the error visible here rather than quietly deleting it.
 
-## 🔴 WHAT I FOUND WHEN I WENT LOOKING FOR THAT STICK — 2026-09-18 10:45 AM
+**And the target is not Mint. It is Ubuntu.** Jeff's 09-01 words said *"switched over to the mint"*,
+but what was actually built and what is on the stick is **Ubuntu 26.04 "Resolute Raccoon"**, release
+amd64 20260423.1, read from `E:\.disk\info`.
 
-**It does not exist.** Measured, not assumed:
-- `Win32_LogicalDisk` shows only **C: (222 GB)** and **D: (1863 GB)**, both DriveType 3 = fixed
-  disks. **No removable drive is plugged into the Beast.**
-- **No Linux Mint ISO anywhere on C: or D:.** The only `.iso` on the machine is
-  `Win11_25H2_English_x64_v2.iso`, dated 7/17/2026.
-- **No USB-writing tool installed** (searched Program Files, Program Files (x86), Downloads and
-  Desktop).
+### WHAT IS ACTUALLY ON THE STICK — drive E:, `UBUNTU 26_0`, 14.43 GB FAT32
 
-**So step one of a job Jeff asked for on 09-01 was never done.** That is the honest starting point.
-
----
-
-## WHICH MINT — verified 2026-09-18, not from memory
-
-**Linux Mint 22.x, the XFCE edition.**
-
-| | Cinnamon | **XFCE** |
+| Path | Size | Written |
 |---|---|---|
-| RAM minimum | 2 GB | **1 GB** |
-| RAM recommended | 4 GB | **2 GB** |
-
-XFCE is the lighter desktop and the one recommended for older machines. Mint 22.x needs a **64-bit
-processor** — the G620 is Sandy Bridge and 64-bit, so it qualifies. Mint 22.1 "Xia" is LTS,
-**supported to 2029**.
-⚠️ **Check how much RAM that machine actually has before ordering the edition** — the record does
-not say, and I am not guessing at it.
-Sources: [Linux Mint 22 specs](https://invgate.com/itdb/linux-mint-22) ·
-[Mint 22.1 LTS to 2029](https://linuxsecurity.com/news/vendors-products/linux-mint-22-1-xia-stability-security) ·
-[XFCE requirements thread](https://forums.linuxmint.com/viewtopic.php?t=265102)
+| A full bootable **Ubuntu 26.04** live image | 3.19 GB squashfs | 7/1/2026 |
+| `GARAGE-SETUP\READ-ME-FIRST.txt` | 4.2 KB | **9/1/2026 1:40 PM** |
+| `GARAGE-SETUP\setup.sh` | 4.1 KB | **9/1/2026 1:38 PM** |
+| `GARAGE-SETUP\touchscreen\install-touchscreen.sh` | 7.7 KB | **9/1/2026 1:40 PM** |
+| `GARAGE-SETUP\touchscreen\nwfermi-glorang.zip` | 251 KB | the touchscreen driver source |
+| `GARAGE-SETUP\touchscreen\nwfermi-dmonad.zip` | 293 KB | second driver fork |
+| `PRB350MA.CAP` (root of stick) | 16 MB | ⚠️ **the BEAST's motherboard BIOS from the Aug 2026 flash — do not delete without a copy elsewhere** |
 
 ---
 
-# THE PROCEDURE
+# THE PROCEDURE — IT IS ALREADY WRITTEN, ON THE STICK
 
-## STEP 0 — what you need in hand
-- A **USB stick, 8 GB or bigger**, that can be wiped
-- The **Mint XFCE ISO** — about 3 GB, downloaded on the Beast (**I can do this — just say go**)
-- A **USB writer**. Mint's own installation guide says: *"Download Etcher, install it and run it.
-  Click Select image and select your ISO file. Click Select drive and select your USB stick. Click
-  Flash!"* Rufus is the other standard choice on Windows and works fine.
-  [Mint's official "Create the bootable media"](https://linuxmint-installation-guide.readthedocs.io/en/latest/burn.html)
+**Follow `E:\GARAGE-SETUP\READ-ME-FIRST.txt`.** It is better than what I wrote this morning, and it
+was written by a session that had the machine's actual hardware in front of it. The short version:
 
-## STEP 1 — build the stick (on the Beast, ~20 minutes mostly waiting)
-Download ISO → open the writer → select ISO → select the USB stick → Flash. That's it.
-🔴 **It erases the stick completely.** Make sure there's nothing on it you want.
+1. **Boot the stick** — power on, tap **ESC** repeatedly, HP startup menu → **Boot Device Options
+   (F9)** → the USB DISK 2.0 entry. *If the stick appears twice, pick the **NON-UEFI** one — it's a
+   2011 machine.*
+2. **Pick "Try Ubuntu", NOT Install.** Nothing touches the hard drive in that mode.
+3. **🔴 TEST WIFI BEFORE INSTALLING.** Join `Loewen301`. **If WiFi does not work, STOP — do not
+   install.** Shut down, Windows still boots, nothing is lost. *Escape hatch if it ever fails: plug
+   your phone in by USB and turn on USB tethering — Linux needs no driver for that, so you can never
+   be stranded.*
+4. **Rescue your files** — `Users/Jeff Loewen Office 2/` → Documents, Desktop, Pictures, Downloads.
+   Hunt the genealogy files (`.rmgc`, `.rmtree`, `.ged`) you looked for on 09-01 and never found.
+   Reach the Beast from Files with **Ctrl+L** → `smb://301server/OneDrive`.
+   **Once you install, anything left on that drive is gone.**
+5. **Install** — tick **"Install third-party software"**, choose *Erase disk and install Ubuntu*,
+   and **remember the password you set — SSH needs it.** Budget 20–30 minutes on a 2011 CPU and a
+   spinning drive. *"Start it and come inside. Do not stand in a 94-degree garage."*
+6. **Run the setup script** — `bash /media/$USER/*/GARAGE-SETUP/setup.sh`
 
-## STEP 2 — 🔴 RESCUE THE FILES *BEFORE* YOU INSTALL ANYTHING
+### What `setup.sh` does — I read it line by line before vouching for it
+- Checks it can reach the Beast at **192.168.1.194**, and prints the WiFi hardware the kernel sees
+- **Installs `openssh-server` and enables it at boot** ← this is the handoff; after this I can work
+  on the machine from the Beast
+- Installs `curl wget git htop cifs-utils avahi-daemon`
+- Prints the machine's **IP, hostname and SSH user**, and the exact `ssh` command to reach it
+- Safe to re-run
 
-**This is the step that cannot be undone if you skip it.** That drive has been in that machine since
-roughly 2011. You think everything moved to the Beast during the file transfer — *think*, not know.
-Once Mint installs, anything still on there is gone permanently.
+**Then tell me that IP and I take it from there — kiosk, dashboard, HA integration, all remote.**
+You should not have to go back out to the garage.
 
-1. Boot the garage PC from the USB
-2. Pick **"Try Linux Mint"** — ⚠️ **NOT "Install"**. Live mode runs entirely off the stick and
-   touches the hard drive not at all.
-3. From that desktop, open the Windows drive and actually look in
-   **`Users\Jeff Loewen Office 2\`** — Documents, Desktop, Pictures, Downloads
-4. **Specifically hunt for genealogy files: `.rmgc`, `.rmtree`, `.ged`** — the RootsMagic file you
-   went looking for on 09-01 and never found may be sitting right there
-5. Also worth a look: scanned documents, tax files, old photos
-6. Copy anything worth keeping **straight to the Beast over the network** — that direction works,
-   and Mint mounts `\\301SERVER\OneDrive` natively
+### ⚠️ One inconsistency on the stick, flagged not fixed
+`setup.sh` (13:38) says the touchscreen driver *"was last confirmed on Mint 20.1 and is unlikely to
+build"*. `READ-ME-FIRST.txt` (13:40, two minutes later) **corrects that**: the glorang fork included
+on the stick *"is maintained for Ubuntu 24.04 and later. Corrected 2026-09-01."*
+**The readme is newer and wins.** Try the touchscreen script; if it fights after one reboot, stop,
+use a wireless keyboard and mouse, and tell me.
 
-## STEP 3 — install
-From the **same live session**, click **Install Linux Mint**. Same stick, same trip, five extra
-minutes. You are not doing this twice.
-
-## STEP 4 — put it back on the network
-Join **`Loewen301`** (the household SSID — *not* the factory SSID on the gateway label, and **not**
-`Loewen301_Ext`, which no longer exists and is what started this whole mess).
-
-## STEP 5 — 🔑 GIVE ME A WAY IN, PERMANENTLY
-
-Jeff, 2026-09-18: *"on the network it needs to be built so that you can go into all of them as
-needed to work on them."*
-
-On Mint this is two commands and it's built in — no extra software, no cost:
-
-```bash
-sudo apt install openssh-server
-sudo systemctl enable --now ssh
-```
-
-That is the whole thing. From then on I can reach that machine from the Beast to work on it, the
-way I reach everything else. **See `NETWORK_PLAN.md` for how this fits the other machines** and for
-the key-based login that replaces typing a password.
-
-## STEP 6 — stop the address going stale
+## AFTER THE INSTALL — stop the address going stale
 Give it a **DHCP reservation on the BGW320**, the same as Beehive has. `OPEN_ITEMS` #112 asks for
 this in its own words: *"give it a DHCP reservation like Beehive's, because its recorded addresses
 go stale every time."* Two different addresses for this machine are already recorded in the files
