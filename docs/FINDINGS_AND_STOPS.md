@@ -883,3 +883,41 @@ and **strike an item the moment it is done, in the same commit that does it.** T
 about something else entirely. That is how 192 entries produce four real jobs.
 
 ---
+
+---
+
+## 🔬 OPEN-ITEMS VERIFICATION SWEEP — 2026-09-18
+
+Every row in `OPEN_ITEMS.md` measured against the live app, live Home Assistant, the BGW320 and
+`OPEN_ITEMS_CLOSED.md`. Nothing taken on trust. **Seven rows struck: #11, #23, #26, #27, #119,
+#187, #188, #190.**
+
+### The four that were filed as Jeff's and were ours
+
+| row | what really happened |
+|---|---|
+| **#23** — live-TV skip | 🔴 **It was finished on 2026-09-10 21:46 and nobody noticed for eight days.** Measured twice on Jeff's own Sling session: **279 s against a 280 s target**, and Jeff confirmed *"It did."* `automation.hcc_ff_the_commercials_apple_tv_exact_4_40` last fired 2026-09-11T02:46:49Z. **The 09-16 re-verify checked `last_triggered` and the Fire TV's power state and concluded "still true" — it never opened `OPEN_ITEMS_CLOSED.md`, where the answer was sitting.** That is the component-check trap, committed against the very file that carries the rule against it. |
+| **#188** — the two phone calls | The row existed only because a call left no trace in any file. Both outcomes are now in `BID_TRACKER.md`. Billing Jeff for our recording failure was wrong. |
+| **#189** — Daniels' flex diameters | Chasing a bidder for a document is our work. |
+| **#131** — two water reports disagree ~2 gal | Filed under "his go." It is arithmetic we can do. |
+
+### Two live faults found on the way — measured, not inferred
+
+- 🔴 **The mailbox sensor is off the mesh.** `binary_sensor.mailbox_contact` stuck **`on`** with its
+  linkquality frozen since **2026-09-16 ~07:40 — 52.8 hours**. It has been reporting the mailbox as
+  standing open since Wednesday. #84/#85/#127's fault is live, not theoretical, and this is the
+  sensor the record already documents as having been orphaned once before.
+- 🔴 **No smoke or CO entity exists in Home Assistant.** All 552 entities searched for `smoke`,
+  `carbon_monoxide`, `co_alarm` — **zero matches.** The largest real safety gap in the house.
+
+### ⚠️ Two traps this sweep nearly fell into — both already documented, both nearly repeated
+
+1. **Nine sensors stale at *exactly* 67.9 hours.** Identical timestamps across unrelated devices is
+   the signature of **an HA restart flooring `last_updated`**, not nine simultaneous failures. Use
+   `last_triggered` or Z2M availability. Reporting those as faults would have been nine false alarms.
+2. **A string comparison said the live app differed from HEAD** — 932,668 vs 932,301 characters,
+   which reads exactly like deploy drift. It was a **PowerShell UTF-8 artifact**. The raw *byte*
+   compare proved them identical (sha256 `e0f43171…`, 943,487 bytes). **Compare bytes, not strings.**
+3. **`.215` answers a ping but is NOT GaragePC** — MAC `20-be-b8-3a-8c-5d` is **Amazon**, i.e. the
+   Fire TV. GaragePC is `.121`/`.212`, both absent from ARP. A ping proves something answers at an
+   address, not *which* something. This is the third time that trap has been written down.
