@@ -79,10 +79,18 @@ const check = (name, ok, detail) => {
   check('A/C card shows a real temperature', /\d+(\.\d+)?°/.test(acTemp), acTemp);
   check('A/C card reads the weather station, not the Echo', /station/i.test(acSensor), acSensor);
 
-  await page.click('#snav-weather'); await page.waitForTimeout(2500);
-  check('station card indoor temperature',  /\d+(\.\d+)?°F/.test(await txt('stIndoor')));
-  check('station card outdoor temperature', /\d+(\.\d+)?°F/.test(await txt('stOutdoor')));
-  check('station card barometric pressure', /inHg/.test(await txt('stPressure')));
+  // 2026-09-17: these three asserted on stIndoor/stOutdoor/stPressure and FAILED against a
+  // correct app. Those ids belonged to the separate station CARD, which Jeff had deleted on
+  // 2026-09-16 06:12 — "I don't want to look in two places for those readings" — when the
+  // readings moved onto the WEATHER hero readout. index.html says so in a comment and tells
+  // you not to re-add the card; stRender() still writes the st* ids defensively and set()
+  // no-ops on a missing element, so nothing errored and the gate just went red forever.
+  // A gate that fails on working code is worse than no gate: it trains you to ignore it.
+  // Pointed at the hero ids, which is where the feature actually lives now.
+  await page.click('#snav-weather'); await page.waitForTimeout(4000);
+  check('station indoor temperature on the hero',  /\d+(\.\d+)?°F/.test(await txt('wxInTemp')),   await txt('wxInTemp'));
+  check('station outdoor temperature on the hero', /\d+(\.\d+)?°F/.test(await txt('wxTemp')),     await txt('wxTemp'));
+  check('station barometric pressure on the hero', /inHg/.test(await txt('wxPressure')),          await txt('wxPressure'));
 
   await page.click('#snav-irr'); await page.waitForTimeout(6000);
   const irr = await page.evaluate(() => {
