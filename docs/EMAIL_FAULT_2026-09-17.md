@@ -1,3 +1,32 @@
+> # ⛔ THIS DOCUMENT WAS WRONG. DISPROVED 2026-09-18 6:12 PM.
+>
+> **Jeff's email was never broken.** He sent a message from **Outlook** at 6:12 PM from
+> `jeff.loewen@comcast.net` and it reached the Gmail inbox **in under a minute**
+> (thread `1a0b6cb372fcd6c6`). Outbound works. Inbound was already proven by the 13
+> uncontested CCs on 09-16, recorded further down this very page and ignored.
+>
+> Measured the same evening: **third-party client access already ticked**, email safe
+> list **unticked**, both Comcast servers reachable, **zero Outlook errors in 3,000
+> Application events**, and he uses the **new Store Outlook (`olk`)** — not the classic
+> client this document's mechanism describes.
+>
+> **The whole thing traces to ONE text from ONE contractor on 2026-09-14.** That became a
+> standing "KNOWN MAIL FAULT" repeated in every sweep brief for days. This page even says
+> below that the mechanism was *"inferred … not observed"* — and sessions used it anyway.
+>
+> Jeff, 2026-09-18 6:15 PM: *"you are the one that raised the alarm about my email not
+> working, and then you kept on and on and on about it … so now we spent all this time
+> working on trying to fix it when nothing was wrong with it to begin with."*
+>
+> **Keep this page only as the record of how that happened. Do not act on it.**
+> One third-party report is a lead. Test before declaring a fault.
+>
+> *(One real defect was found in passing and is worth fixing on its own merits: the*
+> *CLASSIC Outlook profile has SMTP port **465**; Comcast wants **587/STARTTLS**. Jeff*
+> *does not use classic Outlook, so this was never his symptom.)*
+
+---
+
 # 🔴 THE EMAIL FAULT — your mail is not bouncing, you cannot SEE it
 
 **Written 2026-09-17. Jeff: *"I told you to fix my fucking email"* and *"why do I still have
