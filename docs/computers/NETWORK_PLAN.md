@@ -136,12 +136,20 @@ rather than remembered.
 
 # 5. THE ORDER OF WORK
 
-**🟢 PROGRESS 2026-09-18:** Both laptops are done. The Lenovo (.173) is now Ubuntu
-`GarageLaptop` — key-based SSH login, file share reachable, standard toolset, auto-updates.
-The Acer (.176) has key-based SSH login, cleaner, Bitwarden, updates — but is fighting a
-recurring hard freeze (RAM test + graphics driver, see NETWORK_MAP/OPEN_ITEMS). **Steps 4, 5
-and most of 6 are DONE for the two laptops.** Still open: the garage HP TouchSmart (step 1,
-still a physical job), and step 3 DHCP reservations (gateway, with Jeff).
+**🟢 PROGRESS 2026-09-18 (8:57 PM — proven by `windows-scripts\Verify-Network.ps1`, 19 PASS / 0 FAIL / 3 SKIP):**
+Both laptops are done and the network is verified end to end.
+- **Lenovo (.173)** — Ubuntu `GarageLaptop`: passwordless key SSH, **Beast's OneDrive mounted read-only at
+  `/mnt/beast/OneDrive` (guest, no password, survives reboot via fstab `nofail`+automount)**, Chrome, Bitwarden,
+  house-app + HA desktop icons, never-sleep, auto-updates.
+- **Acer (.176)** — key SSH, cleaner, Bitwarden, updates, **Intel UHD 620 driver updated 2019→2026 (31.0.101.2141)**,
+  and **already syncing Jeff's files via its own OneDrive login** (jeff.loewen@comcast.net) — so it needs no SMB mount.
+  Still under watch for the recurring hard freeze (RAM cleared as a matched Timetec pair; graphics driver was the
+  last untested suspect and is now current — the freeze is now a wait-and-watch).
+- **The share was opened per Jeff's standing decision** (LAN is open, router is the wall): `OneDrive` share is
+  Everyone=Read at the share level and NTFS, Guest enabled, no passwords anywhere. Beast-side script:
+  `C:\HCC-SETUP\open-onedrive-share.ps1`. Client-side: `windows-scripts\lenovo-mount-beast.sh`.
+
+**Steps 4, 5, 6 DONE.** Still open: the garage HP TouchSmart (step 1, physical), and step 3 DHCP reservations (gateway, with Jeff).
 
 | # | Step | Status |
 |---|---|---|
@@ -149,8 +157,8 @@ still a physical job), and step 3 DHCP reservations (gateway, with Jeff).
 | 2 | **SSH reachability** — the Beast is the client, both laptops now run sshd | ✅ done for the laptops |
 | 3 | **DHCP reservations** on the BGW320 | ⏳ gateway change, do with Jeff watching |
 | 4 | **Key-based login** on both laptops | ✅ done, keys installed, passwordless |
-| 5 | **File share + standard toolset** | ✅ Lenovo done; Acer parity pending its freeze fix |
-| 6 | **Update `NETWORK_MAP.md`** with what's actually true | ✅ done 09-18 |
+| 5 | **File share + standard toolset** | ✅ done — Lenovo mounts the share (guest RO); Acer has the files via its own OneDrive; both carry Chrome/Bitwarden/cleaner |
+| 6 | **A script that PROVES it** | ✅ `windows-scripts\Verify-Network.ps1` — 19 PASS / 0 FAIL / 3 SKIP, 09-18 8:57 PM |
 
 🔴 **I am not doing any of it without you saying so**, and step 3 touches the gateway, which is the
 one piece that can take the whole house off the internet if it goes wrong. That one we do together,

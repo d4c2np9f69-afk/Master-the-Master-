@@ -88,8 +88,11 @@ Result '301SERVER - has the share' $ok $(if($ok){'C:\Users\jeffl\OneDrive exists
 $out = RemoteRun $LENOVO 'smbclient -L //192.168.1.194 -N 2>/dev/null | grep -ci onedrive'
 Result 'GarageLaptop - sees the share' ($out -match '^[1-9]') $(if($out -match '^[1-9]'){'smbclient listed OneDrive on 301SERVER'}else{"could not list it: $out"})
 
-$out = RemoteRun $LENOVO 'mount | grep -c 301SERVER'
-Result 'GarageLaptop - share MOUNTED' ($out -match '^[1-9]') $(if($out -match '^[1-9]'){'mounted now'}else{'not mounted - needs Jeff to sign in once as jeffl'})
+# The share mounts by IP (//192.168.1.194/OneDrive), NOT by the hostname, so
+# grepping for "301SERVER" failed a share that WAS mounted (09-18). Match the
+# mount point, which is unambiguous.
+$out = RemoteRun $LENOVO 'mount | grep -c "/mnt/beast/OneDrive"'
+Result 'GarageLaptop - share MOUNTED' ($out -match '^[1-9]') $(if($out -match '^[1-9]'){'mounted at /mnt/beast/OneDrive, guest read-only, no password'}else{'not mounted - run lenovo-mount-beast.sh'})
 
 # The Acer gets Jeff's files through ONEDRIVE, not the SMB share - it is signed in
 # as jeff.loewen@comcast.net and the Desktop is redirected into it (found 09-18).

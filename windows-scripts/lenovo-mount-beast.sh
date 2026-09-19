@@ -28,7 +28,12 @@ fi
 echo
 echo "=== 3. mount point + fstab (survives reboot, does not hang boot if the Beast is off) ==="
 sudo mkdir -p "$MNT"
-FSTAB_LINE="//$SERVER/$SHARE $MNT cifs guest,ro,vers=3.0,uid=$UIDN,gid=$GIDN,iocharset=utf8,_netdev,nofail,x-systemd.automount,x-systemd.idle-timeout=600 0 0"
+# NOT the bare 'guest' flag: on this Beast that sends a NULL session and Windows
+# returns 0xc0000022 STATUS_ACCESS_DENIED (proven 2026-09-18). An explicit
+# username=Guest with an empty password over ntlmssp is accepted - that is what
+# actually mounted 115 entries in the diagnosis. No password is stored; Guest's
+# password is empty by design.
+FSTAB_LINE="//$SERVER/$SHARE $MNT cifs username=Guest,password=,sec=ntlmssp,ro,vers=3.0,uid=$UIDN,gid=$GIDN,iocharset=utf8,_netdev,nofail,x-systemd.automount,x-systemd.idle-timeout=600 0 0"
 if grep -qF "//$SERVER/$SHARE " /etc/fstab; then
   sudo sed -i "\#//$SERVER/$SHARE #d" /etc/fstab
 fi
