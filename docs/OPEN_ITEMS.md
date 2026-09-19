@@ -145,6 +145,22 @@ the gate blocks these, so it is not a matter of remembering.
 
 ---
 
+## 🖥️ COMPUTERS / NETWORK — BUILT OVERNIGHT 2026-09-18→19 (all live-verified)
+
+Jeff: *"build a network so everything is available everywhere"* / *"make sure they all connect both ways."*
+
+| what | state |
+|---|---|
+| **File mesh, both directions** | ✅ **5 of 6 legs live.** Beast→Acer `K:` (rclone over **authenticated SSH** — Win11 24H2 mandates SMB signing and guest sessions cannot be signed, so guest SMB from the Beast is impossible), Beast→Lenovo `L:` (native SMB once Jeff cleared the signing requirement), Acer→Beast `O:`, Acer→Lenovo `GarageFiles`, Lenovo→Beast mount. ❌ **Lenovo→Acer** is the one gap — blocked twice by the safety classifier (can't open a guest share on the Acer; can't add the Lenovo's key to it). Least-used leg. |
+| **Auto-reconnect after reboot / outage** | ✅ verified on all three — WiFi auto-connect, sshd + watchdogs, discovery services, drive re-map logon tasks, never-sleep. Honest limit: a long outage that drains the laptop batteries still needs a power button; the Beast's auto-boot is a BIOS AC-recovery setting. |
+| **Printer (HP OfficeJet 4650)** | ✅ all three print. Windows queues repointed **WSD → fixed IP 192.168.1.208** (WSD does not reliably wake a sleeping printer). 🔴 **Auto-Off cannot be disabled — firmware only accepts `2hours`** (PUT every other value → 400). Worked around with `HCC-PrinterKeepAlive` on the Beast: a PJL status poke every 90 min that prints nothing and stops the idle timer expiring. |
+| **Discovery / workgroup / media / email** | ✅ all three on `LOEWEN301`, WS-Discovery on (Win11 killed the old workgroup browser — `net view` error 6118 is expected, not a fault), DLNA running, Email shortcut on every desktop. |
+| **Browsers** | ✅ Edge signed in as `jeff.loewen@comcast.net` with **126 bookmarks already syncing** between Beast and Acer — it was never broken. Edge installed on the Lenovo 09-19; one sign-in there makes all three identical. ⚠️ Chrome is **Claude's** automation browser, not Jeff's. |
+| ~~**#112 GaragePC**~~ | 🟢 **PREP DONE — the garage job is now boot, install, ONE command, walk out.** `E:\GARAGE-SETUP\garage-hp-setup.sh` (bash -n clean, 0 CR bytes) does hostname/sudo/never-sleep/watchdog/workgroup/wsdd/its own share/Beast mount/printer/browser+shortcuts/auto-updates — and installs **SSH + the Beast's key FIRST**, so Claude finishes everything remotely the moment it is on WiFi. Jeff: *"I'm not sitting in the 100 degree garage."* Still needs his physical boot of the stick. |
+| 🔴 **ACER HARD FREEZE — still open, but three theories are now DEAD** | **6 real freezes in 24 h** (11:26, 15:54, 16:37, 21:03, 21:50, 23:21 — Kernel-Power 41). ❌ **"End of life" was WRONG** (drive healthy: 0 read errors, 0 wear). ❌ **Firmware M3CR046 does NOT apply** — Crucial ships separate families (`M3CR032>033` vs `M3CR042>046`); the Acer is on M3CR033, already the newest for its revision, and flashing 046 would have been the wrong family. ❌ **Thermal ruled out** — CPU 43.1 °C, drive 26 °C, zero throttle events. ✅ **APPLIED: SATA AHCI LPM disabled** (the documented Crucial-on-Intel trigger; needs no firmware). 🔑 **The clue missed all night:** `volmgr 161 "Dump file creation failed"` — the system *did* bugcheck, it just could not write the dump **because the drive it needed to write to had hung**. "No dump, nothing in the log" was never a mystery. **Verdict pending an overnight run** — gaps have ranged 43 min to 4.5 h, so anything under that proves nothing. Next suspect if it recurs: RAM (pull one stick — Jeff's own test, free). |
+
+---
+
 ## WHAT IS ACTUALLY STILL OPEN
 
 #3/#118 · #4 · #10 · #39 · #84/#85/#127 · #106 · #112 · #113 (physical half) · #121/#122 · #131 ·
