@@ -11,7 +11,10 @@ $up   = (Get-Date) - $boot
 
 Write-Output "=== uptime ==="
 L 'booted'            $boot
-L 'uptime'            ("{0}h {1}m" -f [int]$up.TotalHours, $up.Minutes)
+# [int] in PowerShell ROUNDS (5.6 -> 6), it does not truncate. That printed
+# "6h 35m" for a 5h36m uptime and briefly looked like the machine had rebooted.
+# Floor it. Fixed 2026-09-19.
+L 'uptime'            ("{0}h {1}m" -f [math]::Floor($up.TotalHours), $up.Minutes)
 L 'LPM fix applied'   $fix
 L 'hours since fix'   ([math]::Round(((Get-Date)-$fix).TotalHours,1))
 
