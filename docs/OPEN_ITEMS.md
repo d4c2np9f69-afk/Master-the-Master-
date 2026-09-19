@@ -145,6 +145,40 @@ the gate blocks these, so it is not a matter of remembering.
 
 ---
 
+## 🔴 STANDING CONSTRAINT — ANGELA'S WORK COMPUTERS (Jeff, 2026-09-19 09:10)
+
+> *"make sure you don't block Angela's work computers. I don't want them on my network but they
+> have to be on the WiFi and ethernet"*
+
+**Two requirements, and they pull in opposite directions:** they must keep **internet over both WiFi
+and Ethernet**, and they must **not participate in Jeff's LAN**.
+
+⚠️ **WHICH MACHINES THESE ARE IS NOT RECORDED ANYWHERE.** `Search-HCC.ps1 "Angela work computer"`
+returns nothing across decisions, conversation, chronicles and reference guides. **Until Jeff names
+them (or their MACs), no session can safely claim to have protected or isolated them.** Ask once,
+write it here.
+
+🟢 **Nothing done in the 09-18/19 build can block them.** Every change was *inside* three machines —
+Beast (sharing/media config), Acer (power, SSH key, time), Lenovo (samba/wsdd/nmbd). **The gateway,
+DHCP and routing were never touched.** The pending SMB-signing change is also per-machine on Jeff's
+three, not network-wide, so it cannot reach her either.
+
+**What the gateway can actually do (verified 2026-09-19, not assumed):**
+- **WiFi — yes.** BGW320-500 Guest SSID has a **Network Access** setting; on **"Internet Only"** a
+  guest client reaches the internet but **cannot contact any LAN host, including the gateway**, on a
+  separate subnet. That is exactly the requirement.
+- **Ethernet — UNCONFIRMED.** Guest SSID is wireless-only in every source found; the BGW320's LAN
+  ports all sit on the home LAN and it exposes no VLANs. **Do not promise wired isolation until it
+  has been looked for in the admin UI at `192.168.1.254`.** "Could not check" is the honest state.
+- ⚠️ Changing gateway settings affects the **whole household's** connectivity — **needs Jeff's
+  explicit go**, never done unasked.
+
+📌 **Practical note:** corporate-managed laptops normally do not join a workgroup or share files
+anyway, so they can sit on the same subnet without being "on the network" in the sharing sense.
+Being on `192.168.1.x` is not the same as participating in Jeff's file sharing.
+
+---
+
 ## 🖥️ COMPUTERS / NETWORK — BUILT OVERNIGHT 2026-09-18→19 (all live-verified)
 
 Jeff: *"build a network so everything is available everywhere"* / *"make sure they all connect both ways."*
