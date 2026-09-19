@@ -153,10 +153,19 @@ the gate blocks these, so it is not a matter of remembering.
 **Two requirements, and they pull in opposite directions:** they must keep **internet over both WiFi
 and Ethernet**, and they must **not participate in Jeff's LAN**.
 
-⚠️ **WHICH MACHINES THESE ARE IS NOT RECORDED ANYWHERE.** `Search-HCC.ps1 "Angela work computer"`
-returns nothing across decisions, conversation, chronicles and reference guides. **Until Jeff names
-them (or their MACs), no session can safely claim to have protected or isolated them.** Ask once,
-write it here.
+🟢🟢 **RESOLVED 2026-09-19 09:12 — THE REQUIREMENT IS ALREADY MET, AND NOT BY US.** Jeff, verbatim:
+***"I can't get on her computers they are blocked I tried just to see if I could."***
+Her employer's endpoint policy blocks inbound access — corporate-managed, host firewall closed, no
+file sharing exposed. So the machines pull an address and internet from the gateway while
+participating in **nothing** on Jeff's LAN. **That is exactly "on the WiFi and Ethernet but not on
+my network," achieved with zero configuration on our side.**
+
+✅ **THEREFORE: DO NOT build guest-SSID isolation for this, and do not touch the gateway for it.**
+A BGW320 change would affect the **whole household's** connectivity to solve a problem that does
+not exist. The wired-isolation question is **moot** — it never needed answering.
+⛔ **And do not try to reach or "fix" Angela's machines.** They are her employer's, they are locked
+down deliberately, and being unable to reach them is the CORRECT state — not a fault to report and
+not a wall to work around.
 
 🟢 **Nothing done in the 09-18/19 build can block them.** Every change was *inside* three machines —
 Beast (sharing/media config), Acer (power, SSH key, time), Lenovo (samba/wsdd/nmbd). **The gateway,
