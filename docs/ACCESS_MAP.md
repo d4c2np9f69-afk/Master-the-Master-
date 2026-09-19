@@ -180,9 +180,14 @@ returned `0x0`.** Plus `explorer.exe` running and 6 interactive logon sessions.
 | **`Get-SmbConnection`** | **machine-wide** | 🟢 no — use this |
 | `Get-ScheduledTaskInfo … LastTaskResult` | machine-wide | 🟢 no |
 
-⚠️ **Also: OneDrive is GONE from the Acer by Jeff's decision** (error `0x8004de80` → *"Okay no
-OneDrive on acer"*). It reaches his files over the `O:` SMB mapping instead. **A check must not
-outlive the decision it encodes** — that one could only ever fail.
+🔄 **OneDrive on the Acer flipped TWICE on 2026-09-19 — check, do not assume.** Early that day it
+failed with `0x8004de80` and Jeff said *"Okay no OneDrive on acer"*, so files came over the `O:`
+SMB mapping. **At 07:54 he turned it back on: *"I also turned on the one drive and it is now
+working great."*** Verified live — OneDrive.exe up since 07:23, signed in as
+`jeff.loewen@comcast.net`, **19,962 files / 45.54 GB**, zero sync errors.
+**So the Acer now reaches his files BOTH ways.** `acer-files-probe.ps1` therefore tests both routes
+and passes if either works — **a check hard-wired to one route fails the moment he changes his
+mind**, which is exactly what happened here within three hours of that check being written.
 
 ---
 

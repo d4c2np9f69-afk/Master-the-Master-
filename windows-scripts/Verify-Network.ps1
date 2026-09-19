@@ -99,21 +99,20 @@ Result 'GarageLaptop - reads the share' ($out -match '^[1-9]') $(if($out -match 
 $out = RemoteRun $LENOVO 'mount | grep -c "/mnt/beast/OneDrive"'
 Result 'GarageLaptop - share MOUNTED' ($out -match '^[1-9]') $(if($out -match '^[1-9]'){'mounted at /mnt/beast/OneDrive, guest read-only, no password'}else{'not mounted - run lenovo-mount-beast.sh'})
 
-# WAS: acer-onedrive-probe.ps1, asserting OneDrive was signed in and syncing.
-# TWO reasons that was wrong, both found 09-19:
-#  1. JEFF KILLED ONEDRIVE ON THE ACER after error 0x8004de80 - "Okay no OneDrive
-#     on acer". The check was asserting a thing he decided against, so it could
-#     only ever FAIL. A check must not outlive the decision it encodes.
-#  2. Its replacement must not test the O: drive letter over SSH either - net use
-#     mappings are PER LOGON SESSION, so O: reads "Unavailable" in an SSH session
-#     while Jeff's console session has it mounted. That nearly got reported as a
-#     broken mesh leg when HCC-MapBeastAtLogon had in fact run at 23:22:03 and
-#     returned 0x0 on the unattended reboot.
+# Checks BOTH routes and passes if EITHER works. Which one is live flipped TWICE
+# in one day (09-19): OneDrive died with 0x8004de80 -> "Okay no OneDrive on acer"
+# -> files came over the O: SMB mapping -> then 07:54 Jeff turned OneDrive back
+# on, "it is now working great" (verified: 19,962 files / 45.54 GB, no errors).
+# A check hard-wired to one route fails the moment he changes his mind.
+# ALSO: never test the O: drive letter over SSH - net use mappings are PER LOGON
+# SESSION, so O: reads "Unavailable" in an SSH session while Jeff's console
+# session has it mounted. That nearly got reported as a broken mesh leg when
+# HCC-MapBeastAtLogon had in fact run at 23:22:03 and returned 0x0.
 # Get-SmbConnection is machine-wide and is the honest instrument.
 $out = RemoteRun $ACER 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\HCC-SETUP\acer-files-probe.ps1'
 $parts = $out -split '\|'
-$ok = ($parts.Count -ge 3) -and ([int]$parts[0] -gt 0) -and ($parts[1] -match '192\.168\.1\.194')
-Result 'JeffsLapTop - reaches the Beast''s files' $ok $(if($ok){"$($parts[0]) live SMB session(s) to $($parts[1]); logon remap task OK=$($parts[2])"}else{"$out"})
+$ok = ($parts.Count -ge 4) -and ($parts[0] -ne 'NONE')
+Result 'JeffsLapTop - reaches Jeff''s files' $ok $(if($ok){"via $($parts[0]) - $($parts[1]) SMB session(s), $($parts[3]) OneDrive files"}else{"no route to his files: $out"})
 
 Say "4. WILL IT SURVIVE A REBOOT? (the thing that actually breaks)"
 $out = RemoteRun $ACER 'sc qc sshd'
