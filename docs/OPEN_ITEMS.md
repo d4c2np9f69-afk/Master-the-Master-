@@ -209,8 +209,33 @@ matters because the SEND TO GARAGE handoff is useless without audio out there.
 ⚠️ **Trap:** `pactl list short sinks` returns EMPTY over SSH because **`pactl` was not installed**
 (now is) *and* it needs `XDG_RUNTIME_DIR=/run/user/1000` + `DBUS_SESSION_BUS_ADDRESS` set.
 **An empty sink list is NOT evidence of no audio.**
-⚠️ **No dongle model has been recommended.** Rule 8: a real search and a verified bluez-compatible
-model first. ⚠️ Jeff's 5 GHz-vs-2.4 hunch was right about the **hardware** but was NOT what broke
+🛒 **DONGLE — WHAT TO BUY, verified against THIS machine + real prices from the BROWSER, 2026-09-19.**
+**Buy one whose specs say `RTL8761B`/`RTL8761BU`, or that states Linux support.** The usual forum
+failure cannot happen here: kernel **7.0.0-31 / Ubuntu 26.04.1 LTS** (btrtl needs 5.8+), modules
+`btusb`+**`btrtl`** present, and the firmware is **already on disk** — `rtl8761b_fw.bin`,
+`rtl8761bu_fw.bin`, `rtl8761cu_fw.bin`, 46 files in `/lib/firmware/rtl_bt/`. With `bluez 5.85` +
+`libspa-0.2-bluetooth` it is plug-and-pair. USB ports are USB 2.0, which is all a BT dongle needs.
+
+✅ **RECOMMENDED: Cudy `BU530` — $6.49**, listing states verbatim *"…ultra-low latency audio,
+**Windows and Linux**"*, 4.2★ (248), Amazon "Overall Pick", next-day delivery.
+🔴 **THE TRAP he would have hit buying "a cheap dongle": the best-sellers are WINDOWS-ONLY in their
+own specs** — **UGREEN BT5.3 $6.99 (*"Windows 11/10/8.1 Only"*)**, UGREEN BT6.0 $7.99,
+**TP-Link UB500 $11.99**, Amazon Basics 5.4 $8.96. UGREEN alone shows *3,000+ bought this month*.
+**Do not buy any of those.** Safer/pricier: **StarTech `USBA-BLUETOOTH-V5-C2` $16.99**
+(Windows/Linux, RTL8761B) or **Panda BT4.0 Nano $19.99** (lists Ubuntu/Mint/Fedora by name).
+⚠️ **Unconfirmed: the Cudy's exact chipset** — it claims Linux but does not name the chip.
+⚠️ **WebFetch is 403 on Amazon; the BROWSER is not.** Jeff, 10:13: *"Why can't you think Use the
+browser so I get the correct one."* He was right — `ACCESS_MAP` already says vendor sites need it.
+
+🟢 **JEFF'S DECISION 10:17 — buying the dongle, NOT running a cable:** *"I don't need more cables on
+my work bench I will get the dongal."* **The 3.5 mm cable option is CLOSED — do not re-pitch it.**
+🛠️ **READY FOR ARRIVAL, zero garage fiddling.** `windows-scripts/lenovo-pair-bluetooth.sh` is staged
+on the Lenovo at `~/pair-bluetooth.sh` (`bash -n` clean; dry-run correctly reports **"NO CONTROLLER"**
+today rather than faking success). Jeff plugs it in and walks away — Claude runs it from the Beast:
+it starts the service, scans, pairs **and trusts** (without trust the speakers never auto-reconnect),
+sets the bluez sink as default, and **plays a tone to prove it**.
+
+⚠️ Jeff's 5 GHz-vs-2.4 hunch was right about the **hardware** but was NOT what broke
 discovery — that was `disable netbios = Yes`.
 
 ---
