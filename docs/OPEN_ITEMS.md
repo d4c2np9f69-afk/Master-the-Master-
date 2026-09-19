@@ -197,8 +197,18 @@ Being on `192.168.1.x` is not the same as participating in Jeff's file sharing.
 | 🖥️ machine | **Lenovo B570 (1068BAU)** — many shipped without BT |
 | ✅ **BT software already complete** | `bluez 5.85`, `bluez-obexd`, **`libspa-0.2-bluetooth`** (the PipeWire A2DP plugin), pipewire + wireplumber active — **a USB dongle would be plug-and-pair, nothing to install** |
 
-**So Jeff's garage Bluetooth speakers will NOT work on it as-is.** ## 🖥️ COMPUTERS / NETWORK — BUILT OVERNIGHT 2026-09-18→19 (all live-verified) option: the B570 has built-in
-speakers and a 3.5 mm jack — a cable to the speakers' aux input costs nothing.
+**So Jeff's garage Bluetooth speakers will NOT work on it as-is.**
+
+🟢 **BUT THE ZERO-COST PATH IS CONFIRMED WORKING, not assumed** (tested 2026-09-19 10:04): sink
+`alsa_output.pci-0000_00_1b.0.analog-stereo` — **ALC272 Analog = built-in speakers + 3.5 mm jack**,
+with `HDMI 0` as a second output. **`speaker-test` played a 440 Hz tone without error** and the sink
+moved `SUSPENDED → IDLE`, proving audio actually flowed. Not muted; volume raised 40% → 60%.
+**A 3.5 mm cable to the speakers' aux input gives the garage sound today for nothing** — which
+matters because the SEND TO GARAGE handoff is useless without audio out there.
+
+⚠️ **Trap:** `pactl list short sinks` returns EMPTY over SSH because **`pactl` was not installed**
+(now is) *and* it needs `XDG_RUNTIME_DIR=/run/user/1000` + `DBUS_SESSION_BUS_ADDRESS` set.
+**An empty sink list is NOT evidence of no audio.**
 ⚠️ **No dongle model has been recommended.** Rule 8: a real search and a verified bluez-compatible
 model first. ⚠️ Jeff's 5 GHz-vs-2.4 hunch was right about the **hardware** but was NOT what broke
 discovery — that was `disable netbios = Yes`.
