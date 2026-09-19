@@ -17,7 +17,10 @@ const code = ['garageOpenerId','garagePositionId','garageIsOverheadDoor','garage
 eval(code);
 if (typeof garagePick !== 'function') { console.error('extraction failed'); process.exit(1); }
 
-const states = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+// .replace(/^﻿/,'') is load-bearing - see the note in doors-entity-test.js.
+// PowerShell 5.1 `Set-Content -Encoding UTF8` emits a BOM; JSON.parse throws on it and
+// the gate then looks broken rather than fed bad input. Cost 10 minutes on 2026-09-19.
+const states = JSON.parse(fs.readFileSync(process.argv[2], 'utf8').replace(/^﻿/, ''));
 let fail = 0;
 function check(label, got, want){
   const ok = got === want; if (!ok) fail++;

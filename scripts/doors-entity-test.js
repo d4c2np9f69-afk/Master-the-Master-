@@ -10,7 +10,12 @@ function extract(name){
 }
 const code=['garageIsOverheadDoor','hccDoorSensors','hccDoorIsOpen'].map(extract).join('\n');
 eval(code);
-const states=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+// .replace(/^﻿/,'') is load-bearing: PowerShell 5.1's `Set-Content -Encoding UTF8`
+// writes a BOM, and JSON.parse throws on it. The documented way to produce this file on
+// this machine is PowerShell, so without this the gate crashes with a module stack trace
+// and dumps the whole states file - which reads like a broken gate, not a bad input.
+// Cost 10 minutes on 2026-09-19. Write BOM-less with [System.IO.File]::WriteAllText.
+const states=JSON.parse(fs.readFileSync(process.argv[2],'utf8').replace(/^﻿/,''));
 let fail=0;
 function check(l,g,w){const ok=g===w;if(!ok)fail++;console.log((ok?'  PASS  ':'  FAIL  ')+l+'  got='+g+(ok?'':'  WANT='+w));}
 const doors=hccDoorSensors(states);
