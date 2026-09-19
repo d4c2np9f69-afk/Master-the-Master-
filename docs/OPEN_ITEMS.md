@@ -188,6 +188,22 @@ Being on `192.168.1.x` is not the same as participating in Jeff's file sharing.
 
 ---
 
+## 🔌 LENOVO HARDWARE LIMITS — measured 2026-09-19, do not re-investigate
+
+| fact | evidence |
+|---|---|
+| ❌ **NO Bluetooth radio** | `/sys/class/bluetooth` = **0 entries**; `rfkill` lists only `ideapad_wlan`/`phy0` (a switched-off radio would still be listed); the two `8087:0024` USB devices are Intel **Rate Matching Hubs**, not BT |
+| ❌ **2.4 GHz WiFi only** | Qualcomm Atheros **AR9285** — single-band. That is why it sits on `Loewen301` and not `Loewen301-5G`, and it cannot change without hardware |
+| 🖥️ machine | **Lenovo B570 (1068BAU)** — many shipped without BT |
+| ✅ **BT software already complete** | `bluez 5.85`, `bluez-obexd`, **`libspa-0.2-bluetooth`** (the PipeWire A2DP plugin), pipewire + wireplumber active — **a USB dongle would be plug-and-pair, nothing to install** |
+
+**So Jeff's garage Bluetooth speakers will NOT work on it as-is.** ## 🖥️ COMPUTERS / NETWORK — BUILT OVERNIGHT 2026-09-18→19 (all live-verified) option: the B570 has built-in
+speakers and a 3.5 mm jack — a cable to the speakers' aux input costs nothing.
+⚠️ **No dongle model has been recommended.** Rule 8: a real search and a verified bluez-compatible
+model first. ⚠️ Jeff's 5 GHz-vs-2.4 hunch was right about the **hardware** but was NOT what broke
+discovery — that was `disable netbios = Yes`.
+
+---
 ## 🖥️ COMPUTERS / NETWORK — BUILT OVERNIGHT 2026-09-18→19 (all live-verified)
 
 Jeff: *"build a network so everything is available everywhere"* / *"make sure they all connect both ways."*
