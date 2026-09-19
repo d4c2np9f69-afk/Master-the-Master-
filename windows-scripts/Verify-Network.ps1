@@ -85,8 +85,13 @@ Say "3. CAN EACH MACHINE READ THE SHARED DRIVE? (the feature, not the port)"
 $ok = Test-Path 'C:\Users\jeffl\OneDrive'
 Result '301SERVER - has the share' $ok $(if($ok){'C:\Users\jeffl\OneDrive exists (it is the source)'}else{'NOT FOUND'})
 
-$out = RemoteRun $LENOVO 'smbclient -L //192.168.1.194 -N 2>/dev/null | grep -ci onedrive'
-Result 'GarageLaptop - sees the share' ($out -match '^[1-9]') $(if($out -match '^[1-9]'){'smbclient listed OneDrive on 301SERVER'}else{"could not list it: $out"})
+# WAS: smbclient -L //192.168.1.194 -N | grep -ci onedrive. That is ANONYMOUS
+# enumeration, and the Beast refuses anonymous (it prompts for a username), so it
+# returned 0 and FAILED a machine that reads the share fine - proven 09-19 by
+# listing 117 files through the mount. The feature is "can it READ the files",
+# so read them. Fixed 09-19.
+$out = RemoteRun $LENOVO 'ls /mnt/beast/OneDrive 2>/dev/null | wc -l'
+Result 'GarageLaptop - reads the share' ($out -match '^[1-9]') $(if($out -match '^[1-9]'){"$out files readable in /mnt/beast/OneDrive"}else{"cannot read it: $out"})
 
 # The share mounts by IP (//192.168.1.194/OneDrive), NOT by the hostname, so
 # grepping for "301SERVER" failed a share that WAS mounted (09-18). Match the
@@ -94,14 +99,21 @@ Result 'GarageLaptop - sees the share' ($out -match '^[1-9]') $(if($out -match '
 $out = RemoteRun $LENOVO 'mount | grep -c "/mnt/beast/OneDrive"'
 Result 'GarageLaptop - share MOUNTED' ($out -match '^[1-9]') $(if($out -match '^[1-9]'){'mounted at /mnt/beast/OneDrive, guest read-only, no password'}else{'not mounted - run lenovo-mount-beast.sh'})
 
-# The Acer gets Jeff's files through ONEDRIVE, not the SMB share - it is signed in
-# as jeff.loewen@comcast.net and the Desktop is redirected into it (found 09-18).
-# Testing SMB here failed a machine that already had the files. Test the FEATURE.
-# probe lives ON the Acer at C:\HCC-SETUP\ (deployed from windows-scripts\acer-onedrive-probe.ps1)
-$out = RemoteRun $ACER 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\HCC-SETUP\acer-onedrive-probe.ps1'
+# WAS: acer-onedrive-probe.ps1, asserting OneDrive was signed in and syncing.
+# TWO reasons that was wrong, both found 09-19:
+#  1. JEFF KILLED ONEDRIVE ON THE ACER after error 0x8004de80 - "Okay no OneDrive
+#     on acer". The check was asserting a thing he decided against, so it could
+#     only ever FAIL. A check must not outlive the decision it encodes.
+#  2. Its replacement must not test the O: drive letter over SSH either - net use
+#     mappings are PER LOGON SESSION, so O: reads "Unavailable" in an SSH session
+#     while Jeff's console session has it mounted. That nearly got reported as a
+#     broken mesh leg when HCC-MapBeastAtLogon had in fact run at 23:22:03 and
+#     returned 0x0 on the unattended reboot.
+# Get-SmbConnection is machine-wide and is the honest instrument.
+$out = RemoteRun $ACER 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\HCC-SETUP\acer-files-probe.ps1'
 $parts = $out -split '\|'
-$ok = ($parts.Count -ge 3) -and ($parts[0] -match '@') -and ([int]$parts[1] -gt 100) -and ($parts[2] -match 'True')
-Result 'JeffsLapTop - has Jeff''s files (OneDrive)' $ok $(if($ok){"signed in as $($parts[0]), $($parts[1]) files, sync running"}else{"$out"})
+$ok = ($parts.Count -ge 3) -and ([int]$parts[0] -gt 0) -and ($parts[1] -match '192\.168\.1\.194')
+Result 'JeffsLapTop - reaches the Beast''s files' $ok $(if($ok){"$($parts[0]) live SMB session(s) to $($parts[1]); logon remap task OK=$($parts[2])"}else{"$out"})
 
 Say "4. WILL IT SURVIVE A REBOOT? (the thing that actually breaks)"
 $out = RemoteRun $ACER 'sc qc sshd'

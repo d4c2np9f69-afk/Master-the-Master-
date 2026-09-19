@@ -156,10 +156,33 @@ authenticated SSH**, not a share. Don't "fix" it back to guest SMB.
 browser with WS-Discovery. Workgroup on all machines is `LOEWEN301`.
 
 **Whole-mesh proof script:** `windows-scripts\Verify-Network.ps1` — last run **19 PASS / 0 FAIL /
-3 SKIP**. ⚠️ Four of its checks originally failed *healthy* machines (lid-setting grep in the wrong
-dir, icon count broken on CRLF, `quser` absent on Win11 Home, mount check grepping a hostname when
-the share mounts by IP). **A gate that fails a working machine is worse than no gate** — if it
-fails, suspect the check before the machine.
+3 SKIP** (2026-09-19 04:55). ⚠️ **SIX of its checks have now failed *healthy* machines** (lid-setting
+grep in the wrong dir, icon count broken on CRLF, `quser` absent on Win11 Home, mount check grepping
+a hostname when the share mounts by IP, anonymous `smbclient -L -N` against a server that refuses
+anonymous, and a OneDrive assertion Jeff had already overruled).
+**A gate that fails a working machine is worse than no gate** — if it fails, suspect the check
+before the machine.
+
+### 🔴 THE TRAP THAT ALMOST BECAME A FALSE FAULT REPORT (2026-09-19)
+
+**`net use` drive mappings are PER LOGON SESSION.** An SSH session is **not** Jeff's console
+session. So `O:` correctly reads **"Unavailable"** over SSH *while his desktop has it mounted*.
+Reading that as a broken mesh leg was wrong, and it was two commands from being reported as one.
+
+**What proved it:** `HCC-MapBeastAtLogon` → `C:\HCC-SETUP\map-beast.cmd` (which already uses
+`/user:Guest ""`, correctly) **last ran 2026-09-18 23:22:03 — 15 s after the freeze reboot — and
+returned `0x0`.** Plus `explorer.exe` running and 6 interactive logon sessions.
+
+| instrument | scope | lies over SSH? |
+|---|---|---|
+| `net use` / `Get-PSDrive O` | **per logon session** | 🔴 **YES** |
+| `Test-Path \\server\share` | per logon session | 🔴 **YES** |
+| **`Get-SmbConnection`** | **machine-wide** | 🟢 no — use this |
+| `Get-ScheduledTaskInfo … LastTaskResult` | machine-wide | 🟢 no |
+
+⚠️ **Also: OneDrive is GONE from the Acer by Jeff's decision** (error `0x8004de80` → *"Okay no
+OneDrive on acer"*). It reaches his files over the `O:` SMB mapping instead. **A check must not
+outlive the decision it encodes** — that one could only ever fail.
 
 ---
 
