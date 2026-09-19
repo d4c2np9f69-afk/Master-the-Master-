@@ -44,9 +44,9 @@ Set-SmbServerConfiguration -RequireSecuritySignature $false -Force
 Set-SmbServerConfiguration -EnableSecuritySignature  $false -Force
 Set-SmbClientConfiguration -RequireSecuritySignature $false -Force
 Set-SmbClientConfiguration -EnableInsecureGuestLogons $true -Force
-$sс = Get-SmbClientConfiguration; $ss = Get-SmbServerConfiguration
-L 'client RequireSecuritySignature' $sс.RequireSecuritySignature
-L 'client EnableInsecureGuestLogons' $sс.EnableInsecureGuestLogons
+$sc = Get-SmbClientConfiguration; $ss = Get-SmbServerConfiguration
+L 'client RequireSecuritySignature' $sc.RequireSecuritySignature
+L 'client EnableInsecureGuestLogons' $sc.EnableInsecureGuestLogons
 L 'server RequireSecuritySignature' $ss.RequireSecuritySignature
 
 Write-Output ""

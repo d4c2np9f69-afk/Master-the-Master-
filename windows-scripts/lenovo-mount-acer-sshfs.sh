@@ -17,7 +17,11 @@
 # acer-trust-lenovo.ps1, which writes both files and sets the strict ACL.
 set -u
 MNT=/mnt/acer
-# 🔴 REMOTE PATH MUST BE EMPTY. Windows OpenSSH's sftp already lands in
+# 🔴 TWO THINGS MUST BOTH BE RIGHT OR THE MOUNT SUCCEEDS AND SHOWS NOTHING:
+#   (a) uid=1000,gid=1000 and NO default_permissions. Windows sftp reports
+#       ownership as '-', so with default_permissions the kernel denies Jeff
+#       read access and the mount looks EMPTY rather than failing.
+#   (b) REMOTE PATH MUST BE EMPTY. Windows OpenSSH's sftp already lands in
 # /C:/Users/jeffl, so giving a path makes sshfs resolve it RELATIVE to that -
 # /C:/Users/jeffl/C:/Users/jeffl - which does not exist. The mount then SUCCEEDS
 # and lists ZERO items, which looks like a permissions problem and is not.
@@ -56,7 +60,7 @@ sudo mkdir -p "$MNT"
 sudo chown "$USER:$USER" "$MNT"
 # allow_other so the desktop session and root both see it; IdentityFile is
 # explicit because this may run from a non-login context.
-sshfs -o allow_other,default_permissions,reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,StrictHostKeyChecking=no,IdentityFile=/home/jeffloewen/.ssh/id_ed25519 \
+sshfs -o allow_other,uid=1000,gid=1000,reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,StrictHostKeyChecking=no,IdentityFile=/home/jeffloewen/.ssh/id_ed25519 \
       "$REMOTE" "$MNT" 2>/tmp/sshfs.err
 if mountpoint -q "$MNT"; then
     n=$(ls "$MNT" 2>/dev/null | wc -l)
@@ -74,7 +78,7 @@ fi
 
 echo ""
 echo "=== 4. make it survive a reboot ==="
-echo "jeffl@192.168.1.176: $MNT fuse.sshfs _netdev,nofail,allow_other,default_permissions,reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,StrictHostKeyChecking=no,IdentityFile=/home/jeffloewen/.ssh/id_ed25519,x-systemd.automount,x-systemd.idle-timeout=600 0 0" | sudo tee -a /etc/fstab >/dev/null
+echo "jeffl@192.168.1.176: $MNT fuse.sshfs _netdev,nofail,allow_other,uid=1000,gid=1000,reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,StrictHostKeyChecking=no,IdentityFile=/home/jeffloewen/.ssh/id_ed25519,x-systemd.automount,x-systemd.idle-timeout=600 0 0" | sudo tee -a /etc/fstab >/dev/null
 sudo systemctl daemon-reload
 echo "  fstab entry written (nofail, so a sleeping Acer never blocks boot)"
 grep -n 'acer' /etc/fstab | sed 's/^/      /'
