@@ -130,6 +130,37 @@ life of this project, until 2026-09-10.
 and `Enable-BitLocker` exist on Home but the feature does not. Home gets Device Encryption only,
 which needs **both** Secure Boot (PCR7) **and** clean DMA — see OPEN_ITEMS #4.
 
+### 4b. 🔑 THE OTHER THREE MACHINES — how to actually reach them (added 2026-09-19)
+
+*This file said "how to reach EVERY system" and did not mention a single one of the machines the
+09-18/19 session networked. That gap is why a later session would have re-derived all of it.*
+
+| Machine | Address | How Claude gets in | Proof it worked |
+|---|---|---|---|
+| **Beast** (this PC) | `192.168.1.194` | local | — |
+| **Acer** laptop | `192.168.1.176` · user `jeffl` | **`ssh jeffl@192.168.1.176`** — key already installed | `ssh … "powershell -File C:\Users\jeffl\x.ps1"` returns output |
+| **Lenovo** (garage, Linux) | `192.168.1.173` · user `jeffloewen` | **`ssh jeffloewen@192.168.1.173`** — key already installed | `ssh … hostname` |
+| **HP** (garage) | *not yet on WiFi* | staged: `E:\GARAGE-SETUP\garage-hp-setup.sh` installs sshd **+ the Beast's key FIRST** | Jeff reports the IP, then it is remote-finishable |
+
+🔴 **THE RULE THAT SAVES THE MOST TIME HERE: never inline a script over SSH.** Nested quoting
+between PowerShell → ssh → the remote shell broke **six separate times** in one session. **Always
+`scp` a script file, then run it by path.** That worked every single time:
+```powershell
+scp -o StrictHostKeyChecking=no local.ps1 jeffl@192.168.1.176:C:/Users/jeffl/x.ps1
+ssh jeffl@192.168.1.176 "powershell -ExecutionPolicy Bypass -File C:\Users\jeffl\x.ps1"
+```
+⚠️ **Guest SMB from the Beast is IMPOSSIBLE, not misconfigured** — Win11 24H2 mandates SMB signing
+and a guest session cannot be signed (`0xC05D0003`). That is why Beast→Acer runs **rclone over
+authenticated SSH**, not a share. Don't "fix" it back to guest SMB.
+⚠️ `net view` **error 6118 is expected**, not a fault — Win11 replaced the NetBIOS workgroup
+browser with WS-Discovery. Workgroup on all machines is `LOEWEN301`.
+
+**Whole-mesh proof script:** `windows-scripts\Verify-Network.ps1` — last run **19 PASS / 0 FAIL /
+3 SKIP**. ⚠️ Four of its checks originally failed *healthy* machines (lid-setting grep in the wrong
+dir, icon count broken on CRLF, `quser` absent on Win11 Home, mount check grepping a hostname when
+the share mounts by IP). **A gate that fails a working machine is worse than no gate** — if it
+fails, suspect the check before the machine.
+
 ---
 
 ## 5. Everything else

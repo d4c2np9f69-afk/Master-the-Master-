@@ -272,7 +272,7 @@ all rows promoted to ON HAND, photo-confirmed, not unboxed per Jeff's order.)
 |---|---|---|---|
 | PMS5003 + MH-Z19B + ZE07-CO + MQ-4 + BME280 | 1 ea | ~$40–50 | Guardian Air Station (see docs/guardian/air_station_plan_2026-08-18.md; brain = Jeff's spare ESP32, $0) |
 | Zigbee leak pucks | 3 | ~$15 | master vanity ×2 + dishwasher (Jeff 08-18). Irrigation-box puck DECLINED — meter LTS covers irrigation, box too damp for electronics |
-| Kidde SM120X relay (store) | 1 | $18.99 | wired-alarm interconnect → air station GPIO |
+| Kidde SM120X relay | 1 | **~$12.50–$15** | wired-alarm interconnect → air station GPIO. ✅ **Priced + compat-verified 2026-09-19:** works with Jeff's **Firex i4618AC** (Kidde cross-compat list). ⚠️ **NOT at Kidde/Konnected/Alarm Grid — sold out/discontinued;** use an electrical supply house (GeScan $12.49, IMS $14.50, ADI). Avoid the unbranded Amazon clones — 120 V life-safety part. ⚠️ Smoke only, and **dead during a power outage.** Detail: `docs/automation/IDEAS_FROM_WHAT_WE_OWN_2026-09-17.md` §4c |
 | 3M VHB tape roll (store) | 1 | ~$10 | re-mount door sensors (front door fell 2:12 AM 08-18 — stock adhesive fails on 2×AA weight); body-on-door, magnet-on-molding |
 | Radon test kit (store) | 1 | ~$15 | measure BEFORE any $97 RD200 buy |
 

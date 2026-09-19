@@ -345,12 +345,51 @@ into a contact sensor** instead; a float is only closed at one level.
 ### Your existing hardwired smoke/CO alarms → HA — the best safety spend on this page
 If they're 3-wire interconnected (black/white/red), a **Kidde SM120X relay module** wires into the
 interconnect and gives a **dry-contact output when ANY alarm in the house trips**. Feed that into a
-spare contact sensor (reed hack) and **every hardwired alarm becomes an HA sensor** — which drives
-the fireplace kill above, an all-Echo announcement, and HVAC shutdown.
+spare contact sensor (reed hack) and **every hardwired SMOKE alarm becomes an HA sensor** — which
+drives the fireplace kill above, an all-Echo announcement, and HVAC shutdown.
+
+> ### ✅ VERIFIED 2026-09-19 — read this before buying. Four things here were wrong.
+>
+> **1. COMPATIBILITY: CONFIRMED YES.** Jeff's hardwired alarm is a **Firex `i4618AC`** (the one that
+> was chirping 08-18). The SM120X manual's own list is Kidde-only — `1235/1235CA, 1275/1275CA,
+> 1285/1285CA, PE120/PE120CA, PI2000/PI2000CA, KN-COSM-IB/IBCA, HD135F/HD135FCA`, *"all with red
+> interconnect wires"* — and **Firex is not named on it.** But Kidde's own
+> [Firex interconnectivity page](https://www.kidde.com/support/smoke-alarms/firex-interconnectivity)
+> lists the i4618AC as interconnectable with `1235, 1275, 1285, PE120, Pi2000, KN-COSM-IB` — the
+> *same* models. Same 9 VDC red-wire standard, same parent company. **It will work.**
+>
+> **2. PRICE: ~$12.50–$29, not "$25–30" — but availability is the real problem.** Kidde's own store
+> says **$24.97, "Sorry - this product is no longer available," out of stock**; the Kidde product page
+> shows "Coming Soon"; **Alarm Grid says discontinued**; and **Konnected — the link this doc sends you
+> to — is sold out.** Still stocked through electrical/industrial channels: GeScan **$12.49**, IMS
+> Supply **from $14.50**, ADI Global, Select Safety Sales. ⚠️ The Amazon "replacement for SM120X"
+> listings are unbranded (Duodyeo/Pokin/Bezmaksas) — **this is a 120 V life-safety circuit; buy the
+> real UL-listed Kidde part from a supply house, not a no-name clone.**
+>
+> **3. ⚠️ IT IS DEAD DURING A POWER OUTAGE.** The manual, verbatim: *"Since this module is 120 volt AC
+> powered, it will not function during an AC power failure, even if it is being used with the …
+> alarms which have battery backup power."* The alarms still scream on their 9 V backup — **HA just
+> won't hear them.** That is a real hole in exactly the scenario where a fire is most likely, and
+> nothing in this repo said so before today.
+>
+> **4. ⚠️ IT DOES NOT COVER CO.** The manual: CO-only models *"will not activate the SM120X"*, and on
+> combo units *"only the Smoke portion"* trips it. So "every hardwired smoke/**CO** alarm becomes an
+> HA sensor" was false. **CO needs its own detector** — see the Zigbee CO line on the shopping list.
+>
+> **Wiring (from the manual, P/N 810-1775 Rev.B):** black = AC hot · white = AC neutral · red =
+> interconnect · **blue = common · yellow = NC · orange = NO** · gray = 9 VDC out (5 mA max).
+> Contacts rated **10 A @ 120 VAC / 5 A @ 30 VDC**. Each module counts as one interconnect device —
+> subtract one from the chain's max. Mounts in a UL-listed junction box.
+>
+> **The $0 option was checked and is closed:** Alexa Guard used to do smoke/CO *sound* detection free
+> on the Echos Jeff already owns. **Amazon retired it** — that feature now requires **Alexa Emergency
+> Assist, $5.99/mo or $59/yr.** A forever-subscription to replace a one-time ~$15 part is the wrong
+> trade here.
+
 [Kidde](https://www.kidde.com/products/safety-accessories/smoke-alarm-relay-module) ·
-[Konnected](https://konnected.io/products/kidde-sm120x-hardwired-smoke-alarm-relay-module)
-**~$25–30 unverified. Verify your alarms are Kidde-compatible interconnect first.** It's a
-junction-box wiring job — squarely your wheelhouse.
+[Konnected (sold out)](https://konnected.io/products/kidde-sm120x-hardwired-smoke-alarm-relay-module) ·
+[manual PDF](https://www.brooksequipment.com/files/SM120X_M.pdf)
+It's a junction-box wiring job — squarely your wheelhouse.
 
 ### The old hardware
 - **🥇 HP TouchSmart 520 → wall-mounted HA dashboard.** It's a **23-inch touchscreen all-in-one**.
@@ -444,7 +483,10 @@ vehicles. **Get the truck's useful signals from TPMS via rtl_433 instead.**
 ## Small spends — ALL PRICES UNVERIFIED, I price them before you buy
 11. DS18B20/DHT22 on the dryer vent (~$3–5) → dryer-done **+ blocked-vent fire warning**
 12. SCT-013-030 CT clamp (~$10–15) on the dryer's L1 → the most reliable detection there is
-13. Kidde SM120X (~$25–30) → every hardwired smoke/CO alarm becomes an HA sensor
+13. ✅ **Kidde SM120X — PRICED + COMPAT-VERIFIED 2026-09-19: ~$12.50–$15** at an electrical supply
+    house (GeScan/IMS/ADI); **sold out at Kidde, Konnected and Alarm Grid — do not send Jeff there.**
+    Confirmed compatible with his **Firex i4618AC** interconnect. → every hardwired **smoke** alarm
+    becomes an HA sensor. **NOT CO, and NOT during a power outage** — see the full box above.
 14. Energy-monitoring plug for the washer — **only if** your Tuya plug has no power reporting
 15. Photointerrupter (~$3) → pendulum rate and "clock stopped"
 
