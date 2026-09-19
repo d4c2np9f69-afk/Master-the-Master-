@@ -21,8 +21,8 @@ in it uses software that is already free and already on the machines.
 | **301SERVER** — "the Beast" | **.194** | This machine. 16 GB RAM. Where I run. | 🟢 live |
 | **Beehive** | **.66** (fixed) | Home Assistant, Beelink J45 | 🟢 live |
 | **GaragePC** | .121 / .212 | HP TouchSmart 520, 23" touchscreen, Pentium G620 | 🔴 **down** — see `GARAGE_PC_REPAIR_KIT.md` |
-| **JeffsLapTop** | .176 | **Acer Aspire E5-576**, i3-8130U, 16 GB, 466 GB | ⚪ powered off — gateway shows it 17 days stale |
-| **DellMasterBed** | .173 | **the Lenovo B570** — name inherited from a retired Dell | ⚪ powered off |
+| **JeffsLapTop** | .176 | **Acer Aspire E5-576**, i3-8130U, 16 GB, MX500 SSD | 🟡 **live, SET UP 09-18** (5 GHz, SSH+keys, cleaner, Bitwarden) but has a **recurring hard freeze** under active diagnosis — see NETWORK_MAP + OPEN_ITEMS |
+| **GarageLaptop** | .173 | **Lenovo B570**, Pentium B960, 8 GB, MX500 SSD — **wiped to Ubuntu 26.04 on 09-18** (was "DellMasterBed"/Win10) | 🟢 **live and DONE** — SSH `jeffloewen`, no-password login, never-sleep, Chrome+Bitwarden, Windows-like desktop, auto-updates |
 | Fire TV | .215 (fixed) | — | 🟢 |
 | HP OfficeJet 4650 | .208 | printer | 🟢 |
 
@@ -136,15 +136,21 @@ rather than remembered.
 
 # 5. THE ORDER OF WORK
 
-| # | Step | Blocked on | Risk |
-|---|---|---|---|
-| 1 | **Garage PC → Mint** | ⚠️ **Jeff's hands** — it's powered off, which `ACCESS_MAP` §7b lists as one of only five genuine blockers | none to anything running |
-| 2 | **OpenSSH Server on the Beast** | your go | low — adds a service, changes nothing existing |
-| 3 | **DHCP reservations** on the BGW320 | your go | low, but it is the gateway, so you should be sat there |
-| 4 | **OpenSSH on the two laptops** | they have to be powered on | low |
-| 5 | **Key-based login** across all of them | steps 2–4 | none |
-| 6 | **File share + standard toolset** on each | steps 1–4 | none |
-| 7 | **Update `NETWORK_MAP.md` + `ACCESS_MAP.md`** with what's actually true | the above | none |
+**🟢 PROGRESS 2026-09-18:** Both laptops are done. The Lenovo (.173) is now Ubuntu
+`GarageLaptop` — key-based SSH login, file share reachable, standard toolset, auto-updates.
+The Acer (.176) has key-based SSH login, cleaner, Bitwarden, updates — but is fighting a
+recurring hard freeze (RAM test + graphics driver, see NETWORK_MAP/OPEN_ITEMS). **Steps 4, 5
+and most of 6 are DONE for the two laptops.** Still open: the garage HP TouchSmart (step 1,
+still a physical job), and step 3 DHCP reservations (gateway, with Jeff).
+
+| # | Step | Status |
+|---|---|---|
+| 1 | **Garage PC (HP TouchSmart) → Ubuntu** | ⏳ still Jeff's hands — the USB kit is ready |
+| 2 | **SSH reachability** — the Beast is the client, both laptops now run sshd | ✅ done for the laptops |
+| 3 | **DHCP reservations** on the BGW320 | ⏳ gateway change, do with Jeff watching |
+| 4 | **Key-based login** on both laptops | ✅ done, keys installed, passwordless |
+| 5 | **File share + standard toolset** | ✅ Lenovo done; Acer parity pending its freeze fix |
+| 6 | **Update `NETWORK_MAP.md`** with what's actually true | ✅ done 09-18 |
 
 🔴 **I am not doing any of it without you saying so**, and step 3 touches the gateway, which is the
 one piece that can take the whole house off the internet if it goes wrong. That one we do together,
