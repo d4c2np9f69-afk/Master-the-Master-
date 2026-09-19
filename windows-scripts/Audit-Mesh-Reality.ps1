@@ -59,7 +59,7 @@ foreach ($t in @(@('\\GarageLaptop\GarageFiles','the Lenovo share, BY NAME'), @(
 }
 
 Section 'REVERSE - can each machine reach the BEAST? (the half that gets forgotten)'
-Res 'Acer -> Beast live SMB sessions' ([int]$A[0] -gt 0) "$($A[0]) session(s)"
+Res 'Acer -> Beast can READ on demand' ($A[1] -eq 'True') "$($A[2]) items via UNC ($($A[3]) idle session(s) - session COUNT is not a health signal)"
 Res 'Lenovo -> Beast mount readable'  ([int]$L[0] -gt 0) "$($L[0]) files"
 Res 'Lenovo -> Acer' $(if([int]$L[1] -gt 0){$true}else{'skip'}) $(if([int]$L[1] -gt 0){"$($L[1]) items"}else{'not mounted - documented gap, NTFS denies guest'})
 
@@ -76,15 +76,15 @@ Res 'keepalive task' ($ka -ne $null) $(if($ka){$ka.State}else{'MISSING'})
 
 Section 'AUTO-RECOVERY - will it survive a reboot?'
 Res 'Lenovo services enabled at boot' ($L[5] -and $L[5] -notmatch 'disabled') $L[5]
-Res 'Acer drive-remap task'           ($A[1] -match 'Ready|Running') $A[1]
+Res 'Acer drive-remap task ran OK'    ($A[5] -eq 'True') "LastTaskResult=0: $($A[5])"
 
 Section 'TIME - every fault call here rests on event timestamps'
 Res 'Beast clock'  $true (Get-Date).ToString('HH:mm:ss')
-Res 'Acer clock'   ($A[2] -ne '') $(if($A[2]){$A[2]}else{'no answer'})
+Res 'Acer clock'   ($A[6] -ne '') $(if($A[6]){$A[6]}else{'no answer'})
 Res 'Lenovo clock' ($L[6] -ne '') $(if($L[6]){$L[6]}else{'no answer'})
 
 Section 'UPTIME (the Acer is under freeze observation)'
-Res 'Acer uptime'   ($A[4] -ne '') "$($A[4]) min"
+Res 'Acer uptime'   ($A[7] -ne '') "$($A[7]) min"
 Res 'Lenovo uptime' ($L[7] -ne '') "$($L[7]) min"
 $w = Get-ScheduledTask -TaskName 'HCC-WatchAcer' -EA SilentlyContinue
 Res 'freeze watcher running' ($w.State -eq 'Running') $w.State
