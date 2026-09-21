@@ -6,8 +6,12 @@ that we don't know what's what and who's who."*
 
 🔴 **RULES FOR EVERY SESSION**
 1. **Every bid, reply, phone call or text goes in the LOG at the bottom the same day, with the date and time.**
-2. **Never compare sticker prices.** Compare the **10-YEAR COST** line: price + labour cover + refrigerant +
-   any required maintenance plan. That is what caught Petitt at ≥$14,296 against a $13,000 sticker.
+2. 🔴 **SUPERSEDED 2026-09-21 6:58 PM BY JEFF — NO MORE 10-YEAR NUMBERS.** Verbatim: *"From now on don't
+   give me the 10 year numbers I want the cost out of pocket the day I install."* **Compare CASH OUT OF POCKET
+   ON INSTALL DAY.** Rebates are not deductions — the TVA $300 arrives later, so it does NOT reduce install-day
+   cash. Optional labour-warranty adders are NOT in the number unless Jeff buys one.
+   *(Prior rule, kept only as history: "never compare sticker prices, compare the 10-YEAR COST line" — that is
+   what caught Petitt at ≥$14,296 against a $13,000 sticker. The 10-year view did its job; Jeff has now called it.)*
 3. **A number nobody has written down is not a bid.** Verbal figures go in the log marked VERBAL.
 4. **Quote the source.** Written quote > email > phone. If it is not on their paper, it is not in the deal.
 5. **Do not send any bidder another bidder's name, price or paperwork.** The 3-bid comparison PDF contains
