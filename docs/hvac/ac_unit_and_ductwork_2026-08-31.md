@@ -721,6 +721,37 @@ and for a house Jeff intends to hold 30 years that is the single most valuable l
 qualified installer. **Choosing Goodman therefore KILLS the friend-labour path outright.** That is
 not a small print difference; it removes an option Jeff still has.
 
+> ### ⚠️ AMENDED 2026-09-21 — THE CLAIM ABOVE IS OVER-STATED. READ THIS BEFORE RELYING ON IT.
+>
+> Jeff asked for a Daikin package unit for a **direct counter purchase from D.T. McCall & Sons,
+> Carthage**, which made "does the warranty survive a non-contractor install" the decisive question.
+> **Daikin's actual warranty certificate was pulled and read verbatim this session** —
+> `PWDPKGETYURG rev 04/2025`, which names *"Models: DP14GM, DP14UM, DP3GM, DP3UM"*.
+>
+> 🔑 **There is NO general licensed-installer requirement anywhere in it.** The only
+> installer-related exclusion is this, word for word:
+>
+> > *"Units that are **ordered over the Internet, by telephone, or by other electronic means**
+> > unless the unit is installed by a dealer adhering to all applicable federal, state, and local
+> > codes, policies, and licensing requirements."*
+>
+> **The trigger is the ORDER CHANNEL, not the installer.** A walk-in counter purchase is none of
+> those three things, so the exclusion never fires and the unit keeps full cover regardless of who
+> sets it. There is also **no "unauthorized reseller" clause** of any kind.
+>
+> ⚠️ **What is NOT verified:** the research reports Goodman's certificate carries the identical
+> sentence, but **the document actually read here was Daikin's, not Goodman's.** So the row above is
+> corrected for **Daikin** and remains **unverified for Goodman** — do not restate it as fact for
+> either brand without pulling `GPGM3_Warranty.pdf` first.
+>
+> 🔴 **The real risk in a self-install was never the paperwork.** Both certificates carry
+> *"Damage or repairs required as a consequence of **faulty installation** or application"* as a
+> standing exclusion — a bad set gets denied on **cause**. And *"a licensed contractor must bring
+> the failed part to a Daikin distributor"*, so Jeff cannot walk a warranty part to the counter
+> himself for 12 years.
+>
+> Full three-way write-up: `bid/daikin-vs-carrier-vs-tempstar-source.html`.
+
 **4. 🔴 THE PAD QUESTION RE-OPENS ON GOODMAN.** Old Nordyne is 47.5 in; Blueridge 47.66 in -
 a 0.16 in difference, which is why "no pour needed" held. **Goodman is 51 in deep - 3.5 in bigger
 than what the existing pad carries.** Expect to need the **50x53x3 pad, $239.99**, which erases
