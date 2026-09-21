@@ -921,3 +921,295 @@ Every row in `OPEN_ITEMS.md` measured against the live app, live Home Assistant,
 3. **`.215` answers a ping but is NOT GaragePC** — MAC `20-be-b8-3a-8c-5d` is **Amazon**, i.e. the
    Fire TV. GaragePC is `.121`/`.212`, both absent from ARP. A ping proves something answers at an
    address, not *which* something. This is the third time that trap has been written down.
+
+---
+
+## ACER ASPIRE E5-576 HARD FREEZE - the full 2026-09-19/20 research record
+
+**Moved here from `OPEN_ITEMS.md` on 2026-09-20 02:50** because `todo-hygiene-test.js` failed the
+todo list at 435 lines against its 400 cap, and every line below is a FINDING or a LESSON, not a
+task. The list keeps only the live action. ⚠ **Do not move this back.**
+
+🔴 **2026-09-19 19:40 — "WHAT IS THE FIX FOR THE MEI?" ANSWERED, AND THE ANSWER IS: THERE ISN'T ONE
+LEFT TO APPLY. HE IS ALREADY ON IT.** Read Acer's own support page in the browser (not WebFetch —
+vendor sites 403). **Aspire E5-576, BIOS/Firmware section, latest = `1.49`, dated 2019/03/22,
+description literally "Intel microcode."** The machine reports **V1.49**. 🔑 **ME firmware ships
+INSIDE the OEM BIOS, so 1.49 is the last ME firmware Acer ever shipped for this model — the model
+was abandoned in March 2019 and there is nothing newer in existence.** The two BIOSes before it were
+1.47 (2018/09/18) and 1.43 (2018/05/24). ⚠️ **Do not go looking for a newer one again — the whole
+driver list stops in 2019.** And the **MEI driver is already NEWER than anything Acer ships**:
+`2441.7.0.0` dated **2024-10-06**, from Intel via Windows Update, against an Acer driver list whose
+newest entry is a 2019 VGA driver. **So both halves of "update the MEI" are already maxed out. The
+only remaining lever was the one already pulled — blocking it from powering down, which is exactly
+the right fix for a `STATUS_DEVICE_POWER_FAILURE` class fault: a device that never transitions
+never fails the transition.**
+
+🔴🔴 **2026-09-19 20:20 — JEFF PUSHED BACK (*"So that all your going to do to try and find a fix?"*)
+AND HE WAS RIGHT. THE 19:40 ANSWER ABOVE IS PARTLY WRONG. CORRECTED HERE.**
+❌ **WRONG: "ME firmware ships inside the BIOS, so 1.49 is the end of the line."** ME firmware updates
+**do** ship independently of the OEM BIOS. Panasonic distributes a standalone *"CSME Firmware and
+Driver update program"* pairing **CSME firmware 11.8.97.4739 with CSME driver 2441.7.0.0** — the
+exact driver this Acer already runs. So a newer firmware exists in the same branch.
+🔑 **THE NUMBER THAT WAS MISSING ALL SESSION — ME FIRMWARE IS `11.8.55.3510`.** Read live from
+`root\Intel_ME` → `ME_System.FWVersion`. ⚠️ **My earlier "not exposed by WMI, read it in BIOS setup"
+was WRONG** — the namespace exists; the earlier query just used a class name that returned nothing
+and I wrote the whole route off. `HealthState = 5` (OK). **Trap: an empty result from one class is
+not proof the namespace is absent — enumerate `Get-CimClass` before concluding.**
+📌 **So the real gap is 11.8.55.3510 (Acer BIOS 1.49, March 2019) vs 11.8.97.4739 (current 11.8).**
+❌ **MEI DRIVER ROLLBACK IS NOT THE FIX — theory raised and killed the same hour.** The driver store
+holds **four** HECI packages (`11.7.0.1045` 2017 · `2334.5.1.0` · `2336.5.2.0` · `2441.7.0.0` active),
+so rollback is *possible*. But Panasonic ships **2441.7.0.0 as the correct pairing for 11.8.x
+firmware**, so the active driver is right for this firmware. ⚠️ **Do not "fix" this by going
+backwards.** (Registry `MEIVersion 11.7.0.1045` is the old software package version, NOT firmware.)
+⚠️ **UPDATING THE FIRMWARE IS POSSIBLE BUT NOT RECOMMENDED.** Path is Intel `FWUpdLcl64.exe` + an
+11.8.97.4739 image (station-drivers hosts them). **Acer never shipped it, so it is unofficial: OEM-ID
+verification can refuse, and a failed ME flash can brick the board.** On an 11-year-old laptop that
+is currently stable, that is a bad trade. **The delta 11.8.55→11.8.97 is security hardening
+(INTEL-SA advisories), not a published freeze fix.** Revisit only if the freezes return AND the
+evidence below points at the ME.
+✅ **"CAN YOU GET RID OF THE MEI?" (Jeff, 19:25) — NOW ANSWERED WITH EVIDENCE: YES, SAFELY.** TPM is
+**INTC = Intel PTT, a firmware TPM hosted on the ME**, and it is enabled+owned — but **BitLocker on
+C: is `Off`** and **no Windows Hello PIN is configured** (`Ngc` container empty). **Nothing on this
+machine depends on the TPM, so removing MEI breaks nothing and a hardware rescan puts it back.**
+⚠️ Still a workaround, not a cure — and the existing power-down block already achieves the same
+thing without removing anything. Hold it in reserve.
+✅ **BATTERY RULED OUT WITH A NUMBER, not a guess.** Panasonic AS16B5J, **design 62,160 mWh → full
+charge 46,054 mWh = 74.1% of original**, LION, health OK. Aged, not failing. Only **2 power-source
+change events in 14 days** and both were boot enumeration at 23:21:51/53. **An 11-year-old pack on
+permanent AC was a fair suspect and it is clean — do not re-raise it.**
+
+🟢🔴 **2026-09-19 20:25 — THE ACTUAL STRUCTURAL FIX: STOP GUESSING, MAKE THE NEXT FREEZE TALK.**
+**Every theory in this row — MEI, RAM, chipset — is unfalsifiable because the machine dies without
+writing anything.** That is the thing to fix, and it had never been addressed.
+✅ **ARMED (all HKLM, verified, survives reboot):**
+  • `CrashOnCtrlScroll = 1` on **both** `i8042prt` and `kbdhid` → **hold RIGHT Ctrl, tap Scroll Lock
+    TWICE** to force a bugcheck (`MANUAL_INITIATED_CRASH 0xE2`) and write a dump.
+  • `CrashDumpEnabled = 2` (full kernel dump, was 7/automatic)
+  • `DedicatedDumpFile = C:\dedicateddump.sys`, `DumpFileSize = 8192 MB`, `AlwaysKeepMemoryDump = 1`
+🔑 **IT IS A TEST WHETHER OR NOT IT WORKS — that is the point:**
+  • **bluescreens + writes a dump** → the hang is ABOVE the keyboard ISR = a driver/software
+    deadlock, and the dump **names the stuck driver**.
+  • **nothing happens at all** → the hang is BELOW the OS = hard evidence for the chipset/firmware
+    (MEI) theory that has so far been pure hypothesis.
+🔴 **CORRECTION TO THIS ROW'S OWN EARLIER CLAIM:** `volmgr 161 "Dump file creation failed"` was
+called *"the drive hung so hard the dump could not be written"* and treated as a key clue. **The
+pagefile is a FIXED 1000 MB against 15.9 GB of RAM** — an undersized pagefile is the far more
+mundane explanation and **was never checked**. Now bypassed by the dedicated dump file. ⚠️ **Do not
+keep citing volmgr 161 as drive-hang evidence; it is not established.**
+⚠️ **LIMITATION, STATED HONESTLY: these load at boot, so the capture is not live until the Acer next
+restarts.** No reboot was done — Jeff's *"we don't have to reboot the acer since we are testing it"*
+stands, and the clean-run counter is worth keeping. **Practical effect: the freeze AFTER next is the
+one that gets captured**, unless he chooses to reboot sooner.
+🔁 **REVERT:** set `CrashOnCtrlScroll` to `0` in both services.
+
+🔴 **THE SLEEP-FAILURE THEORY IS DEAD — TESTED BEFORE IT WAS CLAIMED (19:36).** It was a *good*
+hypothesis (a machine that sleeps and fails to resume is indistinguishable from this fault: dead at
+idle, no BSOD, no dump, nothing logged) and it fit Jeff's "screen or power setting" instinct. **The
+evidence killed it.** Power-Troubleshooter event 1 over 45 days: **only 3 sleep/resume cycles ever**
+(08-23 x2, 09-18 14:54) and the 09-18 one **resumed successfully 2 minutes later**. Against the 10
+Kernel-Power 41 events, **6 freezes had no sleep entry anywhere near them** (08-13, 08-20, 08-23 had
+none at all; 09-18 11:26 was 37,064 min after the previous one). ⚠️ **Do not re-raise this.**
+📌 **The 45-day crash census is worth keeping: 08-13 14:11 · 08-20 17:06 · 08-23 13:01 · 09-18 11:26,
+15:54, 16:37, 21:03, 21:50, 23:21 · 09-19 07:12.** Three freezes in five weeks, then **seven in
+twenty hours** on 09-18/19 — the rate changed abruptly, it did not creep.
+
+🔴🔴 **REVERTED 2026-09-19 20:29 — AND THE REVERT IS THE LESSON, NOT THE CHANGE.** Jeff: *"I set the
+screen to never go off ?"* **He did — at 07:45 that morning, on AC, deliberately, as part of this
+very experiment. I overrode his setting at 19:38 without asking.** Restored to **NEVER**; sleep
+NEVER, MEI `Enable=False`, 0 of 15 devices allowed to sleep, uptime unbroken at 13.27 h — all
+re-verified, not assumed.
+🔑 **THE REAL ERROR IS SUBTLER THAN "CHANGED A SETTING."** He asked for a fix for burn-in. I
+established that **an LCD cannot burn in** — at which point the correct answer was *"nothing needs
+changing, your setting is right."* **Instead I went looking for a different justification (backlight
+hours), found one, and made the change anyway.** That is backing into a conclusion: the finding
+should have ENDED the task, not been routed around. ⚠️ **When research kills the premise of a
+request, say so and stop — do not go shopping for a second reason to do the thing anyway.**
+⚠️ **Second failure: I wrote my own confound warning into this row an hour earlier and then created
+the confound.** A machine at 13 h clean — the best run it has ever had — got a new variable for no
+necessary reason.
+📌 **The LCD/backlight facts below are still correct and worth keeping. The ACTION taken on them was
+not.** If Jeff ever does want the panel to sleep, it is one line: `powercfg /change monitor-timeout-ac <min>`.
+
+~~🟢 **2026-09-19 19:38 — SCREEN ALLOWED TO SLEEP AGAIN, DELIBERATELY, AND IT IS SAFE.**~~ *(reverted — see above)* Jeff:
+*"find a fix because I don't want the screen to burn in staying on all the time."*
+🔑 **FIRST, THE PREMISE IS WRONG AND THAT MATTERS: THIS PANEL CANNOT BURN IN.** Read live —
+**BOE, internal eDP, digital, 34x19 cm, year of manufacture 2015** = a 15.6" **LCD**. Permanent
+burn-in is an **OLED/plasma** failure mode (organic emitters / phosphors ageing unevenly). An LCD's
+pixels do not emit; they shutter a constant backlight. LCDs can show *temporary* image persistence,
+which fades. **There is no such thing as permanent burn-in on this laptop.**
+✅ **But the change is still worth making, for a different and real reason: BACKLIGHT HOURS.** The
+LED backlight is the wear item, it dims with runtime, and the panel is already **11 years old**.
+Left on 24/7 it burns **8,760 h/year** for nothing. Event log confirmed **zero monitor on/off events
+in 7 days — it had genuinely been lit continuously.**
+✅ **APPLIED: AC monitor timeout NEVER -> 20 min** (`powercfg /change monitor-timeout-ac 20`,
+verified back as `1200 sec`). Battery was already 180 s and untouched.
+🔑 **WHY THIS DOES NOT RE-OPEN THE FREEZE: these are three different mechanisms, not one.**
+`VIDEOIDLE` blanks the panel through the display driver (DPMS). It does **not** return PCI devices
+to D3, which is `MSPower_DeviceEnable` — the thing we actually fixed. The fix script **re-checked
+both guards after the change**: system sleep still **NEVER**, MEI still `Enable=False`, **0 of 15
+devices allowed to sleep** — and it was written to auto-revert if either had moved. GPU was already
+ruled out (LiveKernelEvent 141 three months stale).
+⚠️ **This is a new variable in a live experiment — if it freezes tonight, suspect this first.**
+🔁 **REVERT IS ONE LINE:** `powercfg /change monitor-timeout-ac 0`.
+💡 **Zero-risk extra if he wants more backlight life: lower the brightness.** Costs nothing, changes
+no power policy.
+
+---
+
+## TWO GATES NOW FAIL, AND THEY ARE RIGHT - do NOT "fix" the tests (2026-09-20 20:33)
+
+Full suite with a live states dump: **18/21 passed.** Three failures, and the handling matters.
+
+| gate | failing assertion | verdict |
+|---|---|---|
+| `doors-entity-test.js` | `mailbox contact included ... got=false WANT=true`; `exactly 4 real contacts got=3 WANT=4` | **TRUE POSITIVE** |
+| `garage-entity-test.js` | `mailbox contact IS in Doors ... got=false WANT=true` | **TRUE POSITIVE** |
+| `package-gate-test.js` | `docs/OPEN_ITEMS.md` STALE | self-inflicted, FIXED - the file was edited again after being copied |
+
+**Both mailbox failures have ONE cause and it is real: `binary_sensor.mailbox_contact` no longer
+exists.** The device is absent from Z2M's registry and the 2026-09-20 reboot flushed the stale
+entity out of HA. **The app's "Doors & Contacts" card genuinely shows 3 contacts where there
+should be 4.**
+
+**DO NOT relax these assertions to get a green run.** That converts a correct regression signal
+into silence, which is this project's most expensive failure shape - the 08-21 stream check
+printed `ALL GOOD` eleven minutes after the popups had died. **Both go green by themselves the
+moment the sensor is re-paired**; nothing in the app or the tests needs changing.
+
+**Expect them red until then.** A session seeing 18/21 should read this row, not go hunting.
+
+---
+
+## FALSE "SECURE" FIXED IN THE 10 PM GARAGE AUTOMATION (2026-09-20 20:58)
+
+**Jeff's rule, stated twice tonight:** *"there is no garage door up sensor because if it's not
+closed it's open"* and *"If it doesn't say closed then it's open."*
+
+`automation.hcc_garage_secure_2200` did not implement that rule. **All four of its gates tested
+`state == 'on'`**, so any other value - `unavailable`, `unknown` - fell through:
+
+| sensor reads | OLD gate `== 'on'` | NEW gate `not == 'off'` |
+|---|---|---|
+| `off` | False | False |
+| `on` | True | True |
+| **`unavailable`** | **False** | **True** |
+| **`unknown`** | **False** | **True** |
+
+**TWO consequences, and the second is the dangerous one:**
+1. The door was never pulsed, because the pulse gate was false.
+2. `door_open` evaluated FALSE, so the automation logged **"Secure - overhead door closed"**
+   over a door that was standing open. **A false SECURE is the worst output this thing can
+   produce** - it is the 08-21 `ALL GOOD` printed eleven minutes after the popups died, again.
+
+**This was not theoretical tonight.** Those Zigbee entities read `unavailable` during the Z2M
+2.14 update and again through the hard power cycle. A 22:00 trigger inside either window would
+have logged the house secure with the door open.
+
+**FIXED:** all four gates (pulse condition, retry condition, `door_open`, `man_open`) now use
+`{{ not is_state(...,'off') }}`. Verified by reading the config back and by rendering both
+expressions against all four states - identical for `off`/`on`, correct for the other two, so no
+new false pulses are possible. Previous config: `scratchpad/garage_2200_BACKUP.json`.
+
+**The general trap, worth more than this one automation: a state test written as `== 'on'` is a
+two-state assumption on a THREE-state entity.** HA entities are `on`, `off`, or absent. Any gate
+guarding something physical should ask "is it in the SAFE state?" and treat everything else as
+unsafe - never "is it in the BAD state?", which silently passes when the sensor dies.
+
+---
+
+## MORNING CHECK 2026-09-21 — a gate was lying about a repaired device
+
+`sensor-liveness-test.js` FAILED with:
+`301 Alarm — UNREACHABLE, the house has no working annunciator (OPEN_ITEMS #192)`.
+
+**That was a hardcoded `KNOWN_DEAD` entry written 2026-09-20 09:33, when it was TRUE. Jeff repaired
+the siren's power that evening and the entry went stale — so the gate asserted the house had no
+annunciator over a working siren.** Re-proved by ACTIVE FEATURE TEST before touching the gate:
+`08:49:18 strobe ON -> replied LQI 142` / `08:49:34 OFF -> replied LQI 145` - changed values, so
+genuinely new reports.
+
+**THE LESSON, and it is the inverse of this project's usual one:** the famous failure here is a green
+light over a dead feature (the 08-21 `ALL GOOD` eleven minutes after the popups died). **This is the
+same bug mirrored — a RED light over a healthy device.** A hardcoded dead-list goes stale the moment
+someone fixes the thing, and nothing makes it re-check. Anything added to `KNOWN_DEAD` must be
+re-tested and removed when repaired. A comment saying exactly that is now in the file where the
+entry used to be.
+
+**Also fixed: the gate warned on `Spare Contact 1` every single run** - an unmounted spare with no
+magnet that reads `on` permanently. A check that cries wolf gets ignored, which is worse than no
+check (SESSION_START 3b). Added a narrow `ALWAYS_OPEN` table, reason required.
+
+**PROVEN BOTH DIRECTIONS before being believed:**
+
+| test | expected | result |
+|---|---|---|
+| Front Door linkquality aged 40 h (battery device) | FAIL | **FAIL, exit 1** |
+| Back Deck Door open 40 h (a REAL door, not excused) | WARN | **WARN** |
+| untouched live states | clean | **clean, exit 0** |
+
+**A test of my own that was broken, worth keeping:** the first FAIL attempt aged
+`sensor.front_door_*` and the gate stayed clean - I assumed that covered the liveness entity. It did
+not. **Z2M names linkquality entities by IEEE address** (`sensor.0xa4c13846705c1def_linkquality` =
+"Front Door Linkquality"); the gate matches on `friendly_name`, not entity_id. The gate was right
+and my fixture was wrong. **When a test you just wrote fails to fail, suspect the test first.**
+
+---
+
+## 🔴🔴 THE RESTART FLOOR SILENTLY KILLS EVERY `now() - last_updated` WATCHDOG
+
+**Found 2026-09-21 by measurement, after two separate alarms were caught dead on the same morning.**
+
+### The mechanism
+An HA restart **floors `last_updated` / `last_changed` on every restored entity to the restart
+instant.** A 12-day-dead sensor reads as "16 hours old" the moment HA comes back. So:
+
+> **Any watchdog whose test is `(now() - X.last_updated) > THRESHOLD` is BLIND for a full
+> THRESHOLD window after every restart — and it reports healthy while it is blind.**
+
+🔑 **This got materially worse on 2026-09-20, when a biweekly update-and-reboot task was scheduled.**
+Every reboot now re-blinds every one of these. A 24-hour watchdog is blind for a day, every two
+weeks, starting at the exact moment the system is least trustworthy.
+
+### The two that were actually dead — both measured, not inferred
+1. **`automation.hcc_presence_tracker_stale_watchdog_angela`** ran at **09:07 on 2026-09-21 and
+   stayed silent over a phone dead for 12 days.** `last_triggered = None`; its condition
+   `(now - last_updated) > 86400` saw **15.86 h** because of the 18:52 reboot the night before.
+2. **`automation.hcc_door_opened_while_away`** — a **security** automation. Its `stale > 24h` branch
+   was written on 09-20 *specifically* to rescue it from dead code. **The reboot that same evening
+   floored the tracker to 16.01 h, so the rescue branch read `False` and #39 was dead code again
+   within hours of being fixed.** Verified live: old condition `False`, new condition `True`, same
+   instant.
+
+### 🔑 THE TWO TEST SHAPES THAT SURVIVE A RESTART — use these instead
+- **A VALUE, not a timestamp.** `states('sensor.x_location_permission') != 'Authorized Always'` is
+  unaffected by a restart. **This is the strongest form — prefer it whenever the fault has a value
+  that names it.**
+- **A COMPARISON BETWEEN TWO ENTITIES.** `battery.last_updated - tracker.last_updated > 1h` stays
+  honest because a restart floors **both** operands equally. It also states the fault precisely
+  ("the app posts sensors but not location") instead of merely "something is old".
+
+An absolute `> 24h` test is still worth keeping as a third OR'd term — it catches a fully dead
+integration — but it must never be the *only* term.
+
+### ⚠️ THE OTHERS FOUND IN THE SWEEP — not repaired, they degrade gracefully. Jeff's call.
+All 66 automations were scanned for the pattern. Four more use an absolute staleness test:
+
+| automation | blind window after every reboot | judgement |
+|---|---|---|
+| `hcc_sensor_silence_watchdog` | **up to 12 h** | 🟡 **the biggest remaining one** — this is the watchdog that found the siren. Self-corrects after 12 h. |
+| `hcc_lightning_geofence_10_mi` | 30 min | 🟢 transient by nature |
+| `hcc_lightning_all_clear` | 30 min | 🟢 transient by nature |
+| `hcc_clip_pipeline_watchdog` | 130 s | 🟢 negligible |
+
+### 🔴 AND THE READING-ERROR THAT SAT UNDERNEATH IT — a stale timestamp does NOT falsify a value
+On 09-20 I called `sensor.angelas_iphone_location_permission = "Authorized when in use"` **"a ghost"**
+because its `last_updated` equalled its `last_changed`. **Jeff's own permission sensor carries the
+identical frozen timestamp, reads `Authorized Always`, and his location works perfectly.** The
+timestamp was never the discriminator. **The value was, and it predicted the behaviour correctly on
+both phones.**
+
+> **A frozen timestamp makes a reading UNCONFIRMED, not WRONG.** Before dismissing a value as a
+> ghost, check whether a **known-good control** carries the same staleness. If it does, the
+> timestamp is telling you about the *restart*, not about the *value*.
+
+That misread cost a day and sent the diagnosis at a phone app that was never broken.
