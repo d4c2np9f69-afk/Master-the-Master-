@@ -15,7 +15,10 @@ that we don't know what's what and who's who."*
 6. Scope asked of everyone, so the numbers are comparable: twist removed at the unit **both sides** · three
    6"→8" branches (dining, master bedroom, living) · new 7" garage run · new 16" return (18" priced as an
    option) · existing 20×25 filter grille stays · **existing duct STAYS — inspect, re-strap, seal/tape what
-   leaks** · start-up static pressures recorded · permit pulled.
+   leaks** · start-up static pressures recorded.
+   🔴 **NO PERMIT — struck 2026-09-21.** White House requires none for a gas like-for-like change-out
+   (Goodlettsville checked with the city 09-17; Jeff confirmed). **"Permit pulled" is no longer part of
+   the scope and must not be scored against anyone.** Peters' $95 permit line comes off his total.
    🔴 **NOT asking anyone to replace duct for damp insulation.** Jeff, 2026-09-15 6:32 PM: *"in the summertime
    in Tennessee all of them are damp from condensation. Once we get it sealed up it should dry out."*
    A bidder who quotes duct replacement on damp insulation is padding, and that is now the test.

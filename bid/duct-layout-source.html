@@ -61,14 +61,14 @@
       <ol>
         <li><b>Unit connections:</b> new square-to-round transitions on <b>both</b> supply and return at the package unit. Remove the existing twisted connections.</li>
         <li><b>Return:</b> new 16" insulated flex straight back from the unit, a sheet-metal 90 across the supply trunk, and a second sheet-metal 90 into the return filter grille. <i>16" runs about 713 ft/min at 995 CFM, the ACCA Manual D maximum for flex; quote 18" (about 563 ft/min) as an option.</i></li>
-        <li><b>Return filter grille:</b> at least 3.3 sq ft of filter face (≤ 300 ft/min), e.g. 20 × 25. Replace the existing grille if smaller.</li>
+        <li><b>Return filter grille:</b> the existing <b>20 × 25 grille STAYS</b> — 3.5 sq ft of face, about 287 ft/min at design airflow, already inside the ≤ 300 ft/min target. <i>Nothing to price here.</i></li>
         <li><b>Upgrade 6" → 8":</b> Dining room, <b>Master bedroom</b>, Living room, each with a new saddle tap, balancing damper and boot.</li>
         <li><b>New 7" garage run:</b> saddle tap <b>on the side of the 12" supply trunk</b> (not off the trunk end); core through the brick and seal the penetration; turn up and run up the garage wall to a boot and brown register; <b>balancing damper at the register, inside the garage</b>, so it can be shut off in winter without entering the crawl space.</li>
-        <li><b>Existing to remain:</b> supply trunk 16" → 14" → 12" with reducers; Master bath 6" (one register, adequate), Guest bedroom 7", Office 6", Guest bath 6". Inspect, re-seal and re-strap. <b>Replace any run with wet or damaged insulation.</b></li>
+        <li><b>Existing to remain:</b> supply trunk 16" → 14" → 12" with reducers; Master bath 6" (one register, adequate), Guest bedroom 7", Office 6", Guest bath 6". Inspect, re-seal and re-strap. <b>The existing duct STAYS.</b> Replace a run only if it is <b>physically damaged</b> — <b>not</b> for damp insulation. <i>In a Tennessee summer every one of them is damp from condensation; once it is sealed it dries out. Do not quote duct replacement on that basis.</i></li>
         <li><b>All flex:</b> fully extended, no kinks, sags or compression; supported per manufacturer; every joint sealed with mastic or UL 181 tape. State the insulation R-value on the quote.</li>
-        <li><b>Thermostat:</b> new 18 AWG thermostat wire with C-wire from unit to thermostat (no power-stealing thermostats per the Carrier 48NL manual); install owner's thermostat.</li>
-        <li><b>Start-up, recorded on the invoice:</b> supply and return static pressure, dampers balanced, airflow set to 995 CFM, refrigerant leak-detection system tested where equipped.</li>
-        <li>Permit pulled by the contractor; old equipment and debris removed.</li>
+        <li><b>Thermostat:</b> new 18 AWG thermostat wire with C-wire from unit to thermostat (no power-stealing thermostats); install owner's thermostat.</li>
+        <li><b>Start-up, recorded on the invoice:</b> supply and return static pressure, dampers balanced, blower airflow set and recorded, refrigerant leak-detection system tested where equipped.</li>
+        <li>Old equipment and debris removed.</li>
       </ol>
     </div>
 
@@ -78,7 +78,7 @@
       <div><b>Equipment</b>2.5-ton gas/electric package unit</div>
       <div><b>Design airflow</b>995 CFM</div>
       <div><b>Source</b>Owner's field sketch, 10 Sep 2026</div>
-      <div><b>Drawing</b>Rev C · 17 Sep 2026 · not to scale</div>
+      <div><b>Drawing</b>Rev D · 21 Sep 2026 · not to scale</div>
     </div>
   </div>
 </div>
@@ -167,7 +167,7 @@
   // return filter grille
   el('rect', {x: 527, y: RY - 50, width: 46, height: 24, fill: '#fff', stroke: INK, 'stroke-width': 2});
   for (let i = 0; i < 5; i++) el('line', {x1: 531 + i * 9, y1: RY - 47, x2: 531 + i * 9, y2: RY - 29, stroke: INK, 'stroke-width': 1});
-  T(580, RY - 44, 'RETURN', {size: 8.5, weight: 700, family: 'Barlow Condensed'}); T(580, RY - 35, 'FILTER GRILLE', {size: 8.5, weight: 700, family: 'Barlow Condensed'}); T(580, RY - 25, '≥ 3.3 sq ft face', {size: 7.5, fill: '#6f6e68'});
+  T(580, RY - 44, 'RETURN', {size: 8.5, weight: 700, family: 'Barlow Condensed'}); T(580, RY - 35, 'FILTER GRILLE', {size: 8.5, weight: 700, family: 'Barlow Condensed'}); T(580, RY - 25, '20 × 25 EXISTING — STAYS', {size: 7.5, fill: '#6f6e68'});
   T(RX - 16, RY - 14, 'HP90', {size: 9, weight: 700, anchor: 'end', family: 'Barlow Condensed', fill: NEW});
   T(566, RY - 14, 'HP90', {size: 9, weight: 700, family: 'Barlow Condensed', fill: NEW});
   T(478, RY + 22, '16" RETURN, NEW (18" option)', {size: 9.5, weight: 700, anchor: 'middle'});
