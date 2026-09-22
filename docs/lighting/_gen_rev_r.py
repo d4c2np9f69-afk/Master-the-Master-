@@ -104,11 +104,11 @@ td.n{font-variant-numeric:tabular-nums}
 
 ROOMS = [("Living room",14,17),("Kitchen / dining",16,13),("Master bed",15,11),
          ("Office / Bed 3",10,13),("Master bath",15,8),("Guest bed",11,10),
-         ("Foyer",8,6),("Guest bath (derived)",10,8.5),("Garage",24,13)]
+         ("Foyer",8,6),("Laundry",7.917,3),("Guest bath (derived)",10,8.5),("Garage",24,13)]
 rows=""
 for n,w,h in ROOMS:
-    rows += '<tr><td>%s</td><td class="n">%g&times;%g</td><td class="n">%d</td><td class="n">%d</td></tr>' % (
-        n,w,h,w*h,2*(w+h)*8)
+    rows += '<tr><td>%s</td><td class="n">%s</td><td class="n">%d</td><td class="n">%d</td></tr>' % (
+        n,(u'7′11″×3′' if n=='Laundry' else u'%g×%g'%(w,h)),int(w*h),int(2*(w+h)*8))
 
 html = (u"<title>HCC Floor Plan — Rev R, measured</title>\n" + style +
  u'\n<section class="sheet"><div class="mast">'
