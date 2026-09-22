@@ -23,8 +23,9 @@ def rm(x,y,w,h,n,s="",fill="#fff",st=M,sw=2.2,dash=False,fs=9.0):
 
 G=HX
 ROOMS=[
- rm(0.8,SB+.8,13,24,"GARAGE","24&#215;13","#ffffff","#8a5000",2.6,False,10),
+ rm(0.8,SB+.8,13,24,"GARAGE","","#ffffff","#8a5000",2.6,False,10),
  rm(G,0,15,11,"MASTER BED","","#ffffff",M,2.6,False,9.6),
+ rm(G,5,3,3,"WC","","#ffffff",M,1.8,False,7),
  rm(G,11,3.5,8,"clo","","#ffffff",M,1.6,False,7),
  rm(G+3.5,11,8,8,"MASTER BATH","","#ffffff",M,2.6,False,8.8),
  rm(G+11.5,11,3.5,8,"clo","","#ffffff",M,1.6,False,7),
@@ -32,13 +33,15 @@ ROOMS=[
  rm(G+3.5,19,7.917,3,"LAUNDRY","","#ffffff",M,2.4,False,8),
  rm(G+11.42,19,3.58,3,"linen","","#ffffff",M,1.6,False,7),
  rm(G,22,16,13,"KITCHEN / DINING","","#ffffff",M,2.6,False,9.6),
- rm(G-3,5,3,3,"WC","","#ffffff",M,2.6,False,7.6),
  rm(G+15.4,0,8,6,"FOYER","","#ffffff",M,2.6,False,8.8),
  rm(G+28.4,0,11,10,"GUEST BED","","#ffffff",M,2.6,False,9.6),
- rm(G+18.4,6.6,10,8.5,"GUEST BATH","","#ffffff",F,2.4,True,8.4),
- rm(G+15.4,15.4,14,17,"LIVING ROOM","","#ffffff",M,2.6,False,9.6),
- rm(G+29.4,16.2,10,13,"OFFICE / BED 3","","#ffffff",M,2.6,False,9.0),
+ rm(G+16.2,11.2,23.2,18,"","",  "#ffffff",F,2.6,True,9),
 ]
+EASTNOTE=('<text x="%s" y="%s" font-size="10" font-weight="700" text-anchor="middle" fill="%s">EAST HALF - YOU PLACE THESE</text>'
+ '<text x="%s" y="%s" font-size="8.6" text-anchor="middle" fill="%s">LIVING ROOM 14x17  |  OFFICE / BED 3 10x13</text>'
+ '<text x="%s" y="%s" font-size="8.6" text-anchor="middle" fill="%s">GUEST BATH ~10x8%s  |  HALLWAY 18x4</text>'
+ '<text x="%s" y="%s" font-size="7.8" text-anchor="middle" fill="%s">they do not fit the way I had them - see the note</text>')%(
+ X(G+27.8),Y(17.4),F, X(G+27.8),Y(19.2),F, X(G+27.8),Y(20.7),F,"&#189;", X(G+27.8),Y(22.4),F)
 HALL=('<rect x="%s" y="%s" width="%s" height="%s" fill="#ffffff" stroke="%s" stroke-width="2.2" stroke-dasharray="6 4"/>'
  '<text x="%s" y="%s" font-size="8.4" font-weight="700" text-anchor="middle">HALLWAY</text>'
  '<text x="%s" y="%s" font-size="6.8" text-anchor="middle" fill="#6b7480">18&#215;4</text>')%(
@@ -67,7 +70,7 @@ svg=('<svg viewBox="0 0 %d %d"><polygon points="%s" fill="#fcfdfe" stroke="#e861
  '<text x="0" y="21" font-size="10" font-weight="700" text-anchor="middle">N</text></g>'
  '<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="#111" stroke-width="2.2"/>'
  '<text x="%s" y="%s" font-size="9" font-weight="700" text-anchor="middle">10 FEET</text></svg>')%(
- round(76*PF),round(50*PF),poly,"".join(ROOMS),HALL,D,N,X(60),Y(1),
+ round(76*PF),round(50*PF),poly,"".join(ROOMS),EASTNOTE,D,N,X(60),Y(1),
  X(0),Y(42),X(10),Y(42),X(5),Y(43.6))
 
 GROUPS=[("NETWORK &amp; POWER",["AT&amp;T gateway","The Beast (301Server)","J45 Beehive","Network switch",
@@ -127,11 +130,7 @@ html=(u"<title>HCC Floor Plan — MARK-UP COPY</title>\n"+style+
  u'<b>West wall:</b> 5&#8242; master bedroom &rarr; jog at the downspout &rarr; 3&#8242; toilet closet '
  u'&rarr; garage door. Your 8&#8242;, confirmed at the corner.</div>'
  u'</div></div>'u'<div class="page2"><div class="mast" style="margin-bottom:8px">'u'<h1>Device Key<span class="badge">67 ITEMS</span></h1>'u'<div class="sub">Write these numbers onto the map on the previous page. 'u'Cross out anything you cannot place; add anything missing at the bottom and I will number it.</div>'u'</div><div class="lists">'+lst+u'</div>'
- u'<div class="warn"><b>&#9888; Still fitted, not measured &mdash; mark these and I will correct:</b><br>'
- u'<b>GUEST BATH off the hallway.</b> Guest bed 10 + office 13 + bath 8&#189; = 31&#8242;6&#8243; against '
- u'a 29&#8242;3&#8243; east wall, so one of the three <b>cannot</b> be on that wall. I took the bath off '
- u'it because you said the hall <i>ends</i> at the guest bathroom. <b>The HALLWAY position</b> follows '
- u'from that.</div>'
+ u'<div class="warn"><b>&#9888; &#9888; THE EAST HALF IS BLANK ON PURPOSE.<br>The four rooms that go there <b>provably do not fit</b> the way I had been drawing them:<br>&nbsp;&nbsp;kitchen 16 + living 14 + office 10 = <b>40 ft</b> across a <b>39&#8242;5&#8243;</b> house<br>&nbsp;&nbsp;guest bed 10 + office 13 + bath 8&#189; = <b>31&#8242;6&#8243;</b> against a <b>29&#8242;3&#8243;</b> east wall<br><b>I drew them overlapping each other on the last sheet rather than admit that. That was wrong.</b> Sketch the walls in that box and I will take every other dimension off it.</div>'
  u'<div class="note"><b>&#10145; Write each number where that device actually is</b>, send it back, and the '
  u'ductwork drawing gets reworked with the runs <b>scaled off this plan</b> instead of estimated.</div>'
  u'</div></section>')
