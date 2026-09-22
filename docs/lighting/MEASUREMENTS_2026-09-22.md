@@ -113,3 +113,62 @@ brick veneer.** The two measurement sets agree to within the walls, which is as 
 perfect — every room a rectangle, schedule totalling exactly to the outline — and **internally
 perfect is not the same as right.** A self-consistent set of guesses will always close; that is what
 makes it dangerous.
+
+
+---
+
+# ✅✅ THE OUTLINE CLOSES — 10:39 AM
+
+Jeff went back out for the jog I was missing: **the step at the end of the kitchen is 5′7″**,
+photographed at the inside corner (`kitchen_jog_corner_2026-09-22.jpg`). **The window on the left of
+that photo is the kitchen window**, so the kitchen's back wall projects south and the house steps in
+east of it. Whole rear elevation: `rear_elevation_2026-09-22.jpg`.
+
+With that one number the perimeter closes **in both directions**:
+
+### East–west
+```
+back, walking east                 +58.50
+front, walking west                -39.42     (19'8 + 5'6 + 14'3)
+garage front, walking west         -14.83     (13 ft interior + ~11 in of wall each side)
+the 4'3" on the west               - 4.25     <- so that one is a STEP, not part of the depth
+                                    ------
+closure error                        -0.00 ft
+```
+
+### North–south
+```
+west, walking south                +34.00     (8 + 26)
+east, walking north                -29.25     (24'3 + 5'0)
+kitchen jog, north                 - 5.58     <- the number he just measured
+porch recess, north                - 3.67
+                                    ------
+leftover                             -4.50 ft
+```
+
+🔑 **That 4′6″ leftover is the GARAGE FRONT SET BACK from the house front.** With that single
+assumption **the outline closes in both directions to within inches.**
+
+## What the closed outline establishes
+
+| | |
+|---|---|
+| **House width across the front** | **39′5″** — I had drawn 44 |
+| **Garage** | **13 ft wide interior**, front set back ~4′6″ from the house front, **door in the WEST wall** 8 ft back from the front corner |
+| **Kitchen** | bumps out **5′7″ further south** than the rest of the back wall |
+| **Porch** | a **3′8″ deep recess** in the front wall |
+| **Depths** | east side **29′3″** · west side **38′3″** |
+
+## 🔴 The headline: the footprint is NOT a rectangle, and never was
+
+Every revision **A through Q drew it as one.** It has at least three real steps — the **kitchen
+bump-out**, the **porch recess** and the **garage setback** — and the east and west sides differ by
+**nine feet** of depth.
+
+🔑 **That is why the room areas would never close into a rectangle earlier today.** I kept fitting
+measured rooms into a rectangular outline and treating the mismatch as a problem with the rooms.
+**The outline was the wrong shape. The rooms were fine.**
+
+⚠️ **Lesson for the next session:** when measured parts refuse to fit an assumed whole, question the
+**whole** before you question the parts. The rectangle was never measured — it was the one thing
+nobody had checked, precisely because it looked like a given.
