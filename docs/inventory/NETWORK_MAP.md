@@ -204,10 +204,28 @@ the gateway anyway, over an RE200 sitting **one brick wall** from it. Measured 2
 **256 ms average, 487 ms peak, 5% loss**, against the RE200 at **1 ms / 0%** in the same minute.
 That is not a marginal preference; it is a sticky client holding the worst available link.
 
-⚠️ **Also worth knowing for disaster recovery:** gateway, Beast and Beehive are **in one room on
-one circuit**. A single breaker, a single surge, or one spill takes out the internet, the AI host
-and the whole home-automation hub together. The UPS work in `project_hcc_ups_power_2026-08-21`
-covered the Beast; whether it covers the other two is not recorded.
+✅ **AND THE UPS ALREADY COVERS ALL THREE — corrected 2026-09-22 8:14 AM.**
+
+🔴 **I wrote “whether the UPS covers the other two is not recorded” into this file without
+searching for it. It WAS recorded.** Jeff: *“Read the file! The uninterrupted power supply has the
+J45 the beast the AT&T modem on it. The only thing that is not on the uninterrupted power supply is
+the sound bar and the Vizio TV.”* The record backs him — a prior session wrote:
+*“none of those three are on the UPS — per the record only the Beast, Beehive, the gateway, the
+switch and the sync module are.”*
+
+| on the **APC BN600** | deliberately OFF it |
+|---|---|
+| **J45 Beehive** · **The Beast** · **AT&T gateway** · network switch · sync module | **the sound bar** and the **Vizio TV** |
+
+The sound bar exclusion is settled twice over in Jeff's own words — 08-29: *“that Vizio can speaker
+can be removed it’s the sound bar for the tv and does nothing anyway”*, and 09-10: *“Vizio is the
+sound bar and it was taken out.”* **Do not re-raise it.** Keeping a TV and a sound bar off the
+battery is correct design — they are the biggest draw and the least important load.
+
+🔑 **So the single-room concentration is a DESIGNED one, not an accident.** Gateway, Beast and
+Beehive are together *because* they share one protected supply. That answers the risk I raised: the
+common-mode failure is a breaker or a physical accident, **not** a power blip — the blip case was
+solved on 08-21 and proven end to end with a real ride-through.
 
 ## 📍 PHYSICAL LAYOUT — WHERE THE RADIOS ACTUALLY ARE (Jeff, 2026-09-22 6:37 AM)
 
