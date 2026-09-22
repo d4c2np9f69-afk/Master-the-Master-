@@ -205,9 +205,10 @@
   function renderCans() {
     L.lighting.innerHTML = '';
     Object.entries(P.cans).forEach(([n, list]) => {
-      const dev = state.devices[n]; if (!dev || dev.removed) return;
+      const dev = state.devices[n];
+      if (dev && dev.removed) return;
       list.forEach(c => {
-        el('line', { x1: X(dev.x), y1: Y(dev.y), x2: X(c[0]), y2: Y(c[1]), stroke: '#d9b86a', 'stroke-width': .7, 'stroke-dasharray': '2 3' }, L.lighting);
+        if (dev) el('line', { x1: X(dev.x), y1: Y(dev.y), x2: X(c[0]), y2: Y(c[1]), stroke: '#d9b86a', 'stroke-width': .7, 'stroke-dasharray': '2 3' }, L.lighting);
         el('circle', { cx: X(c[0]), cy: Y(c[1]), r: 4.2, fill: '#fff8e6', stroke: '#c9a44a', 'stroke-width': 1 }, L.lighting);
         el('circle', { cx: X(c[0]), cy: Y(c[1]), r: 1.3, fill: '#c9a44a' }, L.lighting);
       });
