@@ -102,8 +102,8 @@ style=u"""<style>*{box-sizing:border-box}body{margin:0;font:12px/1.4 -apple-syst
 .sheet{padding:14px 18px;max-width:1560px;margin:0 auto}.mast{border-bottom:3px solid #111;padding-bottom:7px;margin-bottom:10px;position:relative}
 h1{font-size:23px;margin:0 0 3px;letter-spacing:-.4px}.rev{position:absolute;right:0;top:2px;text-align:right;font-size:9.6px;color:#6b7480;text-transform:uppercase;letter-spacing:.5px;line-height:1.5}
 .sub{font-size:11.6px;color:#39424b;max-width:960px}.badge{display:inline-block;background:#0b6b3a;color:#fff;font-size:9.6px;font-weight:700;padding:3px 9px;border-radius:11px;margin-left:8px;vertical-align:3px}
-.layout{display:grid;grid-template-columns:1fr 430px;gap:16px;align-items:start}svg{width:100%;height:auto;display:block}
-.lists{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.layout{display:grid;grid-template-columns:1fr;gap:0;align-items:start}svg{height:5.85in;width:auto;max-width:100%;display:block;margin:0 auto}
+.lists{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}.page2{page-break-before:always;padding-top:6px}.i{font-size:10px;padding:2.4px 0 2.4px 20px}.n{font-size:11px;width:18px}.g{font-size:8.8px;padding:2.4px 5px;margin:7px 0 4px}
 .g{font-size:8.4px;font-weight:700;letter-spacing:.4px;color:#fff;background:#39424b;padding:2.4px 5px;border-radius:3px;margin:7px 0 4px}
 .lists>div>.g:first-child{margin-top:0}.m{font-weight:400;opacity:.7}
 .i{font-size:9.8px;padding:1.9px 0 1.9px 20px;position:relative;border-bottom:1px dotted #dde3e8;line-height:1.3}
@@ -126,14 +126,14 @@ html=(u"<title>HCC Floor Plan — MARK-UP COPY</title>\n"+style+
  u'which is what &ldquo;right behind the washing machine&rdquo; has to mean.<br>'
  u'<b>West wall:</b> 5&#8242; master bedroom &rarr; jog at the downspout &rarr; 3&#8242; toilet closet '
  u'&rarr; garage door. Your 8&#8242;, confirmed at the corner.</div>'
- u'</div><div><div class="lists">'+lst+u'</div>'
+ u'</div></div>'u'<div class="page2"><div class="mast" style="margin-bottom:8px">'u'<h1>Device Key<span class="badge">67 ITEMS</span></h1>'u'<div class="sub">Write these numbers onto the map on the previous page. 'u'Cross out anything you cannot place; add anything missing at the bottom and I will number it.</div>'u'</div><div class="lists">'+lst+u'</div>'
  u'<div class="warn"><b>&#9888; Still fitted, not measured &mdash; mark these and I will correct:</b><br>'
  u'<b>GUEST BATH off the hallway.</b> Guest bed 10 + office 13 + bath 8&#189; = 31&#8242;6&#8243; against '
  u'a 29&#8242;3&#8243; east wall, so one of the three <b>cannot</b> be on that wall. I took the bath off '
  u'it because you said the hall <i>ends</i> at the guest bathroom. <b>The HALLWAY position</b> follows '
  u'from that.</div>'
- u'<div class="note"><b>&#10145; Write the %d numbers where they really are</b>, send it back, and the '
+ u'<div class="note"><b>&#10145; Write each number where that device actually is</b>, send it back, and the '
  u'ductwork drawing gets reworked with the runs <b>scaled off this plan</b> instead of estimated.</div>'
- u'</div></div></section>')
+ u'</div></section>')
 io.open("HCC_Floorplan_MARKUP.html","w",encoding="utf-8").write(html)
 print("MARKUP built - %d numbered items"%n)
