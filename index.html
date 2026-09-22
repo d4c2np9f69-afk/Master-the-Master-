@@ -11529,7 +11529,16 @@ function loadGuardian(){
     var DEVDOM = ['light.','switch.','sensor.','binary_sensor.','cover.','lock.','climate.','camera.','media_player.','fan.','vacuum.','number.','select.'];
     var devs = states.filter(function(s){ return DEVDOM.some(function(p){ return s.entity_id.indexOf(p) === 0; }); });
     if (devs.length){
-      var offline = devs.filter(function(s){ return s.state === 'unavailable' || s.state === 'unknown'; }).length;
+      // 2026-09-21: this counted EVERY unknown/unavailable entity and told Jeff
+      // "ATTENTION - 65 devices offline" while every real device in the house was fine.
+      // WHY IT STARTED THAT DAY: the 09-20 18:52 HARD POWER CYCLE. 206 of 619 entities
+      // carry that exact minute. Before the reboot HA held these values in memory; the
+      // restart cleared them, and every entity that only populates on an EVENT came back
+      // 'unknown' and has had no reason to repopulate since. Nothing broke.
+      var offline = devs.filter(function(s){
+        if (s.state !== 'unavailable' && s.state !== 'unknown') return false;
+        return !hccNormallyUnknown(s.entity_id);
+      }).length;
       var online = devs.length - offline;
       var frac = offline / devs.length;
       // A single blip offline is normal (sensors sleep, devices unplug) — only flag a
@@ -11796,6 +11805,33 @@ function hccDoorSensors(states){
   });
 }
 function hccDoorIsOpen(s){ return s.state === 'on' || s.state === 'open'; }
+
+// Entities whose 'unknown' / 'unavailable' IS the normal resting state.
+// Built 2026-09-21 after the Guardian card reported "ATTENTION - 65 devices offline"
+// with nothing actually wrong. The 09-20 18:52 hard power cycle cleared HA's in-memory
+// values; 206 of 619 entities carry that exact minute. Anything that only populates on
+// an EVENT came back 'unknown' and stayed there. Counting those as offline is the bug.
+// Deliberately NOT solved by disabling entities in HA: the 08-19 hygiene pass disabled
+// the Alexa do-not-disturb switches, and that is the suspected cause of announce failing
+// silently - HA can no longer see or clear DND. Filter the display, not the data.
+function hccNormallyUnknown(id){
+  // Alexa timer/alarm/reminder: 'unknown' means NOTHING IS SET. Settled 2026-09-04,
+  // when these same readings were added to HCC-Audit.py's baseline for this reason.
+  if (/_next_(alarm|timer|reminder)$/.test(id)) return true;
+  // iOS Companion sensors the phone only reports under specific conditions.
+  if (id.indexOf('iphone') !== -1 &&
+      /_(ssid|bssid|sim_1|sim_2|storage|connection_type|geocoded_location|last_update_trigger|audio_output|camera_stream|activity|steps|pressure|distance|current_pace|average_active_pace|current_cadence|floors_ascended|floors_descended|kiosk_mode|kiosk_volume|kiosk_brightness|focus)$/.test(id)) return true;
+  // The garage camera is a MAINS-POWERED MINI WITH NO BATTERY, so no temperature and no
+  // wi-fi sensor is documented-normal (SESSION_START.md section 5). Never report it as a fault.
+  if (id.indexOf('blink_garage_temperature') !== -1 || id.indexOf('blink_garage_wi_fi') !== -1) return true;
+  // EV-only entity on a gas vehicle - it can never populate on the GLE 350.
+  if (id === 'sensor.gle_350_end_of_charge') return true;
+  // The siren's volume select is WRITE-ONLY in practice - zigbee_mesh_routers_2026-08-27.md:
+  // "never reports state - it stayed unknown through every set." Automations pass the level
+  // in the mqtt payload and never trust the select, so unknown here is expected forever.
+  if (id === 'select.301_alarm_volume') return true;
+  return false;
+}
 
 // ── GARAGE DOOR (Home Guardian) ───────────────────────────────────────────
 // Two independent HA entity shapes, per docs/beehive/garage_door_sonoff_mini_dry_setup_2026-08-06.md:

@@ -25,97 +25,13 @@ anything — one answered from the record, one by building the thing that was ac
 
 ---
 
-## 🟢 #194 — ANGELA'S PRESENCE: ROOT-CAUSED 2026-09-21 10:50, AND MY 09-20 CONCLUSION WAS WRONG
+## 🔴 #194 — ANGELA'S PRESENCE. **OWNER: ANGELA'S PHONE. One setting, not yet done.**
 
-**Jeff, 2026-09-21 10:44: *"Fix it and I want 15 min out the phone reports always in HA"***
+**Angela's iPhone → Settings → Privacy & Security → Location Services → Home Assistant → Always**, then open the HA app once.
+Also: **Low Power Mode off**, **Background App Refresh on**, the four triggers under **HA app → Settings → Companion App → Location**, and her app is two releases behind (2026.7.0 vs Jeff's 2026.9.1).
+✅ **Everything on the HA side is BUILT and armed** — `automation.hcc_angela_15_minutes_out` (fires off her phone **or** the Mercedes, so it is live today), the rewritten stale-tracker watchdog, and the repaired `#39` door automation.
 
-### 🔴 THE RETRACTION FIRST
-On 09-20 I wrote that `sensor.angelas_iphone_location_permission` = `Authorized when in use` **"is a
-GHOST"**, because its `last_updated` equalled its `last_changed`. **That reasoning was wrong, and the
-control disproves it:**
-
-| | Angela | Jeff |
-|---|---|---|
-| `location_permission` | **`Authorized when in use`** | **`Authorized Always`** |
-| timestamp on that sensor | 955.32 min (restart floor) | **955.32 min — the SAME floor** |
-| does location post? | **never — 16.0 h, nothing** | **yes — 8.6 h and moving** |
-
-**Jeff's permission sensor carries the identical frozen timestamp and his says `Always` and his
-location works.** So the timestamp was never the discriminator — **the VALUE is, and it predicts the
-behaviour correctly on both phones.** ⚠️ **The general lesson: a stale timestamp makes a value
-*unconfirmed*, not *false*. I used "the timestamp is frozen" to discard a reading that was correct,
-and it cost a day.** Check whether a KNOWN-GOOD control carries the same staleness before calling a
-value a ghost.
-
-### ✅ THE DECISIVE TEST — 2026-09-21 10:47, silent push, no notification shown to anyone
-Pushed `request_location_update` to `notify.mobile_app_angelas_iphone` and watched for 90 s:
-
-```
-+15s   sensor.angelas_iphone_battery_level   40 -> 30    CHANGED   <- her app woke and answered
-       device_tracker.angelas_iphone         unmoved through 90 s
-```
-
-🔑 **Her app is ALIVE, reachable by push, and posting real new values. It answered a location request
-by posting a sensor and NO location.** That is exactly what iOS does to a backgrounded app under
-*While Using the App*. **So this is not a dead app, not the network, not HA, and not the webhook —
-it is the iOS permission, which is what its own sensor has been saying all along.**
-
-📌 **Context that made it obvious: all 26 of her entities sat at the restart floor with 0 posted in
-15.9 h, while Jeff's posted 7 of 33.** Her battery still read the exact `40` and steps `233` from
-14:41 the previous afternoon — i.e. her app only posts while she is actually looking at it.
-
-### 🔴 THE ONE THING ONLY ANGELA CAN DO — 20 seconds on her iPhone
-**Settings → Home Assistant → Location → change "While Using the App" to "Always".** Then open the HA
-app once so it re-posts. **Everything on the HA side is now built and waiting for that one toggle.**
-⚠️ It is genuinely set to *When In Use* right now, whatever the phone's own screen appeared to show
-earlier — her app is reporting that value to HA live.
-
-### ✅ BUILT 2026-09-21 — `automation.hcc_angela_15_minutes_out`
-Replaces the 10-minute alert Jeff asked to move to 15. **Verified armed: 2 triggers / 2 conditions /
-4 actions, state `on`.**
-- **Two GPS sources, so it is NOT dead code today:** `person.angela_loewen` **and**
-  `device_tracker.gle_350_device_tracker` (the Mercedes, live — 0.02 h). Whichever is alive fires it.
-- `distance()` **returns MILES here — verified**, not assumed: `zone.almost_home` r=16093 m computes
-  to exactly `10.0`. So `below: 15` is 15 miles ≈ 15 minutes, matching the existing 1 mile/minute
-  convention.
-- 🟢 **Reality-checked against her real destinations: work = 22.6 mi, barn = 16.6 mi — both beyond 15**,
-  so a return trip from either genuinely crosses the threshold.
-- **Guard against restart noise:** a condition requires `distance > 0.5` mi, so the boot-time
-  re-initialisation (everything reads 0.01 mi at home) can never fire it. Plus a 30-minute cooldown.
-- **Actions ordered by PROVEN reliability, the 22:05 lesson:** `persistent_notification` FIRST, then
-  Jeff's iPhone, then Alexa announce. ⚠️ **The Alexa leg is `continue_on_error` and remains UNPROVEN**
-  — see the still-open Alexa announce defect. A silent Alexa can no longer swallow the phone alert.
-- ⚠️ **NOT fired live on purpose.** Firing it would have pushed *"Angela is about 15 minutes out"* to
-  Jeff's phone while she is at home — a false time-sensitive alert, the exact 08-22 mistake. Logic was
-  tested by rendering the templates and simulating the distance instead.
-
-### ✅ FIXED 2026-09-21 — the watchdog that should have caught this and DIDN'T
-`automation.hcc_presence_tracker_stale_watchdog_angela` **ran at 09:07 this morning and stayed silent
-over a phone that had been dead 12 days.** Measured: `last_triggered = None`, condition
-`(now - last_updated) > 86400` against a tracker reading **15.86 h**.
-
-🔑 **ROOT CAUSE — AN HA RESTART FLOORS `last_updated`, SO IT ZEROES THE STALENESS CLOCK.** The 18:52
-reboot reset her 12-day-old tracker to "15.9 hours old". **Any watchdog built on absolute
-`now() - last_updated` is blind for a full day after every reboot — and we now reboot on a schedule
-every 2 weeks.** This is the restart-floor trap this file already documents, turned into a silent
-alarm failure.
-
-**Rewritten to three OR'd tests, and the first two survive a restart:**
-1. `perm != 'Authorized Always'` — **a VALUE, so a restart cannot affect it.** This one would have
-   fired correctly this morning.
-2. `battery.last_updated - tracker.last_updated > 1h` — **a COMPARISON between two entities, so a
-   restart floors both equally and it stays honest.** Detects the precise fault: sensors post,
-   location does not.
-3. the original `> 24 h` absolute test, kept to catch a fully dead app.
-
-🟢 **PROVEN, not assumed: the new condition evaluates `True` right now, where the old one evaluated
-`False` at 09:07 today.** Message renders naming the fault and the exact fix.
-
-### ⚠️ `automation.angela_almost_home` (the 10-minute one) IS NOW `off` — DELIBERATE, NOT A FAULT
-Turned off 2026-09-21 10:52 so one trip does not produce two alerts 5 minutes apart. **It is the
-YAML-package copy in `packages/hcc.yaml` with no `id`, so it cannot be edited through the config
-API** — switching it off was the available move. **Jeff: say the word and it goes back on as a
-second-stage "10 minutes out" alert.**
+📖 **The full write-up moved to `docs/FINDINGS_AND_STOPS.md` on 2026-09-21** — the retraction of my 09-20 ghost-reading call, the silent push test that proved it, the restart-floor defect class, and the sweep of all 66 automations. **Reference, not a todo.**
 
 ---
 
