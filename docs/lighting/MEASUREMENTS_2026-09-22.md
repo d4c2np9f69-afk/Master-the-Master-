@@ -172,3 +172,44 @@ measured rooms into a rectangular outline and treating the mismatch as a problem
 ⚠️ **Lesson for the next session:** when measured parts refuse to fit an assumed whole, question the
 **whole** before you question the parts. The rectangle was never measured — it was the one thing
 nobody had checked, precisely because it looked like a given.
+
+
+---
+
+## 🔑 ADJACENCY — 10:51 & 10:53 AM
+
+**Laundry: 7′11″ × 3′ = 24 sf.** I had drawn it **5 × 11 = 55 sf, more than twice its real size**
+— 31 sf I was silently stealing from elsewhere. At **3 ft deep it is an ALCOVE, not a room**: a
+reach-in with the machines side by side and no floor to stand in.
+
+**Master bath — Jeff, 10:53:** *"The master bath is 8 foot from wall to where the shower ends. The
+rest of that little square in there are closets, linen closets, master closet, my closet, and that
+butts up to the back of the laundry room."*
+
+### What that establishes
+
+| | |
+|---|---|
+| The **8 ft** in "15 × 8" | is **wall → end of the shower**, not the whole block |
+| The master bath block | is **bath + a CLOSET CLUSTER**: linen, master closet, Jeff's closet |
+| The closets | **back onto the laundry room** |
+
+❌ **So my "CLOSETS" block was in the wrong place.** I had an 11 × 6 closet block at the
+**north-east**, invented to balance the area. **The closets are actually in the master suite, west,
+between the bath and the laundry.** That north-east block was never real — which is consistent with
+Jeff closing it earlier as *"we don't really need those."*
+
+🔑 **And it places the laundry.** Backing onto the master closets puts the laundry in the
+**west/central** part of the house, in the master-suite block — **not off the kitchen**, which is
+where several revisions drew it.
+
+### Still open: the EAST side
+
+Both remaining tiling failures are on the east, and none of this touches them:
+
+```
+south row   kitchen 16 + living 14 + office 10 = 40.0 ft  vs  39.42  -> 7 in over
+east stack  guest bed 10 + office 13 + bath 8.5 = 31.5 ft  vs  29.25  -> 2 ft 3 over
+```
+
+**The west half is now solved. The east half is the whole remaining question.**
