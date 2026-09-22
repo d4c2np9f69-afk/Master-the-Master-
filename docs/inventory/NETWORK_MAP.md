@@ -179,6 +179,43 @@ Fixed by re-provisioning through the B-hyve app's **Update Wi-Fi Settings** — 
 `docs/utilities/bhyve_wifi_reconnect.md`. ⚠️ **Jeff checked and the app did not display the old
 SSID, so the orphan theory fits the timeline but was never directly confirmed.**
 
+## 📍 PHYSICAL LAYOUT — WHERE THE RADIOS ACTUALLY ARE (Jeff, 2026-09-22 6:37 AM)
+
+**This was never written down, and without it the B-hyve numbers look like a mystery. With it they
+are obvious.** Jeff, verbatim: *"The RE200 is in the office which is closest to the B-hyve which is
+on the outside wall of the office going through the brick wall. The main modem is in the master
+bedroom, which is the other end of the house."*
+
+| thing | where |
+|---|---|
+| **BGW320 gateway** (`.254`) | **MASTER BEDROOM — far end of the house** |
+| **RE200 wired AP** (`.196`) | **OFFICE** |
+| **B-hyve "Water Hog"** (`.187`) | **On the OUTSIDE WALL OF THE OFFICE** — one brick wall from the RE200 |
+
+### 🔑 SO THE TIMER IS A FEW FEET FROM THE RE200 AND IS TALKING TO THE FAR END OF THE HOUSE INSTEAD
+
+That is textbook **sticky-client** behaviour: it associated with the gateway at some point — most
+likely while the RE200 was down, being reset, or during the 08-13 extender retirement — and 802.11
+gives a client **no obligation to roam** once associated. It will hold a bad link until it drops
+completely rather than move to a better AP. **Same SSID and same PSK on both radios means nothing
+ever forces the decision.**
+
+**This is what that looks like in numbers** (measured 2026-09-22 06:16, 20 packets, control taken in
+the same minute):
+
+| target | avg | peak | loss | path |
+|---|---|---|---|---|
+| **B-hyve `.187`** | **256 ms** | **487 ms** | **5%** | across the whole house to the master bedroom |
+| RE200 `.196` | 1 ms | 6 ms | 0% | wired |
+| Gateway `.254` | 0 ms | 1 ms | 0% | wired |
+
+⚠️ **And it got WORSE after Jeff reset it that morning** — 68 ms / 0% loss at 05:11, then 256 ms /
+5% loss at 06:16. **A reset does not help a sticky client; it can re-stick to the same wrong AP.**
+That is the evidence that settles it: the answer is not another reset, it is removing the choice.
+
+🟢 **One brick wall at a few feet beats a whole house of drywall, joists and appliances.** Dedicating
+the RE200 is not a marginal improvement here — the correct AP is practically touching the device.
+
 ## 🔴 DECISION 2026-09-22 — THE RE200 IS DEDICATED TO THE B-HYVE
 
 **Jeff, 2026-09-22 6:02 AM: *"We are going to have to dedicate the RE200 to the B-hyve or it will
