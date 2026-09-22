@@ -15,7 +15,7 @@ The August plan (`HCC_Floorplan_STAGE1_ROOMS.html`, `_DRAFT`, `_DEVICE_KEY`) car
 
 | room | August 2026 | this map |
 |---|---|---|
-| **GUEST BEDROOM** | not mapped | ❌ **still not mapped** |
+| **GUEST BEDROOM** | not mapped | ✅ **MAPPED — drawn together with the guest bath as `room6`** (Jeff, 9:23 AM) |
 | **OFFICE** | not mapped | ✅ **MAPPED — labelled, east / south-east** |
 
 **Sharky has since been inside the office.** That makes its position in this map real evidence
@@ -71,3 +71,51 @@ correction landed in the two rooms Sharky has never entered. When a source is mi
 area, say which area and mark it on the artifact — do not let a plausible fill-in sit on the drawing
 looking exactly like a measured room. Rev P marks the two remaining guesses (**PANTRY**, **CLOSETS**)
 for that reason, and they should stay marked until Jeff replaces them.
+
+
+---
+
+## 🔑 UPDATE 9:23 AM — the toilet is visible, and it splits `room6`
+
+Jeff: *"the map draws the guest bedroom and guest bathroom together, but if you look real close, you
+can see where he goes around the toilet in the guest bath."*
+
+**He is right, and it is the single most useful thing on the map.** Cropped and enlarged 8×: on the
+**east side of `room6` the mapped floor wraps a stepped diagonal.** A straight wall maps as a straight
+line; **a staircase in the occupancy grid is the robot tracing something ROUND**, quantised into
+cells. That is a toilet base, against the **east wall**.
+
+**So `room6` splits:**
+
+| lobe | is |
+|---|---|
+| the lobe running **NORTH** off the corridor | **GUEST BEDROOM** |
+| the **EAST** lobe, with the toilet | **GUEST BATHROOM** |
+| the narrow **horizontal arm** between them | the **corridor** |
+
+✅✅ **That is exactly the arrangement Rev P reached from Jeff's sentence alone** — guest bed north of
+the corridor, guest bath off its east end. **Two independent sources, same answer.** The two rooms
+that had never been measured by anything are now the best-evidenced rooms at the east end.
+
+⚠️ **This supersedes the line above saying the guest bedroom is still unmapped.** It is mapped — it
+was just never *named*, so it reads as `room6` alongside the bath.
+
+---
+
+## ❌ RETRACTED SAME SESSION — I read a dimension off a position marker
+
+At 9:25 Jeff said *"where the red walls are is where the hall is a real hallway."* I extracted the two
+red dashed runs by colour — **187 px and 214 px against a 1,172 px mapped width** — called that
+**16–18% of the house, so 7–8 ft**, and stretched the drawn corridor from 4 ft to 8 ft.
+
+**Jeff, 9:27: *"Those walls are just there to keep him out of the office and guest bedroom and they
+are not to scale."*** The number is worthless. **Reverted to 4 ft**, which is what the room geometry
+itself yields — the corridor is exactly as long as the guest bedroom and the office overlap, a
+*derived* length rather than a guess.
+
+🔑 **The lesson, and it is the same one as the map itself:** the red walls are a **position** marker,
+not a **dimension**. Jeff had already said the map is "really off"; I accepted that for the room
+outlines and then quietly exempted his own annotation from it, because it was crisp and easy to
+measure. **Precision in the measuring does not create accuracy in the source.** What the red walls
+genuinely establish — *where* the walled stretch is, between guest bedroom and office — stands, and
+matches the plan.
