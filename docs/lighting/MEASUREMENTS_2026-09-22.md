@@ -213,3 +213,35 @@ east stack  guest bed 10 + office 13 + bath 8.5 = 31.5 ft  vs  29.25  -> 2 ft 3 
 ```
 
 **The west half is now solved. The east half is the whole remaining question.**
+
+
+---
+
+## ❌ 11:03 AM — I ASKED A QUESTION THAT COULD NOT BE ANSWERED
+
+I asked Jeff whether the window at the north-west corner was a bathroom window or a bedroom
+window, to settle which room sits there. **Jeff: *"There are no windows on the west side."***
+Photographed — `west_wall_no_windows_2026-09-22.jpg`: blank brick the whole run.
+
+**My test was worthless, and I should have known that before asking.** I have had the driveway
+camera still all morning and it shows that same blank wall. **I invented a discriminator without
+checking whether the thing I was discriminating on exists.** Same shape as reading a dimension off
+the Sharky no-go walls, and as comparing gross floor area to net.
+
+### What the photos DO establish
+
+- ✅ **The west wall is blank brick end to end.** So every room fronting it is one that does not
+  need a window — **bath, closets, toilet closet, garage.** That is real evidence about what can be
+  there, just not about which.
+- ✅ **The master bedroom's window is the ARCHED WINDOW ON THE FRONT**, in the gable — second photo.
+  Not on the west. That kills my earlier "which window" framing entirely.
+- ✅ The first photo is an **inside corner between two blank brick walls with a downspout** — one of
+  the jogs, confirming again that the footprint steps.
+
+### Still open
+
+The order of rooms along the west wall, north to south, from the NW corner to the garage door.
+**8 ft total.** Jeff has said that 8 ft is **5 ft master bedroom + 3 ft toilet closet**, and also
+that there is *"another jog over to the garage door."* The arithmetic cannot separate the orderings
+— re-ordering a stack does not change its sum — so **this needs Jeff to name the order, not another
+inference from me.**
