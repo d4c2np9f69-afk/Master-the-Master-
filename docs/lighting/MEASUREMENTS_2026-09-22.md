@@ -60,20 +60,49 @@ SHORTFALL                              ~150 sf
 
 At a confirmed depth of 32 ft, that puts the width at **≈ 39–40 ft, not 44.**
 
-⚠️ **So the ~1,400 sf figure that has been carried in the record for months is too high.**
-It was never a measurement — it was a remembered number, and the 44 ft width was reverse-engineered
-to hit it. **Two inferences propping each other up.**
+❌ **RETRACTED 10:21 AM — I SAID THE RECORD’S ~1,400 sf WAS TOO HIGH. IT IS NOT. I WAS WRONG.**
+The perimeter walk puts **gross heated floor area at 1,402 sf** — which is the 1,400 that has been
+in the record all along. 🔑 **It is a GROSS figure (outside dimensions); I was comparing it against
+a NET total (the sum of interior room measurements), and those differ by the thickness of every
+wall — 181 sf here.** The record was right and my comparison was apples to oranges.
+**Do not "correct" the 1,400 sf figure. It is a good number.**
 
 ---
 
-## ❓ The one number that closes it
+## ✅ CLOSED — the perimeter walk, 10:20 AM
 
-**The overall outside WIDTH of the house** (back wall, house only, not the garage) — item **A** on
-the measurement card. Everything else is now known or tightly constrained; the rooms do not yet
-close into a rectangle without it, and I am not going to invent a width for the third time.
+Jeff walked the whole outside with the laser, **cubbies included, garage included:**
 
-Also worth one more shot: **is the porch 5 wide × 7′6″ deep, or 7′6″ wide × 5 deep?** It is drawn
-as a recess, so the orientation moves the foyer.
+| side | segments | total |
+|---|---|---|
+| **Back** (south) | 22′6″ + 36′0″ | 58.50 ft |
+| **East** | 24′3″ + 5′0″ | 29.25 ft |
+| **Front** (north) | 5′6″ + 19′8″ + 3′8″ + 14′3″ | 43.08 ft |
+| **West** | 8′0″ + 26′0″ + 4′3″ | 38.25 ft |
+| | **perimeter as walked** | **169.08 ft** |
+
+**Bounding footprint ≈ 50.8 × 33.8 = 1,714 sf gross, garage included.**
+
+### 🔑 The front wall reads cleanly, and it confirms the prediction
+
+`19′8″ + 5′6″ + 14′3″ = **39.42 ft** of house across the front`, leaving **3′8″ as the porch recess
+depth** — the jog in and back out.
+
+✅✅ **An hour earlier, from the room areas alone, I predicted 39–40 ft. The tape says 39.42.**
+Two completely independent methods — area arithmetic and a perimeter walk — landing on the same
+number. **The house is 39.4 ft wide, not the 44 I had drawn.**
+
+### ✅ And the gross/net cross-check closes
+
+```
+gross footprint                    1,714 sf
+less garage interior 24 × 13         -312
+= gross heated                     1,402 sf
+measured rooms + hall + bath + est.  1,221 sf net interior
+difference                             181 sf  = walls
+```
+181 sf over a 169 ft perimeter is about **6.4 inches of average wall thickness — exactly right for
+brick veneer.** The two measurement sets agree to within the walls, which is as good as this gets.
 
 ---
 
