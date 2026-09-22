@@ -30,8 +30,11 @@
   .stage svg{width:100%;height:100%;display:block;touch-action:none;cursor:grab} .stage svg:active{cursor:grabbing}
   .dev{cursor:pointer} .dev.drag{cursor:move} .dev.sel .dot{stroke:var(--sel);stroke-width:3.5} .reg.drag{cursor:move}
   #tip{position:absolute;pointer-events:none;background:#1f2833;color:#fff;padding:6px 9px;border-radius:5px;font-size:11.5px;max-width:260px;box-shadow:0 4px 14px rgba(0,0,0,.2);z-index:5} #tip span{display:block;color:#c9d1da;font-size:10.5px;margin-top:2px}
-  .legend{position:absolute;left:12px;bottom:12px;background:rgba(255,255,255,.94);border:1px solid #dcdfe3;border-radius:6px;padding:8px 10px;font-size:10.5px;color:#4a535d;display:grid;grid-template-columns:auto auto;gap:3px 14px;max-width:420px}
-  .legend div{display:flex;align-items:center;gap:6px} .legend i{display:inline-block;width:14px;height:8px;border:1.5px solid #77766f;background:#efeee9} .legend i.n{border-color:#2a78d6;background:#d7e7fb} .legend i.w{border:0;height:0;border-top:2px solid #2f6db5;width:16px} .legend i.d{border:0;height:0;border-top:2px solid #8a3b2a;width:16px} .legend i.c{width:9px;height:9px;border-radius:50%;border:1.5px solid #c9a44a;background:#fff8e6} .legend i.t{border:0;height:0;border-top:2px dashed #7b52ab;width:16px} .legend i.r{width:12px;height:9px;border:1.5px solid #1f2833;background:#fff}
+  .legend{position:absolute;left:12px;bottom:12px;background:rgba(255,255,255,.95);border:1px solid #dcdfe3;border-radius:6px;padding:8px 10px;font-size:10.5px;color:#4a535d;max-width:470px}
+  .lg-grid{display:grid;grid-template-columns:auto auto;gap:3px 14px} .lg-grid.rooms,.lg-grid.cats{grid-template-columns:auto auto auto;gap:2px 12px}
+  .lg-h{font:600 9.5px var(--display);letter-spacing:.1em;text-transform:uppercase;color:#6f7780;margin:7px 0 3px;border-top:1px solid #eceef1;padding-top:5px}
+  .legend .lg-grid div{display:flex;align-items:center;gap:6px;white-space:nowrap} .legend i{display:inline-block;width:14px;height:8px;border:1.5px solid #77766f;background:#efeee9;flex:0 0 auto} .lg-grid.rooms i{width:14px;height:10px;border:1px solid #c9ced4} .lg-grid.cats i{width:10px;height:10px;border-radius:50%;border:0}
+  .legend i.n{border-color:#2a78d6;background:#d7e7fb} .legend i.w{border:0;height:0;border-top:2px solid #2f6db5;width:16px} .legend i.d{border:0;height:0;border-top:2px solid #8a3b2a;width:16px} .legend i.c{width:9px;height:9px;border-radius:50%;border:1.5px solid #c9a44a;background:#fff8e6} .legend i.t{border:0;height:0;border-top:2px dashed #7b52ab;width:16px} .legend i.r{width:12px;height:9px;border:1.5px solid #1f2833;background:#fff} .legend i.inf{border:1px dashed #c05621;background:#fff}
   .north{position:absolute;right:14px;top:12px;text-align:center;font:700 12px var(--display);color:#1f2833}
   .scale{position:absolute;right:14px;bottom:12px;font:600 10px var(--body);color:#4a535d;background:rgba(255,255,255,.94);padding:4px 8px;border:1px solid #dcdfe3;border-radius:5px}
   .scale i{display:block;height:6px;border:1.5px solid #1f2833;border-top:0;width:120px;margin-bottom:3px}
@@ -55,6 +58,8 @@
   #log{list-style:none;padding:0;margin:0;font-size:12px} #log li{padding:5px 0;border-bottom:1px solid var(--rule2)} .when{display:block;color:var(--muted);font-size:10.5px}
   .foot{padding:6px 12px;border-top:1px solid var(--rule);font-size:11px;color:var(--muted);display:flex;gap:10px;align-items:center} #status{flex:1}
   .note{background:#fff8e6;border-left:3px solid #c9a44a;padding:8px 10px;border-radius:0 5px 5px 0;font-size:11.5px;color:#1f2833;margin:8px 0}
+  .qin{display:flex;gap:12px;flex-wrap:wrap;margin:6px 0 10px;font-size:11.5px;color:var(--ink2)} .qin input{width:56px;padding:4px 6px;border:1px solid var(--rule);border-radius:5px;font:12px var(--body);background:var(--panel);color:var(--ink);margin:0 3px}
+  tr.inf td{color:var(--muted)}
   @media (max-width:900px){ main{grid-template-columns:1fr} aside{border-left:0;border-top:1px solid var(--rule);max-height:50vh} .legend{display:none} }
   @page{size:letter landscape;margin:.35in}
   @media print{
@@ -71,7 +76,7 @@
 <header>
   <div>
     <h1>Loewen House Plan</h1>
-    <div class="sub"><b>301 S Aztec Dr · White House, TN</b> · Rev 1 · 22 Sep 2026 · devices from Jeff’s hand markup · ductwork per the Rev D scope · 1 ft grid</div>
+    <div class="sub"><b>301 S Aztec Dr · White House, TN</b> · Rev 2 · 22 Sep 2026 · shell from the laser walk, rooms from the laser + photos · devices from Jeff’s markup · ductwork per Rev D · 1 ft grid</div>
   </div>
   <div class="tools">
     <div class="layers">
@@ -96,10 +101,19 @@
     <div class="north">N<br><svg width="18" height="26" viewBox="0 0 18 26"><path d="M9 1 L15 22 L9 17 L3 22 Z" fill="#1f2833"/></svg></div>
     <div class="scale"><i></i>5 FEET</div>
     <div class="legend">
-      <div><i class="n"></i> new duct (Rev D scope)</div><div><i></i> existing duct, stays</div>
-      <div><i class="d"></i> door swing</div><div><i class="w"></i> window</div>
-      <div><i class="c"></i> recessed can → its dimmer</div><div><span class="n" style="min-width:16px;height:16px;line-height:16px;font-size:9px;background:#1d5fbf">7</span> device · colour = category</div>
-      <div><i class="t"></i> thermostat wire · new 18 AWG with C</div><div><i class="r"></i> register · ⊘ balancing damper on new runs</div>
+      <div class="lg-grid">
+        <div><i class="n"></i> new duct (Rev D scope)</div><div><i></i> existing duct, stays</div>
+        <div><i class="d"></i> door swing</div><div><i class="w"></i> window</div>
+        <div><i class="c"></i> recessed can → its dimmer</div><div><i class="r"></i> register · ⊘ damper on new runs</div>
+        <div><i class="t"></i> thermostat wire · 18 AWG with C</div><div><i class="inf"></i> room inferred, not measured</div>
+      </div>
+      <div class="lg-h">Rooms</div>
+      <div class="lg-grid rooms">
+        <div><i style="background:#dbe7f7"></i> bedrooms</div><div><i style="background:#cfecf0"></i> baths</div><div><i style="background:#dcefcf"></i> kitchen · dining</div>
+        <div><i style="background:#fbe6c4"></i> living</div><div><i style="background:#e9e4f4"></i> hall · foyer</div><div><i style="background:#e3dfd7"></i> garage</div>
+      </div>
+      <div class="lg-h">Devices · colour = category</div>
+      <div class="lg-grid cats" id="cat-legend"></div>
     </div>
   </section>
 
@@ -107,7 +121,7 @@
     <div class="tabs">
       <button class="tab on" data-pane="devices">Devices <span id="count"></span></button>
       <button class="tab" data-pane="duct">Ductwork</button>
-      <button class="tab" data-pane="rooms">Rooms</button>
+      <button class="tab" data-pane="rooms">Quantities</button>
       <button class="tab" data-pane="log">Changes</button>
     </div>
     <div class="pane" id="pane-devices">
@@ -123,9 +137,17 @@
       <ol class="scope" id="scope"></ol>
     </div>
     <div class="pane" id="pane-rooms" hidden>
-      <table><thead><tr><th>Room</th><th class="num">ft</th><th class="num">sq ft</th></tr></thead><tbody id="room-rows"></tbody></table>
+      <div class="note">Quantities for quoting — paint, carpet, gutters, roof. Rooms tile with zero-thickness walls, so a tape pulled wall to wall reads ~1–2 ft less than these; the shell is from the laser walk.</div>
+      <div class="qin"><label>Ceiling <input id="q-ceil" type="number" value="8" min="7" max="12" step="0.5"> ft</label><label>Roof pitch <input id="q-pitch" type="number" value="8" min="2" max="14" step="1"> /12</label><label>Overhang <input id="q-over" type="number" value="1" min="0" max="3" step="0.5"> ft</label></div>
+      <table><thead><tr><th>Room</th><th class="num">ft</th><th class="num">sq ft</th><th>floor</th><th class="num">wall ft</th><th class="num">wall sq ft</th></tr></thead><tbody id="room-rows"></tbody></table>
+      <p class="dim">Wall sq ft = perimeter × ceiling, gross — subtract doors (≈20 sq ft each) and windows (≈12). Ceilings to paint ≈ <span id="ceil-total"></span> sq ft (house). Rooms marked <i>inferred</i> are drawn from Jeff’s descriptions, not measured.</p>
+      <h3>Floors</h3>
+      <table><thead><tr><th>Finish</th><th class="num">sq ft</th><th class="num">sq yd</th></tr></thead><tbody id="floor-rows"></tbody></table>
+      <h3>Exterior</h3>
+      <table><tbody id="ext-rows"></tbody></table>
+      <p class="dim">Brick veneer all round. Gutters run on the eaves: the back and both sides, plus the front outside the two gables. Roof area is footprint + overhang × the pitch factor — a ballpark for a roofer, not a takeoff.</p>
       <h3>How the shell was measured</h3>
-      <p class="dim">Bosch GLM 20 laser, 22 Sep 2026. Front 39′5″ · east 29′3″ · west 34′10″ · kitchen bump-out 5′7″ · porch recess 5′6″ × 3′8″ · garage 13 × 24 taped, front set back 8 ft with the door in the north wall. The perimeter closes in both directions to within inches.</p>
+      <p class="dim">Bosch GLM 20 laser, 22 Sep 2026. Front 39′5″ · east 29′3″ · west 34′10″ · kitchen bump-out 5′7″ (west 7′8″ of the kitchen) · porch recess 5′6″ × 3′8″ · garage 13 × 24 taped, front set back 8 ft with the door in the north wall · deck 26 ft from the kitchen jog.</p>
     </div>
     <div class="pane" id="pane-log" hidden>
       <ul id="log"></ul>
@@ -136,6 +158,7 @@
 
 <script src="plan-data.js"></script>
 <script>
-  (function () { const ol = document.getElementById('scope'); window.PLAN.duct.scope.forEach(s => { const li = document.createElement('li'); li.innerHTML = '<b>' + s[0] + ':</b> ' + s[1]; ol.appendChild(li); }); })();
+  (function () { const ol = document.getElementById('scope'); window.PLAN.duct.scope.forEach(s => { const li = document.createElement('li'); li.innerHTML = '<b>' + s[0] + ':</b> ' + s[1]; ol.appendChild(li); });
+    const lg = document.getElementById('cat-legend'); window.PLAN.cats.forEach(c => { const d = document.createElement('div'); d.innerHTML = '<i style="background:' + c.color + '"></i> ' + c.name; lg.appendChild(d); }); })();
 </script>
 <script src="plan-app.js"></script>

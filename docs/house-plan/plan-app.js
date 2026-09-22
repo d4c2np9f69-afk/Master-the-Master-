@@ -8,7 +8,7 @@
   const FX = px => px / PF + VX0, FY = px => px / PF + VY0;
   const NS = 'http://www.w3.org/2000/svg';
   const INK = '#1f2833', NEW = '#2a78d6', NEWF = '#d7e7fb', OLD = '#77766f', OLDF = '#efeee9', WIRE = '#7b52ab';
-  const TINT = { bed: '#f7f4ec', bath: '#eaf3f5', kitchen: '#f1f5e9', living: '#f8f2e8', hall: '#f8f8f5', garage: '#f0eee8', porch: '#eee7da', clo: '#f1f0ec', util: '#eef0f2' };
+  const TINT = { bed: '#dbe7f7', bath: '#cfecf0', kitchen: '#dcefcf', living: '#fbe6c4', hall: '#e9e4f4', garage: '#e3dfd7', porch: '#e8ddcb', clo: '#efece4', util: '#e6eaee' };
   const catById = Object.fromEntries(P.cats.map(c => [c.id, c]));
 
   const svg = document.getElementById('plan');
@@ -62,9 +62,17 @@
       el('rect', { x: r.x, y: r.y, width: r.w, height: r.h, fill: '#fff', stroke: '#455a64', 'stroke-width': 1.4, 'stroke-dasharray': '5 3', rx: 3 }, L.yard);
       T(r.x + r.w / 2, r.y + 12, y.label, { size: 8, weight: 700, fill: '#455a64', family: 'var(--display)', ls: '.08em' }, L.yard);
       T(r.x + r.w / 2, r.y + r.h - 5, y.sub, { size: 5.6, fill: '#455a64' }, L.yard);
+    } else if (y.kind === 'steps') {
+      const r = rectPx(y.rect);
+      el('rect', { x: r.x, y: r.y, width: r.w, height: r.h, fill: '#fff', stroke: '#b59a6a', 'stroke-width': 1 }, L.yard);
+      for (let i = 1; i < 6; i++) el('line', { x1: r.x, y1: r.y + i * r.h / 6, x2: r.x + r.w, y2: r.y + i * r.h / 6, stroke: '#b59a6a', 'stroke-width': .8 }, L.yard);
+      T(r.x + r.w / 2, r.y + r.h + 10, y.label, { size: 6.5, fill: '#8a6d3b' }, L.yard);
+    } else if (y.kind === 'street') {
+      el('line', { x1: X(y.seg[0]), y1: Y(y.seg[1]), x2: X(y.seg[2]), y2: Y(y.seg[3]), stroke: '#c9ced4', 'stroke-width': 2 }, L.yard);
+      T(X(y.seg[0]) + 30, Y(y.seg[1]) - 6, y.label, { anchor: 'start', size: 8, fill: '#7a8087', family: 'var(--display)', ls: '.14em', weight: 600 }, L.yard);
     } else if (y.kind === 'crawl') {
       el('rect', { x: X(y.seg[0]), y: Y(y.seg[1]) - 4, width: (y.seg[2] - y.seg[0]) * PF, height: 8, fill: '#fff', stroke: INK, 'stroke-width': 1.2 }, L.labels);
-      T(X(y.seg[0]) + (y.seg[2] - y.seg[0]) * PF / 2, Y(y.seg[1]) + 14, y.label, { size: 6.2, fill: '#5a636d' }, L.labels);
+      T(X(y.seg[0]) + (y.seg[2] - y.seg[0]) * PF / 2, Y(y.seg[1]) + 24, y.label, { size: 6.2, fill: '#5a636d' }, L.labels);
     }
   });
 
@@ -74,6 +82,7 @@
     let cx, cy;
     if (r.poly) { el('polygon', { points: pts(r.poly), fill, stroke: INK, 'stroke-width': 2.2, 'stroke-linejoin': 'miter' }, L.rooms); const b = r.label; cx = X(b[0]); cy = Y(b[1]); }
     else { const b = rectPx(r.rect); el('rect', { x: b.x, y: b.y, width: b.w, height: b.h, fill, stroke: INK, 'stroke-width': r.small ? 1.4 : 2.2 }, L.rooms); cx = r.label ? X(r.label[0]) : b.x + b.w / 2; cy = r.label ? Y(r.label[1]) : b.y + b.h / 2; }
+    if (r.inferred) { const b = r.poly ? null : rectPx(r.rect); if (b) el('rect', { x: b.x + 3, y: b.y + 3, width: b.w - 6, height: b.h - 6, fill: 'none', stroke: '#c05621', 'stroke-width': .8, 'stroke-dasharray': '3 3' }, L.rooms); }
     if (!r.name) return;
     if (r.small) T(cx, cy + 3, r.name, { size: r.name.length > 4 ? 6.4 : 7, fill: '#5a636d', family: 'var(--display)', ls: '.06em', weight: 600 }, L.labels);
     else {
@@ -89,6 +98,13 @@
     el('line', { x1: X(d.seg[0]), y1: Y(d.seg[1]), x2: X(d.seg[2]), y2: Y(d.seg[3]), stroke: INK, 'stroke-width': 1.3, 'stroke-dasharray': '6 5' }, L.walls);
     const mx = (X(d.seg[0]) + X(d.seg[2])) / 2, my = (Y(d.seg[1]) + Y(d.seg[3])) / 2, vert = d.seg[0] === d.seg[2];
     T(vert ? mx - 6 : mx, vert ? my : my - 5, d.label, { size: 6.2, fill: '#5a636d', rot: vert ? -90 : 0 }, L.labels);
+  });
+  // half walls (a real wall, ~42 in high)
+  (P.halfWalls || []).forEach(d => {
+    el('line', { x1: X(d.seg[0]), y1: Y(d.seg[1]), x2: X(d.seg[2]), y2: Y(d.seg[3]), stroke: INK, 'stroke-width': 5 }, L.walls);
+    el('line', { x1: X(d.seg[0]), y1: Y(d.seg[1]), x2: X(d.seg[2]), y2: Y(d.seg[3]), stroke: '#fff', 'stroke-width': 1.6, 'stroke-dasharray': '3 3' }, L.walls);
+    const vert = d.seg[0] === d.seg[2];
+    T(X(d.seg[0]) + (vert ? -7 : 0), (Y(d.seg[1]) + Y(d.seg[3])) / 2, d.label, { size: 6, fill: '#5a636d', rot: vert ? -90 : 0 }, L.labels);
   });
   // doors
   P.doors.forEach(d => {
@@ -121,6 +137,7 @@
     el('line', { x1, y1, x2, y2, stroke: '#2f6db5', 'stroke-width': 1.2 }, L.walls);
     el('line', { x1, y1: y1 - 2.4, x2, y2: y2 - 2.4, stroke: '#2f6db5', 'stroke-width': 1 }, L.walls);
     el('line', { x1, y1: y1 + 2.4, x2, y2: y2 + 2.4, stroke: '#2f6db5', 'stroke-width': 1 }, L.walls);
+    if (w.seg[0] === w.seg[2]) { T(x1 + 12, (y1 + y2) / 2, w.label, { size: 6, fill: '#2f6db5', rot: -90 }, L.labels); return; }
     const below = w.seg[1] > 10;
     T((x1 + x2) / 2, y1 + (below ? 13 : -9), w.label, { size: 6, fill: '#2f6db5' }, L.labels);
   });
@@ -135,7 +152,15 @@
       if (f.kind === 'bed') {
         el('rect', { x: r.x, y: r.y, width: r.w, height: r.h, fill: '#fff', stroke: FX_STROKE, 'stroke-width': 1, rx: 3 }, g);
         if (f.head === 'w') { el('rect', { x: r.x, y: r.y, width: 10, height: r.h, fill: '#f2f2ef', stroke: FX_STROKE, 'stroke-width': .8 }, g); el('rect', { x: r.x + 14, y: r.y + 6, width: 18, height: r.h / 2 - 9, fill: '#fff', stroke: FX_STROKE, 'stroke-width': .8, rx: 4 }, g); el('rect', { x: r.x + 14, y: r.y + r.h / 2 + 3, width: 18, height: r.h / 2 - 9, fill: '#fff', stroke: FX_STROKE, 'stroke-width': .8, rx: 4 }, g); }
+        else if (f.head === 'e') { el('rect', { x: r.x + r.w - 10, y: r.y, width: 10, height: r.h, fill: '#f2f2ef', stroke: FX_STROKE, 'stroke-width': .8 }, g); el('rect', { x: r.x + r.w - 32, y: r.y + 6, width: 18, height: r.h / 2 - 9, fill: '#fff', stroke: FX_STROKE, 'stroke-width': .8, rx: 4 }, g); el('rect', { x: r.x + r.w - 32, y: r.y + r.h / 2 + 3, width: 18, height: r.h / 2 - 9, fill: '#fff', stroke: FX_STROKE, 'stroke-width': .8, rx: 4 }, g); }
         else { el('rect', { x: r.x, y: r.y, width: r.w, height: 10, fill: '#f2f2ef', stroke: FX_STROKE, 'stroke-width': .8 }, g); el('rect', { x: r.x + 6, y: r.y + 14, width: r.w / 2 - 9, height: 18, fill: '#fff', stroke: FX_STROKE, 'stroke-width': .8, rx: 4 }, g); el('rect', { x: r.x + r.w / 2 + 3, y: r.y + 14, width: r.w / 2 - 9, height: 18, fill: '#fff', stroke: FX_STROKE, 'stroke-width': .8, rx: 4 }, g); }
+      } else if (f.kind === 'shower') {
+        el('rect', { x: r.x, y: r.y, width: r.w, height: r.h, fill: '#fff', stroke: FX_STROKE, 'stroke-width': 1 }, g);
+        line([r.x, r.y, r.x + r.w, r.y + r.h]); line([r.x + r.w, r.y, r.x, r.y + r.h]);
+        el('circle', { cx: r.x + r.w / 2, cy: r.y + r.h / 2, r: 4, fill: '#fff', stroke: FX_STROKE, 'stroke-width': .8 }, g);
+      } else if (f.kind === 'bench' || f.kind === 'counter') {
+        el('rect', { x: r.x, y: r.y, width: r.w, height: r.h, fill: '#f4f1ea', stroke: '#8a6d3b', 'stroke-width': 1 }, g);
+        if (f.kind === 'bench') for (let i = 1; i < (f.vertical ? r.h : r.w) / 12; i++) f.vertical ? line([r.x, r.y + i * 12, r.x + r.w, r.y + i * 12]) : line([r.x + i * 12, r.y, r.x + i * 12, r.y + r.h]);
       } else if (f.kind === 'tub') {
         el('rect', { x: r.x, y: r.y, width: r.w, height: r.h, fill: '#fff', stroke: FX_STROKE, 'stroke-width': 1, rx: 6 }, g);
         el('rect', { x: r.x + 5, y: r.y + 5, width: r.w - 10, height: r.h - 10, fill: 'none', stroke: FX_STROKE, 'stroke-width': .8, rx: 8 }, g);
@@ -148,7 +173,7 @@
         el('rect', { x: r.x, y: r.y, width: r.w, height: r.h, fill: '#fff', stroke: INK, 'stroke-width': 1.2 }, g);
         for (let i = 1; i < 6; i++) line([r.x + i * r.w / 6, r.y + 2, r.x + i * r.w / 6, r.y + r.h - 2]);
       } else if (f.kind === 'table') {
-        el('rect', { x: r.x, y: r.y, width: r.w, height: r.h, fill: '#fff', stroke: FX_STROKE, 'stroke-width': 1, rx: 12 }, g);
+        el('rect', { x: r.x, y: r.y, width: r.w, height: r.h, fill: '#fff', stroke: FX_STROKE, 'stroke-width': 1, rx: f.round ? Math.min(r.w, r.h) / 2 : 12 }, g);
         [[r.x - 8, r.y + r.h / 2], [r.x + r.w + 8, r.y + r.h / 2], [r.x + r.w / 2, r.y - 8], [r.x + r.w / 2, r.y + r.h + 8]].forEach(c => el('circle', { cx: c[0], cy: c[1], r: 5, fill: '#fff', stroke: FX_STROKE, 'stroke-width': .8 }, g));
       } else {
         el('rect', { x: r.x, y: r.y, width: r.w, height: r.h, fill: '#fff', stroke: FX_STROKE, 'stroke-width': 1, rx: f.kind === 'appliance' ? 1.5 : 2 }, g);
@@ -168,6 +193,11 @@
       const [x, y] = [X(f.at[0]), Y(f.at[1])];
       el('circle', { cx: x, cy: y, r: 13, fill: '#fff', stroke: FX_STROKE, 'stroke-width': 1 }, g);
       T(x, y + 2.5, 'WH', { size: 6.5, fill: '#7a8087', weight: 700 }, g);
+    } else if (f.kind === 'fan') {
+      const [x, y] = [X(f.at[0]), Y(f.at[1])];
+      el('circle', { cx: x, cy: y, r: 3.5, fill: '#fff', stroke: FX_STROKE, 'stroke-width': 1 }, g);
+      [0, 72, 144, 216, 288].forEach(a => el('ellipse', { cx: x, cy: y - 12, rx: 3.2, ry: 9, fill: '#fff', stroke: FX_STROKE, 'stroke-width': .8, transform: `rotate(${a} ${x} ${y})` }, g));
+      T(x, y + 26, 'fan', { size: 5.6, fill: '#7a8087' }, g);
     }
   });
 
@@ -332,19 +362,46 @@
   keyEl.addEventListener('click', e => { const b = e.target.closest('[data-restore]'); if (!b) return; const d = state.devices[+b.dataset.restore]; d.removed = false; persist(d, `#${d.n} ${d.name} — restored`); renderDevices(); renderCans(); renderKey(); });
   document.getElementById('search').addEventListener('input', e => { filter = e.target.value; renderKey(); });
 
-  /* ---------- rooms table ---------- */
-  (function roomsTable() {
-    const tb = document.getElementById('room-rows'); let tot = 0;
-    P.rooms.filter(r => !r.small && r.id !== 'porch').forEach(r => {
-      let w, h, area;
-      if (r.poly) { area = Math.abs(r.poly.reduce((s, p, i, a) => { const q = a[(i + 1) % a.length]; return s + p[0] * q[1] - q[0] * p[1]; }, 0)) / 2; w = 16; h = 12.83; }
-      else { w = r.rect[2]; h = r.rect[3]; area = w * h; }
-      if (r.id !== 'garage') tot += area;
-      const tr = document.createElement('tr'); tr.innerHTML = `<td>${r.name}</td><td class="num">${w.toFixed(1)} × ${h.toFixed(1)}</td><td class="num">${Math.round(area)}</td>`; tb.appendChild(tr);
+  /* ---------- quantities (rooms, floors, walls, exterior, roof) ---------- */
+  const polyArea = poly => Math.abs(poly.reduce((s, p, i, a) => { const q = a[(i + 1) % a.length]; return s + p[0] * q[1] - q[0] * p[1]; }, 0)) / 2;
+  const polyPerim = poly => poly.reduce((s, p, i, a) => { const q = a[(i + 1) % a.length]; return s + Math.hypot(q[0] - p[0], q[1] - p[1]); }, 0);
+  function renderQuantities() {
+    const ceil = +(document.getElementById('q-ceil').value) || 8, pitch = +(document.getElementById('q-pitch').value) || 8, over = +(document.getElementById('q-over').value) || 1;
+    const tb = document.getElementById('room-rows'); tb.innerHTML = '';
+    const byFloor = {}; let houseArea = 0, wallTot = 0, ceilTot = 0;
+    P.rooms.filter(r => r.id !== 'porch' && r.id !== 'fp' && r.id !== 'fclo' && r.name).forEach(r => {
+      let w, h, area, perim;
+      if (r.poly) { area = polyArea(r.poly); perim = polyPerim(r.poly); w = 16; h = 12.83; }
+      else { w = r.rect[2]; h = r.rect[3]; area = w * h; perim = 2 * (w + h); }
+      const wall = perim * ceil;
+      if (r.id !== 'garage') { houseArea += area; wallTot += wall; ceilTot += area; }
+      byFloor[r.floor || '—'] = (byFloor[r.floor || '—'] || 0) + area;
+      const tr = document.createElement('tr'); if (r.inferred) tr.className = 'inf';
+      tr.innerHTML = `<td>${r.name}${r.inferred ? ' <span class="dim">inferred</span>' : ''}</td><td class="num">${w.toFixed(1)} × ${h.toFixed(1)}</td><td class="num">${Math.round(area)}</td><td>${r.floor || ''}</td><td class="num">${Math.round(perim)}</td><td class="num">${Math.round(wall)}</td>`;
+      tb.appendChild(tr);
     });
-    const tr = document.createElement('tr'); tr.className = 'total'; tr.innerHTML = `<td><b>Named rooms, house only</b></td><td></td><td class="num"><b>${Math.round(tot)}</b></td>`; tb.appendChild(tr);
-    const g = document.createElement('tr'); g.innerHTML = `<td colspan="3" class="dim">Gross footprint from the laser walk ≈ 1,402 sf. Rooms tile with zero-thickness walls, so they read ~1–2 ft short of a tape pulled wall to wall — that is the wall, not an error.</td>`; tb.appendChild(g);
-  })();
+    const tr = document.createElement('tr'); tr.className = 'total'; tr.innerHTML = `<td><b>House (garage excluded)</b></td><td></td><td class="num"><b>${Math.round(houseArea)}</b></td><td></td><td></td><td class="num"><b>${Math.round(wallTot)}</b></td>`; tb.appendChild(tr);
+    // floors
+    const fl = document.getElementById('floor-rows'); fl.innerHTML = '';
+    Object.entries(byFloor).sort((a, b) => b[1] - a[1]).forEach(([k, v]) => { const t = document.createElement('tr'); t.innerHTML = `<td>${k}</td><td class="num">${Math.round(v)}</td><td class="num">${(v / 9).toFixed(1)}</td>`; fl.appendChild(t); });
+    // exterior
+    const o = P.outline; const sides = { front: 0, back: 0, east: 0, west: 0 };
+    o.forEach((p, i) => { const q = o[(i + 1) % o.length]; const len = Math.hypot(q[0] - p[0], q[1] - p[1]); if (p[1] === q[1]) sides[p[1] < 15 ? 'front' : 'back'] += len; else sides[p[0] > 30 ? 'east' : 'west'] += len; });
+    const perim = polyPerim(o), foot = polyArea(o);
+    const eave = sides.back + sides.east + sides.west + Math.max(0, sides.front - P.exterior.gableSpans);
+    const footOver = foot + perim * over + 4 * over * over;
+    const roof = footOver * Math.sqrt(1 + Math.pow(pitch / 12, 2));
+    const ex = document.getElementById('ext-rows'); ex.innerHTML = '';
+    [['Footprint, house + garage (outline)', `${Math.round(foot)} sq ft`], ['Exterior wall perimeter', `${Math.round(perim)} ft`],
+     ['Front wall (north)', `${Math.round(sides.front)} ft · two gables, ${P.exterior.gableSpans} ft of it`], ['Back wall (south)', `${Math.round(sides.back)} ft · eaved`],
+     ['East side', `${Math.round(sides.east)} ft · eaved`], ['West side', `${Math.round(sides.west)} ft · eaved`],
+     ['Gutter run (eaves only)', `≈ ${Math.round(eave)} ft`], ['Brick wall area at ' + ceil + ' ft', `≈ ${Math.round(perim * ceil)} sq ft gross, before windows and doors`],
+     ['Roof area at ' + pitch + '/12 with ' + over + ' ft overhang', `≈ ${Math.round(roof)} sq ft = ${(roof / 100).toFixed(1)} squares`],
+     ['Deck', `${Math.round(polyArea(P.yard.find(y => y.kind === 'deck').poly))} sq ft`]].forEach(([k, v]) => { const t = document.createElement('tr'); t.innerHTML = `<td>${k}</td><td class="num">${v}</td>`; ex.appendChild(t); });
+    document.getElementById('ceil-total').textContent = Math.round(ceilTot);
+  }
+  ['q-ceil', 'q-pitch', 'q-over'].forEach(id => document.getElementById(id).addEventListener('input', renderQuantities));
+  renderQuantities();
 
   /* ---------- pan / zoom ---------- */
   const view = { k: 1, tx: 0, ty: 0 };
