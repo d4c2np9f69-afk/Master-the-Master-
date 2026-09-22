@@ -118,7 +118,7 @@ answers at an address, not WHICH something.** Confirm the identity before naming
 already in `HCC_ACCESS.md` §5, so the beast can authenticate the moment it appears.
 
 **His go / his decision** (one word each):
-`#10` arm panic **and** disable the old one · `#39` + the alarm subsystem · `#28` URL rotation ·
+**RE200 → dedicate to B-hyve** (plan in `NETWORK_MAP.md`; **never Pairing Mode**) · `#10` arm panic **and** disable the old one · `#39` + the alarm subsystem · `#28` URL rotation ·
 `#84 / #85 / #127` **one Z2M restart**, held for the repeater still in shipping · `#106` the A/C job ·
 `#131` after the proof run · `#27` Smart Stall *("do not start until Jeff says go")* ·
 **`#183`** the utility-card half of the Cloudflare fix — written, tested, **shipped switched off**

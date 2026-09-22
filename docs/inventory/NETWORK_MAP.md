@@ -179,6 +179,53 @@ Fixed by re-provisioning through the B-hyve app's **Update Wi-Fi Settings** — 
 `docs/utilities/bhyve_wifi_reconnect.md`. ⚠️ **Jeff checked and the app did not display the old
 SSID, so the orphan theory fits the timeline but was never directly confirmed.**
 
+## 🔴 DECISION 2026-09-22 — THE RE200 IS DEDICATED TO THE B-HYVE
+
+**Jeff, 2026-09-22 6:02 AM: *"We are going to have to dedicate the RE200 to the B-hyve or it will
+keep dropping."*** This settles the question he first raised on **2026-09-03** and that was never
+answered: *"I don't know what we gotta do to get it to hook into that."*
+
+### Why nothing else works
+The RE200 broadcasts **the same SSID and the same PSK as the gateway**. That is a correct roaming
+setup, which means **the client chooses for itself** — and the timer keeps choosing the gateway.
+**There is no way to pin a client to one AP when both look identical to it.** Not MAC filtering on
+the RE200 (the timer would still prefer the gateway), not a reset, not re-pairing.
+
+### Measured 2026-09-22 05:11, and this is what "dropping" looks like before it drops
+| target | avg | peak | loss |
+|---|---|---|---|
+| **B-Hyve timer `.187`** | **68 ms** | **116 ms** | 0% |
+| RE200 `.196` | 1 ms | 3 ms | 0% |
+| Gateway `.254` | 0 ms | 1 ms | 0% |
+
+**It was associated and answering the whole time.** A ping test that only asks "is it up" would have
+called this healthy — it is 68x the latency of everything else on the LAN. Congestion measured
+2026-09-03 backs it: gateway ch 1 at **44%** utilisation, RE200 ch 6 at **23%**.
+
+### THE PLAN
+1. **Rename the RE200's 2.4 GHz SSID** to something distinct — e.g. `Loewen301-IoT`. Admin at
+   `http://192.168.1.196`, password in `HCC_ACCESS.md` §5.
+   🔴 **10 login attempts before lockout and 2 are already used.** Get it right first try.
+2. **Consider disabling the RE200's 5 GHz** (`Loewen301-5G`). The B-hyve is 2.4-only, so 5 GHz only
+   invites other clients onto an AP we are dedicating.
+3. **Re-provision the timer** — B-hyve app → **My B-hyve → Devices → Water Hog → Update Wi-Fi
+   Settings** → pick the new SSID. 🔴 **NEVER Pairing Mode — Orbit's own words: *"putting the
+   device in pairing mode will also Factory Reset the device,"* which wipes all six zone programs and
+   the `IRR_FLOW` model built on them.** See `docs/utilities/bhyve_wifi_reconnect.md`.
+4. **Re-measure the ping.** If it does not come down near the RE200's 1 ms, the radio is the problem,
+   not the AP.
+
+### ⚠️ THE ACCEPTED COST — Jeff should know this going in
+The RE200 had **5 clients attached** as of 2026-09-03, **including the office printer at `.208`**.
+Renaming its SSID drops every one of them back onto the gateway radio — the congested one. Nothing
+breaks permanently (the `Loewen301` SSID still exists on the gateway), but the printer and whatever
+else was benefiting from ch 6 lose it. **That is the price of dedicating the AP, and it is the point.**
+
+### 🔴 SEPARATE FINDING, 2026-09-22 — HA HAS **ZERO** B-HYVE ENTITIES
+No zones, no switches, nothing. The app runs entirely on `loadIrrigationDirect()`, the Orbit cloud
+fallback. **Home Assistant cannot see or control irrigation at all right now**, so no HA automation,
+watchdog or Guardian check can cover it. Not caused by the Wi-Fi problem; a separate gap.
+
 ## Still unidentified — do not re-guess these
 `.198 CMWC1ZZABR` · `.166 dp-730602E4` · `.183 espressif` (`28:05:A5`, an **RE200 client**) ·
 `.82 none-3` · `.161 none-4` · `.182` (RE200 client, `BE-79-DD-6C-A6-5B`, locally-administered
