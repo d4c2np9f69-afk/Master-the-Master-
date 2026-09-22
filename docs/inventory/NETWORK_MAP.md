@@ -179,6 +179,36 @@ Fixed by re-provisioning through the B-hyve app's **Update Wi-Fi Settings** — 
 `docs/utilities/bhyve_wifi_reconnect.md`. ⚠️ **Jeff checked and the app did not display the old
 SSID, so the orphan theory fits the timeline but was never directly confirmed.**
 
+## 🔴 THE ENTIRE NETWORK CORE IS IN THE MASTER BEDROOM (Jeff, 2026-09-22 8:09 AM)
+
+**Jeff: *"The j45 beehive sits on top of the beast."*** Combined with the 6:37 AM layout and the
+photo of the bedroom dresser, that puts **three critical things in one corner of one room**:
+
+| in the master bedroom | |
+|---|---|
+| **BGW320 gateway** `.254` | the white unit on the dresser |
+| **The Beast / 301Server** `.194` | |
+| **J45 Beehive** `.66` | **sitting on top of the Beast** — so Home Assistant **and the Zigbee coordinator and its antenna** are here too |
+
+### Two consequences, and both are measurable rather than theoretical
+
+**1. 🔴 ZIGBEE RADIATES FROM THE MASTER BEDROOM**, not from the middle of the house. Every LQI
+number in `zigbee_mesh_routers_2026-08-27.md` is *distance from this corner*. The mailbox at the
+street, the garage sensors and the kitchen leak sensors are all reaching back here. **This is the
+missing context for the 2026-09-15 antenna experiment** — the front-of-house sensors improved and
+the kitchen/garage/back ones dropped when the whip was tilted, which is exactly what an antenna in
+*this* room would do.
+
+**2. 🔴 THE B-HYVE IS AS FAR FROM THE GATEWAY AS THIS HOUSE PHYSICALLY ALLOWS** — and it chose
+the gateway anyway, over an RE200 sitting **one brick wall** from it. Measured 2026-09-22 06:16:
+**256 ms average, 487 ms peak, 5% loss**, against the RE200 at **1 ms / 0%** in the same minute.
+That is not a marginal preference; it is a sticky client holding the worst available link.
+
+⚠️ **Also worth knowing for disaster recovery:** gateway, Beast and Beehive are **in one room on
+one circuit**. A single breaker, a single surge, or one spill takes out the internet, the AI host
+and the whole home-automation hub together. The UPS work in `project_hcc_ups_power_2026-08-21`
+covered the Beast; whether it covers the other two is not recorded.
+
 ## 📍 PHYSICAL LAYOUT — WHERE THE RADIOS ACTUALLY ARE (Jeff, 2026-09-22 6:37 AM)
 
 **This was never written down, and without it the B-hyve numbers look like a mystery. With it they
