@@ -221,10 +221,22 @@ Renaming its SSID drops every one of them back onto the gateway radio — the co
 breaks permanently (the `Loewen301` SSID still exists on the gateway), but the printer and whatever
 else was benefiting from ch 6 lose it. **That is the price of dedicating the AP, and it is the point.**
 
-### 🔴 SEPARATE FINDING, 2026-09-22 — HA HAS **ZERO** B-HYVE ENTITIES
-No zones, no switches, nothing. The app runs entirely on `loadIrrigationDirect()`, the Orbit cloud
-fallback. **Home Assistant cannot see or control irrigation at all right now**, so no HA automation,
-watchdog or Guardian check can cover it. Not caused by the Wi-Fi problem; a separate gap.
+### ✅ RETRACTED 2026-09-22 — "HA HAS ZERO B-HYVE ENTITIES" WAS WRONG
+
+I reported that at 06:0x and it is **false**. **All six zones exist and report normally:**
+`switch.z1_front_right` (station 1) · `switch.z2_front_left` (2) · `switch.z3_back_left` (3) ·
+`switch.z4_back_right` (4) · `switch.z5_right_side_drive` (5) · `switch.garden` (6) — all `off`.
+
+🔑 **WHY I GOT IT WRONG, because the mistake is reusable:** I filtered entity ids for
+`bhyve|orbit|irrigation|zone_`. **Not one of those strings appears in the names.** The zones are
+named after where they water, not after the vendor. That is precisely the trap SESSION_START §0
+names: *"searching for the DEAD plan and finding nothing does not mean nothing is documented."*
+An empty match on the wrong term became a confident claim that a whole subsystem was missing.
+
+✅ The real list was already written down in `docs/mower/gps_firmware_coworker_findings_2026-08-11.md`
+and I only found it because a read gate forced that file open. **These entities also expose a
+`station` attribute** (`switch.garden` → `station: 6`) which is authoritative — use it instead of
+parsing digits out of the name.
 
 ## Still unidentified — do not re-guess these
 `.198 CMWC1ZZABR` · `.166 dp-730602E4` · `.183 espressif` (`28:05:A5`, an **RE200 client**) ·
