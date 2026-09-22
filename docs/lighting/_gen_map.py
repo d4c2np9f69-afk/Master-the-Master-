@@ -21,50 +21,64 @@ def rm(x,y,w,h,st=M,sw=2.2,dash=False):
 
 # ---- TILED like Rev G: every room shares walls, no gaps, no floating boxes.
 #      Column lines: 0 | 15 | 23 | 33 | 39.42     Row lines: 0 | 11 | 15 | 19 | 22 | 29.25 | 34.83
-# ---- N-S corridor, per the 12:09 photos: hall leaves the living room's NE corner
-#      heading NORTH beside the fireplace, short corridor with a door each side,
-#      dead-ends at the guest bath at the front. Office = east column (Jeff's circle).
+# ---- REV G MARKUP, exactly (Jeff 12:16 "use this one"), on the measured shell.
+#  Row 1: MASTER BED | FOYER | GUEST BED | GUEST BATH
+#  Row 2: MASTER BATH (+WC, closets) | HALLWAY open to the living room | GREEN VESTIBULE
+#  Row 3: LAUNDRY / pantry | LIVING ROOM (fireplace on its EAST wall) | 3ft strip | OFFICE = east column
+#  Row 4: KITCHEN + DINING (table by the half-wall)
 ROOMS = "".join([
  rm(0.8,SB+.8,13,24,"#8a5000",2.6),
- rm(G,0,15,11), rm(G,11,15,8), rm(G,19,15,3), rm(G,22,16,12.83),
- rm(G,11,3,8,M,1.4), rm(G+3,11,8,8,M,1.4), rm(G+3.5,19,7.917,3,M,1.4),
- rm(G+15,0,8,6), rm(G+23,0,3,6,M,1.4),
- rm(G+26,0,6.5,8.5),
- rm(G+15,6,11,10),
- rm(G+26,8.5,3.5,7.5),
- rm(G+15,16,14,13.25),
- rm(G+29,13,3,7.0,M,1.6), rm(G+29,20,3,9.25,M,1.6),
- rm(G+29.5,12.5,3,3.5,M,1.2),
- rm(G+32.5,0,6.92,29.25),
+ rm(G,0,15,11), rm(G+15,0,8,11), rm(G+23,0,10,11), rm(G+33,0,6.42,11),
+ rm(G,11,15,8), rm(G,11,3,8,M,1.4), rm(G+3,11,8,8,M,1.4),
+ rm(G,19,15,3), rm(G+3.5,19,7.917,3,M,1.4),
+ rm(G,22,16,12.83),
+ rm(G+15,11,14.42,4,M,1.2),
+ rm(G+29.42,11,4.08,4),
+ rm(G+33.5,11,5.92,4,M,1.4),
+ rm(G+15,15,14.42,14.25),
+ rm(G+29.42,15,10,14.25),
+ rm(G+29.42,17,1.5,5,M,1.6),
 ])
+# hall is OPEN to the living room: erase that wall, dash it
 OPEN=('<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="#fff" stroke-width="5"/>'
-      '<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="%s" stroke-width="1.4" stroke-dasharray="5 4"/>')%(
-      X(G+26.2),Y(16),X(G+29.3),Y(16), X(G+26),Y(16),X(G+29.5),Y(16),M)
-DOORS=('<path d="M %s %s A %s %s 0 0 1 %s %s" fill="none" stroke="%s" stroke-width="1.6"/>'
+      '<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="%s" stroke-width="1.4" stroke-dasharray="5 4"/>'
+      '<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="#fff" stroke-width="5"/>')%(
+      X(G+15.2),Y(15),X(G+29.2),Y(15), X(G+15),Y(15),X(G+29.42),Y(15),M,
+      X(G+15),Y(11.2),X(G+15),Y(14.8))
+# half wall between dining and living room
+HALF=('<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="#fff" stroke-width="5"/>'
+      '<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="%s" stroke-width="3" stroke-dasharray="3 3"/>')%(
+      X(G+15.9),Y(22.3),X(G+15.9),Y(29.0), X(G+16),Y(22),X(G+16),Y(29.25),M)
+# the three doors on the vestibule + master bed door at its SE corner
+DOORS=('<path d="M %s %s A %s %s 0 0 0 %s %s" fill="none" stroke="%s" stroke-width="1.6"/>'
+       '<path d="M %s %s A %s %s 0 0 1 %s %s" fill="none" stroke="%s" stroke-width="1.6"/>'
        '<path d="M %s %s A %s %s 0 0 0 %s %s" fill="none" stroke="%s" stroke-width="1.6"/>'
        '<path d="M %s %s A %s %s 0 0 1 %s %s" fill="none" stroke="%s" stroke-width="1.6"/>')%(
-       X(G+26),Y(11.8),2.5*PF,2.5*PF,X(G+26),Y(9.3),H,
-       X(G+29.5),Y(11.8),2.5*PF,2.5*PF,X(G+29.5),Y(9.3),H,
-       X(G+27),Y(8.5),2.5*PF,2.5*PF,X(G+29.5),Y(8.5),H)
-ROOMS += OPEN + DOORS
+       X(G+30),Y(11),2.5*PF,2.5*PF,X(G+32.5),Y(11),H,
+       X(G+30),Y(15),2.5*PF,2.5*PF,X(G+32.5),Y(15),H,
+       X(G+33.5),Y(11),2.5*PF,2.5*PF,X(G+33.5),Y(13.5),H,
+       X(G+15),Y(8.5),2.5*PF,2.5*PF,X(G+15),Y(11),H)
+ROOMS += OPEN + HALF + DOORS
 
 def lab(x,y,t,sz=9.4,c="#111"):
     return '<text x="%s" y="%s" font-size="%s" font-weight="700" text-anchor="middle" fill="%s">%s</text>'%(
         X(x),Y(y),sz,c,t)
 LABELS = (lab(7.3,17,"GARAGE",11,"#8a5000")
  + lab(G+7.5,4.0,"MASTER BED",9.8) + lab(G+7.5,5.3,"15 x 11",6.6,"#6b7480")
+ + lab(G+19,4.4,"FOYER",9.2) + lab(G+19,5.7,"8 x 6",6.6,"#6b7480")
+ + lab(G+28,4.4,"GUEST BED",9.4) + lab(G+28,5.7,"11 x 10",6.6,"#6b7480")
+ + lab(G+36.2,3.6,"GUEST",8.6) + lab(G+36.2,4.8,"BATH",8.6) + lab(G+36.2,6.4,"tub N, sink E",5.8,"#6b7480")
  + lab(G+7.0,13.2,"MASTER BATH",9.0) + lab(G+7.0,14.4,"8 ft to shower end",6.4,"#6b7480")
  + lab(G+1.5,15.0,"WC",6.6) + lab(G+13.0,15.0,"clo",6.4)
- + lab(G+7.5,21.0,"LAUNDRY",8.4) + lab(G+7.5,22.0,"7'11 x 3",6.2,"#6b7480")
- + lab(G+8,29.0,"KITCHEN / DINING",9.8) + lab(G+8,30.3,"16 x 13",6.6,"#6b7480")
- + lab(G+19,2.6,"FOYER",9.0) + lab(G+19,3.8,"8 x 6",6.4,"#6b7480") + lab(G+24.5,3.2,"coat",6.0)
- + lab(G+29.25,3.6,"GUEST",8.6) + lab(G+29.25,4.8,"BATH",8.6) + lab(G+29.25,6.1,"8%s deep"%"&#189;",6.2,"#6b7480")
- + lab(G+20.5,10.4,"GUEST BED",9.4) + lab(G+20.5,11.7,"11 x 10",6.6,"#6b7480")
- + lab(G+27.75,12.6,"hall",6.4,"#6b7480")
- + lab(G+31,14.5,"clo",6.0)
- + lab(G+22,22.0,"LIVING ROOM",10.2) + lab(G+22,23.4,"14 x 17",6.8,"#6b7480")
- + lab(G+30.5,16.0,"FIRE",6.4) + lab(G+30.5,17.1,"PLACE",6.4) + lab(G+30.5,24.6,"clo",6.4)
- + lab(G+36,13.5,"OFFICE",9.4) + lab(G+36,14.7,"BED 3",9.4) + lab(G+36,16.0,"10 x 13",6.6,"#6b7480"))
+ + lab(G+7.5,21.0,"LAUNDRY",8.4) + lab(G+13.2,21.0,"pantry",6.0) + lab(G+1.75,21.0,"clo",6.0)
+ + lab(G+8,29.0,"KITCHEN / DINING",9.8) + lab(G+8,30.3,"16 x 13",6.6,"#6b7480") + lab(G+13.5,24.0,"table",6.0,"#6b7480")
+ + lab(G+16.6,25.6,"half wall",5.4,"#6b7480")
+ + lab(G+22,12.4,"HALLWAY",9.0) + lab(G+22,13.7,"open to living room",6.2,"#6b7480")
+ + lab(G+31.46,12.4,"vest",5.8,"#6b7480") + lab(G+36.46,13.4,"clo",6.0)
+ + lab(G+22,22.6,"LIVING ROOM",10.2) + lab(G+22,24.0,"14 x 17",6.8,"#6b7480")
+ + lab(G+30.17,19.2,"F",6.0) + lab(G+30.17,20.3,"P",6.0)
+ + lab(G+35.5,21.4,"OFFICE",9.4) + lab(G+35.5,22.6,"BED 3",9.4) + lab(G+35.5,23.9,"10 x 13",6.6,"#6b7480")
+ + lab(G+35.5,28.4,"window S",5.8,"#6b7480"))
 
 def dot(x,y,n,c=D):
     return ('<circle cx="%s" cy="%s" r="7.6" fill="#fff" stroke="%s" stroke-width="1.7"/>'
@@ -72,19 +86,19 @@ def dot(x,y,n,c=D):
         X(x),Y(y),c,X(x),Y(y)+2.7,c,n)
 
 P=[]
-for x,y,n in [(G+13.4,1.4,1),(G+13.4,3.0,2),(G+13.4,4.6,3),(G+13.4,6.2,4),(G+13.4,7.8,5),
-  (G+13.4,9.4,8),(G+2.0,2.4,21),(G+4.4,2.4,22),(G+7.5,5.4,16),(G+10.6,1.4,52),
-  (G+10.6,3.0,51),(G+10.6,4.6,55)]: P.append(dot(x,y,n))
-P.append(dot(G+36,18.6,6))
+for x,y,n in [(G+1.6,7.2,1),(G+1.6,8.6,2),(G+1.6,10.0,3),(G+3.2,8.6,4),(G+3.2,10.0,5),
+  (G+3.2,7.2,8),(G+5.0,2.4,21),(G+9.0,2.4,22),(G+7.5,5.4,16),(G+13.6,4.0,52),
+  (G+13.6,5.6,51),(G+13.6,7.2,55)]: P.append(dot(x,y,n))
+P.append(dot(G+34.5,17.6,6))
 for x,y,n in [(3.2,8.4,7),(5.6,8.4,9),(7.6,13.5,20),(10.2,13.5,23),(3.2,10.6,15),
   (5.6,10.6,34),(1.7,20.0,27),(7.0,7.4,28),(9.4,7.4,41),(1.7,22.6,63),(11.2,8.4,53)]:
     P.append(dot(x,y,n))
 for x,y,n in [(G+8,23.4,17),(G+2.4,33.4,32),(G+5.4,33.4,33),(G+8.4,33.4,59),
   (G+11.4,33.4,60),(G+14.2,33.4,61),(G+2.4,30.4,24)]: P.append(dot(x,y,n))
-for x,y,n in [(G+22,18.0,18),(G+26.5,17.4,38),(G+17.6,18.0,39),(G+17.6,20.2,49),
-  (G+19.8,20.2,50),(G+22.0,20.2,54),(G+24.2,20.2,56),(G+27.6,28.2,26),
-  (G+17.6,27.8,62),(G+26.4,20.2,35),(G+24.2,26.0,36)]: P.append(dot(x,y,n))
-for x,y,n in [(G+7.5,15.0,19),(G+5.4,20.4,57),(G+9.6,20.4,58),(G+29.25,7.4,31)]: P.append(dot(x,y,n))
+for x,y,n in [(G+22,19.6,18),(G+25,12.6,38),(G+27.3,12.6,39),(G+28.0,18.0,49),
+  (G+28.0,20.0,50),(G+16.8,23.6,54),(G+28.0,22.0,56),(G+22.0,28.2,26),
+  (G+17.6,27.8,62),(G+24.0,20.2,35),(G+26.0,20.2,36)]: P.append(dot(x,y,n))
+for x,y,n in [(G+7.5,15.0,19),(G+5.4,20.4,57),(G+9.6,20.4,58),(G+36.2,8.6,31)]: P.append(dot(x,y,n))
 for x,y,n in [(G+19,4.8,25),(G+19,-1.4,10)]: P.append(dot(x,y,n))
 for x,y,n in [(-1.8,2.4,11),(G+41.6,1.4,12),(G+34,31.8,13),(G+20,32.8,14),(G+44,-2.4,29),
   (G+42.6,14.0,37),(G+41.6,18.8,42),(G+45.6,21,43),(G+45.6,22.6,44),(G+45.6,24.2,45),
