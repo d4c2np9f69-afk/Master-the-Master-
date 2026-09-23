@@ -16,6 +16,8 @@ Status legend: **ORDERED** → **ON HAND** → **INSTALLED** · plus **RETIRED**
 
 | Item | Qty | Status | Cost | Location / Notes |
 |---|---|---|---|---|
+| Chamberlain **myQ hub** | 1 | **RETIRED 2026-09-23** | — | 🔴 **Not in service and nothing depends on it — verified, not assumed: 569 HA entities queried 11:19, ZERO match "myq".** The garage door runs on the **SONOFF MINI-D** (`cover.garage_door`, `switch.garage_garage_door_opener`), wired as a third trigger beside the wall button, commissioned 09-15. myQ is also on the **never-re-propose** list. Jeff, 11:21: *"I was going to sell it but get nothing for it after postage."* **Do not suggest selling, re-deploying or integrating it.** |
+| ↳ its **5V 1.5A AC adapter** (NSA8EU-05015000, UL E302975) | 1 | **REPURPOSED 2026-09-23** | $0 | ➡️ **Now powers the garage QFX PBX-BF120 Bluetooth speaker.** Spec checked before use: speaker wants **5V 1A**, this gives **5.0V 1.5A** — extra amps are headroom the device simply does not draw, never a mismatch; undersized would be the fault. Barrel fits. **Saved buying a $5.99 USB-to-DC tip-set cable.** ⚠️ Polarity symbols on adapter and speaker were to be eyeballed; a charge indicator on the speaker is the confirmation. |
 | Haozee Zigbee 3.0 dongle (CC2652P1, +20dBm) | 1 | **ON HAND 08-15** (photo) | $8.92 | Coordinator. USB extension cable ON HAND. Z2M, not ZHA. SMA antenna in box. |
 | Tuya Zigbee door/window sensor (Excellux 2-pc) | 2 pks | **ON HAND 08-15** (photo) | $9.58 ×2 | battery end devices |
 | Zigbee door/window sensor (Coolo 2-pc) | 1 pk | **ON HAND 08-15** (photo) | $6.39 | battery |
