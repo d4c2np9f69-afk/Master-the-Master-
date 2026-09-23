@@ -36,6 +36,14 @@ $KNOWN = @{
     '192.168.1.231' = 'Sharky (robot vacuum)'
 }
 
+# 🔑 THE HP's REAL WIRED MAC, read off its own PXE ROM screen 2026-09-23 11:00:
+#   CLIENT MAC ADDR: 38 60 77 9F 9B 7A   (Realtek PCIe GBE Family Controller v2.38)
+# Match on THIS, not on an address. Every recorded IP for this machine has gone stale - .121 and
+# .212 in the files, plus .82/.201/.204 chased and discarded this morning. A MAC does not drift.
+# ⚠️ It is the WIRED MAC. The Techkey WiFi dongle is a different one (90-de-80-32-d9-9f, 09-01) and
+# is being abandoned anyway: the Realtek 802.11ac dongle enumerates with NO in-kernel driver.
+$HP_WIRED_MAC = '38-60-77-9f-9b-7a'
+
 function Sweep {
     $found = @()
     # ARP is cheap and shows anything that has talked recently
@@ -89,6 +97,22 @@ do {
     if (-not $Quiet) {
         "`n{0}  -  {1} hosts in ARP, {2} not in the known list" -f (Get-Date -Format 'HH:mm:ss'), $hosts.Count, $unknown.Count
     }
+    # The MAC settles it before any guessing starts. Checked against EVERY host, not just unknown
+    # ones, because a stale gateway label on a reused address would otherwise hide it.
+    $hp = $hosts | Where-Object { $_.MAC -eq $HP_WIRED_MAC }
+    if ($hp) {
+        "`n  *** KITCHENPC (the HP) IS ON THE NETWORK - matched by MAC, not by address ***"
+        "      {0}   mac {1}" -f $hp.IP, $hp.MAC
+        $hpid = Identify $hp.IP
+        "      name : {0}" -f $(if ($hpid.name) { $hpid.name } else { '(no reverse DNS yet)' })
+        "      SSH 22 {0}" -f $(if ($hpid.ssh) { 'OPEN' } else { 'closed - still installing, or the install did not finish' })
+        if ($hpid.sshName) { "      answers as : {0}" -f $hpid.sshName }
+        if ($hpid.ssh) {
+            "      Finish it from the Beast - no garage trip:"
+            "        ssh jeff@{0} 'bash ~/GARAGE-SETUP/garage-hp-setup.sh'" -f $hp.IP
+        }
+    }
+
     foreach ($h in $unknown) {
         $id = Identify $h.IP
         $isWindows = $id.smb -or $id.rdp

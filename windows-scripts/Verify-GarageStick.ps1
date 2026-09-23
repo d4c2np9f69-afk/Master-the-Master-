@@ -76,6 +76,27 @@ foreach ($b in $blocks[1..($blocks.Count-1)]) {
 }
 Result 'every AUTO entry carries autoinstall' $allAuto 'without it the installer just sits there asking questions'
 Result 'manual entries preserved' (@($entries | Where-Object { $_ -match 'original entry' }).Count -ge 1) 'the stick can never be made unbootable'
+
+# 2026-09-23, EARNED THE HARD WAY - 2 hours and five boots. This is a DESKTOP ISO, so the installer
+# that launches after the live session is GRAPHICAL. `nomodeset` disables the real display driver,
+# which is right for a text installer on old hardware and exactly WRONG here: the live session boots
+# fine, then the installer has nowhere to draw and sprays escape codes at the console. It failed at
+# the identical line every single time. The previous verifier passed this stick 29/0/0 because it
+# checked that the AUTO entries CARRY `autoinstall` - it never asked whether the entry could
+# actually run the installer. Structure, not function.
+$isDesktopIso = (Test-Path (Join-Path $stick 'casper\minimal.squashfs')) -or ((Get-Content (Join-Path $stick '.disk\info') -Raw -ErrorAction SilentlyContinue) -notmatch 'Server')
+$defLine = [regex]::Match($g, '(?m)^\s*set\s+default=(\d+)')
+$defIdx  = if ($defLine.Success) { [int]$defLine.Groups[1].Value } else { 0 }
+$defName = if ($defIdx -lt $entries.Count) { $entries[$defIdx] } else { '(out of range)' }
+$defBody = if ($defIdx -lt ($blocks.Count - 1)) { $blocks[$defIdx + 1] } else { '' }
+$defKernel = (($defBody -split "`n") | Where-Object { $_.Trim().StartsWith('linux') }) -join ' '
+Result 'default entry is an AUTO INSTALL one' ($defName -match 'AUTO') "default=$defIdx -> $defName"
+if ($isDesktopIso) {
+    Result 'default entry does NOT force nomodeset' ($defKernel -notmatch 'nomodeset') `
+        $(if ($defKernel -match 'nomodeset') { 'FATAL on a DESKTOP ISO - the graphical installer gets no display driver' } else { 'graphical installer can start' })
+} else {
+    Result 'default entry nomodeset check' 'skip' 'not a desktop ISO - a text installer is fine with nomodeset'
+}
 Result 'grub braces balanced' ((([regex]::Matches($g,'{')).Count) -eq (([regex]::Matches($g,'}')).Count)) 'an unbalanced brace = no boot menu at all'
 
 Say "3. SETUP SCRIPTS - LF endings, counted in BYTES"
