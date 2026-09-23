@@ -1,6 +1,9 @@
 #!/bin/bash
 # ============================================================================
-# GARAGE HP (GaragePC / HP TouchSmart 520) - ONE-SHOT UBUNTU SETUP
+# HP TouchSmart 520 -> KITCHEN WALL (KitchenPC) - ONE-SHOT UBUNTU SETUP
+# Renamed 2026-09-20: the LENOVO is the garage machine (GarageLaptop);
+# this HP comes inside to the kitchen wall. Two machines must not both
+# claim the garage identity. Filename kept so the README stays valid.
 # Run once on the freshly-installed Ubuntu. It makes the machine match the rest
 # of the house AND - critically - gets SSH + the Beast's key up FIRST, so the
 # moment this box is on WiFi, Claude finishes everything else remotely from the
@@ -27,8 +30,8 @@ echo "$ME ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/90-$ME-nopasswd >/de
 log "passwordless sudo set"
 
 echo "==== 2. IDENTITY ===="
-sudo hostnamectl set-hostname GaragePC 2>/dev/null
-log "hostname: GaragePC"
+sudo hostnamectl set-hostname KitchenPC 2>/dev/null
+log "hostname: KitchenPC"
 
 echo "==== 3. NEVER SLEEP / STAY REACHABLE ===="
 sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target >/dev/null 2>&1
@@ -88,7 +91,7 @@ Description=wsdd host advertiser (makes this box appear in Windows Network)
 After=network-online.target smbd.service
 Wants=network-online.target
 [Service]
-ExecStart=/usr/bin/wsdd -i ${IFACE} -4 -w LOEWEN301 -n GaragePC
+ExecStart=/usr/bin/wsdd -i ${IFACE} -4 -w LOEWEN301 -n KitchenPC
 Restart=always
 RestartSec=5
 [Install]
@@ -107,23 +110,23 @@ fi
 # which makes nmbd refuse to start ("Skipped due to exec-condition") and reports
 # itself as inactive/enabled - looking like a service that merely is not
 # running. With nothing answering name lookups, Windows LISTS the machine in
-# Network but cannot turn GARAGEPC into an address, so clicking it fails while
+# Network but cannot turn KITCHENPC into an address, so clicking it fails while
 # \\<ip>\share opens instantly. That was the entire two-day Lenovo symptom.
 if grep -qiE '^\s*disable netbios' /etc/samba/smb.conf; then
     sudo sed -i -E 's/^\s*disable netbios\s*=.*/   disable netbios = no/I' /etc/samba/smb.conf
 else
     sudo sed -i '/^\[global\]/a\   disable netbios = no' /etc/samba/smb.conf
 fi
-grep -qiE '^\s*netbios name' /etc/samba/smb.conf || sudo sed -i '/^\[global\]/a\   netbios name = GaragePC' /etc/samba/smb.conf
+grep -qiE '^\s*netbios name' /etc/samba/smb.conf || sudo sed -i '/^\[global\]/a\   netbios name = KitchenPC' /etc/samba/smb.conf
 sudo systemctl enable --now nmbd >/dev/null 2>&1
 sleep 2
-log "netbios ON, nmbd=$(systemctl is-active nmbd) (this is what makes \\\\GaragePC resolve)"
+log "netbios ON, nmbd=$(systemctl is-active nmbd) (this is what makes \\\\KitchenPC resolve)"
 
 echo "==== 6. SHARE ITS OWN FILES (guest, so the house can reach it) ===="
-grep -q '^\[GarageHPFiles\]' /etc/samba/smb.conf || sudo tee -a /etc/samba/smb.conf >/dev/null <<SHARE
+grep -q '^\[KitchenPCFiles\]' /etc/samba/smb.conf || sudo tee -a /etc/samba/smb.conf >/dev/null <<SHARE
 
-[GarageHPFiles]
-   comment = Garage HP files
+[KitchenPCFiles]
+   comment = Kitchen PC files
    path = /home/$ME
    browseable = yes
    read only = no
@@ -133,11 +136,18 @@ grep -q '^\[GarageHPFiles\]' /etc/samba/smb.conf || sudo tee -a /etc/samba/smb.c
    directory mask = 0755
 SHARE
 sudo sed -i '/^\[global\]/a \   map to guest = Bad User' /etc/samba/smb.conf 2>/dev/null
+# 2026-09-22: Windows 11 24H2 (the Beast, the Acer) refuses a GUEST session to a server that does not
+# sign - proven on the Lenovo 09-18, fixed there by lenovo-samba-signing.sh, and it is what lets the
+# Beast open \\GarageLaptop\GarageFiles today (26 entries, no password). SERVER side only: the
+# CLIENT side must stay default, because an anonymous session cannot sign (that broke Network ->
+# 301SERVER on the Lenovo for an evening).
+sudo sed -i '/^\s*server signing/d;/^\s*client signing/d' /etc/samba/smb.conf
+sudo sed -i '/^\[global\]/a \   server signing = required' /etc/samba/smb.conf
 # validate BEFORE restarting - a bad smb.conf takes smbd AND nmbd down together
 if sudo testparm -s >/dev/null 2>&1; then
     sudo systemctl enable --now smbd >/dev/null 2>&1
     sudo systemctl restart nmbd >/dev/null 2>&1
-    log "sharing /home/$ME as GarageHPFiles (smbd=$(systemctl is-active smbd) nmbd=$(systemctl is-active nmbd))"
+    log "sharing /home/$ME as KitchenPCFiles (smbd=$(systemctl is-active smbd) nmbd=$(systemctl is-active nmbd))"
 else
     log "ERROR: smb.conf failed testparm - NOT restarting samba. Fix before rebooting."
 fi
@@ -151,13 +161,36 @@ sudo timedatectl set-ntp true 2>/dev/null
 sleep 2
 log "clock synced=$(timedatectl show -p NTPSynchronized --value 2>/dev/null) tz=$(timedatectl show -p Timezone --value 2>/dev/null) now=$(date '+%H:%M:%S')"
 
-echo "==== 7. MOUNT THE BEAST'S ONEDRIVE ===="
-sudo mkdir -p /mnt/beast/OneDrive
-FST='//192.168.1.194/OneDrive /mnt/beast/OneDrive cifs username=Guest,password=,sec=ntlmssp,ro,vers=3.0,uid=1000,gid=1000,iocharset=utf8,_netdev,nofail,x-systemd.automount,x-systemd.idle-timeout=600 0 0'
-grep -qF '//192.168.1.194/OneDrive' /etc/fstab || echo "$FST" | sudo tee -a /etc/fstab >/dev/null
+echo "==== 7. MOUNT THE WHOLE HOUSE - Beast + Acer, guest, no password ===="
+# Jeff 2026-09-22 6:04 PM: "pull up everything on the beast and the same for the acer ... no passwords
+# on the network." Same mount line that was PROVEN on the Lenovo (username=Guest, empty password,
+# ntlmssp). The Beast's Users, OneDrive and ClipArchive shares are Everyone; the Acer's Users share
+# is Everyone since 09-22 too. nofail + automount: a machine that is off never hangs this boot.
+UIDN=$(id -u); GIDN=$(id -g)
+add_mount(){ # server share mountpoint ro|rw
+  local srv=$1 share=$2 mnt=$3 mode=$4
+  sudo mkdir -p "$mnt"
+  local line="//$srv/$share $mnt cifs username=Guest,password=,sec=ntlmssp,$mode,vers=3.0,uid=$UIDN,gid=$GIDN,iocharset=utf8,_netdev,nofail,x-systemd.automount,x-systemd.idle-timeout=600 0 0"
+  grep -qF "//$srv/$share " /etc/fstab && sudo sed -i "\#//$srv/$share #d" /etc/fstab
+  echo "$line" | sudo tee -a /etc/fstab >/dev/null
+}
+add_mount 192.168.1.194 Users       /mnt/beast/Users       rw
+add_mount 192.168.1.194 OneDrive    /mnt/beast/OneDrive    rw
+add_mount 192.168.1.194 ClipArchive /mnt/beast/ClipArchive ro
+add_mount 192.168.1.176 Users       /mnt/acer/Users        rw
 sudo systemctl daemon-reload
-sudo mount /mnt/beast/OneDrive 2>/dev/null && log "Beast OneDrive mounted" || log "Beast mount will auto-mount on access"
-ln -sfn /mnt/beast/OneDrive "$HOME/Beast-OneDrive" 2>/dev/null
+for m in /mnt/beast/Users /mnt/beast/OneDrive /mnt/beast/ClipArchive /mnt/acer/Users; do
+  sudo mount "$m" 2>/dev/null && log "mounted $m ($(ls -1 "$m" 2>/dev/null | wc -l) entries)" || log "$m will auto-mount on first use (that machine may be off)"
+done
+mkdir -p ~/Desktop
+ln -sfn /mnt/beast/Users/jeffl "$HOME/Desktop/Beast" 2>/dev/null
+ln -sfn /mnt/acer/Users/jeffl  "$HOME/Desktop/Acer"  2>/dev/null
+ln -sfn /mnt/beast/OneDrive    "$HOME/Beast-OneDrive" 2>/dev/null
+BM="$HOME/.config/gtk-3.0/bookmarks"; mkdir -p "$(dirname "$BM")"; touch "$BM"
+grep -q 'file:///mnt/beast/Users/jeffl ' "$BM" || echo 'file:///mnt/beast/Users/jeffl Beast - everything' >> "$BM"
+grep -q 'file:///mnt/acer/Users/jeffl ' "$BM"  || echo 'file:///mnt/acer/Users/jeffl Acer - everything'   >> "$BM"
+grep -q 'file:///mnt/beast/ClipArchive ' "$BM" || echo 'file:///mnt/beast/ClipArchive Beast Clip Archive' >> "$BM"
+log "desktop folders Beast + Acer, sidebar bookmarks added"
 
 echo "==== 8. PRINTER (HP OfficeJet 4650, driverless IPP) ===="
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -q cups printer-driver-all >/dev/null 2>&1
@@ -202,26 +235,29 @@ ping -c1 -W3 192.168.1.194 >/dev/null 2>&1 && chk "can reach the Beast" ok "192.
 grep -q 'claude-on-301server' ~/.ssh/authorized_keys 2>/dev/null && chk "Beast key installed" ok "trusted" || chk "Beast key installed" no "MISSING"
 
 [ "$(systemctl is-active smbd)" = "active" ] && chk "smbd (serves its files)" ok active || chk "smbd" no "$(systemctl is-active smbd)"
-[ "$(systemctl is-active nmbd)" = "active" ] && chk "nmbd (name resolution - the 2-day bug)" ok active || chk "nmbd (name resolution)" no "INACTIVE - \\\\GaragePC will NOT resolve"
+[ "$(systemctl is-active nmbd)" = "active" ] && chk "nmbd (name resolution - the 2-day bug)" ok active || chk "nmbd (name resolution)" no "INACTIVE - \\\\KitchenPC will NOT resolve"
 [ "$(systemctl is-active wsdd-host)" = "active" ] && [ "$(systemctl show wsdd-host -p NRestarts --value)" -le 2 ] \
     && chk "wsdd-host (appears in Network)" ok "NRestarts=$(systemctl show wsdd-host -p NRestarts --value)" \
     || chk "wsdd-host" no "crash-looping - Errno 98, see journalctl -u wsdd-host"
 
 # it must answer its OWN name, which is what Windows actually does when clicked
-nmblookup -A 127.0.0.1 2>/dev/null | grep -qi 'GARAGEPC.*<20>' && chk "answers to the name GARAGEPC" ok "<20> file server registered" || chk "answers to the name GARAGEPC" no "NOT registered"
+nmblookup -A 127.0.0.1 2>/dev/null | grep -qi 'KITCHENPC.*<20>' && chk "answers to the name KITCHENPC" ok "<20> file server registered" || chk "answers to the name KITCHENPC" no "NOT registered"
 
-mountpoint -q /mnt/beast 2>/dev/null && chk "Beast share mounted" ok "$(ls /mnt/beast 2>/dev/null | wc -l) items" || chk "Beast share mounted" no "not mounted"
+N=$(ls -1 /mnt/beast/Users/jeffl 2>/dev/null | wc -l); [ "$N" -gt 0 ] && chk "Beast - everything (Users/jeffl)" ok "$N items, no password" || chk "Beast - everything (Users/jeffl)" no "EMPTY - Beast off, or its share/NTFS not open"
+N=$(ls -1 /mnt/beast/OneDrive 2>/dev/null | wc -l); [ "$N" -gt 0 ] && chk "Beast OneDrive" ok "$N items" || chk "Beast OneDrive" no "empty"
+N=$(ls -1 /mnt/acer/Users 2>/dev/null | wc -l); [ "$N" -gt 0 ] && chk "Acer Users" ok "$N items" || chk "Acer Users" no "empty (Acer off or asleep is normal)"
+testparm -s 2>/dev/null | grep -qi 'server signing = required' && chk "samba signs (Win11 guest can connect)" ok required || chk "samba signs" no "NOT set - the Beast/Acer will refuse guest"
 lpstat -p 2>/dev/null | grep -qi 'officejet\|HP' && chk "printer installed" ok "$(lpstat -p 2>/dev/null | head -1)" || chk "printer installed" no "no HP queue"
 [ "$(timedatectl show -p NTPSynchronized --value 2>/dev/null)" = "yes" ] && chk "clock synced" ok "$(date '+%H:%M:%S')" || chk "clock synced" no "NOT syncing - timestamps unreliable"
 
 echo ""
 echo "============================================================"
 if [ "$FAILED" -eq 0 ]; then
-  echo " ALL CHECKS PASSED - GaragePC is genuinely set up."
+  echo " ALL CHECKS PASSED - KitchenPC is genuinely set up."
 else
   echo " $FAILED CHECK(S) FAILED - do NOT walk away yet, read the FAIL lines."
 fi
-echo " On the network as GaragePC / LOEWEN301, reachable over SSH."
+echo " On the network as KitchenPC / LOEWEN301, reachable over SSH."
 echo " IP: $IP"
 echo " >> Tell Claude that IP. Everything else finishes from the Beast -"
 echo "    no more garage time needed."

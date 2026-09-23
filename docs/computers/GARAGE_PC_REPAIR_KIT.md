@@ -27,6 +27,102 @@ This is a repair we owe. Not a chore he is behind on.
 
 ---
 
+## 📍 PHYSICAL STATE OF THE HP RIGHT NOW — Jeff, 2026-09-20 20:15
+
+> *"The stick was in the HP and the Ubuntu install is spinning, that was the last state of the
+> machine and it is off now. So I'm just telling you so that you know where things are — what I
+> just told you is not in the record, I just want you to be prepared for it."*
+
+**Recorded here because he is right that it was nowhere.** A session searched the docs, the master
+record and the 137 MB 09-18/19 transcript for it and correctly reported finding nothing. Verbal
+state from Jeff is the only source, so it goes in the file.
+
+**STATE: an Ubuntu install was STARTED on the HP, appeared to hang on the spinner, and the machine
+was POWERED OFF mid-install. The stick has since been pulled and is in the Beast.**
+
+> **2026-09-22 7:50 PM — stick re-audited on the Beast (`E:\`) before the next attempt.** Every file
+> read end to end, YAML parsed, GRUB entries checked, LF confirmed byte-by-byte with Python, `bash -n`
+> clean, and `garage-hp-setup.sh` patched to the 09-22 no-password sharing model (mounts the Beast
+> AND the Acer as guest, desktop folders, signed Samba). Full detail: `OPEN_ITEMS.md` #112.
+> **The Windows boot loop does not matter to this path** — ESC → F9 is firmware, and the autoinstall
+> wipes whatever the 09-01 attempt left. **Not verified, cannot be from here: the autoinstall has
+> never booted on the HP.** The 09-01 "spinning" was the manual installer.
+
+### What that means for the next attempt
+1. 🔴 **Assume the 500 GB disk is PARTIALLY WRITTEN.** A power-off mid-install leaves a
+   half-built partition table, possibly with Windows already partly destroyed. **No manual cleanup
+   is needed** — `autoinstall.yaml` uses `storage.layout: direct`, which wipes and repartitions
+   from scratch. A partial install is exactly what it heals.
+2. ⚠️ **It also means the boot loop and the file-rescue question may already be moot** — there may
+   be no intact Windows left to loop or to copy from.
+3. 🔑 **IT WAS PROBABLY NOT HUNG. IT WAS PROBABLY SLOW.** Pentium G620 (2011), 5400 rpm spinning
+   drive, USB 2.0, 3.4 GB squashfs. This doc's own PART B budgets **20–30 minutes**, and the
+   installer can sit on one frame for many minutes while it writes. **Do not treat a still screen
+   as a failure before 15 minutes.**
+4. ✅ **FIXED 2026-09-20: `quiet splash` was REMOVED from both automatic GRUB entries**, so the
+   next attempt shows scrolling console text instead of a spinner. Working-slowly and genuinely
+   stuck no longer look identical. If it does stop, **photograph the last few lines** — that names
+   the failure instead of leaving another unfalsifiable spinner. `nomodeset` is also the default
+   entry now, covering Sandy Bridge graphics as the other candidate cause.
+
+---
+
+## 🔴 WHICH MACHINE IS WHICH — settled by Jeff 2026-09-20 20:10
+
+> *"Yes the Garage HP is coming into the kitchen and the lenovo will be the garage computer,
+> that is why it is named garage computer."*
+
+| machine | role | name |
+|---|---|---|
+| **Lenovo B570** — `192.168.1.173` | **THE GARAGE COMPUTER** (already built, on WiFi) | `GarageLaptop` |
+| **HP TouchSmart 520** | **KITCHEN WALL command centre** (replaces the wall iPad; iPad moves beside the living-room thermostat) | **`KitchenPC`** |
+
+⚠️ **THE FILENAMES AND THIS DOC'S TITLE ARE HISTORICAL.** `garage-hp-setup.sh` and
+`GARAGE_PC_REPAIR_KIT.md` both still say *garage* because the READMEs and the stick reference
+them by name. **The CONTENTS are correct; the filenames are not.** Do not rename them without
+updating `E:\GARAGE-SETUP\READ-ME-FIRST.txt` in the same change.
+
+🔴 **A DRAFT OF THE 09-20 UNATTENDED INSTALLER SET `hostname GaragePC` — caught by Jeff, not
+by a test.** That would have put **two machines on the network claiming the garage identity**,
+with the Lenovo already holding it. Fixed across `autoinstall.yaml` and `garage-hp-setup.sh`
+(hostname, wsdd `-n`, netbios name, and the share `GarageHPFiles` → `KitchenPCFiles`).
+
+⚠️ **AND THE RENAME ITSELF NEARLY SHIPPED A RE-RUN BUG:** the share block's idempotency guard
+still read `grep -q '^\[GarageHPFiles\]'` while the heredoc wrote `[KitchenPCFiles]`, so the
+block would have been **appended again on every run**. On the one machine whose entire history is
+*"Jeff ran it twice"*. Guard and payload now both say `KitchenPCFiles`; verified `bash -n` clean,
+0 CRLF.
+
+---
+
+## 🔴🔴 CORRECTED 2026-09-20 19:54 — THE BOOT LOOP IS THE CURRENT STATE
+
+**Jeff, verbatim: *"The boot loop is the current state of the HP."***
+
+⚠️ **Every file in this repo says the 09-01 boot loop was *"recovered with System Restore"*, and that
+is WRONG.** The restore did not hold, or it regressed. The machine is boot-looping **right now**.
+This file, `OPEN_ITEMS.md` #112 and `BEEHIVE_REFERENCE.md` all carried the healed version.
+
+**What this changes, and what it does NOT:**
+- ❌ **Windows cannot be used to rescue files** — it does not reach a desktop.
+- ✅ **The DRIVE is fine.** The fault is Windows policy/boot, not the disk. Its files are still
+  readable from a Linux live session (step B3) right up until the disk is erased.
+- ✅ **It does not block the USB install at all.** The HP's boot menu (ESC → F9) is FIRMWARE-level
+  and does not care that Windows is broken.
+- ✅ It also settles the question of whether Windows is worth saving. It is out of support, and
+  Jeff's own words in this file: *"I think it's time with windows is about over."*
+
+🔑 **ROOT CAUSE, AND IT IS OURS — `SETUP-GARAGE.ps1` ran `secedit /configure /areas USER_RIGHTS`,
+re-applying the whole policy block, and JEFF RAN IT TWICE.** Quarantined to
+`DO-NOT-RUN/SETUP-GARAGE.ps1.BROKEN` with a `WHY.txt`.
+🔴 **"Ran it twice" is the transferable lesson: a destructive, non-idempotent step that can execute
+a SECOND time is the whole failure.** The 2026-09-20 unattended installer was built with that in
+front of it and ends in `shutdown: poweroff`, NOT `reboot` — because a stick left in a USB-first
+BIOS would otherwise re-run the installer and re-wipe the machine it had just built. Same machine,
+same shape, one line apart.
+
+---
+
 ## WHAT THE MACHINE IS, AND WHAT'S WRONG
 
 | | |
