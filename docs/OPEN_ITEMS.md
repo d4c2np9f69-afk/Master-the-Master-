@@ -251,7 +251,9 @@ browser so I get the correct one."* He was right — `ACCESS_MAP` already says v
 
 🟢 **JEFF'S DECISION 10:17 — buying the dongle, NOT running a cable:** *"I don't need more cables on
 my work bench I will get the dongal."* **The 3.5 mm cable option is CLOSED — do not re-pitch it.**
-🛠️ **READY FOR ARRIVAL, zero garage fiddling.** `windows-scripts/lenovo-pair-bluetooth.sh` is staged
+🟢🟢 **DONGLE ARRIVED AND WORKS — VERIFIED LIVE 2026-09-23 09:43.** Jeff: *"it's in and working great it's even picking up the neighbors tv."* Measured, not taken on trust: controller **`hci0` = `D4:0D:AB:15:2A:75 GarageLaptop [default]`**, `bluetooth.service` **active**, `libspa-0.2-bluetooth` present (the A2DP plugin — without it devices pair and stay silent), and a 20 s scan returned **11 devices**, so the radio genuinely transmits and receives. **The "no Bluetooth radio" hardware limit below is now WORKED AROUND — do not re-raise it as a blocker.**
+⏭️ **PAIRING STILL OWED, and it is not a fault: Jeff, 09:45 — *"the speaker is not plugged in."*** A BT speaker only advertises a friendly name while powered **and in pairing mode**; nothing audio-like was in the scan, which is expected. **When he powers it and the LED flashes FAST:** re-scan, then `bash ~/pair-bluetooth.sh <MAC>` — it pairs, **trusts** (without trust it never auto-reconnects), sets the sink and plays a tone to prove it. ⛔ **The scan also sees the neighbours' gear — Megan is west, Grandma is north (Jeff, 09:44). Do NOT pair with, probe, or catalogue their devices, and never map a MAC to a person. Only ever pair the address Jeff confirms is his.**
+🛠️ *Staged 09-19, still in place:* `windows-scripts/lenovo-pair-bluetooth.sh` is staged
 on the Lenovo at `~/pair-bluetooth.sh` (`bash -n` clean; dry-run correctly reports **"NO CONTROLLER"**
 today rather than faking success). Jeff plugs it in and walks away — Claude runs it from the Beast:
 it starts the service, scans, pairs **and trusts** (without trust the speakers never auto-reconnect),
