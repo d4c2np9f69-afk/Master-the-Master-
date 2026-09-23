@@ -70,6 +70,11 @@
     } else if (y.kind === 'street') {
       el('line', { x1: X(y.seg[0]), y1: Y(y.seg[1]), x2: X(y.seg[2]), y2: Y(y.seg[3]), stroke: '#c9ced4', 'stroke-width': 2 }, L.yard);
       T(X(y.seg[0]) + 30, Y(y.seg[1]) - 6, y.label, { anchor: 'start', size: 8, fill: '#7a8087', family: 'var(--display)', ls: '.14em', weight: 600 }, L.yard);
+    } else if (y.kind === 'neighbor') {
+      // orientation marker only - which way the nearest houses are. Drawn light so it never
+      // competes with the plan itself.
+      T(X(y.at[0]), Y(y.at[1]), y.label + (y.sub ? '  · ' + y.sub : ''),
+        { anchor: 'middle', size: 7, fill: '#9aa0a6', family: 'var(--display)', ls: '.14em', weight: 600, rot: y.rot }, L.yard);
     } else if (y.kind === 'crawl') {
       el('rect', { x: X(y.seg[0]), y: Y(y.seg[1]) - 4, width: (y.seg[2] - y.seg[0]) * PF, height: 8, fill: '#fff', stroke: INK, 'stroke-width': 1.2 }, L.labels);
       T(X(y.seg[0]) + (y.seg[2] - y.seg[0]) * PF / 2, Y(y.seg[1]) + 24, y.label, { size: 6.2, fill: '#5a636d' }, L.labels);

@@ -128,6 +128,13 @@ window.PLAN = (function () {
     { kind: 'walk', poly: [[14.2, -4.2], [H(25.17), -4.2], [H(25.17), 0], [H(19.67), 0], [H(19.67), -1.4], [14.2, -1.4]], label: 'walk' },
     { kind: 'steps', rect: [H(19.9), -1.4, 5.0, 1.4], label: '' },
     { kind: 'street', seg: [-6, -8.2, 61, -8.2], label: 'S AZTEC DR' },
+    /* Neighbours, from Jeff 2026-09-23 09:44: "Megan is my neighbor to the west and Grandma is to
+       the north." In this coordinate system north is -y (the street side) and west is -x, so these
+       sit at the top and left edges. Kept INSIDE the fixed viewBox (x -6..61, y -9..45) - anything
+       outside it is silently clipped. Orientation only: no property lines, nothing about their
+       houses, and never anything about their devices. */
+    { kind: 'neighbor', at: [-3.6, 21], label: 'MEGAN', sub: 'west', rot: -90 },
+    { kind: 'neighbor', at: [42, -8.9], label: 'GRANDMA', sub: 'north, across the street' },
   ];
 
   const cats = [
