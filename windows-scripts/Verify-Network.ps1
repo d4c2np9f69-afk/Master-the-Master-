@@ -213,6 +213,43 @@ Result 'Lenovo: .ssh hidden from the share' ($out -match 'NT_STATUS') 'samba vet
 # and not the network: the Acer->Lenovo leg fails the same way over SSH while Get-SmbConnection
 # shows it LIVE from his desktop. So this stays a SKIP, never a fake PASS.
 Result 'Acer Explorer double-click' 'skip' 'only Jeff can see his own console - ACCESS_MAP 4b'
+
+Say "7. WALK-UP ACCESS: Network -> <PC> opens with NO password (Jeff 2026-09-23)"
+# Jeff: "all my computers ... work as one ... no password needed for any of them on my network."
+#
+# THE ROOT CAUSE THIS SECTION GUARDS, found 2026-09-23 after a day of chasing guest/signing settings:
+# Explorer Network connects BY NAME. Jeff's profile is MICROSOFT-ACCOUNT linked, so with no session for
+# that name Windows offers MicrosoftAccount\jeff.loewen@comcast.net; the far end answers 0xC0000064
+# "user name does not exist" and shows the credential box. ForceGuest cannot help - it demotes only
+# LOCAL accounts to Guest, and an MSA logon is not local. The fix is a Guest IPC$ session PER NAME,
+# established by each machine's logon task. IPC$ sessions cannot be persistent, hence the task.
+
+# (a) the actual walk-up behaviour, by NAME - this is the double-click
+$out = cmd /c "net view \\JEFFSLAPTOP 2>&1" | Out-String
+Result 'Beast opens Acer BY NAME, no password' ($out -match 'Share name' -and $out -notmatch 'error') 'net view \\JEFFSLAPTOP listed shares'
+$out = cmd /c "net view \\GARAGELAPTOP 2>&1" | Out-String
+Result 'Beast opens Lenovo BY NAME, no password' ($out -match 'Share name' -and $out -notmatch 'error') 'net view \\GARAGELAPTOP listed shares'
+
+# (b) the SMB CLIENT service. On 2026-09-23 the Acer had LanmanWorkstation DEAD with an EMPTY
+# Parameters\ServiceDll, so every outbound connection failed "System error 67" and NOTHING reached
+# the far end - it looked exactly like a sharing-permissions problem and was not one.
+$svc = Get-Service LanmanWorkstation
+$dll = (Get-Item "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters").GetValue("ServiceDll",$null,[Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)
+Result 'Beast SMB client service alive' ($svc.Status -eq 'Running' -and $dll) "Workstation=$($svc.Status) ServiceDll=$dll"
+
+$out = RemoteRun $ACER 'powershell -NoProfile -Command "(Get-Service LanmanWorkstation).Status"'
+Result 'Acer SMB client service alive' ($out -match 'Running') "Workstation=$out"
+# reg query needs NO nested quotes - the Get-Item form returned empty through PowerShell->ssh and
+# reported a FALSE FAIL against a value that was correctly set. Quote-free is the reliable shape.
+$out = RemoteRun $ACER 'reg query HKLM\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters /v ServiceDll'
+Result 'Acer Workstation ServiceDll set' ($out -match 'wkssvc.dll') "$($out -replace '\s+',' ')"
+
+# (c) it must be PERMANENT - the IPC$ session dies with the logon, so the logon task is the mechanism
+$t = Get-ScheduledTask -TaskName 'HCC-Map-Lenovo-SMB' -ErrorAction SilentlyContinue
+$ok = $t -and $t.Triggers.Enabled -contains $true
+Result 'Beast maps the network at logon' $ok 'HCC-Map-Lenovo-SMB -> map-lenovo-smb.cmd, logon trigger'
+$out = RemoteRun $ACER 'powershell -NoProfile -Command "(Get-ScheduledTask -TaskName \"HCC-MapBeastAtLogon\").State"'
+Result 'Acer maps the network at logon' ($out -match 'Ready|Running') "HCC-MapBeastAtLogon state=$out"
 Write-Host ""
 Write-Host "================================================================" -ForegroundColor Cyan
 Write-Host ("  {0} PASS   {1} FAIL   {2} SKIP" -f $script:pass, $script:fail, $script:skip) -ForegroundColor $(if($script:fail){'Yellow'}else{'Green'})
