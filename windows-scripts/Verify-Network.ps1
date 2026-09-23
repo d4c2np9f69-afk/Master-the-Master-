@@ -149,6 +149,70 @@ Result '301SERVER - the cleaner' $ok 'Clean-Beast.ps1 present (the original)'
 $out = RemoteRun $ACER 'dir C:\Users\jeffl\Scripts\Clean-Beast.ps1'
 Result 'JeffsLapTop - the cleaner' ($out -match 'Clean-Beast') $(if($out -match 'Clean-Beast'){'same Clean-Beast.ps1 as the Beast'}else{'unreachable or missing'})
 
+Say "6. NO PASSWORDS ON THE NETWORK (Jeff 2026-09-22) - and credentials still fenced"
+# Built 2026-09-22. Two halves, and BOTH must hold:
+#   (a) every machine opens from every other machine with NO password
+#   (b) credential folders are STILL refused - that exception is part of the decision, not a caveat
+# The LENOVO is the prober for both Windows boxes: it has no account on either, so what it can
+# reach is exactly what any laptop joining the Wi-Fi can reach.
+#
+# QUOTING - this cost a red run the day it was written, and this file already warned about it.
+# PowerShell does NOT use backslash as an escape, so a remote command written with \" ends the
+# string early and the check then measures garbage. It reported six credential folders WIDE OPEN
+# while every one was correctly ACCESS_DENIED. Build remote commands by CONCATENATION.
+
+# (a) the Windows boxes must accept the credential Explorer actually presents: the logged-on name
+# with a password that does not match. Only ForceGuest mapping it to Guest prevents a password box,
+# so a WRONG-PASSWORD probe is the honest test - an anonymous probe can pass while Explorer fails.
+$probe194 = 'smbclient //192.168.1.194/Jeff -U jeffl%wrongpassword_probe -c ls 2>&1 | head -4'
+$out = RemoteRun $LENOVO $probe194
+Result 'Beast opens with a WRONG password' ($out -notmatch 'NT_STATUS') 'mapped to Guest by ForceGuest - no password box'
+
+$probe176 = 'smbclient //192.168.1.176/jeffl -U jeffl%wrongpassword_probe -c ls 2>&1 | head -4'
+$out = RemoteRun $LENOVO $probe176
+Result 'Acer opens with a WRONG password' ($out -notmatch 'NT_STATUS') 'mapped to Guest by ForceGuest - no password box'
+
+$probe173 = 'smbclient //192.168.1.173/GarageFiles -N -c ls 2>&1 | head -4'
+$out = RemoteRun $LENOVO $probe173
+Result 'Lenovo opens with no password' ($out -notmatch 'NT_STATUS') 'samba map to guest = Bad User'
+
+# the CLIENT half. A machine can SERVE with no password and still be unable to OPEN one:
+# Win11 24H2 requires SMB signing and a guest session CANNOT be signed (0xC05D0003). That was the
+# real Acer blocker. These are machine-wide reads, so they stay honest over SSH (ACCESS_MAP 4b).
+$c = Get-SmbClientConfiguration
+Result 'Beast may OPEN a guest share' ($c.EnableInsecureGuestLogons -and -not $c.RequireSecuritySignature) "InsecureGuest=$($c.EnableInsecureGuestLogons) RequireSigning=$($c.RequireSecuritySignature)"
+
+$acerCmd = 'powershell -NoProfile -Command "(Get-SmbClientConfiguration).EnableInsecureGuestLogons,(Get-SmbClientConfiguration).RequireSecuritySignature"'
+$out = RemoteRun $ACER $acerCmd
+$flat = ($out -replace '\s+','/')
+Result 'Acer may OPEN a guest share' ($flat -eq 'True/False') "InsecureGuest/RequireSigning = $flat"
+
+# (b) the exception. Jeff opened his FILES, never his keys. A regression here is silent and serious.
+$credDirs = '.ssh','.claude','AppData','HCC-secrets','iCloudDrive\HCC-Secrets-Vault','iCloudDrive\HCC-secrets'
+foreach ($d in $credDirs) {
+    $cmd = 'smbclient //192.168.1.194/Jeff -U probe%x -c ' + "'cd $d; ls'" + ' 2>&1 | head -2'
+    $out = RemoteRun $LENOVO $cmd
+    # STRICT: only an explicit refusal counts. "not found" is NOT a pass - a folder that was moved
+    # or renamed must go red and get looked at, never score green by being absent.
+    $fenced = $out -match 'ACCESS_DENIED'
+    $why = "guest cannot read it"
+    if (-not $fenced) { $why = "NOT REFUSED - $out" }
+    Result "Beast: $d refused to guest" $fenced $why
+}
+
+$cmd = 'smbclient //192.168.1.176/jeffl -U probe%x -c ' + "'cd .ssh; ls'" + ' 2>&1 | head -2'
+$out = RemoteRun $LENOVO $cmd
+Result 'Acer: .ssh refused to guest' ($out -match 'ACCESS_DENIED') "$out"
+
+$cmd = 'smbclient //192.168.1.173/GarageFiles -N -c ' + "'cd .ssh; ls'" + ' 2>&1 | head -2'
+$out = RemoteRun $LENOVO $cmd
+Result 'Lenovo: .ssh hidden from the share' ($out -match 'NT_STATUS') 'samba veto files - the private key is not served'
+
+# What this section deliberately does NOT claim. Explorer on the Acer runs in Jeff CONSOLE logon and
+# an SSH session cannot borrow it (no network credentials to delegate). Proof that it is SSH lying
+# and not the network: the Acer->Lenovo leg fails the same way over SSH while Get-SmbConnection
+# shows it LIVE from his desktop. So this stays a SKIP, never a fake PASS.
+Result 'Acer Explorer double-click' 'skip' 'only Jeff can see his own console - ACCESS_MAP 4b'
 Write-Host ""
 Write-Host "================================================================" -ForegroundColor Cyan
 Write-Host ("  {0} PASS   {1} FAIL   {2} SKIP" -f $script:pass, $script:fail, $script:skip) -ForegroundColor $(if($script:fail){'Yellow'}else{'Green'})

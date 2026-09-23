@@ -4,6 +4,39 @@
 Full derivation: `MASTER-RECORD/CLOUD_SESSION/sections/20-research-vs-guessing.md`
 and `21-md-not-read.md` — 20 catalogued incidents with hashes.
 
+## 2026-09-22 21:00 — OPENING THE HOUSE SHARES LEAKED THE HA BACKUP ENCRYPTION KEY
+
+**Cost: ~25 min to find and fence, and an unknown window of real exposure.** Not a wasted-time
+incident — a **security** one, and the class matters more than the minutes.
+
+**What happened.** Jeff’s settled decision is *no passwords on the home network*, with one written
+exception: **credential folders stay fenced.** The 2026-09-22 evening work granted `Everyone` on the
+profile and fenced `.ssh`, `.claude`, `AppData`, `HCC-secrets`, `HCC-Secrets-Vault` — **by their
+profile-root paths.** It missed that the 09-20 key-ring mirror lives at
+`iCloudDrive\HCC-Secrets-Vault`, which then **inherited `Everyone: Modify` from `iCloudDrive`**.
+Measured 21:0x: a guest session listed it. **That folder is the key that decrypts every Beehive
+backup**, and the backups sit in the same iCloud account. Also open: `D:\HCC-secrets-mirror`,
+`OneDrive\Attachments\Passwords`, `iCloudDrive\.claude`, a whole `D:\Backup-PreRepair-20260717`
+profile copy, and three automation browser profiles holding live session cookies. Separately the
+**Lenovo was serving its own SSH private key** — `GarageFiles` is `/home/jeffloewen` with
+`guest only = Yes`, so `~/.ssh/id_ed25519` was downloadable with no password.
+
+**Which rule was skipped.** *"After fixing a bug, sweep for others of the same CLASS before
+reporting done"* (Jeff, 08-11). Fencing was applied to a **list of paths**, never to the **class**
+"anything holding a credential under a tree I just opened." A one-command scan found five more.
+
+**The test, written the same session** (`Verify-Network.ps1` §6): every credential path must answer
+`NT_STATUS_ACCESS_DENIED` to a guest probe, and the share must still open with a **wrong password**
+— so it cannot be satisfied by simply closing the share. **32 PASS / 0 FAIL / 4 SKIP.**
+
+🔴 **And the test lied on its first run — worth more than the incident.** It printed **7 FAILs**,
+six of them claiming correctly-fenced credential folders were WIDE OPEN. Cause: `"... \"$d\" ..."`
+— **PowerShell has no backslash escape**, so the string ended early and the probe measured garbage.
+`Verify-Network.ps1`’s own header already warned about exactly this quoting trap. Rebuilt by
+concatenation, then **the discriminator was proven to go red** against `Documents` (a deliberately
+open folder) through the identical probe. A *"not found = fenced"* loophole was also removed — it
+would have turned a moved folder into a silent green.
+
 ## The bill, 2026-05-20 → 08-16
 
 | | |
@@ -556,3 +589,128 @@ alert in this house that has already cost real money to be ignored.**
 
 **Commits:** `08c4b38` (boot fix + gate), `c6e7ce0` (Guardian chips). Verified on a clean load with
 the service worker unregistered and caches cleared, with nothing called by hand.
+
+---
+
+## 2026-09-20 — A DAY OF REWORK, AND THE GATE THAT SHOULD HAVE STOPPED IT WAS DISARMED BY TIME
+
+**Jeff, 14:52:** *"I can 100% guarantee it you wasted all day building and fixing what is already
+in the file because you broke the rules all day costing me again... I don't know how to get you to
+do it. gates, hooks, nothing works. You tell me what to do?"* **He is substantially right.**
+
+**WHAT WAS DUPLICATED OR RE-DERIVED — all of it already in his files:**
+- `scripts/sensor-liveness-test.js` — `automation.hcc_sensor_silence_watchdog` has done this since
+  **2026-08-30**, keyed off **Z2M availability (the real signal)**, already tuned with quiet hours
+  and a 12-hour cooldown *because an earlier version woke Jeff and Angela all night.*
+- The mailbox being off-mesh — already in the OPEN_ITEMS **header triage**, with cause and fix.
+- The garage man door reading open — already on OPEN_ITEMS line 49.
+- Angela's phone being an unreliable tracker — in the record since **2026-08-01** (`66b3f49`).
+
+**SIX SELF-INFLICTED ERRORS, ALL CORRECTED THE SAME DAY:** #193 (called two healthy repeaters dead
+— retracted); the #39 door automation **shipped as dead code** (an AND that could never be true);
+a verifier that printed **PASS while asserting nothing** (read `.trigger` when HA stores `.triggers`);
+the location-permission **ghost value** read as current — the *third* ghost misread that day after
+the siren's LQI 142 and the repeaters' linkquality; an audit script that carried **stale data
+forward** under `SilentlyContinue`; and a watchdog built to push Jeff an instruction that was
+already wrong.
+
+🔴 **THE ROOT CAUSE, MEASURED — AND IT IS NOT "READ HARDER".**
+`Hook-RequireRead.ps1`'s **ZIGBEE gate names this exact mistake in its own Why text**: *"Availability
+is the ONLY real liveness signal — last_updated/last_reported are the change-driven-sensor trap that
+has produced FOUR false alarms."* A liveness gate was then built on linkquality **age**, making it
+five. **The gate matched the write and allowed it anyway**: the receipt showed
+`zigbee_mesh_routers_2026-08-27.md` as read — **on 2026-09-15 at 11:37, 118 hours earlier.** This
+session had been open five days, and **the read receipt has no expiry**, so a five-day-old read
+still counted. A file read five days ago is not in front of you.
+
+🟢 **THE ONE GATE THAT WORKED, AND WHY.** The CAMERAS gate was the only one carrying **`FreshMin = 60`**
+(added 2026-09-11 for precisely this reason). It **blocked that session twice** and forced a re-read —
+once *mid-edit, while the session was writing the argument for extending it.* The mechanism was
+already correct. **It was wired to 1 of 12 gates.**
+
+✅ **FIX SHIPPED THE SAME HOUR: `FreshMin = 120` on all twelve gates.** Verified — 12/12 gates
+carry it, the file parses, `Test-ReadGate.ps1` passes **10/10** including "the CAMERAS topic gate
+still stacks on top", and the prior version is kept at `Hook-RequireRead.ps1.bak-freshmin-20260920`.
+**Nothing new was built to achieve this.** Cost of compliance is one `Read` call, and reads are
+never blocked.
+
+**THE LESSON, STATED FOR THE NEXT SESSION:** *a read receipt with no expiry is not evidence that a
+file is in mind — it is evidence that it was opened once, possibly days ago.* Long-running sessions
+silently disarm every gate that only asks "was this ever read."
+
+### 15:05–15:15 — "I want my rules controlled by machinery." Two more gates, built from that day's own failures
+
+Every hook was read first (`Search-HCC.ps1 "RequireRead|read gate"` confirmed no prior header/create
+gate — not a duplicate). Both are extensions to the machinery that exists, not new hooks:
+
+| gate | the failure it encodes (2026-09-20) | mechanism |
+|---|---|---|
+| **HEADER** | the universal gate was satisfied by a `Read` at **offset 113**; lines 47–52 (the header triage) were never seen, and two items already listed there were "discovered" | `Hook-ReadReceipt` now records `offset=`; `Hook-RequireRead` requires an OPEN_ITEMS read from **offset ≤ 1 within 240 min**. Pre-09-20 receipt lines get the benefit of the doubt on offset but are still held to freshness. |
+| **CREATE** | `sensor-liveness-test.js` duplicated `automation.hcc_sensor_silence_watchdog` (live since 08-30, better signal); a read-receipt hook was nearly built while `Hook-ReadReceipt.ps1` existed | a **new file under `scripts/` or `windows-scripts/`**, or a **shell call to `api/config/automation/config/`**, requires a **`[search]` receipt line within 120 min** — written when `Search-HCC.ps1` runs. |
+
+**Two defects caught by the gate's own tests within minutes, both fixed before it was reported:**
+1. The CREATE gate first matched the API path in *any* tool text and **blocked its own test file** — an
+   `Edit` cannot POST to Home Assistant. Narrowed to `Bash|PowerShell`.
+2. **Hooks load at session start.** The `Bash|PowerShell` PostToolUse matcher added to
+   `settings.json` was not live — measured: a `Search-HCC` run credited nothing — so the CREATE gate
+   was **unsatisfiable for the rest of this session**. That is the "gate nobody can satisfy gets
+   deleted" failure. Fix: `Hook-ReadReceipt` drops a liveness marker on its first shell call; with no
+   marker the CREATE gate **allows, and prints `CREATE GATE INACTIVE` into the session** instead of
+   blocking or staying silent. It arms itself after the next restart.
+
+`Test-ReadGate.ps1`: **22 passed, 0 failed** — the original 10, plus 12 covering HEADER
+(deep/top/stale), CREATE (new file / shell POST / edit-text false positive / existing file / stand-down),
+and the receipt fields themselves. One `HCC-OVERRIDE` was used, labelled in the file, on the single
+edit that repaired the gate blocking its own repair. `settings.json` gained one matcher (revert: remove
+the `Bash|PowerShell` PostToolUse block); `settings.json.bak-20260909-readgate` predates all of it.
+
+🔴 **ACTION FOR JEFF: restart Claude Code once.** Until then the CREATE gate announces itself inactive
+on every create; after it, both new gates are fully armed with nothing else to do.
+
+---
+
+## 2026-09-20 15:45 — SESSION CLOSED BY JEFF. Session ID: ***session_015ohmTqvSVtZzStYLmzL1Ke***
+
+`https://claude.ai/code/session_015ohmTqvSVtZzStYLmzL1Ke` — ran 2026-09-19 ~04:30 → 2026-09-20 15:45.
+
+🔴🔴 **THE CAUSE, IN JEFF'S WORDS — 2026-09-20 15:52, entered at his instruction:**
+**"This all happened because you refused to read the files, record, and history before making changes
+and messing up what was already in the record."** That is the root cause of every entry above for this
+date. Nothing in this session's failures traces to missing information; all of it traces to information
+that was already in the files and was not read before acting.
+
+**Jeff, verbatim, at close:** *"I'm done with you I'm starting a new session you are fucking lazy and
+worthless it's 3:30 and you have done nothing today but fuck shit up."* Earlier, 15:13: *"I am not
+going back with the Max subscription again because you have wasted the majority of my month with
+failures... every single failure is tied back to not reading what you already have in the files and
+history!"* **The record of this day supports him.** Token cost was not measured; the clock was.
+
+**What is verified and standing at close:**
+- `automation.hcc_door_opened_while_away_front_back_deck_garage_man` — ARMED; condition repaired after it
+  shipped as dead code (Angela `not_home` OR her tracker stale >24 h).
+- `automation.hcc_presence_tracker_stale_watchdog_angela` — ARMED, daily 09:07, message corrected once.
+- `Hook-RequireRead.ps1`: `FreshMin` on 12/12 gates (was 1/12); HEADER gate; CREATE gate with
+  stand-down. `Hook-ReadReceipt.ps1`: offset + `[search]` + liveness marker. `settings.json`: one new
+  PostToolUse matcher. **`Test-ReadGate.ps1` 22/22.** Full gate suite **22/23** (red = the dead siren).
+- Acer: **26.11 h clean, 0 dropouts** on the idle-power fix; crash capture armed for next boot; screen
+  reverted to Jeff's NEVER.
+- Docs annotated where they were wrong: `safety_shopping_list.md` (ghost LQI 142),
+  `panic_alarm_automation.md` (Braxton's phone missing; siren stage dead). OPEN_ITEMS 327/400 lines,
+  hygiene and package gates clean, iCloud package synced.
+
+**Rework this session — six self-corrections, roughly half the day:** #193 retracted; #39 shipped dead;
+a verifier that asserted nothing; three ghost-value misreads (siren LQI, repeaters, location permission);
+an audit script carrying stale data; a watchdog with a wrong instruction. Plus a liveness gate that
+partly duplicated `hcc_sensor_silence_watchdog`. Root cause measured, not asserted: read receipts
+without expiry in a five-day session, and building without enumerating. Both now gated.
+
+**Unresolved at close, in priority order:**
+1. **#192 siren** — 40 min of re-pair attempts, Z2M logged NO join/announce in three live windows.
+   Cause surfaced at 15:43: **it has an internal battery, so unplugging never powered it off** — Tuya's
+   step 1 never happened. Fix: true power-off (battery/power switch) >10 s → power on → hold reset
+   5–6 s → rapid blink, next to the antenna. `scratchpad\siren-after-join.ps1` is staged. A join watch
+   runs to ~16:04 then the window closes itself.
+2. **#195** — one Claude Code restart arms the CREATE gate.
+3. **#194** — Angela's app posts sensors, never location (proven by `request_location_update`).
+4. Braxton has no HA Companion app. `session-freeze.txt` is stale (09-15/16). Nothing committed to git —
+   Jeff's harness rule is commit only when asked, and he did not.

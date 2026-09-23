@@ -16,6 +16,15 @@ Set-ItemProperty $srv -Name RestrictNullSessAccess -Value 0 -Type DWord
 # Guest-only sharing model = Windows' own "password protected sharing OFF". Any name with no password
 # (a Linux file manager knocks as its own user) is treated as Guest instead of being refused. Added 19:40.
 Set-ItemProperty $lsa -Name ForceGuest -Value 1 -Type DWord
+
+# --- THE CLIENT HALF, added 2026-09-22 21:1x. Without it this machine can SERVE with no password but
+# cannot OPEN another machine that way, so Network -> <pc> still shows a password box.
+# Win11 24H2 requires SMB signing by default and a GUEST SESSION CANNOT BE SIGNED (0xC05D0003), so a
+# required-signing client refuses every guest share. Measured on the Acer tonight: it had
+# RequireSecuritySignature=True while the Beast (which worked) had False. Matching them fixed it.
+$wks = 'HKLM:\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters'
+Set-ItemProperty $wks -Name AllowInsecureGuestAuth -Value 1 -Type DWord
+Set-SmbClientConfiguration -RequireSecuritySignature $false -Force
 $shares = (Get-SmbShare | Where-Object { $_.Name -notmatch '\$$' -and $_.ShareType -eq 'FileSystemDirectory' }).Name
 Set-ItemProperty $srv -Name NullSessionShares -Value $shares -Type MultiString
 Restart-Service LanmanServer -Force
