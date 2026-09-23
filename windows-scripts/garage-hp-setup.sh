@@ -134,6 +134,12 @@ grep -q '^\[KitchenPCFiles\]' /etc/samba/smb.conf || sudo tee -a /etc/samba/smb.
    force user = $ME
    create mask = 0644
    directory mask = 0755
+   # 2026-09-23: the share is the WHOLE home dir, so without this the machine hands its own SSH
+   # PRIVATE KEY to anyone on the Wi-Fi with no password. Found live on the Lenovo the same day -
+   # id_ed25519 was downloadable. Jeff's rule is no passwords on the network AND credential folders
+   # stay fenced; veto hides these from SMB only, local and SSH use are untouched.
+   veto files = /.ssh/.gnupg/.aws/.azure/.docker/.netrc/.pki/.password-store/
+   delete veto files = no
 SHARE
 sudo sed -i '/^\[global\]/a \   map to guest = Bad User' /etc/samba/smb.conf 2>/dev/null
 # 2026-09-22: Windows 11 24H2 (the Beast, the Acer) refuses a GUEST session to a server that does not
@@ -217,6 +223,73 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -q unattended-upgrades >/
 sudo dpkg-reconfigure -f noninteractive unattended-upgrades >/dev/null 2>&1
 log "unattended-upgrades on"
 
+echo "==== 10b. HANDOFF - pick up here what you were doing in the house ===="
+# Jeff 2026-09-19: "I'm watching a utube video on the beast ... how can we make that video come up
+# out there without me having to find it and start it over out there?"
+# Jeff 2026-09-23: "I want it to go both ways."
+#
+# The Beast runs a relay on :8099 with one queue per machine. This box polls its own queue and opens
+# whatever was sent - a video at the exact second, or a PDF at the page.
+# systemd USER service + LINGER, so it runs with nobody logged in and comes back after a reboot.
+# (The Windows side gets this wrong easily: a boot-triggered task with LogonType=Interactive can
+# never start. That left the relay dead 09-19 to 09-23.)
+cat > "$HOME/handoff-watcher.sh" <<'WATCH'
+#!/bin/bash
+set -u
+RELAY="http://192.168.1.194:8099/pending?for=kitchen"
+POLL=3
+BROWSER=""
+for b in google-chrome chromium-browser chromium microsoft-edge firefox; do
+    command -v "$b" >/dev/null 2>&1 && { BROWSER="$b"; break; }
+done
+[ -z "$BROWSER" ] && BROWSER="xdg-open"
+echo "$(date '+%H:%M:%S') handoff watcher up on $(hostname), browser=$BROWSER"
+translate() {
+    local u="$1"
+    case "$u" in
+        file:///[Cc]:/Users/jeffl/OneDrive/*)
+            local rest="${u#file:///[Cc]:/Users/jeffl/OneDrive/}"
+            rest=$(printf '%b' "${rest//%/\x}")
+            if [ -e "/mnt/beast/OneDrive/$rest" ]; then echo "file:///mnt/beast/OneDrive/$rest"
+            else echo "MISSING:/mnt/beast/OneDrive/$rest"; fi ;;
+        *) echo "$u" ;;
+    esac
+}
+while true; do
+    U=$(curl -s --max-time 8 "$RELAY" 2>/dev/null || true)
+    if [ -n "${U:-}" ]; then
+        T=$(translate "$U")
+        case "$T" in
+            MISSING:*) echo "$(date '+%H:%M:%S') CANNOT REACH: ${T#MISSING:}" ;;
+            *) echo "$(date '+%H:%M:%S') OPENING: $T"; "$BROWSER" --new-window "$T" >/dev/null 2>&1 & ;;
+        esac
+    fi
+    sleep "$POLL"
+done
+WATCH
+chmod +x "$HOME/handoff-watcher.sh"
+
+mkdir -p "$HOME/.config/systemd/user"
+cat > "$HOME/.config/systemd/user/handoff.service" <<UNIT
+[Unit]
+Description=Handoff watcher - opens what another machine sent here
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=%h/handoff-watcher.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
+UNIT
+systemctl --user daemon-reload >/dev/null 2>&1
+systemctl --user enable --now handoff >/dev/null 2>&1
+sudo loginctl enable-linger "$ME" >/dev/null 2>&1
+sleep 2
+log "handoff watcher=$(systemctl --user is-active handoff 2>/dev/null) enabled=$(systemctl --user is-enabled handoff 2>/dev/null) linger=$(loginctl show-user "$ME" -p Linger --value 2>/dev/null)"
+
 echo ""
 echo "==== 11. SELF-VERIFY - PROVE it before Jeff walks out of the garage ===="
 # Jeff, 2026-09-19: "I definitely don't want to go through this with the HP in
@@ -247,6 +320,10 @@ N=$(ls -1 /mnt/beast/Users/jeffl 2>/dev/null | wc -l); [ "$N" -gt 0 ] && chk "Be
 N=$(ls -1 /mnt/beast/OneDrive 2>/dev/null | wc -l); [ "$N" -gt 0 ] && chk "Beast OneDrive" ok "$N items" || chk "Beast OneDrive" no "empty"
 N=$(ls -1 /mnt/acer/Users 2>/dev/null | wc -l); [ "$N" -gt 0 ] && chk "Acer Users" ok "$N items" || chk "Acer Users" no "empty (Acer off or asleep is normal)"
 testparm -s 2>/dev/null | grep -qi 'server signing = required' && chk "samba signs (Win11 guest can connect)" ok required || chk "samba signs" no "NOT set - the Beast/Acer will refuse guest"
+testparm -s 2>/dev/null | grep -qi 'veto files' && chk "credential folders fenced from the share" ok "veto files set - .ssh not served" || chk "credential folders fenced" no "MISSING - this box would hand out its SSH PRIVATE KEY"
+[ "$(systemctl --user is-active handoff 2>/dev/null)" = "active" ] && chk "handoff watcher running" ok "polls the Beast relay for 'kitchen'" || chk "handoff watcher running" no "$(systemctl --user is-active handoff 2>/dev/null)"
+[ "$(loginctl show-user "$ME" -p Linger --value 2>/dev/null)" = "yes" ] && chk "handoff survives reboot (linger)" ok "starts at boot, not at login" || chk "handoff survives reboot (linger)" no "LINGER OFF - it will only run once Jeff logs in"
+curl -s --max-time 6 -o /dev/null -w '%{http_code}' http://192.168.1.194:8099/status 2>/dev/null | grep -q 200 && chk "Beast handoff relay reachable" ok "port 8099 answering" || chk "Beast handoff relay reachable" no "relay down on the Beast"
 lpstat -p 2>/dev/null | grep -qi 'officejet\|HP' && chk "printer installed" ok "$(lpstat -p 2>/dev/null | head -1)" || chk "printer installed" no "no HP queue"
 [ "$(timedatectl show -p NTPSynchronized --value 2>/dev/null)" = "yes" ] && chk "clock synced" ok "$(date '+%H:%M:%S')" || chk "clock synced" no "NOT syncing - timestamps unreliable"
 

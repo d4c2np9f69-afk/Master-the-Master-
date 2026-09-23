@@ -250,6 +250,55 @@ $ok = $t -and $t.Triggers.Enabled -contains $true
 Result 'Beast maps the network at logon' $ok 'HCC-Map-Lenovo-SMB -> map-lenovo-smb.cmd, logon trigger'
 $out = RemoteRun $ACER 'powershell -NoProfile -Command "(Get-ScheduledTask -TaskName \"HCC-MapBeastAtLogon\").State"'
 Result 'Acer maps the network at logon' ($out -match 'Ready|Running') "HCC-MapBeastAtLogon state=$out"
+
+Say "8. HANDOFF: pick up what you were doing on ANY machine (Jeff 2026-09-23)"
+# Jeff: "I'm watching a utube video on the beast, I go to the garage to work on the bench and I can
+# pull the video up there and continue" + "I want it to go both ways."
+#
+# Relay on the Beast, one queue per target, /send?to= and /pending?for=. Watchers on each machine.
+# THE PERMANENCE BUG THIS GUARDS, found 2026-09-23: the relay task had a BOOT trigger but
+# LogonType=Interactive, so after the 09-20 reboot it could never start - nobody is logged in at
+# boot. It last ran 09-19 and sat dead for four days while Task Scheduler cheerfully said "Ready".
+# The relay now runs as SYSTEM (it serves HTTP, it needs no desktop); the WATCHERS run at logon
+# (they open a browser Jeff looks at). Getting those two backwards is the whole failure mode.
+
+$relay = 'http://192.168.1.194:8099'
+try { $st = [Text.Encoding]::UTF8.GetString((Invoke-WebRequest "$relay/status" -UseBasicParsing -TimeoutSec 6).Content) } catch { $st = [string]::Empty }
+Result 'Handoff relay answering' ($st -match 'relay alive') "$(($st -split "`n")[0])"
+Result 'Relay has a queue per target' (($st -match 'garage') -and ($st -match 'beast') -and ($st -match 'acer')) 'garage + beast + acer queues present'
+
+# the relay MUST be SYSTEM+boot or it dies at the next restart - this is the exact 09-19 bug
+$rt = Get-ScheduledTask -TaskName 'HCC-GarageHandoff' -ErrorAction SilentlyContinue
+$sysBoot = $rt -and $rt.Principal.UserId -match 'SYSTEM' -and ($rt.Triggers | ForEach-Object { $_.CimClass.CimClassName }) -contains 'MSFT_TaskBootTrigger'
+Result 'Relay survives reboot (SYSTEM + at boot)' $sysBoot "principal=$($rt.Principal.UserId) trigger=$(($rt.Triggers | ForEach-Object { $_.CimClass.CimClassName }) -join ",")"
+$restart = $rt -and $rt.Settings.RestartCount -gt 0
+Result 'Relay restarts itself on failure' $restart "RestartCount=$($rt.Settings.RestartCount)"
+
+# watchers - one per machine, each must be at LOGON (they open a browser in Jeff's session)
+$wt = Get-ScheduledTask -TaskName 'HCC-HandoffWatcher' -ErrorAction SilentlyContinue
+$wOk = $wt -and (($wt.Triggers | ForEach-Object { $_.CimClass.CimClassName }) -contains 'MSFT_TaskLogonTrigger')
+Result 'Beast watcher armed at logon' $wOk "state=$($wt.State)"
+$out = RemoteRun $ACER 'powershell -NoProfile -Command "(Get-ScheduledTask -TaskName \"HCC-HandoffWatcher\").State"'
+Result 'Acer watcher armed at logon' ($out -match 'Ready|Running') "state=$out"
+$out = RemoteRun $LENOVO 'systemctl --user is-enabled garage-handoff'
+Result 'Garage watcher enabled (systemd user)' ($out -match 'enabled') "is-enabled=$out"
+$out = RemoteRun $LENOVO 'loginctl show-user jeffloewen -p Linger'
+Result 'Garage watcher runs with nobody logged in' ($out -match 'Linger=yes') 'linger on - it starts at boot, not at login'
+
+# FEATURE TEST, not a component test: actually push something through the relay and watch a
+# machine consume it. A relay that answers /status can still be handing nothing over.
+$probe = 'https://example.com/hcc-gate-probe'
+try {
+    [void](Invoke-WebRequest "$relay/send?to=garage&u=$probe" -UseBasicParsing -TimeoutSec 6)
+    Start-Sleep -Seconds 6
+    $after = [Text.Encoding]::UTF8.GetString((Invoke-WebRequest "$relay/status" -UseBasicParsing -TimeoutSec 6).Content)
+    # the garage watcher should have taken it, flipping consumed to True for that queue
+    $line = ($after -split "`n" | Select-String -Pattern 'garage' -Context 0,1) -join ' '
+    $taken = $line -match 'consumed: True'
+} catch { $taken = $false; $line = "relay unreachable" }
+Result 'Garage actually CONSUMES a handoff' $taken "probe delivered and picked up"
+# example.com is used deliberately - an earlier test used real YouTube links and left videos
+# playing on three machines. A gate must never start media on a screen Jeff is looking at.
 Write-Host ""
 Write-Host "================================================================" -ForegroundColor Cyan
 Write-Host ("  {0} PASS   {1} FAIL   {2} SKIP" -f $script:pass, $script:fail, $script:skip) -ForegroundColor $(if($script:fail){'Yellow'}else{'Green'})

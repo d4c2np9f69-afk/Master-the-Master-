@@ -1,0 +1,149 @@
+# Verify-GarageStick.ps1 - PROVE the KitchenPC install stick is ready, do not assert it.
+#
+# Jeff, 2026-09-23: "double and triple check the stick to make sure that when it loads the HP all
+# this is already there to just integrate into the network ... I'm not gonna go through all this
+# again with that computer."
+#
+# Run it any time the stick is plugged in. READ ONLY - it changes nothing.
+# Every check here is earned by a real failure:
+#   - a .sh with CRLF fails on Linux while Git-Bash's `bash -n` says it is fine, so COUNT BYTES
+#   - `bash -n` does NOT look inside heredocs, so the embedded watcher is extracted and checked
+#   - `shutdown: poweroff` is load-bearing: `reboot` + a USB-first BIOS re-wipes the machine it
+#     just built (2026-09-01, Jeff ran a script twice and boot-looped this very box)
+#   - the embedded SSH key must match THIS Beast, or Claude cannot finish the job remotely
+
+$ErrorActionPreference = 'SilentlyContinue'
+$script:pass = 0; $script:fail = 0; $script:skip = 0
+function Say($t) { Write-Host ""; Write-Host "--- $t" -ForegroundColor Cyan }
+function Result($name, $ok, $proof) {
+    if ($ok -is [string]) { Write-Host ("  SKIP  {0,-46} {1}" -f $name, $proof) -ForegroundColor DarkGray; $script:skip++ }
+    elseif ($ok)          { Write-Host ("  PASS  {0,-46} {1}" -f $name, $proof) -ForegroundColor Green;    $script:pass++ }
+    else                  { Write-Host ("  FAIL  {0,-46} {1}" -f $name, $proof) -ForegroundColor Red;      $script:fail++ }
+}
+
+Write-Host ""
+Write-Host "================================================================" -ForegroundColor Cyan
+Write-Host ("  KITCHENPC STICK VERIFICATION   " + (Get-Date -Format 'ddd yyyy-MM-dd h:mm tt')) -ForegroundColor Cyan
+Write-Host "================================================================" -ForegroundColor Cyan
+
+# find the stick by CONTENT, not by drive letter - letters move between sessions
+$stick = $null
+foreach ($d in (Get-PSDrive -PSProvider FileSystem).Root) {
+    if ((Test-Path (Join-Path $d 'autoinstall.yaml')) -and (Test-Path (Join-Path $d 'casper'))) { $stick = $d; break }
+}
+if (-not $stick) {
+    Say "STICK NOT FOUND"
+    Result 'install stick present' 'skip' 'no drive has autoinstall.yaml + casper - plug it in'
+    Write-Host ""
+    Write-Host ("  {0} PASS   {1} FAIL   {2} SKIP" -f $script:pass, $script:fail, $script:skip) -ForegroundColor Yellow
+    Write-Host "  A SKIP IS NOT A PASS. The stick was not checked." -ForegroundColor Yellow
+    exit 0
+}
+Write-Host ("  stick found at {0}" -f $stick) -ForegroundColor Green
+
+Say "1. AUTOINSTALL - it must build the right machine and then STOP"
+$aiPath  = Join-Path $stick 'autoinstall.yaml'
+$ai      = Get-Content $aiPath -Raw
+$aiBytes = [IO.File]::ReadAllBytes($aiPath)
+$crCount = @($aiBytes | Where-Object { $_ -eq 13 }).Count
+Result 'autoinstall.yaml is LF (no CR)' ($crCount -eq 0) "CR bytes = $crCount (CRLF breaks cloud-init)"
+Result 'hostname KitchenPC'  ($ai -match 'hostname:\s*KitchenPC') 'not GaragePC - the Lenovo is the garage machine'
+Result 'creates user jeff'   ($ai -match 'username:\s*jeff')      'matches the rest of the house'
+Result 'shutdown: poweroff'  ($ai -match 'shutdown:\s*poweroff')  'LOAD-BEARING: reboot + USB-first BIOS = re-wipe'
+Result 'installs openssh-server' ($ai -match 'openssh-server')    'Claude finishes the job remotely'
+Result 'copies GARAGE-SETUP to the new home' ($ai -match 'GARAGE-SETUP') 'the setup script lands on the box'
+
+$keyOnStick = [regex]::Match($ai, 'ssh-ed25519 (\S+)').Groups[1].Value
+$beastKey = ''
+$pub = Join-Path $env:USERPROFILE '.ssh\id_ed25519.pub'
+if (Test-Path $pub) { $beastKey = ((Get-Content $pub -Raw) -split '\s+')[1] }
+Result 'embedded key matches THIS Beast' ($keyOnStick -and $keyOnStick -eq $beastKey) 'otherwise Claude cannot log in afterwards'
+
+Say "2. BOOT MENU - this is the only screen Jeff ever touches"
+$g = Get-Content (Join-Path $stick 'boot\grub\grub.cfg') -Raw
+$entries = [regex]::Matches($g, 'menuentry\s+"([^"]+)"') | ForEach-Object { $_.Groups[1].Value }
+$autoEntries = @($entries | Where-Object { $_ -match 'AUTO' })
+Result 'AUTO INSTALL entries exist' ($autoEntries.Count -ge 1) ("{0} found" -f $autoEntries.Count)
+Result 'they are labelled KitchenPC' (-not ($autoEntries -match 'GaragePC')) 'a wrong label is how the wrong box gets wiped'
+$blocks = $g -split 'menuentry\s+"'
+$allAuto = $true
+foreach ($b in $blocks[1..($blocks.Count-1)]) {
+    $n = $b.Split('"')[0]
+    if ($n -match 'AUTO') {
+        $lin = ($b -split "`n") | Where-Object { $_.Trim().StartsWith('linux') }
+        if (-not ($lin -match 'autoinstall')) { $allAuto = $false }
+    }
+}
+Result 'every AUTO entry carries autoinstall' $allAuto 'without it the installer just sits there asking questions'
+Result 'manual entries preserved' (@($entries | Where-Object { $_ -match 'original entry' }).Count -ge 1) 'the stick can never be made unbootable'
+Result 'grub braces balanced' ((([regex]::Matches($g,'{')).Count) -eq (([regex]::Matches($g,'}')).Count)) 'an unbalanced brace = no boot menu at all'
+
+Say "3. SETUP SCRIPTS - LF endings, counted in BYTES"
+foreach ($f in (Get-ChildItem (Join-Path $stick 'GARAGE-SETUP') -Filter *.sh)) {
+    $b  = [IO.File]::ReadAllBytes($f.FullName)
+    $cr = @($b | Where-Object { $_ -eq 13 }).Count
+    Result ("LF endings: " + $f.Name) ($cr -eq 0) ("CR bytes = $cr  (Git-Bash grep lies about this)")
+}
+
+Say "4. IT MUST ARRIVE ALREADY PART OF THE HOUSE (Jeff: 'just integrate into the network')"
+$hp = Get-Content (Join-Path $stick 'GARAGE-SETUP\garage-hp-setup.sh') -Raw
+$want = [ordered]@{
+  'joins the LOEWEN301 workgroup'       = 'workgroup = LOEWEN301'
+  'shares its own files to guest'       = 'guest ok = yes'
+  'samba signs (Win11 guest needs it)'  = 'server signing = required'
+  'name resolution (netbios/nmbd)'      = 'disable netbios = no'
+  'mounts the Beast, no password'       = '/mnt/beast'
+  'mounts the Acer, no password'        = '/mnt/acer'
+  'FENCES credential folders'           = 'veto files'
+  'handoff watcher installed'           = 'handoff-watcher.sh'
+  'handoff polls its own queue'         = 'for=kitchen'
+  'handoff survives reboot (linger)'    = 'enable-linger'
+  'installs the Beast SSH key first'    = 'authorized_keys'
+  'self-verifies before Jeff walks off' = 'ALL CHECKS PASSED'
+}
+foreach ($k in $want.Keys) {
+    Result $k ($hp -match [regex]::Escape($want[$k])) $want[$k]
+}
+
+Say "5. THE EMBEDDED WATCHER - bash -n does NOT look inside heredocs"
+$m = [regex]::Match($hp, "(?s)<<'WATCH'`n(.*?)`nWATCH`n")
+if ($m.Success) {
+    $tmp = Join-Path $env:TEMP 'hcc-embedded-watcher.sh'
+    [IO.File]::WriteAllText($tmp, $m.Groups[1].Value.Replace("`r`n","`n"))
+    # Git Bash is installed here but is NOT on PowerShell's PATH, so Get-Command alone turned this
+    # into a SKIP - and a skip is not a pass. Look in the known locations too.
+    $bash = (Get-Command bash -ErrorAction SilentlyContinue).Source
+    if (-not $bash) {
+        foreach ($cand in 'C:\Program Files\Git\bin\bash.exe','C:\Program Files\Git\usr\bin\bash.exe','C:\Program Files (x86)\Git\bin\bash.exe') {
+            if (Test-Path $cand) { $bash = $cand; break }
+        }
+    }
+    if ($bash) {
+        $out = & $bash -n $tmp 2>&1
+        if ($LASTEXITCODE -eq 0) { Result 'embedded watcher is valid bash' $true 'bash -n clean' }
+        else                     { Result 'embedded watcher is valid bash' $false "$out" }
+    } else { Result 'embedded watcher is valid bash' 'skip' 'no bash on PATH to check with' }
+    Remove-Item $tmp -ErrorAction SilentlyContinue
+} else {
+    Result 'embedded watcher present' $false 'WATCH heredoc not found - the HP would get no handoff'
+}
+
+Say "6. OFFLINE INSTALL - the HP may have no network while installing"
+$deb = @(Get-ChildItem (Join-Path $stick 'pool') -Recurse -Filter 'openssh-server*.deb' -ErrorAction SilentlyContinue)
+if ($deb.Count -ge 1) { Result 'openssh-server in the local pool' $true $deb[0].Name }
+else                  { Result 'openssh-server in the local pool' $false 'MISSING - SSH would not survive an offline install' }
+
+Write-Host ""
+Write-Host "================================================================" -ForegroundColor Cyan
+if ($script:fail) { $c = 'Yellow' } else { $c = 'Green' }
+Write-Host ("  {0} PASS   {1} FAIL   {2} SKIP" -f $script:pass, $script:fail, $script:skip) -ForegroundColor $c
+Write-Host "================================================================" -ForegroundColor Cyan
+if ($script:fail -eq 0) {
+  Write-Host "  The stick is ready. Boot the HP with ESC -> F9 -> the USB device," -ForegroundColor Green
+  Write-Host "  pick an AUTO INSTALL entry, and walk away. It powers itself off." -ForegroundColor Green
+  Write-Host "  It comes back on the network with no passwords, both shares mounted," -ForegroundColor Green
+  Write-Host "  credential folders fenced, and the handoff watcher already running." -ForegroundColor Green
+} else {
+  Write-Host "  DO NOT BOOT IT YET - read the FAIL lines above." -ForegroundColor Yellow
+}
+Write-Host ""

@@ -1,30 +1,43 @@
-# Adds a "SEND TO GARAGE" bookmarklet to Edge's bookmarks bar.
+# Adds a "SEND TO <MACHINE>" bookmarklet to Edge's bookmarks bar - one per target.
+#
+# Jeff, 2026-09-19 09:47 (the garage video) and 2026-09-23 07:44: "I want it to go both ways."
 #
 # One click while a video is playing:
-#   - reads the <video> element's currentTime (works on YouTube and any site
-#     with an HTML5 video, not just YouTube)
+#   - reads the <video> element's currentTime (any HTML5 video, not just YouTube)
 #   - rebuilds the URL with &t=<seconds>s
-#   - posts it to the relay on the Beast
-#   - the garage machine opens it within ~3 s at that exact second
+#   - posts it to the relay on the Beast with the chosen target
+#   - that machine opens it within ~3 s at that exact second
 #
-# Installed on the ACER deliberately: Edge is signed in as
-# jeff.loewen@comcast.net and SYNCS, so it propagates to the Beast on its own -
-# no need to touch the Beast while Angela is watching the news on that screen.
+# Edge is signed in as jeff.loewen@comcast.net and SYNCS, so installing on either Windows machine
+# propagates to the other. The script is idempotent - it refreshes a bookmarklet it already added.
 #
-# 🔴 Edge keeps an integrity MAC of the Bookmarks file in Local State. If the
-# file is edited and that MAC is not cleared, Edge SILENTLY DISCARDS the whole
-# file - which is how a previous session lost bookmarks. Clear the MAC entry and
-# Edge re-signs it on next launch. Both files are backed up first.
+# The Lenovo runs Chrome, not Edge, so it gets the same three as a Chrome bookmarks-bar entry via
+# lenovo-install-handoff-watcher.sh. Its send side also works from a terminal with curl.
+#
+# 🔴 Edge keeps an integrity MAC of the Bookmarks file in Local State. If the file is edited and
+# that MAC is not cleared, Edge SILENTLY DISCARDS the whole file - which is how a previous session
+# lost bookmarks. Clear the MAC entry and Edge re-signs it on next launch. Both files backed up.
 $ErrorActionPreference = 'SilentlyContinue'
 function L($a,$b){ Write-Output ("  {0,-34} {1}" -f $a,$b) }
 
-$relay = 'http://192.168.1.194:8099/send?u='
-# single-line bookmarklet; no double quotes inside so the JSON stays clean
+$relayBase = 'http://192.168.1.194:8099/send'
+
+# Which buttons to create. "garage" = the Lenovo at the bench.
+$targets = @(
+    @{ Name = 'SEND TO GARAGE'; To = 'garage' },
+    @{ Name = 'SEND TO BEAST';  To = 'beast'  },
+    @{ Name = 'SEND TO ACER';   To = 'acer'   }
+)
+
+# single-line bookmarklet; no double quotes inside so the JSON stays clean.
 # Handles three cases in one click:
 #   video  -> append &t=<currentTime>s so it resumes at the exact second
 #   pdf    -> keep #page=N if the viewer put one in the URL
 #   other  -> send the page as-is
-$js = "javascript:(function(){var u;var v=document.querySelector('video');if(v){u=location.href.split('&t=')[0].split('#')[0];u+=(u.indexOf('?')>-1?'&':'?')+'t='+Math.floor(v.currentTime)+'s';}else{u=location.href;}var w=window.open('$relay'+encodeURIComponent(u),'_blank','width=420,height=220');setTimeout(function(){if(w)w.close();},1500);})()"
+function New-Bookmarklet([string]$to) {
+    $relay = "$relayBase" + "?to=$to&u="
+    return "javascript:(function(){var u;var v=document.querySelector('video');if(v){u=location.href.split('&t=')[0].split('#')[0];u+=(u.indexOf('?')>-1?'&':'?')+'t='+Math.floor(v.currentTime)+'s';}else{u=location.href;}var w=window.open('$relay'+encodeURIComponent(u),'_blank','width=420,height=220');setTimeout(function(){if(w)w.close();},1500);})()"
+}
 
 $prof = "$env:LOCALAPPDATA\Microsoft\Edge\User Data\Default"
 $bm   = "$prof\Bookmarks"
@@ -39,25 +52,38 @@ L 'backed up' "Bookmarks + Local State ($stamp)"
 $json = Get-Content $bm -Raw | ConvertFrom-Json
 $bar  = $json.roots.bookmark_bar
 
-$existing = @($bar.children | Where-Object { $_.name -eq 'SEND TO GARAGE' })
-if ($existing.Count -gt 0) {
-    foreach ($e in $existing) { $e.url = $js }
-    L 'bookmarklet' 'already present - URL refreshed'
-} else {
-    # ids must be unique; take one past the current maximum
-    $maxId = 0
-    function Walk($n){ if ($n.id) { $i=[int]$n.id; if ($i -gt $script:maxId) { $script:maxId = $i } }; if ($n.children) { foreach ($c in $n.children) { Walk $c } } }
-    foreach ($r in $json.roots.PSObject.Properties) { if ($r.Value.children) { Walk $r.Value } }
-    $new = [pscustomobject]@{
-        date_added    = ([DateTimeOffset]::UtcNow.ToUnixTimeSeconds() + 11644473600) * 1000000
-        guid          = [guid]::NewGuid().ToString()
-        id            = "$($maxId + 1)"
-        name          = 'SEND TO GARAGE'
-        type          = 'url'
-        url           = $js
+# ids must be unique; take one past the current maximum
+$script:maxId = 0
+function Walk($n){ if ($n.id) { $i=[int]$n.id; if ($i -gt $script:maxId) { $script:maxId = $i } }; if ($n.children) { foreach ($c in $n.children) { Walk $c } } }
+foreach ($r in $json.roots.PSObject.Properties) { if ($r.Value.children) { Walk $r.Value } }
+
+# Do not offer to send to the machine you are sitting at - it would just reopen the same page.
+$me = $env:COMPUTERNAME.ToUpper()
+$selfTarget = switch ($me) { '301SERVER' { 'beast' } 'JEFFSLAPTOP' { 'acer' } default { '' } }
+
+foreach ($t in $targets) {
+    $js = New-Bookmarklet $t.To
+    $existing = @($bar.children | Where-Object { $_.name -eq $t.Name })
+    if ($t.To -eq $selfTarget) {
+        # still install it - Edge SYNCS, so this bar is shared with the other machine where it IS useful
+        L $t.Name 'installed (no-op on this machine, useful on the other via sync)'
     }
-    $bar.children = @($bar.children) + $new
-    L 'bookmarklet' 'ADDED to the bookmarks bar'
+    if ($existing.Count -gt 0) {
+        foreach ($e in $existing) { $e.url = $js }
+        L $t.Name 'already present - URL refreshed'
+    } else {
+        $script:maxId++
+        $new = [pscustomobject]@{
+            date_added = ([DateTimeOffset]::UtcNow.ToUnixTimeSeconds() + 11644473600) * 1000000
+            guid       = [guid]::NewGuid().ToString()
+            id         = "$script:maxId"
+            name       = $t.Name
+            type       = 'url'
+            url        = $js
+        }
+        $bar.children = @($bar.children) + $new
+        L $t.Name 'ADDED to the bookmarks bar'
+    }
 }
 
 $json | ConvertTo-Json -Depth 100 -Compress | Set-Content $bm -Encoding UTF8
@@ -71,8 +97,11 @@ if ($lsj.protection.macs.bookmarks) {
     L 'integrity MAC' 'cleared (Edge re-signs on next launch)'
 } else { L 'integrity MAC' 'none present' }
 
-$check = (Get-Content $bm -Raw | ConvertFrom-Json).roots.bookmark_bar.children | Where-Object { $_.name -eq 'SEND TO GARAGE' }
-L 'verified in file' $(if($check){'yes'}else{'NO - something went wrong'})
-L 'relay it posts to' $relay
+$barNow = (Get-Content $bm -Raw | ConvertFrom-Json).roots.bookmark_bar.children
+foreach ($t in $targets) {
+    $found = @($barNow | Where-Object { $_.name -eq $t.Name }).Count -gt 0
+    L ("verified: " + $t.Name) $(if($found){'yes'}else{'NO - something went wrong'})
+}
+L 'relay they post to' $relayBase
 Write-Output ""
-Write-Output "  Edge must be RESTARTED for it to appear. It then syncs to the Beast on its own."
+Write-Output "  Edge must be RESTARTED for them to appear. They then sync to the other machine on their own."
