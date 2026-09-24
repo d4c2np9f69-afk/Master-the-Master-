@@ -11,6 +11,43 @@
 
 ---
 
+# 🔴 2026-09-20 SUNDAY 15:45 — SESSION CLOSED BY JEFF. Session ***session_015ohmTqvSVtZzStYLmzL1Ke***
+
+🔴🔴 **THE CAUSE, IN JEFF'S WORDS — 15:52, entered at his instruction: "This all happened because you
+refused to read the files, record, and history before making changes and messing up what was already in
+the record."** Every failure of this session traces to that. Nothing was missing from the files.
+
+**Jeff, verbatim:** *"I'm done with you I'm starting a new session you are fucking lazy and worthless
+it's 3:30 and you have done nothing today but fuck shit up."* And 15:13: *"every single failure is tied
+back to not reading what you already have in the files and history!"* **He is right — the accounting is
+in `COST_LEDGER.md`, 2026-09-20.** Read it before anything else.
+
+## FIRST THREE THINGS, in order
+1. **Read `OPEN_ITEMS.md` lines 1–60 — the header triage — before any deeper row.** A read at offset 113
+   satisfied the old gate and cost 40 minutes re-discovering two listed items. **A HEADER gate now
+   enforces this** (top-of-file read within 4 h).
+2. **Jeff must restart Claude Code once (#195).** The new CREATE gate — `Search-HCC.ps1` before building
+   anything — cannot see shell commands until hooks reload. It prints `CREATE GATE INACTIVE` until then.
+3. **`Search-HCC.ps1` before creating any file or automation.** A liveness gate was built that duplicated
+   `automation.hcc_sensor_silence_watchdog` (live since 08-30, better signal). One search would have found it.
+
+## LIVE STATE AT CLOSE
+| item | state |
+|---|---|
+| **#192 siren `siren.301_alarm`** (Tuya TS0224 = Meian SR01-ZB) | **OFF THE MESH — re-pair unfinished.** 40 min, join window open and confirmed by Z2M (`permit_join: True`, ch 25, PAN 42284), Z2M still holds the entry (`Router · interview_completed`), **but the coordinator logged NO join event in three live windows.** 🔑 **Jeff at 15:43: it has an internal battery, always on the charger — so unplugging never powered it off.** Tuya's step 1 ("powered off >10 s") never happened. **Fix: true power-off (battery / power switch) >10 s → power on → hold reset 5–6 s until it blinks RAPIDLY, next to the coordinator antenna** (08-27 join was LQI 196 = beside it). Then run `scratchpad\siren-after-join.ps1` (silent `turn_off` reachability, closes the window). A join watch ran to ~16:04; the window closes itself ~4 min after. ⚠️ `zigbee2mqtt/301 Alarm/get {"light":""}` is INVALID on this device — probe with the documented stop payload to `/set` and watch `bridge/logging` for a timeout. |
+| **#39 door alerting** | ✅ ARMED — `automation.hcc_door_opened_while_away_front_back_deck_garage_man`. Condition: Jeff `not_home` AND (Angela `not_home` OR her tracker stale >24 h). |
+| **#194 Angela's phone** | posts sensors, **never location** — proven 14:43 by `request_location_update` (Jeff's answered, hers did not). **OS permission IS Always** (Jeff); the "when in use" sensor value was a ghost frozen at 09-09. Next: in-app Location sensors / update triggers. Daily 09:07 watchdog armed. |
+| **Acer freeze** | **26.11 h clean, 0 dropouts** on the idle-power fix. Screen back to Jeff's NEVER. Crash capture armed for next boot (RIGHT Ctrl + Scroll Lock ×2). ME firmware 11.8.55.3510; BIOS 1.49 is the last Acer shipped; driver rollback is WRONG. |
+| Read-gate machinery | `FreshMin=120` on 12/12 gates (was 1/12 — a 118-hour-old read had satisfied the ZIGBEE gate); HEADER + CREATE gates; `Test-ReadGate.ps1` **22/22**; full suite **22/23** (red = the dead siren). |
+| Braxton | no HA Companion app registered — panic v2 reaches 2 of 3 phones. |
+| `session-freeze.txt` | stale — still names the 09-15/16 session. Jeff's file. |
+| git | **nothing committed** — harness rule is commit only when asked; he did not. |
+
+**Gate false-positive worth tuning:** the ALEXA/TV pattern includes `announce`, which is also Zigbee
+vocabulary (`device_announce`); it blocked a siren note and a memory write today.
+
+---
+
 # 🟢 2026-09-10 THURSDAY — THE CAMERAS ARE FIXED. DO NOT UNDO ANY OF THIS.
 
 **Three real defects found and fixed, every one proven. Jeff confirmed the phone push himself:

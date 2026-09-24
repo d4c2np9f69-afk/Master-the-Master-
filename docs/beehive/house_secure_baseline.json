@@ -1,0 +1,28 @@
+{
+ "captured": "2026-09-20T22:05:10",
+ "doors": {
+  "binary_sensor.back_deck_door_contact": "off",
+  "binary_sensor.front_door_contact": "off",
+  "binary_sensor.garage_door_down_contact": "off",
+  "binary_sensor.garage_man_door_contact": "off",
+  "binary_sensor.spare_contact_1_contact": "on"
+ },
+ "locks": {
+  "lock.gle_350_lock": "unlocked"
+ },
+ "leaks": {
+  "binary_sensor.guest_bath_leak_water_leak": "off",
+  "binary_sensor.kitchen_refrigerator_leak_water_leak": "off",
+  "binary_sensor.kitchen_sink_leak_water_leak": "off"
+ },
+ "other": {
+  "cover.garage_door": "closed",
+  "binary_sensor.garage_secure": "on",
+  "switch.mini_smart_socket11_2_socket_1": "off"
+ },
+ "excluded": {
+  "lock.gle_350_lock": "DELIBERATELY unlocked - Jeff standing decision. Including it would make the house NEVER read secure.",
+  "binary_sensor.spare_contact_1_contact": "unmounted spare sensor, no magnet - permanently reads on."
+ },
+ "scope": "Doors, locks, overhead door and fan only - the set Jeff named at 21:05."
+}

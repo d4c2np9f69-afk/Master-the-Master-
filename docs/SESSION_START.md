@@ -198,8 +198,12 @@ point: a doc that disagrees with reality makes the next session confidently wron
   part first, not the 3,100 lines below it.
 - ~~Orbit anti-siphon valve ordered, not yet installed~~ → **installed 2026-09-01.** What is open
   now is #109's HOLD: observe irrigation pick back up against real water before changing a line.
-- ~~HA backup encryption key has no durable copy~~ → still single-copy, **but the key was PROVEN
-  to decrypt a real backup on 2026-09-10** (#2). That question is closed; only the second copy isn't.
+- ~~HA backup encryption key has no durable copy~~ → ✅ **OFF-MACHINE 2026-09-20 17:33**, at Jeff's
+  instruction (*"Save it to iCloud"*): the whole key ring mirrored to `iCloudDrive\HCC-Secrets-Vault\`,
+  31 files, `cmp`-verified, with a README. And the chain was PROVEN end to end the same hour — the key
+  decrypted `HCC-Beehive-Backup-2026-09-20.tar`, walking **2,778 members** of the 557.9 MB
+  `homeassistant.tar.gz`. ⚠️ **Still owed:** the key now sits in the SAME iCloud account as the backups
+  it opens, so a genuinely independent copy (Bitwarden, or printed in the safe) remains Jeff's call.
 - ~~Backyard PIR logs zero motion~~ → **it logs motion.** 2 events in 12 h measured 09-10. Sparse,
   not blind (#7). The 26-hour "zero" reading came from a history window wider than 24 h, which
   under-reports to zero — see `ACCESS_MAP.md` §1.

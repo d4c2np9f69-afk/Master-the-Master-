@@ -72,7 +72,74 @@ $s = T 'rg-camera';   Receipt $s $ALL
 $o = Run $s 'PowerShell' 'Restart-Service go2rtc' ''
 Check 'the CAMERAS topic gate still stacks on top' ($o -match 'CAMERAS')
 
-foreach ($x in $sids) { $p = Join-Path $env:TEMP ("hcc-read-$x.txt"); if (Test-Path $p) { [IO.File]::Delete($p) } }
+# ---------------------------------------------------------------------------
+# 2026-09-20 - HEADER gate and CREATE gate, plus the receipt fields they rely on.
+# Each pair proves the gate FAILS on the real mistake AND PASSES when satisfied
+# (SESSION_START 3b: a check that cannot fail is not a check; one that cries
+# wolf is worse than none). The CREATE gate also proves its stand-down: with no
+# shell-receipt marker it must ALLOW and say so, never block the unsatisfiable.
+# ---------------------------------------------------------------------------
+$RECEIPT_HOOK = Join-Path $PSScriptRoot 'Hook-ReadReceipt.ps1'
+$TOP    = "$now|docs/OPEN_ITEMS.md|offset=0"
+$DEEP   = "$now|docs/OPEN_ITEMS.md|offset=113"
+$STALE  = "$($now - 300*60)|docs/OPEN_ITEMS.md|offset=0"
+$SEARCH = "$now|[search] mailbox"
+$BASE   = @("$now|docs/ACCESS_MAP.md", "$now|docs/SESSION_START.md")
+$NEWJS  = 'C:\Users\jeffl\Documents\GitHub\master-the-master-\scripts\zz-test-does-not-exist.js'
+function Marker($sid) { Set-Content -LiteralPath (Join-Path $env:TEMP ("hcc-shellreceipt-" + $sid + ".flag")) -Value $now -Encoding ASCII }
+
+$s = T 'rg-hdr-deep';   Receipt $s ($BASE + $DEEP)
+$o = Run $s 'Edit' '' $APP
+Check 'HEADER: blocks when OPEN_ITEMS was only read from the MIDDLE (offset 113)' ($o -match 'OPEN_ITEMS HEADER') $o
+
+$s = T 'rg-hdr-top';    Receipt $s ($BASE + $TOP)
+$o = Run $s 'Edit' '' $APP
+Check 'HEADER: passes on a top-of-file read' ([string]::IsNullOrWhiteSpace($o)) "output: $o"
+
+$s = T 'rg-hdr-stale';  Receipt $s ($BASE + $STALE)
+$o = Run $s 'Edit' '' $APP
+Check 'HEADER: blocks when the top read is 5 h old' ($o -match 'OPEN_ITEMS HEADER') $o
+
+$s = T 'rg-create-nosearch'; Receipt $s ($BASE + $TOP); Marker $s
+$o = Run $s 'Write' '' $NEWJS
+Check 'CREATE: blocks a NEW scripts/ file with no Search-HCC run' ($o -match 'BUILD-FIRST') $o
+
+$s = T 'rg-create-search';   Receipt $s ($BASE + $TOP + $SEARCH); Marker $s
+$o = Run $s 'Write' '' $NEWJS
+Check 'CREATE: passes once Search-HCC was run' ([string]::IsNullOrWhiteSpace($o)) "output: $o"
+
+$s = T 'rg-create-auto';     Receipt $s ($BASE + $TOP); Marker $s
+$o = Run $s 'PowerShell' 'Invoke-RestMethod -Uri http://192.168.1.66:8123/api/config/automation/config/zz_test -Method POST' ''
+Check 'CREATE: blocks an HA automation create (shell) with no search' ($o -match 'BUILD-FIRST') $o
+
+$s = T 'rg-create-edittext'; Receipt $s ($BASE + $TOP); Marker $s
+$o = Run $s 'Edit' '' $APP
+Check 'CREATE: an Edit whose TEXT mentions the API path does NOT fire (only a shell call can POST)' ([string]::IsNullOrWhiteSpace($o)) "output: $o"
+
+$s = T 'rg-create-existing'; Receipt $s ($BASE + $TOP); Marker $s
+$o = Run $s 'Write' '' $APP
+Check 'CREATE: does NOT fire on an EXISTING file' ([string]::IsNullOrWhiteSpace($o)) "output: $o"
+
+$s = T 'rg-create-standdown'; Receipt $s ($BASE + $TOP)    # NO marker on purpose
+$o = Run $s 'Write' '' $NEWJS
+Check 'CREATE: with no shell-receipt marker it ALLOWS and says INACTIVE (never blocks the unsatisfiable)' (($o -match 'CREATE GATE INACTIVE') -and ($o -notmatch 'BUILD-FIRST')) $o
+
+# The receipt hook itself must write the fields the gates read.
+$s = T 'rg-receipt'; Receipt $s $null
+$pj = @{ session_id = $s; tool_name = 'PowerShell'; tool_input = @{ command = '& "C:\x\Search-HCC.ps1" "mailbox"' } } | ConvertTo-Json -Compress
+$pj | & powershell -NoProfile -ExecutionPolicy Bypass -File $RECEIPT_HOOK 2>$null | Out-Null
+$pj = @{ session_id = $s; tool_name = 'Read'; tool_input = @{ file_path = 'C:\x\docs\OPEN_ITEMS.md'; offset = 113 } } | ConvertTo-Json -Compress
+$pj | & powershell -NoProfile -ExecutionPolicy Bypass -File $RECEIPT_HOOK 2>$null | Out-Null
+$rc = ''
+$rp = Join-Path $env:TEMP ("hcc-read-$s.txt"); if (Test-Path $rp) { $rc = Get-Content $rp -Raw }
+Check 'RECEIPT: a Search-HCC run is credited as [search] <term>' ($rc -match '\[search\] mailbox') $rc
+Check 'RECEIPT: a Read records its offset' ($rc -match 'OPEN_ITEMS\.md\|offset=113') $rc
+Check 'RECEIPT: a shell call drops the liveness marker' (Test-Path (Join-Path $env:TEMP ("hcc-shellreceipt-$s.flag")))
+
+foreach ($x in $sids) {
+  $p = Join-Path $env:TEMP ("hcc-read-$x.txt");         if (Test-Path $p) { [IO.File]::Delete($p) }
+  $m = Join-Path $env:TEMP ("hcc-shellreceipt-$x.flag"); if (Test-Path $m) { [IO.File]::Delete($m) }
+}
 ""
 "READ GATE: $pass passed, $fail failed"
 if ($fail -gt 0) { exit 1 } else { exit 0 }

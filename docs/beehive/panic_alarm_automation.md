@@ -1,5 +1,34 @@
 # Panic button → Beehive alarm automation (sirens + lights + alert the family)
 
+> ## 🔴 MEASURED 2026-09-20 09:20 — TWO GAPS IN THE BUILT VERSION. READ BEFORE ARMING ANYTHING.
+> *(Read-only inspection. 🛑 `OPEN_ITEMS #10` stands: Jeff, 2026-09-10 — "Leave the panic button
+> alone till the alarms are built !!!!" Nothing was armed, edited or fired.)*
+>
+> **1. BRAXTON HAS NO REGISTERED PHONE.** This document specifies Critical push to
+> jeff / angela / braxton. Live service list: **`notify.mobile_app_jeffs_iphone` and
+> `notify.mobile_app_angelas_iphone` exist — there is no braxton target at all.** So the alarm
+> reaches **two of the three people it is designed for**. Fix is free: the HA Companion app on his
+> iPhone, signed into Beehive once.
+>
+> **2. THE SIREN STAGE IS DEAD EVEN WHEN ARMED.** `automation.hcc_panic_button_v2` targets
+> **`siren.301_alarm` as its only siren**, and that device has been **off the mesh for 106 hours**
+> (OPEN_ITEMS #192 — silent since the Z2M restart 09-15 16:37; the "LQI 142 verified" reading in
+> `safety_shopping_list.md` was a retained ghost value). **Arming v2 today would light the lights
+> and push two phones, and make no sound.**
+>
+> ✅ **What IS correct:** every other service v2 calls is registered and resolves —
+> `input_boolean.*`, `light.turn_on`, `notify.alexa_media_everywhere`,
+> `persistent_notification.create`, `siren.turn_on/off`. `entity_id: all` is valid HA syntax, not a
+> defect. **v1 (`automation.hcc_panic_button`, still ARMED) lives in `packages/hcc.yaml` and is
+> invisible to the config API**, so it cannot be inspected this way — consistent with SESSION_START §3.
+>
+> ⚠️ **Instrument note, because it nearly produced a false finding:** the first version of the
+> inspection script reported Jeff's and Angela's phones as "DOES NOT EXIST" — contradicted by a
+> direct service listing three minutes earlier. It rebuilt the service list inside its loop and got
+> nothing back. **The rewritten script asserts a canary service resolves before reporting anything,
+> and aborts if not.** A bad instrument produces confident wrong findings.
+
+
 **What the app does:** tapping the red EMERGENCY bar (after a confirm) POSTs to the
 Beehive webhook `hcc-panic-button` with:
 ```json

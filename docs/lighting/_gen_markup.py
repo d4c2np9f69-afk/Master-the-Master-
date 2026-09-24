@@ -33,19 +33,23 @@ ROOMS=[
  rm(G+3.5,19,7.917,3,"LAUNDRY","","#ffffff",M,2.4,False,8),
  rm(G+11.42,19,3.58,3,"linen","","#ffffff",M,1.6,False,7),
  rm(G,22,16,13,"KITCHEN / DINING","","#ffffff",M,2.6,False,9.6),
- rm(G+15.4,0,8,6,"FOYER","","#ffffff",M,2.6,False,8.8),
- rm(G+28.4,0,11,10,"GUEST BED","","#ffffff",M,2.6,False,9.6),
- rm(G+16.2,11.2,23.2,18,"","",  "#ffffff",F,2.6,True,9),
+ rm(G+15.2,0,7.4,6,"FOYER","","#ffffff",M,2.6,False,8.8),
+ rm(G+22.6,0,11,10,"GUEST BED","","#ffffff",M,2.6,False,9.6),
+ rm(G+15.4,10,18,4,"","","#ffffff",M,2.6,False,9),
+ rm(G+33.4,10,6,8.5,"GUEST BATH","","#ffffff",M,2.4,False,8.2),
+ rm(G+23.4,14.4,10,13,"OFFICE / BED 3","","#ffffff",M,2.6,False,9.0),
+ rm(G+16.0,14.4,7.4,14.85,"","","#ffffff",F,2.6,True,9),
 ]
-EASTNOTE=('<text x="%s" y="%s" font-size="10" font-weight="700" text-anchor="middle" fill="%s">EAST HALF - YOU PLACE THESE</text>'
- '<text x="%s" y="%s" font-size="8.6" text-anchor="middle" fill="%s">LIVING ROOM 14x17  |  OFFICE / BED 3 10x13</text>'
- '<text x="%s" y="%s" font-size="8.6" text-anchor="middle" fill="%s">GUEST BATH ~10x8%s  |  HALLWAY 18x4</text>'
- '<text x="%s" y="%s" font-size="7.8" text-anchor="middle" fill="%s">they do not fit the way I had them - see the note</text>')%(
- X(G+27.8),Y(17.4),F, X(G+27.8),Y(19.2),F, X(G+27.8),Y(20.7),F,"&#189;", X(G+27.8),Y(22.4),F)
-HALL=('<rect x="%s" y="%s" width="%s" height="%s" fill="#ffffff" stroke="%s" stroke-width="2.2" stroke-dasharray="6 4"/>'
- '<text x="%s" y="%s" font-size="8.4" font-weight="700" text-anchor="middle">HALLWAY</text>'
- '<text x="%s" y="%s" font-size="6.8" text-anchor="middle" fill="#6b7480">18&#215;4</text>')%(
- X(G+15.4),Y(11.2),round(18*PF,1),round(4*PF,1),F,X(G+24.4),Y(12.9),X(G+24.4),Y(14.1))
+HALLTXT=('<text x="%s" y="%s" font-size="9" font-weight="700" text-anchor="middle">HALLWAY</text>'
+ '<text x="%s" y="%s" font-size="7.4" text-anchor="middle" fill="%s">18x4 - ends AT the guest bath</text>')%(
+ X(G+24.4),Y(11.7),X(G+24.4),Y(13.0),M)
+LRTXT=('<text x="%s" y="%s" font-size="9" font-weight="700" text-anchor="middle" fill="%s">LIVING</text>'
+ '<text x="%s" y="%s" font-size="9" font-weight="700" text-anchor="middle" fill="%s">ROOM</text>'
+ '<text x="%s" y="%s" font-size="7.4" font-weight="700" text-anchor="middle" fill="%s">measures 14x17</text>'
+ '<text x="%s" y="%s" font-size="7.4" font-weight="700" text-anchor="middle" fill="%s">but only 8x15 is left</text>'
+ '<text x="%s" y="%s" font-size="7.4" font-weight="700" text-anchor="middle" fill="%s">- see the note</text>')%(
+ X(G+19.5),Y(19.5),F,X(G+19.5),Y(20.8),F,X(G+19.5),Y(22.4),F,X(G+19.5),Y(23.7),F,X(G+19.5),Y(25.0),F)
+EASTNOTE=HALLTXT+LRTXT
 
 def dim(x1,y1,x2,y2,t,c=M,off=-4,hz=True):
     o='<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="%s" stroke-width="1.8"/>'%(X(x1),Y(y1),X(x2),Y(y2),c)

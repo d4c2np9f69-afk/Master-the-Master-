@@ -10,9 +10,19 @@ already wired to trigger the siren.
 
 > ## 🔴 THIS LIST IS PARTLY STALE — READ BEFORE SPENDING A DOLLAR (checked 2026-09-19)
 >
+> 🔴🔴 **CORRECTION 2026-09-20 09:20 — THE "LQI 142" BELOW IS A GHOST READING. THE SIREN IS OFF
+> THE MESH.** `siren.301_alarm` has reported **NOTHING since the Zigbee2MQTT restart at
+> 2026-09-15 16:37:45 — 106 hours** — while eight sibling Zigbee devices reported within 0.7–3.5 h.
+> **`142` is the value Z2M retained at that restart, not a live measurement**, which is exactly why
+> the 09-16 check read it as healthy. Its true failure time is unknown and may be EARLIER than the
+> restart. ⚠️ **Do not cite "LQI 142" as proof the siren works.** Caught by
+> `scripts/sensor-liveness-test.js`, written the same night because no gate could see this class of
+> fault. Tracked as **OPEN_ITEMS #192**. The coordinator and Z2M itself are fine — this is the
+> device, not the radio.
+>
 > **Sections 1 and 2 below are already DONE. Buying them again is wasted money.** Verified
 > 2026-09-16: **12 Zigbee devices** are on the mesh reporting link quality and `siren.301_alarm`
-> is paired at **LQI 142**. The coordinator exists, Zigbee2MQTT is running, the radio is solved.
+> is paired at ~~**LQI 142**~~ *(ghost — see correction above)*. The coordinator exists, Zigbee2MQTT is running, the radio is solved.
 > The "don't buy ahead of the J45" gate in the line above refers to a stage that has passed.
 >
 > **What is actually left is section 3 (life-safety sensors), and only part of it** — see the
@@ -29,7 +39,7 @@ already wired to trigger the siren.
 ## 2) ~~The alarm OUTPUT~~ ✅ HARDWARE EXISTS (but judged too weak)
 | Item | Why | ~Price |
 |---|---|---|
-| ~~**Zigbee siren/strobe (indoor)**~~ | ✅ `siren.301_alarm` is paired and reachable at **LQI 142**. ⚠️ **Jeff judged the TS0224 too weak and reassigned it to the leak alarm** — he buys real sirens himself later. **Do not re-pitch a siren.** | ~~$30–40~~ **$0** |
+| ~~**Zigbee siren/strobe (indoor)**~~ | 🔴 **OFF THE MESH as of 2026-09-20 — silent 106 h, see the correction box above (#192).** The old text read *"paired and reachable at LQI 142"*; that was a retained value, not a live one. ⚠️ **Jeff judged the TS0224 too weak and reassigned it to the leak alarm** — he buys real sirens himself later. **Do not re-pitch a siren** — but be aware **the leak alarm currently has no working annunciator**, and `automation.hcc_panic_button_v2` targets this same dead entity as its only siren. | ~~$30–40~~ **$0** |
 | *(optional later)* outdoor siren/strobe | Exterior deterrent — **Jeff's call, not a recommendation** | ~$40 |
 
 ## 3) LIFE-SAFETY sensors — the "tons of safety" priority ⭐

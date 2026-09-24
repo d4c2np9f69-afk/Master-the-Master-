@@ -55,6 +55,10 @@ if ($m) {
         $_.Context.PostContext | ForEach-Object { "    $_" }
         "  " + ("-" * 70)
     }
+    if ($mTotal -gt $Max) {
+        $script:HCCTruncated = $true
+        Write-Host ("  ...{0} MORE HITS NOT SHOWN - you have seen {1}% of them." -f ($mTotal - $Max), [int](100 * $Max / $mTotal)) -ForegroundColor Red
+    }
 } else { Write-Host "  (none)" }
 
 Write-Host "`n=== PROJECT HISTORY (2026-05-20 onward, incl. the pre-transcript era) ===" -ForegroundColor Yellow
@@ -113,8 +117,33 @@ if (Test-Path $guides) {
             $_.Context.PostContext | ForEach-Object { "    $_" }
             "  " + ("-" * 70)
         }
-        if ($gTotal -gt $Max) { Write-Host ("  ...{0} more - narrow the pattern" -f ($gTotal - $Max)) }
+        if ($gTotal -gt $Max) { $script:HCCTruncated = $true; Write-Host ("  ...{0} more - narrow the pattern" -f ($gTotal - $Max)) }
     } else { Write-Host "  (none)" }
 } else {
     Write-Host "  (HCC-Archive not present - is iCloud synced?)"
+}
+
+# ---------------------------------------------------------------------------
+# TRUNCATION WARNING - added 2026-09-20, the same session it was earned.
+#
+# WHAT HAPPENED: a session ran this script, saw "60 hits (showing 8)", read those
+# 8 snippets and treated that as having read the record. It then reported a device
+# as MISSING when the archive said plainly it was "still on your bench" - in one of
+# the 52 hits it never saw. Jeff: "you didn't fully read the file."
+#
+# The CONVERSATION tier was the only one that printed a hit count with NO follow-up
+# hint, so it read like a complete answer. It never was.
+#
+# THE RULE THIS ENFORCES: a search is a POINTER TO FILES, not an answer. The read
+# gates already say "use the Read tool - grep does NOT count", and this script IS a
+# grep. Truncated output must never be the basis of a claim.
+# ---------------------------------------------------------------------------
+if ($script:HCCTruncated) {
+    Write-Host ""
+    Write-Host ("=" * 74) -ForegroundColor Red
+    Write-Host "  THIS OUTPUT IS A SAMPLE, NOT THE RECORD. Results were TRUNCATED." -ForegroundColor Red
+    Write-Host "  A search is a POINTER TO FILES. Do not make a claim from it." -ForegroundColor Red
+    Write-Host "  -> Re-run with -Full, narrow the pattern, or OPEN the files it named." -ForegroundColor Red
+    Write-Host "  Earned 2026-09-20: 8 of 60 hits were read; the answer was in the 52." -ForegroundColor DarkRed
+    Write-Host ("=" * 74) -ForegroundColor Red
 }

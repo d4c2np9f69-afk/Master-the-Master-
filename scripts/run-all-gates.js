@@ -27,7 +27,11 @@ const LIVE_GATES = new Set(['live-e2e-test.js']);
 // data. Dump one with the app open and logged in:
 //   fetch('/api/ha?path=/api/states',{headers:{Authorization:'Bearer '+localStorage.ha_token}})
 // then:  node scripts/run-all-gates.js --states=path\to\states.json
-const ARG_GATES = new Set(['doors-entity-test.js', 'garage-entity-test.js']);
+const ARG_GATES = new Set(['doors-entity-test.js', 'garage-entity-test.js',
+  // added 2026-09-20 — without the states file this one self-skips, and on its
+  // first real run it caught a SILENT siren and two SILENT repeaters that every
+  // other gate in this directory was blind to.
+  'sensor-liveness-test.js']);
 const statesArg = (process.argv.find((a) => a.startsWith('--states=')) || '').slice(9);
 
 // Some gates need HCC_HA_TOKEN and EXIT 0 WITH A "SKIPPED" MESSAGE without it.

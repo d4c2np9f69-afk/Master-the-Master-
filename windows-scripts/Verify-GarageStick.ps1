@@ -159,11 +159,27 @@ Write-Host "================================================================" -F
 if ($script:fail) { $c = 'Yellow' } else { $c = 'Green' }
 Write-Host ("  {0} PASS   {1} FAIL   {2} SKIP" -f $script:pass, $script:fail, $script:skip) -ForegroundColor $c
 Write-Host "================================================================" -ForegroundColor Cyan
-if ($script:fail -eq 0) {
-  Write-Host "  The stick is ready. Boot the HP with ESC -> F9 -> the USB device," -ForegroundColor Green
-  Write-Host "  pick an AUTO INSTALL entry, and walk away. It powers itself off." -ForegroundColor Green
-  Write-Host "  It comes back on the network with no passwords, both shares mounted," -ForegroundColor Green
-  Write-Host "  credential folders fenced, and the handoff watcher already running." -ForegroundColor Green
+# 2026-09-23: THIS SCRIPT IS NO LONGER ALLOWED TO SAY "READY".
+# It said exactly that at 29 PASS / 0 FAIL, one hour before the stick failed five boots in a row and
+# cost Jeff half a day. Every check it runs is STRUCTURAL - the YAML parses, the entries carry the
+# right flags, the files are LF. None of that is evidence an install can COMPLETE. A verifier
+# written from the same assumptions as the thing it checks can only ever confirm those assumptions
+# back to you. So the summary must state what it has never observed, out loud, every run, until a
+# real install has actually happened and left the marker below.
+$provenFile = Join-Path $stick 'GARAGE-SETUP\INSTALL-PROVEN.txt'
+$proven = Test-Path $provenFile
+if ($script:fail -eq 0 -and $proven) {
+  Write-Host ("  STRUCTURALLY SOUND, and an install has been observed: " + ((Get-Content $provenFile -Raw).Trim())) -ForegroundColor Green
+  Write-Host "  Boot: ESC -> F9 -> the USB device -> the default entry, then walk away." -ForegroundColor Green
+} elseif ($script:fail -eq 0) {
+  Write-Host "  STRUCTURALLY SOUND - but NEVER OBSERVED COMPLETING AN INSTALL." -ForegroundColor Yellow
+  Write-Host ""
+  Write-Host "  Every check above is about the SHAPE of the files, not whether this" -ForegroundColor Yellow
+  Write-Host "  configuration can finish on that machine. Do not report this as 'ready'." -ForegroundColor Yellow
+  Write-Host "  The honest sentence is: it looks right and has never been proven." -ForegroundColor Yellow
+  Write-Host ""
+  Write-Host "  When an install genuinely completes, record it so this stops nagging:" -ForegroundColor DarkGray
+  Write-Host ("    Set-Content '" + $provenFile + "' " + '"installed OK <date> - <what came up>"') -ForegroundColor DarkGray
 } else {
   Write-Host "  DO NOT BOOT IT YET - read the FAIL lines above." -ForegroundColor Yellow
 }

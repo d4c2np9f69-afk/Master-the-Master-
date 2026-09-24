@@ -104,8 +104,27 @@ The garage script had the identical unit, with **no `-i` interface and no `-4`**
 - **Lenovo → Acer** — the last of six legs. Key auth now works; the sshfs remote path must be
   **empty** (`jeffl@192.168.1.176:`) because sftp already lands in the profile. Blocked mid-fix by
   the safety classifier on `StrictHostKeyChecking=no`.
-- **Acer freezes** — LPM, firmware, thermal, GPU and the September updates are all eliminated.
-  Jeff's own observation (*"only when idle"*) drove closing every idle power path; watcher running.
+- ~~**Acer freezes**~~ ✅ **SOLVED — CONFIRMED 2026-09-20 19:38 BY POWERED-ON-HOUR CENSUS.**
+  **PRE-FIX: 6.19 powered-on hours in 45 days, 10 freezes — one every 0.62 h (37 minutes of USE).**
+  **POST-FIX: 35.85 powered-on hours in ONE unbroken session, ZERO freezes.** At the pre-fix rate that
+  window should have produced ~58 freezes. The fix landed **09-19 07:47–07:51**, 35 minutes after the
+  last freeze (09-19 07:12:57), so every hour of the clean run is post-fix.
+  🔑 **JEFF DIAGNOSED IT, TWICE.** (1) *"it never crashes when it's being used... only when idle"* — that
+  moved it off the global power settings (all already off) onto the **per-device "allow the computer to turn
+  off this device to save power"** checkbox, still enabled on the Wi-Fi, Ethernet, xHCI USB controller, MEI
+  and root hub. (2) 2026-09-20: *"before the fix I never used it enough to reboot it so the time between
+  crashes is way off."*
+  🔴 **THAT SECOND CORRECTION IS THE METHOD LESSON AND IT IS GENERAL:** a session compared crash dates on
+  the WALL CLOCK and reported *"3 freezes in 5 weeks, then 7 in 20 hours"* — and even used the quiet weeks as a
+  reason to doubt the fix. **The machine was powered on for about TWO HOURS in that entire five-week span.**
+  **Rate per calendar day is meaningless for a device that is mostly off. Divide by EXPOSURE (powered-on
+  hours), not by dates.** Boot/shutdown events (Kernel-General 12/13) give the real denominator.
+  ⚠️ **Two housekeeping gaps found the same evening:** `HCC-WatchAcer` last ran 09-19 07:37, exited
+  `1073807364`, and has a BLANK NextRunTime — **the "watcher running" claim above was false for ~36 h.**
+  And the crash-capture registry (CrashOnCtrlScroll / CrashDumpEnabled=2 / 8 GB dedicated dump) is set but
+  **NOT live** — those load at boot and the last boot (09-19 07:12:55) predates them being written (20:25).
+  🛑 **DO NOT REBOOT IT TO ARM THE CAPTURE.** That would break the clean run to instrument a fault the
+  evidence says is gone. Leave it running.
 - **Jeff's "nothing behind the router" request** — needs his explicit OK: turning off **SMB signing**
   and **guest network logon** is a real hardening removal (Microsoft added them in 24H2 against
   NTLM relay, which is an *inside-the-LAN* attack). Low risk behind his router, but his call.

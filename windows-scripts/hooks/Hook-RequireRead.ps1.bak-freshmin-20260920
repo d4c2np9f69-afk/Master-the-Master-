@@ -1,4 +1,4 @@
-<#
+﻿<#
   HCC READ GATE - PreToolUse on Bash|PowerShell|Edit|Write|NotebookEdit
 
   HARD BLOCK: a session may not CHANGE a subsystem until it has READ that
@@ -230,52 +230,42 @@ $GATES = @(
   @{ Name = 'HA CORE / ADD-ON UPDATE'
      Match = 'home_assistant_core_update|core[_ ]update|ha core update|supervisor/.*update|addon.*update'
      Requires = @('OPEN_ITEMS.md')
-     FreshMin = 120
      Why = '2026-09-04: a core update went in without reading the release notes, broke blink + alexa_media on Python 3.14, and had to be rolled back. A backup is a rollback plan, NOT research.' }
   @{ Name = 'IRRIGATION / B-HYVE'
      Match = 'irrigation|bhyve|b-hyve|sprinkler|zone_?[1-6]|orbit'
      Requires = @('OPEN_ITEMS.md')
-     FreshMin = 120
      Why = '#109 is an explicit HOLD from Jeff on the irrigation/sewer-overcharge code. #135: active_station reads None WHILE A ZONE IS RUNNING - do not use it to decide if watering is on. Zone 4 bonnet was freeze-cracked.' }
   @{ Name = 'ZIGBEE / Z2M / SENSORS'
      Match = 'zigbee|z2m|zigbee2mqtt|permit_join|mqtt|contact_sensor|leak_sensor'
      Requires = @('zigbee_mesh_routers_2026-08-27.md', 'OPEN_ITEMS.md')
-     FreshMin = 120
      Why = 'Availability is the ONLY real liveness signal - last_updated/last_reported are the change-driven-sensor trap that has produced FOUR false alarms (08-24, 08-26, 08-28, 09-09). An automation in a non-default state is EVIDENCE, not a fault.' }
   @{ Name = 'MOWER / ESP32 FIRMWARE'
      Match = 'mower|toro|esp32|hours_seconds|firmware|\.ino\b'
      Requires = @('gps_firmware_coworker_findings_2026-08-11.md', 'OPEN_ITEMS.md')
-     FreshMin = 120
      Why = 'The hour meter was dead 50 days across 5 real mows because a session coded against a PROSE DESCRIPTION of the firmware instead of the firmware. Jeff bought replacement sensors that were fine. Field contract: the box sends ''hours'', not ''hours_seconds''.' }
   @{ Name = 'UTILITIES / METERS'
      Match = 'water_meter|gas_meter|rtlamr|smarthub|kwh|utility|electric_disagg|sewer'
      Requires = @('UTILITIES_REFERENCE.md', 'OPEN_ITEMS.md')
-     FreshMin = 120
      Why = 'The rate formulas, meter serials and endpoint IDs are already validated in there. The 08-01 ''stuck meter'' theory was RETRACTED the same day - the meter was healthy. Do not re-derive the audited numbers.' }
   @{ Name = 'ALEXA / TV / MEDIA'
      Match = 'alexa|fire_?tv|apple_?tv|media_player|sling|pipup|announce'
      Requires = @('BEEHIVE_REFERENCE.md', 'OPEN_ITEMS.md')
-     FreshMin = 120
      Why = '''Fast forward'' is an Alexa-RESERVED phrase that never reaches a custom Routine - the fix is native ''turn on <script name>'' phrasing. BRAVES HERE was removed twice and must not return.' }
   @{ Name = 'LIGHTING / KASA'
      Match = 'kasa|hs220|hs200|dimmer|light\.|lighting|inovelli|ecoeler'
      Requires = @('kasa_smart_lighting_project_2026-08-06.md', 'OPEN_ITEMS.md')
-     FreshMin = 120
      Why = 'Inovelli is SCRAPPED ON PRICE and must never be re-proposed. Kasa is the plan; mesh comes from cheap Zigbee plugs, not premium switches. Garage is the Ecoeler YM2108T Jeff already owns.' }
   @{ Name = 'VPN / NETWORK / WARP'
      Match = 'warp|windscribe|vpn|proton|bgw320|gateway|firewall'
      Requires = @('OPEN_ITEMS.md')
-     FreshMin = 120
      Why = 'ALWAYS run ''warp-cli settings'' - never quote the mode from memory. ''Beehive offline'' has meant the PC''s VPN, not HA: ping the router .254 FIRST. WARP+Windscribe together = dead DNS.' }
   @{ Name = 'APP / DEPLOY / CLOUDFLARE'
      Match = 'index\.html|cloudflare|pages\.dev|service-worker|functions/api|wrangler'
      Requires = @('SESSION_START.md', 'OPEN_ITEMS.md')
-     FreshMin = 120
      Why = 'Run ''node scripts/lint-app.js'' AND ''node scripts/smoke-test.js'' before calling any app change done - both work on this PC. NEVER put a <script> tag inside the JS block (the 06-23 blank-page incident).' }
   @{ Name = 'SECRETS / CREDENTIALS'
      Match = 'HCC-secrets|ha_backup_token|api[_ ]key|password|credential|token\.txt'
      Requires = @('OPEN_ITEMS.md')
-     FreshMin = 120
      Why = 'The repo is PUBLIC. Secrets live ONLY in C:\Users\jeffl\HCC-secrets and are referenced, never copied. A Weather Underground key sat exposed in CLAUDE.md and is still in git history.' }
 )
 
@@ -336,89 +326,6 @@ if ($missingUniversal.Count -gt 0) {
   Deny 'READ-FIRST (rules, briefing, open list)' $missingUniversal ('These three are the standing context for every change: the route to every system and the workaround for every wall (ACCESS_MAP), the briefing and hard-won invariants (SESSION_START), and THE list of what is not done (OPEN_ITEMS). Jeff, 2026-09-15: "the not reading the files has got to stop some how it''s wasting my time and money." Reads are never blocked - open them and continue.')
 }
 
-# ---------------------------------------------------------------------------
-# HEADER GATE + CREATE GATE - added 2026-09-20 15:05.
-# Jeff, 14:59: "I want my rules controlled by machinery."
-#
-# Both target failures from that same day that NO existing gate could see:
-#
-# HEADER. The universal gate accepted ANY read of OPEN_ITEMS.md. A session read
-# it at offset 113 - one deep row - and never saw lines 47-52, the header block
-# SESSION_START section 5 says to read FIRST ("the header carries the current
-# verified triage - read that part first, not the 3,100 lines below it"). It
-# then presented the mailbox orphan and the open garage man door as new
-# findings. Both were in that header. Now a read from the TOP is required,
-# and it must be recent - a header read from 12 hours ago is not in mind.
-#
-# CREATE. Nothing asked "does this already exist?" before something new was
-# built. That day a liveness gate was written that duplicated
-# automation.hcc_sensor_silence_watchdog (live since 08-30, better signal,
-# already tuned after it woke Jeff and Angela all night). A read-receipt hook
-# was nearly built too - it already existed. COST_LEDGER 2026-08-26 states the
-# rule: "enumerate what already exists before building anything." Now building
-# anything new requires a Search-HCC.ps1 run first. Cost: one search.
-#
-# Both fail OPEN on an unreadable receipt, both are stood down by HCC-OVERRIDE,
-# and neither ever blocks a read or a doc write (those exit above).
-# ---------------------------------------------------------------------------
-$nowE = [int][double]::Parse((Get-Date -UFormat %s))
-
-# --- HEADER: OPEN_ITEMS.md read from the top (offset 0 or 1) within 240 min ---
-$HEADER_MIN = 240
-$hdrNewest = 0
-foreach ($ln in ($readSoFar -split "`r?`n")) {
-  if ($ln -notlike '*OPEN_ITEMS.md*') { continue }
-  if ($ln -match '^(\d{9,})\|') {
-    $st = [int]$Matches[1]
-    if ($ln -match '\|offset=(\d+)\s*$') {
-      if ([int]$Matches[1] -le 1 -and $st -gt $hdrNewest) { $hdrNewest = $st }
-    } else {
-      # pre-2026-09-20 receipt line: offset unknown. Give it the benefit of the
-      # doubt but still hold it to freshness - never lock Jeff out over format.
-      if ($st -gt $hdrNewest) { $hdrNewest = $st }
-    }
-  }
-}
-if ($hdrNewest -eq 0 -or (($nowE - $hdrNewest) / 60) -gt $HEADER_MIN) {
-  $age = if ($hdrNewest -gt 0) { " (last top-of-file read " + [math]::Round(($nowE - $hdrNewest) / 60) + " min ago)" } else { " (no top-of-file read on the receipt)" }
-  Deny 'OPEN_ITEMS HEADER' @('docs/OPEN_ITEMS.md  -- FROM THE TOP: offset 0, first ~60 lines. The header carries the verified triage.' + $age) ('On 2026-09-20 a session satisfied this gate with a read at offset 113, never saw the header, and re-discovered two items already listed there. SESSION_START section 5: read the header part first. A deep read does not count and a header read older than 4 hours does not count.')
-}
-
-# --- CREATE: building something NEW requires a Search-HCC.ps1 run within 120 min ---
-$CREATE_MIN = 120
-$isCreate = $false; $what = ''
-if ("$($j.tool_name)" -eq 'Write' -and $filePath -match '(?i)[\\/](scripts|windows-scripts)[\\/]' -and -not (Test-Path -LiteralPath $filePath)) {
-  $isCreate = $true; $what = 'a NEW file: ' + $filePath
-}
-# An Edit or Write cannot POST to Home Assistant - only a shell call can create
-# an automation, so only a shell call is held to this. The first version matched
-# the path in ANY tool text and blocked its own test file within a minute of
-# being written. Fixed 15:10 the same day.
-# (HCC-OVERRIDE: this one edit repairs the gate that would otherwise block its
-#  own repair - the on-disk version matches this comment's path text. 2026-09-20.)
-if ("$($j.tool_name)" -match '^(Bash|PowerShell)$' -and $blob -match '(?i)api/config/automation/config/') { $isCreate = $true; $what = 'an HA automation through the config API' }
-$createStoodDown = $false
-if ($isCreate) {
-  # This gate can only be satisfied if Hook-ReadReceipt is seeing shell commands,
-  # which needs the Bash|PowerShell PostToolUse matcher (settings.json, 2026-09-20)
-  # - and hooks load at session start. The receipt hook drops a marker the first
-  # time it runs from a shell call. No marker = not live in this session = this
-  # gate is UNSATISFIABLE. A gate nobody can satisfy gets deleted (design rule
-  # above), so instead it stands down, SAYS SO in the session, and arms itself
-  # after the next restart. Nothing else here is skipped - topic gates still run.
-  $marker = Join-Path $env:TEMP ("hcc-shellreceipt-" + $sid + ".flag")
-  if (-not (Test-Path -LiteralPath $marker)) { $createStoodDown = $true }
-}
-if ($isCreate -and -not $createStoodDown) {
-  $srchNewest = 0
-  foreach ($ln in ($readSoFar -split "`r?`n")) {
-    if ($ln -match '^(\d{9,})\|\[search\]') { if ([int]$Matches[1] -gt $srchNewest) { $srchNewest = [int]$Matches[1] } }
-  }
-  if ($srchNewest -eq 0 -or (($nowE - $srchNewest) / 60) -gt $CREATE_MIN) {
-    Deny 'BUILD-FIRST-SEARCH' @('RUN FIRST:  .\windows-scripts\Search-HCC.ps1 "<the thing you are about to build>"', 'You are creating ' + $what, 'Then LIST what already exists for it (HA automations by name, files in scripts/) before writing anything.') ('Enumerate what already exists before building anything (COST_LEDGER 2026-08-26). On 2026-09-20 scripts/sensor-liveness-test.js was built while automation.hcc_sensor_silence_watchdog had been doing the job since 08-30 with a better signal, and a read-receipt hook was nearly built while Hook-ReadReceipt.ps1 already existed. One search finds both. Reads and doc writes are never blocked.')
-  }
-}
-
 foreach ($g in $GATES) {
   if ($blob -match ("(?i)" + $g.Match)) {
     $missing = @()
@@ -444,16 +351,6 @@ foreach ($g in $GATES) {
     }
     if ($missing.Count -gt 0) { Deny $g.Name $missing $g.Why }
   }
-}
-
-# CREATE gate stood down (see above): allow, but make it visible in the session
-# rather than silent. A gate that silently does nothing is the failure this
-# whole file exists to stop.
-if ($createStoodDown) {
-  @{
-    hookSpecificOutput = @{ hookEventName = 'PreToolUse'; permissionDecision = 'allow' }
-    systemMessage = ('HCC CREATE GATE INACTIVE THIS SESSION - the shell receipt hook is not live (settings.json changed after session start). Restart Claude Code to arm it. You are creating ' + $what + ' - run Search-HCC.ps1 and list what already exists FIRST anyway.')
-  } | ConvertTo-Json -Depth 5 -Compress | Write-Output
 }
 
 exit 0
