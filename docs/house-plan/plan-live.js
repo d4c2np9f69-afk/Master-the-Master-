@@ -348,7 +348,16 @@
         const eng = st('binary_sensor.gle_350_engine_state'); const lit = eng && eng.state === 'on';
         [-1, 1].forEach(sx => mk('ellipse', { cx: sx * (w / 2 - 14), cy: -l / 2 + 8, rx: 10, ry: 5, fill: lit ? '#fff7cf' : '#6b7684', class: lit ? 'pulse-soft' : null }, g));
       }
-      text(cx, cy + l / 2 + 12, home ? 'GLE 350 · home' : 'GLE 350 · away', { 'font-size': 7.5, fill: '#dfe7ef', 'paint-order': 'stroke', stroke: '#0b1420', 'stroke-width': 2.4 }, top);
+      // Jeff 12:14: "show its location". Away = straight-line miles from zone.home, from the car's own GPS.
+      let where = 'away';
+      const z = st('zone.home'), ea = e && e.attributes;
+      if (!home && z && ea && ea.latitude != null) {
+        const R = 3958.8, rad = v => v * Math.PI / 180, la1 = rad(z.attributes.latitude), la2 = rad(ea.latitude);
+        const dLa = la2 - la1, dLo = rad(ea.longitude - z.attributes.longitude);
+        const mi = 2 * R * Math.asin(Math.sqrt(Math.sin(dLa / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dLo / 2) ** 2));
+        where = (mi < 10 ? mi.toFixed(1) : Math.round(mi)) + ' mi away';
+      }
+      text(cx, cy + l / 2 + 12, home ? 'GLE 350 · home' : 'GLE 350 · ' + where,{ 'font-size': 7.5, fill: '#dfe7ef', 'paint-order': 'stroke', stroke: '#0b1420', 'stroke-width': 2.4 }, top);
     }
   }
 
