@@ -304,6 +304,7 @@
       el('circle', { r: 9.2, fill: c, stroke: '#fff', 'stroke-width': 1.4, class: 'dot' }, gd);
       T(0, 3.2, d.n, { size: d.n > 9 ? 8.2 : 8.8, weight: 700, fill: '#fff', family: 'var(--display)' }, gd);
       const title = el('title', {}, gd); title.textContent = `#${d.n} ${d.name}`;
+      if (window.hccLive) window.hccLive.decorate(gd, d);      // live status light (plan-live.js)
     });
   }
 
@@ -313,6 +314,15 @@
   function renderKey() {
     keyEl.innerHTML = '';
     const q = filter.trim().toLowerCase();
+    const liveLed = n => (window.hccLive ? window.hccLive.led(n) : '');
+    // Live view: anything amber or red is listed first, so a problem is never buried in a category.
+    const probs = window.hccLive && !q ? window.hccLive.problems().filter(n => state.devices[n] && !state.devices[n].removed) : [];
+    if (probs.length) {
+      const grp = document.createElement('div'); grp.className = 'grp attn';
+      grp.innerHTML = `<div class="grp-h"><span class="chip" style="background:#d7263d"></span>Needs attention<span class="cnt">${probs.length}</span></div>`;
+      probs.forEach(n => { const d = state.devices[n], c = catById[d.cat] || catById.OTH; const r = document.createElement('div'); r.className = 'row' + (state.selected === n ? ' sel' : ''); r.dataset.n = n; r.innerHTML = `<span class="n" style="background:${c.color}">${n}</span><span class="nm">${esc(d.name)}<span class="nt">${esc(window.hccLive.tip(n))}</span></span>${liveLed(n)}`; r.addEventListener('click', () => select(n, true)); grp.appendChild(r); });
+      keyEl.appendChild(grp);
+    }
     P.cats.forEach(c => {
       const items = Object.values(state.devices).filter(d => d.cat === c.id && !d.removed && (!q || d.name.toLowerCase().includes(q) || String(d.n) === q || (d.note || '').toLowerCase().includes(q) || (d.ip || '').toLowerCase().includes(q))).sort((a, b) => a.n - b.n);
       if (!items.length) return;
@@ -320,7 +330,7 @@
       grp.innerHTML = `<div class="grp-h"><span class="chip" style="background:${c.color}"></span>${c.name}<span class="cnt">${items.length}</span></div>`;
       items.forEach(d => {
         const r = document.createElement('div'); r.className = 'row' + (state.selected === d.n ? ' sel' : ''); r.dataset.n = d.n;
-        r.innerHTML = `<span class="n" style="background:${c.color}">${d.n}</span><span class="nm">${esc(d.name)}${d.note ? `<span class="nt">${esc(d.note)}</span>` : ''}${d.ip ? `<span class="ip">${esc(d.ip)}</span>` : ''}</span>`;
+        r.innerHTML = `<span class="n" style="background:${c.color}">${d.n}</span><span class="nm">${esc(d.name)}${d.note ? `<span class="nt">${esc(d.note)}</span>` : ''}${d.ip ? `<span class="ip">${esc(d.ip)}</span>` : ''}</span>${liveLed(d.n)}`;
         r.addEventListener('click', () => select(d.n, true));
         grp.appendChild(r);
       });
@@ -345,12 +355,13 @@
     const d = state.devices[n]; if (!d) return;
     if (center) panTo(d.x, d.y);
     showInspector(d);
+    if (window.hccPanel) window.hccPanel(true);     // the panel hides by default (2026-09-25); a tapped dot opens it
   }
   function showInspector(d) {
     const ins = document.getElementById('inspector'); ins.hidden = false;
     const c = catById[d.cat] || catById.OTH;
     if (!editing) {
-      ins.innerHTML = `<div class="ins-h"><span class="n" style="background:${c.color}">${d.n}</span><div><div class="ins-name">${esc(d.name)}</div><div class="ins-cat">${c.name}${d.ip ? ' · ' + esc(d.ip) : ''}</div></div></div>${d.note ? `<div class="ins-note">${esc(d.note)}</div>` : ''}<div class="ins-pos">at ${fmtPos(d)}</div>`;
+      ins.innerHTML = `<div class="ins-h"><span class="n" style="background:${c.color}">${d.n}</span><div><div class="ins-name">${esc(d.name)}</div><div class="ins-cat">${c.name}${d.ip ? ' · ' + esc(d.ip) : ''}</div></div></div>${window.hccLive ? window.hccLive.detail(d.n) : ''}${d.note ? `<div class="ins-note">${esc(d.note)}</div>` : ''}<div class="ins-pos">at ${fmtPos(d)}</div>`;
       return;
     }
     ins.innerHTML = `<div class="ins-h"><span class="n" style="background:${c.color}">${d.n}</span><div class="ins-name">Editing #${d.n}</div></div>
@@ -412,14 +423,31 @@
   /* ---------- pan / zoom ---------- */
   const view = { k: 1, tx: 0, ty: 0 };
   function applyView() { world.setAttribute('transform', `translate(${view.tx} ${view.ty}) scale(${view.k})`); }
-  function zoomAt(f, cx, cy) { const k2 = Math.min(6, Math.max(.5, view.k * f)); const r = k2 / view.k; view.tx = cx - (cx - view.tx) * r; view.ty = cy - (cy - view.ty) * r; view.k = k2; applyView(); }
+  function zoomAt(f, cx, cy) { userMoved = true; const k2 = Math.min(6, Math.max(.5, view.k * f)); const r = k2 / view.k; view.tx = cx - (cx - view.tx) * r; view.ty = cy - (cy - view.ty) * r; view.k = k2; applyView(); }
   function svgPoint(e) { const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); }
   function worldPoint(e) { const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; return pt.matrixTransform(world.getScreenCTM().inverse()); }
   function panTo(fx, fy) { const cx = VW * PF / 2, cy = VH * PF / 2; view.tx = cx - X(fx) * view.k; view.ty = cy - Y(fy) * view.k; applyView(); }
   svg.addEventListener('wheel', e => { e.preventDefault(); const p = svgPoint(e); zoomAt(e.deltaY < 0 ? 1.15 : 1 / 1.15, p.x, p.y); }, { passive: false });
   document.getElementById('z-in').onclick = () => zoomAt(1.25, VW * PF / 2, VH * PF / 2);
   document.getElementById('z-out').onclick = () => zoomAt(1 / 1.25, VW * PF / 2, VH * PF / 2);
-  document.getElementById('z-fit').onclick = () => { view.k = 1; view.tx = 0; view.ty = 0; applyView(); };
+  // FIT THE HOUSE (2026-09-25, Jeff: "the house doesn't get bigger and fill the page"). The viewBox
+  // holds the whole lot (driveway, yard, fire pit) at a fixed 67x54 ft shape, so on a wide screen the
+  // house sat in the middle with blank sides. This zooms the HOUSE (walls + back deck) to fill
+  // whatever shape the map area is, using the svg's real on-screen size.
+  const HOUSE = { x0: -0.5, x1: 55.5, y0: -1, y1: 42 };      // feet, same coords as plan-data.js
+  let userMoved = false;
+  function fitHouse() {
+    const r = svg.getBoundingClientRect(); if (!r.width || !r.height) return;
+    const W = VW * PF, Hh = VH * PF, s = Math.min(r.width / W, r.height / Hh);   // viewBox "meet" scale
+    const visW = r.width / s, visH = r.height / s;                                 // visible area in viewBox units
+    const bx0 = X(HOUSE.x0), bx1 = X(HOUSE.x1), by0 = Y(HOUSE.y0), by1 = Y(HOUSE.y1);
+    view.k = Math.min(6, Math.max(.5, 0.96 * Math.min(visW / (bx1 - bx0), visH / (by1 - by0))));
+    view.tx = W / 2 - view.k * (bx0 + bx1) / 2; view.ty = Hh / 2 - view.k * (by0 + by1) / 2;
+    applyView(); userMoved = false;
+  }
+  document.getElementById('z-fit').onclick = fitHouse;
+  window.addEventListener('resize', () => { if (!userMoved) fitHouse(); });
+  requestAnimationFrame(fitHouse);
 
   let drag = null;
   svg.addEventListener('pointerdown', e => {
@@ -430,7 +458,7 @@
   });
   svg.addEventListener('pointermove', e => {
     if (!drag) { hover(e); return; }
-    if (drag.kind === 'pan') { const p = svgPoint(e); view.tx = drag.tx + (p.x - drag.sx); view.ty = drag.ty + (p.y - drag.sy); applyView(); return; }
+    if (drag.kind === 'pan') { userMoved = true; const p = svgPoint(e); view.tx = drag.tx + (p.x - drag.sx); view.ty = drag.ty + (p.y - drag.sy); applyView(); return; }
     const p = worldPoint(e); drag.moved = true;
     if (drag.kind === 'dev') { const d = state.devices[drag.id]; d.x = +FX(p.x).toFixed(2); d.y = +FY(p.y).toFixed(2); drag.el.setAttribute('transform', `translate(${X(d.x)} ${Y(d.y)})`); }
     else { state.regs[drag.id] = [+FX(p.x).toFixed(2), +FY(p.y).toFixed(2)]; renderDuct(); }
@@ -445,7 +473,8 @@
     const dev = e.target.closest('.dev');
     if (!dev) { tip.hidden = true; return; }
     const d = state.devices[+dev.dataset.n]; const c = catById[d.cat] || catById.OTH;
-    tip.innerHTML = `<b>#${d.n}</b> ${esc(d.name)}<span>${c.name}${d.ip ? ' · ' + esc(d.ip) : ''}</span>`;
+    const lt = window.hccLive ? window.hccLive.tip(d.n) : '';
+    tip.innerHTML = `<b>#${d.n}</b> ${esc(d.name)}<span>${c.name}${d.ip ? ' · ' + esc(d.ip) : ''}</span>${lt ? `<span class="tip-live">${esc(lt)}</span>` : ''}`;
     tip.hidden = false; const r = svg.getBoundingClientRect(); tip.style.left = (e.clientX - r.left + 14) + 'px'; tip.style.top = (e.clientY - r.top + 14) + 'px';
   }
   svg.addEventListener('pointerleave', () => { tip.hidden = true; });
@@ -463,11 +492,18 @@
   editBtn.addEventListener('click', () => {
     if (!db) { status.textContent = 'Editing needs the shared database — open this page on claude.ai.'; return; }
     editing = !editing; document.body.classList.toggle('editing', editing); editBtn.textContent = editing ? 'Done editing' : 'Edit';
+    if (editing && window.hccPanel) window.hccPanel(true);   // the edit status + inspector live in the panel
     renderDevices(); renderDuct(); if (state.selected) showInspector(state.devices[state.selected]);
     status.textContent = editing ? 'Drag any dot or register. Click a dot to edit its details.' : 'Changes saved.';
   });
   document.getElementById('add').addEventListener('click', () => {
-    if (!editing) return;
+    // 2026-09-25: this used to `return` silently when not editing - Jeff tapped Add and nothing
+    // happened. Now Add turns editing on itself (or says why it can't).
+    if (!editing) {
+      if (!db) { status.textContent = 'Adding a device needs the shared database - open this page on claude.ai.'; return; }
+      if (canWrite === false) { status.textContent = 'You have view-only access, so you cannot add devices.'; return; }
+      editBtn.click();
+    }
     const n = Math.max(...Object.keys(state.devices).map(Number)) + 1;
     const c = { x: FX((VW * PF / 2 - view.tx) / view.k), y: FY((VH * PF / 2 - view.ty) / view.k) };
     const d = { n, name: 'New device', cat: 'OTH', x: +c.x.toFixed(1), y: +c.y.toFixed(1), note: '', ip: '', removed: false };
@@ -509,5 +545,11 @@
 
   /* ---------- first paint ---------- */
   renderDevices(); renderCans(); renderDuct(); renderKey(); renderLog([]); applyView();
+  // plan-live.js repaints the status lights through this after every poll. Editing is left alone
+  // (a repaint mid-drag would drop the dot).
+  window.hccPlan = {
+    rerender() { if (drag) return; renderDevices(); renderKey(); if (state.selected && !editing && state.devices[state.selected]) showInspector(state.devices[state.selected]); },
+    select(n) { if (state.devices[n]) select(n, true); },
+  };
   initDb();
 })();

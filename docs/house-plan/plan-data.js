@@ -104,7 +104,9 @@ window.PLAN = (function () {
     { kind: 'table', rect: [H(11.3), 23.2, 3.8, 3.6], label: 'dining', round: true },
     { kind: 'tv', rect: [H(28.6), 16.6, 0.6, 4.0], label: 'TV' },
     { kind: 'fan', at: [H(22.2), 22.4] },
-    { kind: 'rect', rect: [H(30.4), 25.4, 5.0, 2.4], label: 'desk · 4 monitors' },
+    // Jeff 2026-09-25: "it's in the office not the closet" - was drawn from H(30.4), 0.5 ft inside the
+    // office's west closet (fclo, H(29.42)..H(30.92)). Now starts just clear of it. Label was "4 monitors".
+    { kind: 'rect', rect: [H(31.4), 25.4, 5.0, 2.4], label: 'Angela’s desk · 2 computers · 3 monitors' },
     { kind: 'rect', rect: [H(36.8), 19.0, 2.4, 5.5], label: 'desk' },
     { kind: 'fan', at: [H(34.4), 21.6] },
     { kind: 'bench', rect: [0.9, 32.0, 10.0, 2.0], label: 'workbench' },
@@ -233,6 +235,10 @@ window.PLAN = (function () {
     D(76, 'Irrigation shut-off (crawl space, right of the door)', 'IRR', H(38.0), 30.7),
     D(77, 'East-end house lights GFCI (crawl space)', 'OTH', H(39.4), 30.7),
     D(78, 'Deck TV + Roku', 'MED', H(27.5), 30.9),
+    // 79 was added by Jeff on the plan 25 Sep (artifact db); written in here too so the HCC app copy,
+    // which has no db, shows it. 80 = the mower, Jeff 25 Sep: "You can add the mower to the garage".
+    D(79, 'Grandfather clock + W200 speaker', 'MED', 43.5, 27, 'Westminster chimes every 15 min (quiet 10:01 PM-6 AM), 6 AM weather, 10 PM forecast + moon, spoken warnings. HA is the clock; the Beast plays it over Bluetooth.'),
+    D(80, 'Toro TimeMaster mower + sensor box', 'OTH', 7.2, 26.3, 'ESP32 box on the mower reports every 5 min while parked; silent while mowing'),
   ];
 
   // recessed cans, grouped to their dimmer — counts from the lighting plan: bedroom 9, kitchen/dining 9, living 8, garage 8

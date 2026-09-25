@@ -1,4 +1,4 @@
-const CACHE_NAME = "hcc-v125";
+const CACHE_NAME = "hcc-v126";
 const CRITICAL_ASSETS = [
   "./",
   "./index.html",
@@ -45,6 +45,21 @@ self.addEventListener("fetch", event => {
   // API calls always go to network
   if (url.pathname.startsWith("/api/")) {
     event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // The house plan (/docs/house-plan/, opened from Guardian -> House map, 2026-09-25) is edited often.
+  // Its .js files would otherwise fall to the cache-first rule at the bottom and stay stale until the
+  // next CACHE_NAME bump. NETWORK-FIRST, cached copy only when offline.
+  if (url.pathname.startsWith("/docs/")) {
+    event.respondWith(
+      fetch(event.request, { cache: "no-cache" })
+        .then(resp => {
+          if (resp.ok) { const copy = resp.clone(); caches.open(CACHE_NAME).then(c => c.put(event.request, copy)); }
+          return resp;
+        })
+        .catch(() => caches.match(event.request))
+    );
     return;
   }
 

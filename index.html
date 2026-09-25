@@ -3599,6 +3599,12 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
         <button class="btn-full btn-gray" onclick="guardianTestAlerts()">&#128276; TEST ALERTS</button>
       </div>
 
+      <!-- HOUSE MAP, LIVE (2026-09-25, Jeff: "made the map live ... lights that show status").
+           The floor plan at /docs/house-plan/ reads this device's ha_token and paints a status
+           light on every device. Same-origin link, same tab: the plan has a "<- HCC app" button
+           to come back (an installed iOS PWA has no back button). -->
+      <a class="btn-full btn-gray" href="/docs/house-plan/" style="display:block;text-align:center;text-decoration:none;margin-top:8px;box-sizing:border-box">&#127968; HOUSE MAP &middot; LIVE DEVICE STATUS</a>
+
       <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadGuardian()">&#128260; Refresh</button>
       <div class="wx-note">Live from Beehive &middot; auto-refreshes every minute</div>
     </div>
