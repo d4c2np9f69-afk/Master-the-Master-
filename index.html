@@ -3894,6 +3894,11 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
       <div class="grd-actions">
         <button type="button" class="btn-full btn-gray" id="clockBtn" onclick="clockToggle('input_boolean.grandfather_clock')" disabled>Clock&hellip;</button>
         <button type="button" class="btn-full btn-gray" id="clockQBtn" onclick="clockToggle('input_boolean.grandfather_clock_quarter_chimes')" disabled>Quarter chimes&hellip;</button>
+        <button type="button" class="btn-full btn-gray" id="clockWBtn" onclick="clockToggle('input_boolean.grandfather_clock_morning_weather')" disabled>6 AM weather&hellip;</button>
+        <button type="button" class="btn-full btn-gray" data-clocksw="input_boolean.grandfather_clock_holidays" data-label="Holidays (6 AM)" onclick="clockToggle(this.getAttribute('data-clocksw'))" disabled>Holidays&hellip;</button>
+        <button type="button" class="btn-full btn-gray" data-clocksw="input_boolean.grandfather_clock_night_forecast" data-label="10 PM forecast + moon" onclick="clockToggle(this.getAttribute('data-clocksw'))" disabled>10 PM forecast&hellip;</button>
+        <button type="button" class="btn-full btn-gray" data-clocksw="input_boolean.grandfather_clock_speak_warnings" data-label="Spoken warnings" onclick="clockToggle(this.getAttribute('data-clocksw'))" disabled>Warnings&hellip;</button>
+        <button type="button" class="btn-full btn-gray" data-clocksw="input_boolean.grandfather_clock_angela_arriving" data-label="Angela 15 min out" onclick="clockToggle(this.getAttribute('data-clocksw'))" disabled>Angela&hellip;</button>
       </div>
       <div style="font-size:10px;font-weight:700;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;margin:10px 0 6px">Test a chime</div>
       <div class="grd-actions">
@@ -3901,6 +3906,8 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
         <button type="button" class="btn-full btn-gray" onclick="clockTest('half')">&#128276; :30</button>
         <button type="button" class="btn-full btn-gray" onclick="clockTest('threequarter')">&#128276; :45</button>
         <button type="button" class="btn-full btn-gray" onclick="clockTest('hour')">&#128368;&#65039; Hour</button>
+        <button type="button" class="btn-full btn-gray" onclick="clockWeatherTest()">&#128483;&#65039; Weather</button>
+        <button type="button" class="btn-full btn-gray" onclick="clockWeatherTest(CLOCK_NIGHT_AUTO)">&#127769; 10 PM</button>
       </div>
       <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadClock()">&#128260; Refresh</button>
       <div class="wx-note" id="clockNote">Silent 10:01 PM &ndash; 6 AM (10 PM still strikes) &bull; plays on the Bluetooth speaker by the clock, never the TV</div>
@@ -12199,7 +12206,24 @@ function loadVacuum(){
 // ── GRANDFATHER CLOCK (Guardian) — 2026-09-24 ─────────────────────────────
 // Reads the two switches + the automation's last_triggered (it only updates when a chime
 // actually fires — conditions passed — so it is a true "last chime" time).
-var CLOCK_IDS = ['input_boolean.grandfather_clock', 'input_boolean.grandfather_clock_quarter_chimes', 'automation.hcc_grandfather_clock'];
+var CLOCK_IDS = ['input_boolean.grandfather_clock', 'input_boolean.grandfather_clock_quarter_chimes', 'automation.hcc_grandfather_clock',
+                 'input_boolean.grandfather_clock_morning_weather'];
+// 6 AM weather (Jeff 2026-09-24 23:26): Jenny reads today's forecast after the 6 o'clock strikes.
+var CLOCK_WEATHER_AUTO = 'automation.hcc_grandfather_clock_6_am_weather_spoken_after_the_chime';
+// 10 PM overnight forecast + moon, holidays, spoken NWS/lightning warnings, Angela 15 min out
+// (Jeff 2026-09-24 23:35-23:44). Each has its own switch; rendered generically from data-clocksw.
+var CLOCK_NIGHT_AUTO = 'automation.hcc_grandfather_clock_10_pm_overnight_forecast_moon_spoken_after_the_chime';
+function clockRenderSwitches(){
+  var btns = document.querySelectorAll('[data-clocksw]');
+  Array.prototype.forEach.call(btns, function(b){
+    var id = b.getAttribute('data-clocksw'), label = b.getAttribute('data-label');
+    haFetch('/api/states/' + id).then(function(r){ return r.ok ? r.json() : null; }).then(function(s){
+      if (!s){ b.disabled = true; b.innerHTML = label + ' &mdash; not set up'; return; }
+      var on = s.state === 'on'; b.disabled = false; b.className = 'btn-full btn-gray';
+      b.innerHTML = (on ? '&#128277; ' : '&#128276; ') + label + (on ? ' OFF' : ' ON');
+    }).catch(function(){});
+  });
+}
 function loadClock(){
   var card = document.getElementById('clockCard'), banner = document.getElementById('clockBanner'), conn = document.getElementById('clockConn');
   if (!getHaToken()){ if (card) card.style.display = 'none'; return; }
@@ -12207,7 +12231,11 @@ function loadClock(){
     return haFetch('/api/states/' + id, { signal: AbortSignal.timeout(25000) })
       .then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; });
   })).then(function(s){
-    var clock = s[0], q = s[1], auto = s[2];
+    var clock = s[0], q = s[1], auto = s[2], wx = s[3];
+    clockRenderSwitches();
+    var wb = document.getElementById('clockWBtn');
+    if (wb && wx){ var wOn = wx.state === 'on'; wb.disabled = false; wb.className = 'btn-full btn-gray';
+            wb.innerHTML = wOn ? '&#128263; 6 AM weather OFF' : '&#127780;&#65039; 6 AM weather ON'; }
     if (!clock){ if (card) card.style.display = 'none'; return; }   // not set up in HA
     if (card) card.style.display = '';
     var on = clock.state === 'on', qOn = q && q.state === 'on';
@@ -12233,6 +12261,13 @@ function clockToggle(entity){
   haFetch('/api/services/input_boolean/toggle', { method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ entity_id: entity }) })
   .then(function(){ setTimeout(loadClock, 800); })
+  .catch(function(){ if (typeof toast === 'function') toast('⚠ Couldn’t reach Beehive'); });
+}
+// Weather test = run the real 6 AM automation now (skip its conditions): forecast -> sentence -> Jenny.
+function clockWeatherTest(auto){
+  haFetch('/api/services/automation/trigger', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ entity_id: auto || CLOCK_WEATHER_AUTO, skip_condition: true }) })
+  .then(function(r){ if (typeof toast === 'function') toast(r.ok ? '🗣️ Speaking in ~10 s — listen by the clock' : '⚠ Beehive refused the test'); })
   .catch(function(){ if (typeof toast === 'function') toast('⚠ Couldn’t reach Beehive'); });
 }
 // Test = the SAME event the automation fires, so a test proves HA -> Beast -> speaker end to end.
