@@ -353,7 +353,8 @@
     state.selected = n;
     document.querySelectorAll('#key .row').forEach(r => r.classList.toggle('sel', +r.dataset.n === n));
     document.querySelectorAll('#L-devices .dev').forEach(g => g.classList.toggle('sel', +g.dataset.n === n));
-    const row = keyEl.querySelector(`.row[data-n="${n}"]`); if (row) row.scrollIntoView({ block: 'nearest' });
+    if (window.hccPanel) window.hccPanel(true);   // open the drawer FIRST: scrolling a row inside the closed, off-screen drawer dragged the map sideways (25 Sep)
+    const row = keyEl.querySelector(`.row[data-n="${n}"]`); if (row) row.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     const d = state.devices[n]; if (!d) return;
     if (center) panTo(d.x, d.y);
     showInspector(d);

@@ -213,7 +213,7 @@
     svg.insertBefore(defs, svg.firstChild);
   }
   const TVS = [   // fixture rect [x,y,w,h] in feet, which way the screen faces, and the entity that tells us
-    { rect: [P_H(19.0), 3.6, 0.6, 4.2], face: -1, e: 'media_player.bedroom_apple_tv', name: 'Bedroom TV' },
+    { rect: [P_H(19.3), 2.8, 0.3, 5.7], face: -1, e: 'media_player.bedroom_apple_tv', name: 'Bedroom TV' },   // keep in step with plan-data.js fixtures
     { rect: [P_H(28.6), 16.6, 0.6, 4.0], face: -1, e: 'media_player.fire_tv_viewing_room', name: 'Living room TV' },
   ];
   function P_H(hx) { return 14.83 + hx; }

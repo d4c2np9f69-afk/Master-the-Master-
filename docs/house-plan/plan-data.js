@@ -71,7 +71,7 @@ window.PLAN = (function () {
   ];
 
   const windows = [
-    { seg: [H(10.9), 0, H(13.5), 0], label: 'arched window' },
+    { seg: [H(12.3), 0, H(15.6), 0], label: 'arched window' },   // Jeff's photos 25 Sep: just past the foot of the bed, the tall chest to its right
     { seg: [H(28.9), 0, H(31.5), 0], label: 'arched window' },
     { seg: [H(1.4), ED + KJ, H(3.6), ED + KJ], label: 'window' },
     { seg: [H(KB), 31.0, H(KB), 33.2], label: 'window' },
@@ -82,10 +82,16 @@ window.PLAN = (function () {
 
   // fixtures — line art from the photos
   const fixtures = [
-    { kind: 'bed', rect: [H(5.0), 3.0, 6.5, 5.0], head: 'w', label: 'bed' },
-    { kind: 'rect', rect: [H(17.3), 4.0, 2.0, 3.4], label: 'dresser' },
-    { kind: 'tv', rect: [H(19.0), 3.6, 0.6, 4.2], label: 'TV' },
-    { kind: 'rect', rect: [H(13.2), 0.3, 6.2, 2.6], label: 'network shelf' },
+    // MASTER BEDROOM re-drawn from Jeff's four photos, 25 Sep 2026 13:00: king bed centred on the west
+    // wall under the soffit with a nightstand + lamp each side; tall chest between the arched window and the
+    // NE corner; long 6-drawer dresser under a wide wall-mounted TV on the east wall; foyer door at that
+    // wall's south end.
+    { kind: 'bed', rect: [H(4.9), 2.3, 7.0, 6.4], head: 'w', label: 'king bed' },
+    { kind: 'rect', rect: [H(4.8), 0.2, 1.7, 1.9], label: 'nightstand' },
+    { kind: 'rect', rect: [H(4.8), 8.9, 1.7, 1.9], label: 'nightstand' },
+    { kind: 'rect', rect: [H(15.9), 0.2, 2.9, 1.8], label: 'tall chest' },
+    { kind: 'rect', rect: [H(17.9), 3.0, 1.6, 5.3], label: 'dresser', vertical: true },
+    { kind: 'tv', rect: [H(19.3), 2.8, 0.3, 5.7], label: 'TV' },
     { kind: 'fan', at: [H(12.2), 5.5] },
     { kind: 'bed', rect: [H(29.6), 3.4, 5.5, 4.6], head: 'e', label: 'bed' },
     { kind: 'tub', rect: [H(35.4), 3.7, 3.8, 2.4] },
@@ -243,7 +249,9 @@ window.PLAN = (function () {
 
   // recessed cans, grouped to their dimmer — counts from the lighting plan: bedroom 9, kitchen/dining 9, living 8, garage 8
   const cans = {
-    16: [[6.6, 2.6], [9.9, 2.6], [13.2, 2.6], [16.5, 2.6], [11.6, 5.5], [6.6, 8.4], [9.9, 8.4], [13.2, 8.4], [16.5, 8.4]].map(([a, b]) => [H(a), b]),
+    // bedroom cans from Jeff's photos 25 Sep: 3 in the soffit over the headboard, 2 in the TV-wall soffit,
+    // 2 on the window side and 2 on the doorway side of the vaulted ceiling
+    16: [[5.7, 2.6], [5.7, 5.5], [5.7, 8.4], [18.9, 4.2], [18.9, 9.2], [10.6, 2.8], [14.6, 2.8], [10.6, 8.2], [14.6, 8.2]].map(([a, b]) => [H(a), b]),
     17: [[2.6, 24.4], [6.6, 24.4], [10.6, 24.4], [14.4, 24.4], [2.6, 27.6], [10.6, 27.6], [14.4, 27.6], [2.6, 31.2], [5.8, 31.2]].map(([a, b]) => [H(a), b]),
     18: [[17.6, 17.4], [22.2, 17.4], [26.8, 17.4], [17.6, 22.2], [26.8, 22.2], [17.6, 27.0], [22.2, 27.0], [26.8, 27.0]].map(([a, b]) => [H(a), b]),
     19: [[2.2, 13.2], [6.2, 13.2], [2.2, 16.8], [6.6, 16.8]].map(([a, b]) => [H(a), b]),
@@ -269,7 +277,7 @@ window.PLAN = (function () {
       { id: 'office', room: 'Office', size: 6, status: 'existing', reg: [H(36.6), 28.4] },
       { id: 'gbed', room: 'Guest bedroom', size: 7, status: 'existing', reg: [H(27.2), 1.0] },
       { id: 'living', room: 'Living room', size: 7, status: 'new', was: 6, reg: [H(24.5), 28.3] },
-      { id: 'master', room: 'Master bedroom', size: 7, status: 'new', was: 6, reg: [H(15.6), 1.0] },
+      { id: 'master', room: 'Master bedroom', size: 7, status: 'new', was: 6, reg: [H(12.1), 0.8] },   // photo: floor register under the left side of the arched window
       { id: 'dining', room: 'Dining room', size: 7, status: 'new', was: 6, reg: [H(9.4), 28.6] },
       { id: 'mbath', room: 'Master bath', size: 6, status: 'existing', reg: [H(2.0), 15.4] },
       // Jeff 2026-09-25 09:10: "the garage vent is going the wrong way it will come out were the hot
