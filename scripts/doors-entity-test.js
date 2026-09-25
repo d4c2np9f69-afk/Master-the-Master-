@@ -32,7 +32,13 @@ check('garage MAN door IS included', doors.some(d=>d.entity_id==='binary_sensor.
 check('front door included', doors.some(d=>d.entity_id==='binary_sensor.front_door_contact'), true);
 check('back deck included', doors.some(d=>d.entity_id==='binary_sensor.back_deck_door_contact'), true);
 check('no ai_doorbell at all', doors.every(d=>d.entity_id.indexOf('ai_doorbell')<0), true);
-check('mailbox contact included (it is a contact, and the card is Doors & CONTACTS)', doors.some(d=>d.entity_id==='binary_sensor.mailbox_contact'), true);
-check('exactly 4 real contacts', doors.length, 4);
+// 2026-09-24, Jeff: "delete the mailbox ... when I get the mesh extender we can redo the mailbox."
+// The sensor is gone from Z2M (#196). These two checks RE-ARM THEMSELVES: the moment
+// binary_sensor.mailbox_contact exists again in the states file, it must be on the card and the
+// count goes back to 4. Until then, 3 contacts is the correct answer, not a failure.
+const mailboxInHA=states.some(s=>s.entity_id==='binary_sensor.mailbox_contact');
+if(!mailboxInHA) console.log('  NOTE  mailbox sensor not in HA (removed 2026-09-24, #196) - mailbox checks re-arm when it is re-paired');
+check('mailbox contact included iff it exists in HA (it is a contact, and the card is Doors & CONTACTS)', doors.some(d=>d.entity_id==='binary_sensor.mailbox_contact'), mailboxInHA);
+check('exactly '+(mailboxInHA?4:3)+' real contacts', doors.length, mailboxInHA?4:3);
 console.log('\n'+(fail?'*** FAILURES: '+fail+' ***':'ALL CHECKS PASSED')+'\n');
 process.exit(fail?1:0);

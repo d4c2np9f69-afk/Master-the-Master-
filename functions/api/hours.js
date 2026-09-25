@@ -500,6 +500,33 @@ export async function onRequestPost({ request, env }) {
   // Accumulate the yard map automatically, on every reading that carries GPS.
   // No button, no app open, no start/stop — it records from the box's first fix
   // to its last, which is the whole point.
+  // ONE-TIME CLEANUP, 2026-09-24. The parked-drift leak was closed on 08-12 (see the
+  // gate below) but the cells it had already painted were never removed: measured
+  // today, the busiest cells sat at the garage parking spot with up to 670 "visits"
+  // while a real mow paints each cell once. Measured before choosing the cutoff:
+  // every cell at 4+ visits (184 of them) lies within 10.6 m of the parking spot,
+  // while real mown grass (443 cells at 1 visit) has a median distance of 23 m. Only
+  // two mows are on record, so no real grass can reach 4. Runs once, on the box's
+  // next upload, and records what it removed under the flag key.
+  const COVERAGE_CLEANUP_FLAG = 'coverage_cleanup_2026_09_24';
+  const COVERAGE_DRIFT_VISITS = 4;
+  if (kv) {
+    try {
+      if (!(await kv.get(COVERAGE_CLEANUP_FLAG))) {
+        const covRaw = await kv.get(COVERAGE_KEY);
+        const cov = covRaw ? JSON.parse(covRaw) : {};
+        let removed = 0, kept = 0;
+        if (!Array.isArray(cov)) {
+          for (const k of Object.keys(cov)) {
+            if (cov[k] >= COVERAGE_DRIFT_VISITS) { delete cov[k]; removed++; } else kept++;
+          }
+          await kv.put(COVERAGE_KEY, JSON.stringify(cov));
+        }
+        await kv.put(COVERAGE_CLEANUP_FLAG, JSON.stringify({ at: new Date().toISOString(), removed, kept, threshold: COVERAGE_DRIFT_VISITS }));
+      }
+    } catch (_) {}
+  }
+
   if (kv) {
     try {
       const pausedRaw = await kv.get(COVERAGE_PAUSED_KEY);
@@ -643,19 +670,69 @@ export async function onRequestPost({ request, env }) {
       const track = Array.isArray(body.track) && body.track.length
         ? body.track
         : (prev && Array.isArray(prev.track) && prev.track.length ? prev.track : null);
-      hist.push({
-        date: new Date().toISOString(),
-        hours_end: hoursEnd,
-        rpm_peak: pick('rpm_peak'),
-        rpm_avg: pick('rpm_avg'),
-        dist_session_m: pick('dist_session_m'),
-        battery: pick('battery'),
-        esp_temp_f: pick('esp_temp_f'),
-        shock_events: pick('shock_events'),
-        // That mow's own GPS breadcrumb trail, so any individual past mow's path can
-        // be pulled back up later rather than only ever having the most recent one.
-        track: track,
-      });
+      const distTotal = pick('dist_total_m');
+      const last = hist.length ? hist[hist.length - 1] : null;
+      // 2026-09-24: the box's dist_session_m restarts whenever the engine restarts, so a
+      // gas/water stop made "This Mow" report only the last stretch (376 m of a 1,477 m
+      // mow). The lifetime odometer does not restart — the difference from the previous
+      // mow's odometer is the true distance for this mow.
+      const distSinceLast = (last && num(last.dist_total_m) !== null && distTotal !== null &&
+                             distTotal >= last.dist_total_m) ? +(distTotal - last.dist_total_m).toFixed(1) : null;
+      // Jeff, 2026-09-24: "I stopped ... to gas up and get some water, it should not have
+      // logged 2 mows." The firmware closes a mow on ANY engine stop. If this stretch
+      // started within MERGE_GAP_MIN of the previous mow ending, it is the same mow:
+      // fold it into that entry instead of adding a second one.
+      const MERGE_GAP_MIN = 20;
+      let merged = false;
+      if (last && hoursEnd !== null && num(last.hours_end) !== null && last.date) {
+        const runMin = Math.max(0, (hoursEnd - last.hours_end) * 60);
+        const gapMin = (Date.now() - Date.parse(last.date)) / 60000 - runMin;
+        if (isFinite(gapMin) && gapMin <= MERGE_GAP_MIN) {
+          const prevRun = num(last.hours_mow) !== null ? last.hours_mow * 60 : runMin;
+          const ra = pick('rpm_avg'), la = num(last.rpm_avg);
+          last.date = new Date().toISOString();
+          last.rpm_avg = (ra !== null && la !== null && prevRun + runMin > 0)
+            ? Math.round((la * prevRun + ra * runMin) / (prevRun + runMin)) : (ra !== null ? ra : la);
+          last.rpm_peak = Math.max(num(last.rpm_peak) || 0, pick('rpm_peak') || 0) || null;
+          last.hours_end = hoursEnd;
+          if (num(last.hours_mow) !== null) last.hours_mow = +(last.hours_mow + runMin / 60).toFixed(4);
+          if (distSinceLast !== null) last.dist_mow_m = +((num(last.dist_mow_m) || 0) + distSinceLast).toFixed(1);
+          last.dist_session_m = pick('dist_session_m');
+          last.dist_total_m = distTotal;
+          last.battery = pick('battery'); last.esp_temp_f = pick('esp_temp_f');
+          last.shock_events = pick('shock_events');
+          // The box only clears its track buffer after a successful upload, so if the
+          // first stretch's upload failed its points are already at the front of this one.
+          if (track) {
+            const lt = Array.isArray(last.track) ? last.track : [];
+            const same = lt.length && track.length && lt[0][0] === track[0][0] && lt[0][1] === track[0][1];
+            last.track = same ? track : lt.concat(track);
+          }
+          last.segments = (num(last.segments) || 1) + 1;
+          merged = true;
+        }
+      }
+      if (!merged) {
+        const hoursPrev = last ? num(last.hours_end) : null;
+        hist.push({
+          date: new Date().toISOString(),
+          hours_end: hoursEnd,
+          hours_mow: (hoursEnd !== null && hoursPrev !== null) ? +Math.max(0, hoursEnd - hoursPrev).toFixed(4) : null,
+          rpm_peak: pick('rpm_peak'),
+          rpm_avg: pick('rpm_avg'),
+          dist_session_m: pick('dist_session_m'),
+          dist_total_m: distTotal,
+          // No earlier odometer to diff against (first mow on record): the box's own
+          // per-stretch distance is exact for a single stretch.
+          dist_mow_m: distSinceLast !== null ? distSinceLast : pick('dist_session_m'),
+          battery: pick('battery'),
+          esp_temp_f: pick('esp_temp_f'),
+          shock_events: pick('shock_events'),
+          // That mow's own GPS breadcrumb trail, so any individual past mow's path can
+          // be pulled back up later rather than only ever having the most recent one.
+          track: track,
+        });
+      }
       await kv.put(MOW_HISTORY_KEY, JSON.stringify(hist.slice(-MOW_HISTORY_MAX)));
     } catch (_) {}
   }

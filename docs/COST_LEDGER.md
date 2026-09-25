@@ -4,6 +4,14 @@
 Full derivation: `MASTER-RECORD/CLOUD_SESSION/sections/20-research-vs-guessing.md`
 and `21-md-not-read.md` — 20 catalogued incidents with hashes.
 
+## 2026-09-24 13:12 — MY "MASKED" READ OF HCC_ACCESS.md PRINTED TWO PASSWORDS
+Searching for Jeff's Comcast password, I printed lines 95–112 of `HCC-secrets\HCC_ACCESS.md` through a
+regex mask that only caught `password: value` / long tokens. The file writes them as `password \`value\``
+in prose, so the **Wi-Fi password and the LUX password went into the transcript** (archived to the iCloud
+Master Record). Told Jeff at once. **Rule: never print ANY line of a secrets file, masked or not — print
+labels (the first table cell) or line numbers only.** Same class as 09-04 ("reasoning over a derived
+artifact"): trusting my own filter instead of not reading the source into the output at all.
+
 ## 2026-09-23 — I NEVER RESEARCHED IT. I GUESSED, GENERATED CODE ON THE GUESS, AND CALLED IT READY.
 
 **Cost: ~3.5 hours of Jeff's morning, five failed boots, six trips to the machine, nothing

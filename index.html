@@ -2424,7 +2424,10 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
     <!-- A/C RELAY — 2026-09-15. The LUX died in a power surge. Until the ecobee is installed,
          a SONOFF MINI-D (switch.ac_relay) closes the cooling call, run by the HA automation
          automation.hcc_ac_relay_thermostat off the master BEDROOM Echo Dot + an offset helper.
-         Read-only on purpose: a manual button here would fight the automation.
+         No raw relay button on purpose: it would fight the automation. 2026-09-24: the ONE button
+         here drives input_boolean.air_conditioner (the master switch, also "Alexa, turn off the
+         air conditioner"); automation.hcc_ac_master_switch turns the thermostat automation on/off
+         with it and opens the relay on OFF, so OFF stays off until someone turns it back on.
          The 71/73 band below is display text — keep it in step with the automation.
          OPEN_ITEMS #185. Remove this card (and set LUX_RETIRED false or delete the LUX card)
          when the ecobee goes in. -->
@@ -2440,6 +2443,7 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
         <li><span class="sk">Run time</span><span class="sv" id="acRuntime">--</span></li>
         <li><span class="sk">Sensor</span><span class="sv" id="acEcho">--</span></li>
       </ul>
+      <button type="button" id="acMasterBtn" class="btn-full btn-gray" onclick="acMasterToggle()" disabled>A/C switch&hellip;</button>
     </div>
 
     <!-- LUX THERMOSTAT (moved here from GUARDIAN 08-03, right under cameras)
@@ -3879,6 +3883,29 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
       <div class="wx-note">Live from Beehive</div>
     </div>
 
+    <!-- GRANDFATHER CLOCK — 2026-09-24. Jeff: "Can you put controls to run everything in the
+         guardian section." HA is the clock (automation.hcc_grandfather_clock, :00/:15/:30/:45,
+         quiet 22:01-06:00); the Beast is the amplifier (HCC-Scripts\chime_listener.py plays
+         event hcc_chime on the Bluetooth speaker ONLY, never the TV). Test buttons fire that
+         same event, so they prove the whole chain, not just this button. -->
+    <div class="card" id="clockCard" style="display:none">
+      <div class="card-title">&#128368;&#65039; Grandfather Clock <span id="clockConn" class="irr-conn"></span></div>
+      <div id="clockBanner" class="wx-banner wx-load">&#128260; Loading&hellip;</div>
+      <div class="grd-actions">
+        <button type="button" class="btn-full btn-gray" id="clockBtn" onclick="clockToggle('input_boolean.grandfather_clock')" disabled>Clock&hellip;</button>
+        <button type="button" class="btn-full btn-gray" id="clockQBtn" onclick="clockToggle('input_boolean.grandfather_clock_quarter_chimes')" disabled>Quarter chimes&hellip;</button>
+      </div>
+      <div style="font-size:10px;font-weight:700;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;margin:10px 0 6px">Test a chime</div>
+      <div class="grd-actions">
+        <button type="button" class="btn-full btn-gray" onclick="clockTest('quarter')">&#128276; :15</button>
+        <button type="button" class="btn-full btn-gray" onclick="clockTest('half')">&#128276; :30</button>
+        <button type="button" class="btn-full btn-gray" onclick="clockTest('threequarter')">&#128276; :45</button>
+        <button type="button" class="btn-full btn-gray" onclick="clockTest('hour')">&#128368;&#65039; Hour</button>
+      </div>
+      <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadClock()">&#128260; Refresh</button>
+      <div class="wx-note" id="clockNote">Silent 10:01 PM &ndash; 6 AM (10 PM still strikes) &bull; plays on the Bluetooth speaker by the clock, never the TV</div>
+    </div>
+
     <!-- Safety & Emergency (moved from HOME 07-14) -->
     <div class="sec-hdr" style="margin-top:16px">
       <span class="sec-hdr-icon">&#128737;&#65039;</span>
@@ -5123,6 +5150,30 @@ function renderHistory(){
   }).join('');
 }
 
+// 2026-09-24: a mow's real distance. The box's dist_session_m restarts whenever the
+// engine restarts, so a gas stop left "This Mow" showing only the last stretch (376 m
+// of 1,477 m). The server now stores dist_mow_m (odometer difference between mows);
+// older entries fall back to the length of the mow's own saved GPS track.
+function mowTrackLenM(track){
+  if(!Array.isArray(track)) return 0;
+  var m=0, R=6371000, rad=Math.PI/180;
+  for(var i=1;i<track.length;i++){
+    var a=track[i-1], b=track[i];
+    if(!a||!b||typeof a[0]!=='number'||typeof b[0]!=='number') continue;
+    var dLa=(b[0]-a[0])*rad, dLo=(b[1]-a[1])*rad;
+    var h=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(a[0]*rad)*Math.cos(b[0]*rad)*Math.sin(dLo/2)*Math.sin(dLo/2);
+    var d=2*R*Math.asin(Math.min(1,Math.sqrt(h)));
+    if(d<=100) m+=d;               // longer jumps are GPS glitches, same cap as the firmware
+  }
+  return m;
+}
+function mowDistM(entry){
+  if(!entry) return 0;
+  if(typeof entry.dist_mow_m==='number' && entry.dist_mow_m>0) return entry.dist_mow_m;
+  var s=(typeof entry.dist_session_m==='number' && entry.dist_session_m>0) ? entry.dist_session_m : 0;
+  return Math.max(s, mowTrackLenM(entry.track));
+}
+
 // MOW SENSOR HISTORY — auto-recorded server-side the moment each mow ends
 // (functions/api/hours.js). "Hrs This Mow" is a delta between consecutive
 // entries' cumulative hour-meter reading, computed here since the server only
@@ -5138,7 +5189,8 @@ function renderMowSensorHistory(history){
     var hrsThisMow=(prevEntry && typeof prevEntry.hours_end==='number' && typeof entry.hours_end==='number')
       ? Math.max(0, Math.round((entry.hours_end-prevEntry.hours_end)*100)/100) : null;
     var dt=entry.date ? new Date(entry.date).toLocaleDateString() : '—';
-    var distMi=(typeof entry.dist_session_m==='number' && entry.dist_session_m>0) ? (entry.dist_session_m/1609.344).toFixed(2)+' mi' : '—';
+    var dM=mowDistM(entry);
+    var distMi=dM>0 ? (dM/1609.344).toFixed(2)+' mi' : '—';
     return '<tr>'
       +'<td class="td-date">'+dt+'</td>'
       +'<td>'+(hrsThisMow!=null ? hrsThisMow.toFixed(1)+' hrs' : '—')+'</td>'
@@ -6788,7 +6840,8 @@ var AC_TPL = "{%- set i = states.sensor.my_weather_station_inside_temperature -%
   + " 'run_today': states('sensor.a_c_relay_a_c_runtime_today'),"
   + " 'run_24h': states('sensor.a_c_relay_a_c_runtime_24h'),"
   + " 'relay': r.state if r else 'missing', 'relay_changed': r.last_changed.isoformat() if r else none,"
-  + " 'auto': a.state if a else 'missing'} | tojson }}";
+  + " 'auto': a.state if a else 'missing',"
+  + " 'master': states('input_boolean.air_conditioner')} | tojson }}";
 
 function acClock(iso){
   try{ return new Date(iso).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}); }catch(e){ return ''; }
@@ -6821,9 +6874,23 @@ function acRender(d){
     set('acState', 'OFFLINE', 'var(--bad)');
   }
 
-  var auto = d && d.auto;
+  var auto = d && d.auto, master = d && d.master;
   if (auto === 'on') set('acAuto', 'Active', 'var(--ok)');
+  else if (master === 'off') set('acAuto', 'Held OFF by the A/C switch');   // chosen, not a fault
   else set('acAuto', auto === 'off' ? 'OFF &mdash; nothing is controlling the A/C' : 'missing', 'var(--bad)');
+
+  // The master switch button: ON = automatic (71 off / 73 on), OFF = stays off.
+  var mb = document.getElementById('acMasterBtn');
+  if (mb) {
+    if (master === 'on' || master === 'off') {
+      mb.disabled = false;
+      mb.className = 'btn-full ' + (master === 'on' ? 'btn-red' : 'btn-green');
+      mb.innerHTML = master === 'on' ? '&#10060; Turn A/C OFF (stays off)' : '&#10052;&#65039; Turn A/C ON (automatic 71&ndash;73&deg;)';
+      mb.setAttribute('data-master', master);
+    } else {
+      mb.disabled = true; mb.className = 'btn-full btn-gray'; mb.innerHTML = 'A/C switch unavailable';
+    }
+  }
 
   // Source row: this is the console's own reading, so there is no correction to show any more.
   set('acEcho', haveTemp
@@ -7016,6 +7083,18 @@ function stRender(d){
   if (ind == null && out == null) { b.className = 'wx-banner wx-no'; b.innerHTML = '&#9888;&#65039; Station not reporting'; }
   else { b.className = 'wx-banner wx-go';
          b.innerHTML = '&#128225; Live from your own console' + (d && d.indoor_reported ? ' &bull; ' + acAgo(d.indoor_reported) : ''); }
+}
+
+function acMasterToggle(){
+  var mb = document.getElementById('acMasterBtn'); if (!mb || mb.disabled) return;
+  var turnOn = mb.getAttribute('data-master') !== 'on';
+  mb.disabled = true; mb.innerHTML = turnOn ? 'Turning A/C on&hellip;' : 'Turning A/C off&hellip;';
+  haFetch('/api/services/input_boolean/' + (turnOn ? 'turn_on' : 'turn_off'),
+          {method:'POST', headers:{'Content-Type':'application/json'},
+           body: JSON.stringify({entity_id: 'input_boolean.air_conditioner'})})
+    .then(function(r){ if (!r.ok) throw new Error('ha ' + r.status); })
+    .catch(function(){ mb.innerHTML = '&#9888;&#65039; Could not reach Beehive &mdash; try again'; })
+    .then(function(){ setTimeout(loadAcRelay, 1500); });
 }
 
 function loadAcRelay(){
@@ -7823,7 +7902,7 @@ function splashLogin(){
         if(msg){msg.style.color='#22c55e';msg.textContent='Welcome home!';}
         setTimeout(function(){
           dismissSplash();
-          checkBeehive(false);loadCameras();loadHomeStatus();loadUtilities();loadGuardian();loadLights();loadGarage();loadMail();loadVacuum();loadCar();acctRefreshStatus();
+          checkBeehive(false);loadCameras();loadHomeStatus();loadUtilities();loadGuardian();loadLights();loadGarage();loadMail();loadVacuum();loadClock();loadCar();acctRefreshStatus();
         },600);
       } else {
         if(msg){msg.style.color='#ff6262';msg.textContent=res.data.error==='not_setup'?'Login not set up yet':'Wrong password';}
@@ -8084,7 +8163,11 @@ setInterval(loadAlerts, 5*60*1000);
         var distM = (typeof d.dist_total_m==='number') ? d.dist_total_m : 0;
         var distMi = distM>0 ? +(distM/1609.344).toFixed(2) : 0;
         setRow('sensorDist', (distMi>0) ? distMi.toFixed(2)+' mi' : '\u2014');
-        var dsM=(typeof d.dist_session_m==='number')?d.dist_session_m:0; var dsMi=dsM>0?+(dsM/1609.344).toFixed(2):0; setRow('sensorDistSession', dsMi>0?dsMi.toFixed(2)+' mi':'\u2014');
+        // "This Mow" = the last completed mow as the server recorded it (whole mow, gas
+        // stops included), not the box's per-stretch counter.
+        var lastMow=(Array.isArray(d.history)&&d.history.length)?d.history[d.history.length-1]:null;
+        var dsM=lastMow ? mowDistM(lastMow) : ((typeof d.dist_session_m==='number')?d.dist_session_m:0);
+        var dsMi=dsM>0?+(dsM/1609.344).toFixed(2):0; setRow('sensorDistSession', dsMi>0?dsMi.toFixed(2)+' mi':'\u2014');
         var sensorRuntimeHrs = (typeof d.hours === 'number' && d.hours>0) ? d.hours : 0;
         var liveSpeed = (typeof d.speed_mph === 'number' && d.speed_mph>0) ? d.speed_mph
                       : (typeof d.gps_speed_mph === 'number' && d.gps_speed_mph>0) ? d.gps_speed_mph
@@ -8177,7 +8260,11 @@ setInterval(loadAlerts, 5*60*1000);
         // doesn't re-download the whole map every time.
         if(typeof d.coverage_n==='number' && typeof syncYardCoverage==='function') syncYardCoverage(d.coverage_n);
         if(typeof d.tracking_paused==='boolean' && typeof _reflectPauseState==='function') _reflectPauseState(d.tracking_paused, d.paused_since);
-        var trackToShow = freshTrack || (typeof S!=='undefined' && S.sensorTrack.length>=2 ? S.sensorTrack : []);
+        // Red "latest mow" line: the last SAVED mow's full track. The live `track` field
+        // is emptied by the box after every delivery, so it held 2 points on 2026-09-24
+        // while the saved mow had 111.
+        var histTrack = (lastMow && Array.isArray(lastMow.track) && lastMow.track.length>=2) ? lastMow.track : null;
+        var trackToShow = histTrack || freshTrack || (typeof S!=='undefined' && S.sensorTrack.length>=2 ? S.sensorTrack : []);
         if(typeof drawYardMap==='function') drawYardMap(trackToShow);
         if(Array.isArray(d.history)){
           window._serverMowCount=d.history.length;
@@ -8810,6 +8897,17 @@ setInterval(loadAlerts, 5*60*1000);
         if(isFinite(q.x)&&isFinite(q.y)) pts.push(q);
       }
       if(pts.length>=2){
+        // Jeff's deck is 30" (0.76 m). Paint that true width under the centre line so a
+        // mow reads as mown ground, not a thread — only where the map has a real scale.
+        var o1=project(track[0][0],track[0][1]), o2=project(track[0][0]+1/111320,track[0][1]);
+        var pxPerM=Math.abs(o2.y-o1.y);
+        if(usedSatellite && isFinite(pxPerM) && pxPerM>0){
+          ctx.lineJoin='round'; ctx.lineCap='round';
+          ctx.lineWidth=Math.max(3,0.762*pxPerM); ctx.strokeStyle='rgba(204,0,0,0.35)';
+          ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
+          for(var k0=1;k0<pts.length;k0++) ctx.lineTo(pts[k0].x,pts[k0].y);
+          ctx.stroke();
+        }
         ctx.shadowColor='#cc0000'; ctx.shadowBlur=5;
         ctx.lineWidth=3; ctx.strokeStyle='#cc0000';
         ctx.lineJoin='round'; ctx.lineCap='round';
@@ -9178,7 +9276,7 @@ function hccSection(id, btn) {
     if (!window._beehiveChecked) { window._beehiveChecked = true; checkBeehive(false); }
     loadUtilities(); loadCameras(); loadHomeStatus(); loadThermostat(); loadStation();
   }
-  if (id === 'guardian') { loadGuardian(); loadLights(); loadGarage(); loadMail(); loadVacuum(); }
+  if (id === 'guardian') { loadGuardian(); loadLights(); loadGarage(); loadMail(); loadVacuum(); loadClock(); }
   if (id === 'car') { carSwitchVehicle(_activeVehicle); }
   if (id === 'yard') { mowerSync(false); }
   if (id === 'weather') {
@@ -10461,7 +10559,7 @@ function hccTick(){
   _hccLastTick = Date.now();
   mowerSync(false);
   loadThermostat(); loadStation();
-  if (getHaToken()) { checkBeehive(false); loadLights(); loadGarage(); loadMail(); loadVacuum(); loadCar(); }
+  if (getHaToken()) { checkBeehive(false); loadLights(); loadGarage(); loadMail(); loadVacuum(); loadClock(); loadCar(); }
 }
 setInterval(hccTick, HCC_TICK_MS);
 document.addEventListener('visibilitychange', function(){
@@ -10735,6 +10833,7 @@ function saveHaTokenInline() {
         loadGarage();
         loadMail();
         loadVacuum();
+        loadClock();
         checkBeehive(false);
       } else { throw new Error('unexpected_response'); }
     })
@@ -11736,6 +11835,13 @@ function loadLights(){
       if (s.entity_id.indexOf('light.') === 0) return true;
       if (s.entity_id.indexOf('switch.') !== 0) return false;
       if (lightIsIrrigation(s) || isVacuumSwitch(s)) return false; // sprinklers, vacuum settings
+      // 2026-09-24: the A/C relay is not a light — "ALL OFF" was silently killing the A/C, and a
+      // bare toggle here fights the thermostat automation. It is driven from the A/C card's switch.
+      if (s.entity_id === 'switch.ac_relay') return false;
+      // Same sweep: the garage-door relay (Matter MINI-D, reports device_class 'outlet') would be
+      // PULSED by "ALL ON"/"ALL OFF" — both move the door — and the siren's strobe is not a light.
+      // The garage has its own card (cover.garage_door); the siren belongs to the alarm work.
+      if (s.entity_id === 'switch.garage_garage_door_opener' || s.entity_id === 'switch.301_alarm_light') return false;
       // 2026-08-19: this card was showing 54 entities of which 9 were lights or plugs.
       // Everything else was a DEVICE CONFIG toggle that happened to be a switch.*, so
       // "ALL ON" would have re-enabled Kasa auto-firmware-update on all three dimmers
@@ -12090,6 +12196,55 @@ function loadVacuum(){
   });
 }
 
+// ── GRANDFATHER CLOCK (Guardian) — 2026-09-24 ─────────────────────────────
+// Reads the two switches + the automation's last_triggered (it only updates when a chime
+// actually fires — conditions passed — so it is a true "last chime" time).
+var CLOCK_IDS = ['input_boolean.grandfather_clock', 'input_boolean.grandfather_clock_quarter_chimes', 'automation.hcc_grandfather_clock'];
+function loadClock(){
+  var card = document.getElementById('clockCard'), banner = document.getElementById('clockBanner'), conn = document.getElementById('clockConn');
+  if (!getHaToken()){ if (card) card.style.display = 'none'; return; }
+  Promise.all(CLOCK_IDS.map(function(id){
+    return haFetch('/api/states/' + id, { signal: AbortSignal.timeout(25000) })
+      .then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; });
+  })).then(function(s){
+    var clock = s[0], q = s[1], auto = s[2];
+    if (!clock){ if (card) card.style.display = 'none'; return; }   // not set up in HA
+    if (card) card.style.display = '';
+    var on = clock.state === 'on', qOn = q && q.state === 'on';
+    var b = document.getElementById('clockBtn'), qb = document.getElementById('clockQBtn');
+    if (b){ b.disabled = false; b.className = 'btn-full ' + (on ? 'btn-red' : 'btn-green');
+            b.innerHTML = on ? '&#9208;&#65039; Turn clock OFF' : '&#9654;&#65039; Turn clock ON'; }
+    if (qb && q){ qb.disabled = false; qb.className = 'btn-full btn-gray';
+            qb.innerHTML = qOn ? '&#128277; Quarters OFF (:15/:45)' : '&#128276; Quarters ON (:15/:45)'; }
+    var last = auto && auto.attributes && auto.attributes.last_triggered;
+    var lastTxt = last ? ' &middot; last chime ' + new Date(last).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) : '';
+    if (banner){
+      banner.className = 'wx-banner ' + (on ? 'wx-go' : 'wx-load');
+      banner.innerHTML = (on ? '&#128368;&#65039; Chiming &mdash; ' + (qOn ? 'every quarter hour' : 'hour and half hour')
+                             : '&#128263; Clock is OFF') + lastTxt;
+    }
+    if (conn){ conn.textContent = '● LIVE'; conn.style.color = 'var(--ok)'; }
+  }).catch(function(){
+    if (banner){ banner.className = 'wx-banner wx-load'; banner.innerHTML = '&#128368;&#65039; Beehive unreachable &mdash; check your token on HOME'; }
+    if (conn){ conn.textContent = '● OFFLINE'; conn.style.color = 'var(--bad)'; }
+  });
+}
+function clockToggle(entity){
+  haFetch('/api/services/input_boolean/toggle', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ entity_id: entity }) })
+  .then(function(){ setTimeout(loadClock, 800); })
+  .catch(function(){ if (typeof toast === 'function') toast('⚠ Couldn’t reach Beehive'); });
+}
+// Test = the SAME event the automation fires, so a test proves HA -> Beast -> speaker end to end.
+// The hour test strikes the current hour. Tests play even when the clock is OFF (that is the point).
+function clockTest(kind){
+  var h = new Date().getHours() % 12 || 12;
+  var body = { kind: kind }; if (kind === 'hour') body.strikes = h;
+  haFetch('/api/events/hcc_chime', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
+  .then(function(r){ if (typeof toast === 'function') toast(r.ok ? '🔔 Sent to the Beast — listen by the clock' : '⚠ Beehive refused the test'); })
+  .catch(function(){ if (typeof toast === 'function') toast('⚠ Couldn’t reach Beehive'); });
+}
+
 // ── UTILITIES (Water / Gas / Electric) ───────────────────────────────────
 // The "Reading" tiles prefer the converted HA helper sensors (sensor.water_gallons,
 // already ÷10 → gal; sensor.gas_ccf, already ÷100 → ccf), falling back to auto-finding
@@ -12147,6 +12302,11 @@ function loadMail(){
       var recent= by['input_text.mail_recent_times'];
       var box   = by['binary_sensor.mailbox_contact'];
       var got   = by['input_boolean.mail_collected'];
+      // 2026-09-24, Jeff: "delete the mailbox ... when I get the mesh extender we can redo the
+      // mailbox." The sensor is gone from Z2M (#196), so the card hides instead of showing stale
+      // mail stats. It comes back BY ITSELF the moment binary_sensor.mailbox_contact is paired again
+      // (then also turn automation.hcc_mail_arrived_mailbox_door_opened + ..._evidence_capture back on).
+      if (!box){ if (card) card.style.display = 'none'; return; }
       if (!last){
         if (banner){ banner.style.display = ''; banner.className = 'wx-banner wx-no';
           banner.innerHTML = '&#128235; Mail tracking helpers not found in Beehive'; }

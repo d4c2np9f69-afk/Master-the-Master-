@@ -312,5 +312,54 @@ console.log('\n-- telemetry must survive a broken control channel --');
   check('reading still stored despite bad ctrl', j.hours === 5.525, `got ${j.hours}`);
 }
 
+// ---- 2026-09-24: Jeff stopped mid-mow for gas + water and the app showed TWO mows
+// and "This Mow 0.23 mi" (the last stretch only) for a 0.92 mi mow. ----------------
+console.log('\n-- one mow per gas stop (2026-09-24) --');
+const mowEnd = (over = {}) => ({ ...parked(), source: 'mow_end', mow_ended: true, ...over });
+const trk = (n, off = 0) => Array.from({ length: n }, (_, i) => [36.4768 + (i + off) * 0.00004, -86.6600 + (i + off) * 0.00004]);
+const hist = async (kv) => JSON.parse((await kv.get('hours_history')) || '[]');
+{
+  const kv = mockKV();
+  // stretch 1: 0.81 h, 1,101 m. Its upload made it (WiFi at the gas can).
+  await post(kv, mowEnd({ hours: 6.3833, dist_total_m: 7439, dist_session_m: 1101, rpm_peak: 3650, rpm_avg: 3560, track: trk(80) }));
+  // stretch 2 right after the gas stop: 0.27 h, 376 m.
+  await post(kv, mowEnd({ hours: 6.65, dist_total_m: 7815, dist_session_m: 376, rpm_peak: 3600, rpm_avg: 3540, track: trk(31, 80) }));
+  const h = await hist(kv);
+  check('a gas stop mid-mow records ONE mow, not two', h.length === 1, `got ${h.length} entries`);
+  check('merged mow keeps the final hour meter', h[0]?.hours_end === 6.65, JSON.stringify(h[0]?.hours_end));
+  check('merged mow distance = both stretches (1,101 + 376)', h[0]?.dist_mow_m === 1477, JSON.stringify(h[0]?.dist_mow_m));
+  check('merged mow keeps both stretches of track', h[0]?.track?.length === 111, `got ${h[0]?.track?.length}`);
+  check('merged mow keeps the higher RPM peak', h[0]?.rpm_peak === 3650, JSON.stringify(h[0]?.rpm_peak));
+}
+{
+  // The first stretch's upload FAILED (no WiFi in the yard), so its points are still at
+  // the front of the box's buffer on the second upload — must not be doubled.
+  const kv = mockKV();
+  await post(kv, mowEnd({ hours: 6.3833, dist_total_m: 7439, dist_session_m: 1101, track: trk(80) }));
+  await post(kv, mowEnd({ hours: 6.65, dist_total_m: 7815, dist_session_m: 376, track: trk(111) }));
+  const h = await hist(kv);
+  check('a re-sent buffer is not double-counted in the track', h[0]?.track?.length === 111, `got ${h[0]?.track?.length}`);
+}
+{
+  // A real separate mow days later must stay separate, and get its own odometer distance.
+  const kv = mockKV({ hours_history: JSON.stringify([{ date: '2026-09-20T20:00:00.000Z', hours_end: 5.575, dist_total_m: 6338, dist_mow_m: 900 }]) });
+  await post(kv, mowEnd({ hours: 6.65, dist_total_m: 7815, dist_session_m: 376, track: trk(20) }));
+  const h = await hist(kv);
+  check('a mow days later is a NEW entry', h.length === 2, `got ${h.length}`);
+  check('its distance comes from the odometer, not the last stretch', h[1]?.dist_mow_m === 1477, JSON.stringify(h[1]?.dist_mow_m));
+}
+
+console.log('\n-- one-time parked-drift cleanup (2026-09-24) --');
+{
+  const kv = mockKV({ yard_coverage: JSON.stringify({ '3647664,-8666015': 670, '3647665,-8666015': 5, '3647700,-8666100': 1, '3647701,-8666101': 2 }) });
+  await post(kv, parked());
+  const c = await cover(kv);
+  check('parking-spot drift cells (4+ visits) are removed', !c['3647664,-8666015'] && !c['3647665,-8666015'], JSON.stringify(c));
+  check('real grass (1-2 visits) is kept', c['3647700,-8666100'] === 1 && c['3647701,-8666101'] === 2, JSON.stringify(c));
+  await kv.put('yard_coverage', JSON.stringify({ ...c, '3647664,-8666015': 9 }));
+  await post(kv, parked());
+  check('cleanup runs only ONCE', (await cover(kv))['3647664,-8666015'] === 9, JSON.stringify(await cover(kv)));
+}
+
 console.log(`\n${pass} passed, ${fail} failed\n`);
 process.exit(fail ? 1 : 0);

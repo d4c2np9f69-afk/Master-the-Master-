@@ -77,7 +77,10 @@ check('man door counted as a Door', doors.some(d => d.entity_id === 'binary_sens
 check('no battery flag in Doors', doors.every(d => !/battery|_low/.test(d.entity_id)), true);
 check('no spare contact in Doors', doors.every(d => !/spare/.test(d.entity_id)), true);
 check('no ai_doorbell in Doors', doors.every(d => d.entity_id.indexOf('ai_doorbell') < 0), true);
-check('mailbox contact IS in Doors', doors.some(d => d.entity_id === 'binary_sensor.mailbox_contact'), true);
+// 2026-09-24: mailbox removed by Jeff until the mesh extender (#196). Re-arms itself when the
+// sensor is re-paired: present in HA => must be in Doors.
+const mailboxInHA = states.some(s => s.entity_id === 'binary_sensor.mailbox_contact');
+check('mailbox contact in Doors iff it exists in HA', doors.some(d => d.entity_id === 'binary_sensor.mailbox_contact'), mailboxInHA);
 check('Garage row is exactly 1 entity', gar.length, 1);
 check('Garage row is the cover', gar[0] && gar[0].entity_id, 'cover.garage_door');
 
