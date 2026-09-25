@@ -263,24 +263,28 @@ window.PLAN = (function () {
       { from: H(32.5), to: H(12.5), size: 14, status: 'existing' },
       { from: H(12.5), to: H(3.0), size: 12, status: 'existing', capped: true },
     ],
-    ret: { size: 16, status: 'new', turnX: H(27.6), grilleY: 11.0, option: 18 },
+    ret: { size: 18, status: 'new', turnX: H(27.6), grilleY: 11.0 },   // 18" = Jeff's call 09-23 (room to tap a master-bedroom return later)
     branches: [
       { id: 'gbath', room: 'Guest bath', size: 6, status: 'existing', reg: [H(36.4), 10.4] },
       { id: 'office', room: 'Office', size: 6, status: 'existing', reg: [H(36.6), 28.4] },
       { id: 'gbed', room: 'Guest bedroom', size: 7, status: 'existing', reg: [H(27.2), 1.0] },
-      { id: 'living', room: 'Living room', size: 8, status: 'new', was: 6, reg: [H(24.5), 28.3] },
-      { id: 'master', room: 'Master bedroom', size: 8, status: 'new', was: 6, reg: [H(15.6), 1.0] },
-      { id: 'dining', room: 'Dining room', size: 8, status: 'new', was: 6, reg: [H(9.4), 28.6] },
+      { id: 'living', room: 'Living room', size: 7, status: 'new', was: 6, reg: [H(24.5), 28.3] },
+      { id: 'master', room: 'Master bedroom', size: 7, status: 'new', was: 6, reg: [H(15.6), 1.0] },
+      { id: 'dining', room: 'Dining room', size: 7, status: 'new', was: 6, reg: [H(9.4), 28.6] },
       { id: 'mbath', room: 'Master bath', size: 6, status: 'existing', reg: [H(2.0), 15.4] },
-      { id: 'garage', room: 'Garage', size: 7, status: 'new', reg: [13.5, 11.3], side: true, tapX: H(4.6), viaY: 11.3, note: 'saddle tap on the SIDE of the 12" trunk · through the brick · up the garage wall · damper at the register' },
+      // Jeff 2026-09-25 09:10: "the garage vent is going the wrong way it will come out were the hot
+      // water heater is". Was drawn north to the garage FRONT (reg 13.5, 11.3). Now: saddle tap on
+      // the side of the 12" trunk, run SOUTH in the crawl space, west through the brick at the back of
+      // the garage, register on the wall beside the water heater (WH at 12.4, 30.6).
+      { id: 'garage', room: 'Garage', size: 7, status: 'new', reg: [13.5, 29.2], side: true, tapX: H(4.6), viaY: 29.2, note: 'saddle tap on the SIDE of the 12" trunk · south in the crawl space · through the brick by the water heater · up the garage wall · damper at the register' },
     ],
     wire: { from: [H(40.2), 12.6], to: [H(25.9), 11.6] },
     scope: [
       ['Unit connections', 'New square-to-round transitions on both supply and return at the package unit. Remove the existing twisted connections.'],
-      ['Return', 'New 16" insulated flex straight back from the unit, a sheet-metal 90 across the supply trunk, a second sheet-metal 90 into the return filter grille. 16" runs about 713 ft/min at 995 CFM (the Manual D flex maximum) — quote 18" (about 563 ft/min) as an option.'],
+      ['Return', 'New 18" insulated flex straight back from the unit, a sheet-metal 90 across the supply trunk, a second sheet-metal 90 into the return filter grille. 18" runs about 563 ft/min at 995 CFM (16" would be ~713, the Manual D flex maximum) — Jeff chose 18" on 23 Sep to leave room for a master-bedroom return later.'],
       ['Return filter grille', 'The existing 20 × 25 grille stays — 3.5 sq ft of face, about 287 ft/min at design airflow.'],
-      ['Upgrade 6" → 8"', 'Dining room, master bedroom, living room — each with a new saddle tap, balancing damper and boot.'],
-      ['New 7" garage run', 'Saddle tap on the side of the 12" supply trunk (not off the trunk end); core through the brick and seal; turn up and run up the garage wall to a boot and brown register; balancing damper at the register, inside the garage.'],
+      ['Upgrade 6" → 7"', 'Dining room, master bedroom, living room — each with a new saddle tap, balancing damper and boot. 7" not 8": the installer (John) set it on site, Jeff 23 Sep.'],
+      ['New 7" garage run', 'Saddle tap on the side of the 12" supply trunk (not off the trunk end); run SOUTH in the crawl space to the back of the garage; core through the brick beside the water heater and seal; turn up and run up the garage wall to a boot and brown register; balancing damper at the register, inside the garage.'],
       ['Existing to remain', 'Supply trunk 16" → 14" → 12" with reducers; master bath 6", guest bedroom 7", office 6", guest bath 6". Inspect, re-seal, re-strap. Replace a run only if physically damaged — not for damp insulation.'],
       ['All flex', 'Fully extended, no kinks, sags or compression; supported per manufacturer; every joint sealed with mastic or UL 181 tape. State the insulation R-value on the quote.'],
       ['Thermostat', 'New 18 AWG thermostat wire with C-wire from the unit to the thermostat; install the owner’s thermostat.'],

@@ -235,7 +235,8 @@
   }
   function branchGeom(b) {
     const reg = state.regs[b.id] || b.reg;
-    if (b.side) { const tapX = b.tapX, viaY = b.viaY; return { reg, path: [[tapX, duct.supplyY], [tapX, viaY], [reg[0], viaY]], len: Math.abs(viaY - duct.supplyY) + Math.abs(reg[0] - tapX), tap: [tapX, duct.supplyY] }; }
+    // viaY follows the register, so a side run dragged in edit mode keeps a connected path
+    if (b.side) { const tapX = b.tapX, viaY = reg[1]; return { reg, path: [[tapX, duct.supplyY], [tapX, viaY], [reg[0], viaY]], len: Math.abs(viaY - duct.supplyY) + Math.abs(reg[0] - tapX), tap: [tapX, duct.supplyY] }; }
     return { reg, path: [[reg[0], duct.supplyY], [reg[0], reg[1]]], len: Math.abs(reg[1] - duct.supplyY), tap: [reg[0], duct.supplyY] };
   }
   function renderDuct() {
@@ -248,7 +249,7 @@
     el('rect', { x: X(rx) - rt.size / 24 * PF, y: Y(duct.returnY) - rt.size / 24 * PF, width: rt.size / 12 * PF, height: rt.size / 12 * PF, fill: NEWF, stroke: 'none' }, g);
     T(X(rx) - 22, Y(duct.returnY) + 12, 'HP90', { size: 6.5, weight: 700, fill: NEW, family: 'var(--display)' }, g);
     T(X(rx) + 24, Y(rt.grilleY) + 2, 'HP90', { size: 6.5, weight: 700, fill: NEW, family: 'var(--display)' }, g);
-    T(X((u.x + rx) / 2), Y(duct.returnY) + 24, `${rt.size}" RETURN · NEW (${rt.option}" option)`, { size: 7, weight: 700, fill: NEW, family: 'var(--display)', ls: '.05em' }, g);
+    T(X((u.x + rx) / 2), Y(duct.returnY) + 24, `${rt.size}" RETURN · NEW` + (rt.option ? ` (${rt.option}" option)` : ''), { size: 7, weight: 700, fill: NEW, family: 'var(--display)', ls: '.05em' }, g);
     // trunk
     duct.trunk.forEach((s, i) => {
       hduct(g, s.from, s.to, duct.supplyY, s.size, s.status);
@@ -281,7 +282,7 @@
     const row = (cells, cls) => { const tr = document.createElement('tr'); if (cls) tr.className = cls; cells.forEach((c, i) => { const td = document.createElement('td'); td.innerHTML = c; if (i > 1) td.className = 'num'; tr.appendChild(td); }); tb.appendChild(tr); };
     duct.trunk.forEach(s => row([`Supply trunk`, `${s.size}"`, 'existing', Math.abs(s.to - s.from).toFixed(1), cap600(s.size)]));
     const rt = duct.ret; const rl = (duct.unit.x - rt.turnX) + (duct.returnY - rt.grilleY);
-    row([`Return to the 20 × 25 grille`, `${rt.size}" <span class="dim">(${rt.option}" opt.)</span>`, '<b class="new">NEW</b>', rl.toFixed(1), cap600(rt.size)]);
+    row([`Return to the 20 × 25 grille`, `${rt.size}"` + (rt.option ? ` <span class="dim">(${rt.option}" opt.)</span>` : ''), '<b class="new">NEW</b>', rl.toFixed(1), cap600(rt.size)]);
     let total = 0;
     duct.branches.forEach(b => { const gm = branchGeom(b); total += gm.len; row([b.room, `${b.size}"` + (b.was ? ` <span class="dim">was ${b.was}"</span>` : ''), b.status === 'new' ? '<b class="new">NEW</b>' : 'existing', gm.len.toFixed(1), cap600(b.size)], b.status === 'new' ? 'is-new' : ''); });
     row(['<b>All branches</b>', '', '', `<b>${total.toFixed(1)}</b>`, ''], 'total');

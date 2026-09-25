@@ -14,6 +14,15 @@ which rooms, the saddle taps, the return, the existing duct staying, the thermos
 the primary source who was standing in the house with the installer was.** Jeff is a primary
 source. A drawing is not.
 
+## 🔴 GARAGE RUN RE-ROUTED — Jeff, 2026-09-25 9:10 AM
+> *"the garage vent is going the wrong way it will come out were the hot water heater is"*
+
+The plan had it running north to the garage FRONT. It comes through the brick at the **BACK of the
+garage, beside the water heater**. Re-scaled off `docs/house-plan/plan-data.js`: tap → south in the
+crawl space 15.6 ft → west 5.9 ft = **21.5 ft + 8–9 ft up the wall ≈ 30 ft (was 16.2 + rise)**.
+**Four new runs straight-line ≈ 72.8 ft with a 9 ft rise; +25% slack ≈ 91 ft. 4 rolls (100 ft)
+still covers it, but the margin is now ~9 ft, not ~26.** The table below is the pre-reroute figure.
+
 ## THE CURRENT SPEC — four new runs, ALL 7"
 
 | Run | Size | Length (from the laser-measured plan) |
