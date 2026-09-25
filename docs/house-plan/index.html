@@ -129,6 +129,25 @@
   body.dash #L-devices .dev.sel{filter:none}
   body.dash .live{background:rgba(16,20,26,.92);border-color:#2b323b;color:#e8edf2} body.dash .live .ct{color:#c9d1da} body.dash .live b{color:#fff}
   body.dash .north,body.dash .scale{filter:invert(.9) hue-rotate(180deg)}
+  /* THE HOUSE, ALIVE (plan-live.js paintLife) */
+  #L-pools .pool{mix-blend-mode:screen}
+  .flicker{animation:flicker 2.3s infinite}
+  @keyframes flicker{0%,100%{opacity:1}12%{opacity:.72}20%{opacity:.95}37%{opacity:.8}52%{opacity:1}64%{opacity:.68}78%{opacity:.92}}
+  .tv-spill.flicker{animation-duration:3.1s}
+  .standby{animation:breathe 4s ease-in-out infinite}
+  .pulse-soft{animation:breathe 2.4s ease-in-out infinite}
+  .spray{transform-box:fill-box;transform-origin:center;animation:spray 1.8s ease-out infinite}
+  @keyframes spray{0%{transform:scale(.2);opacity:1}100%{transform:scale(1.6);opacity:0}}
+  .air{animation:air 1.1s linear infinite} .flow{animation:air 1.4s linear infinite}
+  @keyframes air{to{stroke-dashoffset:-24}}
+  .spin{animation:spin 1s linear infinite} .orbit{animation:spin 6s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .door-open{animation:breathe 1.6s ease-in-out infinite} .door-open.fast{animation-duration:.6s}
+  @media (prefers-reduced-motion:reduce){ .flicker,.standby,.pulse-soft,.spray,.air,.flow,.spin,.orbit,.door-open,.rain{animation:none!important} }
+  .rain{position:absolute;inset:0;pointer-events:none;z-index:3;opacity:.35;
+        background-image:repeating-linear-gradient(105deg,transparent 0 14px,rgba(170,205,255,.55) 14px 15px,transparent 15px 34px);
+        background-size:120px 120px;animation:rainfall .5s linear infinite}
+  @keyframes rainfall{to{background-position:-30px 120px}}
   #dash{display:none} body.live-on #dash{display:inline-block} #dash[aria-pressed="true"]{background:#1f2833;color:#ffd166;border-color:#1f2833}
   @media (max-width:600px){ .live{font-size:10.5px;gap:6px} .live .when{display:none} }
   @page{size:letter landscape;margin:.35in}
@@ -170,6 +189,7 @@
   <section class="stage">
     <svg id="plan" role="img" aria-label="Floor plan of the Loewen house with every numbered device and the ductwork"></svg>
     <div id="tip" hidden></div>
+    <div class="rain" id="rain" hidden></div>
     <div class="live idle" id="live" role="status" aria-live="polite"></div>
     <div class="north">N<br><svg width="18" height="26" viewBox="0 0 18 26"><path d="M9 1 L15 22 L9 17 L3 22 Z" fill="#1f2833"/></svg></div>
     <div class="scale"><i></i>5 FEET</div>

@@ -552,6 +552,8 @@
   window.hccPlan = {
     rerender() { if (drag) return; renderDevices(); renderKey(); if (state.selected && !editing && state.devices[state.selected]) showInspector(state.devices[state.selected]); },
     select(n) { if (state.devices[n]) select(n, true); },
+    // geometry for plan-live.js's "alive" layer (room light, TVs, doors, sprinklers, air flow)
+    X, Y, PF, P, devices: state.devices, branchGeom,
   };
   initDb();
 })();

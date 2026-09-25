@@ -22,7 +22,7 @@
    on 08-01 came from forgetting that). So a meter only goes amber after 6 quiet hours, red after
    24, and never red for merely reading unknown. */
 (function () {
-  const POLL_MS = 60000;
+  const POLL_MS = 20000;   // 20 s so the house feels live (TVs, lights, doors); still one /api/states call
 
   // Device number -> what to watch. e = the entities that must be reachable (any unavailable = DOWN).
   // bat = the Zigbee battery-low flag, pct = battery %, leak = the moisture flag, lqi = link quality
@@ -173,6 +173,183 @@
     live.res = {}; Object.keys(MAP).forEach(n => { live.res[n] = judge(+n); });
     paintBar();
     if (window.hccPlan) window.hccPlan.rerender();
+    try { paintLife(); } catch (e) { console.warn('life layer', e); }   // never let decoration break the status lights
+  }
+
+  /* ---------- THE HOUSE, ALIVE ----------
+     Jeff 09:40: "add more life to the map, show the tvs on off etc really make it look like it's
+     alive". Everything here is drawn from real HA state on every poll - nothing is simulated:
+       · room light: every can on a dimmer that is ON throws a warm pool, scaled by its brightness
+       · bed lamps glow; the garage fan spins; the hot-water pump's loop circulates
+       · TVs: screen lit + flickering when playing, steady when paused, faint when on, a red standby
+         dot when off - with the app, the title and a progress bar
+       · Echo rings glow cyan while playing
+       · doors: an open contact lights its doorway amber with how long it has been open;
+         the garage door shows OPEN / moving
+       · sprinklers spray when a zone runs; the A/C blows cold air down every duct when the relay runs
+       · Sharky circles the dock while it cleans; camera motion pulses at the camera
+       · weather at the mast (temperature, humidity, wind arrow), inside temperature at the bed,
+         rain falling across the whole map while it rains
+       · the Mercedes sits in the driveway when it is home
+     Two layers: #L-pools (light on the floors, under the cans) and #L-life (on top, no pointer
+     events). Dash mode dims the drawing but not these, which is what makes them glow. */
+  function layer(id, beforeId) {
+    let g = document.getElementById(id); if (g) return g;
+    const world = document.getElementById('world'); if (!world) return null;
+    g = document.createElementNS(NS, 'g'); g.id = id; g.setAttribute('pointer-events', 'none');
+    const before = beforeId && document.getElementById(beforeId);
+    if (before) world.insertBefore(g, before); else world.appendChild(g);
+    return g;
+  }
+  function lifeDefs() {
+    const svg = document.getElementById('plan'); if (!svg || document.getElementById('pool-warm')) return;
+    const defs = document.createElementNS(NS, 'defs');
+    defs.innerHTML =
+      '<radialGradient id="pool-warm"><stop offset="0" stop-color="#ffe2a0" stop-opacity=".95"/><stop offset=".35" stop-color="#ffc55c" stop-opacity=".45"/><stop offset="1" stop-color="#ffb13b" stop-opacity="0"/></radialGradient>' +
+      '<radialGradient id="pool-tv"><stop offset="0" stop-color="#bfe0ff" stop-opacity=".85"/><stop offset=".5" stop-color="#5aa7ff" stop-opacity=".3"/><stop offset="1" stop-color="#2a6fff" stop-opacity="0"/></radialGradient>' +
+      '<radialGradient id="pool-amber"><stop offset="0" stop-color="#ffc04d" stop-opacity=".9"/><stop offset="1" stop-color="#ff9500" stop-opacity="0"/></radialGradient>' +
+      '<radialGradient id="pool-cyan"><stop offset="0" stop-color="#9ff3ff" stop-opacity=".9"/><stop offset="1" stop-color="#22d3ee" stop-opacity="0"/></radialGradient>' +
+      '<filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.6"/></filter>';
+    svg.insertBefore(defs, svg.firstChild);
+  }
+  const TVS = [   // fixture rect [x,y,w,h] in feet, which way the screen faces, and the entity that tells us
+    { rect: [P_H(19.0), 3.6, 0.6, 4.2], face: -1, e: 'media_player.bedroom_apple_tv', name: 'Bedroom TV' },
+    { rect: [P_H(28.6), 16.6, 0.6, 4.0], face: -1, e: 'media_player.fire_tv_viewing_room', name: 'Living room TV' },
+  ];
+  function P_H(hx) { return 14.83 + hx; }
+  const CANS = { 16: 'light.bedroom_cans', 17: 'light.kitchen_dining_room_cans', 18: 'light.livingroom_cans', 19: 'switch.masterbath_cans' };
+  const DOORS = { front: 'binary_sensor.front_door_contact', deck: 'binary_sensor.back_deck_door_contact', man: 'binary_sensor.garage_man_door_contact' };
+  const ZONES = { 43: 'switch.z1_front_right', 44: 'switch.z2_front_left', 45: 'switch.z3_back_left', 46: 'switch.z4_back_right', 47: 'switch.z5_right_side_drive', 48: 'switch.garden' };
+  const CAMS = { 10: '301_front_doorbell', 11: '301_driveway', 12: 'front_right', 13: 'back_left', 14: '301_backyard', 15: 'garage' };
+  const ECHOS = { 54: 'media_player.living_room_echo_dot', 55: 'media_player.master_bedroom' };
+
+  function paintLife() {
+    const hp = window.hccPlan, S = live.states;
+    const pools = layer('L-pools', 'L-lighting'), top = layer('L-life', 'L-lamps');
+    if (!hp || !pools || !top) return;
+    pools.innerHTML = ''; top.innerHTML = '';
+    const rain = document.getElementById('rain');
+    if (!S) { if (rain) rain.hidden = true; return; }
+    lifeDefs();
+    const { X, Y, PF, P, devices } = hp;
+    const st = id => S[id], on = id => S[id] && S[id].state === 'on';
+    const dev = n => devices[n] && !devices[n].removed ? devices[n] : null;
+    const esc2 = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    // labels are sized for the whole-house view on Jeff's 1536-wide screen (at Fit the drawing is ~0.6x), so every size is scaled up 1.5x
+    const text = (x, y, s, o, parent) => { const a = Object.assign({ x, y, 'font-size': 7, 'text-anchor': 'middle', fill: '#fff', 'font-family': 'var(--body)', 'font-weight': 600 }, o || {}); a['font-size'] = +(a['font-size'] * 1.5).toFixed(1); if (a['stroke-width']) a['stroke-width'] = +(a['stroke-width'] * 1.4).toFixed(1); const t = mk('text', a, parent); t.textContent = s; return t; };
+    const mins = iso => Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60000));
+    const dur = m => m < 60 ? m + ' min' : (m / 60).toFixed(m < 600 ? 1 : 0) + ' h';
+
+    // 1. ROOM LIGHT — a warm pool under every can, brightness from the dimmer
+    Object.entries(CANS).forEach(([n, id]) => {
+      const e = st(id); if (!e || e.state !== 'on') return;
+      const b = e.attributes && e.attributes.brightness != null ? e.attributes.brightness / 255 : 1;
+      const k = 0.35 + 0.65 * b;
+      (P.cans[n] || []).forEach(c => {
+        mk('circle', { cx: X(c[0]), cy: Y(c[1]), r: (2.2 + 1.6 * b) * PF, fill: 'url(#pool-warm)', opacity: (0.75 * k).toFixed(2), class: 'pool' }, pools);
+        mk('circle', { cx: X(c[0]), cy: Y(c[1]), r: 3.6, fill: '#fff4d6', opacity: (0.6 + 0.4 * b).toFixed(2), class: 'can-lit' }, top);
+      });
+    });
+    // lamps on plugs
+    [[21, 'switch.bed_lamp_socket_1'], [22, 'switch.smart_socket_2_socket_1']].forEach(([n, id]) => {
+      const d = dev(n); if (!d || !on(id)) return;
+      mk('circle', { cx: X(d.x), cy: Y(d.y), r: 3.2 * PF, fill: 'url(#pool-warm)', opacity: .7, class: 'pool' }, pools);
+    });
+    // garage fan: a spinning fan beside its plug
+    { const d = dev(23); if (d && on('switch.mini_smart_socket11_2_socket_1')) { const g = mk('g', { transform: `translate(${X(d.x) + 24} ${Y(d.y)})` }, top); const r = mk('g', { class: 'spin' }, g); [0, 120, 240].forEach(a => mk('ellipse', { cx: 0, cy: -7, rx: 3, ry: 7, fill: '#cfe8ff', opacity: .9, transform: `rotate(${a})` }, r)); mk('circle', { r: 2.2, fill: '#fff' }, g); } }
+    // hot-water circulation pump: a loop that circulates while it runs
+    { const d = dev(24); if (d && on('switch.hot_water_heater_socket_1')) { mk('circle', { cx: X(d.x), cy: Y(d.y), r: 17, fill: 'none', stroke: '#ff7a59', 'stroke-width': 2.4, 'stroke-dasharray': '6 5', class: 'flow' }, top); text(X(d.x), Y(d.y) + 27, 'hot water circulating', { 'font-size': 6, fill: '#ffb199' }, top); } }
+
+    // 2. TVs
+    TVS.forEach(tv => {
+      const e = st(tv.e); const r = tv.rect;
+      const x = X(r[0]), y = Y(r[1]), w = r[2] * PF, h = r[3] * PF, cx = x + w / 2, cy = y + h / 2;
+      const s = e ? e.state : 'unavailable';
+      if (s === 'off' || s === 'standby' || s === 'unavailable' || s === 'unknown') {
+        mk('circle', { cx: cx, cy: y + h + 3, r: 1.8, fill: '#ff3347', class: 'standby' }, top);     // the little red standby light
+        return;
+      }
+      const playing = s === 'playing', paused = s === 'paused';
+      const glow = playing ? 1 : paused ? .6 : .35;
+      mk('ellipse', { cx: cx + tv.face * 4.2 * PF, cy, rx: 5 * PF, ry: 3.6 * PF, fill: 'url(#pool-tv)', opacity: (0.75 * glow).toFixed(2), class: playing ? 'tv-spill flicker' : 'tv-spill' }, pools);
+      mk('rect', { x: x - 1, y: y - 1, width: w + 2, height: h + 2, rx: 1.5, fill: playing ? '#cfe6ff' : '#8fb8e8', opacity: glow, class: playing ? 'tv-screen flicker' : 'tv-screen' }, top);
+      const a = e.attributes || {};
+      const label = (playing ? '▶ ' : paused ? '⏸ ' : '') + (a.app_name || (s === 'on' || s === 'idle' ? 'On' : cap(s))) + (a.media_title ? ' · ' + a.media_title : '');
+      const lx = cx + tv.face * 5.6 * PF, ly = y - 10;
+      const t = text(lx, ly, label.length > 44 ? label.slice(0, 43) + '…' : label, { 'font-size': 7.5, fill: '#e8f3ff', 'paint-order': 'stroke', stroke: '#0b1420', 'stroke-width': 2.4 }, top);
+      if (a.media_duration > 0 && a.media_position != null) {
+        let pos = +a.media_position; if (playing && a.media_position_updated_at) pos += (Date.now() - Date.parse(a.media_position_updated_at)) / 1000;
+        const f = Math.max(0, Math.min(1, pos / a.media_duration)), bw = 110;
+        mk('rect', { x: lx - bw / 2, y: ly + 6, width: bw, height: 4, rx: 1.5, fill: '#23344a' }, top);
+        mk('rect', { x: lx - bw / 2, y: ly + 6, width: (bw * f).toFixed(1), height: 4, rx: 1.5, fill: '#5aa7ff' }, top);
+      }
+    });
+    // Echo rings while playing
+    Object.entries(ECHOS).forEach(([n, id]) => { const d = dev(+n), e = st(id); if (!d || !e || e.state !== 'playing') return; mk('circle', { cx: X(d.x), cy: Y(d.y), r: 1.6 * PF, fill: 'url(#pool-cyan)', class: 'pulse-soft' }, pools); mk('circle', { cx: X(d.x), cy: Y(d.y), r: 13, fill: 'none', stroke: '#5ee7ff', 'stroke-width': 2.2, class: 'pulse-soft' }, top); });
+
+    // 3. DOORS
+    Object.entries(DOORS).forEach(([doorId, id]) => {
+      const e = st(id), d = P.doors.find(z => z.id === doorId); if (!e || !d || e.state !== 'on') return;
+      const g = d.gap;
+      mk('line', { x1: X(g[0]), y1: Y(g[1]), x2: X(g[2]), y2: Y(g[3]), stroke: '#ffb31a', 'stroke-width': 9, 'stroke-linecap': 'round', opacity: .85, class: 'door-open' }, top);
+      mk('ellipse', { cx: (X(g[0]) + X(g[2])) / 2, cy: (Y(g[1]) + Y(g[3])) / 2, rx: 2.4 * PF, ry: 2.4 * PF, fill: 'url(#pool-amber)', opacity: .6 }, pools);
+      text((X(g[0]) + X(g[2])) / 2, (Y(g[1]) + Y(g[3])) / 2 - 12, 'OPEN · ' + dur(mins(e.last_changed)), { 'font-size': 7.5, fill: '#ffd27a', 'paint-order': 'stroke', stroke: '#1b1206', 'stroke-width': 2.4 }, top);
+    });
+    { const e = st('cover.garage_door'), gd = P.bigDoors.find(z => z.id === 'garage-door');
+      if (e && gd && e.state !== 'closed') {
+        const s = gd.seg, moving = e.state === 'opening' || e.state === 'closing';
+        mk('line', { x1: X(s[0]), y1: Y(s[1]), x2: X(s[2]), y2: Y(s[3]), stroke: '#ffb31a', 'stroke-width': 10, 'stroke-linecap': 'round', opacity: .85, class: moving ? 'door-open fast' : 'door-open' }, top);
+        text((X(s[0]) + X(s[2])) / 2, Y(s[1]) - 14, 'GARAGE DOOR ' + (moving ? e.state.toUpperCase() + '…' : 'OPEN · ' + dur(mins(e.last_changed))), { 'font-size': 8, fill: '#ffd27a', 'paint-order': 'stroke', stroke: '#1b1206', 'stroke-width': 2.4 }, top);
+      } }
+
+    // 4. SPRINKLERS
+    Object.entries(ZONES).forEach(([n, id]) => { const d = dev(+n); if (!d || !on(id)) return; for (let i = 0; i < 3; i++) mk('circle', { cx: X(d.x), cy: Y(d.y), r: 1.2 * PF, fill: 'none', stroke: '#6fd3ff', 'stroke-width': 2, class: 'spray', style: `animation-delay:${i * 0.6}s` }, top); text(X(d.x), Y(d.y) + 26, 'watering', { 'font-size': 6.5, fill: '#9fe3ff' }, top); });
+
+    // 5. A/C — cold air down every duct while the relay runs
+    if (on('switch.ac_relay')) {
+      const du = P.duct, sy = Y(du.supplyY);
+      du.trunk.forEach(t => mk('line', { x1: X(t.from), y1: sy, x2: X(t.to), y2: sy, stroke: '#8fe3ff', 'stroke-width': 3, 'stroke-dasharray': '3 9', 'stroke-linecap': 'round', class: 'air' }, top));
+      du.branches.forEach(b => { const gm = hp.branchGeom(b); const pts = gm.path.map(p => `${X(p[0])},${Y(p[1])}`).join(' '); mk('polyline', { points: pts, fill: 'none', stroke: '#8fe3ff', 'stroke-width': 2.4, 'stroke-dasharray': '3 9', 'stroke-linecap': 'round', class: 'air' }, top); mk('circle', { cx: X(gm.reg[0]), cy: Y(gm.reg[1]), r: 1.4 * PF, fill: 'url(#pool-cyan)', opacity: .55, class: 'pulse-soft' }, pools); });
+      const u = du.unit; text(X(u.x + u.w / 2), Y(u.y) - 6, '❄ COOLING', { 'font-size': 8, fill: '#9fe9ff', 'font-weight': 700 }, top);
+    }
+
+    // 6. SHARKY — circles the dock while cleaning
+    { const d = dev(62), e = st('vacuum.sharky'); if (d && e && /clean|return/.test(e.state)) { const g = mk('g', { transform: `translate(${X(d.x)} ${Y(d.y)})` }, top); const r = mk('g', { class: 'orbit' }, g); mk('circle', { cx: 0, cy: -2.2 * PF, r: 6, fill: '#9aa7b4', stroke: '#fff', 'stroke-width': 1.5 }, r); text(X(d.x), Y(d.y) + 30, e.state === 'cleaning' ? 'Sharky cleaning' : 'Sharky heading home', { 'font-size': 6.5, fill: '#dfe7ef' }, top); } }
+
+    // 7. CAMERA MOTION — a pulse at the camera while Blink reports motion
+    Object.entries(CAMS).forEach(([n, id]) => { const d = dev(+n); if (!d || !on('binary_sensor.' + id + '_motion')) return; mk('circle', { cx: X(d.x), cy: Y(d.y), r: 1.2 * PF, fill: 'none', stroke: '#ff5a6e', 'stroke-width': 2.4, class: 'spray' }, top); text(X(d.x), Y(d.y) - 16, 'motion', { 'font-size': 6.5, fill: '#ff9aa6' }, top); });
+
+    // 8. WEATHER at the mast + inside temperature at the bed + rain over everything
+    { const t = st('sensor.my_weather_station_temperature'), hu = st('sensor.my_weather_station_humidity'), ws = st('sensor.my_weather_station_wind_speed'), wd = st('sensor.my_weather_station_wind_direction');
+      const mast = P.yard.find(y => y.kind === 'mast');
+      if (t && mast && !isNaN(+t.state)) {
+        const r = mast.rect, x = X(r[0] + r[2] / 2), y = Y(r[1] + r[3]) + 16;
+        text(x, y, `${(+t.state).toFixed(1)}°F outside · ${hu ? hu.state + '% hum' : ''}`, { 'font-size': 8.5, fill: '#e8f3ff', 'paint-order': 'stroke', stroke: '#0b1420', 'stroke-width': 2.6 }, top);
+        if (ws && wd && !isNaN(+wd.state)) {
+          const spd = +ws.state, g = mk('g', { transform: `translate(${x} ${y + 16}) rotate(${(+wd.state + 180) % 360})` }, top);
+          mk('path', { d: 'M0,-9 L5,3 L0,0 L-5,3 Z', fill: spd > 0 ? '#9fe9ff' : '#6f7d8c' }, g);
+          text(x + 16, y + 19, spd > 0 ? `${spd} mph` : 'calm', { 'font-size': 7, fill: '#bcd3e6', 'text-anchor': 'start' }, top);
+        }
+      }
+      const it = st('sensor.my_weather_station_inside_temperature'), d = dev(21);
+      if (it && d && !isNaN(+it.state)) text(X(d.x), Y(d.y) + 26, `${(+it.state).toFixed(1)}°F inside`, { 'font-size': 7, fill: '#ffe2a0', 'paint-order': 'stroke', stroke: '#1b1206', 'stroke-width': 2.2 }, top);
+      const pr = st('sensor.my_weather_station_precipitation_intensity');
+      if (rain) rain.hidden = !(pr && +pr.state > 0);
+    }
+
+    // 9. THE MERCEDES — parked in the driveway when it is home
+    { const e = st('device_tracker.gle_350_device_tracker'); const home = e && e.state === 'home';
+      const cx = X(7.4), cy = Y(-1.4), w = 6.3 * PF, l = 13 * PF;
+      const g = mk('g', { transform: `translate(${cx} ${cy})`, opacity: home ? 1 : .35 }, top);
+      mk('rect', { x: -w / 2, y: -l / 2, width: w, height: l, rx: 26, fill: home ? '#2b3440' : 'none', stroke: home ? '#9aa7b4' : '#9aa7b4', 'stroke-width': 1.6, 'stroke-dasharray': home ? null : '5 4' }, g);
+      if (home) {
+        mk('rect', { x: -w / 2 + 10, y: -l / 2 + 42, width: w - 20, height: 34, rx: 8, fill: '#4b6278', opacity: .9 }, g);   // windscreen
+        mk('rect', { x: -w / 2 + 12, y: l / 2 - 64, width: w - 24, height: 26, rx: 8, fill: '#4b6278', opacity: .8 }, g);   // rear glass
+        const eng = st('binary_sensor.gle_350_engine_state'); const lit = eng && eng.state === 'on';
+        [-1, 1].forEach(sx => mk('ellipse', { cx: sx * (w / 2 - 14), cy: -l / 2 + 8, rx: 10, ry: 5, fill: lit ? '#fff7cf' : '#6b7684', class: lit ? 'pulse-soft' : null }, g));
+      }
+      text(cx, cy + l / 2 + 12, home ? 'GLE 350 · home' : 'GLE 350 · away', { 'font-size': 7.5, fill: '#dfe7ef', 'paint-order': 'stroke', stroke: '#0b1420', 'stroke-width': 2.4 }, top);
+    }
   }
 
   /* ---------- the bar at the top of the map ---------- */
