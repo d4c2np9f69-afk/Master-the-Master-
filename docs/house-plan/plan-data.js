@@ -23,12 +23,21 @@ window.PLAN = (function () {
     // Jeff 25 Sep 13:09: "The bedroom goes all the way to the west wall, the bed is against the west wall."
     // The closet / WC / closet strip that used to fill the west 4.67 ft (inferred, never measured) does not exist.
     { id: 'master', name: 'MASTER BEDROOM', sub: '19′8″ × 11', rect: [H(0), 0, 19.67, 11], kind: 'bed', floor: 'carpet', label: [H(14.5), 8.2] },
-    { id: 'mbath', name: 'MASTER BATH', sub: '8 × 8', rect: [H(0), 11, 8, 8], kind: 'bath', floor: 'tile', label: [H(4.0), 13.2] },
-    { id: 'mclo2', name: 'CLOSETS', sub: 'linen · master · Jeff', rect: [H(8), 11, 7, 8], kind: 'clo', floor: 'carpet', inferred: true, label: [H(11.5), 14.6] },
-    { id: 'pantry', name: 'PANTRY', sub: '', rect: [H(0), 19, 3.5, 3], kind: 'util', small: true, floor: 'tile' },
-    { id: 'dryer', name: 'DRYER', sub: '', rect: [H(3.5), 19, 3.5, 3], kind: 'util', small: true, floor: 'tile' },
-    { id: 'washer', name: 'WASHER', sub: '', rect: [H(7), 19, 4.42, 3], kind: 'util', small: true, floor: 'tile' },
-    { id: 'lclo', name: 'closet', sub: '', rect: [H(11.42), 19, 3.58, 3], kind: 'clo', small: true, floor: 'carpet', inferred: true },
+    // MASTER SUITE SOUTH SIDE — Jeff 25 Sep 13:08-13:19 + 4 bath photos:
+    //  · the bath runs EAST-WEST along the bedroom's south side; double vanity on its NORTH wall, tub on its SOUTH
+    //    wall butting the laundry, "in the middle of our closets"
+    //  · WEST end: Jeff's closet (door on the end wall) and the toilet closet (door on the north side)
+    //  · EAST end: the "You are loved" door = Angela's closet, which runs south to butt the dining room
+    //  · the bedroom door is on the bedroom's south wall a few feet from the foyer corner
+    // Sizes fitted to the 15 x 8 band between bedroom and laundry - NOT measured.
+    { id: 'mbath', name: 'MASTER BATH', sub: '', rect: [H(3.8), 11, 7.62, 8], kind: 'bath', floor: 'tile', label: [H(7.6), 15.0] },
+    { id: 'mwc', name: 'TOILET', sub: '', rect: [H(3.8), 11, 3.0, 3.4], kind: 'bath', small: true, floor: 'tile', inferred: true },
+    { id: 'jclo', name: 'JEFF’S', sub: 'closet', rect: [H(0), 11, 3.8, 11], kind: 'clo', floor: 'carpet', inferred: true, label: [H(1.9), 16.0] },
+    { id: 'mvest', name: 'entry', sub: '', rect: [H(11.42), 11, 3.58, 2.6], kind: 'bath', small: true, floor: 'tile', inferred: true },
+    { id: 'aclo', name: 'ANGELA’S', sub: 'closet', rect: [H(11.42), 13.6, 3.58, 8.4], kind: 'clo', floor: 'carpet', inferred: true, label: [H(13.2), 17.8] },
+    // PANTRY + LAUNDRY = ONE room (Jeff's photos 25 Sep 15:44): double doors off the dining area, shelves on three
+    // walls, dryer left, washer right; its back (north) wall butts the master-bath tub. Drawn the bath's width.
+    { id: 'laundry', name: 'PANTRY · LAUNDRY', sub: '', rect: [H(3.8), 19, 7.62, 3], kind: 'util', floor: 'tile', label: [H(7.6), 21.4] },
     { id: 'foyer', name: 'FOYER', sub: '8 × 6', rect: [H(19.67), 3.67, 5.5, 7.33], kind: 'hall', floor: 'hardwood' },
     { id: 'porch', name: 'PORCH', sub: "5'6\" × 3'8\"", rect: [H(19.67), 0, 5.5, 3.67], kind: 'porch', floor: 'concrete' },
     { id: 'guest', name: 'GUEST BEDROOM', sub: '11 × 10', rect: [H(25.17), 0, 10, 11], kind: 'bed', floor: 'carpet', label: [H(28.6), 9.2] },
@@ -55,9 +64,13 @@ window.PLAN = (function () {
     { id: 'office', a: [H(31.2), 15], b: [H(33.4), 15], r: 2.2, sweep: 1, gap: [H(31.3), 15, H(33.3), 15] },
     { id: 'gbath', a: [H(35.17), 14.6], b: [H(35.17), 12.2], r: 2.4, sweep: 1, gap: [H(35.17), 12.1, H(35.17), 14.7] },
     { id: 'master', a: [H(19.67), 8.6], b: [H(19.67), 11], r: 2.4, sweep: 1, gap: [H(19.67), 8.7, H(19.67), 10.9] },
-    { id: 'mbath', a: [H(5.4), 11], b: [H(7.6), 11], r: 2.2, sweep: 0, gap: [H(5.5), 11, H(7.5), 11] },
-    { id: 'laundry', a: [H(8.8), 22], b: [H(11.0), 22], r: 2.2, sweep: 0, gap: [H(8.9), 22, H(10.9), 22] },
-    { id: 'pantry', a: [H(0.7), 22], b: [H(2.9), 22], r: 2.0, sweep: 0, gap: [H(0.8), 22, H(2.8), 22] },
+    { id: 'mbath', a: [H(12.2), 11], b: [H(14.4), 11], r: 2.2, sweep: 0, gap: [H(12.3), 11, H(14.3), 11] },   // bedroom -> tile entry
+    { id: 'mbath2', a: [H(11.42), 13.3], b: [H(11.42), 11.3], r: 2.0, sweep: 0, gap: [H(11.42), 11.2, H(11.42), 13.4] },   // entry -> bath (photo 1, far-wall left door)
+    { id: 'mwc', a: [H(4.2), 14.4], b: [H(6.4), 14.4], r: 2.2, sweep: 1, gap: [H(4.3), 14.4, H(6.3), 14.4] },   // toilet closet
+    { id: 'jclo', a: [H(3.8), 18.6], b: [H(3.8), 16.4], r: 2.2, sweep: 0, gap: [H(3.8), 16.3, H(3.8), 18.7] },   // Jeff's closet
+    { id: 'aclo', a: [H(11.42), 14.6], b: [H(11.42), 16.8], r: 2.2, sweep: 1, gap: [H(11.42), 14.5, H(11.42), 16.9] },   // "You are loved" = Angela's closet
+    { id: 'laundry', a: [H(5.8), 22], b: [H(7.7), 22], r: 1.9, sweep: 0, gap: [H(5.8), 22, H(9.6), 22] },   // double doors, left leaf
+    { id: 'laundry2', a: [H(9.6), 22], b: [H(7.7), 22], r: 1.9, sweep: 1, gap: [H(5.8), 22, H(9.6), 22] },   // right leaf
     { id: 'garage-house', a: [H(0), 22.4], b: [H(0), 24.8], r: 2.4, sweep: 0, gap: [H(0), 22.5, H(0), 24.7] },
     { id: 'deck', a: [H(19), ED], b: [H(21.4), ED], r: 2.4, sweep: 0, gap: [H(19.1), ED, H(21.3), ED], label: 'deck door' },
     { id: 'man', a: [0.8, 18], b: [0.8, 20.4], r: 2.4, sweep: 1, gap: [0.8, 18.1, 0.8, 20.3], label: 'man door' },
@@ -94,10 +107,10 @@ window.PLAN = (function () {
     { kind: 'tub', rect: [H(35.4), 3.7, 3.8, 2.4] },
     { kind: 'toilet', at: [H(36.3), 8.6] },
     { kind: 'sink', at: [H(38.6), 12.6] },
-    { kind: 'sink', at: [H(2.4), 18.2] }, { kind: 'sink', at: [H(5.6), 18.2] },
-    { kind: 'shower', rect: [H(4.6), 11.4, 3.4, 3.4], label: 'shower' },
-    { kind: 'tub', rect: [H(0.3), 11.4, 4.0, 2.4] },
-    { kind: 'appliance', rect: [H(3.8), 19.4, 2.8, 2.3] }, { kind: 'appliance', rect: [H(7.4), 19.4, 3.6, 2.3] },
+    { kind: 'counter', rect: [H(6.9), 11.1, 4.4, 2.0] }, { kind: 'sink', at: [H(8.0), 12.0] }, { kind: 'sink', at: [H(10.2), 12.0] },   // double vanity, north wall
+    { kind: 'tub', rect: [H(5.2), 16.5, 5.0, 2.4] },   // tub / shower on the SOUTH wall, butting the laundry
+    { kind: 'toilet', at: [H(5.3), 12.4] },
+    { kind: 'appliance', rect: [H(4.0), 19.3, 2.4, 2.4], label: 'dryer' }, { kind: 'appliance', rect: [H(8.8), 19.3, 2.4, 2.4], label: 'washer' },
     { kind: 'appliance', rect: [H(0.2), 25.3, 2.8, 3.0], label: 'fridge' },
     { kind: 'appliance', rect: [H(0.2), 29.0, 2.5, 2.6], label: 'range' },
     { kind: 'counter', rect: [H(0.2), 32.8, 7.3, 2.0] },
@@ -177,7 +190,7 @@ window.PLAN = (function () {
     D(16, 'Bedroom cans · HS220 dimmer', 'LIT', H(9.5), 5.6),
     D(17, 'Kitchen / dining cans · HS220 dimmer', 'LIT', H(6.0), 27.4),
     D(18, 'Living room cans · HS220 dimmer', 'LIT', H(22.0), 20.2),
-    D(19, 'Master bath cans · HS210', 'LIT', H(4.0), 15.4),
+    D(19, 'Master bath cans · HS210', 'LIT', H(10.4), 11.7),
     D(20, 'Garage light · YM2108T', 'LIT', 5.7, 19.1),
     D(21, 'Jeff’s bed lamp', 'PLG', H(0.9), 1.1),
     D(22, 'Angela’s bed lamp', 'PLG', H(0.9), 9.9),
@@ -250,7 +263,7 @@ window.PLAN = (function () {
     16: [[1.0, 2.6], [1.0, 5.5], [1.0, 8.4], [18.9, 4.2], [18.9, 9.2], [10.6, 2.8], [14.6, 2.8], [10.6, 8.2], [14.6, 8.2]].map(([a, b]) => [H(a), b]),
     17: [[2.6, 24.4], [6.6, 24.4], [10.6, 24.4], [14.4, 24.4], [2.6, 27.6], [10.6, 27.6], [14.4, 27.6], [2.6, 31.2], [5.8, 31.2]].map(([a, b]) => [H(a), b]),
     18: [[17.6, 17.4], [22.2, 17.4], [26.8, 17.4], [17.6, 22.2], [26.8, 22.2], [17.6, 27.0], [22.2, 27.0], [26.8, 27.0]].map(([a, b]) => [H(a), b]),
-    19: [[2.2, 13.2], [6.2, 13.2], [2.2, 16.8], [6.6, 16.8]].map(([a, b]) => [H(a), b]),
+    19: [[6.4, 15.0], [9.6, 15.0], [5.3, 12.2]].map(([a, b]) => [H(a), b]),
     20: [[3.6, 12.5], [10.6, 12.5], [3.6, 18.0], [10.6, 18.0], [3.6, 23.5], [10.6, 23.5], [3.6, 29.0], [10.6, 29.0]],
     office: [[32.2, 17.6], [36.6, 17.6], [32.2, 22.1], [36.6, 22.1], [32.2, 26.6], [36.6, 26.6]].map(([a, b]) => [H(a), b]),   // Jeff 22 Sep: six cans, no smart switch on them
   };
@@ -275,7 +288,7 @@ window.PLAN = (function () {
       { id: 'living', room: 'Living room', size: 7, status: 'new', was: 6, reg: [H(24.5), 28.3] },
       { id: 'master', room: 'Master bedroom', size: 7, status: 'new', was: 6, reg: [H(12.1), 0.8] },   // photo: floor register under the left side of the arched window
       { id: 'dining', room: 'Dining room', size: 7, status: 'new', was: 6, reg: [H(9.4), 28.6] },
-      { id: 'mbath', room: 'Master bath', size: 6, status: 'existing', reg: [H(2.0), 15.4] },
+      { id: 'mbath', room: 'Master bath', size: 6, status: 'existing', reg: [H(9.0), 15.6] },   // moved into the bath with the 25 Sep re-draw (was in what is now the closet) - drawn, not measured
       // Jeff 2026-09-25 09:10: "the garage vent is going the wrong way it will come out were the hot
       // water heater is". Was drawn north to the garage FRONT (reg 13.5, 11.3). Now: saddle tap on
       // the side of the 12" trunk, run SOUTH in the crawl space, west through the brick at the back of
