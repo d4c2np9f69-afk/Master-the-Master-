@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HCC — Hero Consistency Audit (dev)</title>
+<style>
+  :root{
+    /* Mirror the LIVE hero-grade module from index.html so this page reflects
+       exactly what the app renders. Keep these in sync if the app grade changes. */
+    --hcc-hero-filter: brightness(.80) contrast(1.20) saturate(.82) sepia(.22) hue-rotate(-6deg);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#0a0809;color:#ede8df;font-family:Georgia,'Times New Roman',serif;padding:16px}
+  h1{font-size:18px;color:#d4af37;letter-spacing:.5px;margin:0 0 4px}
+  .sub{font-size:11px;color:rgba(235,215,185,.5);margin-bottom:16px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+  .hero{position:relative;height:160px;overflow:hidden;border-radius:8px;border:1px solid rgba(212,175,55,.25)}
+  .hero img{width:100%;height:100%;object-fit:cover;object-position:center center;display:block;filter:var(--hcc-hero-filter)}
+  .hero::before{content:"";position:absolute;inset:0;pointer-events:none;
+    background:
+      linear-gradient(180deg, rgba(46,28,10,.20) 0%, rgba(22,13,5,.10) 45%, rgba(8,5,2,.34) 100%),
+      radial-gradient(circle at 50% 38%, rgba(255,198,108,.12), transparent 52%),
+      radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(0,0,0,.64) 100%);
+  }
+  .hero .lbl{position:absolute;left:6px;bottom:6px;z-index:2;font-size:10px;font-weight:700;
+    color:#fff;text-shadow:0 1px 4px #000;letter-spacing:.5px;background:rgba(0,0,0,.4);padding:2px 6px;border-radius:4px}
+  .err{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:#ff6262;text-align:center;padding:8px}
+  h2{font-size:13px;color:#d4af37;margin:18px 0 6px}
+  pre{background:#050403;border:1px solid rgba(212,175,55,.2);border-radius:8px;padding:12px;
+    font-family:ui-monospace,Menlo,monospace;font-size:11px;line-height:1.5;color:#cfe8d0;overflow:auto;white-space:pre-wrap}
+  button{margin:8px 0;padding:8px 14px;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.4);
+    border-radius:8px;color:#d4af37;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer}
+  .note{font-size:10px;color:rgba(235,215,185,.4);margin-top:8px;line-height:1.5}
+</style>
+</head>
+<body>
+  <h1>🎬 Hero Consistency Audit</h1>
+  <div class="sub">Live grade applied to every hero. JSON below = real computed values from this device.</div>
+
+  <div class="grid" id="grid"></div>
+
+  <h2>heroes JSON</h2>
+  <button onclick="copyJson()">📋 Copy JSON</button>
+  <pre id="json">loading…</pre>
+  <div class="note">cssFilter &amp; overlay are read live via getComputedStyle (truth from the browser). width/height are each image's natural pixel dimensions. If cssFilter is identical across all heroes, the grade is uniform.</div>
+
+<script>
+var HEROES = [
+  { page:'Home',       image:'images/hero-home.jpg',    classes:['house-hero','hcc-hero-vignette'],          alt:'Home Command Center' },
+  { page:'Weather',    image:'images/hero-weather.jpg', classes:['sec-hero','sec-hero-weather','hcc-hero-vignette'], alt:'Weather' },
+  { page:'Irrigation', image:'images/hero-irr.jpg',     classes:['sec-hero','sec-hero-irr','hcc-hero-vignette'],     alt:'Irrigation' },
+  { page:'Yard',       image:'images/hero-yard.jpg',    classes:['sec-hero','sec-hero-yard','hcc-hero-vignette'],    alt:'Toro TimeMaster 30"' },
+  { page:'Climate',    image:'images/hero-climate.jpg', classes:['sec-hero','sec-hero-climate','hcc-hero-vignette'], alt:'Climate' }
+];
+
+var grid = document.getElementById('grid');
+var loaded = 0;
+
+HEROES.forEach(function(h, i){
+  var fig = document.createElement('div'); fig.className = 'hero';
+  var img = document.createElement('img'); img.src = h.image; img.alt = h.alt;
+  var lbl = document.createElement('div'); lbl.className = 'lbl'; lbl.textContent = h.page;
+  fig.appendChild(img); fig.appendChild(lbl); grid.appendChild(fig);
+  h._fig = fig; h._img = img;
+  function done(){ loaded++; if(loaded === HEROES.length) buildJson(); }
+  img.onload = function(){
+    h.width = img.naturalWidth; h.height = img.naturalHeight; done();
+  };
+  img.onerror = function(){
+    h.width = null; h.height = null; h._error = 'image not found';
+    var e=document.createElement('div'); e.className='err'; e.textContent='⚠ '+h.image+' not found'; fig.appendChild(e);
+    done();
+  };
+});
+
+function buildJson(){
+  var out = { heroes: HEROES.map(function(h){
+    var imgCS = getComputedStyle(h._img);
+    var beforeCS = getComputedStyle(h._fig, '::before');
+    return {
+      page: h.page,
+      image: h.image.split('/').pop(),
+      classes: h.classes,
+      cssFilter: imgCS.filter && imgCS.filter !== 'none' ? imgCS.filter : '(none)',
+      overlay: beforeCS.backgroundImage && beforeCS.backgroundImage !== 'none' ? beforeCS.backgroundImage : '(none)',
+      width: h.width,
+      height: h.height,
+      error: h._error || undefined
+    };
+  })};
+  document.getElementById('json').textContent = JSON.stringify(out, null, 2);
+  window._heroJson = out;
+}
+
+function copyJson(){
+  var t = document.getElementById('json').textContent;
+  if(navigator.clipboard){ navigator.clipboard.writeText(t).then(function(){ alert('JSON copied'); }); }
+  else { alert('Select and copy manually'); }
+}
+</script>
+</body>
+</html>

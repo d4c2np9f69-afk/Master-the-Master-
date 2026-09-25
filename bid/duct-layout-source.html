@@ -1,0 +1,204 @@
+<title>Loewen Duct Layout</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Public+Sans:wght@400;600;700&display=swap">
+<style>
+  :root{
+    --paper:#ffffff; --ink:#17202b; --ink2:#4d4c48; --muted:#6f6e68; --rule:#cfcdc5;
+    --new:#2a78d6; --new-fill:#d7e7fb; --old:#77766f; --old-fill:#efeee9; --wire:#7b52ab;
+    --display:"Barlow Condensed","Arial Narrow",sans-serif; --body:"Public Sans","Segoe UI",Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{background:var(--paper);color:var(--ink)}
+  body{margin:0;font-family:var(--body);font-size:7.7pt;line-height:1.28;padding-block:20px;padding-inline:max(16px,3vw)}
+  @page{size:Letter landscape;margin:0.35in}
+  @media print{body{padding:0}}
+  .sheet{display:grid;grid-template-columns:59fr 41fr;gap:12px;max-width:10.3in;margin:0 auto;border:1.5px solid var(--ink);padding:8px}
+  .plan-wrap{border-right:1px solid var(--rule);padding-right:10px}
+  svg{display:block;width:100%;height:auto;max-width:100%}
+  svg text{font-family:var(--body);fill:var(--ink)}
+  .side{display:flex;flex-direction:column;gap:6px}
+  h1{font-family:var(--display);font-size:18pt;line-height:1;margin:0;font-weight:700}
+  h2{font-family:var(--display);font-size:11.5pt;margin:0 0 3px;font-weight:700;letter-spacing:.03em;text-transform:uppercase}
+  .sub{color:var(--ink2);font-size:8.4pt;margin-top:2px}
+  ol{margin:0;padding-left:17px} li{margin:0 0 2px}
+  .legend{display:grid;grid-template-columns:auto 1fr;gap:1px 8px;align-items:center}
+  .legend svg{width:40px;height:14px}
+  .tb{border-top:1.5px solid var(--ink);display:grid;grid-template-columns:1fr 1fr;font-size:7.8pt}
+  .tb div{padding:3px 5px;border-bottom:1px solid var(--rule)}
+  .tb div:nth-child(odd){border-right:1px solid var(--rule)}
+  .tb b{display:block;font-family:var(--display);font-size:8pt;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  @media (max-width:760px){.sheet{grid-template-columns:1fr}.plan-wrap{border-right:none;padding-right:0}}
+</style>
+
+<div class="sheet">
+  <div class="plan-wrap">
+    <svg id="plan" viewBox="0 0 640 575" role="img" aria-label="Duct layout plan, not to scale"></svg>
+  </div>
+
+  <div class="side">
+    <div>
+      <h1>Duct Layout &amp; Scope</h1>
+      <div class="sub">A/C replacement · Loewen residence · design airflow <b>995 CFM</b> · not to scale</div>
+    </div>
+
+    <div>
+      <h2>Legend</h2>
+      <div class="legend">
+        <svg viewBox="0 0 44 16"><rect x="2" y="4" width="40" height="8" fill="#d7e7fb" stroke="#2a78d6" stroke-width="2"/></svg><span><b>New work</b>: replace or install</span>
+        <svg viewBox="0 0 44 16"><rect x="2" y="4" width="40" height="8" fill="#efeee9" stroke="#77766f" stroke-width="1.5"/></svg><span>Existing, to remain (inspect, re-seal, re-strap)</span>
+        <svg viewBox="0 0 44 16"><circle cx="22" cy="8" r="6" fill="#fff" stroke="#17202b" stroke-width="1.5"/><line x1="17" y1="13" x2="27" y2="3" stroke="#17202b" stroke-width="1.5"/></svg><span>Saddle tap with manual balancing damper</span>
+        <svg viewBox="0 0 44 16"><rect x="16" y="2" width="12" height="12" fill="#fff" stroke="#17202b" stroke-width="1.5"/><line x1="19" y1="5" x2="25" y2="5" stroke="#17202b"/><line x1="19" y1="8" x2="25" y2="8" stroke="#17202b"/><line x1="19" y1="11" x2="25" y2="11" stroke="#17202b"/></svg><span>Boot and supply register</span>
+        <svg viewBox="0 0 44 16"><text x="22" y="12" text-anchor="middle" font-size="9" font-weight="700" font-family="Barlow Condensed">HP90</text></svg><span>Hard-pipe (sheet-metal) 90° elbow</span>
+        <svg viewBox="0 0 44 16"><circle cx="22" cy="8" r="6" fill="#fff" stroke="#7b52ab" stroke-width="1.5"/><text x="22" y="11" text-anchor="middle" font-size="8" font-weight="700" fill="#7b52ab">T</text></svg><span>Thermostat (owner-supplied)</span>
+        <svg viewBox="0 0 44 16"><line x1="2" y1="8" x2="42" y2="8" stroke="#7b52ab" stroke-width="1.5" stroke-dasharray="4 3"/></svg><span>Thermostat wire (low voltage)</span>
+      </div>
+    </div>
+
+    <div>
+      <h2>Required scope</h2>
+      <ol>
+        <li><b>Unit connections:</b> new square-to-round transitions on <b>both</b> supply and return at the package unit. Remove the existing twisted connections.</li>
+        <li><b>Return:</b> new 16" insulated flex straight back from the unit, a sheet-metal 90 across the supply trunk, and a second sheet-metal 90 into the return filter grille. <i>16" runs about 713 ft/min at 995 CFM, the ACCA Manual D maximum for flex; quote 18" (about 563 ft/min) as an option.</i></li>
+        <li><b>Return filter grille:</b> the existing <b>20 × 25 grille STAYS</b> — 3.5 sq ft of face, about 287 ft/min at design airflow, already inside the ≤ 300 ft/min target. <i>Nothing to price here.</i></li>
+        <li><b>Upgrade 6" → 8":</b> Dining room, <b>Master bedroom</b>, Living room, each with a new saddle tap, balancing damper and boot.</li>
+        <li><b>New 7" garage run:</b> saddle tap <b>on the side of the 12" supply trunk</b> (not off the trunk end); core through the brick and seal the penetration; turn up and run up the garage wall to a boot and brown register; <b>balancing damper at the register, inside the garage</b>, so it can be shut off in winter without entering the crawl space.</li>
+        <li><b>Existing to remain:</b> supply trunk 16" → 14" → 12" with reducers; Master bath 6" (one register, adequate), Guest bedroom 7", Office 6", Guest bath 6". Inspect, re-seal and re-strap. <b>The existing duct STAYS.</b> Replace a run only if it is <b>physically damaged</b> — <b>not</b> for damp insulation. <i>In a Tennessee summer every one of them is damp from condensation; once it is sealed it dries out. Do not quote duct replacement on that basis.</i></li>
+        <li><b>All flex:</b> fully extended, no kinks, sags or compression; supported per manufacturer; every joint sealed with mastic or UL 181 tape. State the insulation R-value on the quote.</li>
+        <li><b>Thermostat:</b> new 18 AWG thermostat wire with C-wire from unit to thermostat (no power-stealing thermostats); install owner's thermostat.</li>
+        <li><b>Start-up, recorded on the invoice:</b> supply and return static pressure, dampers balanced, blower airflow set and recorded, refrigerant leak-detection system tested where equipped.</li>
+        <li>Old equipment and debris removed.</li>
+      </ol>
+    </div>
+
+    <div class="tb">
+      <div><b>Project</b>A/C replacement, duct modifications</div>
+      <div><b>Location</b>301 S Aztec Dr, White House, TN 37188</div>
+      <div><b>Equipment</b>2.5-ton gas/electric package unit</div>
+      <div><b>Design airflow</b>995 CFM</div>
+      <div><b>Source</b>Owner's field sketch, 10 Sep 2026</div>
+      <div><b>Drawing</b>Rev D · 21 Sep 2026 · not to scale</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const NEW = '#2a78d6', NEWF = '#d7e7fb', OLD = '#77766f', OLDF = '#efeee9', INK = '#17202b', WIRE = '#7b52ab';
+  const svg = document.getElementById('plan'), NS = 'http://www.w3.org/2000/svg';
+  const el = (t, a) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); svg.appendChild(e); return e; };
+  const T = (x, y, s, o = {}) => { const t = el('text', Object.assign({x, y, 'font-size': o.size || 10, 'text-anchor': o.anchor || 'start', 'font-weight': o.weight || 400}, o.fill ? {fill: o.fill} : {}, o.family ? {'font-family': o.family} : {})); t.textContent = s; return t; };
+  const style = k => k === 'new' ? {fill: NEWF, stroke: NEW, 'stroke-width': 2} : {fill: OLDF, stroke: OLD, 'stroke-width': 1.5};
+  // halo = white outline under a duct that crosses OVER another
+  const hduct = (x1, x2, y, w, k, halo) => { const x = Math.min(x1, x2), W = Math.abs(x2 - x1);
+    if (halo) el('rect', {x, y: y - w / 2 - 3, width: W, height: w + 6, fill: '#fff'});
+    return el('rect', Object.assign({x, y: y - w / 2, width: W, height: w}, style(k))); };
+  const vduct = (x, y1, y2, w, k, halo) => { const y = Math.min(y1, y2), H = Math.abs(y2 - y1);
+    if (halo) el('rect', {x: x - w / 2 - 3, y, width: w + 6, height: H, fill: '#fff'});
+    return el('rect', Object.assign({x: x - w / 2, y, width: w, height: H}, style(k))); };
+  const poly = (pts, k) => el('polygon', Object.assign({points: pts.map(p => p.join(',')).join(' ')}, style(k)));
+  const damper = (x, y) => { el('circle', {cx: x, cy: y, r: 6, fill: '#fff', stroke: INK, 'stroke-width': 1.5}); el('line', {x1: x - 5, y1: y + 5, x2: x + 5, y2: y - 5, stroke: INK, 'stroke-width': 1.5}); };
+  const register = (x, y) => { el('rect', {x: x - 7, y: y - 9, width: 14, height: 18, fill: '#fff', stroke: INK, 'stroke-width': 1.5});
+    [-4, 0, 4].forEach(d => el('line', {x1: x - 4, y1: y + d, x2: x + 4, y2: y + d, stroke: INK, 'stroke-width': 1})); };
+
+  const TX = 330;                 // supply trunk centre line
+  const RX = 283;                 // return vertical centre line
+  const RY = 262;                 // return horizontal centre line
+  const UNIT_TOP = 488;
+
+  // package unit
+  el('rect', {x: 195, y: UNIT_TOP, width: 210, height: 58, fill: '#fff', stroke: INK, 'stroke-width': 2});
+  T(300, UNIT_TOP + 22, 'PACKAGE UNIT (outdoors, on pad)', {anchor: 'middle', size: 10, weight: 700, family: 'Barlow Condensed'});
+  T(300, UNIT_TOP + 36, '2.5-ton gas/electric · 995 CFM', {anchor: 'middle', size: 9.5});
+  T(300, UNIT_TOP + 49, 'supply + return: new square-to-round transitions', {anchor: 'middle', size: 8.5, fill: NEW});
+
+  // return vertical (new) + its transition
+  poly([[RX - 16, UNIT_TOP], [RX + 16, UNIT_TOP], [RX + 10, UNIT_TOP - 14], [RX - 10, UNIT_TOP - 14]], 'new');
+  vduct(RX, UNIT_TOP - 14, RY + 10, 20, 'new');
+
+  // supply trunk (existing) with new transition at the unit
+  poly([[TX - 16, UNIT_TOP], [TX + 16, UNIT_TOP], [TX + 10, UNIT_TOP - 14], [TX - 10, UNIT_TOP - 14]], 'new');
+  vduct(TX, UNIT_TOP - 14, 330, 20, 'old');
+  poly([[TX - 10, 330], [TX + 10, 330], [TX + 8.5, 318], [TX - 8.5, 318]], 'old');
+  vduct(TX, 318, 190, 17, 'old');
+  poly([[TX - 8.5, 190], [TX + 8.5, 190], [TX + 7, 180], [TX - 7, 180]], 'old');
+  vduct(TX, 180, 88, 14, 'old');
+  el('rect', {x: TX - 9, y: 84, width: 18, height: 5, fill: INK}); T(TX, 78, 'capped', {size: 7, anchor: 'middle', fill: '#6f6e68'});
+  // trunk size labels
+  T(TX + 16, 420, '16" S', {size: 9.5, weight: 700, family: 'Barlow Condensed'});
+  T(TX + 14, 302, '14" S', {size: 9.5, weight: 700, family: 'Barlow Condensed'});
+  T(TX + 12, 128, '12" S', {size: 9.5, weight: 700, family: 'Barlow Condensed'});
+  T(TX + 14, UNIT_TOP - 5, 'SUPPLY', {size: 8.5, weight: 700, family: 'Barlow Condensed', fill: '#4d4c48'});
+
+  // left branches (cross OVER the return vertical)
+  const left = [
+    {y: 405, size: 6, room: 'Office', k: 'old'},
+    {y: 312, size: 8, room: 'Living room', k: 'new', was: 6},
+    {y: 150, size: 8, room: 'Dining room', k: 'new', was: 6},
+  ];
+  left.forEach(b => {
+    const w = b.size * 1.6;
+    hduct(TX - 10, 62, b.y, w, b.k, b.y > RY);
+    register(55, b.y);
+    if (b.k === 'new') damper(TX - 22, b.y);
+    T(150, b.y - w / 2 - 5, `${b.room} · ${b.size}"` + (b.was ? `  (NEW, was ${b.was}")` : '  (existing)'), {size: 9.5, weight: b.k === 'new' ? 700 : 400, anchor: 'middle', fill: b.k === 'new' ? INK : '#4d4c48'});
+  });
+
+  // right branches
+  const right = [
+    {y: 452, size: 6, room: 'Guest bath', k: 'old'},
+    {y: 352, size: 7, room: 'Guest bedroom', k: 'old'},
+    {y: 200, size: 8, room: 'Master bedroom', k: 'new', was: 6},
+    {y: 144, size: 6, room: 'Master bath', k: 'old'},
+  ];
+  right.forEach(b => {
+    const w = b.size * 1.6;
+    hduct(TX + 10, 598, b.y, w, b.k);
+    register(605, b.y);
+    if (b.k === 'new') damper(TX + 22, b.y);
+    T(470, b.y - w / 2 - 5, `${b.room} · ${b.size}"` + (b.was ? `  (NEW, was ${b.was}")` : '  (existing)'), {size: 9.5, weight: b.k === 'new' ? 700 : 400, anchor: 'middle', fill: b.k === 'new' ? INK : '#4d4c48'});
+  });
+
+  // return: HP90 at top of vertical, horizontal OVER the trunk, HP90 into the filter grille
+  el('path', {d: `M${RX - 10},${RY + 10} L${RX - 10},${RY} Q${RX - 10},${RY - 10} ${RX},${RY - 10} L${RX + 10},${RY - 10} L${RX + 10},${RY + 10} Z`, fill: NEWF, stroke: NEW, 'stroke-width': 2});
+  hduct(RX + 10, 540, RY, 20, 'new', true);
+  el('path', {d: `M540,${RY - 10} L550,${RY - 10} Q560,${RY - 10} 560,${RY - 20} L560,${RY - 26} L540,${RY - 26} Z`, fill: NEWF, stroke: NEW, 'stroke-width': 2});
+  // return filter grille
+  el('rect', {x: 527, y: RY - 50, width: 46, height: 24, fill: '#fff', stroke: INK, 'stroke-width': 2});
+  for (let i = 0; i < 5; i++) el('line', {x1: 531 + i * 9, y1: RY - 47, x2: 531 + i * 9, y2: RY - 29, stroke: INK, 'stroke-width': 1});
+  T(580, RY - 44, 'RETURN', {size: 8.5, weight: 700, family: 'Barlow Condensed'}); T(580, RY - 35, 'FILTER GRILLE', {size: 8.5, weight: 700, family: 'Barlow Condensed'}); T(580, RY - 25, '20 × 25 EXISTING — STAYS', {size: 7.5, fill: '#6f6e68'});
+  T(RX - 16, RY - 14, 'HP90', {size: 9, weight: 700, anchor: 'end', family: 'Barlow Condensed', fill: NEW});
+  T(566, RY - 14, 'HP90', {size: 9, weight: 700, family: 'Barlow Condensed', fill: NEW});
+  T(478, RY + 22, '16" RETURN, NEW (18" option)', {size: 9.5, weight: 700, anchor: 'middle'});
+  T(RX - 16, 430, '16" R', {size: 9.5, weight: 700, anchor: 'end', family: 'Barlow Condensed', fill: NEW});
+  T(RX - 16, 443, 'NEW', {size: 8.5, weight: 700, anchor: 'end', fill: NEW});
+
+  // garage run (new, 7"): SADDLE TAP off the SIDE of the 12" trunk - never off the trunk end (kills static pressure)
+  const GY = 102, GX = 508, GW = 7 * 1.6;
+  hduct(TX + 7, GX + GW / 2, GY, GW, 'new');              // out of the SIDE of the trunk, straight through the brick wall
+  vduct(GX, GY + GW / 2, 34, GW, 'new');                   // turn up on the garage side, run up the wall
+  el('rect', {x: GX - GW / 2, y: GY - GW / 2, width: GW, height: GW, fill: NEWF});   // clean the elbow corner
+  damper(GX, 58);                                          // balancing damper AT THE REGISTER, inside the garage
+  T(GX + 12, 52, 'damper at the register -', {size: 7.5, fill: '#6f6e68'});
+  T(GX + 12, 61, 'shut off from the garage', {size: 7.5, fill: '#6f6e68'});
+  T(GX + 12, 70, 'in winter, no crawl space', {size: 7.5, fill: '#6f6e68'});
+  T(TX + 34, GY + 15, 'saddle tap on the side of the trunk - not off the trunk end', {size: 7.5, fill: '#6f6e68'});
+  // brick wall
+  el('rect', {x: 478, y: 84, width: 12, height: 36, fill: '#fff', stroke: INK, 'stroke-width': 1});
+  for (let i = 0; i < 6; i++) el('line', {x1: 478, y1: 88 + i * 6, x2: 490, y2: 88 + i * 6, stroke: '#9a978c', 'stroke-width': 1});
+  el('rect', {x: GX - 7, y: 20, width: 14, height: 18, fill: '#fff', stroke: INK, 'stroke-width': 1.5}); [-4, 0, 4].forEach(d => el('line', {x1: GX - 4, y1: 29 + d, x2: GX + 4, y2: 29 + d, stroke: INK, 'stroke-width': 1}));
+  T(440, 22, 'Garage · 7"  (NEW run)', {size: 9.5, weight: 700, anchor: 'middle'});
+  T(474, 90, 'core through brick, seal', {size: 8, anchor: 'end', fill: '#6f6e68'});
+  T(GX + 12, 32, 'brown register (garage wall)', {size: 8, fill: '#6f6e68'});
+
+  // thermostat and wire
+  el('path', {d: `M384,${UNIT_TOP} L384,236 L390,236`, fill: 'none', stroke: WIRE, 'stroke-width': 1.5, 'stroke-dasharray': '4 3'});
+  el('circle', {cx: 398, cy: 236, r: 8, fill: '#fff', stroke: WIRE, 'stroke-width': 1.5});
+  T(398, 239.5, 'T', {size: 9, weight: 700, anchor: 'middle', fill: WIRE});
+  T(410, 233, 'Thermostat', {size: 8.5, weight: 700, fill: WIRE}); T(410, 244, 'new 18 AWG wire with C', {size: 8, fill: WIRE});
+
+  // not to scale stamp
+  T(8, 568, 'NOT TO SCALE · all sizes are round duct diameters', {size: 8, fill: '#6f6e68'});
+})();
+</script>
