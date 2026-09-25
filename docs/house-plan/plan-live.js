@@ -196,19 +196,52 @@
   }
   function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
-  /* ---------- hooks plan-app.js calls ---------- */
+  /* ---------- the lamps ----------
+     Jeff 09:24: "They don't look like lights. I want it to be like a car dashboard with real
+     illumination." Each light is now a dashboard lamp: a blurred halo of light spilling round it,
+     a domed lens (radial gradient, hot white-ish core -> colour -> dark rim), a dark bezel and a
+     specular glint. Lit lamps breathe; amber pulses; red blinks with a flashing ring. An OFF lamp
+     is an unlit lens with no glow, the way a dash shows a dark indicator.
+     Lamps live in their own layer ABOVE the devices so "dash mode" can dim the whole drawing and the
+     device dots while the lamps stay at full brightness. pointer-events:none, so a click still lands
+     on the device underneath. */
   const NS = 'http://www.w3.org/2000/svg';
+  const LENS = {   // [core, colour, rim]
+    ok: ['#eafff0', '#2fe07a', '#0b6b33'], warn: ['#fff6d6', '#ffb31a', '#8a5200'],
+    down: ['#ffe3e3', '#ff3347', '#7a0a14'], alarm: ['#ffe3e3', '#ff3347', '#7a0a14'],
+    off: ['#8d949c', '#5b626a', '#2c3136'], unknown: ['#c9ced4', '#8f969e', '#4a5057'],
+  };
+  const GLOW = { ok: '#35ff86', warn: '#ffb31a', down: '#ff2d42', alarm: '#ff2d42' };
+  let lampLayer = null;
+  function ensureDefs() {
+    const svg = document.getElementById('plan'); if (!svg || document.getElementById('lamp-glow')) return;
+    const defs = document.createElementNS(NS, 'defs');
+    let h = '<filter id="lamp-glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="3.2"/></filter>';
+    Object.entries(LENS).forEach(([k, c]) => { h += `<radialGradient id="lens-${k}" cx="40%" cy="38%" r="65%"><stop offset="0" stop-color="${c[0]}"/><stop offset=".45" stop-color="${c[1]}"/><stop offset="1" stop-color="${c[2]}"/></radialGradient>`; });
+    defs.innerHTML = h; svg.insertBefore(defs, svg.firstChild);
+  }
+  function lampsLayer() {
+    if (lampLayer && lampLayer.isConnected) return lampLayer;
+    const world = document.getElementById('world'); if (!world) return null;
+    lampLayer = document.createElementNS(NS, 'g'); lampLayer.id = 'L-lamps'; lampLayer.setAttribute('pointer-events', 'none');
+    world.appendChild(lampLayer); return lampLayer;
+  }
+  function mk(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; }
+
+  /* ---------- hooks plan-app.js calls ---------- */
   window.hccLive = {
     active: () => live.on,
-    decorate(gd, d) {                                   // the light on a dot
+    clear() { const l = lampsLayer(); if (l) l.innerHTML = ''; },
+    decorate(gd, d) {                                   // the lamp on a dot
       const r = live.res[d.n]; if (!live.on || !r || !r.lvl) return;
-      if (r.lvl === 'down' || r.lvl === 'alarm') {
-        const h = document.createElementNS(NS, 'circle'); h.setAttribute('r', 15); h.setAttribute('fill', 'none'); h.setAttribute('stroke', COLORS.down); h.setAttribute('stroke-width', 2.6); h.setAttribute('class', 'down-ring'); gd.insertBefore(h, gd.firstChild);
-      }
-      const c = document.createElementNS(NS, 'circle');
-      c.setAttribute('cx', 8.8); c.setAttribute('cy', -8.8); c.setAttribute('r', 4.8);
-      c.setAttribute('fill', COLORS[r.lvl]); c.setAttribute('stroke', '#fff'); c.setAttribute('stroke-width', 1.6);
-      c.setAttribute('class', 'led-dot lv-' + r.lvl); gd.appendChild(c);
+      ensureDefs(); const layer = lampsLayer(); if (!layer) return;
+      const lv = r.lvl;
+      const g = mk('g', { transform: gd.getAttribute('transform') + ' translate(9 -9)', class: 'lamp lv-' + lv }, layer);
+      if (lv === 'down' || lv === 'alarm') mk('circle', { r: 17, cx: -9, cy: 9, fill: 'none', stroke: GLOW.down, 'stroke-width': 2.6, class: 'down-ring' }, g);
+      if (GLOW[lv]) mk('circle', { r: (lv === 'down' || lv === 'alarm') ? 15 : 12, fill: GLOW[lv], filter: 'url(#lamp-glow)', class: 'halo' }, g);
+      mk('circle', { r: 7, fill: '#15191e' }, g);                                          // bezel
+      mk('circle', { r: 5.7, fill: `url(#lens-${lv})`, class: 'lens' }, g);                   // lens
+      mk('ellipse', { cx: -1.9, cy: -2.1, rx: 2.1, ry: 1.3, fill: '#fff', opacity: GLOW[lv] ? .75 : .35 }, g);  // glint
     },
     led(n) { const r = live.res[n]; if (!live.on || !r || !r.lvl) return ''; return '<span class="kled" title="' + WORDS[r.lvl] + '" style="background:' + COLORS[r.lvl] + '"></span>'; },
     detail(n) {
@@ -239,6 +272,12 @@
   if (token) {
     live.on = true;
     document.body.classList.add('live-on');
+    // Dash mode: ON by default in the live view (that is what Jeff asked for), remembered per browser.
+    const dashBtn = document.getElementById('dash');
+    const setDash = on => { document.body.classList.toggle('dash', on); if (dashBtn) { dashBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); dashBtn.innerHTML = on ? '&#9728; Day view' : '&#9790; Dash lights'; } };
+    let dashPref = null; try { dashPref = localStorage.getItem('hccPlanDash'); } catch (e) {}
+    setDash(dashPref !== '0');
+    if (dashBtn) dashBtn.addEventListener('click', () => { const on = !document.body.classList.contains('dash'); setDash(on); try { localStorage.setItem('hccPlanDash', on ? '1' : '0'); } catch (e) {} });
     const back = document.getElementById('back-app'); if (back) back.hidden = false;
     document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); });
     setInterval(poll, POLL_MS);

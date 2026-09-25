@@ -108,6 +108,28 @@
   #tip .tip-live{color:#ffd9a0}
   .back-app{font:600 12px var(--body);color:var(--accent-ink);text-decoration:none;border:1px solid var(--rule);border-radius:6px;padding:6px 10px;background:var(--panel)} .back-app:hover{border-color:var(--accent)}
   .lg-live{display:none} body.live-on .lg-live{display:block}
+  /* DASHBOARD LAMPS (Jeff 09:24: "like a car dashboard with real illumination"). Lit lamps breathe,
+     amber pulses, red blinks hard. DASH MODE dims the drawing and the device dots like instrument
+     panel lighting at night so only the lamps glow; the Dash button flips back to the day view. */
+  .lamp .halo{animation:breathe 3.2s ease-in-out infinite}
+  .lamp.lv-warn .halo{animation:breathe 1.5s ease-in-out infinite}
+  .lamp.lv-down .halo,.lamp.lv-alarm .halo{animation:blink 0.9s steps(2,jump-none) infinite}
+  .lamp.lv-down .lens,.lamp.lv-alarm .lens{animation:blinklens 0.9s steps(2,jump-none) infinite}
+  @keyframes breathe{0%,100%{opacity:.55}50%{opacity:.95}}
+  @keyframes blink{0%{opacity:1}100%{opacity:.15}}
+  @keyframes blinklens{0%{opacity:1}100%{opacity:.55}}
+  @media (prefers-reduced-motion:reduce){ .lamp .halo,.lamp .lens{animation:none} }
+  .kled,.led{background-image:radial-gradient(circle at 38% 35%,rgba(255,255,255,.85) 0 18%,transparent 45%)}
+  .kled{box-shadow:0 0 6px 1px currentColor} .led{box-shadow:0 0 0 2px #fff,0 0 9px 2px rgba(35,165,90,.7)}
+  .live.bad .led,.live.alarm .led{box-shadow:0 0 0 2px #fff,0 0 10px 3px rgba(215,38,61,.8)} .live.warn .led{box-shadow:0 0 0 2px #fff,0 0 10px 3px rgba(227,155,0,.75)}
+  body.dash .stage{background:#0b0f14}
+  body.dash .stage svg{background:#0b0f14}
+  body.dash #L-grid,body.dash #L-yard,body.dash #L-rooms,body.dash #L-fixtures,body.dash #L-lighting,body.dash #L-duct,body.dash #L-walls,body.dash #L-labels,body.dash #L-dims{filter:brightness(.34) saturate(.55)}
+  body.dash #L-devices{filter:brightness(.55) saturate(.7)}
+  body.dash #L-devices .dev.sel{filter:none}
+  body.dash .live{background:rgba(16,20,26,.92);border-color:#2b323b;color:#e8edf2} body.dash .live .ct{color:#c9d1da} body.dash .live b{color:#fff}
+  body.dash .north,body.dash .scale{filter:invert(.9) hue-rotate(180deg)}
+  #dash{display:none} body.live-on #dash{display:inline-block} #dash[aria-pressed="true"]{background:#1f2833;color:#ffd166;border-color:#1f2833}
   @media (max-width:600px){ .live{font-size:10.5px;gap:6px} .live .when{display:none} }
   @page{size:letter landscape;margin:.35in}
   @media print{
@@ -137,6 +159,7 @@
       <label><input type="checkbox" id="ly-grid" data-layer="grid" checked> Grid</label>
     </div>
     <div class="zoom"><button class="btn" id="z-out" aria-label="Zoom out">−</button><button class="btn" id="z-fit">Fit</button><button class="btn" id="z-in" aria-label="Zoom in">+</button></div>
+    <button class="btn" id="dash" aria-pressed="true" title="Dim the drawing so the status lamps glow like a dashboard">&#9728; Dash lights</button>
     <button class="btn" id="edit">Edit</button>
     <button class="btn" id="add" title="Adds the next number at the centre of the view (edit mode)">+ Add device</button>
     <button class="btn" id="print">Print</button>

@@ -298,6 +298,7 @@
   }
   function renderDevices() {
     const g = L.devices; g.innerHTML = '';
+    if (window.hccLive && window.hccLive.clear) window.hccLive.clear();   // lamps are redrawn below
     Object.values(state.devices).filter(d => !d.removed).sort((a, b) => a.n - b.n).forEach(d => {
       const c = (catById[d.cat] || catById.OTH).color;
       const gd = el('g', { class: 'dev' + (state.selected === d.n ? ' sel' : '') + (editing ? ' drag' : ''), 'data-n': d.n, transform: `translate(${X(d.x)} ${Y(d.y)})` }, g);
