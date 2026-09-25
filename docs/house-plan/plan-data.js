@@ -20,10 +20,9 @@ window.PLAN = (function () {
   // rooms: rect [x,y,w,h] or poly; kind = tint; floor = finish seen in the photos; inferred = shape not measured
   const rooms = [
     { id: 'garage', name: 'GARAGE', sub: '13 × 24 · taped', rect: [0.8, SB + 0.8, 13, ED + KJ - 0.83 - (SB + 0.8)], kind: 'garage', floor: 'concrete' },
-    { id: 'master', name: 'MASTER BEDROOM', sub: '15 × 11', rect: [H(4.67), 0, 15, 11], kind: 'bed', floor: 'carpet', label: [H(14.5), 8.2] },
-    { id: 'mclo1', name: 'CLOSET', sub: '', rect: [H(0), 0, 4.67, 5], kind: 'clo', small: true, floor: 'carpet', inferred: true },
-    { id: 'wc', name: 'WC', sub: '', rect: [H(0), 5, 4.67, 3], kind: 'bath', small: true, floor: 'tile', inferred: true },
-    { id: 'mpass', name: 'closet', sub: '', rect: [H(0), 8, 4.67, 3], kind: 'clo', small: true, floor: 'tile', inferred: true },
+    // Jeff 25 Sep 13:09: "The bedroom goes all the way to the west wall, the bed is against the west wall."
+    // The closet / WC / closet strip that used to fill the west 4.67 ft (inferred, never measured) does not exist.
+    { id: 'master', name: 'MASTER BEDROOM', sub: '19′8″ × 11', rect: [H(0), 0, 19.67, 11], kind: 'bed', floor: 'carpet', label: [H(14.5), 8.2] },
     { id: 'mbath', name: 'MASTER BATH', sub: '8 × 8', rect: [H(0), 11, 8, 8], kind: 'bath', floor: 'tile', label: [H(4.0), 13.2] },
     { id: 'mclo2', name: 'CLOSETS', sub: 'linen · master · Jeff', rect: [H(8), 11, 7, 8], kind: 'clo', floor: 'carpet', inferred: true, label: [H(11.5), 14.6] },
     { id: 'pantry', name: 'PANTRY', sub: '', rect: [H(0), 19, 3.5, 3], kind: 'util', small: true, floor: 'tile' },
@@ -57,8 +56,6 @@ window.PLAN = (function () {
     { id: 'gbath', a: [H(35.17), 14.6], b: [H(35.17), 12.2], r: 2.4, sweep: 1, gap: [H(35.17), 12.1, H(35.17), 14.7] },
     { id: 'master', a: [H(19.67), 8.6], b: [H(19.67), 11], r: 2.4, sweep: 1, gap: [H(19.67), 8.7, H(19.67), 10.9] },
     { id: 'mbath', a: [H(5.4), 11], b: [H(7.6), 11], r: 2.2, sweep: 0, gap: [H(5.5), 11, H(7.5), 11] },
-    { id: 'wc', a: [H(2.2), 8], b: [H(4.4), 8], r: 2.0, sweep: 1, gap: [H(2.3), 8, H(4.3), 8] },
-    { id: 'mclo', a: [H(4.67), 1.2], b: [H(4.67), 3.4], r: 2.0, sweep: 0, gap: [H(4.67), 1.3, H(4.67), 3.3] },
     { id: 'laundry', a: [H(8.8), 22], b: [H(11.0), 22], r: 2.2, sweep: 0, gap: [H(8.9), 22, H(10.9), 22] },
     { id: 'pantry', a: [H(0.7), 22], b: [H(2.9), 22], r: 2.0, sweep: 0, gap: [H(0.8), 22, H(2.8), 22] },
     { id: 'garage-house', a: [H(0), 22.4], b: [H(0), 24.8], r: 2.4, sweep: 0, gap: [H(0), 22.5, H(0), 24.7] },
@@ -86,9 +83,9 @@ window.PLAN = (function () {
     // wall under the soffit with a nightstand + lamp each side; tall chest between the arched window and the
     // NE corner; long 6-drawer dresser under a wide wall-mounted TV on the east wall; foyer door at that
     // wall's south end.
-    { kind: 'bed', rect: [H(4.9), 2.3, 7.0, 6.4], head: 'w', label: 'king bed' },
-    { kind: 'rect', rect: [H(4.8), 0.2, 1.7, 1.9], label: 'nightstand' },
-    { kind: 'rect', rect: [H(4.8), 8.9, 1.7, 1.9], label: 'nightstand' },
+    { kind: 'bed', rect: [H(0.2), 2.3, 7.0, 6.4], head: 'w', label: 'king bed' },
+    { kind: 'rect', rect: [H(0.1), 0.2, 1.7, 1.9], label: 'nightstand' },
+    { kind: 'rect', rect: [H(0.1), 8.9, 1.7, 1.9], label: 'nightstand' },
     { kind: 'rect', rect: [H(15.9), 0.2, 2.9, 1.8], label: 'tall chest' },
     { kind: 'rect', rect: [H(17.9), 3.0, 1.6, 5.3], label: 'dresser', vertical: true },
     { kind: 'tv', rect: [H(19.3), 2.8, 0.3, 5.7], label: 'TV' },
@@ -97,7 +94,6 @@ window.PLAN = (function () {
     { kind: 'tub', rect: [H(35.4), 3.7, 3.8, 2.4] },
     { kind: 'toilet', at: [H(36.3), 8.6] },
     { kind: 'sink', at: [H(38.6), 12.6] },
-    { kind: 'toilet', at: [H(1.6), 6.5] },
     { kind: 'sink', at: [H(2.4), 18.2] }, { kind: 'sink', at: [H(5.6), 18.2] },
     { kind: 'shower', rect: [H(4.6), 11.4, 3.4, 3.4], label: 'shower' },
     { kind: 'tub', rect: [H(0.3), 11.4, 4.0, 2.4] },
@@ -183,8 +179,8 @@ window.PLAN = (function () {
     D(18, 'Living room cans · HS220 dimmer', 'LIT', H(22.0), 20.2),
     D(19, 'Master bath cans · HS210', 'LIT', H(4.0), 15.4),
     D(20, 'Garage light · YM2108T', 'LIT', 5.7, 19.1),
-    D(21, 'Jeff’s bed lamp', 'PLG', H(5.3), 1.6),
-    D(22, 'Angela’s bed lamp', 'PLG', H(5.3), 9.5),
+    D(21, 'Jeff’s bed lamp', 'PLG', H(0.9), 1.1),
+    D(22, 'Angela’s bed lamp', 'PLG', H(0.9), 9.9),
     D(23, 'Garage fan plug', 'PLG', 1.6, 13.4),
     D(24, 'Hot water pump', 'PLG', 11.0, 31.5, 'at the water heater'),
     D(25, 'Front door contact', 'CON', H(22.4), 4.5),
@@ -217,7 +213,7 @@ window.PLAN = (function () {
     D(52, 'Master bedroom TV (Vizio)', 'MED', H(18.3), 4.3),
     D(53, 'Garage TV', 'MED', 5.8, 33.6, 'above the workbench'),
     D(54, 'Living room Echo Dot', 'MED', H(16.2), 22.8, 'on the half wall'),
-    D(55, 'Master bedroom Echo', 'MED', H(5.3), 5.5),
+    D(55, 'Master bedroom Echo', 'MED', H(1.4), 1.6),
     D(56, 'Vizio sound bar', 'MED', H(18.3), 7.1),
     D(57, 'Washer', 'APP', H(9.2), 20.5),
     D(58, 'Dryer', 'APP', H(5.25), 20.5),
@@ -251,7 +247,7 @@ window.PLAN = (function () {
   const cans = {
     // bedroom cans from Jeff's photos 25 Sep: 3 in the soffit over the headboard, 2 in the TV-wall soffit,
     // 2 on the window side and 2 on the doorway side of the vaulted ceiling
-    16: [[5.7, 2.6], [5.7, 5.5], [5.7, 8.4], [18.9, 4.2], [18.9, 9.2], [10.6, 2.8], [14.6, 2.8], [10.6, 8.2], [14.6, 8.2]].map(([a, b]) => [H(a), b]),
+    16: [[1.0, 2.6], [1.0, 5.5], [1.0, 8.4], [18.9, 4.2], [18.9, 9.2], [10.6, 2.8], [14.6, 2.8], [10.6, 8.2], [14.6, 8.2]].map(([a, b]) => [H(a), b]),
     17: [[2.6, 24.4], [6.6, 24.4], [10.6, 24.4], [14.4, 24.4], [2.6, 27.6], [10.6, 27.6], [14.4, 27.6], [2.6, 31.2], [5.8, 31.2]].map(([a, b]) => [H(a), b]),
     18: [[17.6, 17.4], [22.2, 17.4], [26.8, 17.4], [17.6, 22.2], [26.8, 22.2], [17.6, 27.0], [22.2, 27.0], [26.8, 27.0]].map(([a, b]) => [H(a), b]),
     19: [[2.2, 13.2], [6.2, 13.2], [2.2, 16.8], [6.6, 16.8]].map(([a, b]) => [H(a), b]),
