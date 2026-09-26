@@ -204,8 +204,14 @@ sudo systemctl enable --now cups >/dev/null 2>&1
 sudo lpadmin -p HP_OfficeJet_4650 -E -v "ipp://192.168.1.208/ipp/print" -m everywhere 2>/dev/null && log "printer added" || log "printer add best-effort"
 
 echo "==== 9. BROWSERS + BITWARDEN + APP SHORTCUTS ===="
-snap install chromium >/dev/null 2>&1 || sudo snap install chromium >/dev/null 2>&1
 sudo snap install bitwarden >/dev/null 2>&1
+# KitchenPC runs FIREFOX ONLY (OPEN_ITEMS #205, Jeff 09-24: "remove chrome completely"); its
+# shortcuts come from hcc-desktop-standard.sh. Chromium + chromium shortcuts are for other boxes.
+case "$(hostname)" in KitchenPC|kitchenpc)
+  log "KitchenPC: no Chromium (Firefox only, #205) - Bitwarden installed"
+  SKIP_CHROMIUM=1 ;; esac
+if [ -z "${SKIP_CHROMIUM:-}" ]; then
+snap install chromium >/dev/null 2>&1 || sudo snap install chromium >/dev/null 2>&1
 mkdir -p ~/Desktop ~/.local/share/applications
 mkshort(){ # name, url
   local f=~/Desktop/"$1".desktop
@@ -217,6 +223,7 @@ mkshort 'Home Command Center' 'https://loewenhome.com'
 mkshort 'Home Assistant' 'http://192.168.1.66:8123'
 mkshort 'Email' 'https://www.xfinity.com/email'
 log "Chromium + Bitwarden + desktop shortcuts"
+fi
 
 echo "==== 10. AUTO-UPDATES ===="
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -q unattended-upgrades >/dev/null 2>&1
