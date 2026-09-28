@@ -75,7 +75,7 @@ software sets each sound's level** — chimes/voice normal, leak loud, tornado +
 - ⚠️ Supersedes the 08-27 note "Jeff buys real sirens himself" — using the QFX instead is the plan now.
 
 ### Placement + loudness targets (Jeff 13:25)
-- QFX **plugged in and charging permanently**, **behind the grandfather clock, out of sight, aimed slightly up**.
+- QFX **plugged in and charging permanently**, **behind the grandfather clock, out of sight — AIMED AT THE FRONT DOOR and tilted slightly up to bounce off the tray ceiling** (Jeff 13:30). Per the plan that line runs across the living room toward the FOYER, which the master and guest bedroom doors open onto — the sleeping rooms get the direct sound, and a break-in alarm faces the entry.
   Clock = plan #79 — **the CENTER of the house** (Jeff 13:28: "basically in the middle of the house"), at the living room's SE corner where bedrooms, kitchen and office meet; **living room has a 10 ft tray
   ceiling** (not yet on the floor plan). Plan distances: guest bed ~22 ft, kitchen ~23 ft, master bed ~28–29 ft.
 - Targets (verified 09-28): **NFPA 72 sleeping areas ≥ 75 dBA at the pillow** (and 15 dB over ambient);
