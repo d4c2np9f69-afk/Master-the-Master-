@@ -27,6 +27,10 @@ clock has single points of failure, and each one has ALREADY happened:
 | The speaker powers itself off | 09-26 overnight | a log line only |
 | Another program takes the speaker | Kodi, 09-26 | fixed at the source (Kodi pinned to TV) |
 
+⛔ **NO CAMERA ALERTS ON THE CLOCK — Jeff 2026-09-28 12:44: *"I don't want camera stuff playing on the clock."*** Verified that day: the only senders of hcc_speak/hcc_chime/hcc_status are the clock automations, lightning, Angela 15-min-out and HCC-WeatherWarning.py.
+
+🌩️ **WEATHER WARNINGS — Jeff 12:43: *"All weather warnings should play through the clock and everywhere else."*** HCC-WeatherWarning.py now acts on EVERY NWS "...Warning" (not just 6 types; watches/advisories still ignored) and announces on every Echo (`notify.alexa_media_everywhere`) alongside the clock, both phones, the Fire TV popup and HA. Hours rule (09-24) unchanged: Tornado + Flash Flood 24/7, others 06-22 on clock/Echos; phones always. Test 12:45: clock spoke, Echo announce accepted by HA.
+
 **Rules for alarm-grade work:**
 1. **The clock is never the ONLY channel for a life-safety alarm.** Phone push (time-sensitive) +
    Echo announce stay as backups. Alert fatigue rules still apply (`alert_fatigue_fix_2026-08-14.md`).
