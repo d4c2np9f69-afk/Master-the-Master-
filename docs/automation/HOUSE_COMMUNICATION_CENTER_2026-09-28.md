@@ -139,3 +139,10 @@ add-on (`core_vlc`) is installed + running** (`media_player.vlc_telnet` idle). *
   HiLetgo relay never added. Siren + 12 V adapter + JOS connectors still needed. Add: 40–50 ft 3.5 mm M-M aux cable.
 - Work to move the clock into HA: chimes + voice + preludes become HA automations playing through VLC (switch the
   Supervisor audio output to analog first; files go in /media). The Beast listener stays as fallback until proven.
+
+### 🛒 CART AFTER THE SWAP — 2026-09-28 14:24 (read back from Amazon; NOT ordered)
+Jeff 14:22: the run goes **under the floor in the crawl space** to the clock (~37 ft on the plan + 2 drops ≈ 45 ft → 50 ft cable).
+Added **Monoprice 100647 50' 3.5 mm stereo M/M (B0015V5KPI) $4.99** (4.6★/1.8K, sold by Amazon). **Removed** the PCM5102A
+DAC and the 5 V charger 2-pack. Clock-box items now: siren 2-pk $9.16 · 12 V 1 A adapter $8.97 · JOS connectors $3.97 ·
+50 ft aux $4.99 = **$27.09**. Jeff's own 2 items (10 ft USB 3.0 extension, 10 ft micro-USB) untouched.
+Siren switch = Jeff's owned spare 16 A WiFi mini relay (to pair). No ESP32 needed.
