@@ -124,3 +124,18 @@ relay on the adapter's mains side (HA-driven, not ESP32). **NOT ORDERED — Jeff
 = $30.05. The piezo (not the 15 W horn) is what Jeff chose ("cheapest siren") → a 12 V ≥0.5 A adapter suffices.
 **13:58 Jeff "Yes we need the audio board" → B0DNW32Y46 PCM5102A 2-pack $8.88 ADDED (cart 6→7, read back). Still NOT in the cart: HiLetgo relay (B00LW15A4W, $7.39) — the ESP32 cannot switch the 12 V siren without a relay or MOSFET. Also needed: a 3.5 mm male-male aux cable DAC → QFX AUX IN (check shelf).**
 Jeff's cart already held a 10 ft USB 3.0 extension + 10 ft micro-USB cable (untouched).
+
+## 🔁 RE-STUDY 2026-09-28 14:00–14:21 — Jeff: "do you have tunnel vision ... make sure we are not buying a bunch of shit that could be run just as well with something we already have"
+He was right. **The HA box (Beehive, Beelink J45) can be the audio source itself** — verified from HA 14:0x: the
+Supervisor audio card has an **analog stereo output** profile (HDMI currently active; switchable), and the **VLC
+add-on (`core_vlc`) is installed + running** (`media_player.vlc_telnet` idle). **Jeff 14:21: "The j45 had a audio jack."**
+- **CHOSEN DIRECTION = A: HA box 3.5 mm out → long aux cable → QFX AUX IN.** Removes the Beast, Bluetooth, the ESP32
+  and the DAC from the chain. HA plays chimes/voice/alarms directly.
+- Location: HA box = plan #3, master bedroom NE corner (beside the BGW320); clock = house center → ~28 ft straight,
+  **~40–50 ft of cable routed** (attic). Risk: hum on a long unbalanced run — fix only if heard (ground-loop isolator).
+- **Siren switching at $0:** Jeff's owned spare 16 A WiFi mini relay module (not yet paired) switches the siren's 12 V
+  adapter. All 4 HA smart sockets are in use (garage fan, 2 bed lamps, water pump) — checked.
+- **Cart consequences (awaiting Jeff's word):** PCM5102A DAC ($8.88) + 5 V charger 2-pack ($7.95) become unnecessary;
+  HiLetgo relay never added. Siren + 12 V adapter + JOS connectors still needed. Add: 40–50 ft 3.5 mm M-M aux cable.
+- Work to move the clock into HA: chimes + voice + preludes become HA automations playing through VLC (switch the
+  Supervisor audio output to analog first; files go in /media). The Beast listener stays as fallback until proven.
