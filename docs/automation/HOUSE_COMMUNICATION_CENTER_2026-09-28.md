@@ -43,7 +43,7 @@ clock has single points of failure, and each one has ALREADY happened:
 3. **Hardware Jeff buys — fire:** smoke via Kidde SM120X on the Firex interconnect (~$12.50–15, verified
    09-19) + a separate CO detector. Then fire/CO speak through the clock.
 4. **Voice in ("talk to it"):** needs a microphone + HA Assist (Nabu Casa cloud speech is already paid
-   for). The W200 has no mic. Research + price before naming any part (CLAUDE.md rule 8).
+   for). The W200 has no mic. **Already owned, $0: a Delam BM-800-class condenser mic** (BEEHIVE_REFERENCE spare-hardware list, set aside for a voice assistant) — check it first. Research + price before naming any part (CLAUDE.md rule 8).
 5. **Louder / independent:** a better speaker and/or the clock on its own small computer, so it no
    longer depends on the Beast. Price before recommending. ⛔ **Not a second BT dongle** — Windows
    supports only one Bluetooth radio (Microsoft Bluetooth FAQ).
