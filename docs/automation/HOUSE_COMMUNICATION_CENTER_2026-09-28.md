@@ -82,3 +82,16 @@ software sets each sound's level** — chimes/voice normal, leak loud, tornado +
   **UL 217 smoke alarm ≥ 85 dB at 10 ft**. Jeff's alarm shopping: 105–120 dB (those ratings are at the siren).
 - Estimate only (no published watts): ~100–110 dB at 1 m at knob max, probably not 120. **Master bedroom with the door
   closed is the one to measure** — Apple Watch Noise app at the pillow; fallback = the master bedroom Echo, $0.
+
+## 🛠️ PLAN 2026-09-28 13:39 — one ESP32 at the clock drives the QFX AND an ear-piercing siren
+> **Jeff:** *"Okay so we add a ear pearcing siren to it and make the esp 32 drive both"*
+
+- **Split:** QFX = voice + tones (via AUX IN, wired); piezo siren = raw volume / deterrent (~120 dB class);
+  ESP32 at the clock drives both → no Beast, no Bluetooth in the alarm path.
+- **Owned (per docs/inventory, 09-28):** spare 16A WiFi mini relay module ($3.39, "spare/project relay");
+  ESP32 30-pin screw-terminal board ($2.39); a spare ESP32 was "TO ORDER" 08-11 and is also earmarked for the
+  Air Station — **unverified whether it arrived**. Network shows **esp32-21206C (NOT the mower box)** + four
+  unidentified ESP devices online (NETWORK_MAP) — identify before buying.
+- **To price before naming (CLAUDE.md rule 8):** an I2S DAC/line-out board for the ESP32 (built-in DAC too rough
+  for voice) · the piezo siren + its power supply · anything to switch it.
+- Status: **PLAN ONLY — nothing bought or built.** Next: Jeff says whether he has a spare ESP32 in hand.
