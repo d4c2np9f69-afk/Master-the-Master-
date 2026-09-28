@@ -73,3 +73,12 @@ software sets each sound's level** — chimes/voice normal, leak loud, tornado +
   board at the clock wired into AUX IN (no Beast, no Bluetooth) — Jeff's call, priced before named.
 - Voice tuning (#212) was done on the W200 — retune by ear after the swap.
 - ⚠️ Supersedes the 08-27 note "Jeff buys real sirens himself" — using the QFX instead is the plan now.
+
+### Placement + loudness targets (Jeff 13:25)
+- QFX **plugged in and charging permanently**, **behind the grandfather clock, out of sight, aimed slightly up**.
+  Clock = plan #79, SE corner of the LIVING ROOM (14 × 17) — the middle of the house; **living room has a 10 ft tray
+  ceiling** (not yet on the floor plan). Plan distances: guest bed ~22 ft, kitchen ~23 ft, master bed ~28–29 ft.
+- Targets (verified 09-28): **NFPA 72 sleeping areas ≥ 75 dBA at the pillow** (and 15 dB over ambient);
+  **UL 217 smoke alarm ≥ 85 dB at 10 ft**. Jeff's alarm shopping: 105–120 dB (those ratings are at the siren).
+- Estimate only (no published watts): ~100–110 dB at 1 m at knob max, probably not 120. **Master bedroom with the door
+  closed is the one to measure** — Apple Watch Noise app at the pillow; fallback = the master bedroom Echo, $0.
