@@ -108,3 +108,8 @@ required; OPUS not for plain ESP32.
 | 12 V ≥1.5 A adapter | check shelf first | $0? | |
 ≈ $28. dB figures on siren listings are seller claims — unverified. $0 switching alternative: the owned 16A WiFi mini
 relay on the adapter's mains side (HA-driven, not ESP32). **NOT ORDERED — Jeff orders.**
+
+### Power from Jeff's shelf (13:48)
+- Jeff's spare ESP32 has **USB-C**; his USB-C cable fits ✅.
+- Charger shown (GDP06AV-0500500) = **5 V ⎓ 500 mA — too weak** (WiFi bursts can brown-out/reboot the ESP32 mid-alarm).
+  Needs a **5 V ≥ 1 A** phone charger. Siren needs a separate **12 V DC (⎓, not AC) ≥ 1.5 A** adapter (15 W siren ≈ 1.25 A).
