@@ -76,7 +76,7 @@ software sets each sound's level** — chimes/voice normal, leak loud, tornado +
 
 ### Placement + loudness targets (Jeff 13:25)
 - QFX **plugged in and charging permanently**, **behind the grandfather clock, out of sight, aimed slightly up**.
-  Clock = plan #79, SE corner of the LIVING ROOM (14 × 17) — the middle of the house; **living room has a 10 ft tray
+  Clock = plan #79 — **the CENTER of the house** (Jeff 13:28: "basically in the middle of the house"), at the living room's SE corner where bedrooms, kitchen and office meet; **living room has a 10 ft tray
   ceiling** (not yet on the floor plan). Plan distances: guest bed ~22 ft, kitchen ~23 ft, master bed ~28–29 ft.
 - Targets (verified 09-28): **NFPA 72 sleeping areas ≥ 75 dBA at the pillow** (and 15 dB over ambient);
   **UL 217 smoke alarm ≥ 85 dB at 10 ft**. Jeff's alarm shopping: 105–120 dB (those ratings are at the siren).
