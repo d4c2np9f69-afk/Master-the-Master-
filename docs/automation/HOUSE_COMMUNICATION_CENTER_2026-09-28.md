@@ -95,3 +95,16 @@ software sets each sound's level** — chimes/voice normal, leak loud, tornado +
 - **To price before naming (CLAUDE.md rule 8):** an I2S DAC/line-out board for the ESP32 (built-in DAC too rough
   for voice) · the piezo siren + its power supply · anything to switch it.
 - Status: **PLAN ONLY — nothing bought or built.** Next: Jeff says whether he has a spare ESP32 in hand.
+
+### Parts priced 2026-09-28 13:4x (Amazon, Jeff's Chrome via CDP, read-only) — Jeff has a spare ESP32 ("Yes", 13:41)
+ESPHome speaker media player (esphome.io, checked): plain ESP32 OK for announcements/WAV/MP3/FLAC; PSRAM recommended not
+required; OPUS not for plain ESP32.
+| part | pick | price | rating |
+|---|---|---|---|
+| I2S DAC w/ AUX out | 2-pack PCM5102A (B0DNW32Y46) | $8.88 | 4.6★ / 28 |
+| siren | wired alarm siren horn 15 W, 6–12 V DC (B07P1FNJTG) | $11.99 | 4.2★ / 1K+ |
+| siren switch | HiLetgo 5 V 1-ch relay 2-pack (B00LW15A4W) | $7.39 | 4.6★ / 1.1K |
+| ESP32 | Jeff's spare | $0 | |
+| 12 V ≥1.5 A adapter | check shelf first | $0? | |
+≈ $28. dB figures on siren listings are seller claims — unverified. $0 switching alternative: the owned 16A WiFi mini
+relay on the adapter's mains side (HA-driven, not ESP32). **NOT ORDERED — Jeff orders.**
