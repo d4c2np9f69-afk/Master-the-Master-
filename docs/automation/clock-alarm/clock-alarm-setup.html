@@ -231,7 +231,7 @@ ol.steps li::marker{font-weight:600;color:var(--accent)}
           <text x="340" y="198" class="lab">Siren A</text>
           <rect x="330" y="212" width="92" height="30" rx="5" fill="var(--room)" stroke="var(--ink)"/>
           <text x="340" y="232" class="lab">Siren B</text>
-          <text x="20" y="276" class="sub">Both reds under +, both blacks under −.</text>
+          <text x="20" y="258" class="sub" style="fill:var(--v12)">Cut the 3.5 mm plug off each siren lead first; strip ¼ in.</text><text x="20" y="276" class="sub">Both reds under +, both blacks under −.</text>
           <text x="20" y="293" class="sub">Backwards = silent, not damaged. Push the plug in until it stops.</text>
           <text x="20" y="40" class="mono">center-positive adapter → the + screw is +</text>
         </svg>
@@ -251,7 +251,7 @@ ol.steps li::marker{font-weight:600;color:var(--accent)}
           <tr><td>Tuya smart plug</td><td>Switches the sirens from HA</td><td><span class="pill own">Owned</span></td><td class="num">$0</td></tr>
           <tr><td>TDC 12 V 0.42 A adapter</td><td>Powers both sirens</td><td><span class="pill own">Owned</span></td><td class="num">$0</td></tr>
           <tr><td>Female barrel screw-terminal connector</td><td>Joins adapter to siren wires</td><td><span class="pill own">Owned</span></td><td class="num">$0</td></tr>
-          <tr><td>Xnrtop 12 V 120 dB piezo siren, 2-pack</td><td>Siren A + Siren B</td><td><span class="pill buy">In cart</span></td><td class="num">$9.16</td></tr>
+          <tr><td>Xnrtop 12 V 120 dB piezo siren, 2-pack</td><td>Siren A + Siren B · leads end in a 3.5 mm plug: cut it off</td><td><span class="pill buy">In cart</span></td><td class="num">$9.16</td></tr>
           <tr><td>Monoprice 50 ft 3.5 mm M–M cable</td><td>HA box → QFX AUX IN</td><td><span class="pill buy">In cart</span></td><td class="num">$4.99</td></tr>
           <tr><td colspan="3" style="text-align:right;font-weight:600">To buy</td><td class="num" style="font-weight:600">$14.15</td></tr>
         </tbody>
@@ -264,7 +264,7 @@ ol.steps li::marker{font-weight:600;color:var(--accent)}
     <h2>Install order</h2>
     <ol class="steps">
       <li><span class="who">Jeff</span>Run the 50 ft cable: HA box jack → down through the floor → crawl space → up behind the clock → QFX AUX IN.</li>
-      <li><span class="who">Jeff</span>Wire both sirens to the screw terminal (reds +, blacks −), plug in the 12 V adapter, plug the adapter into the Tuya plug.</li>
+      <li><span class="who">Jeff</span>Snip the 3.5 mm plug off each siren lead and strip ¼ in (so nothing 12 V can ever be plugged into the speaker's AUX jack). Wire both to the screw terminal (reds +, blacks −), plug in the 12 V adapter, plug the adapter into the Tuya plug.</li>
       <li><span class="who">Jeff</span>Add the Tuya plug in the Smart Life app so it shows up in HA.</li>
       <li><span class="who">Claude</span>Switch HA's audio from HDMI to Analog, set up VLC playback, and move the chimes, voice and alarms from the Beast to HA.</li>
       <li><span class="who">Claude</span>Make the Tuya plug the siren switch; tornado and break-in turn it on, everything else stays voice-only.</li>

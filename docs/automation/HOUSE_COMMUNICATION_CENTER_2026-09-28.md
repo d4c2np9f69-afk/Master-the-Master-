@@ -164,4 +164,7 @@ Siren switch = **Jeff's EXTRA SMART PLUG** (Jeff 14:28: "I have a extra smart pl
   **https://claude.ai/artifact/SekU1JPieXzxc5r7VicuKK** (source `docs/automation/clock-alarm/clock-alarm-setup.html`;
   republish to THAT url). Chain, floor-plan placement, siren terminal close-up, parts ($14.15 to buy), install order.
   Correction: from the clock, "opposite the front door" points toward the back/east (office side), not the kitchen.
+- 15:12 Jeff: "Those sirens have a different end on them" — correct: the Xnrtop listing says **"Adopt 3.5mm plug"** (photos: red/black
+  lead ending in a 3.5 mm plug, called a "12V power plug"). I had read only "1 m wire". **Plan: snip the plug off, strip, screw terminal.**
+  Also a safety point: a 12 V lead on a 3.5 mm plug next to the QFX's 3.5 mm AUX input could be cross-plugged. Diagram updated.
 
