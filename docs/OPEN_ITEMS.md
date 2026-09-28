@@ -103,21 +103,7 @@ step needs hands on the machine, which are his — **but it is a repair we owe, 
 behind on.** When it comes back: give it a DHCP reservation like Beehive's, because its recorded
 addresses go stale every time.
 
-### 🔴 MY NEAR-MISS ON #112 TONIGHT — the trap this row already warns about
-
-I pinged **`192.168.1.215`**, got three replies, and was about to report **"GaragePC is back on the
-network."** **It is not GaragePC.** `.215` is the **Fire TV** — the record has PiPup posting to
-`http://192.168.1.215:7979/notify`. GaragePC's addresses are **`.121` and `.212`**, and the row
-already proved both fail.
-
-**What the record already established, and it is conclusive:** the BGW320's own device list shows
-**56 devices, and the gateway retains powered-off clients for ~4 weeks** — `JeffsLapTop` sits in it
-right now reading *Status: off, 17 days stale*. **GaragePC is absent in every state.** So it has
-not touched this gateway since before 2026-08-14 — which points at the extender retirement, not
-the 09-01 boot loop.
-
-⚠️ **The lesson is the one in `ACCESS_MAP` about instruments that lie: a ping proves something
-answers at an address, not WHICH something.** Confirm the identity before naming the machine.
+🔎 *The 09-16 `.215` near-miss (a ping proves something answers, not WHICH machine) moved to `FINDINGS_AND_STOPS.md` 2026-09-28 — reference, not a task.*
 
 **Fix is unchanged and genuinely his:** power it on, join it to `Loewen301`. Credentials are
 already in `HCC_ACCESS.md` §5, so the beast can authenticate the moment it appears.

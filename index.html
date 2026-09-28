@@ -11845,6 +11845,11 @@ function loadLights(){
       return vacStems.some(function(st){ return st && id.indexOf(st) >= 0; });
     }
     var devs = states.filter(function(s){
+      // 2026-09-28, Jeff: "make sure that the repeaters stay on 24-7 they are listed as on they
+      // come up as lights". The TS0501B Zigbee USB repeaters enumerate as light.* — so "ALL OFF"
+      // and the brightness slider here were switching the mesh's routers off. Anchored rule, not a
+      // bare "contains" (§19 Pattern 2). HA also turns them back on (hcc_zigbee_repeaters_stay_on).
+      if (/^light\.[a-z0-9_]*_repeater$/.test(s.entity_id)) return false;
       if (s.entity_id.indexOf('light.') === 0) return true;
       if (s.entity_id.indexOf('switch.') !== 0) return false;
       if (lightIsIrrigation(s) || isVacuumSwitch(s)) return false; // sprinklers, vacuum settings
