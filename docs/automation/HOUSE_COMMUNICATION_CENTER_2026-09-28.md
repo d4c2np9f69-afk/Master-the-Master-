@@ -160,3 +160,8 @@ Siren switch = **Jeff's EXTRA SMART PLUG** (Jeff 14:28: "I have a extra smart pl
   front door/foyer (bedroom doors, same aim as the QFX), one toward the kitchen/back of the house. Wired in PARALLEL on the one
   green screw connector (both red → +, both black → −); 2 × 0.10–0.15 A ≈ 0.3 A < the TDC adapter's 0.42 A; one Tuya plug
   switches both. Plug fit verified by Jeff's photo 14:59.
+- 📐 **WIRING DIAGRAM (Jeff 15:06 "draw out the set up with everything labeled")** — artifact
+  **https://claude.ai/artifact/SekU1JPieXzxc5r7VicuKK** (source `docs/automation/clock-alarm/clock-alarm-setup.html`;
+  republish to THAT url). Chain, floor-plan placement, siren terminal close-up, parts ($14.15 to buy), install order.
+  Correction: from the clock, "opposite the front door" points toward the back/east (office side), not the kitchen.
+
