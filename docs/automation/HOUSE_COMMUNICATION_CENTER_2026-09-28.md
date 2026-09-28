@@ -156,3 +156,7 @@ Siren switch = **Jeff's EXTRA SMART PLUG** (Jeff 14:28: "I have a extra smart pl
   (read back: badge 4). **Clock-box purchase now = siren 2-pk $9.16 + 50 ft Monoprice aux $4.99 = $14.15.** Everything else owned:
   QFX speaker, HA box audio jack + VLC add-on, Tuya smart plug (siren switch), screw-terminal connectors, 12 V adapter.
   (The old Zmodo power bricks Jeff checked are all 5 V — 1 A x2 micro-USB, 2 A x1 — useful for USB gear, not the siren.)
+- 15:03 Jeff: **install BOTH sirens at the clock, pointed in opposite directions** (piezos are directional) — one toward the
+  front door/foyer (bedroom doors, same aim as the QFX), one toward the kitchen/back of the house. Wired in PARALLEL on the one
+  green screw connector (both red → +, both black → −); 2 × 0.10–0.15 A ≈ 0.3 A < the TDC adapter's 0.42 A; one Tuya plug
+  switches both. Plug fit verified by Jeff's photo 14:59.
