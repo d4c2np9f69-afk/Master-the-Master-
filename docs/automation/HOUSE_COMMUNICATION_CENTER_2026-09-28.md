@@ -146,3 +146,7 @@ Added **Monoprice 100647 50' 3.5 mm stereo M/M (B0015V5KPI) $4.99** (4.6★/1.8K
 DAC and the 5 V charger 2-pack. Clock-box items now: siren 2-pk $9.16 · 12 V 1 A adapter $8.97 · JOS connectors $3.97 ·
 50 ft aux $4.99 = **$27.09**. Jeff's own 2 items (10 ft USB 3.0 extension, 10 ft micro-USB) untouched.
 Siren switch = **Jeff's EXTRA SMART PLUG** (Jeff 14:28: "I have a extra smart plug") — the siren's 12 V adapter plugs into it; HA switches the plug. **Brand = TUYA (Jeff 14:28) ✅** — joins HA through the existing Tuya integration (the same one Sharky uses; re-authed 08-19). The 16 A WiFi mini module (AliExpress 08-18, $3.39) is only a fallback and was never confirmed received. No ESP32, no relay.
+
+- 14:31 Jeff showed he already owns the female 5.5 mm DC barrel **screw-terminal connectors** → JOS (B0CR8TZ41W) REMOVED
+  from the cart (read back: badge 5). Clock-box items now: siren $9.16 + 12 V 1 A adapter $8.97 + 50 ft aux $4.99 = **$23.12**.
+  Next $0 check: a 12 V DC ≥0.5 A adapter with a 5.5×2.1 plug from Jeff's shelf would drop the $8.97 too.
