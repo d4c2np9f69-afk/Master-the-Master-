@@ -113,3 +113,14 @@ relay on the adapter's mains side (HA-driven, not ESP32). **NOT ORDERED — Jeff
 - Jeff's spare ESP32 has **USB-C**; his USB-C cable fits ✅.
 - Charger shown (GDP06AV-0500500) = **5 V ⎓ 500 mA — too weak** (WiFi bursts can brown-out/reboot the ESP32 mid-alarm).
   Needs a **5 V ≥ 1 A** phone charger. Siren needs a separate **12 V DC (⎓, not AC) ≥ 1.5 A** adapter (15 W siren ≈ 1.25 A).
+
+### 🛒 IN JEFF'S AMAZON CART 2026-09-28 13:55 (added by Claude on Jeff's request — NOT ordered; Jeff checks out)
+| asin | item | $ |
+|---|---|---|
+| B0DQ43LMRH | 5 V 2 A UL-listed USB charger ×2 (ESP32 box) | 7.95 |
+| B07K2Z76NB | Xnrtop 12 V 120 dB piezo siren ×2 — 9–12 V, **100–150 mA**, 1 m leads | 9.16 |
+| B0DL8YR2V4 | 12 V 1 A adapter, 5.5×2.1 center-positive (fine print: ETL to UL 62368-1) | 8.97 |
+| B0CR8TZ41W | California JOS 2M+2F DC screw-terminal barrel connectors | 3.97 |
+= $30.05. The piezo (not the 15 W horn) is what Jeff chose ("cheapest siren") → a 12 V ≥0.5 A adapter suffices.
+**Still NOT in the cart:** PCM5102A DAC (B0DNW32Y46, $8.88) and HiLetgo relay (B00LW15A4W, $7.39) — asked Jeff 13:56.
+Jeff's cart already held a 10 ft USB 3.0 extension + 10 ft micro-USB cable (untouched).
