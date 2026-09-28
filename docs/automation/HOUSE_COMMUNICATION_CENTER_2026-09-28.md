@@ -55,3 +55,21 @@ clock has single points of failure, and each one has ALREADY happened:
 ## Loudness today
 PC side is at digital full scale: Windows endpoint 100 %, chimes peak 0.95 with the +9 dB limiter
 (`boost_db` in `chime_config.json`). **The rest is the W200's own volume — its + button, Jeff's hands.**
+
+## 🔊 DECISION 2026-09-28 13:15 — the QFX is the house alarm speaker. Do NOT pitch alarm speakers.
+> **Jeff:** *"I'm trying to use it instead of having to buy alarm speakers."*
+
+Jeff already owns a **QFX PBX-BF120** (12" battery PA speaker: Bluetooth / **AUX IN** / USB / TF / FM /
+mic in, physical VOLUME knob that doubles as power, charges at DC 5 V 1 A, FCC ID OGGQFX-1215, built 19/07).
+Plan: it replaces the W200 as the clock/alarm speaker. **Speaker knob at (or just under) max and left there; the
+software sets each sound's level** — chimes/voice normal, leak loud, tornado + break-in FULL (Jeff 13:11).
+- **Unpublished — MEASURE the real device, never code against a description** (the mower hour-meter lesson):
+  watts, clean-max point, idle auto-off, AUX-vs-BT priority.
+- **Test session (when Angela is not resting):** stepped tones at knob-max → mark where it distorts = "full";
+  30–60 min idle watch for auto-off; dB readings on Jeff's Apple Watch Noise app at the clock, bedroom, far end.
+- Loudness levers at $0: alarm tones re-pitched into 2–4 kHz, harder limiting on alarms than chimes, placement.
+- Battery: 5 V 1 A charging < full-volume draw — minutes of alarm fine, hours at max drain it even plugged in.
+- Honest limits: an alarm is only as reliable as its chain (HA → Beast → link). Best end-state = a small
+  board at the clock wired into AUX IN (no Beast, no Bluetooth) — Jeff's call, priced before named.
+- Voice tuning (#212) was done on the W200 — retune by ear after the swap.
+- ⚠️ Supersedes the 08-27 note "Jeff buys real sirens himself" — using the QFX instead is the plan now.
