@@ -12,6 +12,19 @@ read gate enforces. Do not start these while house items are open.
 
 ---
 
+## 💳 ANCESTRY MEMBERSHIP — CHANGED BY JEFF 2026-09-28 ~09:25
+**U.S. Discovery ($24.99/mo, started 09-01) EXPIRES 10-01-2026 and will NOT renew.** Jeff picked
+**Preserve My Tree, $10.00/mo, starts 10-01** *"so we could still work on it"* (tree + records
+already saved to it stay viewable; searching new paid records stops). Verified on
+ancestry.com/account 09:26 (read-only; the membership block reads *Expires: October 1, 2026* +
+*Upcoming membership: Preserve My Tree*). Route: `HCC-Scripts\open_login_chrome.ps1` (CDP :9222, profile
+logged in), the account page is **`/account`** — `/account/membership` is a dead page.
+**Do NOT re-pitch cancelling it or upgrading it.** Jeff 09:28: *"I still want to be able to work on
+it plus y'all use other sites for research anyway"* → the tree stays the workbench; new record
+searching goes to the free sources already used (FamilySearch — `HCC-Scripts/genealogy/fs-transcripts/`).
+
+---
+
 ## #150 — 🔴 BLOCKED ON PERMISSION: 12 tree detaches are staged and cannot be written 2026-09-07 22:20
 
 ⚠️ UPDATED 2026-09-08 01:40 — was 14. TWO were REMOVED by the DNA veto (#156): Louella Lockhart
