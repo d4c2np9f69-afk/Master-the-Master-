@@ -167,4 +167,11 @@ Siren switch = **Jeff's EXTRA SMART PLUG** (Jeff 14:28: "I have a extra smart pl
 - 15:12 Jeff: "Those sirens have a different end on them" — correct: the Xnrtop listing says **"Adopt 3.5mm plug"** (photos: red/black
   lead ending in a 3.5 mm plug, called a "12V power plug"). I had read only "1 m wire". **Plan: snip the plug off, strip, screw terminal.**
   Also a safety point: a 12 V lead on a 3.5 mm plug next to the QFX's 3.5 mm AUX input could be cross-plugged. Diagram updated.
+- 15:24–15:28 Q&A with Jeff. **Bluetooth CAN drive the QFX just as loud** — the cable was for reliability (no Beast, no BT
+  link in the alarm chain), not loudness. Option on the table: pair the QFX to the Beast over BT today ($0) for the pillow
+  test + as the clock speaker; cable later. **Sirens are HOLD until the pillow test** (Jeff 15:22 "do we need the sirens at
+  all") — they still add a 2nd independent path + the ear-piercing deterrent. Siren chain = HA → Tuya plug → 12 V adapter →
+  sirens (no BT/Beast/cable). ⚠️ **HA's core Tuya integration is CLOUD** — no internet = HA cannot switch the plug. Before the
+  alarm handles break-in/fire: a Zigbee plug (local mesh) or local Tuya control. (The owned Zigbee TS0224 siren is already
+  local, but Jeff judged it too weak 08-27.)
 
