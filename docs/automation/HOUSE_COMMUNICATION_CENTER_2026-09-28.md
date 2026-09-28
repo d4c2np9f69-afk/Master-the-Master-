@@ -6,7 +6,7 @@
 > might even need a better speaker in the end but this is my goal and I would like to be able to even
 > talk to it if necessary in the future"*
 
-**This is the direction for the clock from now on.** Every new announcement, alarm or warning should
+🛑 **GOAL ONLY, 2026-09-28 — Jeff 12:30: "I didn't tell you to build the alarm yet I was just letting you know my goal." No phase starts without his word.** **This is the direction for the clock from now on.** Every new announcement, alarm or warning should
 be designed to come out of the clock. Read this before adding any voice/alert feature anywhere.
 
 ## What it already does (live 2026-09-28)
