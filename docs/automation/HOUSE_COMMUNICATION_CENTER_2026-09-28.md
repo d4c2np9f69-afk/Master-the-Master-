@@ -10,7 +10,7 @@
 be designed to come out of the clock. Read this before adding any voice/alert feature anywhere.
 
 ## What it already does (live 2026-09-28)
-Chimes /15 min (quiet 22:01–06:00) · 6 AM anthem + weather + holidays · noon inside/outside temp ·
+Chimes /15 min (quiet 22:01–06:00) · 7 AM anthem + weather + holidays (moved from 6 at Angela's request 09-28) · noon inside/outside temp ·
 house status 9 AM / 3 PM / 9 PM ("everything is good" / "N errors") · 10 PM forecast + moon ·
 NWS warnings (Tornado + Flash Flood 24/7, others 06–22) · lightning within 10 mi (daytime, 1/h) ·
 "Angela will arrive in about 15 minutes". Source of truth: `HCC-Scripts\chime_listener.py`, the
