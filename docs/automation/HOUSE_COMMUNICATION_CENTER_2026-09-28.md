@@ -150,3 +150,9 @@ Siren switch = **Jeff's EXTRA SMART PLUG** (Jeff 14:28: "I have a extra smart pl
 - 14:31 Jeff showed he already owns the female 5.5 mm DC barrel **screw-terminal connectors** → JOS (B0CR8TZ41W) REMOVED
   from the cart (read back: badge 5). Clock-box items now: siren $9.16 + 12 V 1 A adapter $8.97 + 50 ft aux $4.99 = **$23.12**.
   Next $0 check: a 12 V DC ≥0.5 A adapter with a 5.5×2.1 plug from Jeff's shelf would drop the $8.97 too.
+
+- 14:57 **Jeff owns a TDC Power SA1A-120-0420: 12 V ⎓ 0.42 A, center-positive barrel, UL listed** — siren draws 0.10–0.15 A →
+  fine (≈3× headroom). Fit-test the plug in the green screw-terminal connector. 12 V adapter (B0DL8YR2V4) REMOVED from the cart
+  (read back: badge 4). **Clock-box purchase now = siren 2-pk $9.16 + 50 ft Monoprice aux $4.99 = $14.15.** Everything else owned:
+  QFX speaker, HA box audio jack + VLC add-on, Tuya smart plug (siren switch), screw-terminal connectors, 12 V adapter.
+  (The old Zmodo power bricks Jeff checked are all 5 V — 1 A x2 micro-USB, 2 A x1 — useful for USB gear, not the siren.)
