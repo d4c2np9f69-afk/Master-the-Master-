@@ -122,5 +122,5 @@ relay on the adapter's mains side (HA-driven, not ESP32). **NOT ORDERED — Jeff
 | B0DL8YR2V4 | 12 V 1 A adapter, 5.5×2.1 center-positive (fine print: ETL to UL 62368-1) | 8.97 |
 | B0CR8TZ41W | California JOS 2M+2F DC screw-terminal barrel connectors | 3.97 |
 = $30.05. The piezo (not the 15 W horn) is what Jeff chose ("cheapest siren") → a 12 V ≥0.5 A adapter suffices.
-**Still NOT in the cart:** PCM5102A DAC (B0DNW32Y46, $8.88) and HiLetgo relay (B00LW15A4W, $7.39) — asked Jeff 13:56.
+**13:58 Jeff "Yes we need the audio board" → B0DNW32Y46 PCM5102A 2-pack $8.88 ADDED (cart 6→7, read back). Still NOT in the cart: HiLetgo relay (B00LW15A4W, $7.39) — the ESP32 cannot switch the 12 V siren without a relay or MOSFET. Also needed: a 3.5 mm male-male aux cable DAC → QFX AUX IN (check shelf).**
 Jeff's cart already held a 10 ft USB 3.0 extension + 10 ft micro-USB cable (untouched).
