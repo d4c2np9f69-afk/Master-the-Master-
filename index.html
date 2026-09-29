@@ -3899,13 +3899,17 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
       <div id="clockBanner" class="wx-banner wx-load">&#128260; Loading&hellip;</div>
       <div class="grd-actions">
         <button type="button" class="btn-full btn-gray" id="clockBtn" onclick="clockToggle('input_boolean.grandfather_clock')" disabled>Clock&hellip;</button>
-        <button type="button" class="btn-full btn-gray" id="clockQBtn" onclick="clockToggle('input_boolean.grandfather_clock_quarter_chimes')" disabled>Quarter chimes&hellip;</button>
-        <button type="button" class="btn-full btn-gray" id="clockWBtn" onclick="clockToggle('input_boolean.grandfather_clock_morning_weather')" disabled>6 AM weather&hellip;</button>
-        <button type="button" class="btn-full btn-gray" data-clocksw="input_boolean.grandfather_clock_holidays" data-label="Holidays (6 AM)" onclick="clockToggle(this.getAttribute('data-clocksw'))" disabled>Holidays&hellip;</button>
+        <button type="button" class="btn-full btn-gray" data-clocksw="input_boolean.grandfather_clock_quarter_chimes" data-label="Quarter chimes (:15/:45)" onclick="clockToggle(this.getAttribute('data-clocksw'))" disabled>Quarter chimes&hellip;</button>
+        <button type="button" class="btn-full btn-gray" data-clocksw="input_boolean.grandfather_clock_morning_weather" data-label="7 AM weather" onclick="clockToggle(this.getAttribute('data-clocksw'))" disabled>7 AM weather&hellip;</button>
+        <button type="button" class="btn-full btn-gray" data-clocksw="input_boolean.grandfather_clock_anthem" data-label="7 AM anthem" onclick="clockToggle(this.getAttribute('data-clocksw'))" disabled>Anthem&hellip;</button>
+        <button type="button" class="btn-full btn-gray" data-clocksw="input_boolean.grandfather_clock_holidays" data-label="Holidays (7 AM)" onclick="clockToggle(this.getAttribute('data-clocksw'))" disabled>Holidays&hellip;</button>
+        <button type="button" class="btn-full btn-gray" data-clocksw="input_boolean.grandfather_clock_noon_temperatures" data-label="Noon temperatures" onclick="clockToggle(this.getAttribute('data-clocksw'))" disabled>Noon temps&hellip;</button>
+        <button type="button" class="btn-full btn-gray" data-clocksw="input_boolean.grandfather_clock_house_status" data-label="House status (9/3/9)" onclick="clockToggle(this.getAttribute('data-clocksw'))" disabled>House status&hellip;</button>
         <button type="button" class="btn-full btn-gray" data-clocksw="input_boolean.grandfather_clock_night_forecast" data-label="10 PM forecast + moon" onclick="clockToggle(this.getAttribute('data-clocksw'))" disabled>10 PM forecast&hellip;</button>
         <button type="button" class="btn-full btn-gray" data-clocksw="input_boolean.grandfather_clock_speak_warnings" data-label="Spoken warnings" onclick="clockToggle(this.getAttribute('data-clocksw'))" disabled>Warnings&hellip;</button>
         <button type="button" class="btn-full btn-gray" data-clocksw="input_boolean.grandfather_clock_angela_arriving" data-label="Angela 15 min out" onclick="clockToggle(this.getAttribute('data-clocksw'))" disabled>Angela&hellip;</button>
       </div>
+      <div style="font-size:11px;color:var(--muted);margin:6px 0 0">Each switch shows what is set NOW &mdash; green = on. Tap it to flip.</div>
       <div style="font-size:10px;font-weight:700;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;margin:10px 0 6px">Test a chime</div>
       <div class="grd-actions">
         <button type="button" class="btn-full btn-gray" onclick="clockTest('quarter')">&#128276; :15</button>
@@ -3916,7 +3920,7 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
         <button type="button" class="btn-full btn-gray" onclick="clockWeatherTest(CLOCK_NIGHT_AUTO)">&#127769; 10 PM</button>
       </div>
       <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadClock()">&#128260; Refresh</button>
-      <div class="wx-note" id="clockNote">Silent 10:01 PM &ndash; 6 AM (10 PM still strikes) &bull; plays on the Bluetooth speaker by the clock, never the TV</div>
+      <div class="wx-note" id="clockNote">Silent 10:01 PM &ndash; 6 AM (10 PM still strikes) &bull; plays on the QFX speaker by the clock, never the TV</div>
     </div>
 
     <!-- Safety & Emergency (moved from HOME 07-14) -->
@@ -12230,8 +12234,10 @@ function clockRenderSwitches(){
     var id = b.getAttribute('data-clocksw'), label = b.getAttribute('data-label');
     haFetch('/api/states/' + id).then(function(r){ return r.ok ? r.json() : null; }).then(function(s){
       if (!s){ b.disabled = true; b.innerHTML = label + ' &mdash; not set up'; return; }
-      var on = s.state === 'on'; b.disabled = false; b.className = 'btn-full btn-gray';
-      b.innerHTML = (on ? '&#128277; ' : '&#128276; ') + label + (on ? ' OFF' : ' ON');
+      // 2026-09-29 08:09, Jeff: "I wanted to turn off the quarterly's and it's set up wrong". The old label
+      // showed the ACTION ("Quarters OFF" while they were ON), which reads as the state. Show the STATE.
+      var on = s.state === 'on'; b.disabled = false; b.className = 'btn-full ' + (on ? 'btn-green' : 'btn-gray');
+      b.innerHTML = (on ? '&#9989; ' : '&#128263; ') + label + ': <b>' + (on ? 'ON' : 'OFF') + '</b>';
     }).catch(function(){});
   });
 }
@@ -12244,17 +12250,12 @@ function loadClock(){
   })).then(function(s){
     var clock = s[0], q = s[1], auto = s[2], wx = s[3];
     clockRenderSwitches();
-    var wb = document.getElementById('clockWBtn');
-    if (wb && wx){ var wOn = wx.state === 'on'; wb.disabled = false; wb.className = 'btn-full btn-gray';
-            wb.innerHTML = wOn ? '&#128263; 6 AM weather OFF' : '&#127780;&#65039; 6 AM weather ON'; }
     if (!clock){ if (card) card.style.display = 'none'; return; }   // not set up in HA
     if (card) card.style.display = '';
     var on = clock.state === 'on', qOn = q && q.state === 'on';
-    var b = document.getElementById('clockBtn'), qb = document.getElementById('clockQBtn');
+    var b = document.getElementById('clockBtn');
     if (b){ b.disabled = false; b.className = 'btn-full ' + (on ? 'btn-red' : 'btn-green');
             b.innerHTML = on ? '&#9208;&#65039; Turn clock OFF' : '&#9654;&#65039; Turn clock ON'; }
-    if (qb && q){ qb.disabled = false; qb.className = 'btn-full btn-gray';
-            qb.innerHTML = qOn ? '&#128277; Quarters OFF (:15/:45)' : '&#128276; Quarters ON (:15/:45)'; }
     var last = auto && auto.attributes && auto.attributes.last_triggered;
     var lastTxt = last ? ' &middot; last chime ' + new Date(last).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) : '';
     if (banner){
