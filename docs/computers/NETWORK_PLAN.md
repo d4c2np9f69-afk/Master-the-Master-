@@ -155,7 +155,7 @@ Both laptops are done and the network is verified end to end.
 |---|---|---|
 | 1 | **Garage PC (HP TouchSmart) → Ubuntu** | ⏳ still Jeff's hands — the USB kit is ready |
 | 2 | **SSH reachability** — the Beast is the client, both laptops now run sshd | ✅ done for the laptops |
-| 3 | **DHCP reservations** on the BGW320 | ⏳ gateway change, do with Jeff watching |
+| 3 | **DHCP reservations** on the BGW320 | 🔴 **THIS PARKED STEP BROKE THE MESH 2026-09-29** — Lenovo drifted .173→.158 (AM), Acer .176→.159 (PM); every mapping/script is by IP (Verify-Network, beast-rclone-mount, beast-map-network.cmd, lenovo-mount-acer*, C:\HCC-SETUP\map-lenovo-smb.cmd …). Needs Jeff only to type the gateway Device Access Code; Claude does the rest. Acer MAC `d8-c4-97-be-3d-5d` (wired, Private), Lenovo `44-6d-57-a5-37-57`. 🔴 **SECOND CAUSE, same night: ProtonVPN on the Acer** stuck "Connecting… Waiting for network" (ProTUN, Public) — its kill switch intermittently blocks LAN (SSH up 17:58, dead 18:03, up 18:11). Fix = Proton Settings → Advanced → **Allow LAN connections** (settings file is DPAPI-encrypted; GUI only). |
 | 4 | **Key-based login** on both laptops | ✅ done, keys installed, passwordless |
 | 5 | **File share + standard toolset** | ✅ done — Lenovo mounts the share (guest RO); Acer has the files via its own OneDrive; both carry Chrome/Bitwarden/cleaner |
 | 6 | **A script that PROVES it** | ✅ `windows-scripts\Verify-Network.ps1` — 19 PASS / 0 FAIL / 3 SKIP, 09-18 8:57 PM |
