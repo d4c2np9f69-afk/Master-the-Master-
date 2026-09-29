@@ -138,7 +138,7 @@ which needs **both** Secure Boot (PCR7) **and** clean DMA — see OPEN_ITEMS #4.
 | Machine | Address | How Claude gets in | Proof it worked |
 |---|---|---|---|
 | **Beast** (this PC) | `192.168.1.194` | local | — |
-| **Acer** laptop | `192.168.1.176` · user `jeffl` | **`ssh jeffl@192.168.1.176`** — key already installed | `ssh … "powershell -File C:\Users\jeffl\x.ps1"` returns output |
+| **Acer** laptop (`JeffsLapTop`) | ⚠️ **DHCP — was `.176`, found at `192.168.1.159` 2026-09-29** (name does NOT resolve from the Beast; find it by scanning :22 for `OpenSSH_for_Windows`) · user `jeffl` | **`ssh jeffl@192.168.1.159`** — key already installed | `ssh … "powershell -File C:\Users\jeffl\x.ps1"` returns output |
 | **Lenovo** (garage, Linux) | ⚠️ **DHCP — was `.173`, came up `192.168.1.158` 2026-09-29.** Find it: `ssh jeffloewen@GarageLaptop` resolves · user `jeffloewen` | **`ssh jeffloewen@192.168.1.173`** — key already installed | `ssh … hostname` |
 | **HP** (garage) | *not yet on WiFi* | staged: `E:\GARAGE-SETUP\garage-hp-setup.sh` installs sshd **+ the Beast's key FIRST** | Jeff reports the IP, then it is remote-finishable |
 
