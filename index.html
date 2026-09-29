@@ -3917,6 +3917,7 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
         <button type="button" class="btn-full btn-gray" onclick="clockTest('threequarter')">&#128276; :45</button>
         <button type="button" class="btn-full btn-gray" onclick="clockTest('hour')">&#128368;&#65039; Hour</button>
         <button type="button" class="btn-full btn-gray" onclick="clockWeatherTest()">&#128483;&#65039; Weather</button>
+        <button type="button" class="btn-full btn-gray" onclick="clockAnthemTest()">&#127930; Anthem</button>
         <button type="button" class="btn-full btn-gray" onclick="clockWeatherTest(CLOCK_NIGHT_AUTO)">&#127769; 10 PM</button>
       </div>
       <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadClock()">&#128260; Refresh</button>
@@ -12280,6 +12281,15 @@ function clockWeatherTest(auto){
   haFetch('/api/services/automation/trigger', { method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ entity_id: auto || CLOCK_WEATHER_AUTO, skip_condition: true }) })
   .then(function(r){ if (typeof toast === 'function') toast(r.ok ? '🗣️ Speaking in ~10 s — listen by the clock' : '⚠ Beehive refused the test'); })
+  .catch(function(){ if (typeof toast === 'function') toast('⚠ Couldn’t reach Beehive'); });
+}
+// Anthem test (Jeff 2026-09-29 08:27: "it needs to be a separate button for each"). The Weather test runs
+// the 7 AM automation, which now adds the anthem ONLY on its scheduled 07:00 trigger; this button plays the
+// anthem alone: hcc_speak with a prelude and no text, which chime_listener.py plays without speaking.
+function clockAnthemTest(){
+  haFetch('/api/events/hcc_speak', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ text: '', prelude: 'anthem.wav' }) })
+  .then(function(r){ if (typeof toast === 'function') toast(r.ok ? '🎺 Anthem sent — listen by the clock' : '⚠ Beehive refused the test'); })
   .catch(function(){ if (typeof toast === 'function') toast('⚠ Couldn’t reach Beehive'); });
 }
 // Test = the SAME event the automation fires, so a test proves HA -> Beast -> speaker end to end.
