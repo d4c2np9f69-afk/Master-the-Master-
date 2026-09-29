@@ -1,5 +1,5 @@
-# Runs on the Acer. Why can't it reach the Lenovo (192.168.1.173)?
-$L='192.168.1.173'
+# Runs on the Acer. Why can't it reach the Lenovo (192.168.1.158)?
+$L='192.168.1.158'
 Write-Output "host: $env:COMPUTERNAME  ->  Lenovo $L"
 Write-Output "  ping            : $(Test-Connection $L -Count 2 -Quiet)"
 foreach ($p in 445,139,5357,22) {

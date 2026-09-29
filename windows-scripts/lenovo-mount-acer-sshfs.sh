@@ -4,7 +4,7 @@
 # did, and it was the only SKIP in the reality audit.
 #
 # The old /etc/fstab line could never work:
-#   //192.168.1.176/C/Users/jeffl cifs username=Guest,password=,sec=ntlmssp
+#   //192.168.1.159/C/Users/jeffl cifs username=Guest,password=,sec=ntlmssp
 # Guest CIFS into a Windows user profile is a dead end - NTFS denies Guest on
 # C:\Users\jeffl whatever the share ACL says, and Win11 24H2 refuses to sign a
 # guest session. That same wall forced Beast -> Acer onto authenticated SSH,
@@ -25,10 +25,10 @@ MNT=/mnt/acer
 # /C:/Users/jeffl, so giving a path makes sshfs resolve it RELATIVE to that -
 # /C:/Users/jeffl/C:/Users/jeffl - which does not exist. The mount then SUCCEEDS
 # and lists ZERO items, which looks like a permissions problem and is not.
-REMOTE='jeffl@192.168.1.176:'
+REMOTE='jeffl@192.168.1.159:'
 
 echo "=== 1. prove key auth works before touching fstab ==="
-if ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=no jeffl@192.168.1.176 hostname >/dev/null 2>&1; then
+if ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=no jeffl@192.168.1.159 hostname >/dev/null 2>&1; then
     echo "  key auth OK"
 else
     echo "  KEY AUTH FAILED - run acer-trust-lenovo.ps1 on the Acer first. Stopping."
@@ -78,7 +78,7 @@ fi
 
 echo ""
 echo "=== 4. make it survive a reboot ==="
-echo "jeffl@192.168.1.176: $MNT fuse.sshfs _netdev,nofail,allow_other,uid=1000,gid=1000,reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,StrictHostKeyChecking=no,IdentityFile=/home/jeffloewen/.ssh/id_ed25519,x-systemd.automount,x-systemd.idle-timeout=600 0 0" | sudo tee -a /etc/fstab >/dev/null
+echo "jeffl@192.168.1.159: $MNT fuse.sshfs _netdev,nofail,allow_other,uid=1000,gid=1000,reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,StrictHostKeyChecking=no,IdentityFile=/home/jeffloewen/.ssh/id_ed25519,x-systemd.automount,x-systemd.idle-timeout=600 0 0" | sudo tee -a /etc/fstab >/dev/null
 sudo systemctl daemon-reload
 echo "  fstab entry written (nofail, so a sleeping Acer never blocks boot)"
 grep -n 'acer' /etc/fstab | sed 's/^/      /'

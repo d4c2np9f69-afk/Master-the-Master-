@@ -39,11 +39,11 @@ function MountHost($name,$ip,$user,$remotePath,$drive){
     Write-Output "  logon task HCC-Mount-$name created"
 }
 
-MountHost 'lenovo' '192.168.1.173' 'jeffloewen' '/home/jeffloewen' 'L:'
+MountHost 'lenovo' '192.168.1.158' 'jeffloewen' '/home/jeffloewen' 'L:'
 
 # Acer only if reachable
-if (Test-Connection 192.168.1.176 -Count 2 -Quiet) {
-    MountHost 'acer' '192.168.1.176' 'jeffl' '/C:/Users/jeffl' 'K:'
+if (Test-Connection 192.168.1.159 -Count 2 -Quiet) {
+    MountHost 'acer' '192.168.1.159' 'jeffl' '/C:/Users/jeffl' 'K:'
 } else {
     Write-Output ""
     Write-Output "=== Acer is DOWN (frozen) - K: mount deferred until it is back ==="

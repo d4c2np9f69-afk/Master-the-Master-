@@ -15,7 +15,7 @@
 # Run: powershell -File Watch-Acer.ps1            (foreground, Ctrl+C to stop)
 #      or register it as a task - see the bottom of this file.
 param(
-    [string]$Target   = '192.168.1.176',
+    [string]$Target   = '192.168.1.159',
     [string]$User     = 'jeffl',
     [int]   $EverySec = 60,
     [string]$LogDir   = 'C:\HCC-Heartbeat'

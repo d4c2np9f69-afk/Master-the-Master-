@@ -2,7 +2,7 @@
 # Five of six legs have worked for two days; Lenovo -> Acer never has.
 #
 # Why the old approach cannot work: /etc/fstab on the Lenovo tries
-#   //192.168.1.176/C/Users/jeffl  cifs  username=Guest,password=,sec=ntlmssp
+#   //192.168.1.159/C/Users/jeffl  cifs  username=Guest,password=,sec=ntlmssp
 # Guest CIFS into a Windows user profile is a dead end - NTFS denies Guest on
 # C:\Users\jeffl whatever the share ACL says, and Win11 24H2 will not sign a
 # guest session anyway. That same wall forced Beast -> Acer onto authenticated

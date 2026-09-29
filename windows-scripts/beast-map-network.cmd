@@ -5,7 +5,7 @@ rem the three that already exist (OPEN_ITEMS #195: duplicating existing machiner
 rem
 rem ---- 2026-09-23: THE FIX FOR "Network -> <PC> asks for a password" ----
 rem Explorer's Network node connects BY NAME (\\JEFFSLAPTOP). To the SMB redirector that is a DIFFERENT
-rem server identity than \\192.168.1.176, so a drive mapped by IP does NOT cover it. With no session of
+rem server identity than \\192.168.1.159, so a drive mapped by IP does NOT cover it. With no session of
 rem its own Windows offers Jeff's MICROSOFT ACCOUNT (MicrosoftAccount\jeff.loewen@comcast.net), the far
 rem end answers 0xC0000064 "user name does not exist", and Explorer shows the credential box.
 rem ForceGuest CANNOT fix it - that only demotes LOCAL accounts to Guest, and an MSA logon is not local.
@@ -18,9 +18,9 @@ rem      on every line while the identical command typed by hand worked. ACCESS_
 set LOG=C:\Users\jeffl\map-network.log
 echo ==== %DATE% %TIME% ==== > "%LOG%"
 net use L: /delete /y >nul 2>&1
-net use L: \\192.168.1.173\GarageFiles /user:Guest "" /persistent:yes >> "%LOG%" 2>&1
+net use L: \\192.168.1.158\GarageFiles /user:Guest "" /persistent:yes >> "%LOG%" 2>&1
 net use A: /delete /y >nul 2>&1
-net use A: \\192.168.1.176\Users\jeffl /user:Guest "" /persistent:yes >> "%LOG%" 2>&1
+net use A: \\192.168.1.159\Users\jeffl /user:Guest "" /persistent:yes >> "%LOG%" 2>&1
 echo -- IPC$ Guest sessions BY NAME (this is what fixes the Network double-click) >> "%LOG%"
 net use \\JEFFSLAPTOP\IPC$ /user:Guest "" >> "%LOG%" 2>&1
 net use \\GARAGELAPTOP\IPC$ /user:Guest "" >> "%LOG%" 2>&1

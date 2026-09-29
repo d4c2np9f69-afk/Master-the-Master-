@@ -1,7 +1,7 @@
 #!/bin/bash
 # MAKING THE LENOVO VISIBLE IN WINDOWS' NETWORK - the full trail, 2026-09-19.
 #
-# Symptom: ping and SMB to 192.168.1.173 work from everywhere, but Explorer never
+# Symptom: ping and SMB to 192.168.1.158 work from everywhere, but Explorer never
 # lists it. Proven with real WS-Discovery probes (UDP 3702 -> 239.255.255.250):
 #     from Acer  (5 GHz) -> Beast OK, printer OK, Lenovo SILENT
 #     from Beast (wired) ->            printer OK, Lenovo SILENT

@@ -42,6 +42,6 @@ foreach ($h in '301SERVER','GarageLaptop','JeffsLapTop') {
 
 Write-Output ""
 Write-Output "=== and by UNC (the thing that must work for it to be useful)? ==="
-foreach ($u in '\\301SERVER\OneDrive','\\192.168.1.173\GarageFiles','\\GarageLaptop\GarageFiles') {
+foreach ($u in '\\301SERVER\OneDrive','\\192.168.1.158\GarageFiles','\\GarageLaptop\GarageFiles') {
     Write-Output ("    {0,-34} reachable={1}" -f $u, (Test-Path $u))
 }

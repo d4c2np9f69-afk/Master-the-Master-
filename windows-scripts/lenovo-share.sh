@@ -58,4 +58,4 @@ fi
 echo
 echo "=== 6. PROVE port 445 is now listening ==="
 sudo ss -tlnp 2>/dev/null | grep ':445' | sed 's/^/  /' || echo "  445 NOT listening - check smbd status"
-echo "done - from Windows: \\\\GarageLaptop\\GarageFiles  or  \\\\192.168.1.173\\GarageFiles"
+echo "done - from Windows: \\\\GarageLaptop\\GarageFiles  or  \\\\192.168.1.158\\GarageFiles"

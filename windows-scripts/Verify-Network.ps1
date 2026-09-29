@@ -42,14 +42,14 @@ Write-Host "================================================================" -F
 Write-Host "  HCC NETWORK VERIFICATION   $(Get-Date -Format 'ddd yyyy-MM-dd h:mm tt')" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
 
-$ACER   = 'jeffl@192.168.1.176'
-$LENOVO = 'jeffloewen@192.168.1.173'
+$ACER   = 'jeffl@192.168.1.159'
+$LENOVO = 'jeffloewen@192.168.1.158'
 
 $machines = @(
     @{ n='301SERVER (the Beast)';      ip='192.168.1.194'; local=$true }
     @{ n='Beehive (Home Assistant)';   ip='192.168.1.66';  port=8123   }
-    @{ n='JeffsLapTop (Acer)';         ip='192.168.1.176'; port=22     }
-    @{ n='GarageLaptop (Lenovo)';      ip='192.168.1.173'; port=22     }
+    @{ n='JeffsLapTop (Acer)';         ip='192.168.1.159'; port=22     }
+    @{ n='GarageLaptop (Lenovo)';      ip='192.168.1.158'; port=22     }
     @{ n='GaragePC (HP TouchSmart)';   ip=$null                        }
 )
 
@@ -168,11 +168,11 @@ $probe194 = 'smbclient //192.168.1.194/Jeff -U jeffl%wrongpassword_probe -c ls 2
 $out = RemoteRun $LENOVO $probe194
 Result 'Beast opens with a WRONG password' ($out -notmatch 'NT_STATUS') 'mapped to Guest by ForceGuest - no password box'
 
-$probe176 = 'smbclient //192.168.1.176/jeffl -U jeffl%wrongpassword_probe -c ls 2>&1 | head -4'
+$probe176 = 'smbclient //192.168.1.159/jeffl -U jeffl%wrongpassword_probe -c ls 2>&1 | head -4'
 $out = RemoteRun $LENOVO $probe176
 Result 'Acer opens with a WRONG password' ($out -notmatch 'NT_STATUS') 'mapped to Guest by ForceGuest - no password box'
 
-$probe173 = 'smbclient //192.168.1.173/GarageFiles -N -c ls 2>&1 | head -4'
+$probe173 = 'smbclient //192.168.1.158/GarageFiles -N -c ls 2>&1 | head -4'
 $out = RemoteRun $LENOVO $probe173
 Result 'Lenovo opens with no password' ($out -notmatch 'NT_STATUS') 'samba map to guest = Bad User'
 
@@ -200,11 +200,11 @@ foreach ($d in $credDirs) {
     Result "Beast: $d refused to guest" $fenced $why
 }
 
-$cmd = 'smbclient //192.168.1.176/jeffl -U probe%x -c ' + "'cd .ssh; ls'" + ' 2>&1 | head -2'
+$cmd = 'smbclient //192.168.1.159/jeffl -U probe%x -c ' + "'cd .ssh; ls'" + ' 2>&1 | head -2'
 $out = RemoteRun $LENOVO $cmd
 Result 'Acer: .ssh refused to guest' ($out -match 'ACCESS_DENIED') "$out"
 
-$cmd = 'smbclient //192.168.1.173/GarageFiles -N -c ' + "'cd .ssh; ls'" + ' 2>&1 | head -2'
+$cmd = 'smbclient //192.168.1.158/GarageFiles -N -c ' + "'cd .ssh; ls'" + ' 2>&1 | head -2'
 $out = RemoteRun $LENOVO $cmd
 Result 'Lenovo: .ssh hidden from the share' ($out -match 'NT_STATUS') 'samba veto files - the private key is not served'
 

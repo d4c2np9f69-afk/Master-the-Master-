@@ -8,7 +8,7 @@
 # discovery was never the problem. The next step is what fails:
 #     GarageLaptop                 -> NOT RESOLVABLE
 #     \\GarageLaptop\GarageFiles   -> False
-#     \\192.168.1.173\GarageFiles  -> True    (same share, by IP)
+#     \\192.168.1.158\GarageFiles  -> True    (same share, by IP)
 # Click the machine in Network, Windows cannot turn GARAGELAPTOP into an
 # address, and it looks like the machine is unreachable.
 #

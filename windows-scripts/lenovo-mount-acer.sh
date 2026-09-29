@@ -5,7 +5,7 @@
 set -u
 # Mount ONLY Jeff's user folder, not the whole C:\ drive - narrower and safer,
 # and it is the only part he actually wants (no Windows system files exposed).
-IP=192.168.1.176; SHARE='C/Users/jeffl'; MNT=/mnt/acer; LINK="$HOME/Acer-Files"
+IP=192.168.1.159; SHARE='C/Users/jeffl'; MNT=/mnt/acer; LINK="$HOME/Acer-Files"
 UIDN=$(id -u); GIDN=$(id -g)
 
 echo "=== can we see it at all? ==="

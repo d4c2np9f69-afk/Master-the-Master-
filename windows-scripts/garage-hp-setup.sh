@@ -183,7 +183,7 @@ add_mount(){ # server share mountpoint ro|rw
 add_mount 192.168.1.194 Users       /mnt/beast/Users       rw
 add_mount 192.168.1.194 OneDrive    /mnt/beast/OneDrive    rw
 add_mount 192.168.1.194 ClipArchive /mnt/beast/ClipArchive ro
-add_mount 192.168.1.176 Users       /mnt/acer/Users        rw
+add_mount 192.168.1.159 Users       /mnt/acer/Users        rw
 sudo systemctl daemon-reload
 for m in /mnt/beast/Users /mnt/beast/OneDrive /mnt/beast/ClipArchive /mnt/acer/Users; do
   sudo mount "$m" 2>/dev/null && log "mounted $m ($(ls -1 "$m" 2>/dev/null | wc -l) entries)" || log "$m will auto-mount on first use (that machine may be off)"
