@@ -2428,7 +2428,7 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
          here drives input_boolean.air_conditioner (the master switch, also "Alexa, turn off the
          air conditioner"); automation.hcc_ac_master_switch turns the thermostat automation on/off
          with it and opens the relay on OFF, so OFF stays off until someone turns it back on.
-         The 71/73 band below is display text — keep it in step with the automation.
+         The 70/72 band below is display text — keep it in step with the automation.
          OPEN_ITEMS #185. Remove this card (and set LUX_RETIRED false or delete the LUX card)
          when the ecobee goes in. -->
     <div class="card" id="acCard">
@@ -2437,7 +2437,7 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
       <ul class="spec-list">
         <li><span class="sk">Bedroom</span><span class="sv" id="acTemp">--</span></li>
         <li><span class="sk">A/C</span><span class="sv" id="acState">--</span></li>
-        <li><span class="sk">Holds</span><span class="sv">Off at 71&deg; &bull; On at 73&deg;</span></li>
+        <li><span class="sk">Holds</span><span class="sv">Off at 70&deg; &bull; On at 72&deg;</span></li>
         <li><span class="sk">Automatic</span><span class="sv" id="acAuto">--</span></li>
         <li><span class="sk">Cycles</span><span class="sv" id="acCycles">--</span></li>
         <li><span class="sk">Run time</span><span class="sv" id="acRuntime">--</span></li>
@@ -6897,13 +6897,13 @@ function acRender(d){
   else if (master === 'off') set('acAuto', 'Held OFF by the A/C switch');   // chosen, not a fault
   else set('acAuto', auto === 'off' ? 'OFF &mdash; nothing is controlling the A/C' : 'missing', 'var(--bad)');
 
-  // The master switch button: ON = automatic (71 off / 73 on), OFF = stays off.
+  // The master switch button: ON = automatic (70 off / 72 on), OFF = stays off.
   var mb = document.getElementById('acMasterBtn');
   if (mb) {
     if (master === 'on' || master === 'off') {
       mb.disabled = false;
       mb.className = 'btn-full ' + (master === 'on' ? 'btn-red' : 'btn-green');
-      mb.innerHTML = master === 'on' ? '&#10060; Turn A/C OFF (stays off)' : '&#10052;&#65039; Turn A/C ON (automatic 71&ndash;73&deg;)';
+      mb.innerHTML = master === 'on' ? '&#10060; Turn A/C OFF (stays off)' : '&#10052;&#65039; Turn A/C ON (automatic 70&ndash;72&deg;)';
       mb.setAttribute('data-master', master);
     } else {
       mb.disabled = true; mb.className = 'btn-full btn-gray'; mb.innerHTML = 'A/C switch unavailable';

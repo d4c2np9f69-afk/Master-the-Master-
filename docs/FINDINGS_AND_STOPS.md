@@ -798,7 +798,7 @@ Status: advice given, **nothing built.** | owner: Jeff wiring · me automation o
   ⚠️ **Deployed as a commit built directly on origin tip eb1a0f8** so the 22 local HVAC doc commits (contractor
   negotiation figures) were NOT published; local branch rebased onto c259a57, still ahead 22, unpushed.
   The 09-14 kiosk throttle (#183) is again uncommitted in the working tree, NOT live.
-  🔴 The "Holds 71/73" row is display text — change it if the automation band changes.
+  🔴 The "Holds 70/72 (was 71/73 until 2026-09-29)" row is display text — change it if the automation band changes.
 - ✅ **09-15 ~9:45 PM — THE ECHO DOT IS OUT OF THE LOOP. The A/C now reads Jeff's own weather
   station, and the station has its own card in WEATHER.** Commit `56f8ebf`, SW **hcc-v110**.
   **Why:** the Echo's error was never a constant — it ran **−3.2 °F in the afternoon and −4.0 °F at
