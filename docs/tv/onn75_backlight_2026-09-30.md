@@ -67,3 +67,13 @@ Read in Chrome: Badcaps "LED Backlight current mod." https://www.badcaps.net/for
 | Discharge resistor (few kΩ, ≥5 W), braid/sucker, flux, solder | Jeff's shop stock (assumed — confirm) |
 **Buy now: tester $18.99. Everything else is on hand or waits on what the tester/photos show.**
 **4K "upgrade" (Jeff 11:00):** nothing inside is upgradeable — the panel's resolution/refresh and the Roku main board are fixed; software updates come automatically. The only real upgrade is running the backlight cooler (the mod above).
+
+## 11:10 — If replacing: biggest picture upgrade (Jeff 11:03). Source: RTINGS "Best Mini LED TVs", **updated Sep 18, 2026**; prices read live in Chrome 09-30
+| Tier | 75" model | Price (live) | Why |
+|---|---|---|---|
+| Budget local-dimming | TCL QM6K 75" | **$848** (Walmart, 09:56; was $999.99) | RTINGS' budget pick until 09-18, 7.8/10 |
+| Budget (current RTINGS pick) | Hisense U6SF Pro 75" (Best Buy "U6 … Fire TV 2026") | **Unavailable** at Best Buy 11:08 | deep blacks, anti-glare |
+| **Best value jump** | **Hisense U7SG 75" (U7 2026, Google TV)** | **$1,299.99** (Best Buy, was $1,999.99) | very bright, matte anti-glare, 165 Hz |
+| Premium | Sony BRAVIA 7 II 75" | **$3,099.99** (Best Buy) | best processing/accuracy |
+| Top | Sony BRAVIA 9 II 75" | not shown | RTINGS #1 |
+Not an RTINGS pick (unverified quality): Hisense M7 MiniLED Roku 75" — $599.99. Current onn 75" — $398 (no local dimming = the same class as Jeff's set).
