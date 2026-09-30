@@ -16,3 +16,6 @@ No earlier file existed anywhere (record, iCloud, HCC-secrets, Gmail, Acer) — 
 ## Verdict
 Worth fixing **as a DIY job** (~$65–90 in strips vs ~$384–578 new). Replace **all 12** strips (they fail as a set). Two-person job — a 75" panel is large and thin; cracking it ends the repair. **Not worth paying a shop** — labour would eat most of the gap.
 Confirm it really is the backlight first: TV on, shine a flashlight at the screen — a faint picture = backlight (strips); nothing at all = power/main board instead.
+
+## Confirmed 09-30 9:55 (Jeff)
+TV on, room dark, eye 1–2" from screen → Roku logo faintly visible. **Main board + panel alive; backlight not lit.** Remaining split (optional, Jeff has a meter): backlight output on the power board — voltage appears then drops out = driver OK, protecting against an OPEN strip → strips are the fix; never any voltage = power board. Strips are the common case (series string: one dead LED darks the whole set).
