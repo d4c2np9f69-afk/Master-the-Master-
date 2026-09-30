@@ -1,0 +1,297 @@
+<title>Loewen House Plan</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Public+Sans:wght@400;600;700&display=swap">
+<style>
+  :root{
+    --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif; --body:"Public Sans","Segoe UI",Helvetica,Arial,sans-serif;
+    --bg:#f2f1ed; --panel:#ffffff; --ink:#1f2833; --ink2:#4a535d; --muted:#6f7780; --rule:#dcdfe3; --rule2:#eceef1;
+    --accent:#2a78d6; --accent-ink:#1c5cab; --paper:#ffffff; --sel:#ffd166; --danger:#b3261e; --ok:#2e8b57;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){ --bg:#15181c; --panel:#1d2126; --ink:#eef1f4; --ink2:#c3c9d0; --muted:#8d959e; --rule:#2e343b; --rule2:#262b31; --accent:#5b9cf0; --accent-ink:#8ebbff; --sel:#ffd166; color-scheme:dark; } }
+  :root[data-theme="dark"]{ --bg:#15181c; --panel:#1d2126; --ink:#eef1f4; --ink2:#c3c9d0; --muted:#8d959e; --rule:#2e343b; --rule2:#262b31; --accent:#5b9cf0; --accent-ink:#8ebbff; --sel:#ffd166; color-scheme:dark; }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.4 var(--body);display:flex;flex-direction:column;padding-inline:0}
+  header{display:flex;align-items:center;gap:14px;padding:10px 18px;background:var(--panel);border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  h1{font:700 24px/1 var(--display);margin:0;letter-spacing:.01em}
+  .sub{color:var(--muted);font-size:12px}
+  .sub b{color:var(--ink2);font-weight:600}
+  .tools{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .btn{font:600 12px var(--body);padding:6px 11px;border:1px solid var(--rule);border-radius:6px;background:var(--panel);color:var(--ink);cursor:pointer}
+  .btn:hover{border-color:var(--accent)} .btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff} .btn.danger{color:var(--danger);border-color:var(--danger)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .zoom{display:flex;border:1px solid var(--rule);border-radius:6px;overflow:hidden} .zoom .btn{border:0;border-radius:0;padding:6px 9px} .zoom .btn+.btn{border-left:1px solid var(--rule)}
+  .layers{display:flex;gap:10px;flex-wrap:wrap;font-size:11.5px;color:var(--ink2)} .layers label{display:flex;align-items:center;gap:4px;cursor:pointer}
+  /* 2026-09-25, Jeff: the side panel "needs to be disappearing" so the map is full screen, with
+     "a little arrow" that pops it out. The panel now slides OVER the map from the right, closed by
+     default; the choice is remembered per browser. The map owns the whole width. */
+  /* overflow:hidden - the closed drawer sits translated off the right edge; without this, tapping a dot
+     (which scrolls its key row into view) scrolled the whole PAGE sideways to reach it (found 25 Sep). */
+  main{flex:1;position:relative;min-height:0;display:flex;overflow:hidden;overflow:clip}   /* clip: hidden is still scrollable by scrollIntoView */
+  .stage{position:relative;background:var(--paper);overflow:hidden;min-height:420px;flex:1}
+  .drawer-tab{position:absolute;top:50%;transform:translateY(-50%);z-index:7;border:1px solid var(--rule);background:var(--panel);color:var(--ink);font:600 11px var(--display);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;padding:12px 6px;writing-mode:vertical-rl;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+  .drawer-tab:hover{border-color:var(--accent)} .drawer-tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  #panel-tab{right:0;border-right:0;border-radius:8px 0 0 8px;transition:right .25s ease}
+  body.panel-open #panel-tab{right:min(360px,92vw)}
+  .stage svg{width:100%;height:100%;display:block;touch-action:none;cursor:grab} .stage svg:active{cursor:grabbing}
+  .dev{cursor:pointer} .dev.drag{cursor:move} .dev.sel .dot{stroke:var(--sel);stroke-width:3.5} .reg.drag{cursor:move}
+  #tip{position:absolute;pointer-events:none;background:#1f2833;color:#fff;padding:6px 9px;border-radius:5px;font-size:11.5px;max-width:260px;box-shadow:0 4px 14px rgba(0,0,0,.2);z-index:5} #tip span{display:block;color:#c9d1da;font-size:10.5px;margin-top:2px}
+  /* 2026-09-23: the key is COLLAPSED by default. Jeff: "the key stays pulled up and you can't see
+     the house" - at his 1536px screen the expanded panel sat on top of the drawing. It is still one
+     click away, and the choice is remembered per browser. */
+  .legend{position:absolute;left:12px;bottom:12px;background:rgba(255,255,255,.95);border:1px solid #dcdfe3;border-radius:6px;padding:8px 10px;font-size:10.5px;color:#4a535d;max-width:470px}
+  .legend:not([open]){padding:5px 9px}
+  .legend>summary{cursor:pointer;list-style:none;font:600 9.5px var(--display);letter-spacing:.11em;text-transform:uppercase;color:#6f7780}
+  .legend>summary::-webkit-details-marker{display:none}
+  .legend>summary::after{content:" ▸";font-size:11px}
+  .legend[open]>summary::after{content:" ▾"}
+  .legend>summary:focus-visible{outline:2px solid #2a78d6;outline-offset:2px;border-radius:3px}
+  .lg-grid{display:grid;grid-template-columns:auto auto;gap:3px 14px} .lg-grid.rooms,.lg-grid.cats{grid-template-columns:auto auto auto;gap:2px 12px}
+  .lg-h{font:600 9.5px var(--display);letter-spacing:.1em;text-transform:uppercase;color:#6f7780;margin:7px 0 3px;border-top:1px solid #eceef1;padding-top:5px}
+  .legend .lg-grid div{display:flex;align-items:center;gap:6px;white-space:nowrap} .legend i{display:inline-block;width:14px;height:8px;border:1.5px solid #77766f;background:#efeee9;flex:0 0 auto} .lg-grid.rooms i{width:14px;height:10px;border:1px solid #c9ced4} .lg-grid.cats i{width:10px;height:10px;border-radius:50%;border:0}
+  .legend i.n{border-color:#2a78d6;background:#d7e7fb} .legend i.w{border:0;height:0;border-top:2px solid #2f6db5;width:16px} .legend i.d{border:0;height:0;border-top:2px solid #8a3b2a;width:16px} .legend i.c{width:9px;height:9px;border-radius:50%;border:1.5px solid #c9a44a;background:#fff8e6} .legend i.t{border:0;height:0;border-top:2px dashed #7b52ab;width:16px} .legend i.r{width:12px;height:9px;border:1.5px solid #1f2833;background:#fff} .legend i.inf{border:1px dashed #c05621;background:#fff}
+  .north{position:absolute;right:14px;top:12px;text-align:center;font:700 12px var(--display);color:#1f2833}
+  .scale{position:absolute;right:14px;bottom:12px;font:600 10px var(--body);color:#4a535d;background:rgba(255,255,255,.94);padding:4px 8px;border:1px solid #dcdfe3;border-radius:5px}
+  .scale i{display:block;height:6px;border:1.5px solid #1f2833;border-top:0;width:120px;margin-bottom:3px}
+  aside{background:var(--panel);border-left:1px solid var(--rule);display:flex;flex-direction:column;min-height:0;
+        position:absolute;top:0;right:0;bottom:0;width:min(360px,92vw);z-index:6;transform:translateX(100%);visibility:hidden;
+        transition:transform .25s ease,visibility 0s linear .25s;box-shadow:-6px 0 18px rgba(0,0,0,.14)}
+  body.panel-open aside{transform:none;visibility:visible;transition:transform .25s ease,visibility 0s}
+  @media (prefers-reduced-motion:reduce){ aside,#panel-tab{transition:none} }
+  .tabs{display:flex;border-bottom:1px solid var(--rule)} .tab{flex:1;padding:9px 4px;text-align:center;font:600 12px var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:none;border:0;border-bottom:2px solid transparent;cursor:pointer} .tab.on{color:var(--accent-ink);border-bottom-color:var(--accent)}
+  .pane{flex:1;overflow:auto;padding:10px 12px 18px;min-height:0}
+  .pane-top{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+  #search{flex:1;padding:7px 9px;border:1px solid var(--rule);border-radius:6px;font:12.5px var(--body);background:var(--panel);color:var(--ink)}
+  .grp{margin-bottom:8px} .grp-h{display:flex;align-items:center;gap:7px;font:600 11px var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);padding:6px 0 3px;border-bottom:1px solid var(--rule2)} .chip{width:10px;height:10px;border-radius:2px;display:inline-block} .cnt{margin-left:auto;color:var(--muted);font:600 11px var(--body)}
+  .row{display:flex;gap:8px;align-items:flex-start;padding:4px 4px;border-radius:5px;cursor:pointer;font-size:12px} .row:hover{background:var(--rule2)} .row.sel{background:#fff3cc;color:#1f2833}
+  .n{flex:0 0 auto;min-width:22px;height:22px;padding:0 4px;border-radius:11px;color:#fff;font:700 11px/22px var(--display);text-align:center}
+  .nm{flex:1;line-height:1.3;padding-top:3px} .nt,.ip{display:block;color:var(--muted);font-size:10.5px} .ip{font-family:ui-monospace,Menlo,Consolas,monospace}
+  .muted .row{opacity:.7} .lnk{background:none;border:0;color:var(--accent-ink);cursor:pointer;font:inherit;padding:0;text-decoration:underline}
+  #inspector{border:1px solid var(--rule);border-radius:8px;padding:10px;margin-bottom:10px;background:var(--panel)}
+  .ins-h{display:flex;gap:9px;align-items:center;margin-bottom:6px} .ins-name{font:700 14px var(--display);letter-spacing:.02em} .ins-cat{color:var(--muted);font-size:11px} .ins-note{font-size:12px;color:var(--ink2);margin:4px 0} .ins-pos{color:var(--muted);font-size:11px;margin-top:4px}
+  #inspector label{display:block;font-size:11px;color:var(--muted);margin:6px 0 2px} #inspector input,#inspector select{width:100%;padding:6px 8px;border:1px solid var(--rule);border-radius:5px;font:12.5px var(--body);background:var(--panel);color:var(--ink)}
+  .ins-btns{display:flex;gap:8px;margin-top:10px}
+  table{width:100%;border-collapse:collapse;font-size:12px} th{font:600 10.5px var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:5px 4px;border-bottom:1px solid var(--rule)} td{padding:5px 4px;border-bottom:1px solid var(--rule2);vertical-align:top} td.num,th.num{text-align:right;font-variant-numeric:tabular-nums} tr.total td{border-top:1.5px solid var(--ink);border-bottom:0} .new{color:var(--accent-ink)} .dim{color:var(--muted);font-size:11px} tr.is-new td:first-child{font-weight:600}
+  h3{font:700 13px var(--display);letter-spacing:.08em;text-transform:uppercase;margin:14px 0 6px;color:var(--ink2)}
+  ol.scope{padding-left:18px;margin:0;font-size:12px} ol.scope li{margin-bottom:5px} ol.scope b{color:var(--ink)}
+  #log{list-style:none;padding:0;margin:0;font-size:12px} #log li{padding:5px 0;border-bottom:1px solid var(--rule2)} .when{display:block;color:var(--muted);font-size:10.5px}
+  .foot{padding:6px 12px;border-top:1px solid var(--rule);font-size:11px;color:var(--muted);display:flex;gap:10px;align-items:center} #status{flex:1}
+  .note{background:#fff8e6;border-left:3px solid #c9a44a;padding:8px 10px;border-radius:0 5px 5px 0;font-size:11.5px;color:#1f2833;margin:8px 0}
+  .qin{display:flex;gap:12px;flex-wrap:wrap;margin:6px 0 10px;font-size:11.5px;color:var(--ink2)} .qin input{width:56px;padding:4px 6px;border:1px solid var(--rule);border-radius:5px;font:12px var(--body);background:var(--panel);color:var(--ink);margin:0 3px}
+  tr.inf td{color:var(--muted)}
+  /* The key used to be display:none under 900px - that is why it "went missing" on the iPad/phone.
+     It now stays available at every width, closed to a small tab until tapped. */
+  @media (max-width:900px){ .legend{max-width:calc(100% - 24px);max-height:60vh;overflow:auto} }
+  /* LIVE STATUS (2026-09-25, plan-live.js). The bar sits top-left of the map; tapping it jumps to the
+     first device that needs attention. Status colours are fixed (not themed) because they are
+     signal lights - green/amber/red must read the same on either background. */
+  .live{position:absolute;left:12px;top:12px;z-index:4;display:flex;align-items:center;gap:8px;flex-wrap:wrap;max-width:calc(100% - 80px);
+        background:rgba(255,255,255,.96);border:1px solid #dcdfe3;border-radius:18px;padding:5px 12px 5px 9px;font:600 11.5px var(--body);color:#1f2833;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.10)}
+  .live.idle{cursor:default;font-weight:500;color:#5a636d}
+  .live b{font:700 12px var(--display);letter-spacing:.12em}
+  .live.bad,.live.alarm{border-color:#d7263d;box-shadow:0 0 0 2px rgba(215,38,61,.18),0 2px 10px rgba(0,0,0,.1)} .live.warn{border-color:#e39b00}
+  .live .ct{display:inline-flex;align-items:center;gap:4px;font-weight:600;color:#3a434d;font-variant-numeric:tabular-nums} .live .ct i{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .live .when{color:#7a8087;font-weight:500;font-size:10.5px}
+  .led{width:10px;height:10px;border-radius:50%;flex:0 0 auto;box-shadow:0 0 0 2px #fff}
+  .led.pulse{animation:ledpulse 2.4s ease-in-out infinite}
+  @keyframes ledpulse{0%,100%{opacity:1}50%{opacity:.45}}
+  .down-ring{animation:ringpulse 1.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+  @keyframes ringpulse{0%,100%{opacity:1}50%{opacity:.25}}
+  @media (prefers-reduced-motion:reduce){ .led.pulse,.down-ring{animation:none} }
+  .kled{width:9px;height:9px;border-radius:50%;flex:0 0 auto;margin-top:7px;display:inline-block} .kled.hollow{border:1.5px dashed #9aa3ad;background:transparent}
+  .ins-live{border:1px solid var(--rule);border-radius:6px;padding:6px 8px;margin:6px 0;font-size:11.5px;color:var(--ink2);display:grid;gap:2px}
+  .ins-live .lv-h{display:flex;align-items:center;gap:6px;font:700 12px var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--ink)} .ins-live .lv-h .kled{margin-top:0}
+  .grp.attn .grp-h{color:#d7263d}
+  #tip .tip-live{color:#ffd9a0}
+  .back-app{font:600 12px var(--body);color:var(--accent-ink);text-decoration:none;border:1px solid var(--rule);border-radius:6px;padding:6px 10px;background:var(--panel)} .back-app:hover{border-color:var(--accent)}
+  .lg-live{display:none} body.live-on .lg-live{display:block}
+  /* DASHBOARD LAMPS (Jeff 09:24: "like a car dashboard with real illumination"). Lit lamps breathe,
+     amber pulses, red blinks hard. DASH MODE dims the drawing and the device dots like instrument
+     panel lighting at night so only the lamps glow; the Dash button flips back to the day view. */
+  .lamp .halo{animation:breathe 3.2s ease-in-out infinite}
+  .lamp.lv-warn .halo{animation:breathe 1.5s ease-in-out infinite}
+  .lamp.lv-down .halo,.lamp.lv-alarm .halo{animation:blink 0.9s steps(2,jump-none) infinite}
+  .lamp.lv-down .lens,.lamp.lv-alarm .lens{animation:blinklens 0.9s steps(2,jump-none) infinite}
+  @keyframes breathe{0%,100%{opacity:.55}50%{opacity:.95}}
+  @keyframes blink{0%{opacity:1}100%{opacity:.15}}
+  @keyframes blinklens{0%{opacity:1}100%{opacity:.55}}
+  @media (prefers-reduced-motion:reduce){ .lamp .halo,.lamp .lens{animation:none} }
+  .kled,.led{background-image:radial-gradient(circle at 38% 35%,rgba(255,255,255,.85) 0 18%,transparent 45%)}
+  .kled{box-shadow:0 0 6px 1px currentColor} .led{box-shadow:0 0 0 2px #fff,0 0 9px 2px rgba(35,165,90,.7)}
+  .live.bad .led,.live.alarm .led{box-shadow:0 0 0 2px #fff,0 0 10px 3px rgba(215,38,61,.8)} .live.warn .led{box-shadow:0 0 0 2px #fff,0 0 10px 3px rgba(227,155,0,.75)}
+  body.dash .stage{background:#0b0f14}
+  body.dash .stage svg{background:#0b0f14}
+  body.dash #L-grid,body.dash #L-yard,body.dash #L-rooms,body.dash #L-fixtures,body.dash #L-lighting,body.dash #L-duct,body.dash #L-walls,body.dash #L-labels,body.dash #L-dims{filter:brightness(.34) saturate(.55)}
+  body.dash #L-devices{filter:brightness(.55) saturate(.7)}
+  body.dash #L-devices .dev.sel{filter:none}
+  body.dash .live{background:rgba(16,20,26,.92);border-color:#2b323b;color:#e8edf2} body.dash .live .ct{color:#c9d1da} body.dash .live b{color:#fff}
+  body.dash .north,body.dash .scale{filter:invert(.9) hue-rotate(180deg)}
+  /* THE HOUSE, ALIVE (plan-live.js paintLife) */
+  #L-pools .pool{mix-blend-mode:screen}
+  .flicker{animation:flicker 2.3s infinite}
+  @keyframes flicker{0%,100%{opacity:1}12%{opacity:.72}20%{opacity:.95}37%{opacity:.8}52%{opacity:1}64%{opacity:.68}78%{opacity:.92}}
+  .tv-spill.flicker{animation-duration:3.1s}
+  .standby{animation:breathe 4s ease-in-out infinite}
+  .pulse-soft{animation:breathe 2.4s ease-in-out infinite}
+  .spray{transform-box:fill-box;transform-origin:center;animation:spray 1.8s ease-out infinite}
+  @keyframes spray{0%{transform:scale(.2);opacity:1}100%{transform:scale(1.6);opacity:0}}
+  .air{animation:air 1.1s linear infinite} .flow{animation:air 1.4s linear infinite}
+  @keyframes air{to{stroke-dashoffset:-24}}
+  .spin{animation:spin 1s linear infinite} .orbit{animation:spin 6s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .door-open{animation:breathe 1.6s ease-in-out infinite} .door-open.fast{animation-duration:.6s}
+  @media (prefers-reduced-motion:reduce){ .flicker,.standby,.pulse-soft,.spray,.air,.flow,.spin,.orbit,.door-open,.rain{animation:none!important} }
+  .rain{position:absolute;inset:0;pointer-events:none;z-index:3;opacity:.35;
+        background-image:repeating-linear-gradient(105deg,transparent 0 14px,rgba(170,205,255,.55) 14px 15px,transparent 15px 34px);
+        background-size:120px 120px;animation:rainfall .5s linear infinite}
+  @keyframes rainfall{to{background-position:-30px 120px}}
+  #dash{display:none} body.live-on #dash{display:inline-block} #dash[aria-pressed="true"]{background:#1f2833;color:#ffd166;border-color:#1f2833}
+  @media (max-width:600px){ .live{font-size:10.5px;gap:6px} .live .when{display:none} }
+  @page{size:letter landscape;margin:.35in}
+  @media print{
+    body{display:block;background:#fff;color:#111}
+    header{border:0;padding:0 0 6px} .tools,.layers{display:none!important}
+    main{display:block} .stage{height:6.6in;overflow:visible;page-break-after:always} .stage svg{height:6.6in;width:auto;margin:0 auto}
+    aside{border:0;display:block;position:static;transform:none;visibility:visible;width:auto;box-shadow:none} .tabs,.pane-top,#inspector,.foot,.drawer-tab{display:none!important}
+    .pane{display:block!important;overflow:visible;padding:0;columns:3;column-gap:18px} .pane[hidden]{display:block!important}
+    #pane-log{display:none!important} #pane-rooms{columns:1} #pane-duct{columns:1;page-break-before:always}
+    .grp{break-inside:avoid} .row{font-size:10px;padding:2px 3px} .n{min-width:18px;height:18px;font-size:9.5px;line-height:18px}
+  }
+</style>
+
+<header>
+  <div>
+    <h1>Loewen House Plan</h1>
+    <div class="sub"><b>301 S Aztec Dr · White House, TN</b> · Rev 2 · 22 Sep 2026 · shell from the laser walk, rooms from the laser + photos · devices from Jeff’s markup · ductwork per Rev D · 1 ft grid</div>
+  </div>
+  <div class="tools">
+    <a class="back-app" id="back-app" href="/" hidden>&#8592; HCC app</a>
+    <div class="layers">
+      <label><input type="checkbox" id="ly-devices" data-layer="devices" checked> Devices</label>
+      <label><input type="checkbox" id="ly-lighting" data-layer="lighting" checked> Lighting</label>
+      <label><input type="checkbox" id="ly-duct" data-layer="duct" checked> Ductwork</label>
+      <label><input type="checkbox" id="ly-fixtures" data-layer="fixtures" checked> Fixtures</label>
+      <label><input type="checkbox" id="ly-yard" data-layer="yard" checked> Yard</label>
+      <label><input type="checkbox" id="ly-grid" data-layer="grid" checked> Grid</label>
+    </div>
+    <div class="zoom"><button class="btn" id="z-out" aria-label="Zoom out">−</button><button class="btn" id="z-fit">Fit</button><button class="btn" id="z-in" aria-label="Zoom in">+</button></div>
+    <button class="btn" id="dash" aria-pressed="true" title="Dim the drawing so the status lamps glow like a dashboard">&#9728; Dash lights</button>
+    <button class="btn" id="edit">Edit</button>
+    <button class="btn" id="add" title="Adds the next number at the centre of the view (edit mode)">+ Add device</button>
+    <button class="btn" id="print">Print</button>
+  </div>
+</header>
+
+<main>
+  <section class="stage">
+    <svg id="plan" role="img" aria-label="Floor plan of the Loewen house with every numbered device and the ductwork"></svg>
+    <div id="tip" hidden></div>
+    <div class="rain" id="rain" hidden></div>
+    <div class="live idle" id="live" role="status" aria-live="polite"></div>
+    <div class="north">N<br><svg width="18" height="26" viewBox="0 0 18 26"><path d="M9 1 L15 22 L9 17 L3 22 Z" fill="#1f2833"/></svg></div>
+    <div class="scale"><i></i>5 FEET</div>
+    <details class="legend" id="legend">
+      <summary>Key</summary>
+      <div class="lg-grid">
+        <div><i class="n"></i> new duct (Rev D scope)</div><div><i></i> existing duct, stays</div>
+        <div><i class="d"></i> door swing</div><div><i class="w"></i> window</div>
+        <div><i class="c"></i> recessed can → its dimmer</div><div><i class="r"></i> register · ⊘ damper on new runs</div>
+        <div><i class="t"></i> thermostat wire · 18 AWG with C</div><div><i class="inf"></i> room inferred, not measured</div>
+      </div>
+      <div class="lg-h">Rooms</div>
+      <div class="lg-grid rooms">
+        <div><i style="background:#dbe7f7"></i> bedrooms</div><div><i style="background:#cfecf0"></i> baths</div><div><i style="background:#dcefcf"></i> kitchen · dining</div>
+        <div><i style="background:#fbe6c4"></i> living</div><div><i style="background:#e9e4f4"></i> hall · foyer</div><div><i style="background:#e3dfd7"></i> garage</div>
+      </div>
+      <div class="lg-h">Devices · colour = category</div>
+      <div class="lg-grid cats" id="cat-legend"></div>
+      <div class="lg-live">
+        <div class="lg-h">Live status light · top right of each dot</div>
+        <div class="lg-grid rooms">
+          <div><i style="background:#23a55a;border-radius:50%;width:9px;height:9px;border:0"></i> reporting</div><div><i style="background:#e39b00;border-radius:50%;width:9px;height:9px;border:0"></i> needs a look</div><div><i style="background:#d7263d;border-radius:50%;width:9px;height:9px;border:0"></i> down · flashing ring</div>
+          <div><i style="background:#9aa3ad;border-radius:50%;width:9px;height:9px;border:0"></i> switched off</div><div>no light = not in Home Assistant</div>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <button type="button" class="drawer-tab" id="panel-tab" aria-controls="side-panel" aria-expanded="false">&#9664; Devices &amp; details</button>
+  <aside id="side-panel">
+    <div class="tabs">
+      <button class="tab on" data-pane="devices">Devices <span id="count"></span></button>
+      <button class="tab" data-pane="duct">Ductwork</button>
+      <button class="tab" data-pane="rooms">Quantities</button>
+      <button class="tab" data-pane="log">Changes</button>
+    </div>
+    <div class="pane" id="pane-devices">
+      <div class="pane-top"><input id="search" type="search" placeholder="Find a device — name, number, IP" aria-label="Find a device"></div>
+      <div id="inspector" hidden></div>
+      <div id="key"></div>
+    </div>
+    <div class="pane" id="pane-duct" hidden>
+      <div class="note">Run lengths are <b>scaled off this plan</b> from the trunk line to each register. Registers are drawn to the room, not measured — in edit mode drag a register to where it really is and the length updates.</div>
+      <table><thead><tr><th>Run</th><th>Size</th><th>Status</th><th class="num">ft</th><th class="num">CFM @ 600 fpm</th></tr></thead><tbody id="duct-rows"></tbody></table>
+      <p class="dim">CFM @ 600 ft/min = duct area × 600, the ACCA Manual D recommended velocity for flex — what each run carries comfortably, not a design assignment. Design airflow for the house is 995 CFM.</p>
+      <h3>Required scope · Rev D, 21 Sep 2026</h3>
+      <ol class="scope" id="scope"></ol>
+    </div>
+    <div class="pane" id="pane-rooms" hidden>
+      <div class="note">Quantities for quoting — paint, carpet, gutters, roof. Rooms tile with zero-thickness walls, so a tape pulled wall to wall reads ~1–2 ft less than these; the shell is from the laser walk.</div>
+      <div class="qin"><label>Ceiling <input id="q-ceil" type="number" value="8" min="7" max="12" step="0.5"> ft</label><label>Roof pitch <input id="q-pitch" type="number" value="8" min="2" max="14" step="1"> /12</label><label>Overhang <input id="q-over" type="number" value="1" min="0" max="3" step="0.5"> ft</label></div>
+      <table><thead><tr><th>Room</th><th class="num">ft</th><th class="num">sq ft</th><th>floor</th><th class="num">wall ft</th><th class="num">wall sq ft</th></tr></thead><tbody id="room-rows"></tbody></table>
+      <p class="dim">Wall sq ft = perimeter × ceiling, gross — subtract doors (≈20 sq ft each) and windows (≈12). Ceilings to paint ≈ <span id="ceil-total"></span> sq ft (house). Rooms marked <i>inferred</i> are drawn from Jeff’s descriptions, not measured.</p>
+      <h3>Floors</h3>
+      <table><thead><tr><th>Finish</th><th class="num">sq ft</th><th class="num">sq yd</th></tr></thead><tbody id="floor-rows"></tbody></table>
+      <h3>Exterior</h3>
+      <table><tbody id="ext-rows"></tbody></table>
+      <p class="dim">Brick veneer all round. Gutters run on the eaves: the back and both sides, plus the front outside the two gables. Roof area is footprint + overhang × the pitch factor — a ballpark for a roofer, not a takeoff.</p>
+      <h3>How the shell was measured</h3>
+      <p class="dim">Bosch GLM 20 laser, 22 Sep 2026. Front 39′5″ · east 29′3″ · west 34′10″ · kitchen bump-out 5′7″ (west 7′8″ of the kitchen) · porch recess 5′6″ × 3′8″ · garage 13 × 24 taped, front set back 8 ft with the door in the north wall · deck 26 ft from the kitchen jog.</p>
+    </div>
+    <div class="pane" id="pane-log" hidden>
+      <ul id="log"></ul>
+    </div>
+    <div class="foot"><span id="status">Rev 1 · every dot is where Jeff wrote it.</span></div>
+  </aside>
+</main>
+
+<script src="plan-data.js?v=20260925f"></script>
+<script>
+  (function () { const ol = document.getElementById('scope'); window.PLAN.duct.scope.forEach(s => { const li = document.createElement('li'); li.innerHTML = '<b>' + s[0] + ':</b> ' + s[1]; ol.appendChild(li); });
+    const lg = document.getElementById('cat-legend'); window.PLAN.cats.forEach(c => { const d = document.createElement('div'); d.innerHTML = '<i style="background:' + c.color + '"></i> ' + c.name; lg.appendChild(d); }); })();
+
+  /* Side panel drawer (2026-09-25). Closed by default so the map is full screen; the arrow tab opens
+     it. window.hccPanel(true) lets plan-app.js open it when a dot is tapped or editing starts. */
+  (function () {
+    const tab = document.getElementById('panel-tab');
+    function set(open, remember) {
+      document.body.classList.toggle('panel-open', open);
+      tab.setAttribute('aria-expanded', open ? 'true' : 'false');
+      tab.innerHTML = open ? '&#9654; Hide panel' : '&#9664; Devices &amp; details';
+      if (remember) { try { localStorage.setItem('hccPlanPanelOpen', open ? '1' : '0'); } catch (e) {} }
+    }
+    window.hccPanel = function (open) { set(open, false); };
+    tab.addEventListener('click', function () { set(!document.body.classList.contains('panel-open'), true); });
+    let saved = null; try { saved = localStorage.getItem('hccPlanPanelOpen'); } catch (e) {}
+    set(saved === '1', false);
+  })();
+
+  /* Remember whether the key is open, per browser. Wrapped in try/catch and defaulting to CLOSED,
+     because storage can be empty or throw in a private window - the plan must never open with the
+     key covering the house just because storage was unavailable. */
+  (function () {
+    const d = document.getElementById('legend');
+    if (!d) return;
+    try { if (localStorage.getItem('hccPlanKeyOpen') === '1') d.open = true; } catch (e) {}
+    d.addEventListener('toggle', function () {
+      try { localStorage.setItem('hccPlanKeyOpen', d.open ? '1' : '0'); } catch (e) {}
+    });
+  })();
+</script>
+<script src="plan-live.js?v=20260925f"></script>
+<script src="plan-app.js?v=20260925f"></script>

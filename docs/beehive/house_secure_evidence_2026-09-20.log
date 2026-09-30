@@ -1,0 +1,37 @@
+=== WATCHING THE 22:00 GARAGE SECURE RUN ===  armed 20:55:55
+    door is CRACKED for the fan right now - this is the real test
+20:58:13  automation.hcc_garage_secure_at_10_pm_door_fan_man_door on -> unavailable
+20:58:13  automation.hcc_garage_secure_at_10_pm_door_fan_man_door unavailable -> on
+22:00:00  switch.garage_garage_door_opener                     off -> on
+22:00:01  switch.garage_garage_door_opener                     on -> off
+22:00:04  binary_sensor.garage_door_down_contact               on -> off
+22:00:04  cover.garage_door                                    open -> closed
+22:00:05  switch.mini_smart_socket11_2_socket_1                on -> off
+22:00:05  binary_sensor.garage_secure                          off -> on
+=== watch window closed 22:10:55 ===
+secure-snapshot armed 21:15:30 -> fires 22:05:00
+
+=== HOUSE SECURE BASELINE  2026-09-20T22:05:10 ===
+  -- doors --
+     binary_sensor.back_deck_door_contact             off
+     binary_sensor.front_door_contact                 off
+     binary_sensor.garage_door_down_contact           off
+     binary_sensor.garage_man_door_contact            off
+     binary_sensor.spare_contact_1_contact            on   [EXCLUDED: unmounted spare sensor, no magnet - permanently reads on.]
+  -- locks --
+     lock.gle_350_lock                                unlocked   [EXCLUDED: DELIBERATELY unlocked - Jeff standing decision. Including it would make the house NEVER read secure.]
+  -- leaks --
+     binary_sensor.guest_bath_leak_water_leak         off
+     binary_sensor.kitchen_refrigerator_leak_water_leak off
+     binary_sensor.kitchen_sink_leak_water_leak       off
+  -- other --
+     cover.garage_door                                closed
+     binary_sensor.garage_secure                      on
+     switch.mini_smart_socket11_2_socket_1            off
+
+  doors counted toward SECURE : 4
+  any NOT closed              : NONE
+  overhead (off=closed)       : off
+  garage fan                  : off
+  VERDICT: HOUSE SECURE
+  saved -> house_secure_baseline.json

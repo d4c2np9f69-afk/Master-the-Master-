@@ -1,0 +1,11 @@
+{
+  "domain": "bhyve",
+  "name": "Orbit B-Hyve",
+  "version": "1.0.0",
+  "documentation": "https://github.com/d4c2np9f69-afk/master-the-master-",
+  "dependencies": [],
+  "codeowners": [],
+  "requirements": [],
+  "iot_class": "cloud_polling",
+  "config_flow": true
+}
