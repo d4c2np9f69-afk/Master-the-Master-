@@ -35,3 +35,6 @@ Full set for 100044717 = **12 strips (10 A + 2 B)**. ❌ The $54.26 eBay 3949767
 - **"LED Strips(12) For ELEMENT E4FAA75R WR75UT4210 ONN 100044717 LED75D07A-ZC66AG-06"** — **$36.55, free delivery**, US, seller ledbacklight2022 99.4 % (3.6K) → the **-06 / 30375007005/6** strip version.
 - **"New 12pcs LED Strips 30375007007 30375007008 For 100044717 WR75UT4210 E4FAA75R"** — **$42.06, free delivery, free returns**, US, seller famfutr 100 % (6.3K) → the **30375007007/8** strip version.
 - Two strip families exist: **30375007005/006 (LED75D07A/B-ZC66AG-06)** vs **30375007007/008 (LED75D07A/B-ZC66AG)**. Read the number on an old strip, then buy the matching 12-strip kit. Either is ≈ $37–42 delivered vs $398 new.
+
+## Soldering? (Jeff 10:02 — "last time the repair man had to solder the strips together in one place")
+Checked the Amazon GUANGMING kit (B0FFZRBDFG) product photos in Chrome 10:06: the new strips end in **two bare round SOLDER PADS — no plug connectors visible**. Listing text: "1 Set is 12 strips … 10 A (30375007007) + 2 B (30375007008) … 826 mm, 7 LEDs each, 3 V per bead"; nothing about connectors. ⇒ **Plan on soldering the jumper wires between strips** (2 per joint), which matches the earlier repair. Reuse the old jumper wires/harness. Not verified: how many joints — count them when the back is off.
