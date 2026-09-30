@@ -48,3 +48,11 @@ Badcaps, read in Chrome:
 
 ## 10:33 — parts on hand (Jeff)
 Jeff has **a whole box of NEW capacitors, incl. 450 V** → the cap swap is **$0**. Pick by the old cap's printing: same µF (forum: 10 µF), ≥ same voltage, 105 °C if available, similar diameter. If no exact 10 µF, check with Claude before substituting. Walkthrough given in chat 10:27 (discharge through a resistor + confirm 0 V; polarity stripe = negative, match the board's shaded half; test before closing).
+
+## 10:38 — Current-reduction mod while it's open? (Jeff)
+Read in Chrome: Badcaps "LED Backlight current mod." https://www.badcaps.net/forum/showthread.php?t=61722
+- "Overdriven on purpose to limit life" = ONE member's opinion (dskall: *"Max for these leds is 350ma as opposed to 400ma which in my opinion is deliberate"*), not established fact.
+- Method that WORKED there: identify the LED driver IC, read its datasheet, and **raise the ISENSE resistor** (between the constant-current PWM MOSFET's source and GND) → 420 mA → ~300 mA, "plenty bright".
+- 🔴 **Trap in the same thread:** he first pulled a resistor on the boost converter's **CS** pin — that **INCREASED** LED current. Wrong resistor = the opposite of the goal. **Never do it blind.**
+- Alt route: TV service-mode backlight setting (no hardware).
+**Plan:** YES, worth doing while it's open — but only after identifying this board's LED driver IC from photos + its datasheet. Jeff photographs both sides of the power board around the backlight connector / MOSFET / small SMD resistors + the driver IC's part number. Claude finds the datasheet and the exact ISENSE resistor + new value. Aim for a modest cut (~15–25 %).
