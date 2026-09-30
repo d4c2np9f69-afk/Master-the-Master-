@@ -56,3 +56,14 @@ Read in Chrome: Badcaps "LED Backlight current mod." https://www.badcaps.net/for
 - 🔴 **Trap in the same thread:** he first pulled a resistor on the boost converter's **CS** pin — that **INCREASED** LED current. Wrong resistor = the opposite of the goal. **Never do it blind.**
 - Alt route: TV service-mode backlight setting (no hardware).
 **Plan:** YES, worth doing while it's open — but only after identifying this board's LED driver IC from photos + its datasheet. Jeff photographs both sides of the power board around the backlight connector / MOSFET / small SMD resistors + the driver IC's part number. Claude finds the datasheet and the exact ISENSE resistor + new value. Aim for a modest cut (~15–25 %).
+
+## 11:00 — PARTS LIST (Jeff: "not doing it today but I wanted to get all the parts") — prices read in Chrome
+| Part | Status / price |
+|---|---|
+| 450 V 10 µF 105 °C electrolytic | **ON HAND** (Jeff's box of new caps) — $0 |
+| LED backlight tester | **BUY:** TKDMR "LED Lamp Bead TV Backlight Tester … 0-300V 30mA" — **$18.99**, 4.7★ / 766 ratings (Amazon search 10:59). Alt: 0-300V adaptive tester $17.39, 4.5★/380. Tests each strand FROM THE BACKLIGHT CONNECTOR (~96 V healthy) — no need to dig to the strips first. |
+| 12-strip kit | **WAIT** — only if the tester fails a strand; read the strip part number then (005/006 vs 007/008). $36.55–42.06 (see 10:05). |
+| Current-sense resistor (mod) | **WAIT for board photos** — value + package unknown. If wanted as a hedge: Chanzon 1206 SMD kit, 60 values, 1/4 W — **$9.99**, 236 ratings (may not fit if the board uses 0805 / through-hole). |
+| Discharge resistor (few kΩ, ≥5 W), braid/sucker, flux, solder | Jeff's shop stock (assumed — confirm) |
+**Buy now: tester $18.99. Everything else is on hand or waits on what the tester/photos show.**
+**4K "upgrade" (Jeff 11:00):** nothing inside is upgradeable — the panel's resolution/refresh and the Roku main board are fixed; software updates come automatically. The only real upgrade is running the backlight cooler (the mod above).
