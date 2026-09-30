@@ -188,3 +188,11 @@ listed the share,"* not *"the port is open."*
 - **Angela's work Dell is not in scope.** It's a corporate machine.
 - **The garage PC is step one** and it is the only step that needs a screwdriver's worth of your
   time rather than a yes.
+
+## 2026-09-30 AM — Acer fixed + tidied (Jeff away caring for Angela; no asks)
+- **Beast drives on the Acer:** `C:\HCC-SETUP\map-beast.cmd` hung at logon 07:20 (network not up; killed 0xC000013A). Rewritten: waits for the Beast, retries 5×, only remaps a missing drive. Task `HCC-MapBeastAtLogon` = logon +20 s **and every 10 min**, runs on battery. Proven 08:09: O:, B:, IPC$ to 301SERVER + GARAGELAPTOP; result 0. Backup `map-beast.cmd.bak-20260930`.
+- **Kiyo webcam** gave zero frames (light on, no picture) after a 07:18 port change; Jeff re-seated it 08:40 → real 640×480 frame (ffmpeg via winget `Gyan.FFmpeg`). Windows now names it **"USB Video Device"** — pick that in Zoom. Built-in "HD WebCam" also works.
+- **CnX Pro:** the only purchase is **10-Bit HDR PRO, 2026-07-16, $15.99/yr** (order 97e24810…). Video Casting / Remove Ads were never bought. Root cause on the Acer: **Microsoft Store was installed but NOT registered for user jeffl** (`ms-windows-store:` link failed). Registered in-session (`Add-AppxPackage -Register …WindowsStore_22501.1401.7.0…`), Store opens signed in, "Get updates" run. ⚠️ CnX's Pro page after the fix was NOT visually confirmed (UIA click missed). Beast CnX also shows Pro trial since Aug (08-08 0x80072EFD); both PCs now reach all 5 Store licence hosts, no NRPT/proxy.
+- **Heat:** 60 s full load held 155 % of base (full turbo) the whole time, 0 throttle events → no evidence it needs paste/fan now. ACPI zone (57 °C/135 °F) is static, not a core sensor.
+- **RAM:** 2×8 GB DDR3L-1600, both slots full, board max 16 GB (SMBIOS) — cannot add; 8 GB committed, pagefile 41 MB. SSD MX500 500 GB, 329 GB free.
+- **Desktop (OneDrive\Desktop = shared with the Beast):** 22 clutter items MOVED (not deleted) to `OneDrive\Documents\Desktop cleanup 2026-09-30\` by type; broken shortcuts (PC Health Check → Windows.old, Tor → missing folder, CCleaner 7) + duplicate Edge moved there too. Desktop now 10 working icons. HP Support Assistant (installed on an Acer) left alone.
