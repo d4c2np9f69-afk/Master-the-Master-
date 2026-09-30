@@ -29,3 +29,9 @@ TV on, room dark, eye 1–2" from screen → Roku logo faintly visible. **Main b
 | ShopJimmy 261501013121 | 12 strips | $64.99 | — | OUT OF STOCK |
 | **New TV:** Walmart — model 100044717 **out of stock**; current onn 75" 4K Roku TV **$398** | | | | |
 **Pick:** match the old strips' printed part number first, then the cheapest listing that names it (eBay $52–54, most sales on the $54.26 one). Repair ≈ $53 vs $398 new.
+
+## CORRECTION 10:05 — strip COUNT (Jeff: "Is the 12 strip")
+Full set for 100044717 = **12 strips (10 A + 2 B)**. ❌ The $54.26 eBay 394976725095 listing recommended at 9:57 **never states a count and its main photo shows 8 strips — dropped.** eBay search (Buy It Now, price+ship lowest, read in Chrome 10:03) — listings that SAY 12 in the title:
+- **"LED Strips(12) For ELEMENT E4FAA75R WR75UT4210 ONN 100044717 LED75D07A-ZC66AG-06"** — **$36.55, free delivery**, US, seller ledbacklight2022 99.4 % (3.6K) → the **-06 / 30375007005/6** strip version.
+- **"New 12pcs LED Strips 30375007007 30375007008 For 100044717 WR75UT4210 E4FAA75R"** — **$42.06, free delivery, free returns**, US, seller famfutr 100 % (6.3K) → the **30375007007/8** strip version.
+- Two strip families exist: **30375007005/006 (LED75D07A/B-ZC66AG-06)** vs **30375007007/008 (LED75D07A/B-ZC66AG)**. Read the number on an old strip, then buy the matching 12-strip kit. Either is ≈ $37–42 delivered vs $398 new.
