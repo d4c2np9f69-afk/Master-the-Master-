@@ -124,6 +124,63 @@ if (Test-Path $guides) {
 }
 
 # ---------------------------------------------------------------------------
+# THE REPO ITSELF - added 2026-10-08, the same session it was earned.
+#
+# WHAT HAPPENED: Jeff asked why the house map was not "alive" with lights and working
+# ceiling fans. I ran THIS SCRIPT three times with three different patterns, got no
+# on-point hit, and told him his request "is not written anywhere". It WAS. It was at
+# the top of paintLife() in docs/house-plan/plan-live.js:
+#     Jeff 09:40: "add more life to the map, show the tvs on off etc really make it
+#     look like it's alive"
+# and the features he was asking for were ALREADY BUILT underneath it - duct airflow on
+# switch.ac_relay, sprinkler spray on the six zone switches, warm pools scaled by each
+# dimmer's real brightness. He was being asked to re-request work he had already paid
+# for, because the search meant to prevent exactly that could not see the repo.
+#
+# THIS SCRIPT HAD THIS HOLE ONCE BEFORE. The REFERENCE GUIDES tier above was added
+# 2026-08-21 for the identical reason - it "only ever searched the MASTER-RECORD
+# subfolder", so material one directory up was invisible. Same class, new tier.
+#
+# WHY IT MATTERS MORE THAN AN ORDINARY MISS: CASE_STUDY_FOR_ANTHROPIC.md names this as
+# failure mode #6 - "grepping for a dead plan's keyword, finding nothing, and concluding
+# no plan was documented" - and says it "twice nearly ended the project". A UserPromptSubmit
+# hook ALREADY forces this search before any "that was never documented" claim. The hook
+# worked. The tool it forced was incomplete, so the session complied and was still wrong.
+#
+# THE PRINCIPLE: when enforcement is mechanical, the MECHANISM MUST BE COMPLETE. Fixing the
+# tool beats writing a rule telling the next session to also grep the repo by hand - that
+# rule would be prose, and prose is what this project has already proved does not survive a
+# session boundary.
+# ---------------------------------------------------------------------------
+$repo = Split-Path -Parent $PSScriptRoot
+Write-Host "`n=== THE REPO (code + docs) matching '$Pattern' ===" -ForegroundColor Magenta
+if (Test-Path $repo) {
+    $rFiles = Get-ChildItem -Path $repo -Recurse -File -ErrorAction SilentlyContinue |
+        Where-Object {
+            $_.FullName -notmatch '\\\.git\\' -and
+            $_.FullName -notmatch '\\node_modules\\' -and
+            $_.Length -lt 2MB -and
+            $_.Extension -match '^\.(md|js|mjs|ps1|py|yaml|yml|json|html|css|txt|cmd|sh)$'
+        }
+    $rHits = $rFiles | Select-String -Pattern $Pattern -ErrorAction SilentlyContinue
+    $rTotal = @($rHits).Count
+    if ($rTotal -gt 0) {
+        Write-Host "  $rTotal hits (showing up to $Max)`n"
+        $rHits | Select-Object -First $Max | ForEach-Object {
+            $rel = $_.Path.Replace($repo, '').TrimStart('\')
+            Write-Host ("  [{0}:{1}]" -f $rel, $_.LineNumber) -ForegroundColor DarkMagenta
+            Write-Host "  > $($_.Line.Trim())" -ForegroundColor Green
+            "  " + ("-" * 70)
+        }
+        if ($rTotal -gt $Max) { $script:HCCTruncated = $true; Write-Host ("  ...{0} more - narrow the pattern" -f ($rTotal - $Max)) }
+    } else {
+        Write-Host "  (none)"
+    }
+} else {
+    Write-Host "  (repo not found at $repo)"
+}
+
+# ---------------------------------------------------------------------------
 # TRUNCATION WARNING - added 2026-09-20, the same session it was earned.
 #
 # WHAT HAPPENED: a session ran this script, saw "60 hits (showing 8)", read those
