@@ -41,12 +41,24 @@ window.PLAN = (function () {
     { id: 'foyer', name: 'FOYER', sub: '8 × 6', rect: [H(19.67), 3.67, 5.5, 7.33], kind: 'hall', floor: 'hardwood' },
     { id: 'porch', name: 'PORCH', sub: "5'6\" × 3'8\"", rect: [H(19.67), 0, 5.5, 3.67], kind: 'porch', floor: 'concrete' },
     { id: 'guest', name: 'GUEST BEDROOM', sub: '11 × 10', rect: [H(25.17), 0, 10, 11], kind: 'bed', floor: 'carpet', label: [H(28.6), 9.2] },
-    { id: 'gbath', name: 'GUEST BATH', sub: '', rect: [H(35.17), 3.5, 4.25, 11.5], kind: 'bath', floor: 'tile', label: [H(37.3), 7.4] },
+    // 🔴 DEPTH 11.5 IS NOT MEASURED - see ROOM_GEOMETRY_AUDIT_2026-10-08.md. The laser walk puts the
+    // east side at 29'3" (29.25). Guest bath ~8.5 (an ESTIMATE, never measured) + office 13 (laser)
+    // + the 3.5 NE notch = 25.0, leaving 4.25 ft unexplained - and this room was stretched +3.00 and
+    // the office +1.25 to absorb exactly that 4.25. The 12:44 markup shows a `clo` / closet strip
+    // between this room and the office that would close it without touching the office's measured 13.
+    // DO NOT "tidy" these numbers to make the outline close again - that is what hid the gap.
+    { id: 'gbath', name: 'GUEST BATH', sub: 'depth not measured', rect: [H(35.17), 3.5, 4.25, 11.5], kind: 'bath', floor: 'tile', inferred: true, label: [H(37.3), 7.4] },
     { id: 'kitchen', name: 'KITCHEN · DINING', sub: '16 × 13', kind: 'kitchen', floor: 'hardwood',
       poly: [[H(0), 22], [H(16), 22], [H(16), ED], [H(KB), ED], [H(KB), ED + KJ], [H(0), ED + KJ]], label: [H(9.6), 27.2] },
     { id: 'hall', name: 'HALLWAY', sub: 'open to the living room · dead-ends at the guest bath', rect: [H(15), 11, 20.17, 4], kind: 'hall', floor: 'carpet', label: [H(20.4), 12.05] },
-    { id: 'living', name: 'LIVING ROOM', sub: '14 × 17', rect: [H(15), 15, 14.42, 14.25], kind: 'living', floor: 'carpet', label: [H(20.8), 23.2] },
-    { id: 'office', name: 'OFFICE · BED 3', sub: '10 × 13', rect: [H(29.42), 15, 10, 14.25], kind: 'bed', floor: 'carpet', label: [H(34.6), 17.8] },
+    // The laser reads 14 x 17 and this rect is 14.42 x 14.25, which LOOKS 2.75 ft short and is not.
+    // The hallway's south edge is DASHED on the 12:44 markup, annotated "open to living room" - the
+    // 17 ft runs from the hallway's north wall straight through to the back wall: 14.25 + 2.75 of
+    // open hallway = 17. The geometry is right; the bare "14 × 17" label was what misled.
+    { id: 'living', name: 'LIVING ROOM', sub: '14 × 17 · the 17 runs through the open hallway', rect: [H(15), 15, 14.42, 14.25], kind: 'living', floor: 'carpet', label: [H(20.8), 23.2] },
+    // 🔴 Laser says 13 deep; drawn 14.25. The extra 1.25 is part of the unexplained 4.25 ft on the
+    // east wall - see the guest-bath note above and ROOM_GEOMETRY_AUDIT_2026-10-08.md.
+    { id: 'office', name: 'OFFICE · BED 3', sub: '10 × 13 · drawn 1.25 deep, east wall unresolved', rect: [H(29.42), 15, 10, 14.25], kind: 'bed', floor: 'carpet', label: [H(34.6), 17.8] },
     { id: 'fp', name: 'FP', sub: '', rect: [H(29.42), 16, 1.5, 5], kind: 'clo', small: true },
     { id: 'fclo', name: '', sub: '', rect: [H(29.42), 22, 1.5, 7.25], kind: 'clo', small: true, floor: 'carpet' },
   ];
