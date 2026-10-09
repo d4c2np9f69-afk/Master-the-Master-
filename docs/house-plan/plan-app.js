@@ -15,7 +15,10 @@
   svg.setAttribute('viewBox', `0 0 ${VW * PF} ${VH * PF}`);
   const world = el('g', { id: 'world' }, svg);
   const L = {};
-  ['grid', 'yard', 'rooms', 'fixtures', 'lighting', 'duct', 'walls', 'labels', 'dims', 'devices'].forEach(k => { L[k] = el('g', { id: 'L-' + k, class: 'layer' }, world); });
+  // 'glow' sits above the rooms and below the fixtures so lamplight reads as light ON the floor.
+  // It is deliberately NOT in the body.dash dim-list in index.html - everything else is knocked
+  // back to brightness(.34) in dash mode, and the glow staying full is what makes it look lit.
+  ['grid', 'yard', 'rooms', 'glow', 'fixtures', 'lighting', 'duct', 'walls', 'labels', 'dims', 'devices'].forEach(k => { L[k] = el('g', { id: 'L-' + k, class: 'layer' }, world); });
 
   function el(tag, attrs, parent) {
     const e = document.createElementNS(NS, tag);
@@ -200,8 +203,15 @@
       T(x, y + 2.5, 'WH', { size: 6.5, fill: '#7a8087', weight: 700 }, g);
     } else if (f.kind === 'fan') {
       const [x, y] = [X(f.at[0]), Y(f.at[1])];
+      // Blades go in their own group so CSS can spin them about the hub. The four CEILING
+      // fans are pull-chain / RF - kasa_smart_lighting_project_2026-08-06.md, confirmed
+      // 2026-08-13: "Every ceiling fan is wired independently of the LED circuits." There is
+      // no HA entity, so there is no real state to show and the motion is decorative. That is
+      // why it runs unconditionally instead of off a live value, and why it must never be
+      // presented as proof a fan is actually running.
+      const blades = el('g', { class: 'fan-blades', style: `transform-origin:${x}px ${y}px` }, g);
+      [0, 72, 144, 216, 288].forEach(a => el('ellipse', { cx: x, cy: y - 12, rx: 3.2, ry: 9, fill: '#fff', stroke: FX_STROKE, 'stroke-width': .8, transform: `rotate(${a} ${x} ${y})` }, blades));
       el('circle', { cx: x, cy: y, r: 3.5, fill: '#fff', stroke: FX_STROKE, 'stroke-width': 1 }, g);
-      [0, 72, 144, 216, 288].forEach(a => el('ellipse', { cx: x, cy: y - 12, rx: 3.2, ry: 9, fill: '#fff', stroke: FX_STROKE, 'stroke-width': .8, transform: `rotate(${a} ${x} ${y})` }, g));
       T(x, y + 26, 'fan', { size: 5.6, fill: '#7a8087' }, g);
     }
   });
@@ -209,15 +219,31 @@
   /* ---------- lighting (cans + spider to the dimmer) ---------- */
   function renderCans() {
     L.lighting.innerHTML = '';
+    L.glow.innerHTML = '';
+    ensureGlowGradient();
     Object.entries(P.cans).forEach(([n, list]) => {
       const dev = state.devices[n];
       if (dev && dev.removed) return;
       list.forEach(c => {
         if (dev) el('line', { x1: X(dev.x), y1: Y(dev.y), x2: X(c[0]), y2: Y(c[1]), stroke: '#d9b86a', 'stroke-width': .7, 'stroke-dasharray': '2 3' }, L.lighting);
+        // The pool of light this can throws on the floor. Hidden until showcase/dash turns the
+        // glow layer on, so the plain daytime drawing is unchanged.
+        el('circle', { cx: X(c[0]), cy: Y(c[1]), r: 34, fill: 'url(#canGlow)', class: 'can-pool' }, L.glow);
         el('circle', { cx: X(c[0]), cy: Y(c[1]), r: 4.2, fill: '#fff8e6', stroke: '#c9a44a', 'stroke-width': 1 }, L.lighting);
         el('circle', { cx: X(c[0]), cy: Y(c[1]), r: 1.3, fill: '#c9a44a' }, L.lighting);
       });
     });
+  }
+
+  // One shared radial gradient for every light pool - defined once, referenced by all of them.
+  function ensureGlowGradient() {
+    if (svg.querySelector('#canGlow')) return;
+    let defs = svg.querySelector('defs');
+    if (!defs) defs = el('defs', {}, svg);
+    const rg = el('radialGradient', { id: 'canGlow' }, defs);
+    el('stop', { offset: '0%', 'stop-color': '#ffd98a', 'stop-opacity': .85 }, rg);
+    el('stop', { offset: '45%', 'stop-color': '#ffc46b', 'stop-opacity': .32 }, rg);
+    el('stop', { offset: '100%', 'stop-color': '#ffb347', 'stop-opacity': 0 }, rg);
   }
 
   /* ---------- ductwork ---------- */

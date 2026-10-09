@@ -457,7 +457,15 @@
   function counts() { const c = { ok: 0, off: 0, warn: 0, down: 0, alarm: 0, unknown: 0 }; Object.values(live.res).forEach(r => { if (r && r.lvl) c[r.lvl]++; }); return c; }
   function paintBar() {
     if (!bar) return;
-    if (!live.on) { bar.className = 'live idle'; bar.innerHTML = '<span class="led" style="background:' + COLORS.unknown + '"></span>Live status lights show when this plan is opened from the HCC app (Guardian → House map).'; return; }
+    if (!live.on) {
+      bar.className = 'live idle';
+      // Showcase is a LOOK, not a reading. Say so plainly - a pretty plan that implies the
+      // lights are really on would be worse than the dead one it replaces.
+      bar.innerHTML = document.body.classList.contains('showcase')
+        ? '<span class="led" style="background:' + COLORS.unknown + '"></span><b>SHOWCASE</b> · how the house is laid out, lit for display — <b>not live readings</b>. Open from the HCC app (Guardian → House map) for real status.'
+        : '<span class="led" style="background:' + COLORS.unknown + '"></span>Live status lights show when this plan is opened from the HCC app (Guardian → House map).';
+      return;
+    }
     if (!live.when) { bar.className = 'live'; bar.innerHTML = '<span class="led pulse" style="background:' + COLORS.unknown + '"></span>Checking every device…'; return; }
     const c = counts(), t = live.when.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
     const bad = c.down + c.alarm;
@@ -559,6 +567,27 @@
     document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); });
     setInterval(poll, POLL_MS);
     poll();
+  } else {
+    // No token: the plan was opened OUTSIDE the HCC app - a shared link, a browser bookmark,
+    // or Jeff showing it to somebody. That is the view most people ever see, and it used to
+    // render stone dead: no lamps, no night view, and the "Dash lights" button in index.html
+    // sat there visible but wired to nothing, because this whole block was app-only.
+    // Showcase mode turns on the dark view and the decorative light pools so the drawing looks
+    // like a lit house instead of a CAD plot. It carries NO live data and the bar says so.
+    const dashBtn = document.getElementById('dash');
+    const setShow = on => {
+      document.body.classList.toggle('dash', on);
+      document.body.classList.toggle('showcase', on);
+      if (dashBtn) { dashBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); dashBtn.innerHTML = on ? '&#9728; Day view' : '&#9790; Dash lights'; }
+      paintBar();
+    };
+    let showPref = null; try { showPref = localStorage.getItem('hccPlanShowcase'); } catch (e) {}
+    setShow(showPref !== '0');
+    if (dashBtn) dashBtn.addEventListener('click', () => {
+      const on = !document.body.classList.contains('showcase');
+      setShow(on);
+      try { localStorage.setItem('hccPlanShowcase', on ? '1' : '0'); } catch (e) {}
+    });
   }
   paintBar();
 })();
