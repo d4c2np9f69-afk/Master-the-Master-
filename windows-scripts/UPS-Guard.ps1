@@ -37,7 +37,13 @@ param(
     # Interruptions closer together than this are treated as one event.
     [int]$SequenceGapSeconds = 45,
 
-    [string]$LogPath = 'C:\ProgramData\HCC\ups-guard.log'
+    [string]$LogPath = 'C:\ProgramData\HCC\ups-guard.log',
+
+    # How often the guard says "I am alive" in the log. A parameter, not a constant, so the
+    # heartbeat can actually be PROVEN - with a 6-hour default you would have to wait 6 hours
+    # to watch it fire once, and a check nobody can run is how this became unverifiable in the
+    # first place.
+    [double]$HeartbeatMinutes = 360
 )
 
 $ErrorActionPreference = 'Stop'
@@ -82,7 +88,33 @@ $seqOffTotal   = 0.0     # cumulative seconds of darkness in this sequence
 $lastRestore   = $null
 $warned        = $false
 
+# ---------------------------------------------------------------------------
+# HEARTBEAT - added 2026-10-09, because this guard could not be verified at all.
+#
+# THE PROBLEM: this runs as SYSTEM, so a normal session cannot see it. Checking by
+# process is a trap TWICE over - Get-CimInstance cannot read another user's CommandLine,
+# so filtering on it silently returns "not running" for a perfectly healthy guard, and a
+# query whose own command line contains the script name MATCHES ITSELF and returns a
+# healthy guard that is really its own reflection. Both happened on 2026-10-09 inside ten
+# minutes. HCC-Audit.py says it plainly every run: "3 task(s) not visible without admin
+# rights, NOT checked this run" - and one of them is the thing standing between the house
+# brain and a power line that was crashing it twice a week.
+#
+# THE FIX: the log is world-readable, so the guard says so itself. One line every 6 hours
+# turns "cannot be checked" into "check the file". No admin, no process inspection, no
+# guessing from PIDs. Four lines a day is nothing next to a log that already doubles as a
+# power-quality record of what CEMC delivers.
+#
+# A stale heartbeat is now REAL evidence the guard is down, which nothing could show before.
+$lastBeat = Get-Date
+Write-Log 'HEARTBEAT' ("Alive. Mains={0}. Battery={1}%. Next beat in {2} min." -f (Get-MainsState), (Get-Charge), $HeartbeatMinutes)
+
 while ($true) {
+
+    if (((Get-Date) - $lastBeat).TotalMinutes -ge $HeartbeatMinutes) {
+        $lastBeat = Get-Date
+        Write-Log 'HEARTBEAT' ("Alive. Mains={0}. Battery={1}%." -f (Get-MainsState), (Get-Charge))
+    }
 
     $mains = Get-MainsState
     $now   = Get-Date
