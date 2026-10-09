@@ -425,6 +425,55 @@
       const u = du.unit; text(X(u.x + u.w / 2), Y(u.y) - 6, '❄ COOLING', { 'font-size': 8, fill: '#9fe9ff', 'font-weight': 700 }, top);
     }
 
+    // 5b. THE MACHINE MESH — Jeff, 2026-10-08: "if the computers are all working together
+    // the[n] show there is a network signal between them".
+    // Until tonight this was undrawable: a scan of all 575 HA entities found nothing for the
+    // Beast, Acer, Lenovo or KitchenPC, so a link here would have been decoration pretending
+    // to be data. HCC-Scripts\Publish-MachineHealth.ps1 now publishes one retained MQTT
+    // connectivity entity per machine every 5 min, with expire_after 900 so a dead publisher
+    // reads UNAVAILABLE rather than holding a stale "online" - these lines go dark instead of
+    // lying. Star topology, because the Beast IS the hub: it runs the AI host, the shares and
+    // every scheduled job.
+    // Colour follows Jeff's law (2026-10-08): up = green, off = black. A laptop that is simply
+    // powered off is NOT a fault and must never be drawn red.
+    {
+      const HUB = 2;
+      const MESH = {
+        2:  'binary_sensor.hcc_machines_beast_online',
+        81: 'binary_sensor.hcc_machines_acer_laptop_online',
+        82: 'binary_sensor.hcc_machines_garage_laptop_online',
+        83: 'binary_sensor.hcc_machines_kitchenpc_online',
+      };
+      const hub = dev(HUB);
+      if (hub && st(MESH[HUB])) {
+        const hx = X(hub.x), hy = Y(hub.y);
+        let linked = 0;
+        Object.keys(MESH).forEach((k) => {
+          const n = +k; if (n === HUB) return;
+          const d = dev(n); if (!d) return;
+          const alive = on(MESH[n]);
+          const x2 = X(d.x), y2 = Y(d.y);
+          mk('line', {
+            x1: hx, y1: hy, x2, y2,
+            stroke: alive ? '#23a55a' : '#0a0d12',
+            'stroke-width': alive ? 1.8 : 1,
+            'stroke-dasharray': '4 6',
+            'stroke-linecap': 'round',
+            opacity: alive ? 0.85 : 0.3,
+            class: alive ? 'air' : null,
+          }, top);
+          if (alive) {
+            linked++;
+            const pkt = mk('circle', { r: 2.6, fill: '#7df0a8' }, top);
+            mk('animateMotion', { dur: '2.6s', repeatCount: 'indefinite', path: `M ${hx} ${hy} L ${x2} ${y2}` }, pkt);
+          }
+        });
+        if (linked) {
+          text(hx, hy - 20, linked + ' linked', { 'font-size': 6.5, fill: '#8fe6ad' }, top);
+        }
+      }
+    }
+
     // 6. SHARKY — circles the dock while cleaning
     { const d = dev(62), e = st('vacuum.sharky'); if (d && e && /clean|return/.test(e.state)) { const g = mk('g', { transform: `translate(${X(d.x)} ${Y(d.y)})` }, top); const r = mk('g', { class: 'orbit' }, g); mk('circle', { cx: 0, cy: -2.2 * PF, r: 6, fill: '#9aa7b4', stroke: '#fff', 'stroke-width': 1.5 }, r); text(X(d.x), Y(d.y) + 30, e.state === 'cleaning' ? 'Sharky cleaning' : 'Sharky heading home', { 'font-size': 6.5, fill: '#dfe7ef' }, top); } }
 

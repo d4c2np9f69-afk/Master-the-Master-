@@ -208,7 +208,8 @@ mind**, which is exactly what happened here within three hours of that check bei
 | Windscribe | `windscribe-cli.exe status` / `connect best` | 🔴 `warp-cli disconnect` FIRST or DNS dies |
 | AT&T gateway | BGW320 | `HCC_ACCESS.md` §Network |
 | GaragePC | SMB as its own account | `HCC_ACCESS.md` §5 *(moved off a Word file 2026-09-10)* |
-| **Search everything ever said** | `windows-scripts\Search-HCC.ps1 "topic"` | — |
+| **Search everything ever said** | `windows-scripts\Search-HCC.ps1 "topic"` | — · 🆕 **2026-10-08 it also searches THE REPO.** It never did before, which is how a session ran it three times and still told Jeff a built feature "is not written anywhere" |
+| **Machine reachability in HA** | `HCC-Scripts\Publish-MachineHealth.ps1` · task **HCC Machine Health**, every 5 min | 🔑 **Lives OUTSIDE the repo on purpose** — it names the HA credential and this repo is PUBLIC; the secret guard refused the repo copy and was right to. Publishes retained MQTT discovery so the entities survive an HA restart, with `expire_after: 900` so a dead publisher reads UNAVAILABLE instead of a stale "online". Entities: `binary_sensor.hcc_machines_{beast,acer_laptop,garage_laptop,kitchenpc}_online` + `_house_mesh_healthy`. Built because a scan of all 575 entities found NO machine entity at all |
 | Whole-house audit | `python HCC-Scripts\HCC-Audit.py` | — |
 | Cameras ⛔ **FROZEN** | `Verify-CameraStreams.ps1`, `Test-CameraFeature.ps1` | no change unless it FAILS or Jeff asks |
 
