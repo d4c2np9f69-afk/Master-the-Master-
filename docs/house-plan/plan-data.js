@@ -47,7 +47,28 @@ window.PLAN = (function () {
     // the office +1.25 to absorb exactly that 4.25. The 12:44 markup shows a `clo` / closet strip
     // between this room and the office that would close it without touching the office's measured 13.
     // DO NOT "tidy" these numbers to make the outline close again - that is what hid the gap.
-    { id: 'gbath', name: 'GUEST BATH', sub: 'depth not measured', rect: [H(35.17), 3.5, 4.25, 11.5], kind: 'bath', floor: 'tile', inferred: true, label: [H(37.3), 7.4] },
+    // 🔴 EAST WALL CORRECTED 2026-10-09. Jeff: "he still doesn't have the map right with all the
+    // information he had." He was right. The drawing hid a 4.25 ft discrepancy by inflating the
+    // only two rooms on this wall, one of which was MEASURED:
+    //     east side, perimeter walk (24'3" + 5'0")   29.25   MEASURED
+    //       NE corner notch                           3.50   drawn, not measured
+    //       guest bath depth                          8.50   DERIVED from the 26'6" chain
+    //                                                        (hallway 18 + guest bath 8.5 = 26.5)
+    //       office depth                             13.00   MEASURED, Bosch GLM 20
+    //                                                ------
+    //                                                25.00 -> 4.25 ft UNACCOUNTED FOR
+    // It used to draw guest bath 11.5 (+3.00) and office 14.25 (+1.25) = exactly the 4.25, so the
+    // outline closed while contradicting the laser. Now every MEASURED number is honoured and the
+    // 4.25 is drawn as two explicit UNMEASURED strips instead of being smeared into real rooms -
+    // the 12:44 markup shows a `clo`/closet band in both places. Uncertainty you can SEE beats
+    // uncertainty hidden inside a room that looks surveyed.
+    // Full working: docs/house-plan/ROOM_GEOMETRY_AUDIT_2026-10-08.md
+    // The 3 ft strip goes NORTH of the bath, not south. South would break two things that are
+    // known-true: the hallway "dead-ends at the guest bath" (its own subtitle), and the bath's
+    // door at y 12.2-14.6 plus its duct register at [H(36.4), 10.4] both sit in the lower half.
+    // Geometry must not be rearranged into something tidier than the evidence.
+    { id: 'egap1', name: 'UNMEASURED', sub: '3 ft', rect: [H(35.17), 3.5, 4.25, 3.0], kind: 'clo', small: true, inferred: true },
+    { id: 'gbath', name: 'GUEST BATH', sub: "8½ deep · from the 26'6\" chain", rect: [H(35.17), 6.5, 4.25, 8.5], kind: 'bath', floor: 'tile', label: [H(37.3), 10.2] },
     { id: 'kitchen', name: 'KITCHEN · DINING', sub: '16 × 13', kind: 'kitchen', floor: 'hardwood',
       poly: [[H(0), 22], [H(16), 22], [H(16), ED], [H(KB), ED], [H(KB), ED + KJ], [H(0), ED + KJ]], label: [H(9.6), 27.2] },
     { id: 'hall', name: 'HALLWAY', sub: 'open to the living room · dead-ends at the guest bath', rect: [H(15), 11, 20.17, 4], kind: 'hall', floor: 'carpet', label: [H(20.4), 12.05] },
@@ -58,7 +79,12 @@ window.PLAN = (function () {
     { id: 'living', name: 'LIVING ROOM', sub: '14 × 17 · the 17 runs through the open hallway', rect: [H(15), 15, 14.42, 14.25], kind: 'living', floor: 'carpet', label: [H(20.8), 23.2] },
     // 🔴 Laser says 13 deep; drawn 14.25. The extra 1.25 is part of the unexplained 4.25 ft on the
     // east wall - see the guest-bath note above and ROOM_GEOMETRY_AUDIT_2026-10-08.md.
-    { id: 'office', name: 'OFFICE · BED 3', sub: '10 × 13 · drawn 1.25 deep, east wall unresolved', rect: [H(29.42), 15, 10, 14.25], kind: 'bed', floor: 'carpet', label: [H(34.6), 17.8] },
+    // Office is now its MEASURED 10 × 13 and bottom-aligned to the back wall, which is where it
+    // physically sits (its register is at the back, reg [H(36.6), 28.4], and the markup shows its
+    // windows on the south elevation). The 1.25 ft that used to be stretched into it is drawn
+    // above it as the second unmeasured strip - the markup shows a closet band along that edge.
+    { id: 'egap2', name: 'UNMEASURED', sub: '1¼ ft', rect: [H(29.42), 15, 10, 1.25], kind: 'clo', small: true, inferred: true },
+    { id: 'office', name: 'OFFICE · BED 3', sub: '10 × 13 · laser', rect: [H(29.42), 16.25, 10, 13], kind: 'bed', floor: 'carpet', label: [H(34.6), 19.0] },
     { id: 'fp', name: 'FP', sub: '', rect: [H(29.42), 16, 1.5, 5], kind: 'clo', small: true },
     { id: 'fclo', name: '', sub: '', rect: [H(29.42), 22, 1.5, 7.25], kind: 'clo', small: true, floor: 'carpet' },
   ];

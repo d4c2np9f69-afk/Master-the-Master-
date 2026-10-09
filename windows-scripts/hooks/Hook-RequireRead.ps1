@@ -456,9 +456,24 @@ if ($isCreate -and -not $createStoodDown) {
 # ---------------------------------------------------------------------------
 $script:Briefs = @()
 
+# ONCE PER SESSION PER TOPIC. Jeff, 2026-10-08 23:19, after seeing the SECRETS brief for the
+# SEVENTH time in one session: "This makes seven times now you have said the same thing."
+# He is right and this was my regression, shipped tonight. The first version emitted a topic's
+# Why on EVERY matching tool call, so one evening of work touching the token path repeated the
+# same paragraph seven times. A fact repeated until it is wallpaper is worse than no fact -
+# it is the cry-wolf failure in a different costume, and it burns his tokens every repeat.
+# The brief is now delivered the FIRST time a topic is touched in a session and never again.
+$briefFlag = Join-Path $env:TEMP ("hcc-briefed-" + $sid + ".txt")
+$briefedSoFar = ''
+if (Test-Path $briefFlag) { $briefedSoFar = (Get-Content -LiteralPath $briefFlag -Raw) }
+$newlyBriefed = @()
+
 foreach ($g in $GATES) {
   if ($blob -match ("(?i)" + $g.Match)) {
-    if ($g.Why) { $script:Briefs += ('[' + $g.Name + '] ' + $g.Why) }
+    if ($g.Why -and ($briefedSoFar -notmatch [regex]::Escape('<' + $g.Name + '>'))) {
+      $script:Briefs += ('[' + $g.Name + '] ' + $g.Why)
+      $newlyBriefed += ('<' + $g.Name + '>')
+    }
     $missing = @()
     $now = [int][double]::Parse((Get-Date -UFormat %s))
     foreach ($doc in $g.Requires) {
@@ -496,9 +511,11 @@ if ($createStoodDown) {
 # blocked. This is the whole point of the BRIEF ON PASS change above: the Why used to be
 # shown only to a session that had already failed. A session that behaved got silence.
 if ($script:Briefs.Count -gt 0) {
-  $msgs += ("HCC TOPIC BRIEF - what is already known about what you are touching. " +
-            "Not a block; you are allowed through. These cost Jeff real hours to learn:`n  " +
+  $msgs += ("HCC TOPIC BRIEF (first time this topic is touched this session) - what is " +
+            "already known about what you are touching. Not a block; you are allowed through:`n  " +
             ($script:Briefs -join "`n  "))
+  # Remember it so the same paragraph is never repeated at Jeff again.
+  try { Add-Content -LiteralPath $briefFlag -Value ($newlyBriefed -join '') -ErrorAction SilentlyContinue } catch { }
 }
 
 if ($msgs.Count -gt 0) {

@@ -48,7 +48,16 @@ $ALL  = @("$now|docs/ACCESS_MAP.md", "$now|docs/SESSION_START.md", "$now|docs/OP
 $APP  = 'C:\Users\jeffl\Documents\GitHub\master-the-master-\index.html'
 $sids = @()
 
-function T($sid) { $script:sids += $sid; return $sid }
+# Each test must start from a clean slate. The brief flag (hcc-briefed-<sid>.txt, added
+# 2026-10-09 so a topic is briefed ONCE per session) lives in TEMP and outlives the run, so
+# without this the suite passes the first time and fails every run after - which is worse than
+# failing outright, because it looks like a real regression in unchanged code. Caught
+# immediately: 5 tests went red on the second run.
+function T($sid) {
+  $script:sids += $sid
+  Remove-Item (Join-Path $env:TEMP ("hcc-briefed-" + $sid + ".txt")) -ErrorAction SilentlyContinue
+  return $sid
+}
 
 $s = T 'rg-empty';    Receipt $s $null
 $o = Run $s 'Edit' '' $APP
@@ -128,6 +137,19 @@ $o = Run $s 'Edit' '' 'C:\Users\jeffl\Documents\GitHub\master-the-master-\docs\h
 Check 'HOUSE PLAN brief: fires on a plan-live.js edit' ($o -match 'HOUSE PLAN') "output: $o"
 Check 'HOUSE PLAN brief: says it is ALREADY ALIVE' ($o -match 'ALREADY ALIVE') "output: $o"
 Check 'HOUSE PLAN brief: never blocks' (NotDenied $o) "output: $o"
+
+# ONCE PER SESSION. Jeff, 2026-10-08 23:19, after the SECRETS brief appeared for the
+# SEVENTH time in one session: "This makes seven times now you have said the same thing."
+# That was a regression shipped the same evening - the brief fired on EVERY matching call.
+# A fact repeated until it is wallpaper is the cry-wolf failure in a different costume,
+# and every repeat costs Jeff tokens. Second touch of the same topic must stay silent.
+$o2 = Run $s 'Edit' '' 'C:\Users\jeffl\Documents\GitHub\master-the-master-\docs\house-plan\plan-app.js'
+Check 'BRIEF: the SECOND touch of a topic does NOT repeat it' ($o2 -notmatch 'HOUSE PLAN') "output: $o2"
+Check 'BRIEF: the second touch still allows' (NotDenied $o2) "output: $o2"
+# And a DIFFERENT topic in the same session must still get its own first brief.
+$o3 = Run $s 'Edit' '' 'C:\Users\jeffl\Documents\GitHub\master-the-master-\windows-scripts\zz-probe-warp.ps1'
+Check 'BRIEF: a different topic still briefs once' (NotDenied $o3) "output: $o3"
+
 
 
 
