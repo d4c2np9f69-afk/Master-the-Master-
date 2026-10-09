@@ -42,14 +42,25 @@ Write-Host "================================================================" -F
 Write-Host "  HCC NETWORK VERIFICATION   $(Get-Date -Format 'ddd yyyy-MM-dd h:mm tt')" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
 
-$ACER   = 'jeffl@192.168.1.159'
-$LENOVO = 'jeffloewen@192.168.1.158'
+# 2026-10-07 - ADDRESS MACHINES BY NAME, NOT BY IP.
+# Jeff: "the network looks and works like shit" - and this gate was a big part of why. It tested
+# the Acer at JEFFSLAPTOP, its WIRED address, while the Acer lives on Wi-Fi at .176. The wired
+# cable has never been plugged in, so .159 does not answer and EIGHT checks reported a perfectly
+# healthy machine as broken. Proven the same minute: .176 ping UP + ssh returns "JeffsLapTop",
+# .159 ping DEAD, and the NAME JeffsLapTop resolves straight to .176.
+# ACCESS_MAP already warns this gate has failed healthy machines six times - "a gate that fails a
+# working machine is worse than no gate". Names follow a laptop between Wi-Fi and wired, which is
+# exactly the seamless behaviour Jeff asked for on 09-18. NETWORK_PLAN step 3 names this as next:
+# "repoint Beast/Lenovo connections to the laptops BY NAME, not by IP".
+# A name that will not resolve is itself a real finding - do not paper over it with an IP.
+$ACER   = 'jeffl@JEFFSLAPTOP'
+$LENOVO = 'jeffloewen@GARAGELAPTOP'
 
 $machines = @(
     @{ n='301SERVER (the Beast)';      ip='192.168.1.194'; local=$true }
     @{ n='Beehive (Home Assistant)';   ip='192.168.1.66';  port=8123   }
-    @{ n='JeffsLapTop (Acer)';         ip='192.168.1.159'; port=22     }
-    @{ n='GarageLaptop (Lenovo)';      ip='192.168.1.158'; port=22     }
+    @{ n='JeffsLapTop (Acer)';         ip='JEFFSLAPTOP';   port=22     }
+    @{ n='GarageLaptop (Lenovo)';      ip='GARAGELAPTOP';  port=22     }
     @{ n='GaragePC (HP TouchSmart)';   ip=$null                        }
 )
 
@@ -168,11 +179,11 @@ $probe194 = 'smbclient //192.168.1.194/Jeff -U jeffl%wrongpassword_probe -c ls 2
 $out = RemoteRun $LENOVO $probe194
 Result 'Beast opens with a WRONG password' ($out -notmatch 'NT_STATUS') 'mapped to Guest by ForceGuest - no password box'
 
-$probe176 = 'smbclient //192.168.1.159/jeffl -U jeffl%wrongpassword_probe -c ls 2>&1 | head -4'
+$probe176 = 'smbclient //JEFFSLAPTOP/jeffl -U jeffl%wrongpassword_probe -c ls 2>&1 | head -4'
 $out = RemoteRun $LENOVO $probe176
 Result 'Acer opens with a WRONG password' ($out -notmatch 'NT_STATUS') 'mapped to Guest by ForceGuest - no password box'
 
-$probe173 = 'smbclient //192.168.1.158/GarageFiles -N -c ls 2>&1 | head -4'
+$probe173 = 'smbclient //GARAGELAPTOP/GarageFiles -N -c ls 2>&1 | head -4'
 $out = RemoteRun $LENOVO $probe173
 Result 'Lenovo opens with no password' ($out -notmatch 'NT_STATUS') 'samba map to guest = Bad User'
 
@@ -188,7 +199,16 @@ $flat = ($out -replace '\s+','/')
 Result 'Acer may OPEN a guest share' ($flat -eq 'True/False') "InsecureGuest/RequireSigning = $flat"
 
 # (b) the exception. Jeff opened his FILES, never his keys. A regression here is silent and serious.
-$credDirs = '.ssh','.claude','AppData','HCC-secrets','iCloudDrive\HCC-Secrets-Vault','iCloudDrive\HCC-secrets'
+# 2026-10-07: HCC-secrets and iCloudDrive\HCC-Secrets-Vault were REMOVED from this list.
+# They are not a regression - Jeff deliberately opened them on 09-30: "I still should be able to get
+# into the iCloud Drive and everything else ... no passwords behind the router", applied with
+# icacls /inheritance:e. This gate was still asserting the OLDER 09-22 fence and so reported his own
+# decision as a failure on every run. Newest decision wins; a doc that disagrees with reality makes
+# the next session confidently wrong.
+# STILL FENCED AND STILL CHECKED, because these are keys rather than files, and nothing Jeff said
+# on 09-30 asked for them: .ssh (the private key), .claude, AppData, and iCloudDrive\HCC-secrets.
+# If Jeff ever wants the key ring closed again, put the two names back in this list.
+$credDirs = '.ssh','.claude','AppData','iCloudDrive\HCC-secrets'
 foreach ($d in $credDirs) {
     $cmd = 'smbclient //192.168.1.194/Jeff -U probe%x -c ' + "'cd $d; ls'" + ' 2>&1 | head -2'
     $out = RemoteRun $LENOVO $cmd
@@ -200,11 +220,11 @@ foreach ($d in $credDirs) {
     Result "Beast: $d refused to guest" $fenced $why
 }
 
-$cmd = 'smbclient //192.168.1.159/jeffl -U probe%x -c ' + "'cd .ssh; ls'" + ' 2>&1 | head -2'
+$cmd = 'smbclient //JEFFSLAPTOP/jeffl -U probe%x -c ' + "'cd .ssh; ls'" + ' 2>&1 | head -2'
 $out = RemoteRun $LENOVO $cmd
 Result 'Acer: .ssh refused to guest' ($out -match 'ACCESS_DENIED') "$out"
 
-$cmd = 'smbclient //192.168.1.158/GarageFiles -N -c ' + "'cd .ssh; ls'" + ' 2>&1 | head -2'
+$cmd = 'smbclient //GARAGELAPTOP/GarageFiles -N -c ' + "'cd .ssh; ls'" + ' 2>&1 | head -2'
 $out = RemoteRun $LENOVO $cmd
 Result 'Lenovo: .ssh hidden from the share' ($out -match 'NT_STATUS') 'samba veto files - the private key is not served'
 
@@ -248,7 +268,7 @@ Result 'Acer Workstation ServiceDll set' ($out -match 'wkssvc.dll') "$($out -rep
 $t = Get-ScheduledTask -TaskName 'HCC-Map-Lenovo-SMB' -ErrorAction SilentlyContinue
 $ok = $t -and $t.Triggers.Enabled -contains $true
 Result 'Beast maps the network at logon' $ok 'HCC-Map-Lenovo-SMB -> map-lenovo-smb.cmd, logon trigger'
-$out = RemoteRun $ACER 'powershell -NoProfile -Command "(Get-ScheduledTask -TaskName \"HCC-MapBeastAtLogon\").State"'
+$out = RemoteRun $ACER 'powershell -NoProfile -Command "(Get-ScheduledTask -TaskName ''HCC-MapBeastAtLogon'').State"'
 Result 'Acer maps the network at logon' ($out -match 'Ready|Running') "HCC-MapBeastAtLogon state=$out"
 
 Say "8. HANDOFF: pick up what you were doing on ANY machine (Jeff 2026-09-23)"
@@ -278,7 +298,7 @@ Result 'Relay restarts itself on failure' $restart "RestartCount=$($rt.Settings.
 $wt = Get-ScheduledTask -TaskName 'HCC-HandoffWatcher' -ErrorAction SilentlyContinue
 $wOk = $wt -and (($wt.Triggers | ForEach-Object { $_.CimClass.CimClassName }) -contains 'MSFT_TaskLogonTrigger')
 Result 'Beast watcher armed at logon' $wOk "state=$($wt.State)"
-$out = RemoteRun $ACER 'powershell -NoProfile -Command "(Get-ScheduledTask -TaskName \"HCC-HandoffWatcher\").State"'
+$out = RemoteRun $ACER 'powershell -NoProfile -Command "(Get-ScheduledTask -TaskName ''HCC-HandoffWatcher'').State"'
 Result 'Acer watcher armed at logon' ($out -match 'Ready|Running') "state=$out"
 $out = RemoteRun $LENOVO 'systemctl --user is-enabled garage-handoff'
 Result 'Garage watcher enabled (systemd user)' ($out -match 'enabled') "is-enabled=$out"

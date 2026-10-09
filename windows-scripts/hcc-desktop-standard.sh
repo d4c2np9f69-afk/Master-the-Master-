@@ -98,10 +98,15 @@ shortcut() { printf '[Desktop Entry]\nVersion=1.0\nType=Application\nName=%s\nEx
 # KitchenPC runs FIREFOX, not Chrome (OPEN_ITEMS #205, 2026-09-24): Chrome on that
 # machine's Sandy Bridge GPU hard-reset it; Firefox uses the same GPU without resetting,
 # and Jeff said "remove chrome completely". Other machines keep Chrome.
-case "$(hostname)" in
-  KitchenPC|kitchenpc) web() { echo "firefox --new-window $1"; }; WICON=firefox ;;
-  *)                   web() { echo "google-chrome-stable --password-store=basic --app=$1"; }; WICON=google-chrome ;;
-esac
+# 2026-10-07, Jeff: "If you don't need chrome on the computers I don't. I don't like chrome" and
+# "Keep chrome where needed for you I just don't use it". So FIREFOX IS THE BROWSER ON EVERY
+# MACHINE HE TOUCHES. Chrome stays installed on the BEAST ONLY, and only because the SmartHub
+# electric puller and the Ancestry work attach to real Chrome over CDP - Playwright's bundled
+# Chromium trips a bot check on both (ACCESS_MAP section 2). Nothing on a Linux box needs it.
+# This also removes the KitchenPC special case entirely: Chrome hard-reset that machine's Sandy
+# Bridge GPU (OPEN_ITEMS #205) and Jeff said "remove chrome completely" - with Firefox everywhere
+# there is no longer a per-host branch that can put it back by accident.
+web() { echo "firefox --new-window $1"; }; WICON=firefox
 shortcut "Home Command Center" "$(web https://loewenhome.com)" "$WICON"
 shortcut "Home Assistant"      "$(web http://192.168.1.66:8123)" "$WICON"
 shortcut "Email"               "$(web https://www.xfinity.com/email)" "$WICON"

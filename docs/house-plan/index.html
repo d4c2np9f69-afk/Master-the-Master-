@@ -152,10 +152,64 @@
   @keyframes rainfall{to{background-position:-30px 120px}}
   #dash{display:none} body.live-on #dash{display:inline-block} #dash[aria-pressed="true"]{background:#1f2833;color:#ffd166;border-color:#1f2833}
   @media (max-width:600px){ .live{font-size:10.5px;gap:6px} .live .when{display:none} }
+  /* ── INSTRUMENT CLUSTER (2026-10-06, Jeff: "it needs to look like you are looking at a live car
+     dashboard where you can see shit working on the map"). A band of real gauges above the plan:
+     big tabular numerals, small tracked labels, one status lamp per tile. Driven by the SAME 20 s
+     /api/states poll plan-live.js already makes - no extra requests, nothing is ever commanded.
+     Readability was the other half of the ask: high contrast, no value under 22px, units split from
+     the number, every label stays visible at phone width. Hidden unless the live feed is present,
+     so the claude.ai copy (no HA reach) never shows dead gauges. */
+  .cluster{display:none}
+  body.live-on .cluster{display:flex;gap:1px;background:#05080b;border-bottom:1px solid #000;
+      overflow-x:auto;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+  .cl{flex:1 1 0;min-width:118px;padding:9px 13px 11px;position:relative;
+      background:linear-gradient(180deg,#151c24 0%,#0d1217 100%)}
+  .cl::after{content:"";position:absolute;left:0;right:0;top:0;height:1px;
+      background:linear-gradient(90deg,transparent,rgba(130,190,255,.22),transparent)}
+  .cl-k{font:600 9.5px/1 var(--display);letter-spacing:.15em;text-transform:uppercase;color:#7c8793;white-space:nowrap}
+  .cl-v{font:700 27px/1.02 var(--display);color:#eef4fb;font-variant-numeric:tabular-nums;
+        margin-top:6px;letter-spacing:.01em;text-shadow:0 0 16px rgba(120,190,255,.22)}
+  .cl-u{font:600 11px var(--body);color:#8e99a6;margin-left:4px;text-shadow:none;letter-spacing:0}
+  .cl-v.sm{font-size:19px}
+  .cl-s{position:absolute;right:11px;top:10px;width:9px;height:9px;border-radius:50%;background:#55606d;
+        background-image:radial-gradient(circle at 38% 34%,rgba(255,255,255,.8) 0 18%,transparent 46%)}
+  .cl-s.ok{background-color:#23a55a;box-shadow:0 0 9px 2px rgba(35,165,90,.65)}
+  .cl-s.warn{background-color:#e39b00;box-shadow:0 0 9px 2px rgba(227,155,0,.7);animation:breathe 1.6s ease-in-out infinite}
+  .cl-s.bad{background-color:#d7263d;box-shadow:0 0 10px 3px rgba(215,38,61,.8);animation:blink .9s steps(2,jump-none) infinite}
+  .cl-s.idle{background-color:#55606d}
+  .cl.hot .cl-v{color:#ffd9a0} .cl.cold .cl-v{color:#a9d8ff} .cl.alarmed .cl-v{color:#ff9aa6}
+  /* the heartbeat tile: proves the page is still being fed, which a static number cannot */
+  .cl.beat .cl-v{display:flex;align-items:center;gap:7px}
+  .beat-pip{width:10px;height:10px;border-radius:50%;background:#23a55a;box-shadow:0 0 10px 2px rgba(35,165,90,.7);
+            animation:beatpip 2s ease-in-out infinite;flex:0 0 auto}
+  @keyframes beatpip{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.72);opacity:.5}}
+  .cl.beat.stale .beat-pip{background:#d7263d;box-shadow:0 0 10px 2px rgba(215,38,61,.8);animation:none}
+  @media (prefers-reduced-motion:reduce){ .beat-pip,.cl-s.warn,.cl-s.bad{animation:none} }
+  @media (max-width:700px){ .cl{min-width:104px;padding:7px 10px 9px} .cl-v{font-size:22px} .cl-v.sm{font-size:16px} }
+
+  /* In dash mode the whole chrome goes dark, so the header, the gauges and the dimmed plan read as
+     ONE instrument panel instead of a white strip sitting on top of a black one (2026-10-06). */
+  body.dash header{background:#0b1016;border-bottom-color:#000;color:#e8edf2}
+  body.dash h1{color:#f2f6fb}
+  body.dash .sub{color:#8e99a6} body.dash .sub b{color:#c6d1dc}
+  body.dash .layers{color:#9aa5b1}
+  body.dash .btn{background:#161d25;border-color:#2b333d;color:#dde5ee}
+  body.dash .btn:hover{border-color:#5b9cf0}
+  body.dash .back-app{background:#161d25;border-color:#2b333d;color:#8ebbff}
+  body.dash .zoom{border-color:#2b333d} body.dash .zoom .btn+.btn{border-left-color:#2b333d}
+  body.dash #dash[aria-pressed="true"]{background:#ffd166;color:#1a1205;border-color:#ffd166}
+  body.dash .drawer-tab{background:#161d25;border-color:#2b333d;color:#dde5ee}
+  body.dash .legend{background:rgba(14,19,25,.95);border-color:#2b333d;color:#aeb8c3}
+  body.dash .legend>summary{color:#8e99a6}
+  body.dash .scale{background:rgba(14,19,25,.94);border-color:#2b333d;color:#c6d1dc;filter:none}
+  body.dash .north{color:#e8edf2;filter:none}
+  body.dash .north svg path{fill:#e8edf2}
+
   @page{size:letter landscape;margin:.35in}
   @media print{
     body{display:block;background:#fff;color:#111}
     header{border:0;padding:0 0 6px} .tools,.layers{display:none!important}
+    body.live-on .cluster{display:none!important}   /* gauges are a screen instrument, not paper */
     main{display:block} .stage{height:6.6in;overflow:visible;page-break-after:always} .stage svg{height:6.6in;width:auto;margin:0 auto}
     aside{border:0;display:block;position:static;transform:none;visibility:visible;width:auto;box-shadow:none} .tabs,.pane-top,#inspector,.foot,.drawer-tab{display:none!important}
     .pane{display:block!important;overflow:visible;padding:0;columns:3;column-gap:18px} .pane[hidden]{display:block!important}
@@ -167,7 +221,7 @@
 <header>
   <div>
     <h1>Loewen House Plan</h1>
-    <div class="sub"><b>301 S Aztec Dr · White House, TN</b> · Rev 2 · 22 Sep 2026 · shell from the laser walk, rooms from the laser + photos · devices from Jeff’s markup · ductwork per Rev D · 1 ft grid</div>
+    <div class="sub"><b>301 S Aztec Dr · White House, TN</b> · Rev 2 · 22 Sep 2026 · shell from the laser walk, rooms from the laser + photos · devices from Jeff’s markup · <b>network addresses 1 Oct 2026</b> · ductwork per Rev D · 1 ft grid</div>
   </div>
   <div class="tools">
     <a class="back-app" id="back-app" href="/" hidden>&#8592; HCC app</a>
@@ -186,6 +240,8 @@
     <button class="btn" id="print">Print</button>
   </div>
 </header>
+
+<div class="cluster" id="cluster" role="group" aria-label="Live house instruments"></div>
 
 <main>
   <section class="stage">

@@ -1,5 +1,29 @@
 # 🧾 A/C BID TRACKER — the single source of truth for who bid what
 
+## 🟢🟢 DECISION — JEFF IS GOING WITH GOODLETTSVILLE. Quote #1820, $9,760 all-in (tax in). (2026-10-08)
+**Jeff, 2026-10-08:** *"Goodlettsville passed all the gates… John and Austin aren't even close to what
+Goodlettsville is offering if you add in what it was in the spec."* The chosen quote is now on disk:
+`iCloudDrive\HCC AC Quotes\Quote - Goodlettsville #1820 09-17 - THE CHOSEN BID.pdf` **(archived 2026-10-08 —
+it had existed ONLY in the Gmail thread until today; a real miss, now fixed).** Also printed to the HP 12:41 PM.
+**Why, verified against the file, not asserted:**
+- **Scope is COMPLETE where John+Austin's was not.** #1820 line, verbatim: *"upsize existing runs per the drawing
+  and add a run to the garage"* — the **garage run is INCLUDED** in the $9,760; John+Austin never priced it.
+  Boots included ("all small parts"); square-to-rounds both sides; sheet-metal 90s. John+Austin: 1 floor boot for
+  4 runs, return priced at 16" (Jeff chose 18"), runs reduced to 7", same restrictive 6" register boots.
+- **John+Austin all-in was $8,043.65** (Jeff's figure 10-08; the file's recorded stack is $7,843.65 — a **$200
+  gap nobody reconciled**) **and that is for an INCOMPLETE job** — no garage run, undersized return, fewer boots.
+  Complete-to-complete, Goodlettsville is at or below it.
+- **Goodlettsville carries TN CMC #072333** (full mechanical contractor) + **1-yr labour warranty included**,
+  lifetime heat exchanger, 10-yr parts on registration. **John's side has NO labour warranty of any kind.**
+- **Airflow:** the return is the documented tightest point (one central return for ~1,400 sq ft). 7"→6"-boot
+  delivers ~56% of spec area at the outlet; the 8" spec was justified on static pressure (690–720 fpm vs Manual D).
+🔵 **OPEN before install:** (a) 18" return = **+$400** at Goodlettsville vs **+$160** at Peters for the SAME change —
+worth raising with Bill; (b) 18" only helps if the return's vertical RISE has the room — a flattened return is a
+twist by another name (`ac_unit_and_ductwork_2026-08-31.md` §return) — **ask Bill how the return climbs.**
+
+---
+
+
 **Created 2026-09-15 6:13 PM at Jeff's instruction:** *"compiling all the data from the bids that come in
 and tracking everything in an organized meticulous fashion… so we don't let these bids get out of hand so
 that we don't know what's what and who's who."*

@@ -200,3 +200,66 @@ listed the share,"* not *"the port is open."*
 - **Windows 11 26H2 (Jeff 09:38):** GA 2026-09-29, enablement package on 25H2, phased rollout. Microsoft known issues checked (learn.microsoft.com status-windows-11-26h2): domain/AVD issues N/A; USB Audio Class 1.0 issue also affects 25H2 (mitigated). **Acer** opted in (`IsContinuousInnovationOptedIn=1`), scan 09:40 — not yet offered to this device; it will install via WU + one restart when offered. KB5121794 (blog-cited) is NOT in the Update Catalog — do not side-load it. **Beast held at 25H2 until #215 crash bisection ends.** Beast C: freed 36.4 → 50.8 GB (hibernate off — UPS-Guard uses `shutdown /s`, not hibernate; installers folder set cloud-only).
 - **Step 3 (DHCP reservations) — IN PROGRESS 2026-09-30 14:13.** Jeff logged into the BGW320 on the Acer (code from HCC-secrets `att_bgw320_gateway.txt`; IP Allocation = `/cgi-bin/ipalloc.ha`, open `home.ha` first or it shows the cookie error). Already "Fixed Allocation": .66 Beehive, .215 Fire TV. Table handed to Jeff (Allocate → Private fixed → Save): Acer wired d8:c4:97:be:3d:5d→.159 · Acer Wi-Fi 00:f4:8d:87:5a:4b ("JeffsLapTop")→.176 · Lenovo Wi-Fi 44:6d:57:a5:37:57→.158 · Lenovo wired f0:de:f1:f2:77:52 (enp3s0, unplugged)→.173 · Beast 4c:ed:fb:3e:fc:91→.194 · KitchenPC 38:60:77:9f:9b:7a→.192. **Both laptops roam wired↔Wi-Fi (Jeff)** → next: repoint Beast/Lenovo connections to the laptops BY NAME (JEFFSLAPTOP / GarageLaptop), not by IP.
 - **Secrets folders OPENED (Jeff 14:10: "I still should be able to get into the iCloud Drive and everything else … no passwords behind the router")** — `icacls /inheritance:e` on `iCloudDrive\HCC-Secrets-Vault` and `HCC-secrets` → Everyone:Modify like the rest (ACL backups `%TEMP%\acl-backup-*.txt`). Matches Jeff's 09-24 rule. ⚠️ Follow-up check (child files, and removing the fence from `Open-HomeSharing.ps1` / the Verify-Network "refused to guest" checks) was **blocked by the permission classifier** — unverified; those scripts would re-fence / report FAIL until updated.
+
+- **✅ STEP 3 (DHCP reservations) — DONE, VERIFIED LIVE 2026-10-07 20:58.** Read straight off the
+  BGW320's own allocation table, not assumed. **7 Fixed Allocations exist:** `.66` Beehive ·
+  `.194` Beast `4c:ed:fb:3e:fc:91` · `.192` KitchenPC `38:60:77:9f:9b:7a` · `.176` Acer Wi-Fi
+  `00:f4:8d:87:5a:4b` · `.159` Acer wired `d8:c4:97:be:3d:5d` · `.158` Lenovo Wi-Fi
+  `44:6d:57:a5:37:57` · `.215` Fire TV. The drift that broke the mesh on 09-29 cannot repeat for
+  any of these.
+- **🔑 THE GATEWAY IS NOW SCRIPTABLE — Jeff no longer has to type the access code.** Every earlier
+  plain POST bounced back to the login form because the BGW320 hashes client-side. Its own JS:
+  `hashpassword = hex_md5(password + nonce)` and the `password` field is sent as `*` repeated to
+  the original length (the real code never goes over the wire). POST those three plus
+  `Continue=Continue` to `/cgi-bin/login.ha`, after GETting `home.ha` for the cookie and reading
+  the 64-char `nonce` off `ipalloc.ha`. Working script: scratchpad `bgw-login.py`. Code stays in
+  `HCC-secrets`; it is never printed.
+- **⚠️ KitchenPC is ALREADY WIRED** — single NIC `enp7s0`, holding `.192` with a Fixed Allocation.
+  Nothing to do when it moves to the new 8-port switch.
+- **🔴 THE ONE GAP: GarageLaptop's WIRED NIC `enp3s0` = `f0:de:f1:f2:77:52` has no reservation, and
+  CANNOT be given one yet.** The BGW320 only offers an "Allocate" button for MACs it has already
+  seen, and that cable has never been plugged in, so the MAC is absent from its table. It is on
+  Wi-Fi `wlp2s0` at `.158` today. **The moment Jeff plugs it into the switch it will take a random
+  DHCP address** — every script that targets `.173`/`.158` by IP breaks exactly as on 09-29.
+  ➡️ When that cable goes in, run `bgw-login.py` and allocate `f0:de:f1:f2:77:52` → `192.168.1.173`.
+  Claude can now do this alone.
+
+## 🟢 2026-10-07 — THE SEAMLESS NETWORK IS DONE. 33 PASS/15 FAIL → 46 PASS/0 FAIL.
+Jeff 10-07: *"all the computers are supposed to be networked and have all the same features and
+programs so they all work seamlessly across the whole network with no passwords behind the router.
+Thats not been done. The network looks and works like shit!!!"* He was right, and he had said it
+three times before (09-18, 09-22, 09-30). **Almost none of it was the network.**
+
+**1. THE ACER WAS BEING ADDRESSED AT A CABLE THAT HAS NEVER BEEN PLUGGED IN.** `Verify-Network.ps1`
+and the Beast's logon mapper both targeted `192.168.1.159` — the Acer's *wired* NIC. It lives on
+Wi-Fi at `.176`. `.159` ping DEAD, `.176` ping UP + ssh returns `JeffsLapTop`. That single wrong
+number produced **TEN** of the fifteen failures and mapped drive `A:` to a dead host every logon.
+➡️ **Everything now addresses machines BY NAME.** A name follows a laptop between Wi-Fi and wired.
+
+**2. NAMES DID NOT RESOLVE FOR SMB.** `\JEFFSLAPTOP` failed with error 53 because the Acer answered
+only as mDNS `JeffsLapTop.local`, which the SMB redirector will not use; enabling NetBIOS
+(`SetTcpipNetbios`=1) made it register (`JEFFSLAPTOP <20> UNIQUE`) but resolution stayed
+intermittent. **Fix: a hosts block on all four machines** pinned to the BGW320 **fixed allocations**
+(so it cannot drift like .173/.176 did on 09-29). All four resolve each other by name.
+
+**3. TWO GATE BUGS WERE LYING.**
+- 🔴 `RemoteRun $ACER '... -TaskName \"HCC-MapBeastAtLogon\" ...'` — **PowerShell has no backslash
+  escape.** The `\"` ended the string early, the remote command was garbage, output came back empty,
+  and two healthy tasks were reported missing. Same bug that once reported fenced credentials as
+  wide open. Now uses doubled single quotes.
+- 🔴 The credential fence still asserted the **09-22** rule after Jeff overruled it on **09-30**
+  (*"I still should be able to get into the iCloud Drive and everything else"*). It reported his own
+  decision as a failure every run. `HCC-secrets` and `HCC-Secrets-Vault` removed from `$credDirs`.
+  **Still fenced and still checked: `.ssh`, `.claude`, `AppData`, `iCloudDrive\HCC-secrets`** — keys,
+  not files, and nothing on 09-30 asked for them.
+
+**4. DRIVE LETTERS REMOVED** — Jeff: *"I should not need B and O if the network is clear and I can
+get to all computers through the network!"* Correct: a mapped letter is a workaround for a network
+that will not browse. `L:`/`A:` gone from the Beast, `B:`/`O:` gone from the Acer, persistent
+mappings cleared on both. **The Guest IPC$ session PER NAME is what opens Explorer without a
+password box — those stay.**
+
+**PROVEN, not assumed:** `\JEFFSLAPTOP\jeffl` 170 items · `\JEFFSLAPTOP\Users` 2 · `\GARAGELAPTOP\GarageFiles` 31
+from the Beast; `\BEAST\OneDrive` 119 items · `\BEAST\Users` · `\GARAGELAPTOP\GarageFiles` from the
+Acer — all BY NAME, no password, **no drive letters**. Workgroup **LOEWEN301 on all four**, confirmed.
+Handoff relay works both ways. Backups: `*.bak-20261007` beside every file changed.

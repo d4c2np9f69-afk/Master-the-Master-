@@ -252,9 +252,73 @@ window.PLAN = (function () {
     D(78, 'Deck TV + Roku', 'MED', H(27.5), 30.9),
     // 79 was added by Jeff on the plan 25 Sep (artifact db); written in here too so the HCC app copy,
     // which has no db, shows it. 80 = the mower, Jeff 25 Sep: "You can add the mower to the garage".
-    D(79, 'Grandfather clock + W200 speaker', 'MED', 43.5, 27, 'Westminster chimes every 15 min (quiet 10:01 PM-6 AM), 6 AM weather, 10 PM forecast + moon, spoken warnings. HA is the clock; the Beast plays it over Bluetooth.'),
+    D(79, 'Grandfather clock + QFX PBX-BF120 speaker', 'MED', 43.5, 27, 'Westminster chimes every 15 min (quiet 10:01 PM-6 AM), 6 AM weather, 10 PM forecast + moon, spoken warnings. HA is the clock; the Beast plays it over Bluetooth. Speaker is PORTABLE - confirm its real spot before trusting the distance.'),
     D(80, 'Toro TimeMaster mower + sensor box', 'OTH', 7.2, 26.3, 'ESP32 box on the mower reports every 5 min while parked; silent while mowing'),
+    // 81-83 added 1 Oct 2026: the three computers that got DHCP reservations on 30 Sep but had never
+    // been drawn. POSITIONS ARE PROVISIONAL - each is placed in the room its own hostname names, not
+    // from Jeff's markup like every other dot on this plan. Drag them in edit mode and they stick.
+    D(81, 'Acer laptop (JeffsLapTop)', 'NET', H(34.5), 24.0, 'Acer Aspire E5-576 · roams the house, so this dot is only where it usually sits - drag it'),
+    D(82, 'Lenovo laptop (GarageLaptop)', 'NET', 4.0, 29.8, 'Lenovo B570 on Ubuntu · position provisional - drag it'),
+    D(83, 'KitchenPC', 'NET', H(6.5), 31.5, 'position provisional - drag it'),
+    // 84-85 added 7 Oct 2026 (Jeff): Angela's two work computers, BOTH IN THE OFFICE.
+    // One is hardwired again off the new 8-port switch, the other is on Wi-Fi. Positions are
+    // inside the office rect but PROVISIONAL - Jeff has not said which desk each sits at.
+    D(84, 'Angela work PC (wired)', 'NET', H(32.0), 18.5, 'hardwired off the new 8-port switch, 7 Oct 2026 - position provisional, drag it'),
+    D(85, 'Angela work PC (Wi-Fi)', 'NET', H(36.5), 18.5, 'on Wi-Fi - position provisional, drag it'),
+    // 86 added 7 Oct 2026 (Jeff): THE BLUETOOTH DONGLE IS NOT AT THE BEAST. It sits on a USB
+    // extension run out toward the clock (28 Sep), in the hallway, which this plan's own room
+    // label calls 'open to the living room' - hence the direct line of sight Jeff describes.
+    // Jeff 7 Oct: '15ft from the dongle with direct line of sight'. Placed at exactly 15.0 ft
+    // from the clock dot (43.5, 27). MEASURE BLUETOOTH RANGE FROM THIS DOT, NOT FROM DEVICE 2 -
+    // the Beast is 27.7 ft away in the master bedroom and that number is misleading.
+    D(86, 'Bluetooth dongle (clock link)', 'NET', 43.5, 12.0, 'QGOO Class 1 BT 5.3, Actions ATS2851, on a USB extension in the hallway - 15 ft line-of-sight to the QFX by the clock. Range is measured from HERE, not from the Beast.'),
   ];
+
+  /* ADDRESSES — added 1 Oct 2026, from docs/inventory/NETWORK_MAP.md (the BGW320 census and its
+     label layer) and docs/computers/NETWORK_PLAN.md step 3 (DHCP reservations, 30 Sep 2026).
+
+     "fixed" = a reservation on the gateway, so the address survives a reboot. That matters here:
+     every drive mapping and script in this house points at an IP, and on 29 Sep the Lenovo drifted
+     .173 -> .158 and the Acer .176 -> .159 overnight and broke the lot.
+
+     A BLANK IS DELIBERATE, NOT A MISSING LOOKUP. Most devices on this plan have no address of their
+     own: the contacts, leak sensors and repeater plugs are Zigbee, the clock speaker and the garage
+     speaker are Bluetooth, the switch, the UPS and the Ethernet jacks are passive, and the Kasa
+     dimmers never joined the Wi-Fi. Do not fill one in by inference — the census has a standing
+     list of addresses that were guessed wrong and disproven (.198, .166, .171), and the rule there
+     is "do not re-guess these". Only MAC-vendor or unplug-test evidence goes in this table.
+
+     The irrigation zones carry their Home Assistant entity ids rather than an IP, because that is
+     what addresses them; all six are named after where they water, not after the vendor. */
+  const IP = {
+    1: '192.168.1.254',                      // AT&T BGW320-500 gateway
+    2: '192.168.1.194 · fixed',              // the Beast / 301SERVER
+    3: '192.168.1.66 · fixed',               // Beehive (Home Assistant)
+    7: '192.168.1.121 / .212 · offline',     // Garage PC, HP TouchSmart - down since the extender retirement
+    21: '192.168.1.224',                     // Tuya socket, MAC-embedded id ESP_DFE142
+    22: '192.168.1.171',                     // the "Nest Protect" impostor - unplug test, 13 Aug
+    23: '192.168.1.170',                     // Tuya socket, ESP_DFC785
+    24: '192.168.1.209',                     // TY_WR, last Tuya standing
+    42: '192.168.1.187',                     // B-hyve Water Hog - Orbit OUI 44:67:55, joined within 9 s of the cloud record
+    43: 'switch.z1_front_right',
+    44: 'switch.z2_front_left',
+    45: 'switch.z3_back_left',
+    46: 'switch.z4_back_right',
+    47: 'switch.z5_right_side_drive',
+    48: 'switch.garden',
+    50: '192.168.1.215 · fixed',             // Fire TV Stick, the PiPup target
+    54: '192.168.1.186',                     // Echo Dot - Amazon OUI fc:49:2d
+    56: '192.168.1.68',                      // VIZIOCastAudio4523
+    62: '192.168.1.231',                     // Sharky - died the moment Jeff switched it off, 13 Aug 15:03
+    67: 'KTNWHITE21 · WU station',
+    69: '192.168.1.196 · wired AP',          // the office RE200 on Cat6 backhaul - admin at http://192.168.1.196
+    79: 'Bluetooth to the Beast (192.168.1.194) · HCC-Scripts\\chime_listener.py',
+    80: '192.168.1.232',                     // mower ESP32 - confirmed by 5-min heartbeat timing
+    81: '192.168.1.159 wired · .176 Wi-Fi · both fixed',
+    82: '192.168.1.158 · fixed',             // Wi-Fi; the wired port is still unreserved, cable never plugged in
+    83: '192.168.1.192 · fixed',                     // mower ESP32 - confirmed by 5-min heartbeat timing
+  };
+  devices.forEach(d => { if (IP[d.n]) d.ip = IP[d.n]; });
 
   // recessed cans, grouped to their dimmer — counts from the lighting plan: bedroom 9, kitchen/dining 9, living 8, garage 8
   const cans = {

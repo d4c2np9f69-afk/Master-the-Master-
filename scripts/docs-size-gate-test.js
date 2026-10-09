@@ -33,7 +33,11 @@ const HOME = process.env.USERPROFILE || process.env.HOME || '';
 
 const LIMITS = [
   // file, max lines, max KB, when it costs you
-  { p: path.join(REPO, 'CLAUDE.md'),                max: 750,  kb: 70,  when: 'EVERY TURN' },
+  // 2026-10-08: trimmed 70.1 KB -> 48.4 KB. Pending Items (duplicated OPEN_ITEMS.md), the
+  // mower sensor field contract, the LUX API reference and the cost-ledger narrative all
+  // moved to docs/CLAUDE_TRIMMED_SECTIONS_2026-10-08.md. ~5,279 tokens saved on EVERY turn.
+  // Cap ratcheted down to just above the new size so the gain cannot quietly erode.
+  { p: path.join(REPO, 'CLAUDE.md'),                max: 600,  kb: 52,  when: 'EVERY TURN' },
   { p: path.join(HOME, 'CLAUDE.md'),               max: 80,   kb: 5,   when: 'EVERY TURN' },
   { p: path.join(REPO, 'docs', 'SESSION_START.md'), max: 260,  kb: 18,  when: 'once per session' },
   { p: path.join(REPO, 'docs', 'OPEN_ITEMS.md'),    max: 3600, kb: 290, when: 'once per session (read gate)' },

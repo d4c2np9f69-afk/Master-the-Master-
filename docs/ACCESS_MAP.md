@@ -138,9 +138,16 @@ which needs **both** Secure Boot (PCR7) **and** clean DMA — see OPEN_ITEMS #4.
 | Machine | Address | How Claude gets in | Proof it worked |
 |---|---|---|---|
 | **Beast** (this PC) | `192.168.1.194` | local | — |
-| **Acer** laptop (`JeffsLapTop`) | ⚠️ **DHCP — was `.176`, found at `192.168.1.159` 2026-09-29** (name does NOT resolve from the Beast; find it by scanning :22 for `OpenSSH_for_Windows`) · user `jeffl` | **`ssh jeffl@192.168.1.159`** — key already installed | `ssh … "powershell -File C:\Users\jeffl\x.ps1"` returns output |
-| **Lenovo** (garage, Linux) | ⚠️ **DHCP — was `.173`, came up `192.168.1.158` 2026-09-29.** Find it: `ssh jeffloewen@GarageLaptop` resolves · user `jeffloewen` | **`ssh jeffloewen@192.168.1.173`** — key already installed | `ssh … hostname` |
-| **HP** (garage) | *not yet on WiFi* | staged: `E:\GARAGE-SETUP\garage-hp-setup.sh` installs sshd **+ the Beast's key FIRST** | Jeff reports the IP, then it is remote-finishable |
+| **Acer** laptop (`JeffsLapTop`) | `192.168.1.176` ✅ **the NAME resolves now** (hosts entry) · user `jeffl` · Windows 11 Home, 1366x768 | **`ssh jeffl@JEFFSLAPTOP`** — key installed | 2026-10-08: `ssh … "powershell … -File C:\HCC-SETUP\x.ps1"` returned output |
+| **Lenovo** (garage, Linux) | `192.168.1.158` · name resolves · user **`jeffloewen`** · Ubuntu | **`ssh jeffloewen@GARAGELAPTOP`** — key installed | 2026-10-08: returned `GarageLaptop` + `/usr/bin/vlc` |
+| **KitchenPC** (the HP — **now on the network**) | `192.168.1.192` · name resolves · user **`jeffloewen`** · **Ubuntu 26.04.1 LTS** | **`ssh jeffloewen@KITCHENPC`** — key installed | 2026-10-08: returned `KitchenPC` + `Ubuntu 26.04.1 LTS` |
+
+🔴 **The usernames differ per machine and that is what blocks you:** the Beast and Acer are
+**`jeffl`**; the Lenovo and KitchenPC are **`jeffloewen`**. On 2026-10-08 `jeffl@KITCHENPC` and
+`jeffl@GARAGELAPTOP` both returned `Permission denied (publickey,password)` and it looked like
+no access existed — it was the wrong user, not a missing key.
+⚠️ **KitchenPC is LINUX, not Windows.** `powershell` over SSH there returns
+`bash: powershell: command not found`. The old "HP — not yet on WiFi" row was stale.
 
 🔴 **THE RULE THAT SAVES THE MOST TIME HERE: never inline a script over SSH.** Nested quoting
 between PowerShell → ssh → the remote shell broke **six separate times** in one session. **Always

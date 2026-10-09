@@ -172,8 +172,99 @@
     live.when = new Date();
     live.res = {}; Object.keys(MAP).forEach(n => { live.res[n] = judge(+n); });
     paintBar();
+    try { paintCluster(); } catch (e) { console.warn('cluster', e); }   // gauges must never break the status lights
     if (window.hccPlan) window.hccPlan.rerender();
     try { paintLife(); } catch (e) { console.warn('life layer', e); }   // never let decoration break the status lights
+  }
+
+  /* ---------- THE INSTRUMENT CLUSTER ----------
+     Jeff 2026-10-06: "it needs to look like you are looking at a live car dashboard where you can
+     see shit working on the map". The dots on the plan say WHICH device; this band says HOW THE
+     HOUSE IS DOING, in numbers you can read across the room.
+
+     It reads only what the 20 s poll already fetched - no extra calls, nothing commanded.
+     Every entity id below was taken from a live /api/states dump on 2026-10-06, not guessed:
+       sensor.my_weather_station_inside_temperature / _temperature   (Jeff's own PWS)
+       sensor.water_flow · alarm_control_panel.blink_loewen301 · cover.garage_door
+       binary_sensor.remote_ui · input_datetime.grandfather_clock_heartbeat
+       sensor.electric_smarthub_energy_monthly_usage_4501007001_<repeat>  (the id really is doubled)
+     TEMPERATURES ARE FAHRENHEIT - house rule, never print Celsius to Jeff. */
+  const CL_ELEC = 'sensor.electric_smarthub_energy_monthly_usage_4501007001_electric_smarthub_energy_monthly_usage_4501007001';
+
+  function num(id, dp) {
+    const s = live.states && live.states[id];
+    if (!s) return null;
+    const v = parseFloat(s.state);
+    if (!isFinite(v)) return null;
+    return dp == null ? v : +v.toFixed(dp);
+  }
+  function stt(id) { const s = live.states && live.states[id]; return s ? s.state : null; }
+
+  function paintCluster() {
+    const el = document.getElementById('cluster');
+    if (!el) return;
+    if (!live.on || !live.states) { el.innerHTML = ''; return; }
+
+    const inside = num('sensor.my_weather_station_inside_temperature', 0);
+    const out = num('sensor.my_weather_station_temperature', 0);
+    const flow = num('sensor.water_flow', 2);
+    const kwh = num(CL_ELEC, 0);
+    const alarm = stt('alarm_control_panel.blink_loewen301');
+    const garage = stt('cover.garage_door');
+    const net = stt('binary_sensor.remote_ui');
+    const c = counts();
+    const bad = c.down + c.alarm;
+
+    // lights/switches genuinely on, excluding the helper groups and the camera-motion switches
+    let lit = 0;
+    Object.keys(live.states).forEach(id => {
+      if (!/^(light|switch)\./.test(id)) return;
+      if (/all_lights|do_not_disturb|camera_motion_detection|_led$|auto_update/.test(id)) return;
+      if (live.states[id].state === 'on') lit++;
+    });
+
+    // the clock heartbeat: HA holds a timestamp the Beast refreshes every 5 min
+    let beatMin = null;
+    const hb = stt('input_datetime.grandfather_clock_heartbeat');
+    if (hb) { const t = Date.parse(hb.replace(' ', 'T')); if (isFinite(t)) beatMin = Math.round((Date.now() - t) / 60000); }
+
+    const tiles = [];
+    const T = (k, v, u, lamp, cls, title) => tiles.push({ k, v, u, lamp, cls, title });
+
+    T('Inside', inside == null ? '--' : inside, '°F', inside == null ? 'idle' : 'ok',
+      inside == null ? '' : inside >= 78 ? 'hot' : inside <= 64 ? 'cold' : '', 'Ambient weather station, indoor sensor');
+    T('Outside', out == null ? '--' : out, '°F', out == null ? 'idle' : 'ok',
+      out == null ? '' : out >= 90 ? 'hot' : out <= 40 ? 'cold' : '', 'Jeff’s own PWS (KTNWHITE21)');
+    T('Alarm', alarm ? (alarm === 'armed_away' ? 'ARMED' : alarm === 'armed_home' ? 'HOME' : alarm === 'disarmed' ? 'OFF' : String(alarm).toUpperCase()) : '--',
+      '', alarm == null ? 'idle' : /^armed/.test(alarm) ? 'ok' : 'warn', '', 'Blink system arm state');
+    T('Garage', garage ? String(garage).toUpperCase() : '--', '',
+      garage == null ? 'idle' : garage === 'closed' ? 'ok' : 'warn', garage && garage !== 'closed' ? 'alarmed' : '',
+      'Open in daytime heat is CORRECT by Jeff’s rule; still open after 10 PM is a real finding');
+    T('Water now', flow == null ? '--' : flow.toFixed(2), 'gpm', flow == null ? 'idle' : flow > 2 ? 'warn' : 'ok', '',
+      'A 5-minute smoothed derivative - a brief flush shows as a low decimal, that is documented-normal');
+    T('Power cycle', kwh == null ? '--' : kwh, 'kWh', kwh == null ? 'idle' : 'ok', '', 'SmartHub running total this billing cycle');
+    T('Lights on', lit, '', lit ? 'ok' : 'idle', '', 'Real lights and plugs that are on right now');
+    T('Devices', c.ok, 'ok', bad ? 'bad' : c.warn ? 'warn' : 'ok', bad ? 'alarmed' : '',
+      bad ? (bad + ' down') : c.warn ? (c.warn + ' need a look') : 'Everything that reports is answering');
+    T('Internet', net === 'on' ? 'UP' : net == null ? '--' : 'DOWN', '', net === 'on' ? 'ok' : net == null ? 'idle' : 'bad',
+      net === 'on' ? '' : 'alarmed', 'Home Assistant cloud link');
+
+    let html = '';
+    tiles.forEach(t => {
+      const small = typeof t.v === 'string' && t.v.length > 4 ? ' sm' : '';
+      html += '<div class="cl ' + (t.cls || '') + '" title="' + esc(t.title || '') + '">'
+        + '<div class="cl-k">' + esc(t.k) + '</div>'
+        + '<div class="cl-v' + small + '">' + esc(String(t.v)) + (t.u ? '<span class="cl-u">' + esc(t.u) + '</span>' : '') + '</div>'
+        + '<span class="cl-s ' + t.lamp + '"></span></div>';
+    });
+    // the clock tile carries the live pip, so a frozen page is visible at a glance
+    const stale = beatMin == null || beatMin > 15;
+    html += '<div class="cl beat' + (stale ? ' stale' : '') + '" title="'
+      + esc(beatMin == null ? 'No heartbeat from the Beast yet' : 'The clock refreshes this every 5 minutes; over 15 means it is stuck')
+      + '"><div class="cl-k">Clock</div><div class="cl-v sm"><span class="beat-pip"></span>'
+      + (beatMin == null ? '--' : beatMin <= 1 ? 'LIVE' : beatMin + '<span class="cl-u">min</span>') + '</div></div>';
+
+    el.innerHTML = html;
   }
 
   /* ---------- THE HOUSE, ALIVE ----------

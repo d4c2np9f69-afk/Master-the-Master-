@@ -15,12 +15,17 @@ rem TWO FILE TRAPS THIS SCRIPT WAS BITTEN BY, BOTH ON 2026-09-23 - keep them in 
 rem   1. it MUST be CRLF; written LF-only every line failed
 rem   2. a bash heredoc COLLAPSES \\ to \, which produced "System error 67 network name not found"
 rem      on every line while the identical command typed by hand worked. ACCESS_MAP documents this.
+rem
+rem ---- 2026-10-01: DRIVES MAPPED BY NAME, NOT IP ----
+rem Both laptops roam wired<->Wi-Fi and hold two reserved addresses each (Acer .159/.176, Lenovo .158 +
+rem wired TBD), so an IP mapping breaks whenever one switches. The gateway's DNS follows the active NIC.
+rem Verified from the Acer 2026-10-01: GarageLaptop -> .158, JEFFSLAPTOP -> .159, \\GarageLaptop\GarageFiles opens.
 set LOG=C:\Users\jeffl\map-network.log
 echo ==== %DATE% %TIME% ==== > "%LOG%"
 net use L: /delete /y >nul 2>&1
-net use L: \\192.168.1.158\GarageFiles /user:Guest "" /persistent:yes >> "%LOG%" 2>&1
+net use L: \\GARAGELAPTOP\GarageFiles /user:Guest "" /persistent:yes >> "%LOG%" 2>&1
 net use A: /delete /y >nul 2>&1
-net use A: \\192.168.1.159\Users\jeffl /user:Guest "" /persistent:yes >> "%LOG%" 2>&1
+net use A: \\JEFFSLAPTOP\Users\jeffl /user:Guest "" /persistent:yes >> "%LOG%" 2>&1
 echo -- IPC$ Guest sessions BY NAME (this is what fixes the Network double-click) >> "%LOG%"
 net use \\JEFFSLAPTOP\IPC$ /user:Guest "" >> "%LOG%" 2>&1
 net use \\GARAGELAPTOP\IPC$ /user:Guest "" >> "%LOG%" 2>&1
