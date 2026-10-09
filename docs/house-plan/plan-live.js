@@ -82,7 +82,17 @@
     79: { e: ['input_boolean.grandfather_clock'], offOk: true, note: 'HA runs the chimes; the Beast plays them on the W200. The speaker itself does not report to HA.' },
     80: { mower: true },
   };
-  const COLORS = { ok: '#23a55a', warn: '#e39b00', down: '#d7263d', alarm: '#d7263d', off: '#9aa3ad', unknown: '#c3c9d0' };
+  /* THE COLOUR LAW - Jeff, 2026-10-08: "nothing needs to be lit red unless it's not working[;]
+     one it's working it's green[,] if it's off it's black".
+       working  -> green      off -> BLACK      broken -> red
+     'off' was #9aa3ad grey, which read as a fault at a glance; it is now near-black. Not pure
+     #000: on the dash background (#0b0f14) a pure-black lamp vanishes and you cannot tell a
+     switched-off device from one that is not on the map at all. #0a0d12 plus the lamp's own
+     light ring reads as deliberately dark.
+     'warn' stays AMBER, not red - amber is not red, and it is the only way a low battery or a
+     stale sensor gets noticed before it becomes a failure. 'unknown' stays grey: no data is not
+     the same claim as switched off, and colouring it green or black would be inventing a state. */
+  const COLORS = { ok: '#23a55a', warn: '#e39b00', down: '#d7263d', alarm: '#d7263d', off: '#0a0d12', unknown: '#c3c9d0' };
   const WORDS = { ok: 'Reporting', warn: 'Needs a look', down: 'DOWN', alarm: 'ALARM', off: 'Switched off', unknown: 'Unknown' };
 
   const live = { on: false, states: null, mower: null, when: null, err: '', res: {} };
@@ -399,7 +409,18 @@
     // 5. A/C — cold air down every duct while the relay runs
     if (on('switch.ac_relay')) {
       const du = P.duct, sy = Y(du.supplyY);
-      du.trunk.forEach(t => mk('line', { x1: X(t.from), y1: sy, x2: X(t.to), y2: sy, stroke: '#8fe3ff', 'stroke-width': 3, 'stroke-dasharray': '3 9', 'stroke-linecap': 'round', class: 'air' }, top));
+      du.trunk.forEach((t, ti) => {
+        const x1 = X(t.from), x2 = X(t.to);
+        mk('line', { x1, y1: sy, x2, y2: sy, stroke: '#8fe3ff', 'stroke-width': 3, 'stroke-dasharray': '3 9', 'stroke-linecap': 'round', class: 'air' }, top);
+        // Jeff, 2026-10-08: "wind emojis going down the ductwork when the AC or heat is running".
+        // Two per trunk segment, staggered, riding from the air handler outward - the segments are
+        // listed unit-end first, so from->to IS the direction the air actually travels.
+        for (let i = 0; i < 2; i++) {
+          const puff = mk('text', { 'font-size': 13, 'text-anchor': 'middle', opacity: .92 }, top);
+          puff.textContent = '💨';
+          mk('animateMotion', { dur: '3.4s', repeatCount: 'indefinite', begin: (ti * 0.4 + i * 1.7).toFixed(1) + 's', path: `M ${x1} ${sy} L ${x2} ${sy}` }, puff);
+        }
+      });
       du.branches.forEach(b => { const gm = hp.branchGeom(b); const pts = gm.path.map(p => `${X(p[0])},${Y(p[1])}`).join(' '); mk('polyline', { points: pts, fill: 'none', stroke: '#8fe3ff', 'stroke-width': 2.4, 'stroke-dasharray': '3 9', 'stroke-linecap': 'round', class: 'air' }, top); mk('circle', { cx: X(gm.reg[0]), cy: Y(gm.reg[1]), r: 1.4 * PF, fill: 'url(#pool-cyan)', opacity: .55, class: 'pulse-soft' }, pools); });
       const u = du.unit; text(X(u.x + u.w / 2), Y(u.y) - 6, '❄ COOLING', { 'font-size': 8, fill: '#9fe9ff', 'font-weight': 700 }, top);
     }
