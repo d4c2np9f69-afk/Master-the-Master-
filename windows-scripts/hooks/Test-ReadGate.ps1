@@ -31,6 +31,18 @@ function Check($name, $cond, $detail) {
   else { $script:fail++; "  FAIL  $name   $detail" }
 }
 
+# A gate PASSES when it does not DENY. It may still emit an ALLOW carrying a topic brief.
+# Before 2026-10-08 a pass was always silent, so these tests asserted empty output. The
+# BRIEF ON PASS change in Hook-RequireRead.ps1 now delivers each matched topic's hard-won
+# fact even when nothing is blocked, so 'no output' stopped being the right question and
+# four of these tests cried wolf on their first run. The right question is whether the
+# action was DENIED.
+function NotDenied($out) {
+  if ([string]::IsNullOrWhiteSpace($out)) { return $true }
+  return ($out -notmatch '"permissionDecision"\s*:\s*"deny"')
+}
+
+
 $now  = [int][double]::Parse((Get-Date -UFormat %s))
 $ALL  = @("$now|docs/ACCESS_MAP.md", "$now|docs/SESSION_START.md", "$now|docs/OPEN_ITEMS.md")
 $APP  = 'C:\Users\jeffl\Documents\GitHub\master-the-master-\index.html'
@@ -50,23 +62,23 @@ Check '  asks for exactly the two missing' (($o -match 'SESSION_START') -and ($o
 
 $s = T 'rg-full';     Receipt $s $ALL
 $o = Run $s 'Edit' '' $APP
-Check 'allows the mutation once all three are read' ([string]::IsNullOrWhiteSpace($o)) "output: $o"
+Check 'allows the mutation once all three are read' (NotDenied $o) "output: $o"
 
 $s = T 'rg-override'; Receipt $s $null
 $o = Run $s 'PowerShell' 'Remove-Item foo.txt  # HCC-OVERRIDE' ''
-Check 'HCC-OVERRIDE stands the gate down' ([string]::IsNullOrWhiteSpace($o)) "output: $o"
+Check 'HCC-OVERRIDE stands the gate down' (NotDenied $o) "output: $o"
 
 $s = T 'rg-docs';     Receipt $s $null
 $o = Run $s 'Write' '' 'C:\Users\jeffl\Documents\GitHub\master-the-master-\docs\OPEN_ITEMS.md'
-Check 'writing a doc is exempt' ([string]::IsNullOrWhiteSpace($o)) "output: $o"
+Check 'writing a doc is exempt' (NotDenied $o) "output: $o"
 
 $s = T 'rg-scratch';  Receipt $s $null
 $o = Run $s 'Write' '' 'C:\tmp\scratchpad\foo.py'
-Check 'scratchpad is exempt' ([string]::IsNullOrWhiteSpace($o)) "output: $o"
+Check 'scratchpad is exempt' (NotDenied $o) "output: $o"
 
 $s = T 'rg-read';     Receipt $s $null
 $o = Run $s 'PowerShell' 'Get-ChildItem C:\Users\jeffl' ''
-Check 'a non-mutating command is never blocked' ([string]::IsNullOrWhiteSpace($o)) "output: $o"
+Check 'a non-mutating command is never blocked' (NotDenied $o) "output: $o"
 
 $s = T 'rg-camera';   Receipt $s $ALL
 $o = Run $s 'PowerShell' 'Restart-Service go2rtc' ''
@@ -94,7 +106,20 @@ Check 'HEADER: blocks when OPEN_ITEMS was only read from the MIDDLE (offset 113)
 
 $s = T 'rg-hdr-top';    Receipt $s ($BASE + $TOP)
 $o = Run $s 'Edit' '' $APP
-Check 'HEADER: passes on a top-of-file read' ([string]::IsNullOrWhiteSpace($o)) "output: $o"
+Check 'HEADER: passes on a top-of-file read' (NotDenied $o) "output: $o"
+
+# --- BRIEF ON PASS, added 2026-10-08 --------------------------------------
+# The failure this guards: a topic gate's Why is the hard-won fact, and until today it
+# was handed to Deny and nowhere else. A COMPLIANT session was waved through in silence
+# and told nothing. On 2026-10-08 that let a session read thousands of lines, comply
+# fully, and still tell Jeff a feature he had already paid for "is not written anywhere".
+# Jeff: "nothing fucking works to get a session to comply." Compliance was never the
+# variable - the fact was simply never delivered.
+# This asserts the brief SURVIVES. Delete the brief and this test goes red.
+Check 'BRIEF: a PASSING topic gate still delivers its Why' ($o -match 'HCC TOPIC BRIEF') "output: $o"
+Check 'BRIEF: it allows rather than blocks' ($o -match '"permissionDecision":"allow"') "output: $o"
+Check 'BRIEF: it carries the real fact, not a placeholder' ($o -match 'lint-app') "output: $o"
+
 
 $s = T 'rg-hdr-stale';  Receipt $s ($BASE + $STALE)
 $o = Run $s 'Edit' '' $APP
@@ -106,7 +131,7 @@ Check 'CREATE: blocks a NEW scripts/ file with no Search-HCC run' ($o -match 'BU
 
 $s = T 'rg-create-search';   Receipt $s ($BASE + $TOP + $SEARCH); Marker $s
 $o = Run $s 'Write' '' $NEWJS
-Check 'CREATE: passes once Search-HCC was run' ([string]::IsNullOrWhiteSpace($o)) "output: $o"
+Check 'CREATE: passes once Search-HCC was run' (NotDenied $o) "output: $o"
 
 $s = T 'rg-create-auto';     Receipt $s ($BASE + $TOP); Marker $s
 $o = Run $s 'PowerShell' 'Invoke-RestMethod -Uri http://192.168.1.66:8123/api/config/automation/config/zz_test -Method POST' ''
@@ -114,11 +139,11 @@ Check 'CREATE: blocks an HA automation create (shell) with no search' ($o -match
 
 $s = T 'rg-create-edittext'; Receipt $s ($BASE + $TOP); Marker $s
 $o = Run $s 'Edit' '' $APP
-Check 'CREATE: an Edit whose TEXT mentions the API path does NOT fire (only a shell call can POST)' ([string]::IsNullOrWhiteSpace($o)) "output: $o"
+Check 'CREATE: an Edit whose TEXT mentions the API path does NOT fire (only a shell call can POST)' (NotDenied $o) "output: $o"
 
 $s = T 'rg-create-existing'; Receipt $s ($BASE + $TOP); Marker $s
 $o = Run $s 'Write' '' $APP
-Check 'CREATE: does NOT fire on an EXISTING file' ([string]::IsNullOrWhiteSpace($o)) "output: $o"
+Check 'CREATE: does NOT fire on an EXISTING file' (NotDenied $o) "output: $o"
 
 $s = T 'rg-create-standdown'; Receipt $s ($BASE + $TOP)    # NO marker on purpose
 $o = Run $s 'Write' '' $NEWJS

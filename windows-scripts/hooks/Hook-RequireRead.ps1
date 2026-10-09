@@ -419,8 +419,37 @@ if ($isCreate -and -not $createStoodDown) {
   }
 }
 
+# ---------------------------------------------------------------------------
+# BRIEF ON PASS - added 2026-10-08, the same session it was earned.
+#
+# THE BUG THIS FIXES is stated in this file's own words 30 lines below:
+# "A gate that silently does nothing is the failure this whole file exists to stop."
+# That is EXACTLY what every topic gate did whenever a session was COMPLIANT.
+#
+# $g.Why holds the hard-won fact - "Inovelli is SCRAPPED ON PRICE", "the hour meter was
+# dead 50 days", "availability is the ONLY real liveness signal". It was handed to Deny
+# and NOWHERE ELSE. So the fact reached a session ONLY when that session had already
+# failed to read. Behave, and the gate waved you through in silence and told you nothing.
+# COMPLIANCE WAS PUNISHED WITH IGNORANCE.
+#
+# PROVEN 2026-10-08: the read gate forced ACCESS_MAP + SESSION_START + OPEN_ITEMS at
+# session start. The APP gate matched the house-plan page edits all evening, but its
+# requirements were already satisfied, so it passed SILENTLY and its Why was never shown.
+# Meanwhile the fact that actually mattered - that the house plan already HAS a live
+# layer, built and bound to real HA entities and gated behind `if (token)` - was in no
+# required file at all. The session complied fully, read thousands of lines, and still
+# told Jeff that a feature he had already paid for "is not written anywhere."
+#
+# Jeff, 2026-10-08: "nothing fucking works to get a session to comply." Compliance was
+# never the variable - the fact simply was not delivered. Now a matched topic emits its
+# Why whether it denies OR allows. It costs nothing until that topic is touched, unlike
+# CLAUDE.md, which costs tokens on every turn forever.
+# ---------------------------------------------------------------------------
+$script:Briefs = @()
+
 foreach ($g in $GATES) {
   if ($blob -match ("(?i)" + $g.Match)) {
+    if ($g.Why) { $script:Briefs += ('[' + $g.Name + '] ' + $g.Why) }
     $missing = @()
     $now = [int][double]::Parse((Get-Date -UFormat %s))
     foreach ($doc in $g.Requires) {
@@ -449,10 +478,24 @@ foreach ($g in $GATES) {
 # CREATE gate stood down (see above): allow, but make it visible in the session
 # rather than silent. A gate that silently does nothing is the failure this
 # whole file exists to stop.
+$msgs = @()
 if ($createStoodDown) {
+  $msgs += ('HCC CREATE GATE INACTIVE THIS SESSION - the shell receipt hook is not live (settings.json changed after session start). Restart Claude Code to arm it. You are creating ' + $what + ' - run Search-HCC.ps1 and list what already exists FIRST anyway.')
+}
+
+# Deliver the facts for every topic this action touched, even though nothing is being
+# blocked. This is the whole point of the BRIEF ON PASS change above: the Why used to be
+# shown only to a session that had already failed. A session that behaved got silence.
+if ($script:Briefs.Count -gt 0) {
+  $msgs += ("HCC TOPIC BRIEF - what is already known about what you are touching. " +
+            "Not a block; you are allowed through. These cost Jeff real hours to learn:`n  " +
+            ($script:Briefs -join "`n  "))
+}
+
+if ($msgs.Count -gt 0) {
   @{
     hookSpecificOutput = @{ hookEventName = 'PreToolUse'; permissionDecision = 'allow' }
-    systemMessage = ('HCC CREATE GATE INACTIVE THIS SESSION - the shell receipt hook is not live (settings.json changed after session start). Restart Claude Code to arm it. You are creating ' + $what + ' - run Search-HCC.ps1 and list what already exists FIRST anyway.')
+    systemMessage = ($msgs -join "`n`n")
   } | ConvertTo-Json -Depth 5 -Compress | Write-Output
 }
 
