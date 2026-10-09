@@ -118,13 +118,60 @@ try {
 
     $url = "$($used.Http)/api/backup/download/$($latest.backup_id)?agent_id=$agentId"
     $tmpPath = "$destPath.partial"
-    Invoke-WebRequest -Uri $url -Headers @{Authorization = "Bearer $token"} -OutFile $tmpPath -TimeoutSec $used.DownloadSec
+    $idPath  = "$destPath.partial.id"
+
+    # 2026-10-08: RESUMABLE. The scheduled task carries ExecutionTimeLimit PT15M while this script
+    # allows DownloadSec 1800 (30 min), so a slow run is KILLED by Windows -- LastTaskResult 267014
+    # SCHED_S_TASK_TERMINATED. On 10-08 that stopped it 6 MB short of a 638 MB file at exactly 06:45,
+    # 15 minutes after its 06:30 start. The old code then DELETED the .partial on any size mismatch,
+    # so every killed run restarted from zero and the backup could never get across on a slow day.
+    # Now it resumes with an HTTP Range request: a killed run keeps its bytes and the next run
+    # finishes the job. Raising the task limit (needs admin) is still worth doing, but this means
+    # the sync no longer DEPENDS on it.
+    # The .id sidecar guards the one way resuming could corrupt a file: two automatic backups on the
+    # same calendar day share destPath but have different backup_ids, so appending the second onto
+    # the first would produce a valid-looking tar that is garbage. Different id -> start over.
+    $resumeFrom = 0
+    if (Test-Path $tmpPath) {
+        $priorId = if (Test-Path $idPath) { (Get-Content $idPath -Raw).Trim() } else { "" }
+        if ($priorId -eq $latest.backup_id) {
+            $resumeFrom = (Get-Item $tmpPath).Length
+            if ($resumeFrom -ge $expectedSize) { $resumeFrom = 0; Remove-Item $tmpPath -Force }
+            else { Write-Log "RESUME: $resumeFrom of $expectedSize bytes already on disk (backup_id $priorId)" }
+        } else {
+            Write-Log "DISCARD: partial belongs to backup_id '$priorId', want '$($latest.backup_id)'"
+            Remove-Item $tmpPath -Force
+        }
+    }
+    Set-Content -Path $idPath -Value $latest.backup_id -Encoding ascii
+
+    $req = [System.Net.HttpWebRequest]::Create($url)
+    $req.Headers.Add("Authorization", "Bearer $token")
+    $req.Timeout          = $used.ConnectMs
+    $req.ReadWriteTimeout = $used.DownloadSec * 1000
+    if ($resumeFrom -gt 0) { $req.AddRange([long]$resumeFrom) }
+
+    $resp = $req.GetResponse()
+    # 206 = the server honoured the Range. 200 with a resume pending means it ignored it and is
+    # sending the whole file, so the local bytes must be thrown away or the file would be doubled.
+    $append = ($resumeFrom -gt 0 -and [int]$resp.StatusCode -eq 206)
+    if ($resumeFrom -gt 0 -and -not $append) { Write-Log "NOTE: server ignored Range (HTTP $([int]$resp.StatusCode)) -- restarting the download" }
+
+    $in  = $resp.GetResponseStream()
+    $out = New-Object System.IO.FileStream($tmpPath, $(if ($append) { [System.IO.FileMode]::Append } else { [System.IO.FileMode]::Create }), [System.IO.FileAccess]::Write)
+    try {
+        $buf = New-Object byte[] 1048576
+        while (($n = $in.Read($buf, 0, $buf.Length)) -gt 0) { $out.Write($buf, 0, $n) }
+    } finally {
+        $out.Dispose(); $in.Dispose(); $resp.Dispose()
+    }
 
     $actualSize = (Get-Item $tmpPath).Length
     if ($actualSize -ne $expectedSize) {
-        Remove-Item $tmpPath -Force
-        throw "Size mismatch: expected $expectedSize, got $actualSize"
+        # Deliberately KEPT, not deleted -- these bytes are what the next run resumes from.
+        throw "Size mismatch: expected $expectedSize, got $actualSize (partial kept for resume)"
     }
+    Remove-Item $idPath -Force -ErrorAction SilentlyContinue
 
     Move-Item $tmpPath $destPath
     Set-ItemProperty -Path $destPath -Name IsReadOnly -Value $true

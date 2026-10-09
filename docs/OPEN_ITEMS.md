@@ -51,6 +51,21 @@ anything — one answered from the record, one by building the thing that was ac
 
 ---
 
+## 🆕 2026-10-08 EVENING
+
+**Jeff, this session: *“He puts on this eight page list of shit for me to do.”*** He is right, and he already
+said it on 09-29: *“It has become a list of I'm too fucking lazy to do something so I put them on
+Jeff's list.”* Four items were staged here and **three of them said JEFF**. They were taken back and
+done. **One row survives below, and it is Claude's.**
+
+*Finished work and the east-wall note live in `OPEN_ITEMS_CLOSED.md` — this file holds only what somebody is going to DO.*
+
+| # | What is open | Owner | The exact next step |
+|---|---|---|---|
+| 🟡 **#226** | **CLAUDE'S, NOT JEFF'S.** Jeff asked for a network signal between the computers on the house map. There is no live source: a scan of **all 575 HA entities** found nothing for the Beast, Acer, Lenovo or KitchenPC — only `binary_sensor.camera_ai_server_reachable`. Machine-to-machine status lives in `Verify-Network.ps1` on the Beast, not in HA, so nothing is drawn today because drawing it would be inventing it. | **Claude** | Publish one reachability entity per machine into HA from the existing `Verify-Network.ps1` run (REST `POST /api/states/binary_sensor.*`), then bind them in `plan-live.js` the same way the zones and `switch.ac_relay` already are |
+
+---
+
 ## 🔴 #194 — ANGELA'S PRESENCE. **OWNER: ANGELA'S PHONE. One setting, not yet done.**
 
 **Angela's iPhone → Settings → Privacy & Security → Location Services → Home Assistant → Always**, then open the HA app once.

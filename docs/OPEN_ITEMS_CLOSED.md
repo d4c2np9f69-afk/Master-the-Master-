@@ -13,6 +13,25 @@ The live list is `OPEN_ITEMS.md`.
 
 ---
 
+## 🆕 2026-10-08 EVENING — closed the same session
+
+### ✅ CLOSED THIS SESSION
+
+- 🟢 **Night Mode was dying at step 1 and taking the whole scene with it.** After the 2026.10.0 update the log carried “The Tuya cloud rejected the command” 3×; the two Tuya bed-lamp sockets were ONE call, so `mode: single` aborted the sequence and the living room, dining and bedroom cans never ran at all. Split into one call per socket and set `continue_on_error` on every device step in BOTH branches — one unreachable device can no longer take out the lights, and HA still logs each failure so nothing is hidden. Saved via `POST /api/config/automation/config/hcc_night_mode_lights`, read back to confirm, entity verified `state: on` / `mode: single`. ⚠️ **Not feature-tested** — proving it needs a real Night Mode trigger, and firing it deliberately at night would turn bedroom lights on with Angela there. It proves itself on the next genuine run.
+- 🟢 **The nightly backup copy could never finish on a slow day, and now it can.** `HCC Beehive Backup Sync` returned `267014` = `SCHED_S_TASK_TERMINATED` on 10-08, leaving a `.partial` of **632,241,640 bytes stamped 06:45 — exactly 15 minutes after its 06:30 start**, ~6 MB short. 🔑 **Root cause was a contradiction in our own setup: the script allows `DownloadSec = 1800` (30 min) while the task's `ExecutionTimeLimit` is `PT15M`** (normal runs take 7 min, 06:30→06:37 every day 10-02..10-07, so the limit is marginal). **And the old code DELETED its own partial on any size mismatch, so every killed run restarted from zero.** `Sync-HABackup.ps1` now resumes with an HTTP Range request and keeps the bytes; a killed run is finished by the next one. A `.partial.id` sidecar guards the one corruption path (two automatic backups on the same calendar day share a filename but not a `backup_id`). Parses clean, 0 syntax errors. **Raising the task limit needs admin and is still worth doing, but the sync no longer DEPENDS on it.**
+- 🟢 **The backups were never missing — Jeff was right and I was wrong.** I reported “no backup from today” having checked only the iCloud mirror, not the source. 15 backups sit on the Beehive, including **642.4 MiB at 21:29 UTC = 4:29 PM CT, six minutes before the 4:35 PM restart**. Only the off-box copy had stopped. It is across now: `HCC-Beehive-Backup-2026-10-08.tar`, **673,587,200 bytes, 21:16:01, size-verified, via LAN-IP**. **Lesson: checking a mirror is not checking the thing.**
+- 🟢 **`docs/lighting/docs/` was not a misplaced file.** The PDF at `docs/lighting/docs/lighting/HCC_Floorplan_STAGE2_DEVICE_KEY.pdf` (74,402 B, 09:33) is an older duplicate of `docs/lighting/HCC_Floorplan_STAGE2_DEVICE_KEY.pdf` (75,169 B, 09:34), which is already correctly in place. Litter from a re-export one minute earlier. Moved out of the repo to the session scratchpad rather than destroyed; the two now-empty folders are untracked and invisible to git.
+- 🟢 **`package-gate-test.js` had been FAILING** — the `HCC-PROJECT` handoff package carried stale copies of `docs/OPEN_ITEMS.md` and `rules/CLAUDE.md`. Both refreshed and `cmp`-verified byte-identical. Full suite back to 19/19.
+
+### 🟡 A NOTE, NOT A JOB: the east wall is 4.25 ft short on paper
+
+**Nothing is broken and nobody has to do anything.** Recorded so the next session does not re-derive it.
+
+The perimeter walk says the east side is 29.25 ft. Guest bath ~8.5 (an ESTIMATE, never measured) + office 13 (laser) + the 3.5 NE notch = 25.0. `plan-data.js` quietly inflates the guest bath **+3.00** and the office **+1.25** — **exactly 4.25** — so the outline closes while contradicting the only room on that wall anyone measured. The 12:44 markup shows a `clo`/closet strip there that would account for it. Those two rooms are now **labelled on the drawing as unmeasured** instead of silently wrong, which is the part that actually mattered.
+
+**If Jeff ever happens to have the Bosch out** — guest bath depth, the depth of that closet strip, and the foyer (markup 8×6 vs drawn 5.5×7.33) would close it. Not worth a trip on its own. ⚠️ **More photos will not help** — 18 are already on disk including the Sharky LIDAR map, which is topology only. Full audit: `docs/house-plan/ROOM_GEOMETRY_AUDIT_2026-10-08.md`.
+
+
 ## 🟢 CLOSED 2026-08-23 — guest network re-enabled, LAN media opened
 
 | # | Item | Owner | Age | Notes |
