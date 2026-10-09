@@ -277,6 +277,15 @@ $GATES = @(
      Requires = @('OPEN_ITEMS.md')
      FreshMin = 120
      Why = 'The repo is PUBLIC. Secrets live ONLY in C:\Users\jeffl\HCC-secrets and are referenced, never copied. A Weather Underground key sat exposed in CLAUDE.md and is still in git history.' }
+  # NO Requires ON PURPOSE - this is a BRIEF, not a blocker. It can never deny anything; it
+  # only hands over what tonight cost Jeff hours to learn. Added 2026-10-08 after he said
+  # "nothing fucking works to get a session to comply" - and he was right that the answer is
+  # not another thing to comply with. With BRIEF ON PASS live, a Requires-less topic is pure
+  # knowledge at zero friction, which is the only kind of machinery worth adding now.
+  @{ Name = 'HOUSE PLAN'
+     Match = 'house-plan|plan-live|plan-data|plan-app|paintLife|housePlan'
+     Requires = @()
+     Why = 'IT IS ALREADY ALIVE - do not rebuild it. paintLife() in plan-live.js drives duct airflow off switch.ac_relay, sprinkler spray off the six zone switches (ZONES 43-48), warm floor pools scaled by each light''s REAL brightness, TVs, doors, Sharky, rain, the Mercedes, and the machine mesh. On 2026-10-08 a session told Jeff this ''is not written anywhere'' and he nearly paid to have it built a second time. THREE TRAPS: (1) paintLife runs only inside poll(), which runs only `if (token)` - outside the HCC app you get showcase mode, not live data, so ''it looks dead'' usually means no token, not a bug; (2) BUMP ?v= in index.html or NO DEVICE EVER GETS YOUR CHANGE - it bit twice in one evening, and asset-version-gate-test.js now catches it; (3) the east wall is 4.25 ft short on paper - guest bath and office depths are NOT measured and are labelled as such. Read docs/house-plan/ROOM_GEOMETRY_AUDIT_2026-10-08.md before touching room geometry.' }
 )
 
 # ---------------------------------------------------------------------------

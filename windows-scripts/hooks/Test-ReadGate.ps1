@@ -120,6 +120,16 @@ Check 'BRIEF: a PASSING topic gate still delivers its Why' ($o -match 'HCC TOPIC
 Check 'BRIEF: it allows rather than blocks' ($o -match '"permissionDecision":"allow"') "output: $o"
 Check 'BRIEF: it carries the real fact, not a placeholder' ($o -match 'lint-app') "output: $o"
 
+# HOUSE PLAN is a Requires-less BRIEF topic: it must inform and must NEVER block.
+# It exists because on 2026-10-08 a session told Jeff the house plan's live layer
+# "is not written anywhere" and he nearly paid to have it built twice.
+$s = T 'rg-houseplan'; Receipt $s ($BASE + $TOP)
+$o = Run $s 'Edit' '' 'C:\Users\jeffl\Documents\GitHub\master-the-master-\docs\house-plan\plan-live.js'
+Check 'HOUSE PLAN brief: fires on a plan-live.js edit' ($o -match 'HOUSE PLAN') "output: $o"
+Check 'HOUSE PLAN brief: says it is ALREADY ALIVE' ($o -match 'ALREADY ALIVE') "output: $o"
+Check 'HOUSE PLAN brief: never blocks' (NotDenied $o) "output: $o"
+
+
 
 $s = T 'rg-hdr-stale';  Receipt $s ($BASE + $STALE)
 $o = Run $s 'Edit' '' $APP
