@@ -136,7 +136,18 @@ $s = T 'rg-houseplan'; Receipt $s ($BASE + $TOP)
 $o = Run $s 'Edit' '' 'C:\Users\jeffl\Documents\GitHub\master-the-master-\docs\house-plan\plan-live.js'
 Check 'HOUSE PLAN brief: fires on a plan-live.js edit' ($o -match 'HOUSE PLAN') "output: $o"
 Check 'HOUSE PLAN brief: says it is ALREADY ALIVE' ($o -match 'ALREADY ALIVE') "output: $o"
-Check 'HOUSE PLAN brief: never blocks' (NotDenied $o) "output: $o"
+Check 'HOUSE PLAN: allows once OPEN_ITEMS is read' (NotDenied $o) "output: $o"
+
+# 2026-10-09 04:50, Jeff: "there has never been a session that has the discipline to operate
+# without the read gates." This topic shipped at 22:40 with NO Requires - deliberately unable
+# to block - on my argument that briefing beats blocking. Six hours later I overrode a blocking
+# gate three times. It now blocks like the other twelve, and THIS asserts it, so the softening
+# cannot quietly return.
+# Separate variables - reusing $s/$o here clobbered the session the dedup tests below rely on,
+# and two of them went red against unchanged code. Caught on the first run.
+$sBlk = T 'rg-houseplan-block'; Receipt $sBlk @()
+$oBlk = Run $sBlk 'Edit' '' 'C:\Users\jeffl\Documents\GitHub\master-the-master-\docs\house-plan\plan-live.js'
+Check 'HOUSE PLAN: BLOCKS when the required reading is not done' ($oBlk -match 'BLOCKED') "output: $oBlk"
 
 # ONCE PER SESSION. Jeff, 2026-10-08 23:19, after the SECRETS brief appeared for the
 # SEVENTH time in one session: "This makes seven times now you have said the same thing."

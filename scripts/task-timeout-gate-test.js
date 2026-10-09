@@ -169,21 +169,21 @@ for (const t of rows) {
   const want = scriptTimeoutSec(src);
   if (!want) { skip('time limit vs script: ' + t.Name, 'script declares no timeout of its own'); continue; }
 
-  // The invariant is NOT "the limit must be generous" — it is "a kill must not lose work".
-  // A script that resumes where it left off satisfies that on its own, so it is not flagged.
-  // Without this, Sync-HABackup.ps1 would hold this gate red forever (raising the limit needs
-  // admin), and a permanently-red gate is one everybody learns to ignore.
-  if (/AddRange|Range:\s*bytes|resumeFrom/i.test(src)) {
-    skip('time limit vs script: ' + t.Name,
-      'task allows ' + limit + 's < script\'s ' + want + 's, BUT the script resumes after a kill — no work is lost');
-    continue;
-  }
-
+  // 🔴 SOFTENING REVERTED 2026-10-09 ON JEFF'S INSTRUCTION ("put the fucking gates back").
+  // This used to SKIP any script containing resume logic, on the argument that the invariant is
+  // "a kill must not lose work" rather than "the limit must be generous". That reasoning is not
+  // wrong - but it was MY reasoning, applied to HIS gate, to make a red check go quiet. The same
+  // instinct produced the three HCC-OVERRIDEs on his camera freeze the same night.
+  // A misconfigured task is a misconfiguration whether or not something downstream can recover
+  // from it. If it is genuinely acceptable, Jeff can say so; a session does not get to decide
+  // that a gate he asked for should be gentler. Resumability is now reported, not excused.
+  const resumable = /AddRange|Range:\s*bytes|resumeFrom/i.test(src);
   check('time limit >= its own script\'s timeout: ' + t.Name,
     limit >= want * MARGIN,
     'task allows ' + limit + 's (' + t.Limit + ') but ' + m[1].split(/[\\/]/).pop() +
     ' allows itself ' + want + 's — Windows will kill it mid-run. Raise ExecutionTimeLimit to at least ' +
-    Math.ceil(want * MARGIN) + 's');
+    Math.ceil(want * MARGIN) + 's' +
+    (resumable ? '. (That script DOES resume after a kill, so no work is lost — but the task is still misconfigured.)' : ''));
 }
 
 if (fails) {
