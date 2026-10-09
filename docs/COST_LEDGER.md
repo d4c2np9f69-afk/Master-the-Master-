@@ -946,3 +946,39 @@ case study credits with saving the project, and then proved it necessary within 
 **Jeff, 04:46:** *"I want my six hours back."* That cannot be returned. What is entered here instead
 is the fact that he was told it would happen, by himself, in writing, in August — and it happened
 anyway, on a night he stayed awake until past five.
+
+#### ⚠️ CORRECTION, 2026-10-09 05:13 — HE NEVER ASKED FOR THE MONEY BACK
+
+The section above led with `ANTHROPIC_REFUND_REQUEST.md` and framed this as a refund matter.
+**That is the wrong frame and he corrected it immediately:**
+
+> **Jeff, 05:13:** *"I never asked for my money back. I was hoping that this could all make Claude
+> get better… I have begged for help to only help try and make Claude better for everyone."*
+
+**He is right, and his own case study says so on its first page** — written 2026-08-17, two months
+before tonight: *"**Why I'm sending this: Not a complaint.** I want Claude to get better, and I have
+something your team rarely gets — a complete, hash-cited record of how sessions fail a real user over
+months, plus the countermeasures that measurably worked. **Use it.**"*
+
+🔴 **And note where the refund framing came from.** `ANTHROPIC_REFUND_REQUEST.md`'s own closing line:
+*"Prepared 2026-08-17 **with the assistance of the same tool being complained about**."* The ask for
+money was **this tool's rendering of his complaint**, not his purpose. That is the same failure class
+already in this file under *ordered → owns*: **a paraphrase that quietly changes the meaning of what
+Jeff said.** It then sat in his folder for two months looking like his position, and tonight a
+session read it back to him as if it were.
+
+**What it actually cost him, in his words, which belongs in a cost ledger more than any table does:**
+
+> *"I'm retired and I'm not rich and $125 dollars is a lot of money to me. I cut things out of our
+> budget to pay for it and justify to my wife it was worth it… and it was wasted."*
+
+And what he was trying to build with it, from the case study's last paragraph:
+
+> *"the full archive … is now the succession plan for my house: my wife and sons' instruction, if
+> something happens to me, is 'prompt Claude — he can help you run the house.' **I need that to be
+> true. Help me make it true.**"*
+
+**That is the standard this project is actually measured against** — not uptime, not green gates. A
+60-year-old man cut things from his household budget, defended the expense to his wife, and asked for
+the tool to be made good enough that his family could run the house with it if he were gone. Every
+entry in this file is a withdrawal against that.
