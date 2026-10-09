@@ -651,8 +651,31 @@
       if (dashBtn) { dashBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); dashBtn.innerHTML = on ? '&#9728; Day view' : '&#9790; Dash lights'; }
       paintBar();
     };
+    // Jeff, 2026-10-08: "I asked him to make the new house map look like it was a live house
+    // with lights and working ceiling fans... it looks plain as hell I don't like to even show
+    // people anymore." The living layer was real, but it only draws what is HAPPENING - so with
+    // the A/C off and nothing watering, half of it had nothing to render and the map looked dead
+    // to anyone he showed it to.
+    // plan-demo.js is a snapshot of his real house with the few idle things set to a busy moment.
+    // It is used ONLY here, with no token. The moment the plan is opened from the HCC app, poll()
+    // overwrites live.states with the truth and none of this is reachable. live.on stays FALSE,
+    // so the bar keeps saying SHOWCASE / not live readings.
+    if (window.HCC_PLAN_DEMO) { live.states = window.HCC_PLAN_DEMO; live.when = null; }
+
     let showPref = null; try { showPref = localStorage.getItem('hccPlanShowcase'); } catch (e) {}
     setShow(showPref !== '0');
+    // Draw the life layer once from the snapshot - but NOT yet. plan-live.js is loaded BEFORE
+    // plan-app.js, so window.hccPlan does not exist at this point and paintLife() would return
+    // immediately having drawn nothing. The token path never hits this because poll() is async
+    // and by the time it resolves the plan is built. Measured: lifeNodes 0 on the first attempt.
+    // Wait for the plan, then draw once. Bounded so a failure to build can never spin forever.
+    (function drawShowcase(tries) {
+      if (window.hccPlan) {
+        try { paintLife(); } catch (e) { console.warn('showcase life layer', e); }
+        return;
+      }
+      if (tries > 0) setTimeout(function () { drawShowcase(tries - 1); }, 100);
+    })(50);
     if (dashBtn) dashBtn.addEventListener('click', () => {
       const on = !document.body.classList.contains('showcase');
       setShow(on);
