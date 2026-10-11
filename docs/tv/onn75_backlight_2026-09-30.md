@@ -253,3 +253,27 @@ There is no case where knowing it earlier saves a teardown. Stop hunting for it.
 
 **Also read off pic 2:** backlight boost transformer **`MSC ZY-T0204`, date code `2051`** = week 51
 of 2020. Other silkscreen in the area: `L201`, `JMP1/7/21/24`, `M6`, `M8`, `M9`, ground point `GP5`.
+
+## 2026-10-11 3:08 PM — ⚠️ ORDER OF WORK CORRECTED BY JEFF. TESTER FIRST, CAP SECOND.
+**This supersedes every "cap first" instruction above, including the 10:38 and 11:00 plans and the
+2:55 PM entry.** Jeff, verbatim: *"there is no reason to do the cap and risk desoldering soldering a
+new cap if it's the strips and the strip tester is the most non-invasive step right now."*
+
+**He is right and the earlier ordering was wrong.** It was built on "the cap is $0, so do it first."
+**The cap is not free.** It costs a desolder/resolder on a 2021 board that is healthy apart from the
+backlight — a lifted pad or a cold joint converts one fault into two — and if the fault is in the
+strings, that rework buys nothing and teaches nothing. **Diagnose before intervening.**
+
+**And the tester result changes what to do about the cap, so waiting makes it a decision instead of
+a guess:**
+- **both strings light** ⇒ fault is on the BOARD ⇒ the cap swap becomes a *targeted* repair, and the
+  old cap can be measured out of circuit afterwards to confirm it had actually failed
+- **a string is open** ⇒ the cap is almost certainly fine ⇒ **do not touch it at all**
+
+**THE ORDER, FINAL:** (1) **TKDMR tester on CON301/CON302, all four wire combinations** — wholly
+non-invasive, nothing unsoldered, tester arrives the morning of 2026-10-12; (2) only then the
+`EC210` cap, *if* the tester points at the board; (3) strips last, and only if a string is open —
+at which point the panel is coming off anyway and the strip part number gets read in the same minute.
+
+🔑 This is the project's own "test before declaring a fault" rule applied to hardware, and Jeff
+applied it before Claude did.
