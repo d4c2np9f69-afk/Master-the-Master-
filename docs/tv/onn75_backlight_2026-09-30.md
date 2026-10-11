@@ -215,3 +215,41 @@ connector → strips only if a strand actually fails.**
 🔑 Incidental: Jeff's set uses **12** strips, which matches the **V756-J03** lineage; the
 **M75Q6-J03 uses 16**. And the Vizio-numbered 12-set is **$79.99** against **$36.55–42.06** for the
 onn-numbered ones — so the onn part numbers are the cheap path regardless.
+
+## 2026-10-11 2:55 PM — 🔑 BACKLIGHT WIRING SOLVED FROM JEFF'S PHOTOS (tester arrives 10-12 AM)
+Read directly off the power-board silkscreen in Jeff's wide shots — **this supersedes the
+earlier guess that each connector was an independent strand:**
+
+**`CON301` is silkscreened `LED+`. `CON302` is silkscreened `LED-`.**
+They are the two ENDS of the backlight circuit, not two separate strands.
+
+**Topology, now settled:** **2 parallel strings of 6 strips each.** All anodes exit `CON301`,
+all cathodes return to `CON302`. 6 strips x 7 beads x 3 V = **126 V**, exactly the board's
+`LED:100-126V` ceiling (6-bead variant = 108 V, also in range — either way it is 2 strings of 6).
+A single 12-strip series string would need ~252 V, which the board explicitly never exceeds.
+
+**The 3-pin connector is explained.** Jeff's close-ups of the `CON302` plug show a 3-position
+housing with **only TWO wires (grey + pink), terminals in the OUTER positions, middle position
+EMPTY.** The centre slot is **creepage spacing for 126 V plus a key** — not a circuit.
+⇒ each connector carries **2 wires = the 2 strings**.
+
+### HOW TO TEST (the tester goes ACROSS the two connectors, NOT within one)
+`CON302` alone cannot light anything — it is only the return side.
+- **RED probe → a `CON301` wire (LED+)**, **BLACK probe → a `CON302` wire (LED-)**
+- Pairing is unknown, so **sweep all 4 combinations** (301-A/302-A, 301-A/302-B, 301-B/302-A,
+  301-B/302-B). **Exactly 2 of the 4 should light** — those are the real strings. The other two
+  are open circuits; the tester just ramps to max, which is safe and normal.
+- **2 of 4 light, similar voltage** → both strings good → **the fault is the BOARD, not the strips**
+- **1 of 4 lights** → one string open → dead bead **or the old hand-soldered jumper**
+- **0 of 4** → fall back and try WITHIN `CON302` (outer pin to outer pin) before concluding anything
+- Keep RED on `CON301` throughout; reversed, the string simply blocks.
+
+### 🔑 WHY THE STRIP PART NUMBER NEVER NEEDS TO BE KNOWN IN ADVANCE (Jeff's ask)
+Process of elimination: **the only path that requires strips runs THROUGH opening the panel**,
+and the number is printed on the strip at that moment.
+- both strings pass ⇒ strips fine ⇒ buy a power board ⇒ **panel never comes off, number irrelevant**
+- a string is open ⇒ panel is coming off anyway ⇒ **read the number then**
+There is no case where knowing it earlier saves a teardown. Stop hunting for it.
+
+**Also read off pic 2:** backlight boost transformer **`MSC ZY-T0204`, date code `2051`** = week 51
+of 2020. Other silkscreen in the area: `L201`, `JMP1/7/21/24`, `M6`, `M8`, `M9`, ground point `GP5`.
