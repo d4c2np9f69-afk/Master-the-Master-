@@ -125,6 +125,22 @@ life of this project, until 2026-09-10.
 | Who actually used a share | Security log id **5140** (File Share auditing is ON) |
 | Encryption / Secure Boot / DMA truth | `msinfo32 /report <file>` → *Device Encryption Support* names every blocker |
 | Read a `.docx` with no Word installed | `zipfile` → `word/document.xml`, strip the tags |
+| **Is a host up?** | 🔴 **`Test-Connection -Count 2 -Quiet`**, never `ping`'s summary — see below |
+
+### 🔴 A THIRD INSTRUMENT THAT LIES, AND IT FAILS TOWARD A FALSE PASS (found 2026-10-10 23:05)
+
+**`ping.exe`'s statistics line counts an ICMP *unreachable* as a received reply.** Both dark
+devices from OPEN_ITEMS #225 printed **`Received = 3, Lost = 0 (0% loss)`** while every single
+line above it read **`Reply from 192.168.1.194: Destination host unreachable`** — that is the
+**Beast's own address**, i.e. our router answering "I can't find it", not the target answering.
+Reading only the summary (`ping … | tail -3`) reported the RE200 and `WS-SD00PJBA` as **back on
+the network when both are still dead**, and it was one sentence from being told to Jeff.
+
+**Use `Test-Connection -ComputerName <ip> -Count 2 -Quiet` → `$true/$false`** (it returned
+`False` for both, correctly), or if you must use `ping`, grep for `Reply from <the target ip>:`
+**with `bytes=`** and never for `Lost =`. 🟢 Our own scripts were already right —
+`Publish-MachineHealth.ps1:77` and `Verify-Network.ps1:71` both use `-Quiet`; this trap was a
+hand-run command, so there is no code to fix, only this note.
 
 ⚠️ **This box is Windows 11 *Home* (SKU 101).** Full BitLocker is **Pro-only**; `manage-bde.exe`
 and `Enable-BitLocker` exist on Home but the feature does not. Home gets Device Encryption only,
@@ -209,7 +225,7 @@ mind**, which is exactly what happened here within three hours of that check bei
 | AT&T gateway | BGW320 | `HCC_ACCESS.md` §Network |
 | GaragePC | SMB as its own account | `HCC_ACCESS.md` §5 *(moved off a Word file 2026-09-10)* |
 | **Search everything ever said** | `windows-scripts\Search-HCC.ps1 "topic"` | — · 🆕 **2026-10-08 it also searches THE REPO.** It never did before, which is how a session ran it three times and still told Jeff a built feature "is not written anywhere" |
-| **Machine reachability in HA** | `HCC-Scripts\Publish-MachineHealth.ps1` · task **HCC Machine Health**, every 5 min | 🔑 **Lives OUTSIDE the repo on purpose** — it names the HA credential and this repo is PUBLIC; the secret guard refused the repo copy and was right to. Publishes retained MQTT discovery so the entities survive an HA restart, with `expire_after: 900` so a dead publisher reads UNAVAILABLE instead of a stale "online". Entities: `binary_sensor.hcc_machines_{beast,acer_laptop,garage_laptop,kitchenpc}_online` + `_house_mesh_healthy`. Built because a scan of all 575 entities found NO machine entity at all |
+| **Machine reachability in HA** | `HCC-Scripts\Publish-MachineHealth.ps1` · task **HCC Machine Health**, every 5 min | 🔑 **Lives OUTSIDE the repo on purpose** — it names the HA credential and this repo is PUBLIC; the secret guard refused the repo copy and was right to. Publishes retained MQTT discovery so the entities survive an HA restart, with `expire_after: 900` so a dead publisher reads UNAVAILABLE instead of a stale "online". Entities: `binary_sensor.hcc_machines_{beast,acer_laptop,garage_laptop,kitchenpc}_online` + **`binary_sensor.hcc_machines_house_mesh_healthy`** (that full id — `hcc_house_mesh_healthy` returns MISSING and reads as "never built"; it cost a lookup 2026-10-10). Built because a scan of all 575 entities found NO machine entity at all |
 | Whole-house audit | `python HCC-Scripts\HCC-Audit.py` | — |
 | Cameras ⛔ **FROZEN** | `Verify-CameraStreams.ps1`, `Test-CameraFeature.ps1` | no change unless it FAILS or Jeff asks |
 
