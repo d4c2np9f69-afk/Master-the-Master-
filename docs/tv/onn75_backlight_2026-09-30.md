@@ -87,10 +87,20 @@ Silkscreen on the power board beside the backlight connector, photographed by Je
 - 12 strips ÷ 6 = **2 strands** — matches the **two connectors** (CON301 + CON302) on the board
 - Backlight power ≈ 2 × 126 V × 0.75 A = **~189 W** of the TV's 260 W rating. Consistent.
 
-**This independently confirms the ~96 V tester figure from the 10:12 Badcaps notes.** The TKDMR
-tester drives **30 mA**, not 750 mA; blue LED Vf at 30 mA ≈ 2.3 V, so 42 × 2.3 = **~97 V healthy**,
-and one dead LED = 96 − 2.3 = **~93.7 V**, which is the 93 V the thread reported. Three independent
-sources agree — **the $18.99 tester will read true on this set.**
+⚠️ **CORRECTION, same day 2:10 PM — the above was OVERSTATED and the LED-per-strip count is NOT
+settled by the board spec.** 6 LEDs × 3 V × 6 strips = **108 V also falls inside 100–126 V**, so the
+silkscreen cannot tell a 7-LED strip from a 6-LED one. And the "~96 V healthy strand" figure is from
+the Badcaps thread on the **70" onn 100012588 — a DIFFERENT TV** — so claiming "three independent
+sources agree" was wrong. What IS solid: **12 strips across 2 connectors = 6 strips per strand**.
+🔑 **Use the tester by COMPARING THE TWO STRANDS AGAINST EACH OTHER, not against an absolute number.**
+Whatever a healthy strand reads on this set, the bad one reads lower or nothing. That is independent
+of which strip variant is installed.
+
+🔑 **And this is why multiple strip versions exist for one TV:** the driver is a CONSTANT-CURRENT
+source with a **100–126 V compliance window**. It pushes ~750 mA and the voltage lands wherever the
+string needs it. Any variant whose total string voltage falls in that window works electrically.
+**So the risk in picking the wrong kit is MECHANICAL, not electrical** — strip length, LED spacing,
+and where the solder pads and mounting clips land against the diffuser and reflector.
 
 **Meter expectation corrected:** normal running output at CON301/CON302 = **100–126 V**. A reading
 of a few hundred volts only occurs on an OPEN, unloaded output just before protection trips — that
@@ -116,3 +126,62 @@ likely MOSFET; the sense resistors are the small SMD parts at its source pin.**
    mod a simple "remove one".
 🔴 Nothing gets removed before the IC datasheet is in hand — the Badcaps member pulled the boost
 converter's CS resistor first and **INCREASED** LED current.
+
+## 2026-10-11 2:10 PM — RESEARCH: how to AVOID the strips, and how to pick them (Jeff's ask)
+
+### A. There are THREE strip variants for this model, not two
+| Family | Model marking | Notes |
+|---|---|---|
+| `30375007005` / `006` | LED75D07A/B-ZC66AG-**06** | eBay ledbacklight2022 $36.55 free ship |
+| `30375007007` / `008` | LED75D07A/B-ZC66AG (and **-05** per some sellers) | eBay famfutr $42.06; Newegg $67.64 |
+| `261501013121` | visible no. `06-1-75FZ-OD35-12X6-824.6X12-220913` | ShopJimmy $64.99, **OUT OF STOCK** |
+
+🔑 **The third one can probably be ELIMINATED on its date code:** `...-220913` = **2022-09-13**
+production. Jeff's set is **S/N HA211230C75005153 (~Dec 2021)**, with board date codes 2021-05-27
+(power) and 2021-08-13 (main). That variant post-dates his TV by ~9 months. Note it is also
+**824.6 mm / "12X6"**, not 826 mm — a different length AND a different LED count.
+
+⚠️ **Sellers contradict each other on the -05/-06 suffixes.** One Amazon kit (XIMAIACC B0G2XPMHRT)
+is sold as fitting **both** `-06` and `-05`; a JOPHANN listing pairs `30375007007` with `-05`; an
+AliExpress listing pairs `30375007007` with `-06`. **No manufacturer source resolves it** — these are
+reseller cross-references, not documentation. Do not order on a suffix.
+
+⚠️ **Newegg's listing adds a second discriminator:** "there are two versions of this set… this
+version uses **12 strips labeled A**" — i.e. one version is **12 × A**, the other is **10 A + 2 B**.
+Count the A/B split on the old strips, not just the number.
+
+### B. ShopJimmy's "Version" kits DO partly fingerprint this TV — but not the strips
+Version 8 kit lists T-con **`ZBZZ`** and power supply **`514C7001M17`** — **both match Jeff's TV**
+(T-con `ZBZZ`, power board label `M17`) — and that kit carries strips `30375007007/008`.
+🔴 **But it is NOT proof:** the Version 8 main-board list (M21144/M21153/M22056/M22223/M22189/
+515C90100M13/M22233/M22222-MT) does **not** include Jeff's **`M21123-MT`**, and the Element
+E4FAA75R "Version 1" kit also uses the **same `514C7001M17`** power board while its matching eBay
+strips are the **-06 / 005-006** family. **The boards do not discriminate the strips.** ShopJimmy's
+own instruction is just "match the strips shown to the originals in your TV before ordering."
+
+### C. 🔑 WHAT KEEPS JEFF OUT OF THE STRIPS — ranked, cheapest first
+1. **`EC210`, the 450 V 10 µF 105 °C cap — $0, already on hand.** The documented fix for this exact
+   symptom; the Badcaps member had **15** of them where that cap was the whole repair, and said
+   *"the backlights test fine."* Do this first.
+2. 🔑 **THE HAND-SOLDERED JUMPER FROM THE LAST REPAIR — $0, and a prime suspect here.** Jeff 09-30:
+   *"last time the repair man had to solder the strips together in one place."* The strands are
+   **series** circuits, so a cracked or cold joint at that jumper is an **OPEN** — which on a tester
+   looks **exactly** like a dead LED, and would send him to buy strips he does not need. The joint is
+   several years old and has been heat-cycled every day since. **Inspect and reflow that joint before
+   buying anything.** (Reasoning from the series topology, not a cited repair report.)
+3. **Reseat CON301 / CON302** and check for browned or burnt pins — $0.
+4. **Power board**, if the tester shows BOTH strands healthy: ShopJimmy `514C7001M17` **$59.99 new**;
+   Discount Merchant sells a pulled/tested one (TV7001-ZC02-01 / 514C7001M17 / E021M509-**D1**) with a
+   30-day warranty, cheaper. `M17` and `M27` are interchangeable; Jeff's board is the **-B2** revision
+   of the same `E021M509`.
+5. **Single LED bead swap** — only if exactly one bead is dead. ⚠️ **Check the bead rating:** this set
+   runs **~750 mA per strand**, so each bead dissipates ~2.25 W. The common generic replacement beads
+   sold for TV repair are **3 V 350 mA** — roughly HALF the current this TV needs. Under-rated beads
+   will cook. Not priced here; correct-rating beads not yet identified.
+   **And this does not save the teardown** — the panel still has to come off.
+
+### D. The honest bottom line on "which strips"
+**Nothing on the power board, the main board, the T-con, or the serial number identifies the strip
+variant.** It is read off an old strip, or off a panel-assembly sticker if one is visible with the
+back cover off. Everything else is a reseller's guess. Since the cap is $0 and the tester works
+**from the connector**, the strip question may never need answering.
