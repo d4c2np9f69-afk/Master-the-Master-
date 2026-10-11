@@ -1,0 +1,225 @@
+<title>Alexa Commands — HCC</title>
+
+<style>
+  :root{
+    --paper:#F7F3EC;
+    --card:#FFFFFF;
+    --ink:#1B1815;
+    --soft:#5E574C;
+    --faint:#8A8175;
+    --brass:#7E6017;
+    --brass-bg:#F0E7D2;
+    --rule:#E3DBCC;
+    --stop:#9C2F22;
+    --stop-bg:#F6E9E6;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#151310;
+      --card:#1E1B16;
+      --ink:#F3EDE1;
+      --soft:#B0A692;
+      --faint:#8C8474;
+      --brass:#D9B65E;
+      --brass-bg:#2A2418;
+      --rule:#332E24;
+      --stop:#E8897A;
+      --stop-bg:#2C1D19;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#151310;
+    --card:#1E1B16;
+    --ink:#F3EDE1;
+    --soft:#B0A692;
+    --faint:#8C8474;
+    --brass:#D9B65E;
+    --brass-bg:#2A2418;
+    --rule:#332E24;
+    --stop:#E8897A;
+    --stop-bg:#2C1D19;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;
+    margin:0;
+    padding:32px 20px 72px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:34px;}
+
+  header{border-bottom:3px solid var(--brass);padding-bottom:18px;}
+  .eyebrow{
+    font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--brass);font-weight:700;margin:0 0 8px;
+  }
+  h1{font-size:clamp(30px,5vw,42px);line-height:1.1;margin:0 0 10px;letter-spacing:-.02em;text-wrap:balance;}
+  .lede{margin:0;color:var(--soft);font-size:16px;max-width:62ch;}
+
+  section{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:22px 24px;break-inside:avoid;}
+  h2{
+    font-size:13px;letter-spacing:.13em;text-transform:uppercase;
+    margin:0 0 4px;color:var(--brass);font-weight:700;
+  }
+  .subhead{margin:0 0 18px;color:var(--faint);font-size:13.5px;}
+
+  .cmds{display:flex;flex-direction:column;gap:0;margin:0;padding:0;list-style:none;}
+  .cmds li{
+    display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);
+    gap:6px 26px;align-items:baseline;
+    padding:11px 0;border-top:1px solid var(--rule);
+  }
+  .cmds li:first-child{border-top:none;}
+  .say{font-size:17px;font-weight:600;letter-spacing:-.01em;margin:0;}
+  .say::before{content:"“";color:var(--faint);}
+  .say::after{content:"”";color:var(--faint);}
+  .does{font-size:14px;color:var(--soft);margin:0;}
+
+  @media (max-width:600px){
+    .cmds li{grid-template-columns:1fr;gap:3px;}
+  }
+
+  .note{
+    background:var(--brass-bg);border-left:3px solid var(--brass);
+    padding:13px 16px;border-radius:0 8px 8px 0;font-size:14px;color:var(--ink);
+    margin-top:18px;
+  }
+  .note strong{color:var(--brass);}
+
+  .stop{background:var(--stop-bg);border-color:var(--stop);}
+  .stop h2{color:var(--stop);}
+  .stoplist{margin:0;padding-left:20px;font-size:14.5px;color:var(--soft);display:flex;flex-direction:column;gap:7px;}
+  .stoplist b{color:var(--ink);font-weight:600;}
+
+  footer{color:var(--faint);font-size:12.5px;border-top:1px solid var(--rule);padding-top:14px;}
+
+  @media print{
+    body{background:#fff;color:#000;padding:0;font-size:11.5pt;}
+    section{border:1px solid #bbb;box-shadow:none;break-inside:avoid;page-break-inside:avoid;}
+    .wrap{gap:18px;max-width:none;}
+    .note,.stop{background:#fff;}
+    header{border-bottom-color:#000;}
+  }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Home Command Center · Beehive</p>
+    <h1>What you can ask Alexa</h1>
+    <p class="lede">Every phrase below is live right now. Alexa was cleaned up on August 14 — she went from
+      69 things down to 33, and everything left on this card is something a person would actually say out loud.</p>
+  </header>
+
+  <section>
+    <h2>The pattern that always works</h2>
+    <p class="subhead">Anything on this card follows the same shape. If you forget a specific phrase, this one carries you.</p>
+    <ul class="cmds">
+      <li>
+        <p class="say">Alexa, turn on <em>[name]</em></p>
+        <p class="does">Works for every routine, scene, zone and switch listed here — not just lights.</p>
+      </li>
+      <li>
+        <p class="say">Alexa, turn off <em>[name]</em></p>
+        <p class="does">The reverse, wherever off means something.</p>
+      </li>
+    </ul>
+    <div class="note"><strong>If she says she can't find a device:</strong> say
+      “Alexa, discover devices” and wait about thirty seconds. That's the fix for nearly every
+      “I don't know that one” answer.</div>
+  </section>
+
+  <section>
+    <h2>Lights</h2>
+    <p class="subhead">Living room cans, on the new Kasa dimmer.</p>
+    <ul class="cmds">
+      <li><p class="say">Alexa, turn on Night Mode</p><p class="does">Drops the cans to 10% over a two-second fade — the level you set yourself.</p></li>
+      <li><p class="say">Alexa, turn off Night Mode</p><p class="does">Brings them back to full, same gentle fade.</p></li>
+      <li><p class="say">Alexa, turn on living room lights</p><p class="does">Full brightness, no fade.</p></li>
+      <li><p class="say">Alexa, set living room lights to 40 percent</p><p class="does">Any number you like. This is how you find a new level worth saving.</p></li>
+      <li><p class="say">Alexa, dim the living room lights</p><p class="does">Steps them down a notch from wherever they are.</p></li>
+    </ul>
+    <div class="note"><strong>Want a different night level?</strong> Set the cans where you like them by voice or on the
+      wall dimmer, tell me, and I'll re-point Night Mode at it. Takes a minute.</div>
+  </section>
+
+  <section>
+    <h2>TV</h2>
+    <p class="subhead">Fire TV in the viewing room, Apple TV in the bedroom.</p>
+    <ul class="cmds">
+      <li><p class="say">Alexa, turn on Skip the Commercials</p><p class="does">Jumps the Fire TV forward through a break.</p></li>
+      <li><p class="say">Alexa, turn on Resume Show</p><p class="does">Presses play again on the Fire TV.</p></li>
+      <li><p class="say">Alexa, turn on Sling</p><p class="does">Opens Sling TV on the Fire TV. “Sling TV” works too.</p></li>
+      <li><p class="say">Alexa, pause the Bedroom TV</p><p class="does">The Apple TV. “Play the Bedroom TV” starts it again.</p></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Around the house</h2>
+    <ul class="cmds">
+      <li><p class="say">Alexa, turn on Good Night</p><p class="does">Turns off <em>every</em> light in the house and logs the time — including the new living room cans.</p></li>
+      <li><p class="say">Alexa, turn on Vacuum the House</p><p class="does">Sends Sharky out.</p></li>
+      <li><p class="say">Alexa, stop the Vacuum</p><p class="does">Sends him back.</p></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Irrigation</h2>
+    <p class="subhead">The six B-Hyve zones, by plain number instead of their old codes.</p>
+    <ul class="cmds">
+      <li><p class="say">Alexa, turn on Zone One</p><p class="does">Front right. Two through Five follow the same pattern.</p></li>
+      <li><p class="say">Alexa, turn on Garden Zone</p><p class="does">The garden bed.</p></li>
+      <li><p class="say">Alexa, turn off Zone One</p><p class="does">Shuts it down.</p></li>
+    </ul>
+    <div class="note"><strong>Say turn off when you're done.</strong> A zone started by voice isn't running a
+      scheduled program, so don't count on it stopping itself.</div>
+  </section>
+
+  <section>
+    <h2>The Mercedes</h2>
+    <ul class="cmds">
+      <li><p class="say">Alexa, turn on Car Heater</p><p class="does">The GLE's auxiliary heater.</p></li>
+      <li><p class="say">Alexa, turn on Car Climate</p><p class="does">Pre-entry climate control.</p></li>
+    </ul>
+    <div class="note">Remote <em>start</em> is deliberately not on Alexa — it needs the PIN and has
+      Mercedes' own attempt limit behind it. That one stays in the app.</div>
+  </section>
+
+  <section>
+    <h2>Backyard weather</h2>
+    <p class="subhead">Your own weather station, not Alexa's guess at the region.</p>
+    <ul class="cmds">
+      <li><p class="say">Alexa, what's the Backyard Temperature?</p><p class="does">Straight off the station behind the house.</p></li>
+    </ul>
+    <div class="note">Humidity, wind and feels-like are all published to Alexa too, but she answers temperature
+      questions far more reliably than the others. If one gives you trouble, the app always has it.</div>
+  </section>
+
+  <section class="stop">
+    <h2>What she can no longer touch</h2>
+    <p class="subhead">Thirty-six things were removed. Nothing you used is gone.</p>
+    <ul class="stoplist">
+      <li><b>Nine Home Assistant add-ons</b> — Z-Wave, Studio Code Server, Plex, VLC, Spotify Connect, Traccar, the
+        Silicon Labs flasher, the Blink liveview proxy, the CEC scanner. A stray “turn off Z-Wave” could have taken
+        down real infrastructure.</li>
+      <li><b>Six camera motion-detection switches</b> — switching one off silently kills the alert pipeline, which is
+        exactly how the cameras went quiet for four days earlier this month.</li>
+      <li><b>Four duplicate Tuya plugs</b> — Smart Life already hands Alexa the bed lamp, the water heater and two
+        sockets. She was seeing each one twice. Smart Life's copies still work exactly as before.</li>
+      <li><b>Eleven Echo speakers handed back to Alexa</b> — she already owns her own speakers natively; these were
+        noise in the device list.</li>
+      <li><b>Six odds and ends</b> — sun position, the home zone, the mower's last-sync text, and similar. Nothing
+        anyone would say out loud.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Home Command Center · Alexa cleanup and Night Mode built 14 August 2026 · 33 devices exposed.
+    Anything not on this card, Alexa simply cannot reach.
+  </footer>
+
+</div>

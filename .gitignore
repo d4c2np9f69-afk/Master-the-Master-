@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+node_modules/
+package.json
+package-lock.json
+
+# Firmware credentials — this repo is PUBLIC
+secrets.h
+firmware/**/secrets.h
+docs/OPEN_ITEMS.md.bak-*
+
+# Local safety backups made before a trim/edit - never repo content
+*.bak-*
