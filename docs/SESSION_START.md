@@ -168,9 +168,15 @@ not a gate.*
 Get it the way `ACCESS_MAP.md` §1 documents; every script in `HCC-Scripts/` already has the
 pattern. Without the flag the runner **skips them and says so** — a skip is not a pass.
 
-**Last full run: 2026-10-10 23:5x — `node scripts/run-all-gates.js` → 22/22 of the runnable
-gates PASS, exit 0 (22nd is the new `reachability-instrument-test.js`). 5 skipped and named by
-the runner: 3 want `--states=<file>`, 2 want `HCC_HA_TOKEN`. A SKIP IS NOT A PASS.**
+**Last full run: 2026-10-11 06:3x — `node scripts/run-all-gates.js` → 22/22 PASS, exit 0, and
+then the 5 the runner skipped were RUN BY HAND AND ALSO PASS. 🟢 27 OF 27 GREEN, NOTHING
+SKIPPED — the first time, so there is no "a skip is not a pass" hole left to argue about.**
+How to run the 5 the runner cannot: `sensor-liveness-test.js`, `doors-entity-test.js` and
+`garage-entity-test.js` take a states dump as a **POSITIONAL** argument — the runner's
+*"needs `--states=<file>`"* wording is WRONG, that flag is read as a filename and it skips
+again. `sensor-coverage-test.js` and `live-e2e-test.js --live` need `HCC_HA_TOKEN` exported
+from the token file in `HCC-secrets\` (reference the file, never paste the value).
+Live app proven end to end 06:3x: 6 sections open, 0 page errors, no credential in any URL.
 ⚠️ **This line read *"20/20, exit 0, 2026-09-16"* for 24 days** while the suite grew to 26 gates
 and `package-gate-test.js` sat RED for a week (OPEN_ITEMS #220 caught it). **Re-stamp it with the
 real number the same session you run the suite** — a stale green is how the 09-15 boot crash
