@@ -316,3 +316,23 @@ verdict. The two strings are each other's reference** — which is exactly why h
 **Vendor safety note:** *"Don't test for a long time if you can't tell which lead is + and which
 is -."* During the 4-combination sweep, keep the non-conducting pairs brief — but still hold the
 conducting ones through the full ramp.
+
+## 2026-10-11 3:41 PM — POLARITY, SETTLED FROM THE BOARD SILKSCREEN (Jeff's photos)
+# `CON301` = **LED+** → **RED** probe · `CON302` = **LED-** → **BLACK** probe
+Both are printed on the board under their own connector: `LED+` under `CON301` (clearly readable in
+the transformer shot), `LED-` under `CON302` (the `ED-` visible in the first EC210 close-up).
+
+🔑 **POLARITY IS DECIDED BY WHICH CONNECTOR, NOT WHICH WIRE — so it cannot be got wrong.**
+`CON301` carries BOTH strings' anodes, so **every wire in it is positive**. `CON302` carries both
+cathodes, so **every wire in it is negative**. Red to either wire in `CON301`, black to either wire
+in `CON302`. There is no pin-level choice.
+
+**The 4-combination sweep is about PAIRING, not polarity** — finding which anode belongs with which
+cathode. A wrong pairing is simply an **open circuit**: reads ~300, nothing lights, no harm done.
+And a genuinely reversed connection just blocks — display pegs, nothing damaged; the vendor's only
+caution is against *leaving* it connected long when polarity is unknown, which it is not here.
+
+⚠️ **THE ONE REAL AMBIGUITY: mark the plugs BEFORE unplugging them.** The `CON302` plug has a
+**grey** and a **pink** wire (Jeff's close-up). No photo exists of the `CON301` plug — if its wires
+are the same colours the two are easy to confuse once both are loose. **Tape marked `+` on the
+`CON301` plug before removal** eliminates the only thing in this test that can actually go wrong.
