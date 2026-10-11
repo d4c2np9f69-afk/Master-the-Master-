@@ -185,3 +185,33 @@ own instruction is just "match the strips shown to the originals in your TV befo
 variant.** It is read off an old strip, or off a panel-assembly sticker if one is visible with the
 back cover off. Everything else is a reseller's guess. Since the cap is $0 and the tester works
 **from the connector**, the strip question may never need answering.
+
+## 2026-10-11 2:35 PM — ALL FIVE LABELS LOOKED UP (Jeff's photos). Confirmed 75" 4K.
+
+| Label on the TV | What it is | Result |
+|---|---|---|
+| `JR745R3HA2Y` / `16TH1903MF` | **LCD OPEN-CELL PANEL** | 75" 4K open cell. Also used in **Vizio M75Q7-J03, M75Q6-J03, V756X-J03, V755M-K03**. `16TH1903MF` returns nothing. |
+| `ZBZZ` / `K0042HVZZ` / `PTH16A017S` | **T-con** | Confirmed for onn 100044717 **and Vizio M75Q6-J03 / V756-J03 / V756X-J03**. **$15.95–17.99**, in stock several sellers. Alternates: `ZAZZ`, `BG000N700/701`, `338Z054-1`, `PTH6403YF`. ⚠️ **Record correction: this doc previously said `K004HVZZ`. It is `K0042HVZZ`.** |
+| `M17/2010088806/13` · `20210527` | **Power board** | = **`514C7001M17`**, built **2021-05-27**. ShopJimmy **$59.99** new; pulled/tested cheaper. M17↔M27 interchangeable. |
+| `WC0HR2601` · Huizhou Gaoshengda · Cust. P/N `1196330` · FCC `2AC23-WC0HR2601` | **Wi-Fi/BT module** | Dual band **2.4 GHz (2412–2462)** + **5 GHz (5180–5240, 5745–5825)**. FCC granted 2017-02-21, Class II change 2020-05-29. Sold on eBay as a spare; same module appears in Hisense Roku sets. **Nothing to do with the backlight** — but it is the part to buy if WiFi ever dies. |
+| `2227570Q A03` / `LT20210820B` (embossed metal) | internal casting / mould number | **No match anywhere.** `LT20210820B` is a **date: 2021-08-20**, which slots neatly between the power board (05-27), main board (08-13) and final assembly (~Dec 2021). Not an orderable part. |
+
+### 🔴 THE ANSWER ON STRIPS — a definitive NEGATIVE, proven three independent ways
+**The open cell and the T-con are shared across brands. The BACKLIGHT TRAY IS NOT.** Same panel
+`JR745R3HA2Y`, three different backlight assemblies:
+- **Sharp** 75EQ7EA / 75EQ3KA → strips **`LED75D09-ZC46AG-02` / `30375009003`**
+- **Vizio** V756-J03 → strips **`LB7502K`**, set of 12, **$79.99** (TvPartsGuy)
+- **onn** 100044717 → strips **`30375007007/008`** or **`005/006`**, $36.55–42.06
+
+And the third proof: the **same `514C7001M17` power board** ships in onn kits paired with the
+`007/008` strips AND in the Element E4FAA75R kit paired with the `-06` strips.
+
+⇒ **NOTHING on the panel, the T-con, the power board, the main board or the serial number
+identifies the strip variant. It can only be read off a strip.** Stop looking for a shortcut —
+this is now evidence, not an assumption. Which is exactly why the order of work stands:
+**cap (`EC210`, $0, on hand) → reflow the old hand-soldered jumper ($0) → $18.99 tester from the
+connector → strips only if a strand actually fails.**
+
+🔑 Incidental: Jeff's set uses **12** strips, which matches the **V756-J03** lineage; the
+**M75Q6-J03 uses 16**. And the Vizio-numbered 12-set is **$79.99** against **$36.55–42.06** for the
+onn-numbered ones — so the onn part numbers are the cheap path regardless.
