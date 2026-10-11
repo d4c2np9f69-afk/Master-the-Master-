@@ -176,6 +176,53 @@ if (Test-Path $repo) {
     } else {
         Write-Host "  (none)"
     }
+
+    # -----------------------------------------------------------------------
+    # FILE NAMES AND PATHS - added 2026-10-11, the same hour it was earned.
+    #
+    # WHAT HAPPENED: Jeff had the back off the 75" onn TV and asked me to pull up the
+    # repair. I ran Search-HCC.ps1 "Onn TV". This repo tier printed "(none)", so I
+    # worked from a conversation snippet instead of the file - and asked him to measure
+    # a capacitor and three dimensions that docs\tv\onn75_backlight_2026-09-30.md
+    # already answered, including that the cap was ON HAND and the swap was $0.
+    # Jeff, 2026-10-11 11:19: "that fucking pisses me off because next time you ask me
+    # to do something I will think your wasting my time."
+    # THAT is the real cost: one wasted ask is a tax on every future ask.
+    #
+    # WHY IT MISSED: the content search is a literal phrase match. That file says
+    # "onn. Roku TV" and never the two words "Onn TV" adjacent - so the phrase matched
+    # nothing, while the FILENAME said onn75_backlight in plain sight.
+    #
+    # Same class as the two holes already patched above (REFERENCE GUIDES 08-21, THE
+    # REPO 10-08): the mechanism was incomplete, so a session obeyed the rule and was
+    # still wrong. A filename is evidence. The search now reads it.
+    # -----------------------------------------------------------------------
+    $stop = @('the','and','for','with','that','this','was','are','not','all','any',
+              'from','has','have','its','our','out','use','how','why','what','when',
+              'fix','get','new','old','one','two','can','did','does','into','onto')
+    $tokens = @($Pattern -split '[\s\-_/\\]+' |
+                ForEach-Object { ($_ -replace '[^\w]', '').ToLower() } |
+                Where-Object { $_.Length -ge 2 -and $stop -notcontains $_ })
+    $pathHits = @()
+    if ($tokens.Count -gt 0) {
+        $pathHits = @($rFiles | ForEach-Object {
+            $rel = $_.FullName.Replace($repo, '').TrimStart('\')
+            $score = 0
+            foreach ($t in $tokens) { if ($rel.ToLower() -like "*$t*") { $score++ } }
+            if ($score -gt 0) { [pscustomobject]@{ Rel = $rel; Score = $score } }
+        } | Sort-Object -Property @{Expression = 'Score'; Descending = $true}, Rel)
+    }
+    if ($pathHits.Count -gt 0) {
+        Write-Host "`n  --- FILES WHOSE NAME/PATH MATCHES (a content search cannot see a filename) ---" -ForegroundColor Magenta
+        if ($rTotal -eq 0) {
+            Write-Host "  !! THE CONTENT SEARCH SAID (none) AND THESE FILES EXIST." -ForegroundColor Red
+            Write-Host "  !! OPEN THEM BEFORE YOU SAY ONE WORD OR ASK JEFF FOR ONE THING." -ForegroundColor Red
+        }
+        $pathHits | Select-Object -First 12 | ForEach-Object {
+            Write-Host ("  [{0}/{1} terms]  {2}" -f $_.Score, $tokens.Count, $_.Rel) -ForegroundColor Yellow
+        }
+        if ($pathHits.Count -gt 12) { Write-Host ("  ...{0} more" -f ($pathHits.Count - 12)) }
+    }
 } else {
     Write-Host "  (repo not found at $repo)"
 }
