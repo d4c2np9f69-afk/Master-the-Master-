@@ -277,3 +277,42 @@ at which point the panel is coming off anyway and the strip part number gets rea
 
 🔑 This is the project's own "test before declaring a fault" rule applied to hardware, and Jeff
 applied it before Claude did.
+
+## 2026-10-11 3:36 PM — TESTER IS THE TKDMR **TD2B**. PROCEDURE CORRECTED FROM VENDOR SOURCES.
+Jeff: *"You look all that shit up"* — he was right to push; the 3:14 PM guidance was reasoned off
+the product photo. Looked up properly; **two things in it were wrong.**
+
+**Unit as received:** TKDMR **TD2B**, mains in 85-245 V, out **0-300 V DC at 30 mA**, 3-digit
+display, jacks marked **`LED+` (red)** and **`LED-` (dark)**, two needle probes. Auto-adjusting —
+**no manual range control found in any source.**
+
+### 🔴 CORRECTION 1 — IT RAMPS OVER 3-5 SECONDS. HOLD THE PROBES, DO NOT TAP.
+Vendor: allow **3-5 s after plug-in**; output then **rises gradually**, display **starts ~156 V and
+climbs toward 300 V**, beads go **dim to bright over 3-5 s, then stabilise.**
+**The 3:14 PM instruction said "touch, read, lift" — that is WRONG and would misread a GOOD string
+as open**, because a tap catches the ramp mid-climb at a high number. **Hold until the reading stops
+moving, then read.**
+
+### 🔴 CORRECTION 2 — TOLERANCE IS WIDER THAN STATED
+3:14 PM said the two strings should match "within a volt or so" — that was a guess.
+**Vendor criterion: a difference of more than 3 V or 3% between groups indicates a problem.**
+One missing bead is ~2.4 V, i.e. right at that threshold, so **write both numbers down and compare
+deliberately rather than by eye.**
+
+### Reading table (corrected)
+| Display | Means |
+|---|---|
+| settles at a stable number, beads light | **healthy string** |
+| **~300 V, will not come down** | **OPEN** — dead bead **or POOR PROBE CONTACT** (vendor lists contact first — reseat before concluding) |
+| **`00.0`** | **SHORT** in the strip or a bead — *not previously documented here* |
+| two strings differ by **>3 V or >3%** | the lower one has the fault |
+
+### ⚠️ NOT VERIFIED — the 80-110 V expectation
+That figure was this session's arithmetic (bead count x Vf at 30 mA), **not a measurement, and no
+published typical values exist** — every source says reference values vary by panel and to compare
+against a known-good strip of the same set. **Treat any absolute number as information, not a
+verdict. The two strings are each other's reference** — which is exactly why having two helps.
+
+**Vendor safety note:** *"Don't test for a long time if you can't tell which lead is + and which
+is -."* During the 4-combination sweep, keep the non-conducting pairs brief — but still hold the
+conducting ones through the full ramp.
