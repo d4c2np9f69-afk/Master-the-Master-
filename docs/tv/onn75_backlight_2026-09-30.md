@@ -77,3 +77,42 @@ Read in Chrome: Badcaps "LED Backlight current mod." https://www.badcaps.net/for
 | Premium | Sony BRAVIA 7 II 75" | **$3,099.99** (Best Buy) | best processing/accuracy |
 | Top | Sony BRAVIA 9 II 75" | not shown | RTINGS #1 |
 Not an RTINGS pick (unverified quality): Hisense M7 MiniLED Roku 75" — $599.99. Current onn 75" — $398 (no local dimming = the same class as Jeff's set).
+
+## 2026-10-11 1:45 PM — 🔑 BACKLIGHT SPEC READ OFF THE BOARD (Jeff's photos, TV open on the bench)
+Silkscreen on the power board beside the backlight connector, photographed by Jeff:
+**`LED:100-126V  710MA--790MA`** · connector **`CON302`** · cap **`EC210`** · ground point `GP5` · `C334` nearby.
+
+**Derived topology (arithmetic, from this spec + the kit listing's "7 LEDs each, 3 V per bead"):**
+- 126 V ÷ 3 V = **42 LEDs in series per strand**; 42 ÷ 7 = **6 strips in series per strand**
+- 12 strips ÷ 6 = **2 strands** — matches the **two connectors** (CON301 + CON302) on the board
+- Backlight power ≈ 2 × 126 V × 0.75 A = **~189 W** of the TV's 260 W rating. Consistent.
+
+**This independently confirms the ~96 V tester figure from the 10:12 Badcaps notes.** The TKDMR
+tester drives **30 mA**, not 750 mA; blue LED Vf at 30 mA ≈ 2.3 V, so 42 × 2.3 = **~97 V healthy**,
+and one dead LED = 96 − 2.3 = **~93.7 V**, which is the 93 V the thread reported. Three independent
+sources agree — **the $18.99 tester will read true on this set.**
+
+**Meter expectation corrected:** normal running output at CON301/CON302 = **100–126 V**. A reading
+of a few hundred volts only occurs on an OPEN, unloaded output just before protection trips — that
+is the symptom, not the target. (An earlier in-chat figure of ~340 V was quoted as if it were the
+spec; the board silkscreen supersedes it.)
+
+**Diagnostic consequence:** one dead LED opens a 6-strip strand = **half the screen**, and the
+driver shuts BOTH channels. Reinforces the 09-30 verdict: replace all 12, not one.
+
+## 2026-10-11 — FB202 is NOT the mod target (second photo)
+Jeff photographed a purple axial part silkscreened **`FB202`**, with **`Q301`** and `M6` adjacent.
+**FB = ferrite bead** — a wire at DC with HF loss. It sets no current, has nothing to tune, and
+removing it just opens that rail. **Do not touch it.**
+
+🔑 But `Q301` is the useful find: the 300-series is the backlight section, and the Badcaps method
+puts the ISENSE resistor **between the constant-current MOSFET's source and GND**. **Q301 is the
+likely MOSFET; the sense resistors are the small SMD parts at its source pin.**
+
+**STILL NEEDED to unblock the current-reduction mod (Jeff, while the TV is open):**
+1. The small IC near CON301/CON302 — 8–16 pins — **close enough to read the top marking.**
+2. **Around Q301** — the small SMD resistors at its pins, close enough to read the codes
+   (`R100` = 0.1 Ω, `1R0` = 1 Ω, `0R5`, `R200`…). Often 2–3 in parallel, which is what makes the
+   mod a simple "remove one".
+🔴 Nothing gets removed before the IC datasheet is in hand — the Badcaps member pulled the boost
+converter's CS resistor first and **INCREASED** LED current.
