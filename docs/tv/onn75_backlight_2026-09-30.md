@@ -334,5 +334,7 @@ caution is against *leaving* it connected long when polarity is unknown, which i
 
 ⚠️ **THE ONE REAL AMBIGUITY: mark the plugs BEFORE unplugging them.** The `CON302` plug has a
 **grey** and a **pink** wire (Jeff's close-up). No photo exists of the `CON301` plug — if its wires
-are the same colours the two are easy to confuse once both are loose. **Tape marked `+` on the
-`CON301` plug before removal** eliminates the only thing in this test that can actually go wrong.
+are the same colours the two are easy to confuse once both are loose. ✅ **DONE 3:45 PM — JEFF TAPED `CON302`, NOT `CON301`.** Either one settles it, but get the
+sense right: **THE TAPED PLUG IS `CON302` = `LED-` = the BLACK probe.** The UNMARKED plug is
+`CON301` = `LED+` = RED. (An earlier draft of this line said to tape `CON301` with a `+`; that is
+NOT what is on the bench — the tape means NEGATIVE.)
