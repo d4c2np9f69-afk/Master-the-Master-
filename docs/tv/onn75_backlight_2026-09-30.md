@@ -618,3 +618,34 @@ them.** Removing more of the back cover gains nothing.
    (`30375007007/008`), free delivery. A second teardown costs far more than 6 spare strips.
 
 **Economics, final: $0 (re-flow / crimp / bead jumper) → ~$42 (all 12 strips) → $398 (new TV).**
+
+## 2026-10-12 11:00 AM — 🔑 **JEFF: THIS TV WAS GOING IN THE DUMPSTER. THE DOWNSIDE IS ZERO.**
+**Jeff, verbatim:** *"you got to remember this tv was about to go in the dumpster so if we can save it
+great but if something goes wrong I was going to toss it without even trying"*
+
+### ⚠️ THIS CORRECTS THE FRAMING OF EVERY ENTRY ABOVE
+Earlier entries price the repair against **"$398 for a new TV"** and repeat **"cracking the panel ends
+the repair"** as a hard stop. **Both are the wrong frame.** Jeff was not going to buy a replacement —
+he was going to **throw this set out unopened.** So:
+- **Worst case is not −$398. Worst case is a TV he had already written off.**
+- **"Cracking the panel ends the repair" is no longer a reason to hesitate.** It ends an attempt that
+  cost nothing. Caution about the glass is now about not wasting his morning, not about loss.
+- ⇒ **BE AGGRESSIVE ON THE TEARDOWN.** If the rear tray resists, pry it. **The iFixit anecdote about
+  cutting the reflector sheet along three sides and taping it back is clearly acceptable here** — the
+  earlier "evaluate, do not assume" hedge was calibrated to a TV worth protecting. This one isn't.
+
+### 💵 BUT REVERSE THE SPENDING ORDER — THIS IS NOW THE ONLY WAY TO ACTUALLY LOSE
+**Do not buy the $36.55–42.06 strip kit until the set is open, the fault is found, AND the panel is
+confirmed intact on the bench.** Money spent on strips for a TV whose glass then cracks is the single
+real downside left in this job. **Open first, spend second.**
+**Revised economics: $0 (free tests / re-flow / crimp / bead jumper) → ~$42 (strips, only after the
+panel is proven intact) → walk away at $0 loss.**
+
+### 🔴 WHAT DOES *NOT* RELAX — THE HAZARDS TO JEFF, NOT TO THE TV
+- **The power board carries a 450 V rail that holds charge with the set unplugged.** Bleed it through
+  a resistor (few kΩ, ≥5 W — not a screwdriver) and **confirm 0 V on the meter** before working on it.
+- A 75" panel is heavy, flexes under its own weight, and its glass edges are sharp. **Two people on
+  any lift.** Gloves advisable.
+- 🔑 **The real cost of this job is Jeff's time, not the hardware.** That is why the free tests still
+  come first, in order: **wire-pierce at the `CON302` plug (rules in/out a bad crimp, 30 s, no
+  teardown) → re-flow the old hand-soldered jumper → per-strip TD2B test → single-bead solder jumper.**
