@@ -649,3 +649,54 @@ panel is proven intact) → walk away at $0 loss.**
 - 🔑 **The real cost of this job is Jeff's time, not the hardware.** That is why the free tests still
   come first, in order: **wire-pierce at the `CON302` plug (rules in/out a bad crimp, 30 s, no
   teardown) → re-flow the old hand-soldered jumper → per-strip TD2B test → single-bead solder jumper.**
+
+## 2026-10-12 11:27 AM — ✅ JEFF'S DECISION: **PROCEED WITH REPLACING THE BACKLIGHT STRIPS.**
+**Jeff, verbatim:** *"Look I am 100 % confident that it is the back light… unless you've got some other
+advice except for sticking holes and wires, let's move forward with replacing the back lights."*
+**His call, and it is backed by the measurement.** The wire-pierce / crimp test is DROPPED. No further
+diagnostic detours — the next action is the teardown.
+
+### 🔑 NEW SYMPTOM ON THE RECORD — THE BOOT LOOP BEFORE THE BLACKOUT (not previously documented)
+**Jeff:** *"before this happened it would go into some weird power cycle that sometimes I had to reset
+the TV with a hard reset button and completely reset it up a couple of times because it got stuck in
+a boot loop — other than that the TV works fine until the backlight issue."*
+**This CORROBORATES the backlight diagnosis rather than competing with it.** An LED string going
+**intermittently** open makes the constant-current driver trip protection; the set drops its rails and
+restarts, which presents as a power-cycle / boot loop. The string then failed fully open and the
+backlight stayed dark for good. **Textbook progression: intermittent open → protection trips →
+reboot loop → hard open → black screen.**
+⚠️ Worth keeping in view for after the repair: if the loop ever returns **with** good strips fitted,
+the suspicion moves back to the power board (and `EC210` with it). Not now.
+
+### ▶️ WHAT JEFF IS DOING NOW — teardown procedure given in chat 11:27 AM
+Bleed the power board (resistor + **confirm 0 V**) → photograph every connector → unplug all
+board-to-board cabling → power board and main board OUT → T-con unscrewed but **ribbons left attached
+to the panel** → 🔴 **peel the black tape off the panel edge-driver boards** (the full-width source
+strip along the bottom and the `ST73-LSL` gate board at the corner — these are **bonded to the glass
+by tan flex tabs; a torn tab = a permanent dead band**, and the tape is currently tying the panel to
+the tray) → perimeter screws out, sorted by length → **lift the metal tray straight up, evenly, two
+hands**; the glass stays face-down in the front frame and never moves. If it binds: a missed screw or
+the diffuser sticking. **Look, do not force.**
+
+### ON OPENING — THE THREE THINGS TO DO IN THAT MINUTE
+1. **Photograph the strip part number** (`30375007005/006` vs `30375007007/008`) and send it — Claude
+   prices and links the cheapest matching 12-strip kit same day. Current spread **$36.55–42.06**,
+   free delivery.
+2. **Look at the old hand-soldered joint** from the previous repair. If that is the open, it is free.
+3. **Run the TD2B down the 6 strips one at a time** (~19–21 V good, pegged 300 = the dead one) — tells
+   him whether one strip failed or the whole run. Neither of these changes the decision to fit all 12;
+   they tell him whether the repair will hold.
+
+### SUPPLIES FOR THE SWAP
+- **New strips ship with bare solder pads and NO plug connectors** (verified 10-11 from the kit photos)
+  ⇒ **soldering is required; REUSE the old jumper wires and harness — save every one.**
+- Double-sided / thermal tape in case the kit's own adhesive is poor.
+- **Keep the old strips laid out in order** until the new set is in and lit.
+
+### BOARDS IDENTIFIED FROM THE 11:22 AM TEARDOWN PHOTOS
+Power/backlight driver (yellow, left, twin heatsinks + transformer) · T-con (small green, blue
+connectors, beside the `A03 ZC 75` sticker) · main board (right, HDMI + heatsink) · 2 speaker bars ·
+**panel SOURCE driver = the full-width green strip along the bottom edge with tan COF tabs** ·
+**panel GATE driver = `ST73-LSL` / `BLWK-LSL` / `VGL_AAL`, pins `LCK1`–`LCK8`, at the corner.**
+🔴 **The two panel driver boards are NOT unpluggable — they are bonded to the glass. They are the most
+fragile things in the set and the only ones that can end this repair.**
