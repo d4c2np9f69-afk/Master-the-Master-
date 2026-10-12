@@ -339,12 +339,11 @@ sense right: **THE TAPED PLUG IS `CON302` = `LED-` = the BLACK probe.** The UNMA
 `CON301` = `LED+` = RED. (An earlier draft of this line said to tape `CON301` with a `+`; that is
 NOT what is on the bench — the tape means NEGATIVE.)
 
-## 2026-10-12 10:40 AM — ⚠⚠ **THIS ENTIRE SECTION IS SUPERSEDED BY THE 10:47 AM ENTRY BELOW.**
-⚠ **ITS HEADLINE CONCLUSION — "`CON302` IS OPEN" — IS WRONG.** `CON302` was **POOR PROBE CONTACT**. On a
-reseat it read **113 V, identical to `CON301`**. BOTH strings are good; the fault is the BOARD.
-**Read the 10:47 entry, not this one.** Kept verbatim only so the error and its cause stay on the record.
-
-### (superseded) 10:40 AM — tester result, first reading
+## 2026-10-12 10:40 AM — ✅ TESTER RESULT. **FAULT LOCALIZED: `CON302` STRING IS OPEN.**
+✅ **THIS ENTRY IS CORRECT AND IS THE STANDING CONCLUSION** — re-confirmed by Jeff at 10:50 AM.
+⚠ It was briefly marked superseded at 10:47 on a mis-read of which connector Jeff was describing;
+that 10:47 reversal is itself WRONG and is marked as such below. **The topology correction in this
+section (each connector = one whole string, grey=+, pink=-) is also correct and stands.**
 
 **Jeff's measurement, verbatim:** *"on the 301- Red to gray and Black to pink I got 113 v and nothing
 on any other combo"*
@@ -410,8 +409,17 @@ the panel IS coming off, so the number gets read in the same minute. Do not pre-
 
 **Economics unchanged:** $0 (re-flow) → ~$42 (strips) → $398 (new TV, Walmart current onn 75" 4K).
 
-## 2026-10-12 10:47 AM — ✅✅ **BOTH STRINGS GOOD, VISUALLY CONFIRMED. THE FAULT IS THE POWER BOARD.**
-### THIS SUPERSEDES THE 10:40 AM ENTRY ABOVE, WHICH WAS WRONG.
+## 2026-10-12 10:47 AM — ⛔⛔ **THIS ENTIRE SECTION IS WRONG AND IS RETRACTED. DO NOT ACT ON IT.**
+⛔ **"Both strings good / the fault is the power board" is FALSE.** It was built on reading Jeff’s
+10:47 message as describing `CON302` when he was describing **`CON301`**. He corrected it at 10:50:
+*"No sorry the 301 is the side that lit up and settled at 113v the 302 side stayed at 300v"*
+⛔ **The `EC210` cap swap this section revived is CANCELLED AGAIN. DO NOT DESOLDER `EC210`.**
+✅ **The one part of this section that IS correct and worth keeping: the ramp-direction correction**
+(the TD2B ramps **300 → 111 → settles 113** under load, i.e. DOWNWARD from its open-circuit ceiling as
+the 30 mA limit pulls it to the chain’s forward drop — not upward from 156 V as recorded 10-11).
+**Read the 10:40 AM entry above and the 10:52 AM entry below. Kept verbatim so the error stays on the record.**
+
+### (RETRACTED) 10:47 AM — second reading, mis-attributed to the wrong connector
 
 **Jeff, verbatim:** *"On 302 side The meter was at 300 then went to 111 then settled at 113 v"* and
 *"Also the screen lit up on the 302 side bright"*
@@ -482,3 +490,66 @@ the bench exactly:
 
 **Economics: $0 (cap on hand) vs $398 new TV.** The $18.99 tester paid for itself twice over — it
 cancelled a $42 parts buy AND a two-person 75" panel teardown.
+
+## 2026-10-12 10:52 AM — 🔴 **FINAL, SETTLED BY JEFF. `CON302`'s 6 STRIPS ARE OPEN. THAT IS THE FAULT.**
+### Supersedes the 10:47 retraction. Agrees with the original 10:40 reading.
+
+**Jeff, verbatim 10:50:** *"No sorry the 301 is the side that lit up and settled at 113v the 302 side
+stayed at 300v"*
+⇒ the 10:47 message (*"on 302 side … 300 then 111 then settled 113"*) and *"the screen lit up … bright"*
+were **both describing `CON301`.** `CON302` has never produced anything but a pegged 300 V.
+
+### ✅ THE MEASUREMENT, FINAL
+| Connector | Reading | Beads | Verdict |
+|---|---|---|---|
+| **`CON301`** (red→grey, black→pink) | **300 → 111 → settles 113 V** | **screen lit BRIGHT** | **GOOD — 6 strips, unbroken** |
+| **`CON302`** (same orientation, both polarities, after reseating) | **pegged 300 V, will not come down** | **nothing** | **🔴 OPEN — the dead backlight** |
+
+**113 V on `CON301` lands dead centre of the board's own silkscreened `LED:100-126V` window**, and the
+screen lighting bright is direct visual proof — that half of the backlight is perfect.
+**`CON302` pegged at the tester's 300 V ceiling = the current limit never engaged = no current flowed
+= the series chain is broken.** With `CON301` proving both the tester and Jeff's technique on the
+same probes minutes earlier, and with a reseat already tried, contact error is ruled out.
+
+### ⛔ `EC210` CAP SWAP — CANCELLED. **DO NOT DESOLDER IT.**
+The 10-11 3:08 PM plan called this branch in advance: *"a string is open ⇒ the cap is almost
+certainly fine ⇒ **do not touch it at all**."* **That is the live branch.** The board is behaving
+correctly: one open string makes the constant-current driver shut down **both** channels, which is
+exactly why the symptom is a fully black screen instead of a half-lit one.
+⚠️ Note what the tester does and does not prove: **it is the power source during this test, so it
+says NOTHING about the board.** It proves only that string 301 conducts and string 302 does not.
+The board is not exonerated — it is simply not implicated, and there is now a *confirmed* fault
+elsewhere that fully explains the symptom. Fix the confirmed one first.
+
+### ▶️ THE PANEL IS COMING OFF. ORDER OF WORK — CHEAPEST FIRST.
+1. **$0 — INSPECT AND RE-FLOW THE OLD HAND-SOLDERED JUMPER ON THE `CON302` RUN, BEFORE BUYING ANYTHING.**
+   Jeff 10-11: *"last time the repair man had to solder the strips together in one place."* A cracked
+   or cold joint at that splice is the **prime suspect** for an open string, and it is on the string
+   that died. Inspect every joint on the 302 side under a light and **tug-test** them.
+2. **$0 — FIND THE EXACT DEAD STRIP WITH THE TESTER.** 🔑 With the tray open, test the 6 strips of the
+   302 run **ONE AT A TIME** — a single strip is ~6–7 beads, so expect roughly **19–21 V** on a good
+   one and a **pegged 300 V** on the open one. This narrows a dead backlight to one 826 mm strip in
+   about a minute and tells Jeff whether it is one strip or several. *(Expected per-strip voltage is
+   arithmetic from 113 V ÷ 6 strips, not a measured figure.)*
+3. **Harness/connector check** — the open could be a broken wire or a bad crimp in the `CON302`
+   harness rather than a bead. Also $0 if so. Cannot be tested from outside; check it once open.
+4. **Strips, only if a bead is genuinely dead** — **read the number off the old strip at that moment**,
+   then buy the matching 12-strip kit: **$36.55** (`30375007005/006`) or **$42.06** (`30375007007/008`),
+   both free delivery. Replace **all 12** — they fail as a set and a second teardown costs far more
+   than 6 spare strips.
+5. **Current-reduction mod** while it is open — still blocked on photos of the LED driver IC marking
+   and the SMD resistors at `Q301`. Never blind (the 🔴 CS-pin trap above).
+6. **Lower the backlight setting** in the TV menu afterwards, to buy the new strips life.
+
+🔴 **Teardown cautions already on the record:** two-person job; **cracking the panel ends the repair.**
+
+### 🔑 WHAT THE 10-11 "STRIP NUMBER" ANALYSIS GOT RIGHT
+The 10-11 elimination logic holds exactly as written: *"the only path that requires strips runs
+THROUGH opening the panel, and the number is printed on the strip at that moment."* That path is now
+the live one. **Do not pre-order** — the family (`005/006` vs `007/008`) was re-searched 10-12 and
+confirmed un-identifiable in advance, and it does not matter, because the number gets read in the
+same minute the panel comes off.
+
+**Economics: $0 (re-flow / harness) → ~$42 (all 12 strips) → $398 (new TV).**
+The $18.99 tester still earned its money: it localized the fault to one half of the backlight
+*without* guessing, and it kept `EC210` in the board.
