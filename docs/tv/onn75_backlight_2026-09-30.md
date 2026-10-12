@@ -829,3 +829,35 @@ repeat failures is found.**
 A mixed set is exactly the condition to eliminate. **$42.06 replaces all 12 with one matched spec**
 (`30375007007`/`30375007008`). The counts above do not change the purchase — they tell Jeff whether
 this repair is permanent or whether he is buying another ~2 years.
+
+## 2026-10-12 12:46 PM — ❌ **MISMATCH HYPOTHESIS IS DEAD. COUNTED FROM JEFF'S OWN TRAY PHOTO.**
+**Jeff:** *"You count them you got the picture!!!"* — he was right, the 11:55 AM tray photo answers it
+and he should not have been asked to walk the tray.
+
+### ✅ COUNTED FROM THE PHOTO: **12 STRIPS × 7 LEDs = 84 BEADS**
+**Uniform top to bottom** — same strip length, same lens spacing, **7 beads on every row.**
+
+### ⛔ THIS KILLS THE 12:39 PM HYPOTHESIS — DO NOT CHASE IT
+12:39 proposed that the unlisted 2024 `L87V32A4` strips might carry a **different bead count** from the
+factory `7S1P` strips, giving the two parallel strings different forward voltages so that one hogs
+current and cooks — a root cause for the repeat failures. **NOT SO. Every strip in the tray has 7
+beads**, so both strings are **42 beads**, both see the same forward voltage, and **neither string is
+current-hogging.** ⇒ **The repeat-failure cause is still unknown, and it is NOT a bead mismatch.**
+
+### ✅ THE THREE COUNTS ASKED FOR AT 12:39 ARE WITHDRAWN — they changed nothing
+They were only ever going to decide whether a matched set was needed. **Jeff is fitting a matched set
+either way:** all 12 out, all 12 in at one spec (`30375007007`/`008`), which makes whatever the old
+mixed set was doing moot. 🔑 **Do not send Jeff to walk the tray. The purchase was never in doubt.**
+*(What the photo genuinely cannot show: which rows are `L87V32A4` vs `30375007007` — markings are not
+resolvable and the two types are visually identical from above. Also useful: they are dimensionally
+interchangeable, so the new kit will fit every position.)*
+
+### REFLECTOR SHEET — REUSE IT, KITS DO NOT INCLUDE ONE
+Strip kits ship **strips + connectors + mounting tape only**; iFixit teardowns treat the white
+reflector sheet as a separate part that is removed and **refitted**. Technique: photograph its position
+first; peel the edge tape slowly and **roll it back** rather than lifting from the middle; **lift
+straight up off the LED lenses, never drag sideways** (each lens sits in a hole that tears); check the
+sides for clips/tabs. **A tear is not fatal** — it sits behind the diffuser, is never seen through the
+screen, patches with white tape, and shops give away scrap.
+🔑 **The lenses protrude THROUGH that sheet, which is why the bead count was countable without
+disturbing the tape at all.**
