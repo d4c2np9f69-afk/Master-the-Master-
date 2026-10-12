@@ -861,3 +861,105 @@ sides for clips/tabs. **A tear is not fatal** — it sits behind the diffuser, i
 screen, patches with white tape, and shops give away scrap.
 🔑 **The lenses protrude THROUGH that sheet, which is why the bead count was countable without
 disturbing the tape at all.**
+
+---
+
+## 2026-10-12 1:53 PM — 🔴 PARTS SOURCING: "I need the parts faster then 2 weeks"
+
+**Chrome extension is NOT connected this session** (`tabs_context_mcp` → "Browser extension is not
+connected"). Everything below is from WebFetch/WebSearch **read live at 1:53 PM today**, except
+where marked. eBay (403) and Walmart (bot check) **block my reads entirely** — those two need Jeff's
+own click.
+
+### ✅ THE DISCRIMINATOR — SOLVED. His set is 12 × ALL-"A".
+
+`30375007007` = the **"A"** strip. `30375007008` = the **"B"** strip. This TV ships in **two
+different versions** and ShopJimmy's listing says so outright:
+
+> "This version uses 12 strips labeled **"A"** with part number **30375007007**."
+
+**Jeff's strip label photo reads `30375007007` AND is marked `A`.** The tray photo counts
+**12 uniform 7-bead strips** — no odd pair. So his TV is the **12 × all-A** version.
+
+🔴 **BUYING RULE:** a listing that says **"10*A + 2*B"** or pairs **`30375007007 / 30375007008`**
+is the **OTHER version**. The right set lists **`30375007007` ONLY** (the `...007D` suffix is fine —
+same strip). This rules out the Amazon XIMAIACC and GUANGMING kits and the TvPartsGuy `007/008` set.
+
+### ✅ T-CON — IN STOCK, SHIPS TODAY. ORDER IT.
+
+| | |
+|---|---|
+| Part | Element **`BG000N701`** / `338Z054-1` / `ZAZZ`, visible numbers include **`K0042HVZZ`** |
+| Price | **$19.99** |
+| Stock | **IN STOCK, 74 available** (read live 1:53 PM) |
+| Ships | **same business day if ordered before 4 PM CT** |
+| Fitment | "Known Models" table lists **ONN `100044717`**, version `m21123-mt` |
+| Warranty | 180 days |
+| URL | `shopjimmy.com/element-bg000n701-338z054-1-zazz-t-con-board` |
+
+⚠️ **The `$9.50` "Direct TV Parts" price recorded at 11:43 AM CANNOT BE RE-VERIFIED.** Neither
+`directvparts.com` nor `directtvparts.com` resolves (`ENOTFOUND`), and no search finds that board at
+$9.50 anywhere. **Treat the $9.50 as unconfirmed.** $19.99 at ShopJimmy is verified today.
+Alternative: TV Parts Today has `K0042HVZZ`/`ZBZZ` at **$19.99, 104 in stock** — but it is listed as
+a **Vizio** board (`PTH6403YF`, `M75Q6-J03`) and does **not** name ONN `100044717`. Jeff's board
+reads `PTH16A017S`. **ShopJimmy's is the safer match because it names his actual TV model.**
+
+### 🔴 STRIPS — EVERY US-DOMESTIC SHOP IS OUT OF STOCK
+
+| Source | Part | Price | Stock (read live today) |
+|---|---|---|---|
+| ShopJimmy `sj-30375007007` — **exact match, 12 × all-A** | `30375007007`, `LED75D07A-ZC66AG-05` | **$54.99** | ⚠️ **AMBIGUOUS** — see below |
+| ShopJimmy `261501013121` | different strip set | $64.99 | ❌ OUT OF STOCK |
+| ShopJimmy complete kit `KIT-100044717-K9` (strips + `514C7001M17` PSU + `BG000N701` T-con + `M21144-MT` main) | — | $74.99 | ❌ OUT OF STOCK |
+| Newegg `11J-02RK-00017` (= ShopJimmy's own stock) | `30375007007`, 12 × A | no price shown | ❌ OUT OF STOCK, "may or may not be restocked" |
+| TvPartsGuy `30375007007D` | 12 strips | $87.49 | ❌ SOLD OUT |
+| TvPartsGuy `30375007007/008` | 12 strips (wrong version) | $93.74 | ❌ OUT OF STOCK |
+| TV Parts Today | — | — | ❌ **does not carry them** (0 results for `30375007007` and `LED75D07A`) |
+
+⚠️ **ShopJimmy's exact-match set reads BOTH WAYS and needs Jeff's eyeball:**
+- Page schema markup says `schema.org/OutOfStock`, banner reads "Available Out of Stock Substitutes
+  Available Below!", and a pre-order notice appears **with no ship-by date printed**.
+- A search-index snapshot of the same page says **"15 available, same-day shipping before 4pm CT."**
+- **60-second check worth making** — it is the *correct* version AND it would ship with the T-con in
+  **one order, one shipment, today**.
+
+### Sources I CANNOT read (need Jeff's click)
+
+- **eBay — HTTP 403 on every item page.** Search surfaced **US-warehouse** sellers, which is the
+  whole point (not China, not 2 weeks):
+  - **Luckyelectronic** — **Fontana, CA**, ~**$48.56**, 99.8% positive, a buyer comment says
+    "super fast shipping" — `ebay.com/itm/226082598401`
+  - **wjbtvparts** — **Fontana, CA**, ~**$50.16** — `ebay.com/itm/395556040828`
+  - **tvrepairparts-2021** — free delivery, 99.7%, buyer feedback says shipped very quickly
+  - `ebay.com/itm/394970392034` — names `30375007007` **and** `30375007008` → likely the WRONG
+    (10A+2B) version. Check the photo.
+  - ⚠️ One eBay listing itself warns the **"Ships from USA" badge can be false** when the seller is
+    drop-shipping from overseas. **Read the delivery-date estimate, not the badge.**
+- **Walmart `7022057977`** — blocked by a human-verification screen. It is the **10A+2B** version
+  anyway → **wrong set for this TV.**
+- **Amazon** — buy boxes unreadable:
+  - `B0FFZRBDFG` GUANGMING, seller **hhhelectronic** — page literally says *"To see product details,
+    add this item to your cart"*, i.e. **price hidden**. 10A+2B → wrong version.
+  - `B0G2XPMHRT` XIMAIACC — ⚠️ title mixes `-06` with a **typo'd `30275007007`**; 10A+2B → wrong
+    version. **Do not buy.**
+  - `B0CZ6VQTPT` JOPHANN — names `LED75D07A-ZC66AG-05` exactly; page returned **HTTP 500**.
+
+### 💲 THE $0 OPTION IS ALSO THE FASTEST OPTION — FASTER THAN ANY SHIPPING
+
+The tray is **already open**, the strips are **exposed**, and the **TD2B is in his hand**. He can
+probe the open string **strip by strip** right now, find the one dead bead, and **solder a jumper
+across it** (see the 11:00 AM entry). Constant-current driver → string runs at
+`113 − ~2.7 ≈ 110 V`, still inside the board's own `LED:100-126V` window. **Fully reversible, costs
+nothing, and lights the TV TODAY** instead of in 5 days. The ordered strips then become the
+permanent fix rather than the only hope.
+
+### RECOMMENDATION (cheapest-first, delivery stated)
+
+1. **$0 / today** — jumper the dead bead. Everything needed is already on the bench.
+2. **$19.99 / ships today** — ShopJimmy `BG000N701` T-con. **Verified in stock, 74 units.**
+   Order before **4 PM CT** (it is **1:53 PM CT now — ~2 hours left**).
+3. **$54.99 / ships today IF in stock** — ShopJimmy `30375007007` 12 × all-A. Correct version.
+   Check it in the cart; if it takes the order, both parts land in **one shipment**.
+4. **~$48.56 / ~4-6 days** — eBay **Luckyelectronic, Fontana CA**, if ShopJimmy is dry. Confirm the
+   photo shows **12 identical strips** and the title says `30375007007` without `...008`.
+
