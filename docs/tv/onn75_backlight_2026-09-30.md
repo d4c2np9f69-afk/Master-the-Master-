@@ -553,3 +553,68 @@ same minute the panel comes off.
 **Economics: $0 (re-flow / harness) → ~$42 (all 12 strips) → $398 (new TV).**
 The $18.99 tester still earned its money: it localized the fault to one half of the backlight
 *without* guessing, and it kept `EC210` in the board.
+
+### ✅ 10:56 AM — `CON302` RETESTED AND CONFIRMED OPEN
+**Jeff:** *"Tested again 302 stayed at 300v on every combo tested"* — second deliberate pass, both
+polarities, probes reseated on bare metal, tape moved clear, held through the ramp.
+**Contact error is now fully ruled out:** the same probes and the same technique produced
+**300 → 111 → settled 113 V plus a bright screen** on `CON301` minutes earlier. `CON302` never once
+pulled down off the tester's 300 V ceiling ⇒ **no current has ever flowed in that chain.**
+**The diagnosis is closed: 6 of the 12 strips (the `CON302` run) are an open circuit. The panel is
+coming off.** `EC210` stays in the board.
+
+## 2026-10-12 11:00 AM — TEARDOWN + REPAIR PLAN FOR THE OPEN `CON302` RUN
+Searched for a teardown specific to the **onn 100044717** (and the `LED75D07A`/`75R5` panel codes).
+**None exists** — no service manual, no model video. What follows is the general direct-lit procedure
+plus the hazards, flagged where it is anecdote rather than documented.
+
+### 🔴 THERE IS NO SHORTCUT — THE STRIPS ARE REACHED FROM THE FRONT
+Stack, back to front: **rear metal tray → strips (double-sided taped to the tray) → reflector sheet →
+diffuser plate → optical films → LCD panel → front bezel.** The boards mount on the *back* of that
+tray; the strips are on its *front* face. **The LCD and the whole film stack must come off to reach
+them.** Removing more of the back cover gains nothing.
+
+### Order (general, from an onn repair guide + standard practice)
+1. **Padded, clean, dust-free surface** big enough for a 75" panel. A speck of dust on the diffuser
+   shows on screen for the life of the TV.
+2. Back cover off, **photograph every connector before unplugging**, boards out.
+3. Perimeter screws holding the front bezel/frame to the rear chassis.
+4. Separate the front assembly and lift the film stack out **in order and in orientation** — the
+   films are not interchangeable and not symmetric. Lay them in sequence as they come out.
+
+### 🔴 HAZARDS — "cracking it ends the repair" is already on this record
+- **Never lift the LCD by one edge.** A 75" panel flexes under its own weight and cracks. Support it
+  across its whole face; **two people, no exceptions.**
+- **The T-con / LVDS ribbons and the COF tabs along the panel edge tear if the panel shifts** while
+  still tethered. Free them before any lifting.
+- Strips are on **double-sided tape** — they need patience (and gentle heat) coming off, and the new
+  ones need fresh tape if the kit's own tape is poor.
+- ⚠️ **Anecdote, not documented procedure** (iFixit, onn 100012588): one repairer **cut the reflector
+  sheet along three sides, swapped strips one at a time underneath, and taped the sheet back.** Single
+  report, different model — but it is the kind of shortcut worth evaluating with the set open, since
+  it avoids disturbing the film stack at all. Evaluate, do not assume.
+- Swap strips **one at a time** so the stack and the tray alignment never both move at once.
+- New strips ship with **bare solder pads and NO plug connectors** (verified 10-11 from the kit's own
+  photos) ⇒ **reuse the old jumper wires/harness and plan on soldering.**
+
+### 💰 THE $0 PATHS, IN THE ORDER TO TRY THEM — ALL BEFORE BUYING ANYTHING
+1. **Re-flow the old hand-soldered jumper on the `CON302` run.** Jeff 10-11: *"last time the repair
+   man had to solder the strips together in one place."* A cracked/cold joint there is the **prime
+   suspect** for an open chain on the string that died. Inspect under light + **tug-test**.
+2. **Harness / crimp check** on the `CON302` plug and its run into the tray — a broken wire or a bad
+   crimp reads identical to a dead bead from outside.
+3. **Per-strip test with the TD2B** — test the 6 strips of the 302 run **one at a time**. Expect
+   roughly **19–21 V** on a good strip and a **pegged 300 V** on the open one. Pins the exact strip in
+   about a minute. *(That voltage is arithmetic from 113 V ÷ 6, not a measured figure.)*
+4. 🔑 **BYPASS A SINGLE DEAD BEAD WITH A SOLDER JUMPER — $0, and this is a standard repair.** With the
+   dead strip found, identify the open bead (it is the one the tester will not light) and **solder a
+   short wire across that bead's own pads.** The driver is **constant-current**, so the string simply
+   runs at one bead less voltage: **113 − ~2.7 ≈ 110 V, still inside the board's `100-126V` window.**
+   - Trade-offs, stated plainly: that spot is marginally dimmer (one bead of 42, behind a diffuser —
+     in practice invisible), and if the bead died of heat its neighbours are candidates to follow.
+   - **Fully reversible** and costs nothing. If it holds, the repair is **$0 total**.
+5. **Strips only if several beads are dead or the strip is physically damaged** — then read the part
+   number off the old strip and buy **all 12**: **$36.55** (`30375007005/006`) or **$42.06**
+   (`30375007007/008`), free delivery. A second teardown costs far more than 6 spare strips.
+
+**Economics, final: $0 (re-flow / crimp / bead jumper) → ~$42 (all 12 strips) → $398 (new TV).**
