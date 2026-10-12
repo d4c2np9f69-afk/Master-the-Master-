@@ -339,7 +339,12 @@ sense right: **THE TAPED PLUG IS `CON302` = `LED-` = the BLACK probe.** The UNMA
 `CON301` = `LED+` = RED. (An earlier draft of this line said to tape `CON301` with a `+`; that is
 NOT what is on the bench — the tape means NEGATIVE.)
 
-## 2026-10-12 10:40 AM — 🔴 TESTER RESULT. FAULT LOCALIZED: `CON302` STRING IS OPEN. BOARD IS GOOD.
+## 2026-10-12 10:40 AM — ⚠⚠ **THIS ENTIRE SECTION IS SUPERSEDED BY THE 10:47 AM ENTRY BELOW.**
+⚠ **ITS HEADLINE CONCLUSION — "`CON302` IS OPEN" — IS WRONG.** `CON302` was **POOR PROBE CONTACT**. On a
+reseat it read **113 V, identical to `CON301`**. BOTH strings are good; the fault is the BOARD.
+**Read the 10:47 entry, not this one.** Kept verbatim only so the error and its cause stay on the record.
+
+### (superseded) 10:40 AM — tester result, first reading
 
 **Jeff's measurement, verbatim:** *"on the 301- Red to gray and Black to pink I got 113 v and nothing
 on any other combo"*
@@ -404,3 +409,76 @@ this is the A version"). **The 10-11 elimination logic holds unchanged and is no
 the panel IS coming off, so the number gets read in the same minute. Do not pre-order.
 
 **Economics unchanged:** $0 (re-flow) → ~$42 (strips) → $398 (new TV, Walmart current onn 75" 4K).
+
+## 2026-10-12 10:47 AM — ✅✅ **BOTH STRINGS GOOD, VISUALLY CONFIRMED. THE FAULT IS THE POWER BOARD.**
+### THIS SUPERSEDES THE 10:40 AM ENTRY ABOVE, WHICH WAS WRONG.
+
+**Jeff, verbatim:** *"On 302 side The meter was at 300 then went to 111 then settled at 113 v"* and
+*"Also the screen lit up on the 302 side bright"*
+
+### ✅ THE MEASUREMENT, FINAL
+| Connector | Reading | Beads | Verdict |
+|---|---|---|---|
+| **`CON301`** (red→grey, black→pink) | **113 V settled** | — | **GOOD — 6 strips unbroken** |
+| **`CON302`** (same orientation, after reseating probes) | **113 V settled** (300 → 111 → 113) | **screen lit BRIGHT** | **GOOD — 6 strips unbroken** |
+| **Difference between strings** | **0 V / 0 %** | | **vendor fault threshold is >3 V or >3 % — nowhere near it** |
+
+⇒ **ALL 12 STRIPS ARE GOOD.** Not an inference: **Jeff watched half the screen light up bright.**
+A single dead bead would have read ~110 V (≈2.4–2.7 V per bead). Both halves read the same number.
+
+### 🔴 WHY THE 10:40 CALL WAS WRONG — POOR PROBE CONTACT, THE EXACT THING THE VENDOR WARNS ABOUT
+The first `CON302` attempt gave nothing on both polarities, and that was recorded as an open string.
+It was **the needles not seated on bare metal** — the terminals sit down inside the plastic housing,
+and Jeff had tape on that plug. **The vendor lists poor probe contact as cause #1 of a false ~300 V,
+ahead of a dead bead, and that is precisely what happened here.**
+🔑 **RULE EARNED TODAY: a "nothing" reading is NOT a result until the probes have been reseated and
+retried. Only a SETTLED number is data.** One reseat flipped this diagnosis completely and would
+have cost a needless 75" panel teardown.
+
+### 🔴 CORRECTION TO THE 10-11 3:36 PM PROCEDURE — THE RAMP GOES *DOWN*, NOT UP
+10-11 recorded the vendor wording *"display starts ~156 V and climbs toward 300 V."* **On this unit
+with a real load it does the opposite:** **300 → 111 → settles 113.** That is correct and physical —
+unloaded the supply sits at its **300 V ceiling**; once the string conducts, the **30 mA current
+limit** pulls the voltage down to the chain's actual forward drop, so **it settles AT the answer.**
+**The operative rule is unchanged and is the only one that matters: HOLD UNTIL IT STOPS MOVING.
+Direction of travel is irrelevant; a settled number is the measurement.**
+
+### ⛔ 10:40's "CAP SWAP IS CANCELLED" IS REVOKED. THE CAP IS BACK ON, AND IT IS THE $0 REPAIR.
+This is now the **known, documented failure for this exact model**, and the forum signature matches
+the bench exactly:
+- Badcaps **"Onn 100044717 Black screen 75 *Solved"** — same model, same symptom (black screen, faint
+  picture under a flashlight): *"The defect is the power board capacitor near the backlight
+  connection … Look for a bulged cap."*
+- Linked 70" thread: *"Ive had 15 of them where it was that capacitor"* … **"The backlights test
+  fine."** ← **that sentence IS Jeff's measurement.**
+- Caps on this board **may look perfectly flat and still be bad** (explicit in the thread).
+
+**Part: the 450 V 10 µF 105 °C electrolytic next to the backlight connector — `EC210`, the only
+450 V cap on the board. Jeff has a box of NEW caps including 450 V ⇒ $0.**
+
+### ▶️ ORDER OF WORK, REVISED 10:47
+1. **$0 — `EC210` swap.** Visual check for bulge/leak first (absence proves nothing), then desolder,
+   fit the new cap, test. Procedure: discharge through a resistor and **confirm 0 V** before
+   touching; **polarity stripe = negative, match the board's shaded half**; same µF, ≥450 V, 105 °C
+   if available, similar diameter. If there is no exact 10 µF in the box, **check before substituting.**
+2. **Sweep the rest of the board** while it is out — any other bulged/leaking/crusty cap, cold joints
+   around the backlight section. (Jeff's own standing rule: after fixing one, look for others of the
+   same class before calling it done.)
+3. **Measure the OLD cap out of circuit afterwards** — confirms it had actually failed instead of
+   leaving it a guess. This was the reason given on 10-11 for waiting on the tester, and it still holds.
+4. **Current-reduction mod** — still blocked on photos of the LED driver IC marking + the SMD
+   resistors at `Q301`. Worth doing while open; never blind (the 🔴 CS-pin trap above).
+5. **Backlight setting lower in the TV menu** once it is running, to buy the strips life.
+
+### ❌ CANCELLED / NOT NEEDED
+- **The 12-strip kit ($36.55–42.06) — DO NOT BUY.** All 12 strips measured and lit good.
+- **The panel teardown — NOT HAPPENING.** The only reason to open it was strips.
+- **Hunting the strip part number — PERMANENTLY MOOT.** It was never needed, and now never will be.
+- ⚠️ **One honest caveat:** the tester drives **30 mA**; the board runs each string at **~355–395 mA**
+  (710–790 mA total). A bead that is intermittent or high-resistance can pass 30 mA and fail at
+  operating current — the same thread's *"one was the capacitor AND the backlights"*. Unlikely, but
+  it is the one way "strips test fine" could still be incomplete. **If the cap does not fix it, this
+  is the first thing to revisit, not the last.**
+
+**Economics: $0 (cap on hand) vs $398 new TV.** The $18.99 tester paid for itself twice over — it
+cancelled a $42 parts buy AND a two-person 75" panel teardown.
