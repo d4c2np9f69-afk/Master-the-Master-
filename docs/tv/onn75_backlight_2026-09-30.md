@@ -795,3 +795,37 @@ The board's `LED:100-126V` window, the 113 V measurement, the 84-LED count and `
 | T-con `K0042HVZZ` / `BG000N701` | $9.50 |
 | 12 strips `30375007007`/`008` | **$42.06** |
 | **Total** | **≈ $70.55** vs $398 new, vs $0 if tossed |
+
+## 2026-10-12 12:39 PM — 🔴 **MIXED STRIPS IN THE TRAY — and a hypothesis for WHY THIS TV KEEPS EATING BACKLIGHTS**
+**Jeff:** *"All those pics are from the strips themselves"* ⇒ the `L87V32A4` marking is **on a strip**,
+not on the diffuser. **The tray contains TWO DIFFERENT STRIP TYPES:**
+
+| Marking | Date | What it is |
+|---|---|---|
+| `LED75D07A-ZC66AG-05` / **`30375007007`** / `KS-AL 94V-0 E465853` / **`7S1P`** | **2020-03-13** | **factory / OEM spec** |
+| **`L87V32A4`** / `1925-00070` | **2024/02/20** | **aftermarket, fitted by the repairman** |
+
+### ❌ `L87V32A4` / `1925-00070` IS NOT IN ANY CATALOG — searched 10-12, ZERO results
+No seller, no cross-reference, no listing anywhere. **It is an unbranded generic.** Fitted Feb 2024,
+i.e. it has been in service ~2 years 8 months. This matches Jeff's own note that this is the **third**
+set of strips in this TV.
+
+### 🔑 HYPOTHESIS — MISMATCHED STRINGS ON A PARALLEL-FED CONSTANT-CURRENT DRIVER
+The two strings run **in parallel from one driver**, so **they see the SAME voltage.** If the 2024
+aftermarket strips do not carry the same bead count as the factory `7S1P` strips, the two strings have
+**different forward voltages** — and **the string with fewer beads draws more current and runs hot.**
+That would cook that half, repeatedly, no matter how many times it is replaced.
+⇒ **If true, this is the root cause of the repeat failures and the fix is a MATCHED 12-strip set.**
+*(Hypothesis, not established — it stands or falls on the bead count below.)*
+
+### ❓ OWED BY JEFF — three counts, and they decide whether this repair is a fix or another lap
+1. **How many strips are `L87V32A4` vs `30375007007`?**
+2. **Which half are the 2024 strips in — the dead `CON302` side or the good `CON301` side?**
+3. **Count the beads on one `L87V32A4` strip.** Factory is **7**. Seven or not seven.
+🔑 **If the aftermarket strips are in the DEAD half AND have a different bead count, the cause of the
+repeat failures is found.**
+
+### ▶️ ORDER THE KIT REGARDLESS
+A mixed set is exactly the condition to eliminate. **$42.06 replaces all 12 with one matched spec**
+(`30375007007`/`30375007008`). The counts above do not change the purchase — they tell Jeff whether
+this repair is permanent or whether he is buying another ~2 years.
