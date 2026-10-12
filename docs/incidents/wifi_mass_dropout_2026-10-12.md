@@ -127,3 +127,59 @@ green, while the actual feature has been dead since 3:21 PM.
 ⚠️ Also note `sensor.my_weather_station_inside_temperature` is **frozen at 70.3 °F** from 15:21, so
 the thermostat is deciding against a stale number as well as commanding a dead relay. Two of the
 three parts of that control loop are down.
+
+---
+
+## 2026-10-12 6:46 PM — RECOVERED, A/C RUNNING, BOTH WATCHDOGS BUILT
+
+### Recovery
+Devices came back between **6:34 PM** (ping: all eight DOWN) and **6:37:52 PM** (gateway
+`devices.ha`: all `on`). Jeff: *"The re 200 is offline and it's broken so it all needs to go
+through the router itself."* Verified at 6:38 PM — all ten ping UP including `.224`, HA
+unavailable count **81 -> 51** (51 is the normal baseline; permanently-unavailable camera
+entities make an absolute count useless as a signal).
+
+### The A/C came back OFF and could not start itself
+```
+switch.ac_relay                               unavailable -> off   23:37:20Z (6:37 PM)
+sensor.my_weather_station_inside_temperature  70.3 -> 73.8 F
+```
+Two reasons it stayed off, both real:
+1. `select.wifi_smart_switch_power_on_behavior` = **off** by design (FINDINGS_AND_STOPS:768) —
+   after a power cut the A/C stays off until HA turns it on.
+2. The thermostat's ON branch is **`ON >= 72.5 F if off >= 5 min`** (FINDINGS_AND_STOPS:810-812).
+   The relay's `off` timestamp was 6:37:20, so the 5-minute anti-short-cycle guard was blocking
+   it — **and the guard was being fooled.** The compressor had actually been off since
+   **2:55 PM, 3 h 45 m.** The guard was measuring how long the *entity* had existed, not how long
+   the *compressor* had rested.
+
+🔑 **An anti-short-cycle guard keyed to entity state is wrong after an outage** — the entity is
+newborn, the hardware is not. Closed the contact manually at **6:40:11 PM**.
+
+**Cooling PROVEN, not assumed:** inside **73.8 -> 73.6 F** by 6:42:44 with the relay `on`.
+
+### Both owed watchdogs are BUILT (OPEN_ITEMS #227 closed)
+| Entity | Logic |
+|---|---|
+| `automation.hcc_a_c_relay_offline_watchdog_ha_cannot_control_the_a_c` | `switch.ac_relay` -> `unavailable` **for 15 min** AND `input_boolean.air_conditioner` on -> time-sensitive push + persistent notification. The push approved **2026-09-15** (FINDINGS_AND_STOPS:785) and never built until today. |
+| `automation.hcc_mass_dropout_watchdog_3_wi_fi_iot_devices_unavailable_at_once_a_radio_path_died` | **3 of 7** in a deliberately mixed-vendor basket (Matter relay, SONOFF, 3 Kasa, Ambient) `unavailable` **for 5 min** -> push naming the dead devices. The **simultaneity** is the signal. Mixed vendors on purpose so one vendor cloud outage cannot trip it. |
+
+**VERIFIED, not trusted from the API's `ok`:** both entities read back from `/api/states` and both
+are `on`. Trigger template dry-run **both ways** against live state: threshold 3 -> `COUNT=0
+FIRES=False` (all 7 healthy, no false alarm); and seeded with three genuinely-unavailable
+entities -> `COUNT=3 FIRES=True` with the message rendering the device names correctly.
+
+⚠️ **`POST /api/config/automation/config/<id>` returned HTTP 400 twice via
+`Invoke-RestMethod`** and `{"result":"ok"}` immediately via `HttpWebRequest` with explicit
+`[Text.Encoding]::UTF8.GetBytes()`. The schema was never the problem — **`Invoke-RestMethod`
+mangles a UTF-8 JSON body containing `\uXXXX` escapes.** Post HA config as raw UTF-8 bytes.
+HA is **2026.10.0**.
+
+### Still open
+- **RE200 at `192.168.1.196` is dead hardware** (Jeff's call, 10-12) — ping DOWN, HTTP timeout,
+  no ARP. Gateway last saw its wired MAC `b0:be:76:d5:ea:88` **Sat Oct 10 14:20:04**. Everything
+  now rides the gateway radio on **ch 1**. Office coverage is unreplaced. OPEN_ITEMS #225.
+- `1e:5f:2b:b8:08:62` ("dlinkap", off **15:07:55**, 13 min before the clients quit) is a
+  **locally-administered/randomized MAC** — still NOT proven to be a real AP.
+- No smart outlet feeds either AP, so **neither can be power-cycled remotely.** Enumerated all 39
+  `switch.*`/`light.*` entities to confirm.

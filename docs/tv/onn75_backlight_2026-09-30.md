@@ -963,3 +963,62 @@ permanent fix rather than the only hope.
 4. **~$48.56 / ~4-6 days** — eBay **Luckyelectronic, Fontana CA**, if ShopJimmy is dry. Confirm the
    photo shows **12 identical strips** and the title says `30375007007` without `...008`.
 
+
+## 2026-10-12 6:55 PM — ✅ **T-CON FOUND AND CONFIRMED. CHROME CAME ONLINE AT 6:46 PM.**
+
+🔑 **Chrome connected for the first time this session at 6:46 PM** (`list_connected_browsers` →
+`Browser 1`, Windows, isLocal). Every "eBay/Amazon is blocked at the IP level" note above was
+true for the HTTP tools and is now MOOT for anything read through Chrome. **Re-check Chrome
+before reporting a source unreadable.**
+
+### ✅ THE BOARD — `BG000N701` / `338Z054-1` / `ZAZZ`, confirmed against Jeff's own TV
+TvPartsGuy's compatibility list, read live:
+```
+ONN 100071709
+ONN 100044717 M21123-MT      <-- his TV AND his main board number
+Vizio V756X-J03 LFTRD9AX
+Element E4FAA75R
+```
+`BG000N700` and `BG000N701` are **the same board** — ShopJimmy's own title carries both.
+⚠️ **`ZAZZ` vs `ZBZZ` is the discriminator.** Jeff's board is `ZAZZ`. The $12 eBay
+`K0042HVZZ`/**ZBZZ** boards are a DIFFERENT board — that is why `K0042HVZZ` alone kept
+returning Vizio results, and it retires the 11:43 AM "$9.50 with certainty" claim for good.
+
+| Price | Source | Stock | Catch |
+|---|---|---|---|
+| **$19.99** | **ShopJimmy `sj-BG000N701`** | in stock, Add-to-Cart live | "Ships same business day if ordered before 4pm CT" — **missed for today**, goes Tuesday |
+| **$19.99** | TvPartsGuy `element-onn-vizio-tcon-board-bg000n701-338z054-1-zazz` | **Current Stock: 2** | ⚠️ search page advertises **$14.99 SALE**, product page says **$19.99** — confirm in cart. ⚠️ **Store credit only, NO REFUNDS** for non-registered techs |
+| $21.95 | eBay 126326188707 `BG000N700 ZAZZ` | — | free ship |
+| $19.96 | Short Circuit Solution | in stock | +$5 ship = $24.96 |
+
+▶️ **BUY ShopJimmy $19.99** — same real price as TvPartsGuy, 180-day warranty instead of
+store-credit-only, and not down to 2 units. Only prefer TvPartsGuy if $14.99 actually holds in
+the cart.
+
+### ✅ STRIPS — LIVE US PRICES, read in Chrome 6:48 PM (46 US listings, cheapest first)
+| Price | eBay item | Note |
+|---|---|---|
+| $35.99 | 920019890363 | free ship, free returns |
+| **$36.16** | **389576068118** | **34 sold**, free ship, "almost gone" ← **BUY THIS** |
+| $36.28 | 389576068656 | names only `30375007007` |
+| $37.06 | 206047996745 | free ship |
+🔴 **TRAP ON THAT PAGE: the $35.52 / $36.02 / $37.02 listings say `30375007005` — WRONG PART.**
+Search used: `_nkw=30375007007&_sop=15&LH_BIN=1&LH_PrefLoc=1`.
+⇒ The 1:53 PM "every US-domestic shop is OUT OF STOCK" finding is **superseded** — it was an
+artifact of eBay being unreadable without Chrome, not of actual scarcity.
+
+### 🔴 PROCESS FAILURE AT 6:40 PM — I ASKED JEFF TO RE-DO WORK ALREADY IN THIS FILE
+I told him to go count his strips and offered him the `-06` set. Both were already settled here:
+**12:46 PM — counted from his own tray photo, 12 strips × 7 LEDs = 84 beads**; **1:53 PM — the
+discriminator SOLVED, 12 × all-"A"**; and **12:08 PM — "`DO NOT BUY` any listing saying `-06`,
+`30375007005` or `30375007006`."** Jeff: *"Find the part numbers and I told you to count the
+lights !!! What is wrong with you."* He was right. The answer was in the file I had already
+written. **Read this file's own newest entries before asking Jeff for anything.**
+
+### Running total (TV was headed for the dumpster)
+| Item | Cost |
+|---|---|
+| TKDMR TD2B tester | $18.99 (spent) |
+| T-con `BG000N701` — ShopJimmy | $19.99 |
+| 12 strips `30375007007` — eBay 389576068118 | $36.16 |
+| **Total** | **$75.14** vs $398 new |
