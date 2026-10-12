@@ -700,3 +700,46 @@ connectors, beside the `A03 ZC 75` sticker) · main board (right, HDMI + heatsin
 **panel GATE driver = `ST73-LSL` / `BLWK-LSL` / `VGL_AAL`, pins `LCK1`–`LCK8`, at the corner.**
 🔴 **The two panel driver boards are NOT unpluggable — they are bonded to the glass. They are the most
 fragile things in the set and the only ones that can end this repair.**
+
+## 2026-10-12 11:43 AM — ⚠️ T-CON DAMAGED DURING TEARDOWN → **$9.50 REPLACEMENT IDENTIFIED WITH CERTAINTY**
+**Jeff:** *"I've got to replace this board I messed it up."*
+
+### WHAT ACTUALLY BROKE — and what did NOT
+**The `CNC1` fine-pitch FFC connector was torn off the T-con board.** Photographed lying loose beside
+it, black actuator bar still attached, retention tabs bent at both ends, pad row exposed at the board
+edge.
+✅ **The panel's own bonded COF/flex tabs are UNDAMAGED** — the source strip and the `ST73-LSL` gate
+board are untouched. **That is the distinction that matters:** a torn panel flex is unrepairable and
+ends the TV; a torn-off connector on the T-con is a **$9.50 board swap.** The blue-taped panel ribbon
+appears intact in the photo. ⚠️ **Jeff to check the ribbon's contact end** — if it delaminated when the
+connector let go, the ribbon is needed too, not just the board.
+*(Hand-resoldering a 100+ pin 0.5 mm FFC connector is technically possible but pointless at this price,
+and lifted pads would sink it anyway. Not pursued.)*
+
+### 🔑 THE EXACT PART, PINNED FROM THE BOARD'S OWN SILKSCREEN
+Jeff's close-up reads **`BG000N701`** (lower left, under the UL mark) alongside `ZBZZ` / `K0042HVZZ` /
+`PTH16A017S`. The **$9.50 Direct TV Parts listing names `BG000N701` AND model `100044717` in its own
+title** — *"Vizio K0042HVZZ T-Con (ZAZZ, **BG000N700, BG000N701**) V756X-J03 100044717"*.
+⇒ **The earlier ZAZZ-vs-ZBZZ doubt is RESOLVED** — that listing spans several suffixes and explicitly
+carries the `BG000N7xx` number printed on Jeff's board.
+
+| Source | As listed | Price | Stock |
+|---|---|---|---|
+| **✅ Direct TV Parts** (`ZAZZ`, **`BG000N700`/`BG000N701`**, `V756X-J03`, **`100044717`**) | **matches Jeff's `BG000N701` + his model** | **$9.50** | 11 |
+| Torres TV Parts — "ONN `ZBZZ`-`K0042HVZZ`" | matches the `ZBZZ` suffix, onn-branded | $17.99 | 3, 30-day warranty |
+| eBay used, Vizio M75Q6-J03 (`K0042HVZZ` / `167009545A`) | — | $15.95 / best offer | — |
+| tvpartstoday (`ZBZZ`, `PTH6403YF`) | — | $19.99 | **unavailable** |
+**BUY: the $9.50 Direct TV Parts board.** No reason to pay $17.99.
+
+### 🔴 CORRECTION — T-CON CONTROLLER PART NUMBER
+Previously recorded as Novatek **`NT71196ZMFG-00I`** (read off an earlier, poorer photo). The 11:40 AM
+close-up reads it clearly: **`NT71962MFG-001`**, date code `2116-AB`, `P3P36200`. **Use the new number.**
+
+### 💵 RUNNING TOTAL ON A TV THAT WAS GOING IN THE DUMPSTER
+| Item | Cost |
+|---|---|
+| TKDMR TD2B tester | $18.99 (spent) |
+| T-con `K0042HVZZ` / `BG000N701` | **$9.50** |
+| 12 LED strips | $36.55–42.06 (**pending the part number off an old strip**) |
+| **Total** | **≈ $65–70** vs **$398** new, vs **$0** if it had been tossed |
+**Order the T-con now; order the strips the moment the number is read. Both land about the same time.**
