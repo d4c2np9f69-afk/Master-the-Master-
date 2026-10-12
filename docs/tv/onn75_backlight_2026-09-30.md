@@ -743,3 +743,55 @@ close-up reads it clearly: **`NT71962MFG-001`**, date code `2116-AB`, `P3P36200`
 | 12 LED strips | $36.55–42.06 (**pending the part number off an old strip**) |
 | **Total** | **≈ $65–70** vs **$398** new, vs **$0** if it had been tossed |
 **Order the T-con now; order the strips the moment the number is read. Both land about the same time.**
+
+## 2026-10-12 12:08 PM — 🎯 **STRIP PART NUMBER READ OFF THE OLD STRIP. THE HUNT IS OVER.**
+Tray is open, strips exposed, number photographed:
+
+```
+A   [ ] LED75D07A-ZC66AG-05   2020-03-13   7S1P
+        30375007007
+        KS-AL 94V-0  E465853
+```
+Second strip photo also shows **`ES-37517`**, **`V01`**, and the solder pads marked **`A` = anode (+)**
+and **`K` = cathode (-)** — that is the polarity marking to solder to.
+
+### ✅ THIS IS THE `007/008` FAMILY — the `-06` / `30375007005/006` family is RULED OUT
+🔴 **DO NOT BUY any listing saying `-06`, `30375007005` or `30375007006`.**
+The `-05` suffix is the revision and is consistent with `30375007007` (Newegg lists `ZC66AG-05` among
+that part's alternates). **`30375007007` is the number sellers index on — match that.**
+
+### 🔑 `7S1P` — THE BEAD COUNT IS NOW THE MANUFACTURER'S OWN MARKING, NOT ARITHMETIC
+**`7S1P` = 7 in Series, 1 Parallel ⇒ 7 LEDs per strip.** Independently corroborated by counting the
+12:08 PM tray photo: **12 strips × 7 beads = 84 LEDs**, in 2 strings of 6 strips = **42 beads/string**.
+**113 V ÷ 42 = 2.69 V per bead at the tester's 30 mA** — exactly where a 3 V blue LED sits under-driven.
+⇒ **The 10-11 ⚠️ "bead count NOT pinned" caveat and the 10-12 10:47 arithmetic are both now CLOSED.**
+The board's `LED:100-126V` window, the 113 V measurement, the 84-LED count and `7S1P` all agree.
+
+### 💰 WHERE TO BUY — prices stated with their freshness
+| Listing | Price | When read |
+|---|---|---|
+| **✅ eBay — "New 12pcs LED Strips 30375007007 30375007008 For 100044717 WR75UT4210 E4FAA75R", seller famfutr 100 % (6.3K)** | **$42.06, free delivery, free returns** | **live in Chrome 10-11** |
+| Amazon **B0G2XPMHRT** (XIMAIACC) — only listing naming **`-05`** explicitly; 10 A + 2 B | ~$58.99 | 10-11 |
+| eBay 276436622188 | $52.53 / best offer | 10-12 search, index ~11 months stale |
+| eBay 394976725095 | $49.28 / best offer | 10-12 search, index stale |
+**BUY the $42.06 listing; confirm the price on the page.** ⚠️ Chrome extension was NOT connected at
+12:08 PM 10-12, so today's prices could not be re-verified live — the $42.06 is a 1-day-old live read.
+
+### ⚠️ TWO OPEN CHECKS BEFORE ORDERING
+1. 🔴 **SPOT-CHECK 3–4 STRIPS ACROSS THE TRAY, one from each half.** Jeff has said this is the **third**
+   set of strips in this TV, so an earlier repair may have mixed variants — and a 12-piece kit of one
+   type will not seat right against a mixed set. The strip read so far is dated **2020-03-13**, which is
+   *before* this TV was built (serial `HA211230C75005153` ≈ Dec 2021) ⇒ factory or old-stock, not a 2024
+   repair batch.
+2. **Unidentified marking, owed by Jeff:** `L87V32A4` / `1925-00070` / **`2024/02/20`** — photographed on
+   some surface in the tray. **That date is ~3 years after the TV was built**, so it is either a part
+   fitted during the previous repair or it is the diffuser / light-guide rather than a strip.
+   **Jeff to say what surface it is printed on.**
+
+### RUNNING TOTAL
+| Item | Cost |
+|---|---|
+| TKDMR TD2B tester | $18.99 (spent) |
+| T-con `K0042HVZZ` / `BG000N701` | $9.50 |
+| 12 strips `30375007007`/`008` | **$42.06** |
+| **Total** | **≈ $70.55** vs $398 new, vs $0 if tossed |
