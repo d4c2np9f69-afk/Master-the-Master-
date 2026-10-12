@@ -338,3 +338,69 @@ are the same colours the two are easy to confuse once both are loose. ✅ **DONE
 sense right: **THE TAPED PLUG IS `CON302` = `LED-` = the BLACK probe.** The UNMARKED plug is
 `CON301` = `LED+` = RED. (An earlier draft of this line said to tape `CON301` with a `+`; that is
 NOT what is on the bench — the tape means NEGATIVE.)
+
+## 2026-10-12 10:40 AM — 🔴 TESTER RESULT. FAULT LOCALIZED: `CON302` STRING IS OPEN. BOARD IS GOOD.
+
+**Jeff's measurement, verbatim:** *"on the 301- Red to gray and Black to pink I got 113 v and nothing
+on any other combo"*
+
+### ✅ MEASURED FACTS
+| Connector | Red / Black | Reading | Verdict |
+|---|---|---|---|
+| **`CON301`** | red→**grey**, black→**pink** | **113 V, settled** | **HEALTHY — 6 strips, unbroken** |
+| `CON301` | reversed | nothing | normal (series string blocks) |
+| **`CON302`** | both polarities | **nothing** | **OPEN — this is the dead backlight** |
+
+### 🔴 CORRECTION — THE TOPOLOGY CALL ON 10-11 WAS WRONG
+10-11 said the circuit runs **ACROSS** `CON301`→`CON302` (read off the `LED+`/`LED-` silkscreen),
+and that the 4-combination sweep was about *pairing*. **That is wrong, and the bench proved it:**
+all four across-the-plugs combinations read nothing. **Each connector is ONE COMPLETE STRING with
+its own + and -.** The silkscreen labels the **PINS**, not the plugs.
+⇒ **`CON301` grey = LED+, `CON301` pink = LED-.** 2 connectors x 6 strips = the 12-strip set.
+🔑 Lesson: a **2-wire** backlight connector is almost always one string's + and -, not a one-polarity
+bus. The correct first test on an unknown 2-wire LED connector is **WITHIN the connector**, both
+polarities — not across two connectors.
+
+### WHY 113 V PROVES THE STRING IS INTACT
+The TD2B current-limits at **30 mA**. A reading that **settles** instead of pegging at 300 means
+current is flowing through an unbroken series chain. 113 V also lands dead centre of the board's own
+silkscreened compliance window **`LED:100-126V 710MA--790MA`** — i.e. the board's design target for
+one string, measured at the string itself.
+⚠️ **Bead count still NOT pinned.** 42 beads (6 strips x 7) at ~2.7 V each at 30 mA = 113 V, and
+36 beads (6 x 6) at ~3.14 V = 113 V. Vf falls below nominal at 30 mA, which favours 7 beads/strip
+(and the GUANGMING listing says "7 LEDs each"), but **this is arithmetic, not a measurement.**
+The 10-11 ⚠️ CORRECTION block still stands: do not treat a bead count as established.
+⚠️ The Badcaps "~96 V healthy" figure is from the **70" 100012588** — a different panel. 113 V here
+does NOT contradict it and the two must never be compared.
+
+### ⛔ THE `EC210` CAP SWAP IS CANCELLED
+The 10-11 3:08 PM order-of-work predicted this exactly: *"a string is open ⇒ the cap is almost
+certainly fine ⇒ **do not touch it at all**."* **That branch is now the live one.** The board is
+behaving CORRECTLY — one open string makes the constant-current driver shut down **both** channels,
+which is why the symptom is a fully black screen rather than a half-lit one. **Do not desolder
+`EC210`.** Jeff's 10-11 call to test before soldering is what saved this rework on a healthy board.
+
+### ▶️ NEXT, IN ORDER (cheapest first, $0 option first)
+1. **RE-VERIFY `CON302` before the teardown** — reseat the needles on bare metal, both polarities,
+   hold 5 s. Vendor lists **poor probe contact as the #1 cause of a false open**, and the tape Jeff
+   put on that plug can ride over the terminals. 60 seconds vs pulling a 75" panel.
+2. **Record WHICH failure mode `CON302` shows:** pegged **~300 V = OPEN** (broken chain) vs **`00.0`
+   = SHORT**. Different hunt. ← **OWED BY JEFF**
+3. **🔑 $0 FIRST MOVE ONCE OPEN: inspect and re-flow the OLD HAND-SOLDERED JUMPER.** Jeff, 10-11:
+   *"last time the repair man had to solder the strips together in one place."* A cracked/cold joint
+   is the prime suspect for an open string, it is **on the string that died**, and re-flowing costs
+   **$0**. Check every joint on the `CON302` run under a light + tug-test **before buying anything**.
+4. **Strips only if the joints are sound** — then read the number off the old strip and buy the
+   matching 12-strip kit: **$36.55 (30375007005/006)** or **$42.06 (30375007007/008)**, both free
+   delivery. Replace all 12 (they fail as a set; a second teardown costs more than 6 spare strips).
+5. **Current-reduction mod** while it is open — still blocked on photos of the LED driver IC marking
+   and the SMD resistors at `Q301`. Do NOT do it blind (the 🔴 CS-pin trap above).
+
+### ❌ STRIP FAMILY STILL CANNOT BE IDENTIFIED IN ADVANCE — SEARCHED AGAIN 10-12, CONFIRMED
+Tried to discriminate `30375007005/006` from `30375007007/008` by the 113 V reading and by listing
+specs. **Not possible:** no seller publishes bead count per family, and eBay/Newegg listings name
+both numbers in the same title and treat them as interchangeable (Newegg notes only "two versions,
+this is the A version"). **The 10-11 elimination logic holds unchanged and is now moot anyway** —
+the panel IS coming off, so the number gets read in the same minute. Do not pre-order.
+
+**Economics unchanged:** $0 (re-flow) → ~$42 (strips) → $398 (new TV, Walmart current onn 75" 4K).
