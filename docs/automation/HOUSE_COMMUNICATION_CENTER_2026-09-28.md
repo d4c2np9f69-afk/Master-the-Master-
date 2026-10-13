@@ -351,3 +351,32 @@ a critical alert for a Freeze Warning is how people end up switching critical al
 ⚠️ **One thing software cannot set: iOS asks once per app to "Allow Critical Alerts."** If that was
 ever denied for Home Assistant on either phone, `critical:1` silently degrades to an ordinary
 notification. **Test, do not assume** — a critical test push was sent to Jeff's phone 4:35 PM.
+
+### 🔴 4:40–4:45 PM — WATCH TEST FAILED. NOTHING REACHED THE WRIST.
+Critical push sent **4:40:03 PM**, HA accepted it (**HTTP 200**), phone locked.
+> **Jeff 4:44 PM:** *"The watch did not make a sound"* · **4:45 PM:** *"Nothing on the watch"*
+
+**"Nothing at all" is the diagnostic, and it RULES OUT the interruption level.** A `critical:1` alert
+that was being downgraded would still have *appeared* on the watch, silently. Nothing appearing means
+the notification never left the phone — **this is iOS notification MIRRORING, not anything in HA.**
+
+⚠️ **The critical-level fix shipped earlier today is still correct and still needed** — it was a real
+defect (weather warnings at `time-sensitive` could arrive silent at 3 AM). It is simply **not** what
+this failure is. Do not revert it chasing this.
+
+**Two candidates, and the second is a flaw in the TEST, not the system:**
+1. **Home Assistant is not set to "Mirror my iPhone"** — iPhone → Watch app → Notifications → Home
+   Assistant. If that is off, no HA notification has ever reached his wrist.
+2. 🔑 **THE TEST ITSELF IS CONFOUNDED: iOS only hands a notification to the Watch while the iPhone is
+   LOCKED — and Jeff is running this session from that very phone via Claude Code remote control.**
+   If he unlocked it to read a message, the test could not pass regardless of settings. **Any re-test
+   needs a long enough timer that the phone is genuinely locked and set down.**
+
+🔑 **THE STURDIER FIX, IF MIRRORING KEEPS FIGHTING US: put the Home Assistant Companion app on the
+Apple Watch itself.** HA currently knows only two targets — `notify.mobile_app_jeffs_iphone` and
+`notify.mobile_app_angelas_iphone` — i.e. **there is no watch registration at all**, so every alert
+reaching a wrist today is mirrored. Installing it on the Watch gives HA a direct target and removes
+iOS mirroring from the alarm chain entirely. **Not priced, not ordered — it is a free app, but it is
+Jeff's phone and his call.**
+
+⏳ **STILL OWED: the 2-minute live siren test.** Not yet run.
