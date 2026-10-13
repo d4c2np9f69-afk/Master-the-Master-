@@ -436,3 +436,99 @@ own — the pre-flight baseline was taken at 5:35 PM specifically so his hands-o
 mistaken for an update regression.
 
 ▶ **HANDED BACK TO JEFF: the hard reset he does every week or two, then a full test.**
+
+---
+
+## 🕰️ 2026-10-13 6:20–6:31 PM — THE CLOCK IS THE PRODUCT. ANGELA IS THE AUDIENCE.
+> **Jeff 6:19 PM:** *"I just want the clock to say no errors when it reports. Angela gets worried when
+> we have errors… if there is an error on some kind of bullshit that doesn't even have to do, I don't
+> want it reporting."*
+> **6:20 PM:** *"if it's legitimate errors I want to report… if a camera is down or something that's
+> legitimate."*
+> **6:26 PM:** *"status reports at 6 am 9 am 12 pm 3pm 6pm 9pm and 10 pm with a house is secure and
+> all lights are off at 10 pm. She listens to all that and it makes her feel secure and I like that."*
+> **6:27 PM:** *"This clock thing has been the best part of all the automation we've done… she really
+> does listen to the clock so we need to be ACCURATE on it."*
+
+🔑 **THAT LAST LINE IS THE DESIGN BRIEF FOR THIS WHOLE SUBSYSTEM.** The clock is the one part of the
+house Angela uses. **Accuracy outranks completeness, and a false reassurance is the worst possible
+output.** Everything below follows from it.
+
+### ✅ 1. THE 9 PM REPORT SAID "ERRORS" OVER A CLOUD BLIP. FIXED AT THE CLASSIFIER.
+The spoken report is `automation.hcc_grandfather_clock_house_status` → event `hcc_status` → the Beast
+runs **`HCC-Audit.py --brief --hours 6`** and speaks **only CRIT/FAIL**. Run live at 6:20 PM it gave:
+```
+--- FAIL ---   <- this is what gets SPOKEN
+  [log] alexa.state_report (x2): Timeout sending report to Alexa for binary_sensor.front_right_motion
+```
+**That is HA pushing a state OUT to Amazon and the cloud not answering. Nothing in the house stops
+working.** ⛔ **Not silenced — RECLASSIFIED**, using the file's own evidence-based `SELF_HEALING`
+mechanism, which exists for exactly this.
+
+**MEASURED from `HCC-Audit.log` itself (46 dates, 2026-08-29 → 10-13, 413 occurrences):**
+- appears on **26 of 46 days** — chronic, not an event
+- burst sizes 1 → worst-ever **86**
+- 🔑 **ENTITY-LEVEL ALEXA FINDINGS IN 46 DAYS: `0`.** Not once did an Alexa entity go unavailable.
+  **Zero availability cost, every single time.**
+
+⇒ `"alexa.state_report": ("Alexa cloud state push", 100)` — threshold **above the worst burst seen**,
+so a real Alexa outage still alerts. 🔴 **NARROW KEY ON PURPOSE:** a bare `"alexa"` would also swallow
+**alexa_media_player / alexapy**, a different integration that must keep alerting. Backup:
+`HCC-Audit.py.bak-20261013-alexa`. **Result: `0 actionable` — and a genuine camera-down still FAILs,
+because `check_entities()` is independent of this dict.**
+
+### ✅ 2. A LEGITIMATE ERROR WAS HIDING UNDER THE NOISE — THE OFF-BOX BACKUP WAS DEAD 2 DAYS
+Exactly the class Jeff said he DOES want reported:
+```
+2026-10-11 06:30  OK: downloaded ...-2026-10-11.tar (605 MB)
+2026-10-12 06:30  ERROR: The process cannot access the file because it is being used by another process.
+2026-10-13 06:30  ERROR: The process cannot access the file because it is being used by another process.
+```
+**No Beehive backup had reached iCloud since 10-11** — the chain whose encryption key this record calls
+the single most load-bearing secret in the house. **Cause: a stale partial download that iCloud held
+open.** ✅ Fixed by running it: `DISCARD: partial belongs to backup_id ''` → **`OK: downloaded
+HCC-Beehive-Backup-2026-10-13.tar (609,873,920 bytes)`**, then re-run via the scheduled task so its
+own `LastTaskResult` went **1 → 0**. **14 archives on disk, 0 leftover partials. The 10-12 gap is
+permanent.** ⚠️ The race can recur: any interrupted download leaves a partial iCloud can lock.
+
+### ✅ 3. STATUS REPORTS: 9-3-9 → SIX A DAY
+`06:00:05 · 09:00:05 · 12:00:05 · 15:00:05 · 18:00:05 · 21:00:05` — verified read back from the live
+config. ⏰ **The `:05` seconds are load-bearing: the chime strikes on the hour and this speaks after
+it. Do not move it to `:00`.** Entity renamed `…_9_am_3_pm_9_pm_spoken_after_the_chime` →
+**`automation.hcc_grandfather_clock_house_status`**, because an entity id that still said 9-3-9 is how
+the next session gets it wrong.
+
+### ✅ 4. THE 10 PM MESSAGE NOW COVERS LIGHTS — AND MOVED TO A CHANNEL THAT ACTUALLY MAKES SOUND
+🔴 **`docs/beehive/house_secure_2026-09-20.md` records that this announcement HAS NEVER BEEN HEARD:**
+it fired correctly at 22:05, all actions ran, and *"nothing came out of the speakers"* —
+`notify.alexa_media` returned **HTTP 200 and made no sound**, across three formats. **Jeff says Angela
+listens to the CLOCK.** So the message now goes to the clock.
+
+`automation.hcc_house_secure_and_lights_off_10_pm` (renamed from `…at_10_05_pm`), action order:
+1. `persistent_notification` — cannot fail, so the record survives
+2. **`event: hcc_speak` — THE CLOCK.** The proven path, and the one she listens to
+3. `notify.alexa_media` — **KEPT but demoted below the clock with `continue_on_error`**, so a silent
+   or failing Alexa can never abort the action that works
+
+🟢 **PROVEN AT 6:31 PM — NOT ASSUMED, NOT AN HTTP 200.** From `chime.log`:
+```
+18:31:02 speak: "The house is not secure. The garage man door is open. The living room "
+                on "Headphones (QFX PBX-BF120)" (12.0s)
+```
+**And it was RIGHT — the garage man door was genuinely open** (Jeff had just been outside).
+
+**Rendered live before saving. All-clear wording:**
+> *"The house is secure. All doors are closed. All lights are off."*
+
+🔴 **ACCURACY RULES BAKED IN:** every test is **`not is_state(ent,'off')`, never `== 'on'`** — so
+`unavailable` and `unknown` count as **UNSAFE**. Verified by probe. That rule exists because on 09-20
+a `== 'on'` test logged *"Secure"* over a garage door standing open. **A false SECURE is the worst
+output this house can produce.**
+
+⏰ **STAYS AT 22:05, NOT 22:00** — `hcc_house_shutdown_10_pm` turns the lights off *at* 22:00:00, so
+announcing at 22:00 would report lights on while they were still being turned off.
+
+💡 **THE TWO BED LAMPS ARE DELIBERATELY EXCLUDED** (`bed_lamp_socket_1`, `smart_socket_2_socket_1`).
+The shutdown turns them off, but either being switched back on at bedtime is **normal**, and
+announcing it nightly is the crying-wolf that teaches people to stop listening. Same reasoning as the
+Mercedes-lock and spare-contact exclusions in the 09-20 baseline.
