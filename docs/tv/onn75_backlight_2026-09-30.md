@@ -1099,3 +1099,29 @@ the entire job; the white film itself is a few dollars.
 
 ⇒ The 12:46 PM note ("REUSE IT, KITS DO NOT INCLUDE ONE") is now **confirmed by a real search**,
 not just inferred from iFixit teardowns.
+
+## 2026-10-12 7:32 PM — ✅ **$0 — JEFF ALREADY OWNS THE RIGHT TAPE. AND OWNS A TRAP NEXT TO IT.**
+Searched his own Amazon order history (`/your-orders/search`) — 29 orders match "tape".
+
+| Verdict | Item | Ordered |
+|---|---|---|
+| ✅ **USE THIS** | **Juvale Aluminum Tape — 55 Yards Aluminum Foil Tape, HVAC/Ducts/Insulation** (silver) | **Feb 6, 2019** |
+| 🔴 **DO NOT USE** | **LLPT Aluminum *BLACK* Foil Tape**, 2 in × 65 ft, 3.94 mil (`BF065`) — bought **twice** | Jun 21 + Jun 29, 2023 |
+
+🔴 **THE TRAP: he has TWO aluminum foil tapes and one of them is BLACK.** Both read "aluminum foil
+tape" on the roll. **Black absorbs the light the reflector exists to bounce** — it would print a
+dark line on the screen, which is the one failure mode that actually shows. Grab the silver one.
+
+Nothing else in the 29 is suitable: clear nano double-sided (Sep 2026, too thick), carbon-fibre
+vinyl (Jul 2026), hook & loop (Jun 2026 / Dec 2025), PTFE thread tape (Feb 2026, no adhesive),
+Duck painter's tape ×2 (2024, paper — will not take LED heat), caulk strip, silicone scar tape.
+**No white polyester/Mylar tape in the history**, which matches the 7:23 PM finding that no clean
+white polyester film tape is sold in small rolls on Amazon.
+
+⚠️ **The Juvale roll is ~7 years old.** Acrylic foil-tape adhesive can dry out. **Test a scrap
+first** — press it down and try to lift a corner; if it grabs and resists, it is good. If tack is
+gone, a replacement is ~$6 at any hardware store (local Ace closes 8 PM) or Amazon `B0DQLT5M31` /
+`B09BHWMSTD` / `B0B6NDFXPN` at $5.99–$6.99 for 2 in × 50–65 ft.
+
+🔑 **Technique that makes the tape choice almost irrelevant: tape the BACK face of the reflector
+sheet**, so the tape never sits in the light path at all.
