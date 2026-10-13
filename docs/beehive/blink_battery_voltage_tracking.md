@@ -139,3 +139,67 @@ The push path was tested end-to-end on 08-22 and accepted by HA — not merely a
 
 Once a real failure voltage is confirmed, the plan is **replace all cameras' cells together at that
 threshold**, rather than waiting for each to die. Do not propose anything that conflicts with this.
+
+---
+
+# 🏁 EXPERIMENT CLOSED 2026-10-13 ~5:45 PM — JEFF CHANGED ALL THE BATTERIES
+> **Jeff 5:50 PM:** *"Okay all the batteries have been changed in the blink cameras"*
+> **6:01 PM:** *"All the cameras are up and working in the blink app"*
+
+**This is not the experiment being abandoned — it is Jeff executing his own stated end goal**
+(*"anytime the voltage got to that point I would change them all at once, that was the logic behind
+it"*). It ran **52 days**, 2026-08-22 11:18 → 2026-10-13 18:01, **4,519 readings per camera**.
+
+## 🔴 THE ANSWER, AND IT IS NOT THE ONE WE EXPECTED
+**Jeff's 08-18 hypothesis — *"maybe around the 150 mark is the real failure"* — IS NOT SUPPORTED.**
+**Neither test camera ever failed. Not once, in 52 days, from at or below the mark.**
+
+| camera | first logged 08-22 | last before the swap | net over 52 days | min | max | mean | readings **below 150** |
+|---|---|---|---|---|---|---|---|
+| **front_right** (test) | 151 | **150** | **−1** | 147 | 178 | 162.4 | **561 / 4519 = 12%** |
+| **301_driveway** (test) | 146 | **151** | **+5** | **131** | 175 | 162.2 | 251 / 4519 = 6% |
+| back_left | 168 | 147 | −21 | 147 | 175 | 159.9 | 1377 / 4519 = **30%** |
+| 301_backyard | 166 | 147 | −21 | 146 | 173 | 156.0 | 1306 / 4519 = **29%** |
+
+## 🔑 THE REAL FINDING: THIS NUMBER IS NOT A STATE-OF-CHARGE READING
+- **`301_driveway` fell to 131 and came back up to 151.** A battery does not recharge itself. The
+  value swings with **temperature and load**, not remaining capacity.
+- Both test cameras swung **~30–44 points** while their *net* 52-day change was ≈ zero.
+- **`back_left` and `301_backyard` sat below 150 for ~30% of all readings and never died either.**
+- ⇒ **You cannot predict a Blink battery failure from this number, and "below 150" means nothing.**
+  The "Battery crossed 150" push built on 08-22 is therefore a **false-alarm generator** — it would
+  have fired on four cameras that were all perfectly fine.
+
+## ✅ PROVEN, NOT ASSUMED: NEITHER TEST CAMERA EVER WENT DARK
+The log holds **230 polls with no voltage** for front_right and 230 for 301_driveway — which looks
+like death until you check whose. **All 230 are the SAME timestamps, and ALL FOUR cameras are blank
+in every one of them. Camera-specific blanks: `front_right` 0, `301_driveway` 0.**
+⇒ Those are **Blink-side API gaps**, not failures. This is the ghost-value trap again: the shape of
+"dead camera" and the shape of "the cloud returned nothing for everybody" are identical **per
+camera**, and only separate when you compare across devices.
+
+## ▶ WHAT THIS MEANS GOING FORWARD
+1. **Jeff's replace-them-all-at-once policy is the CORRECT one** — and today's action is exactly it.
+   The experiment's conclusion is that no voltage threshold can do better, so a **calendar** beats a
+   **threshold**. 52 days of data says the number cannot give the warning he wanted.
+2. 🔴 **The 150-crossing alert should be retired or raised** — it is now proven to fire on healthy
+   cameras. **Not changed yet; Jeff's call** (cameras are a frozen subsystem).
+3. **The failure-capture alert is still worth keeping**, but it must ignore a poll where **every**
+   camera is blank, or it will cry death on every Blink API gap. **Not changed yet.**
+4. ⚠️ **Scheduled task `HCC Camera Battery Watch` last ran 2026-10-13 07:30 with `LastTaskResult 1`
+   (failure).** Separate from the logger (`HCC Blink Battery Log`, result 0, healthy). **Not
+   investigated — flagged only.**
+
+## 📍 NEW BASELINE — fresh cells, 2026-10-13 18:00
+| camera | pre-swap | post-swap |
+|---|---|---|
+| 301_driveway | 151 | **173** |
+| front_right | 150 | **179** |
+| back_left | 147 | **180** |
+| 301_backyard | 147 | **175** |
+
+⚠️ **`back_left` reported LATE and briefly looked unchanged.** At the 17:46 poll the other three had
+jumped and back_left still read 147, which reads exactly like "this one didn't get new cells." It
+came in at 180 on the next poll. 🔑 **Give the logger one more 15-minute cycle before concluding a
+camera was missed.** (Its wifi also moved −38 → −47, consistent with being handled.)
+*Fresh-cell range is 173–180, so a genuine new-battery reading is ~175±5 — useful for next time.*
