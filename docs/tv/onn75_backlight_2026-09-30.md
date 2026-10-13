@@ -1160,3 +1160,144 @@ Each strip is **826 mm** and the panel is **~1660 mm** wide ⇒ the 12 strips ar
 and the row-to-row path may still use harness wire. **Photograph the existing layout and wiring
 before removing anything** — which pad/plug on each strip goes where, and where the two harness
 wires enter at `CON301` (LED+) and leave at `CON302` (LED−).
+
+---
+
+## 2026-10-13 7:45 AM — ✅ **JEFF READ THE LAYOUT OFF HIS OWN TRAY. NOTHING NEEDS SOLDERING.**
+
+Jeff, verbatim: *"The 12 stripes plug into a strip across the top and then the 301 and 302 wires
+plug into 2 of the 12 strips the one thing I can't see is where it needs to be soldered."*
+
+### ⛔ THE "2 ACROSS × 6 ROWS" GUESS IS DEAD. IT IS 12 ACROSS, VERTICAL.
+My 7:45 PM note guessed 2 across × 6 rows from 826 mm vs a ~1660 mm panel **width**. Wrong axis.
+A 75" 16:9 panel is ~1660 × 934 mm, so **826 mm is the panel HEIGHT, not half its width.** The 12
+strips stand **vertically, side by side across the width** at roughly 138 mm pitch, and every one
+of them plugs **up into a horizontal BUS STRIP across the top of the tray.** Jeff's eyes on the
+open tray beat the arithmetic — and the arithmetic now agrees with him.
+
+### WHAT THAT MEANS FOR THE WIRING
+- **The bus strip across the top does ALL the chaining.** It is what makes 2 strings of 6, not
+  strip-to-strip jumpers. That is why only **2 of the 12** strips receive a harness wire.
+- **`CON301` (LED+) and `CON302` (LED−) each land on one strip** — the head of their own string of
+  6. The other 5 in each string are fed through the bus strip.
+- The **white 2-pin socket (`A`/`K`) on each new strip's face** is where a harness wire lands; the
+  **two male tabs (`A +` / `K −`) at the strip end** are what pushes into the bus strip.
+  **The new set matches his tray.** Plug-together end to end.
+
+### 🔑 ANSWER TO "WHERE DOES IT NEED TO BE SOLDERED": **NOWHERE.**
+A factory tray has **zero** solder joints between strips — it is all plug and bus bar, which is
+exactly what Jeff is looking at. **The solder he remembers was the previous repairman's FIX, not
+how the TV is built.** So there is no solder step to plan for. If he finds a solder blob in there,
+that is the old repair, and it is a **finding**, not a requirement.
+
+### 🔴 NEW AND IMPORTANT: THE BUS STRIP IS NOW THE PRIME SUSPECT FOR THE OPEN
+The fault is **6 of 12 strips open — the whole `CON302` string** (10:52 AM entry, retested 10:56 AM,
+pegged 300 V both polarities). Six strips failing together means a **SHARED path**, and the bus
+strip across the top **is** the shared path. Rank the suspects accordingly:
+
+1. **The bus strip itself** — a cracked trace or a burnt/sprung contact in it kills its entire
+   string at once. **$0 to inspect.** This was not on any earlier list because the bus strip was
+   not known to exist until Jeff looked.
+2. **A bus-strip contact that the old solder repair was patching.** A plug contact that failed once
+   is the contact that fails again. Find the blob and look at what it bridges.
+3. **A single open bead on one of the 6 `CON302` strips** — still possible, still a $0 bypass.
+4. The 12 replacement strips do **not** include a bus strip. **If the bus strip is the fault, it is
+   a separate part and is not on order.** Flag it the moment he gets eyes on it.
+
+### WHAT TO DO BEFORE UNPLUGGING ANYTHING
+- **Photograph the bus strip end to end**, and both harness landings at the 2 fed strips.
+- **Note WHICH of the 12 strips carry the `CON301` and `CON302` wires** (count from one edge) — the
+  new strips must be put back the same way or the harness will not reach.
+- **Find the old solder joint and photograph it.** It is the one thing in the tray that is not
+  factory.
+
+---
+
+## 2026-10-13 7:50 AM — ✅ **JEFF READ THE LAYOUT OFF HIS OWN TRAY. NOTHING NEEDS SOLDERING.**
+
+Jeff, 7:45 AM: *"The 12 stripes plug into a strip across the top and then the 301 and 302 wires plug
+into 2 of the 12 strips the one thing I can't see is where it needs to be soldered."*
+Jeff, 7:49 AM, correcting me before I could get it wrong: ***"that is the harness wire across the
+top that each strip plugs into."*** **It is a WIRE HARNESS, not a PCB bus bar.** Recorded that way
+everywhere below — a harness is testable with a meter and repairable; a PCB bar would not be.
+
+### ⛔ THE "2 ACROSS × 6 ROWS" GUESS IS DEAD. IT IS 12 ACROSS, VERTICAL.
+My 7:45 PM note guessed 2 across × 6 rows from 826 mm vs a ~1660 mm panel **width**. Wrong axis.
+A 75" 16:9 panel is ~1660 × 934 mm, so **826 mm is the panel HEIGHT, not half its width.** The 12
+strips stand **vertically, side by side across the width** at roughly 138 mm pitch, and every one
+plugs **up into the HARNESS WIRE that runs across the top of the tray.**
+
+### WHAT THAT MEANS FOR THE WIRING
+- **The top harness does ALL the interconnecting** — it is what makes 2 strings of 6, not
+  strip-to-strip jumpers. That is why only **2 of the 12** strips receive a board lead.
+- **`CON301` (LED+) and `CON302` (LED−) each plug into one strip** — the head of its own string of
+  6. The other 5 in each string are fed through the top harness.
+- The **white 2-pin socket (`A`/`K`) on each new strip's face** is what a harness lead plugs into.
+  **The new set matches his tray.** Plug-together end to end.
+
+### 🔑 ANSWER TO "WHERE DOES IT NEED TO BE SOLDERED": **NOWHERE.**
+A factory tray has **zero** solder joints between strips — it is all plug plus harness, which is
+exactly what Jeff is looking at. **The solder he remembers was the previous repairman's FIX, not
+how the TV is built.** There is no solder step to plan for. A solder blob in there is the old
+repair, and it is a **finding**, not a requirement.
+
+### 🔴 THE TOP HARNESS IS NOW A PRIME SUSPECT FOR THE OPEN
+The fault is **6 of 12 strips open — the whole `CON302` string** (10:52 AM entry, retested
+10:56 AM, pegged 300 V both polarities). Six strips failing together means a **SHARED** path, and
+the top harness **is** the shared path. Suspects, re-ranked:
+1. **The top harness itself** — a broken conductor or a sprung/corroded contact in it kills its
+   whole string at once. **$0 to test: TD2B or a continuity check from end to end, strips out.**
+   It was never on an earlier list because the harness was not known to exist until Jeff looked.
+2. **The contact the old solder repair was patching.** A contact that failed once fails again.
+3. A single open bead on one of the 6 `CON302` strips — moot now, all 12 are being replaced.
+4. ⚠️ **The 12-strip kit does NOT include the top harness.** If the harness is the fault it is a
+   separate part and **is not on order.**
+
+---
+
+## 2026-10-13 7:52 AM — 🔴 **ALL 12 OLD STRIPS ARE OUT. THE 10A+2B FLAG IS NOW URGENT.**
+
+Jeff, 7:46 AM: *"Btw I have all of the strips cut out and the new strips are ready to go in when
+they arrive."* Tray stripped, tape cut, waiting on the box (strips **Oct 16–20**).
+
+### THE PROBLEM, STATED PLAINLY
+- **This record concluded his tray is `12 × all-A`** (10-12 1:53 PM): his own strip-label photo read
+  `30375007007` **and** was marked `A`, and the tray photo counted 12 uniform 7-bead strips.
+- **The set he bought (eBay `389576068118`) is the `10A + 2B` version.** Re-read live in Chrome
+  **7:47 AM today**: the title and the MPN field both pair `30375007007` **with** `30375007008` /
+  `LED75D07B-ZC66AG`, and the description reads `1 Kit / 12pcs(10A+2B)`. The 10-12 buying rule in
+  this file says exactly that combination is the **other version**.
+- **The two versions are real, not a listing artifact.** ShopJimmy, read live **7:50 AM**:
+  > "There are two versions of this set of LEDs. This version uses 12 strips labeled "A" with part
+  > number 30375007007."
+  and their **"Version 8" kit for this same TV lists 10 strips labeled "A" and 2 labeled "B."**
+- ❓ **What physically differs between A and B is NOT published.** Searched 7:48 AM (extended): no
+  manufacturer doc, no service manual, no teardown states it. On comparable sets the B strip is a
+  **mirror** — connector on the opposite end — which with a single top harness would mean 2 of the
+  12 new strips cannot reach it. **Plausible, NOT verified. Do not assert it.**
+
+### ✅ JEFF CAN SETTLE THIS IN 60 SECONDS, AND THE BOX HASN'T EVEN ARRIVED
+**All 12 originals are loose in his hand with the labels readable.** Read the part number on
+**every one**:
+- **12 read `30375007007` / `A`** ⇒ tray is 12×A ⇒ the kit is **2 strips short** of what fits.
+- **10 read `...007` and 2 read `...008` / `B`** ⇒ the kit is **exactly right**, and the 10-12
+  "12 × all-A" call came from a photo that did not show the odd pair. **That retires this section.**
+
+🔑 **Lay the 12 old strips out in tray order and keep them that way.** They are now the only record
+of which position each came from, and if the kit is 10A+2B they are the template for where the two
+odd strips belong.
+
+### BACKSTOP, PRICED LIVE 7:50 AM — ONLY IF THE COUNT COMES BACK 12×A
+| | |
+|---|---|
+| Part | Element/Westinghouse/ONN **`30375007007`** LED Backlight Strips **(12)** — explicitly **12 × "A"** |
+| Price | **$54.99** |
+| Stock | **in stock**, ships **same business day if ordered before 4 PM CT** |
+| Bonus | **double-sided tape already applied** |
+| URL | `https://www.shopjimmy.com/element-jvc-onn-30375007007-led-backlight-strips-12-e4faa75r/` |
+
+⚠️ That is a **whole second set at $54.99** against the $39.69 already spent, and **no source sells
+individual `30375007007` strips** (checked ShopJimmy 7:50 AM). If the shortfall is real the cheaper
+play is **return the 10A+2B set** — its return window runs to **Nov 18** — not own both.
+📌 This also reverses the 10-12 note that *"EVERY US-DOMESTIC SHOP IS OUT OF STOCK"*: ShopJimmy's
+12×all-A set reads **in stock** today, 7:50 AM.
