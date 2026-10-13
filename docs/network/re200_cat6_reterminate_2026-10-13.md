@@ -405,3 +405,50 @@ which matters — the original was clipped and still got stepped on.
   `http://192.168.1.254/cgi-bin/devices.ha`. 🔴 **Never `ping`'s summary line** (`ACCESS_MAP.md` §4).
 - **Garage PC is `192.168.1.121 / .212`, logged offline "since the extender retirement."** Wiring it
   should restore it — **confirm, do not assume.**
+
+---
+
+## 2026-10-13 9:53 AM — ✅ **JEFF'S DECISION: RE-TERMINATE THE INSTALLED CABLE. $0. DO NOT RE-PITCH REPLACEMENT.**
+
+Jeff, 9:52 AM: *"I just need to replace the end on it so I don't have to rerun it."*
+Jeff, 9:53 AM: ***"No I want to try and repair it first nothing to lose."***
+
+⛔ **SETTLED. The office flat Cat6 gets a new end. Replacement is a FALLBACK ONLY — do not raise it
+again unless the crimp actually fails a tester.** The cable is routed and clipped; re-running it is
+real work, a failed crimp costs two minutes and one spare tip, and Jeff already owns the crimper and
+the tips. **Cost to try: $0.**
+
+🔑 **MY 30 AWG WARNING WAS A RISK, NOT A STOP SIGN, AND I STATED IT AS CLOSE TO ONE.** Flat Cat6 is
+30 AWG against tips built for 23–26, so the blades *may* miss the copper — but "may fail" does not
+outrank "free to attempt on a cable that is already in the wall." **Jeff weighed it correctly.**
+
+### ▶ THE PROCEDURE, FOR THE FLAT CABLE SPECIFICALLY
+🔑 **STEP ZERO, BEFORE ANY CUTTING — READ THE GOOD END.** Jeff has the intact plug in hand (he
+photographed it at 9:40 AM). **Hold it clip-DOWN and read the conductor colours through the clear
+housing, left to right, pin 1 → 8. That order IS the spec.** Copy it exactly and the A-vs-B question
+never arises and a crossover is impossible. **Do not work from a T568B table when the real answer is
+sitting in his hand.**
+
+1. **Cut back 1–2 inches past the crush.** Flat ribbon that has been stood on can carry broken copper
+   inside insulation that still looks perfect.
+2. **Strip ~1 inch of jacket, lightly.** Thin jacket, tiny conductors — a nick here is the classic
+   cause of a link that passes a wiggle test and dies under load.
+3. ✅ **Flat is the EASIER cable to terminate:** **no twists to undo and no centre spline** (round
+   Cat6 has one; flat does not). The 8 conductors already lie side by side in order.
+4. **Check the order against the good end**, flatten into a ribbon, pinch, **trim square to ~0.5"** —
+   short enough that the jacket seats under the strain-relief bar, long enough that all 8 touch the
+   front wall.
+5. **Through the clear plastic, before squeezing:** all 8 fully forward · jacket inside the body ·
+   colours still right.
+6. **Crimp until the tool bottoms out.** One firm complete stroke.
+7. **Test before buttoning up.** Link light → `Test-Connection -Quiet 192.168.1.196` → fresh
+   `Last Activity` at `http://192.168.1.254/cgi-bin/devices.ha`.
+   🔴 **Never read `ping`'s summary line** — `ACCESS_MAP.md` §4, earned 10-10 on this exact device.
+
+### IF AND ONLY IF THE TESTER SHOWS A MISSING PIN
+That is the 30 AWG problem confirmed, not a technique problem. **Then** — and only then — the
+fallback is **Jadaol flat white 50 ft `B00WD017GQ`, $9.99** (needs a $25+ cart for same-day) or
+**flat black `B00WD017FW`, $13.89**, the same ASIN Amazon badges *"Purchased Nov 2017"*.
+
+**Unchanged:** garage and kitchen runs are **$0** on the two unused Seedato 50 ft. **Re-route the
+repaired cable out of the walking path** — nine years of service ended with one footstep.
