@@ -1125,3 +1125,38 @@ gone, a replacement is ~$6 at any hardware store (local Ace closes 8 PM) or Amaz
 
 🔑 **Technique that makes the tape choice almost irrelevant: tape the BACK face of the reflector
 sheet**, so the tape never sits in the light path at all.
+
+## 2026-10-12 7:45 PM — 🔴 **THE NEW STRIPS PLUG TOGETHER. THEY DO NOT NEED SOLDERING.**
+Read all 8 photos of the listing Jeff actually bought (eBay **389576068118**, iPassionPlus Store
+10924 / 99.8%) at full resolution via `i.ebayimg.com/.../s-l1600.jpg`.
+
+### What the photos show
+- Strip silkscreen is **`H2366-A`**. Also marked `L1` at the first LED, and a locating hole.
+- **Each strip carries a white 2-pin CONNECTOR BODY** mounted on its face, metal retention clips
+  both sides, silkscreened **`A`** on one side and **`K`** on the other.
+- **Each strip END carries two male metal TABS**, silkscreened **`K` `−`** and **`A` `+`**.
+- ⇒ **The tabs of one strip push into the socket of the next. Strip-to-strip is a DIRECT PLUG.**
+- **No loose jumper cables appear in any of the 8 photos**, which is consistent with a
+  plug-together set rather than a solder-it-yourself set.
+
+### ⛔ THIS OVERTURNS THE 10-12 10:06 AM NOTE
+That note — *"the new strips end in two bare round SOLDER PADS — no plug connectors visible …
+Plan on soldering the jumper wires between strips (2 per joint)"* — was read off the **Amazon
+GUANGMING kit `B0FFZRBDFG`**, a **DIFFERENT seller's product**. It was never true of the set Jeff
+bought. **Jeff probably does not have to solder anything.** The "reuse the old harness" plan and
+the soldering supplies both drop out unless his tray proves otherwise.
+
+### 🔴 MY ERROR, 7:34 PM — I TOLD JEFF A PHOTO OF HIS OWN PART WAS THE WRONG PART
+Jeff sent the `H2366-A` close-up and asked how the strips connect. I replied *"that photo is
+`H2366-A`. That is not your strip"* and told him it would be the wrong part to order. **It is
+image 5 of the listing he had already bought.** `H2366-A` is the **PCB silkscreen**;
+`LED75D07A-ZC66AG-05` / `30375007007` is the **catalog part number**. Both are on the same strip.
+🔑 **A silkscreen that does not match the catalog number is NOT evidence of a wrong part** — check
+where the photo came from before calling it a mismatch.
+
+### ❓ STILL ONLY HIS TRAY CAN ANSWER
+Each strip is **826 mm** and the panel is **~1660 mm** wide ⇒ the 12 strips are almost certainly
+**2 across × 6 rows**, not one line. So the end-to-end plug joins the two strips *within* a row,
+and the row-to-row path may still use harness wire. **Photograph the existing layout and wiring
+before removing anything** — which pad/plug on each strip goes where, and where the two harness
+wires enter at `CON301` (LED+) and leave at `CON302` (LED−).
