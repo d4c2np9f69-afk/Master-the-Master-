@@ -1478,3 +1478,42 @@ stuff `30375007007` into titles for the `-06` and `10A+2B` kits. ONLY the seller
 ("Package includes…") and the MPN field are evidence.** Read the description iframe before buying —
 it is cross-origin, so navigate the tab to `document.querySelector('#desc_ifr').src` from inside the
 page rather than trying to read it.
+
+---
+
+## 2026-10-13 8:35 AM — ✅ **FULL-WEB SWEEP DONE. ONE SOURCE EXISTS. IT IS THE ONE ALREADY FOUND.**
+
+Jeff, 8:31 AM: *"Find it some where, search the whole web !!!!"* / *"Stop half ass searching."*
+Swept Amazon, ShopJimmy, TvPartsGuy, Newegg via web search, and **~140 eBay listings** read as a
+full result set, not a first page.
+
+### 🔑 THE DISCRIMINATOR THAT MAKES THE SWEEP FAST: **`30375007007D`**
+The 12 × all-A kit is indexed under the **`-D`** part number. Searching eBay for **`30375007007D`**
+returns the whole category (~140 listings) but **only TWO actually carry `...007D`.** Every other
+listing in the entire result set is either `30375007007 / 30375007008` (the 10A+2B set) or the
+`-06` / `30375007005/006` family. **That single search term is the whole filter.**
+
+### THE TWO `...007D` LISTINGS — ONE IS USABLE
+| | ✅ **eBay `156740373272`** | ❌ eBay `357086037360` |
+|---|---|---|
+| Title | **12A LED Strip** … `30375007007D` `30375007007` | ONN `30375007007D` LED Backlight Strips (12) |
+| Item price | **$50.22** | $48.31 |
+| Shipping | **FREE** | **C$85.06 ≈ US $59.56** + **import fees US $5.58** |
+| **Delivered** | **$50.22** | **≈ $113.45** |
+| Delivery to 37188 | **Fri Oct 16 – Wed Oct 21** | **Wed Oct 28 – Fri Oct 30** |
+| Seller | KUNPARTS **(3,376) 99.5%**, El Monte **CA, USA** | tvpartscanada **(46) 96.8%**, Mississauga, Canada |
+| Stock | New, **10+ available**, 19 sold | New, 10+ available, **1 sold** |
+| Proof | **description: "Package includes: 12 PCS "A" LED Backlight Strip" · "Model: 12 A Strips LED75D07A-ZC66AG-05（30375007007）" · "Length:826mm 7led each strip" · fitment names ONN 100044717 `m21123-mt`** | no MPN field, no readable description |
+
+⇒ **The Canada listing costs 2.3× as much delivered, lands 9 days later, and proves nothing.**
+
+### EVERYWHERE ELSE — CHECKED AND DEAD
+| Source | Result |
+|---|---|
+| **Amazon** — searched `30375007007 LED backlight strips 100044717` | **ZERO 12×A.** `B0FFZRBDFG` -06+007/008 · `B0G2XPMHRT` **"12pcs (10*A+2*B)"** · `B0HG9TC71K` **"10 A strips and 2 B strips"**, delivery **Oct 26 – Nov 4** · `B0HG53R1V4` `LED75D07B` · `B0DNP4WLZ2` / `B0HJCBHZ4Q` -06, delivery to **Nov 16**. Slower AND wrong. |
+| **ShopJimmy** | correct version, **OUT OF STOCK** (`ld+json` `availability: OutOfStock`), and Jeff ruled out the vendor on shipping cost. |
+| **TvPartsGuy** `30375007007/30375007008` | **$74.99, OUT OF STOCK**, and its own description says **10 "A" + 2 "B"** — wrong version even if restocked. |
+| **eBay, the other ~138 listings** | all `007/008` or `-06` / `005/006`. Includes every "cheaper" one: `920019890363` $35.99, `397569213788` $34.93, `157658588172` $35.80, `389576068656` $36.28, `318536177675` $36.55 — **all the 10A+2B set.** |
+
+### ▶ VERDICT: **eBay `156740373272`, $50.22 delivered, Oct 16–21. It is the only one.**
+`https://www.ebay.com/itm/156740373272` — **not yet purchased, awaiting Jeff.**
