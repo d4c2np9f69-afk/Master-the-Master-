@@ -1022,3 +1022,55 @@ written. **Read this file's own newest entries before asking Jeff for anything.*
 | T-con `BG000N701` — ShopJimmy | $19.99 |
 | 12 strips `30375007007` — eBay 389576068118 | $36.16 |
 | **Total** | **$75.14** vs $398 new |
+
+## 2026-10-12 7:08 PM — ✅ **ORDERED. BOTH ORDERS VERIFIED IN JEFF'S EBAY ACCOUNT.**
+
+Read directly from `ebay.com/mye/myebay/purchase` and both order-detail pages.
+
+| | T-con | Strips |
+|---|---|---|
+| Item | `ONN 100044717 T-CON BOARD PN: BG000N700 BN: ZAZZ` | `LED Backlight Strips For ONN 100044717 30375007007 30375007008 LED75D07A-ZC66AG` |
+| eBay item # | **126326188707** | **389576068118** |
+| Order # | **09-15290-25734** | **14-15280-91468** |
+| Placed | Oct 12, 5:02 PM | Oct 12, 4:51 PM |
+| Price | $21.95 + $2.14 tax = **$24.09** | $36.16 + $3.53 tax = **$39.69** |
+| Shipping | Free Standard | Free Standard |
+| Seller | `tvbap_feedyourtv` | `partcare` |
+| Condition | ⚠️ **Open box** | **New** |
+| **Arrives** | **Oct 15–19** | **Oct 16–20** |
+| Returns through | Nov 17 | Nov 18 |
+
+Ship-to `301 S Aztec Dr, White House TN 37188-8138`, paid by PayPal. **Total $63.78.**
+⚠️ I recommended the T-con without checking its condition — it is **Open box**, not new. Returns
+run to Nov 17, so it is covered, but that should have been in the recommendation.
+
+### ✅ THE KIT'S OWN DESCRIPTION CONFIRMS THE VERSION — read off the listing page
+```
+Special Note: The TV ONN 100044717 has more than 3 different version led strip model,
+please make sure your original is LED75D07A/B-ZC66AG-05 before ordering.
+Condition: Brand NEW · Size (Length): 826 mm · Number of LED beads: 7 per strip
+Every LED Lamp Voltage: 3V · Package include: 1 Kit / 12pcs(10A+2B)
+```
+🔑 **`-05` is exactly what is printed on Jeff's strip.** The seller's own warning names the one
+check that matters and his TV passes it. 826 mm, 7 beads, 3 V all agree with `7S1P`, the 84-bead
+count and the 113 V measurement. **12 pcs confirmed — it is a full kit, not a single strip.**
+
+### ⚠️ THE KIT IS **10A + 2B**. JEFF'S TRAY IS **12 × ALL-A**.
+Not a reason to cancel, and it does not change the electrical answer — A and B are both 826 mm,
+7 beads, 3 V, so **6 strips × 7 beads × ~2.7 V = 113 V per string is unchanged either way.** The
+A/B difference is **which end the link/solder pads sit on**, i.e. the direction the series run
+travels along the strip.
+
+▶️ **WHAT THIS MEANS ON THE BENCH:** the new strips ship with **bare solder pads and no plug
+connectors**, so Jeff is soldering his own jumpers regardless — but on **2 of the 12** the pads
+will likely sit at the opposite end from the other 10. **Lay all 12 out in the tray and check pad
+positions BEFORE soldering anything**, and put the 2 B strips where their pad orientation makes
+the jumper run shortest. Polarity marking on the pads is `A` = anode (+), `K` = cathode (−).
+
+### RUNNING TOTAL
+| Item | Cost |
+|---|---|
+| TKDMR TD2B tester | $18.99 (spent) |
+| T-con `BG000N700`/`ZAZZ` — eBay 126326188707 | $24.09 |
+| 12 strips `30375007007` — eBay 389576068118 | $39.69 |
+| **Total** | **$82.77** vs $398 new, on a TV that was going in the dumpster |
