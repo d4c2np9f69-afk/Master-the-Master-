@@ -215,3 +215,46 @@ clips. **That is the cable in Jeff's photos.** Nine years old.
 a vendor's full length-list in the title ("6 ft, 10FT 15FT 25FT…"), which tells you nothing about
 what was bought. **The quantity and the actual item only appear inside the order.** Same shape as
 the tape question on 10-12 — the answer was already in his garage both times.
+
+---
+
+## 2026-10-13 9:46 AM — ✅ **CLOSED AT $0. TWO UNUSED 50 FT CABLES COVER BOTH RUNS.**
+
+Jeff, 9:45 AM: *"But I need 2 of them to go to the garage and the kitchen computer"* → 9:46 AM:
+***"I have 2 unused 50 foot."***
+
+### THE SCOPE WAS BIGGER THAN THE RE200
+This was never one cable. **Two runs: one to the GARAGE, one to the KITCHEN COMPUTER.** Both of
+those machines are in the record as having been served by the dead office RE200 — `GaragePC` and
+`KitchenPC`. Wiring them kills the dependency on an extender that has been down since **Sat Oct 10
+14:20:04**.
+
+### ✅ **$0. NOTHING TO BUY.**
+**Jeff has TWO UNUSED 50 ft Cat6 cables** — the **Seedato Cat6 50 ft, black, ordered Aug 9 2022,
+quantity 2**. One per run. **Buy nothing unless a run measures over 50 ft.**
+
+🔑 **And round is the better cable here.** The Seedato are not described as flat; the cable that
+just failed was **30 AWG flat ribbon**, killed by a single footstep. Round patch cable has a
+thicker jacket and heavier conductors — **for a floor-level run to a garage, that is an upgrade,
+not a compromise.**
+
+### PRICED ONLY AS A FALLBACK — DO NOT BUY WITHOUT MEASURING
+| Length | Part | Price | Delivery (read live 9:46 AM) |
+|---|---|---|---|
+| **100 FT flat white** | `B00WD017BG` | **$18.99** | In Stock · **FREE TODAY 1–4 PM** on $25+ |
+| **50 FT flat white** | `B00WD017GQ` | **$9.99** | In Stock · **FREE TODAY 1–4 PM** on $25+ |
+| 50 FT flat black | `B00WD017FW` | $13.89 | tomorrow |
+⚠️ **The free-today window needs a $25+ cart** — two 50 ft at $19.98 misses it; 100 ft + 50 ft
+($28.98) clears it. Also available: 60 / 75 / 150 / 200 FT. **Ethernet's limit is 328 ft, so any of
+these is electrically fine.**
+
+### ▶ REMAINING STEPS — ALL $0
+1. **Measure both runs.** Under 50 ft ⇒ done, use the Seedato pair.
+2. **Route them off the floor** — out of door sweeps and walkways. The 2017 flat cable died because
+   it was underfoot, and nothing about new cable changes that.
+3. **Do not re-crimp the old flat cable.** 30 AWG against tips built for 23–26 AWG.
+4. **Verify, do not assume:** link light, then `Test-Connection -Quiet` on each machine, then a
+   fresh `Last Activity` on `http://192.168.1.254/cgi-bin/devices.ha`.
+   🔴 **Never read `ping`'s summary line** — `ACCESS_MAP.md` §4, earned 10-10 on this exact device.
+5. Then revisit **OPEN_ITEMS #225 / #227** — if the garage and kitchen go wired, the office RE200's
+   coverage gap may simply stop mattering.
