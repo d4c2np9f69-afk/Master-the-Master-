@@ -258,3 +258,67 @@ these is electrically fine.**
    🔴 **Never read `ping`'s summary line** — `ACCESS_MAP.md` §4, earned 10-10 on this exact device.
 5. Then revisit **OPEN_ITEMS #225 / #227** — if the garage and kitchen go wired, the office RE200's
    coverage gap may simply stop mattering.
+
+---
+
+## 2026-10-13 9:48 AM — 📐 **MEASURED OFF THE HOUSE PLAN. 50 FT DOES NOT REACH THE GARAGE.**
+
+Jeff: *"You know the run links look at the fucking house map."* **He is right — the geometry was
+sitting in `docs/house-plan/plan-data.js` the whole time and I asked him to pull a tape instead.**
+Read at 9:48 AM. Frame per the file header: **units FEET, `x = 0` at the garage's west outer wall,
+`y = 0` at the house front (north)**, and `H(n) = 14.83 + n` (the house west wall).
+
+### THE FIXED POINTS, STRAIGHT OUT OF `plan-data.js`
+| Device | Entry | Plan coords | Feet (x, y) |
+|---|---|---|---|
+| **Garage PC** *(HP TouchSmart, "on the workbench")* | `D(7,…)` | `2.6, 33.1` | **(2.6, 33.1)** |
+| **KitchenPC** | `D(83,…)` | `H(6.5), 31.5` | **(21.33, 31.5)** |
+| **Office Ethernet jack / network switch** | `D(71,…)` | `H(36.2), 24.9` | **(51.03, 24.9)** |
+| Office RE200 — **`192.168.1.196`, "on Cat6 backhaul"** | `D(69,…)` | `H(37.3), 22.8` | **(52.13, 22.8)** |
+| AT&T gateway BGW320 | `D(1,…)` | `H(16.3), 0.9` | (31.13, 0.9) |
+| Front network switch | `D(4,…)` | `H(17.5), 2.2` | (32.33, 2.2) |
+| Garage↔house door | `doors: garage-house` | `H(0), 22.4–24.8` | **(14.83, ~23.6)** |
+
+### 🔴 THE GARAGE RUN — **~59 FT BEFORE ANY SLACK**
+Cable follows walls, so the honest number is the routed path, not the diagonal:
+```
+office jack (51.03, 24.9)
+  -> west to the garage/house door (14.83, 23.6)   36.2 + 1.3  = 37.5 ft
+  -> into the garage, to the workbench (2.6, 33.1) 12.2 + 9.5  = 21.7 ft
+                                                    -----------------
+                                          routed minimum  ~=  59.2 ft
+```
+**Already over 50 ft with ZERO slack, zero vertical drops, and not one door casing rounded.**
+Realistic with service loops at both ends: **70–80 ft.**
+⚠️ Routing from the **front** switch is worse, not better: `(32.33, 2.2) → (2.6, 33.1)` =
+**29.7 + 30.9 = 60.6 ft** of right-angle travel.
+⇒ **A 50 ft cable cannot make the garage by any route. It is not close.**
+
+### 🟡 THE KITCHEN RUN — **~36 FT ROUTED. A 50 FT WORKS, BUT IS NOT GENEROUS**
+`office jack (51.03, 24.9) → KitchenPC (21.33, 31.5)` = **29.7 + 6.6 = 36.3 ft** right-angle.
+With slack at both ends, **45–50 ft.** ✅ **One owned Seedato 50 ft covers it, with little to spare.**
+
+### ▶ THE ANSWER
+| Run | Cable | Cost |
+|---|---|---|
+| **Kitchen** | **one of the two unused Seedato 50 ft** | **$0** |
+| **Garage** | **needs 100 ft** — 50 ft is ~10 ft short before slack even starts | below |
+
+| 100 ft option | Gauge | Price | Delivery (live 9:48 AM) |
+|---|---|---|---|
+| Jadaol **flat** white `B00WD017BG` | **30 AWG** | **$18.99** | In Stock · FREE **TODAY 1–4 PM** on a $25+ cart |
+| **Jadaol round white `B0D3J54J91`** — UL Listed, **24 AWG pure copper**, PoE++, indoor/outdoor | **24 AWG** | **$31.99** | In Stock · FREE tomorrow |
+
+🔑 **For a 100 ft garage run the 24 AWG round is the better buy — reason, not preference:** the
+cable that just failed was **30 AWG flat ribbon killed by a single footstep**, and a garage run
+crosses the same kind of floor. **24 AWG = heavier conductors, thicker jacket, far less attenuation
+over 100 ft.** $13 more. ⚠️ And **$18.99 on its own misses the $25 free-today threshold**, so the
+flat option's speed edge mostly evaporates for a single cable.
+
+⚠️ **Stated as an assumption, not a fact: I measured from the OFFICE jack/switch `D(71)`** — where
+`D(69)`'s *"Cat6 backhaul"* note and Angela's *"hardwired off the new 8-port switch"* both point.
+**If the 8-port switch actually lives elsewhere, both numbers move.** The garage conclusion survives
+either way — it is over 50 ft from the office **and** from the front switch.
+
+🔑 **LESSON: THE HOUSE PLAN IS A MEASURING INSTRUMENT, NOT A PICTURE.** `plan-data.js` carries every
+device at surveyed feet with a stated origin. **Read it before asking Jeff to pull a tape.**
