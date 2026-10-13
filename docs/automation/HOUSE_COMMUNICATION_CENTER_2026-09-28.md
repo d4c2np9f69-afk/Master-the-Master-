@@ -283,3 +283,71 @@ plug **runs until something turns it off.** So:
 2. **A WATCHDOG IS REQUIRED, NOT OPTIONAL:** if `switch.house_alarm` is `on` longer than its longest
    legitimate run and no alarm is active, **force it off.** Without it, one failed automation leaves
    a 120 dB siren screaming until somebody unplugs it.
+
+## 🛠️ 2026-10-13 4:29–4:36 PM — BUILT: WHAT THE BIG SIREN FIRES ON
+> **Jeff 4:29 PM:** *"It should go off for 2 min for a tornado 🌪️ warning or other emergency warning
+> and if the panic button is pushed — all the leak sensors should be going through the other siren
+> the small one."* · **4:33 PM:** *"It needs to work on our watches too"*
+
+### ✅ THE LEAK HALF WAS ALREADY DONE — nothing built, nothing changed
+`automation.hcc_water_leak_alarm_all_zigbee_leak_sensors` has driven **only the 301 Alarm** since
+2026-08-27, via `mqtt.publish` → `zigbee2mqtt/301 Alarm/set`, tone `emergency`, `very_high`, strobe,
+60 s. **The big siren was never wired to it and still isn't.** Exactly what Jeff asked for.
+
+### 🏗️ ONE OWNER FOR THE BIG SIREN — `automation.hcc_house_alarm_siren_2_min`
+**Nothing calls `switch.house_alarm` directly. Everything fires the HA event `hcc_siren`.**
+One owner ⇒ one 2-minute rule, one guaranteed off, one thing for the watchdog to police.
+
+| | |
+|---|---|
+| entity | `automation.hcc_house_alarm_siren_2_min` (id `hcc_house_alarm_siren`) |
+| trigger | event `hcc_siren` (optional `reason` is shown in the notification) |
+| mode | `restart` — a second warning restarts the 2 min instead of queueing |
+| actions | `persistent_notification` **first** → `switch.house_alarm` ON → 301 Alarm via `mqtt.publish` → **delay 2:00** → `switch.house_alarm` OFF |
+
+🔑 **IT FIRES BOTH SIRENS, ON PURPOSE.** `switch.house_alarm` is **Tuya CLOUD** — internet down, it is
+silent. The 301 Alarm is **Zigbee LOCAL** — weak, but always reachable. Two independent paths, $0,
+covering this plug's one real failure mode. The 301 runs **60 s not 120**: that is its documented
+known-good duration and `number.301_alarm_max_duration` reads 60. The big siren carries the full two
+minutes.
+
+### 🛡️ `automation.hcc_house_alarm_runaway_watchdog_force_off` — REQUIRED, NOT OPTIONAL
+Trigger: `switch.house_alarm` **on for 3 minutes** (the 2-minute legit run + a minute of margin for
+the ~2 s cloud round trip). Action: **`switch.turn_off` FIRST**, then notify — deliberately inverting
+the usual record-first order, because here *the action is the safety* and a failing notify must never
+be what stops the siren from stopping. Catches the one case the guaranteed off cannot: **an HA restart
+during the 2-minute delay leaves a 120 dB siren running until somebody unplugs it.**
+⚠️ Accepted side effect: a deliberate manual run over 3 minutes also gets killed, with a push saying why.
+
+### 🚨 PANIC BUTTON — v2 ARMED, v1 DISABLED
+- `automation.hcc_panic_button_v2_actually_reaches_people` → **ON**. Now fires `hcc_siren` **early**,
+  right after the `persistent_notification`, so 120 dB does not wait behind four notify calls.
+- Its old `siren.turn_on` on `siren.301_alarm` was **removed** — the new owner drives that same device
+  at **`very_high`**, which `siren.turn_on` cannot reach (it tops out at `high`).
+- `automation.hcc_panic_button` (v1) → **OFF**. It reached nobody, and two armed panic automations is
+  its own bug.
+- 🔴 **STILL JEFF'S CALL, UNCHANGED:** the webhook is `local_only: false` — internet-reachable — and
+  critical alerts bypass Do Not Disturb. Anyone who learns the webhook id could ring both phones at 3 AM.
+
+### 🌪️ WEATHER — only the SIX immediate life threats get the siren
+`HCC-WeatherWarning.py` patched (backup `HCC-WeatherWarning.py.bak-20261013-siren`; `py_compile`
+clean; `--status` ran live and reached NWS). New `siren(event)` fires the `hcc_siren` event **only for
+`ACT_ON`**: Tornado · Severe Thunderstorm · Flash Flood · Extreme Wind · Dust Storm · Snow Squall.
+- **`is_warning()` is unchanged** — every NWS "… Warning" still reaches the phones and the clock.
+  **But a 120 dB siren for a Heat Warning is alert fatigue with a hearing hazard attached.**
+- **NO NIGHT RULE on the siren, on purpose** — a tornado at 3 AM is when it matters most.
+- Placed **after `push()`** so a siren failure can never cost the phone alert.
+
+### ⌚ "IT NEEDS TO WORK ON OUR WATCHES TOO" — this exposed a REAL defect
+**There is no watch notify target in HA** — only `notify.mobile_app_jeffs_iphone` and
+`notify.mobile_app_angelas_iphone`. An Apple Watch **mirrors the iPhone**, so the thing that decides
+whether it makes a noise is the **interruption level**, not the target.
+🔴 **Weather warnings were pushing at `interruption-level: time-sensitive`.** That breaks through a
+**Focus** but **NOT** through Do Not Disturb or a silenced watch — **so a Tornado Warning at 3 AM
+could have arrived silently.** The panic button was already correct at `critical: 1`.
+✅ **Fixed:** the `ACT_ON` six now push `critical: 1, volume 1.0`, which bypasses DND, Focus and the
+ringer switch on **both** phone and watch. Everything else stays `time-sensitive` **deliberately** —
+a critical alert for a Freeze Warning is how people end up switching critical alerts off entirely.
+⚠️ **One thing software cannot set: iOS asks once per app to "Allow Critical Alerts."** If that was
+ever denied for Home Assistant on either phone, `critical:1` silently degrades to an ordinary
+notification. **Test, do not assume** — a critical test push was sent to Jeff's phone 4:35 PM.
