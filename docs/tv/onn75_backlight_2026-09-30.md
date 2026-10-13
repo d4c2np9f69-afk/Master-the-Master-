@@ -1408,3 +1408,73 @@ seller 99.9%. **So there was no 12-cent escape; do not go order it.**
 🔑 **THE PROCESS FIX THIS EARNS:** *when this file contains a BUYING RULE, re-read the rule against
 the item number before writing "BUY THIS" — the rule and the violation were five hours apart in the
 same document, and nothing checked one against the other.*
+
+---
+
+## 2026-10-13 8:26 AM — ✅ **WRONG ORDER CANCELLED. CORRECT 12×A KIT FOUND AND VERIFIED.**
+
+Jeff, 8:22 AM: *"Find out haw we cancel that order and where I can order the correct kit I need"* →
+8:23 AM: *"You go in and cancel that order and find the correct one"* → 8:25 AM: *"get off the jimmy
+shop they charge a fortune for shipping"* → 8:26 AM: *"Stop make all these fucking mistakes you have
+all the information and you are still fucking up and costing me time and money!!!!"* **He is right.
+I told him to buy the wrong set on 10-12 at 6:48 PM, against a rule I wrote myself at 1:53 PM.**
+
+### 🔴 CORRECTION — SHOPJIMMY'S 12×A SET IS **OUT OF STOCK**. MY 7:50 AM "IN STOCK" WAS WRONG.
+At 7:50 AM I read `"in stock!"` off the page with a loose regex and reported it twice, including in
+a committed OPEN_ITEMS entry. **Re-checked properly at 8:22 AM on the same page:**
+`<script type="application/ld+json">` → **`"availability": "https://schema.org/OutOfStock"`**;
+the page block reads **"Available — Out of Stock"** and offers *"Enter your email address to be
+notified when this item is back in stock!"* The `Add to Cart` button is still rendered and enabled,
+which is what made the loose read look positive. 🔑 **STOCK IS THE `ld+json` `availability` FIELD,
+NOT A WORD FOUND SOMEWHERE ON THE PAGE, AND NOT THE PRESENCE OF AN ADD-TO-CART BUTTON.**
+⛔ **ShopJimmy is off the list anyway — Jeff, 8:25 AM: "they charge a fortune for shipping."**
+
+### ✅ CANCELLED — eBay order `14-15280-91468`
+| | |
+|---|---|
+| Item | `389576068118` LED Backlight Strips, the **10A+2B** set |
+| Was | **Awaiting shipment** (not yet shipped — that is why cancel was possible) |
+| Reason given | **Order placed by mistake** |
+| Note to seller | *"Ordered the wrong version by mistake - my TV needs 12 strips all marked "A" (30375007007). This kit is 10A+2B. Sorry for the trouble."* |
+| Result | **"The cancellation is pending"** — `cancelId 5456748954` |
+| Seller window | **up to 3 days to confirm**; response lands in eBay Messages |
+| Refund | $39.69 back to PayPal when the seller accepts |
+
+**How it was done, for the record:** My eBay → Purchases → the strips order's **"Ask to cancel
+order"** link → `ebay.com/Cancel/Start?omsOrderId=14-15280-91468`.
+⚠️ **The reason control is a CUSTOM dropdown, not the native `<select>`.** Setting `select.value`
+programmatically left **Submit disabled** — the React state never updated. **Click the visible
+"Select" button, then click the "Order placed by mistake" row**, and Submit enables.
+
+### ✅ THE CORRECT KIT — eBay `156740373272`, VERIFIED FROM THE SELLER'S OWN DESCRIPTION
+| | |
+|---|---|
+| Title | **12A LED Strip** For ELEMENT E4FAA75R WR75UT4210 100044717 `30375007007D` `30375007007` |
+| **Description** | **"Package includes: 12 PCS "A" LED Backlight Strip"** · **"Model: 12 A Strips `LED75D07A-ZC66AG-05`（`30375007007`） `LED75D07A-ZC66AG-05D` `30375007007D`"** · "Length: 826mm, 7 led each strip" · "The strip length is fixed, cannot be cut" |
+| Fitment named | Element E4FAA75R · ONN **100044717 `m21123-mt`** ← **Jeff's exact main-board version** · Westinghouse WR75UT4210 |
+| Price | **$50.22**, **free standard shipping** |
+| Condition | New · **More than 10 available**, 19 sold |
+| Seller | **KUNPARTS** (3,376) **99.5% positive**, **El Monte, California, USA** |
+| Delivery | **Fri Oct 16 – Wed Oct 21 to 37188** (eBay's own estimate for his zip) |
+| Returns | 30 days, buyer pays return shipping |
+| URL | `https://www.ebay.com/itm/156740373272` |
+
+**No `30375007008`, no `LED75D07B`, no "10A", nowhere on the page.** The `-05` suffix is the correct
+family per the 10-12 record. Delta vs what he paid: **+$10.53**, same delivery window.
+
+⚠️ **One blemish, disclosed:** its 3rd product photo's caption reads `LED7507A-ZC66AG-06` — the
+**-06** family. The description, the MPN field and the title are all unambiguously `-05`/`007`, so
+that reads as a reused stock photo. **Check the strips against his old ones when the box lands.**
+
+### ⛔ REJECTED, WITH THE REASON — DO NOT RE-SURFACE THESE
+| Item | Price | Why rejected |
+|---|---|---|
+| eBay `389576068656` | $36.28 | My 10-12 6:48 PM note called it *"names only 30375007007"* — **that was read off the TITLE ONLY.** Body carries `007` **and** `008` **and** `LED75D07B`. Same 10A+2B set. |
+| eBay `127660475033` "12PCS/set … 30375007007" | $54.88 | Title says `007`; **MPN field says `LED75D07A/B-ZC66AG-06`, `30375007005`, `30375007006`** — the **-06 DO-NOT-BUY family**. Photos show `30375007008` and `-06`. |
+| ShopJimmy `30375007007` 12×A | $54.99 | **OUT OF STOCK** (ld+json), and Jeff ruled out the vendor on shipping cost. |
+
+🔑 **THE LESSON THAT WOULD HAVE PREVENTED ALL OF THIS: ON EBAY THE TITLE IS KEYWORD SOUP. Sellers
+stuff `30375007007` into titles for the `-06` and `10A+2B` kits. ONLY the seller's DESCRIPTION
+("Package includes…") and the MPN field are evidence.** Read the description iframe before buying —
+it is cross-origin, so navigate the tab to `document.querySelector('#desc_ifr').src` from inside the
+page rather than trying to read it.
