@@ -175,3 +175,43 @@ producing a crimp that looks and seats perfectly and tests dead.
 ⚠️ **Measure the run first.** Available 1 · 3 · 5 · 10 · 15 · 20 · 25 · 30 · 35 · 50 · 60 · 75 · 100 ·
 150 · 200 FT. Shorter is cheaper, and the 50 FT is only what the purchase history suggests.
 🔑 **Ships with clips — route it off the floor this time.**
+
+---
+
+## 2026-10-13 9:44 AM — ✅ **$0. JEFF ALREADY OWNS THE REPLACEMENT. BUY NOTHING.**
+
+Jeff: *"Did you see how much cable I already ordered?"* **No — I had seen the listing titles but
+never opened the orders, so I never had the lengths.** Opened them at 9:44 AM. He is right; the
+whole purchase recommendation is withdrawn.
+
+### 🔑 FIRST — THE BROKEN CABLE IS IDENTIFIED FROM HIS OWN ORDER HISTORY
+**Nov 23, 2017 — "Cat 6 Ethernet Cable 50 ft Black with Cable Clips – FLAT Internet Network Cable –
+Snagless RJ45 Connectors – 50 feet Black (15 Meters)."** Black, flat, 50 ft, snagless, ships with
+clips. **That is the cable in Jeff's photos.** Nine years old.
+
+### ✅ WHAT IS ALREADY IN THE HOUSE — READ OFF THE ORDERS, NOT THE LISTING TITLES
+| Ordered | Cable | Qty | Use here |
+|---|---|---|---|
+| **Feb 1, 2022** | **Cat 6 10 ft FLAT, white, snagless** | **2-pack** | ✅ **DIRECT DROP-IN if the office run is ≤ 10 ft — same flat profile, $0** |
+| **Aug 9, 2022** | **Seedato Cat6 50 ft, black** | **×2** | ✅ **covers a long run — but ROUND, not flat** |
+| Jan 20, 2026 | Ciwoda Cat 8, 26 AWG | ×2 @ **$2.99 ea** | short patch (price implies the 6 ft option) |
+| Jan 20, 2022 | Cat8 3 ft outdoor | ×1 | short patch |
+| Nov 12, 2019 | GLANICS Cat8 3 ft | 2-pack | short patch |
+| Feb 15, 2019 | Cat 6 3 ft | 2-pack | short patch |
+| Jan 20, 2022 | Monoprice Cat6 1 ft, 24 AWG stranded | ×2 | jumper |
+
+### ▶ THE CALL
+1. **Measure the run.**
+2. **≤ 10 ft ⇒ use a Feb-2022 white 10 ft FLAT. $0, in the house, done today.**
+3. **Longer ⇒ use a Seedato 50 ft. $0.** It is **round**, so if the route needs flat (under a rug, a
+   door sweep, a baseboard — which is presumably how the original got stepped on), that is the one
+   reason to buy, and only then.
+4. **Still do not re-crimp the old one** — flat Cat6 is **30 AWG** (Jadaol spec bullet, read 9:40 AM)
+   against standard RJ45 tips built for 23–26 AWG.
+5. **Re-route it off the floor.** The 2017 cable shipped with clips and so does any replacement.
+
+⛔ **WITHDRAWN: the $9.99 / $13.89 Jadaol purchase recommendation from 9:40 and 9:42 AM.**
+🔑 **LESSON — I READ THE LISTING TITLE INSTEAD OF OPENING THE ORDER.** The order search result shows
+a vendor's full length-list in the title ("6 ft, 10FT 15FT 25FT…"), which tells you nothing about
+what was bought. **The quantity and the actual item only appear inside the order.** Same shape as
+the tape question on 10-12 — the answer was already in his garage both times.
