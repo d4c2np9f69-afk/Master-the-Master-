@@ -1750,3 +1750,31 @@ Appreciate it - Jeff
 
 **Benchmark he is deciding against:** eBay `156740373272`, **$50.22 delivered, arrives Oct 16–21**,
 12 PCS "A" stated in the listing description. **Doug has to beat that on price or speed.**
+
+---
+
+## 2026-10-13 9:14 AM — ⏳ **$43 BEST OFFER SUBMITTED ON `156740373272`. TWO THINGS PENDING.**
+
+Jeff: *"Sent him a 43 offer and it went through for approval."*
+
+### WHAT IS OUTSTANDING RIGHT NOW
+| # | Thing | State | Clock |
+|---|---|---|---|
+| 1 | **$43 Best Offer** on eBay `156740373272` (12 × all-A strips, list $50.22) | **submitted, awaiting seller** | eBay Best Offers expire in **48 h** or when the seller responds |
+| 2 | **Cancellation** of order `14-15280-91468` (item `389576068118`, the 10A+2B set) | **pending**, `cancelId 5456748954` | seller has **up to 3 days**; **$39.69 back to PayPal** on acceptance |
+| 3 | **T-con** `126326188707` `BG000N700 ZAZZ`, order 09-15290-25734, **$24.09 ⚠️ open box** | **SHIPPED**, tracking live | **est. delivery Mon Oct 19** |
+
+### THE OFFER'S BASIS, FOR THE RECORD
+The seller's own published tier sheet on that listing: **Buy 1 $50.22 · Buy 2 $47.21 · Buy 3 $46.20
+· 4 or more $45.20 each.** He has already advertised a willingness to sell at **$45.20**, so $43 sits
+just under his own floor rather than being a lowball. Second lever: the identical all-A MPN is
+listed at **$42.79** (yxwtvparts, `198045329154`, ships China). $43 is **86 % of list** — above the
+~80 % line where sellers typically set auto-decline.
+
+**If he counters, anything at or below $47.21 beats his own 2-piece price. Take it.**
+⚠️ **Tax is added on top at checkout** — the cancelled order was $36.16 + $3.53 TN tax = $39.69, so
+budget roughly **$47** out the door at $43, or **$55** if it goes through at the $50.22 list.
+
+### RUNNING TOTAL IF THE OFFER LANDS AT $43
+T-con **$24.09** + strips **~$47 with tax** ⇒ **≈ $71** against a **$398** TV, Jeff's own labor,
+tray already open. The cancelled $39.69 comes back separately.
