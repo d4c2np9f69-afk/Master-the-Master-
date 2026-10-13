@@ -1590,9 +1590,11 @@ repair" or "the repair man" means **Doug's TV Repair, Madison TN**.
 
 ### ▶ WHAT TO ASK DOUG — **(615) 945-4977** — PARTS ONLY
 1. 🔑 **"What backlight strips did you put in my 75-inch onn last time?"** He has the job on record,
-   he had the tray open, and **he is the reason there is a soldered joint in it.** His answer
-   independently confirms the version — and he may say he only bridged a strip rather than
-   replacing the set, which would explain why they failed again.
+   he had the tray open, and his answer independently confirms the version.
+   ⛔ **STRUCK 8:46 AM — I had added a guess here that he "may have only bridged a strip rather than
+   replacing the set." Jeff: *"I set there and watched him do the whole repair so you need to stop
+   making guesses… not more of your opinions about his repair."* JEFF WATCHED THE ENTIRE REPAIR. HE
+   IS THE PRIMARY SOURCE ON WHAT DOUG DID. DO NOT SPECULATE ABOUT IT AGAIN.**
 2. **"Do you stock, or can you get, the 12-strip ALL-A set — `30375007007` / `LED75D07A-ZC66AG-05`,
    826 mm, 7 LEDs per strip? Not the 10A+2B, not the -06."** What price, and how fast.
 3. **"Do you have a dead 75-inch onn 100044717 / Element E4FAA75R / Westinghouse WR75UT4210 in the
@@ -1607,3 +1609,46 @@ is a **phone call, not a drive**. Address per their own site: **104 Sarver Ave, 
 
 **Fallback if Doug can't beat it:** eBay `156740373272`, **$50.22 delivered, Oct 16–21**, 10+ in
 stock, description proves 12 PCS "A". Still not purchased.
+
+---
+
+## 2026-10-13 8:46 AM — ✅ **TWO VERIFIED 12×A SOURCES. BOTH PRICED. NO MORE OPINIONS.**
+
+Jeff: *"I set there and watched him do the whole repair so you need to stop making guesses and find
+me the correct part that is what I asked you for not more of your opinions about his repair."*
+**Struck the guess above. Jeff watched the whole repair; he is the primary source on it.** Parts only
+below.
+
+### THE MPN FIELD IS THE TEST. A LISTING IS "A" ONLY IF ITS MPN IS **ALL** OF:
+`30375007007` · `LED75D07A-ZC66AG-05` · `30375007007D` · `LED75D07A-ZC66AG-05D`
+**and contains NONE of** `30375007008` · `LED75D07B` · `-06` · `30375007005/006`.
+**Exactly two listings on eBay pass.** Both read live at 8:44–8:46 AM.
+
+| | 🇺🇸 **eBay `156740373272`** | 🇨🇳 eBay `198045329154` |
+|---|---|---|
+| Price | **$50.22** | **$45.04** — **$42.79 with the listing's coupon** |
+| Shipping | **FREE** | **FREE**, import fees included (nothing extra at checkout) |
+| **Delivered to 37188** | **Fri Oct 16 – Wed Oct 21** | **Tue Oct 20 – Mon Nov 2** |
+| Ships from | **El Monte, California** | **Guangdong, China** |
+| Seller | KUNPARTS **(3,376) 99.5%** | yxwtvparts **(2,492) 99.7%** |
+| Stock | New, 10+ available, 19 sold | New, 10+ available, 4 sold |
+| MPN | ✅ all four A numbers, zero B/-06 | ✅ all four A numbers, zero B/-06 |
+| **Quantity proof** | ✅ **description: "Package includes: 12 PCS "A" LED Backlight Strip" · "Model: 12 A Strips"** | ⚠️ **NOT STATED.** Listing has no description iframe. Photo caption reads *"827mm **A bar**, 3V"* — right strip, **count unconfirmed** |
+| Returns | 30 days | 30 days |
+
+**The trade, stated flat:** the China one saves **$5.18–$7.43** and costs **up to 12 extra days**,
+with **no confirmation it is 12 pieces**. The US one is the only listing anywhere that puts
+**"12 PCS "A"" in writing**, and it is the faster one.
+
+### REJECTED THIS PASS (both looked promising on the title, both failed on the MPN)
+- **eBay `126366182592`** — $49.66, US, title says `LED75D07A-ZC66AG-05`. **MPN: `LED75D07A-ZC66AG-06`,
+  `LED75D07B-ZC66AG-06`, `30375007005`, `30375007006`.** The -06 family with B strips. Dead.
+- **eBay `406448966606`** — $43.02 (smartfixparts, the cheapest thing Google Shopping surfaced).
+  Title pairs `30375007007 30375007008`. 10A+2B. Dead.
+
+### DISTRIBUTORS — NONE CARRY IT
+Searched **Encompass, TVServiceParts, PartsForYourTV, eReplacementParts** by part number: **not one
+appears for `LED75D07A-ZC66AG-05` / `30375007007`.** onn is a Walmart house brand; the authorized
+distributor channel does not stock it.
+⚠️ A search snippet claimed TvPartsGuy shows *"Current Stock: 1"* at $74.99. **Its live page at
+8:37 AM says `"availability": "OutOfStock"` and $87.49.** The index is stale; the live read wins.
