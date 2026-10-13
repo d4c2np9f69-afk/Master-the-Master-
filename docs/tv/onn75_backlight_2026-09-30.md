@@ -1706,3 +1706,47 @@ anywhere in the Nashville area. **The realistic ask on each call is the donor qu
 - **$50.22, US, Oct 16–21, "12 PCS "A"" in writing, Best Offer available** — `156740373272`
 - **$42.79–45.04, China, Oct 20 – Nov 2, count unconfirmed** — `198045329154`
 - **$0–? local** — six phone numbers above; the donor-TV question is the only thing that beats both.
+
+---
+
+## 2026-10-13 8:54 AM — ✉️ **TEXT DRAFTED FOR DOUG. (615) 945-4977. PARTS ONLY.**
+
+Jeff: *"Now write me a professional text I can send to Doug that clearly outlines the repair he did
+last time so he remembers me and then tell him what we need."* Everything in it is sourced from this
+record or from Jeff directly — **no invented detail about the previous repair.**
+
+**Sent as:** text to **(615) 945-4977**. **Verified facts used:** 75" onn Roku, model `100044717`;
+Doug's prior repair involved soldering the strips together in one place; Jeff watched the whole job;
+it cost **$280**; tray is open and all 12 strips are out; TD2B confirmed the `CON302` string open;
+a T-con is already on the way; the part needed is the **12 × all-"A"** set,
+`30375007007` / `LED75D07A-ZC66AG-05`, 826 mm, 7 LEDs per strip.
+
+```text
+Hi Doug - this is Jeff Loewen out in White House. You repaired my 75" onn Roku
+TV (model 100044717) for me a while back. That's the one where you ended up
+having to solder the backlight strips together in one spot to get it lit again -
+I sat there and watched you do the whole job. It ran $280 and it was worth it.
+
+The backlight is out on it again. I've already got it apart on the bench: back
+off, panel tray out, reflector pulled, and all 12 strips removed. I put a
+backlight tester on it and confirmed one whole string of 6 is open, so it's the
+strips. I've also got a replacement T-con board on the way.
+
+I'm doing the work myself this time, so what I'm after is parts, not labor.
+
+What I need is the 12-strip LED backlight set - the all-"A" version:
+30375007007 / LED75D07A-ZC66AG-05, 826mm, 7 LEDs per strip. Not the 10A+2B set,
+and not the -06 version. Mine are 12 identical "A" strips; I pulled them and
+checked every one.
+
+Two questions:
+
+1. Can you get that exact set, and what would it run me and how soon?
+2. Do you have a dead 75" onn 100044717, Element E4FAA75R or Westinghouse
+   WR75UT4210 in the back that I could buy the 12 strips off of?
+
+Appreciate it - Jeff
+```
+
+**Benchmark he is deciding against:** eBay `156740373272`, **$50.22 delivered, arrives Oct 16–21**,
+12 PCS "A" stated in the listing description. **Doug has to beat that on price or speed.**
