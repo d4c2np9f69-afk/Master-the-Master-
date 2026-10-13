@@ -175,3 +175,75 @@ Siren switch = **Jeff's EXTRA SMART PLUG** (Jeff 14:28: "I have a extra smart pl
   alarm handles break-in/fire: a Zigbee plug (local mesh) or local Tuya control. (The owned Zigbee TS0224 siren is already
   local, but Jeff judged it too weak 08-27.)
 
+
+---
+
+## 🚨 2026-10-13 3:55 PM — THE TUYA PLUG IS IN HA. IT IS NAMED **House Alarm**.
+
+Jeff 4:00 PM: *"I just added a smart plug that will control the House Alarm I need you to add it
+and then we can test it."* 4:03 PM: *"It's name is House Alarm 🚨"*
+
+**This is the exact plug the 09-28 plan called for** ("Siren switch = Jeff's EXTRA SMART PLUG …
+Brand = TUYA") — nothing new was bought, and nothing had to be paired by hand.
+
+### What was found, not assumed
+- It **self-discovered through the existing Tuya cloud integration** and was already in HA when
+  Jeff asked. Device registry `identifiers [['tuya','ebef9dfc20df3a4a16hega']]`, config entry
+  `tuya` / `ap-000895.1644…1306` — the same entry that carries the 4 sockets already in service.
+- **First state written `2026-10-13T20:55:44Z` = 3:55 PM Central**, five minutes before his message.
+- It arrived under its factory name **`C0003_P10_W8_EC02`**, with **4 entities and no power
+  metering** — so there is no electrical way to confirm the siren is drawing; the test is acoustic.
+
+### ✅ DONE — renamed, and VERIFIED by re-reading the registry after the write
+`config/device_registry/update` → `name_by_user: House Alarm`, then four
+`config/entity_registry/update` calls. Read back:
+
+| was | now |
+|---|---|
+| `switch.c0003_p10_w8_ec02_socket_1` | **`switch.house_alarm`** |
+| `switch.c0003_p10_w8_ec02_child_lock` | `switch.house_alarm_child_lock` |
+| `select.c0003_p10_w8_ec02_power_on_behavior` | `select.house_alarm_power_on_behavior` |
+| `select.c0003_p10_w8_ec02_indicator_light_mode` | `select.house_alarm_indicator_light_mode` |
+
+⚠️ **`switch.house_alarm` is the ONE entity every automation targets.** The other three are
+settings on a device we installed — kept deliberately under the entity-hygiene rule's own
+carve-out (same reasoning as `switch.sharky_do_not_disturb`), not clutter.
+
+### 🔑 `select.house_alarm_power_on_behavior` reads `power_off` — and that is CORRECT, leave it
+This plug switches a **siren**, not a panel. `power_off` means a power blip brings it back
+**silent**. `last` would resume screaming after an outage, and `power_on` would sound it on every
+restore. **Do not "helpfully" change this to `last`.**
+
+### 🚨 The siren itself — Jeff's photo, 4:01 PM
+Round piezo, white housing / orange face, black L-bracket, two-wire pigtail (**red = +**, the
+other = **−**). This is the **Xnrtop 12 V 120 dB piezo, B07K2Z76NB**, the 2-pack from the 09-28
+cart — so they arrived. The 09-28 build is unchanged and still correct:
+
+```
+HA  →  switch.house_alarm (Tuya plug)  →  TDC Power SA1A-120-0420  →  green screw-terminal
+         120 V AC                          12 V ⎓ 0.42 A, owned        connector
+                                                                            ↓
+                                         BOTH sirens in PARALLEL  (red→+, other→−)
+                                         2 × 0.10–0.15 A ≈ 0.3 A  <  0.42 A  ✅ ~3× headroom
+```
+- ✂️ **The leads end in a 3.5 mm plug** ("Adopt 3.5mm plug") — snip it off, strip, into the screw
+  terminal. ⚠️ **And that is a real hazard worth repeating: a 12 V lead on a 3.5 mm plug sitting
+  next to the QFX's 3.5 mm AUX IN can be cross-plugged.** Cut the plug off, don't just tape it.
+- 📍 Placement (Jeff 09-28 15:03): **both at the clock, aimed in opposite directions** — one at the
+  front door / foyer (the bedroom doors open onto it), one toward the back/east office side.
+- 📐 Wiring diagram already exists: **https://claude.ai/artifact/SekU1JPieXzxc5r7VicuKK**
+  (source `docs/automation/clock-alarm/clock-alarm-setup.html`) — **republish to THAT url.**
+
+### 🔴 THE WEAK LINK, UNCHANGED FROM 09-28 AND NOW LIVE
+**HA's core Tuya integration is CLOUD.** No internet ⇒ HA cannot switch this plug ⇒ **no siren.**
+That is acceptable for a deterrent and a leak/weather alarm; it is **not** acceptable as the only
+path for break-in or fire. The fix is local control, and it is not a purchase:
+- the `tuya_local` / LocalTuya route using the Tuya credentials HA already holds, **or**
+- move the siren onto a Zigbee plug (local mesh, no cloud) — the Zigbee plug 4-pack is already the
+  standing lighting-plan item.
+**Priced before named, per rule 8. Nothing ordered.**
+
+### ⏭ NEXT, IN ORDER
+1. **TEST — needs Jeff's go.** 2-second pulse of `switch.house_alarm`, then off. 🔴 **Not fired
+   blind: 120 dB next to his head is a hearing injury.** Sirens mounted and away from his ears first.
+2. Then the automations ("set it up for all the things that it will work with").
