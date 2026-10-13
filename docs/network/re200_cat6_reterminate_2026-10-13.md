@@ -90,3 +90,59 @@ pass-through, instead push all 8 out the front, verify the colours, and let the 
 ⚠️ **`WS-SD00PJBA` at `.164` went dark in the same 10-10 event and is also still down.** Both hang
 off the same LAN-1 switch while `.222` and `.251` on it are fine, so the switch was never the
 problem. **If one footstep took out the RE200's cable, check whether it took `.164`'s too.**
+
+---
+
+## 2026-10-13 9:40 AM — 🔴 **PHOTOS CHANGE THE ANSWER. DO NOT RE-CRIMP THIS CABLE.**
+
+Jeff, 9:39 AM: *"It's the flat cable and tip that I need to replace"* + two photos.
+
+### WHAT THE PHOTOS SHOW
+1. **Jacket print reads `CAT.6 FLAT CABLE`** — flat ribbon, not round.
+2. **The plug's locking latch is snapped off.** The housing and all 8 gold contacts look intact; the
+   catch is gone.
+
+### 🔑 A BROKEN LATCH DOES NOT BREAK CONDUCTIVITY — IT LETS THE PLUG CREEP OUT
+That is a much better fit for the evidence than a severed conductor: the gateway shows RE200
+`b0:be:76:d5:ea:88` last active **Sat Oct 10 14:20:04** and never returning — **a link that died at
+one moment and stayed dead**, which is exactly what a plug backing out of its port does.
+▶ **$0 FIRST MOVE, 30 SECONDS: push the plug firmly back into the RE200 and watch for the link
+light.** If it comes up, the wire was never the problem. Hold it in with tape or a zip tie, or an
+RJ45 repair clip, and the job is done for nothing.
+
+### ⛔ **DO NOT RE-TERMINATE FLAT CAT6 WITH STANDARD RJ45 TIPS — IT IS 30 AWG**
+Read off the manufacturer's own spec page at 9:40 AM, **Jadaol Cat6/Cat6A Flat**, feature bullet:
+> *"High Performance Cat6, **30 AWG**, RJ45 Ethernet Patch Cable…"*
+
+**Standard RJ45 plugs are built for 23–26 AWG.** Their IDC blades are spaced and sized for that
+range, and on **30 AWG** they frequently miss the copper altogether. **That produces a crimp that
+looks perfect, seats perfectly, and tests dead** — and it would send us chasing the RE200 again.
+🔴 **Jeff's Cat5 crimper and spare tips are the right tools for round solid Cat5e/Cat6 and the wrong
+tools for this cable.** Nothing wrong with them; wrong wire gauge.
+⇒ **If the plug is genuinely the problem, replace the WHOLE CABLE. Do not re-crimp.**
+
+### 🛒 REPLACEMENT — AND HE HAS BOUGHT THIS EXACT ONE BEFORE
+Amazon's own badge on the search card reads **"Purchased Nov 2017"** against **`B00WD017FW`**,
+**Jadaol Cat6/Cat6A Ethernet Cable 50 FT Flat with Clips, Black** — which matches the black flat
+jacket in the photo. **That is almost certainly the cable now lying in the office.**
+
+| | |
+|---|---|
+| Part | **Jadaol Cat6/Cat6A Flat, Black, `B00WD017FW`** |
+| Price | **$13.89** (50 FT) |
+| Stock | **In Stock** |
+| Delivery | **FREE tomorrow 3–6 AM** on orders over $25 |
+| Lengths | 1 · 3 · 5 · 10 · 15 · 20 · 25 · 30 · 35 · 50 · 60 · 75 · 100 · 150 · 200 FT |
+| Bonus | **ships with cable clips** — relevant, since this one got stepped on |
+| Cheaper | **`B00WD017GQ` same cable in WHITE, 50 FT, $9.99, FREE delivery TODAY** · `B018BCJKE0` white 25 FT $9.99 today |
+
+⚠️ **Length is the one thing only Jeff can supply.** Measure the run before ordering — the 50 FT is
+what the history points to, but the office run may be shorter and shorter is cheaper.
+🔑 **White is $3.90 cheaper and arrives TODAY instead of tomorrow.** Colour is the only difference.
+
+### ▶ ORDER OF OPERATIONS
+1. **$0** — reseat the plug firmly, check for a link light and `Test-Connection -Quiet 192.168.1.196`.
+2. **$0** — if it links but will not stay seated, tape/zip-tie it, or add an RJ45 repair clip.
+3. **$9.99–13.89** — only if it is truly dead, swap the whole cable. **Never re-crimp 30 AWG flat.**
+4. 🔑 **Re-route it so it is not underfoot.** It got stepped on once; the clips in the box exist for
+   exactly this.
