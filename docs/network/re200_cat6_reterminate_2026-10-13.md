@@ -322,3 +322,43 @@ either way — it is over 50 ft from the office **and** from the front switch.
 
 🔑 **LESSON: THE HOUSE PLAN IS A MEASURING INSTRUMENT, NOT A PICTURE.** `plan-data.js` carries every
 device at surveyed feet with a stated origin. **Read it before asking Jeff to pull a tape.**
+
+---
+
+## 2026-10-13 9:51 AM — ✅ **JEFF: "THE 50 FOOTERS WILL GO TO THE GARAGE AND KITCHEN PCs." CLOSED. $0.**
+
+⛔ **SUPERSEDED: my 9:48 AM "~59 ft routed, a 50 ft cannot make the garage" calculation.**
+**Jeff has walked the actual route. He is the primary source and he outranks my estimate.**
+
+### WHY MINE CAME OUT LONG — SO THE NEXT SESSION DOES NOT REDO IT
+My number was **not** a measurement of his route. It was `office jack D(71) → garage/house door →
+workbench`, right-angle, **and the start point was my own assumption** — I flagged it as one at the
+time (*"if the 8-port switch actually lives elsewhere, both numbers move"*). **It evidently does.**
+Two things also make a real route shorter than a wall-following estimate:
+- **a feed point closer to the west side of the house than the office**, and
+- **attic or crawl routing**, which cuts the corner the right-angle math is forced to go around.
+🔑 **A right-angle estimate is an UPPER bound on a wall-hugging path, not a floor on a real one.**
+
+### ✅ FINAL — NOTHING TO BUY
+| Run | Cable | Cost |
+|---|---|---|
+| **Garage PC** | one unused **Seedato Cat6 50 ft** (Aug 9 2022) | **$0** |
+| **Kitchen PC** | the other unused **Seedato Cat6 50 ft** | **$0** |
+
+⛔ **WITHDRAWN: every cable purchase recommendation in this file** — the $9.99 / $13.89 / $18.99 /
+$31.99 Jadaol options from 9:40, 9:42, 9:46 and 9:48 AM. **Jeff buys nothing.**
+
+### WHAT STILL STANDS
+1. **Do not re-crimp the dead flat cable.** Flat Cat6 is **30 AWG** (Jadaol spec bullet, read
+   9:40 AM) against RJ45 tips built for **23–26 AWG** — the blades miss the copper and you get a
+   crimp that looks perfect and tests dead.
+2. **Round is the better cable here anyway.** The 50 ft Seedato are round; the cable that failed was
+   30 AWG flat ribbon killed by one footstep.
+3. **Route them off the floor.**
+4. **Verify, never assume:** link light → `Test-Connection -Quiet` on each machine → fresh
+   `Last Activity` at `http://192.168.1.254/cgi-bin/devices.ha`.
+   🔴 **Never read `ping`'s summary line** — `ACCESS_MAP.md` §4, earned 10-10 on this exact device.
+5. **Garage PC is `192.168.1.121 / .212`, logged offline "since the extender retirement"**
+   (`plan-data.js` line 335). Wiring it should bring that back — **confirm it, do not assume it.**
+6. Then revisit **OPEN_ITEMS #225 / #227**: with the garage and kitchen wired, the office RE200's
+   coverage gap may simply stop mattering.
