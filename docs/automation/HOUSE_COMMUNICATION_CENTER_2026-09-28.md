@@ -247,3 +247,39 @@ path for break-in or fire. The fix is local control, and it is not a purchase:
 1. **TEST — needs Jeff's go.** 2-second pulse of `switch.house_alarm`, then off. 🔴 **Not fired
    blind: 120 dB next to his head is a hearing injury.** Sirens mounted and away from his ears first.
 2. Then the automations ("set it up for all the things that it will work with").
+
+### ✅ 2026-10-13 4:17 PM — FIRED AND HEARD. THE SIREN CHAIN IS PROVEN END TO END.
+> **Jeff 4:17 PM:** *"Works perfectly"* · **4:18 PM:** *"It's loud !!"*
+
+**That retires the 09-28 open question** (Jeff 15:22: *"do we need the sirens at all"*) — yes, and
+they deliver the deterrent the TS0224 never could.
+
+| measurement | value |
+|---|---|
+| `switch.house_alarm` ON confirmed | **1.7–2.1 s** after the service call |
+| OFF confirmed | **1.6–1.7 s** |
+| `assumed_state` on the entity | **absent** — HA reports real device state, not an optimistic echo |
+| power metering | **none** — the only instrument is Jeff's ears |
+
+⚠️ **The first pulse at 4:11 PM did NOT sound** — the chain was not finished at the siren end.
+Jeff completed it and it fired on the 4:17 PM pulse. **Nothing in HA was changed between the two**;
+the plug behaved identically both times, which is why "is the plug lying?" had to be settled first
+(it wasn't — no `assumed_state`, and a 2 s round trip is a real device report).
+
+### 🔑 THE PLUG'S PHYSICAL BUTTON WORKS, AND HA STAYS IN SYNC — read off the logbook
+Four state changes 21:14:24–21:16:26 UTC carry **`context_user_id: None` and no service call** =
+Jeff's hand on the plug. HA tracked every one. Two consequences that pull opposite ways:
+- ✅ **It is the fastest kill switch in the house** — faster than the app, Alexa or HA.
+- 🔴 **An intruder can silence the alarm by walking up and pressing it.** That is what
+  `switch.house_alarm_child_lock` would stop. **Left OFF deliberately** — the fast kill is worth more
+  today than the hardening. Revisit once the sirens are mounted at the clock and out of easy reach.
+
+### 🔴🔴 THE ONE DESIGN RULE EVERY SIREN AUTOMATION MUST OBEY
+**This plug has NO built-in duration.** The TS0224 has a 60-second minimum and stops itself; a dumb
+plug **runs until something turns it off.** So:
+1. **Every automation that turns it on MUST have a guaranteed off**, and the off must not sit behind
+   anything that can throw. The leak alert was silently dead in *both* channels until 08-26 because
+   a failing `notify` aborts every action after it — same trap, worse consequence here.
+2. **A WATCHDOG IS REQUIRED, NOT OPTIONAL:** if `switch.house_alarm` is `on` longer than its longest
+   legitimate run and no alarm is active, **force it off.** Without it, one failed automation leaves
+   a 120 dB siren screaming until somebody unplugs it.
