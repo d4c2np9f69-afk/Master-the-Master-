@@ -362,3 +362,46 @@ $31.99 Jadaol options from 9:40, 9:42, 9:46 and 9:48 AM. **Jeff buys nothing.**
    (`plan-data.js` line 335). Wiring it should bring that back — **confirm it, do not assume it.**
 6. Then revisit **OPEN_ITEMS #225 / #227**: with the garage and kitchen wired, the office RE200's
    coverage gap may simply stop mattering.
+
+---
+
+## 2026-10-13 9:51 AM — 🔑 **THE OFFICE RUN IS A 50 FT FLAT, ALREADY INSTALLED BY JEFF. ONE TO BUY.**
+
+Jeff: *"And the one that goes to the office is a 50 footer that's already in place I put that one
+in."* **That closes the picture and it changes the shopping list by exactly one cable.**
+
+### THE THREE RUNS, NOW FULLY ACCOUNTED FOR
+| Run | Cable | State | Cost |
+|---|---|---|---|
+| **Office — RE200 backhaul (`192.168.1.196`)** | **50 ft FLAT**, Jeff's own install | 🔴 **stepped on, one end destroyed** | **needs replacing** |
+| **Garage PC** | unused **Seedato Cat6 50 ft** (Aug 9 2022) | on the shelf | **$0** |
+| **Kitchen PC** | the other unused **Seedato Cat6 50 ft** | on the shelf | **$0** |
+
+🔑 **The damaged cable is the one Jeff bought Nov 23 2017** — *"Cat 6 Ethernet Cable 50 ft Black
+with Cable Clips – FLAT – Snagless RJ45 – 50 feet Black (15 Meters)."* **Nine years in service, and
+it was already routed and clipped.** The two unused Seedato are **round** and are spoken for by the
+garage and kitchen, so **they cannot cover the office.**
+
+⚠️ **AND THE REPLACEMENT SHOULD BE FLAT, NOT ROUND.** Jeff chose flat for that route and installed
+it himself. **A flat replacement drops straight into the existing path and clips; a round one may
+not fit wherever the flat was chosen to go.** Do not "upgrade" him to round on this run.
+
+### ▶ **BUY ONE: a 50 FT FLAT Cat6.** Priced live 9:46–9:48 AM.
+| Option | Price | Delivery |
+|---|---|---|
+| **Jadaol flat WHITE 50 ft `B00WD017GQ`** | **$9.99** | In Stock · **FREE TODAY 1–4 PM** — ⚠️ **needs a $25+ cart** |
+| Jadaol flat BLACK 50 ft `B00WD017FW` | $13.89 | In Stock · tomorrow — **matches the black one in place**, and it is the **same ASIN Amazon badges "Purchased Nov 2017"** |
+
+💡 **$9.99 on its own does not clear the $25 free-today threshold.** Either add ~$15 of anything
+already wanted to land it **this afternoon**, or take tomorrow's delivery. **Both ship with clips**,
+which matters — the original was clipped and still got stepped on.
+
+### STILL STANDS
+- **Do not re-crimp it.** Flat Cat6 is **30 AWG**; RJ45 tips are built for **23–26 AWG** — the blades
+  miss the copper and you get a crimp that looks perfect and tests dead.
+- **Re-route the new one out of the walking path.** Nine years says the old path was fine until it
+  wasn't; one footstep ended it.
+- **Verify:** link light → `Test-Connection -Quiet 192.168.1.196` → fresh `Last Activity` at
+  `http://192.168.1.254/cgi-bin/devices.ha`. 🔴 **Never `ping`'s summary line** (`ACCESS_MAP.md` §4).
+- **Garage PC is `192.168.1.121 / .212`, logged offline "since the extender retirement."** Wiring it
+  should restore it — **confirm, do not assume.**
