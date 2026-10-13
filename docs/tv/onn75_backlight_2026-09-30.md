@@ -1276,7 +1276,7 @@ they arrive."* Tray stripped, tape cut, waiting on the box (strips **Oct 16–20
   **mirror** — connector on the opposite end — which with a single top harness would mean 2 of the
   12 new strips cannot reach it. **Plausible, NOT verified. Do not assert it.**
 
-### ✅ JEFF CAN SETTLE THIS IN 60 SECONDS, AND THE BOX HASN'T EVEN ARRIVED
+### ⛔ STRUCK 10-13 8:18 AM — THIS ASK WAS WRONG. JEFF HAD ALREADY ANSWERED IT ON 10-12.
 **All 12 originals are loose in his hand with the labels readable.** Read the part number on
 **every one**:
 - **12 read `30375007007` / `A`** ⇒ tray is 12×A ⇒ the kit is **2 strips short** of what fits.
@@ -1363,3 +1363,48 @@ Two outs, both already priced, no new work required:
    wired in by its pads even if its tabs are on the wrong end.
 2. **$54.99** — ShopJimmy 12 × all-A `30375007007`, **in stock 7:50 AM**, same-business-day before
    4 PM CT, tape pre-applied. Or **return the 10A+2B set**, window to **Nov 18**.
+
+---
+
+## 2026-10-13 8:19 AM — 🔴🔴 **WHY JEFF HAS THE WRONG STRIPS COMING: I TOLD HIM TO BUY THEM.**
+
+Jeff, 8:18 AM: *"I told you they where all a yesterday."* Jeff, 8:19 AM: *"So why do I have the
+wrong strips coming???"* **Both answered below from this file. He is right on both counts.**
+
+### THE CHAIN, WITH TIMESTAMPS, ALL FROM THIS DOCUMENT
+| Time (10-12) | What this file says |
+|---|---|
+| **1:53 PM** | *"Jeff’s strip label photo reads `30375007007` AND is marked `A`… his TV is the **12 × all-A** version."* And the rule: 🔴 *"**BUYING RULE:** a listing that says **10*A + 2*B** or pairs **`30375007007 / 30375007008`** is the **OTHER version**. The right set lists **`30375007007` ONLY**."* |
+| **6:48 PM** | I listed live eBay prices and wrote: `| **$36.16** | **389576068118** | **34 sold**, free ship, "almost gone" ← **BUY THIS** |` |
+| **7:08 PM** | I verified the placed order and **read the seller’s own description: `1 Kit / 12pcs(10A+2B)`** — and logged it as a soft *"open flag … electrically identical"* instead of stopping it. |
+
+🔴 **I WROTE THE BUYING RULE AT 1:53 PM AND THEN VIOLATED IT MYSELF AT 6:48 PM, FIVE HOURS LATER,
+IN THE SAME DOCUMENT.** Jeff did not pick the wrong part. **I told him which one to buy, by item
+number, in bold.** Then I read `10A+2B` off his confirmed order and did not connect it to my own
+rule written that afternoon.
+
+### ⚠ AND THE "SAFER ALTERNATIVE" ON THE NEXT LINE IS NOT SAFE EITHER — CHECKED LIVE 8:19 AM
+My 6:48 PM table annotated **eBay `389576068656` ($36.28)** as *"names only `30375007007`"*, which
+would have made it the correct 12×A set for 12 cents more. **That annotation was read off the TITLE
+only.** Opened the listing in Chrome at **8:19 AM today**: the body carries **`30375007007` AND
+`30375007008` AND `LED75D07B`** — it is the **same 10A+2B version**. $36.28, New, 2 available,
+seller 99.9%. **So there was no 12-cent escape; do not go order it.**
+
+### ✅ THE ONLY VERIFIED 12 × ALL-A SOURCE REMAINS SHOPJIMMY
+**$54.99, IN STOCK, ships same business day before 4 PM CT, double-sided tape pre-applied**,
+`shopjimmy.com/element-jvc-onn-30375007007-led-backlight-strips-12-e4faa75r/` — its own page states
+*"This version uses 12 strips labeled "A" with part number 30375007007."* (read live 7:50 AM).
+
+### ▶ JEFF’S OPTIONS, CHEAPEST FIRST — HIS CALL, NOT MINE
+1. **$0 — message the seller before it ships.** Ordered 10-12 evening, arrives **Oct 16–20**, so it
+   may not be out the door. Ask iPassionPlus/partcare to send **12 × A (`30375007007`)**. Costs
+   nothing and fixes it at the source.
+2. **$0 — take delivery and use the 2 B strips anyway.** 10 of 12 positions are certainly right, and
+   **every strip has two bare gold solder pads at its far end** (Jeff’s photo 5), so a B strip can be
+   wired in by its pads even if its tabs land on the wrong end. No new parts, no delay.
+3. **~$15.30 net — order the ShopJimmy 12×A set ($54.99) today before 4 PM CT and return the eBay
+   set ($39.69) when it lands.** Return window runs to **Nov 18**. Buys certainty.
+
+🔑 **THE PROCESS FIX THIS EARNS:** *when this file contains a BUYING RULE, re-read the rule against
+the item number before writing "BUY THIS" — the rule and the violation were five hours apart in the
+same document, and nothing checked one against the other.*
