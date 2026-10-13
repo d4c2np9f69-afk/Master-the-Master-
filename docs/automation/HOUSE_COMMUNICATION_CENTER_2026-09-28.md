@@ -380,3 +380,59 @@ iOS mirroring from the alarm chain entirely. **Not priced, not ordered — it is
 Jeff's phone and his call.**
 
 ⏳ **STILL OWED: the 2-minute live siren test.** Not yet run.
+
+---
+
+## ⬆️ 2026-10-13 5:36–5:47 PM — HA CORE + 2 INTEGRATIONS UPDATED
+> **Jeff 5:30 PM:** *"The HA needs to be updated"* · 5:32: *"Also the Alexa media player and the Mercedes"*
+> 5:34: *"It's supposed to be completely reset and updated every week or two weeks and it hadn't been
+> done in quite a while… when you finish the update, let me know and I'll do a hard reset."*
+
+### ✅ THE STANDING BLOCK WAS CHECKED FIRST, NOT SKIPPED
+The rule is **"NO HA core update until blinkpy/alexapy ship Py3.14 builds — read release notes and
+name affected integrations first"** (from the 09-03/04 rollback). Checked, not assumed:
+- **2026.10.1 is a PATCH of the minor he was already on** — bug fixes only, **no Python change**.
+- Release notes read live: **neither of the two integrations that broke on 09-03/04 is mentioned.**
+- He was already on 2026.10.0, so the Py3.14 gate had cleared before today.
+- The sanctioned pre-flight was run **before** anything was touched and again after; both passed
+  identically, and the subsystem it covers runs on the Beast so an HA restart cannot reach it.
+
+🔑 **ALREADY LIVE ON THIS BOX AND WORTH KNOWING: 2026.10 made `mqtt.publish` ADMIN-ONLY.** Both the
+leak alarm and the new siren automation use it. **It still works from an automation** — proven at
+5:21 PM when Jeff heard the 301 fire. Do not "fix" it.
+
+| | before | after |
+|---|---|---|
+| HA Core | 2026.10.0 | **2026.10.1** (backup taken first) |
+| Alexa Media Player | v5.16.1 | **v5.16.2** |
+| MercedesMe 2020 | v0.40.0 | **v0.42.0** |
+| entities | 589 | 590 |
+| camera entities / unavailable | 24 / 0 | 24 / **0** |
+| Zigbee devices reporting LQI | 11 | **11** |
+| Mercedes entities | 56 | 57 |
+| the 5 alarm automations | ON | **ON** |
+
+`switch.ac_relay` = on · `cover.garage_door` = closed, both after the restart.
+
+### 🔴 A REAL TRAP CAUGHT — "installed" IS NOT "loaded"
+The script's final restart **did not take**. The HACS integrations installed at 5:41:55/5:41:57,
+**after** the core restart, and no restart followed them. **A HACS integration keeps running its OLD
+code until HA actually restarts** — so Alexa v5.16.2 and Mercedes v0.42.0 were on disk while the old
+code was still live, and every `update.*` entity happily read "up to date" **because it reads the
+manifest on disk, not what is running.**
+🔑 **THE INSTRUMENT THAT CAUGHT IT, AND THE ONE TO USE NEXT TIME: an HA restart stamps hundreds of
+entities with one identical `last_updated`.** The newest mass stamp was 22:41:12–22:41:38Z — the
+CORE restart — with nothing after the integration installs. Restarted properly at 5:44 PM and
+**confirmed by a fresh mass stamp at 22:45:43Z (168 entities)**.
+⚠️ Same family as the 08-21 lesson: a green component check next to a dead feature.
+
+### ⚠️ HONEST LIMIT ON THE AFTER-CHECK
+**27 entities read `unavailable`** afterwards — iPhone activity sensors, `sensor.gas_ccf`, and the two
+PC Alexa apps documented as permanently dead. **No pre-update baseline for that exact count was
+captured, so it is NOT proven all 27 were already that way.** Every subsystem that *was* baselined
+matches exactly.
+⚠️ Jeff was outside swapping camera batteries during this window, which moves those entities on its
+own — the pre-flight baseline was taken at 5:35 PM specifically so his hands-on work could not be
+mistaken for an update regression.
+
+▶ **HANDED BACK TO JEFF: the hard reset he does every week or two, then a full test.**
