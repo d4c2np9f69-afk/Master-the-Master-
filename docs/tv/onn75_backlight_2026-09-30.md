@@ -1301,3 +1301,65 @@ individual `30375007007` strips** (checked ShopJimmy 7:50 AM). If the shortfall 
 play is **return the 10A+2B set** — its return window runs to **Nov 18** — not own both.
 📌 This also reverses the 10-12 note that *"EVERY US-DOMESTIC SHOP IS OUT OF STOCK"*: ShopJimmy's
 12×all-A set reads **in stock** today, 7:50 AM.
+
+---
+
+## 2026-10-13 8:11 AM — ✅ **JEFF CLOSED THE DIAGNOSIS. NO MORE TESTS. THE STRIPS GET REPLACED.**
+
+Jeff, verbatim: *"All strips are "A". 302 and 301 plug into the wire harness across the top not the
+strip it self. Now you should have all you need from the attached picture and information I've
+sent — don't keep suggesting these one off astronomically statistically impossible other tests that
+need to be done. We know that it is the damn strips that are out and there's no amount of testing
+that's gonna replace the strips. Have to be replaced. The one thing I will be able to do is with
+the meter test the strips before it goes back together."*
+
+### ⛔ RETRACTED: "THE TOP HARNESS IS A PRIME SUSPECT" (my 7:50 AM note). DEAD. DO NOT RE-RAISE.
+I proposed a $0 continuity check of the top harness on the theory that 6 strips failing together
+means a shared path. **Jeff has the tray in front of him and has ruled it out.** The fault is the
+strips, they are already cut out, and no measurement changes the parts order. **This was the third
+time in two days I answered a settled question with another test.** The pattern to stop:
+🔑 **When Jeff has read something off the physical hardware, that is PRIMARY EVIDENCE and it
+outranks any inference I can make from photos, part numbers or topology. Record it and move on.**
+
+### ✅ CORRECTED AGAIN — WHERE `CON301` / `CON302` ACTUALLY LAND
+My 7:45 AM note said the board leads *"plug into 2 of the 12 strips."* **Wrong.**
+**They plug into the WIRE HARNESS across the top, not into any strip.** Confirmed by Jeff and
+visible in his photos: the grey/pink pair runs up and terminates at a harness socket.
+
+### ✅ THE HARNESS, READ OFF JEFF'S 5 PHOTOS (8:11 AM)
+- It is a **white flexible printed strip** running the full width across the top of the tray, with
+  **numbered 2-pin sockets spaced along it — `J1`, `J2`, `J3`, `J7` all legible.** One socket per
+  strip position, so `J1`…`J12`.
+- **Each LED strip's top end carries two male tabs silkscreened `−` and `+`** that push up into its
+  harness socket. Photos 4 and 5 show a strip plugged into `J1` and into `J2`.
+- **The grey/pink board lead lands AT a harness socket** (`J7` in photo 1), soldered to the socket
+  pins. That is the feed, and it is on the harness — not on a strip.
+- **Each strip also carries two bare gold solder pads at its far end** (photo 5, bottom). So a strip
+  can be joined either way: tabs-into-socket, or wire-to-pads.
+- Strips are held by **clear plastic lens/clips on a screw** plus **stripes of double-sided tape**.
+
+### ▶ THE ONLY THING LEFT TO DO, AND IT IS JEFF'S — METER THE NEW STRIPS BEFORE CLOSING UP
+He already owns the tool: the **TKDMR TD2B** (0–300 V DC, current-limited **30 mA**).
+🔴 **A normal multimeter CANNOT test these.** Diode mode puts out ~2–3 V and a strip is **7 beads
+in series ≈ 19 V** — a good strip will read open on a DMM. The TD2B is the only instrument here.
+
+| Test | Probes | Expect | Meaning |
+|---|---|---|---|
+| **One new strip, loose, before taping** | RED → `+` tab, BLACK → `−` tab | **~19–21 V, SETTLED, strip lights** | good |
+| same | same | **pegged 300 V, no light** | dead strip — set it aside |
+| same | reversed | nothing | normal, a series string blocks |
+| **A finished string of 6, from the board plug** | RED → `CON301` wire, BLACK → `CON302` wire | **ramps 300 → ~111 → settles 113 V, lights BRIGHT** | string good |
+
+**Hold the reading until it STOPS MOVING** — the TD2B ramps DOWN from its 300 V open-circuit
+ceiling as the current limit engages. That behaviour already fooled this project once (10-12
+10:47 AM, retracted the same hour). 113 V on a 6-strip string lands dead centre of the board's own
+silkscreened `LED:100-126V` window.
+
+### ⚠️ ONE PARTS ISSUE REMAINS, AND IT IS NOT A TEST
+**Jeff has now confirmed from the hardware: all 12 originals are "A".** The kit he bought is
+**10A + 2B**. If the 2 B strips do not plug into their harness sockets, he is 2 strips short.
+Two outs, both already priced, no new work required:
+1. **$0** — the strips have **bare solder pads at the far end** (his photo 5), so a B strip can be
+   wired in by its pads even if its tabs are on the wrong end.
+2. **$54.99** — ShopJimmy 12 × all-A `30375007007`, **in stock 7:50 AM**, same-business-day before
+   4 PM CT, tape pre-applied. Or **return the 10A+2B set**, window to **Nov 18**.
