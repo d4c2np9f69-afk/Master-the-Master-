@@ -269,3 +269,71 @@ camera recovers on its own.** The one-line fix is to prune stale keys *before* t
 | `Watch-CameraBatteries.ps1` — frozen-family + drain-rate watcher | ✅ healthy, now un-suppressed |
 | "Battery crossed 150" push (from 08-22) | 🔴 **proven false-alarm generator — retire or raise. Jeff's call.** |
 | the early-exit state bug | ⚠️ worked around, not fixed |
+
+---
+
+# 🎯 2026-10-13 6:08 PM — JEFF'S PRIMARY EVIDENCE CHANGES THE ANSWER. THE MARK IS 147.
+> **Jeff:** *"The backyard and back left cameras were completely dead. The front right and driveway
+> were still working. I changed them all so that they would be able to be monitored with a fresh
+> start. I don't want to be overpowering these things and checking them that runs the batteries
+> down, so it doesn't need to be checked every five minutes — set something reasonable."*
+
+🔑 **JEFF READ THE HARDWARE. THAT OUTRANKS EVERY INFERENCE ABOVE.** The two cameras whose telemetry
+froze were **actually dead**, not merely silent. So the frozen 147s were not "ghost values with no
+meaning" — **they are the last breath of a dying camera, which is the single datapoint this entire
+52-day experiment existed to capture.**
+
+## ✅ THE DELIVERABLE, FINALLY: BOTH DEATHS HAPPENED AT 147
+| camera | last voltage before it stopped | died |
+|---|---|---|
+| **back_left** | **147** | 2026-09-28 10:46 |
+| **301_backyard** | **147** | 2026-10-01 21:16 |
+| front_right | 150 — **still alive** | — |
+| 301_driveway | 151 — **still alive** | — |
+
+**Jeff's 2026-08-18 call — *"maybe around the 150 mark is the real failure"* — was right, within 3
+points.** ⚠️ **My 6:00 PM line "the 150 mark is NOT a failure point" was wrong and is RETRACTED.** It
+was built on the two survivors while treating the two corpses as meaningless noise. The survivors
+were alive **precisely because they were still above 147.**
+
+## 🔴 BUT A BARE THRESHOLD STILL DOES NOT WORK — AND THIS IS THE SUBTLE PART
+A single reading at or below 147 does **NOT** mean a dead camera:
+- **`front_right` touched 147 on 10-12 07:30 and recovered to 150** the same day.
+- **`301_driveway` fell to 131 and came back to 151.** A battery does not recharge itself.
+- Both survived; cold sag and load move this number 30–44 points on a healthy cell.
+
+🔑 **THE FAILURE SIGNATURE IS NOT A NUMBER, IT IS A FREEZE.** A living camera's reading **drifts** —
+voltage *and* temp *and* wifi all move. A dead one **repeats byte-for-byte across all three**. That
+is exactly what `Watch-CameraBatteries.ps1` already tests for, and whoever built it on 2026-10-11 had
+this right before today's data confirmed it. **147 tells you where these cells quit; the frozen
+family tells you that one actually has.** Use both: 147 as the *warning* line, the freeze as the
+*confirmation*.
+
+## 🔋 WHAT ACTUALLY DRAINS THE BATTERIES — measured, because Jeff's concern deserved a real answer
+🔑 **THE BATTERY MONITORING IS FREE. IT NEVER TOUCHES A CAMERA.** `Log-BlinkBatteries.ps1` makes
+exactly one call — `GET /api/states` — reading a value HA already holds. **Sampling it every 15
+minutes cost zero battery.** That belief was the premise of the ask, and it was not correct.
+
+| thing | rate | touches a camera? |
+|---|---|---|
+| `Log-BlinkBatteries.ps1` | was 15 min | ❌ reads HA cache only |
+| `automation.hcc_blink_motion_poll_30s` ⚠️ **the name lies — it is `minutes: "/2"`, every 2 min** | 720/day | cloud status fetch |
+| `automation.hcc_blink_periodic_health_reload` | hourly | integration reload |
+| `automation.hcc_snapshot_frame_on_motion` | **on real motion only** | ✅ **the snapshot call — this is the real cost** |
+| `automation.blink_fast_motion_poll` (10 s) | **OFF** | 🔴 must stay off — caused the 08-19 lockout |
+
+**Real drain = PIR wakes, recording and uploads, driven by actual motion — not by us looking.**
+
+## ✅ CHANGED ANYWAY, ON ITS OWN MERITS — logger 15 min → HOURLY
+Jeff's instinct was right even though the premise was not: **15-minute sampling against a drift of
+<1 point/day is wild oversampling**, and the CSV had reached 28,500 rows / 1.98 MB.
+**Verified, not assumed:** `Interval : PT1H`, `Enabled : True`, `State : Ready`,
+`NextRun 10/13/2026 19:00:00`, last run 18:01:01 result 0. **24 readings/day still resolves a
+<1/day drift and any freeze with room to spare.**
+⛔ **The 2-minute motion poll was NOT changed** — slowing it trades away motion-detection latency,
+which is the cameras' actual job. **That is Jeff's call, not mine.**
+
+## 📍 FRESH-START BASELINE — all four replaced together, 2026-10-13 18:00
+`301_driveway 173 · front_right 179 · back_left 180 · 301_backyard 175`
+**All four now share one start date** — four parallel drain curves instead of four staggered unknown
+ones, which is exactly why Jeff changed them all at once. **Watch for the first to approach 147.**
