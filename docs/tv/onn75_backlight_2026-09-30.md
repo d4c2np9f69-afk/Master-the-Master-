@@ -1517,3 +1517,53 @@ listing in the entire result set is either `30375007007 / 30375007008` (the 10A+
 
 ### ▶ VERDICT: **eBay `156740373272`, $50.22 delivered, Oct 16–21. It is the only one.**
 `https://www.ebay.com/itm/156740373272` — **not yet purchased, awaiting Jeff.**
+
+---
+
+## 2026-10-13 8:38 AM — 🔍 **DEEPEST SWEEP, INCLUDING LOCAL. ONE ONLINE SOURCE + ONE LOCAL PHONE CALL.**
+
+Jeff, 8:36 AM: *"Search the whole web there has to be somebody that has this with free shipping and
+faster and cheaper!!! Search locally as well the deepest search possible"* → 8:37 AM:
+*"Look for Doug's TV repair in Nashville area"* → 8:38 AM: *"Doug's tv repair 1 (615) 945-4977"*
+
+### 🏠 LOCAL — **DOUG'S TV REPAIR, MADISON TN. CALL THIS FIRST.**
+| | |
+|---|---|
+| Address | **104 Sarver Ave, Madison, TN 37115** (read off `dougstvrepair.com` contact block) |
+| Phone | **(615) 945-4977** — same number on their site, BBB, MapQuest, Manta, Nextdoor |
+| Distance | **~20 miles** from 301 S Aztec Dr, White House TN 37188 |
+| What they do | TV repair **and they sell parts**, with a cart and *"Free Delivery in USA"*. BBB profile: they *"assist clients with sourcing replacement parts"* — power boards, signal boards, T-con boards. |
+| ⚠️ Backlight strips | **NOT listed anywhere on their site.** Their parts listings show T-con boards, power boards and one "Power LED Board" (`DPS-171CP A`). **No strips.** Their site search 404s, so it had to be read page by page. |
+| ⚠️ Walk-in | **Site never describes a retail counter.** The address appears only under "Contact". **Do not drive there without calling.** |
+| 🔴 Address conflict | BBB says **Madison 37115**; MapQuest says Nashville **37201**; Manta says Nashville **37213**. Their own site says **Madison 37115** — trust that one, but confirm on the phone. |
+
+**What to ask for, word for word** — this is the whole part spec and it fits in one breath:
+> *"75-inch onn 100044717. I need the 12-strip LED backlight set — the **all-A** version,
+> `30375007007` / `LED75D07A-ZC66AG-05`, 826 mm, 7 LEDs per strip. **Not** the 10A+2B set,
+> **not** the -06. Do you have it or can you get it, and how fast?"*
+
+Also worth asking on the same call: **do they have a dead 75" onn / Element E4FAA75R / Westinghouse
+WR75UT4210 in the back he can pull 12 A strips off.** A shop's scrap pile is the only genuinely
+cheaper-and-faster path left, and it costs one question.
+
+### ❌ EVERYTHING ELSE, CHECKED LIVE THIS MORNING — ALL DEAD
+| Source | Checked | Result |
+|---|---|---|
+| **Google Shopping** (`"30375007007D" OR "12 A strips"`) | 8:36 AM | Surfaced **smartfixparts $43.02** as the cheapest. Traced it to eBay **`406448966606`** — title pairs **`30375007007 30375007008`**. **10A+2B. Dead.** |
+| **Walmart** (`30375007007 LED backlight strips`) | 8:36 AM | **One** relevant hit, and its title literally begins **"10A+2B"**. Dead. |
+| **Amazon** | 8:33 AM | **Zero 12×A.** `B0G2XPMHRT` "12pcs (10*A+2*B)" · `B0HG9TC71K` "10 A strips and 2 B strips", delivery **Oct 26 – Nov 4** · `B0HG53R1V4` `LED75D07B` · `B0FFZRBDFG`/`B0DNP4WLZ2`/`B0HJCBHZ4Q` -06, one delivers **Nov 16**. |
+| **TvPartsGuy** — the `30375007007D / 30375007007` set | 8:37 AM | `ld+json` **`availability: OutOfStock`**, price **$87.49**. Dead on both counts. |
+| **TvPartsGuy** — the `007/008` set | 10-12 + today | $74.99, out of stock, **and its own description says 10 A + 2 B** — wrong version even if restocked. |
+| **ShopJimmy** | 8:22 AM | Correct version, **`availability: OutOfStock`**. Vendor also ruled out by Jeff on shipping cost. |
+| **Newegg** | via search | Carried ShopJimmy's stock; out, *"may or may not be restocked."* |
+| **AliExpress** | 8:37 AM | Search page returns 12 item IDs but **renders no readable product text** — and everything there ships from China, which is **slower than Oct 16–21 by definition**. Not pursued further. |
+| **eBay — the full category, ~140 listings** | 8:33 AM | Only **TWO** carry `30375007007D`. Every other one is `007/008` or `-06`/`005/006`. **Every cheaper listing** — $34.93, $35.80, $35.99, $36.28, $36.55, $43.02 — **is the 10A+2B set.** |
+
+### ▶ THE ONLY ONLINE OPTION STANDS: **eBay `156740373272`, $50.22 delivered, Oct 16–21**
+`https://www.ebay.com/itm/156740373272` · KUNPARTS (3,376) 99.5% · El Monte CA · free shipping ·
+10+ in stock · description proves **"12 PCS "A""**, `LED75D07A-ZC66AG-05（30375007007）`, 826 mm,
+7 LED, fitment `m21123-mt`. **Not yet purchased.**
+
+🔑 **There is no cheaper-and-faster online. The 10A+2B kit is what everyone stocks, which is exactly
+why the $36 listings are everywhere and the 12×A is not. Doug's is the only lead that could beat
+it, and it is one phone call.**
