@@ -203,3 +203,69 @@ jumped and back_left still read 147, which reads exactly like "this one didn't g
 came in at 180 on the next poll. 🔑 **Give the logger one more 15-minute cycle before concluding a
 camera was missed.** (Its wifi also moved −38 → −47, consistent with being handled.)
 *Fresh-cell range is 173–180, so a genuine new-battery reading is ~175±5 — useful for next time.*
+
+---
+
+# 🔴 CORRECTION, 2026-10-13 6:05 PM — TWO ERRORS IN THE SECTION ABOVE, PLUS A SUPPRESSED ALARM
+> **Jeff 6:03 PM:** *"I still want the batteries monitored on the blink cameras that is what I
+> changed them all at the same time"*
+
+**Monitoring continues. Nothing was stopped** — `HCC Blink Battery Log` runs every 15 min and is
+healthy (last run 17:59:58, result 0). And changing all four at once **improves** it: four parallel
+drain curves from one common start date, instead of four staggered unknown ones.
+
+Re-reading `Watch-CameraBatteries.ps1` (built 2026-10-11, a far better instrument than the 150
+threshold — it tests whether **voltage + temp + wifi are ALL frozen together**) exposed the following.
+
+## ❌ ERROR 1 — "back_left and 301_backyard sat below 150 and never died either" IS WRONG
+Those two had **stopped sending fresh telemetry weeks before the battery change**, and the watcher
+had already said so in its own log:
+```
+back_left:     voltage+temp+wifi ALL frozen at 147 since 2026-09-28 10:46  (356.5 h)
+301_backyard:  voltage+temp+wifi ALL frozen at 147 since 2026-10-01 21:16  (274.0 h)
+```
+**Their flat 147s were GHOST VALUES, not measurements.** The "30% / 29% of readings below 150" figures
+for those two are therefore **not evidence of anything** and must not be cited. 🔑 This is the
+change-driven-sensor trap again, and the tell was available all along: **a live reading drifts; a
+frozen one repeats byte-for-byte across voltage AND temp AND wifi at once.**
+
+✅ **THE EXPERIMENT'S ACTUAL CONCLUSION STILL STANDS** — because it rests on the **two test cameras**,
+`front_right` and `301_driveway`, which were **live throughout** (the watcher computed real per-day
+drain rates for them right up to 10-13 07:30). Neither ever failed from at/below 150 in 52 days, and
+`301_driveway` fell to 131 and recovered. **The 150 mark is still not a failure point, and the number
+is still not a state-of-charge reading.**
+
+## ❌ ERROR 2 — "`HCC Camera Battery Watch` last ran with result 1 (failure)" IS WRONG
+**`exit 1` is BY DESIGN.** The script exits **0 when it has nothing to report** and **1 whenever it has
+findings** (lines 224 / 260 / 273). `LastTaskResult 1` meant *"findings present"*, not *"broken"*.
+It was working correctly and reporting the two frozen cameras. **Retracted.**
+
+## 🔴 A REAL BUG, AND IT HAD SILENTLY DISARMED THE ALARM
+`camera-battery-seen.json` still held `dead:back_left`, `dead:301_backyard`, `soon:front_right`
+**after** the batteries were changed and all four read healthy.
+
+**Why it never cleared:** line 224 is `if (-not $dead -and -not $soon) { exit 0 }` — an **early exit
+that happens BEFORE the stale-key cleanup and the push block at the end of the script.** So on a
+fully-healthy run the state file is never pruned.
+
+**The consequence is the dangerous part:** the next time `back_left` genuinely dies, its key is still
+present, `$new` comes back empty, the script logs *"nothing new since the last alert"* and **pushes
+nothing.** An alarm that reads as armed and cannot fire — the same shape as the dead-code automations
+found on 09-20 and 10-12.
+
+✅ **FIXED NOW, minimally:** state file backed up to
+`camera-battery-seen.json.bak-20261013-batterychange` and reset to `{}`. Re-ran the watcher twice:
+`ok 301_driveway (173), front_right (179), back_left (180), 301_backyard (175)`, **exit 0**, state
+stays `{}`. Future dead/soon events are now genuinely "new" and will push.
+
+⚠️ **NOT FIXED — the script still has the early-exit bug and will re-strand state the next time a
+camera recovers on its own.** The one-line fix is to prune stale keys *before* that early exit.
+**Not done: cameras are a frozen subsystem and this is Jeff's call.**
+
+## ▶ WHAT MONITORING NOW LOOKS LIKE
+| piece | state |
+|---|---|
+| `HCC Blink Battery Log` — 15 min CSV logger | ✅ healthy, result 0, never stopped |
+| `Watch-CameraBatteries.ps1` — frozen-family + drain-rate watcher | ✅ healthy, now un-suppressed |
+| "Battery crossed 150" push (from 08-22) | 🔴 **proven false-alarm generator — retire or raise. Jeff's call.** |
+| the early-exit state bug | ⚠️ worked around, not fixed |
