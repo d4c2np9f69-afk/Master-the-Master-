@@ -1567,3 +1567,43 @@ cheaper-and-faster path left, and it costs one question.
 🔑 **There is no cheaper-and-faster online. The 10A+2B kit is what everyone stocks, which is exactly
 why the $36 listings are everywhere and the 12×A is not. Doug's is the only lead that could beat
 it, and it is one phone call.**
+
+---
+
+## 2026-10-13 8:43 AM — 🔑 **DOUG *IS* "THE REPAIR MAN." PARTS ONLY — NO LABOR. JEFF'S CALL.**
+
+Jeff, verbatim: *"Doug's tv repair is the guy that has always fixed my TVs he did the last repair.
+But he charged me $280 and that was fair but I'm not paying that again for $398 tv on it 3 repair."*
+
+### 🔑 THIS IDENTIFIES THE HAND-SOLDERED JOINT
+Since 09-30 this record has quoted Jeff on *"last time the repair man had to solder the strips
+together in one place."* **That repair man is Doug.** The one non-factory joint in the tray is
+**Doug's work**, from the repair Jeff paid **$280** for. Every earlier entry that said "the previous
+repair" or "the repair man" means **Doug's TV Repair, Madison TN**.
+
+### 💵 THE ECONOMICS, AND JEFF HAS ALREADY DECIDED
+- TV new: **$398**. Doug's last repair: **$280** — *"that was fair"*, but this is **repair #3**.
+- ⛔ **DO NOT PROPOSE SENDING THE TV TO DOUG, OR ANY PAID LABOR. Jeff has ruled it out.**
+  Current path is **$63.78 already spent** (T-con $24.09 shipped + strips $39.69 being refunded) and
+  **~$50.22** for the correct strips ⇒ **≈ $74 all-in, Jeff's own labor, tray already open.**
+- 🔑 **Doug is now a PARTS COUNTER and a SOURCE OF KNOWLEDGE, not a repair shop, for this job.**
+
+### ▶ WHAT TO ASK DOUG — **(615) 945-4977** — PARTS ONLY
+1. 🔑 **"What backlight strips did you put in my 75-inch onn last time?"** He has the job on record,
+   he had the tray open, and **he is the reason there is a soldered joint in it.** His answer
+   independently confirms the version — and he may say he only bridged a strip rather than
+   replacing the set, which would explain why they failed again.
+2. **"Do you stock, or can you get, the 12-strip ALL-A set — `30375007007` / `LED75D07A-ZC66AG-05`,
+   826 mm, 7 LEDs per strip? Not the 10A+2B, not the -06."** What price, and how fast.
+3. **"Do you have a dead 75-inch onn 100044717 / Element E4FAA75R / Westinghouse WR75UT4210 in the
+   back I can pull 12 A strips off?"** A scrap-pile pull is the only genuinely cheaper-and-faster
+   option left, and it is one question.
+4. **Make it explicit it is parts over the counter — Jeff is doing the work himself.**
+
+⚠️ Backlight strips are **not listed anywhere on `dougstvrepair.com`** (T-con boards, power boards,
+one `DPS-171CP A` "Power LED Board" only) and the site never describes a walk-in counter — so this
+is a **phone call, not a drive**. Address per their own site: **104 Sarver Ave, Madison, TN 37115**
+(~20 mi); directories disagree (MapQuest 37201, Manta 37213) — confirm on the phone.
+
+**Fallback if Doug can't beat it:** eBay `156740373272`, **$50.22 delivered, Oct 16–21**, 10+ in
+stock, description proves 12 PCS "A". Still not purchased.
