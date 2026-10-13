@@ -1778,3 +1778,44 @@ budget roughly **$47** out the door at $43, or **$55** if it goes through at the
 ### RUNNING TOTAL IF THE OFFER LANDS AT $43
 T-con **$24.09** + strips **~$47 with tax** ⇒ **≈ $71** against a **$398** TV, Jeff's own labor,
 tray already open. The cancelled $39.69 comes back separately.
+
+---
+
+## 2026-10-13 9:17 AM — ⏳ **OFFER STILL PENDING. IT CANNOT BE RETRACTED — THAT GOVERNS THE DOUG CALL.**
+
+Jeff: *"Can you check for the offer being accepted that way I know how to handle Doug's response."*
+Read live from **My eBay → Bids & offers**, 9:17 AM.
+
+| | |
+|---|---|
+| Status | **OFFER SENT** — not accepted, not declined, **not countered** |
+| Item | `156740373272` 12A LED Strip, seller **kunparts** (3,287) **99.50 %** |
+| Offer / list | **US $43.00** vs **$50.22**, free shipping |
+| **Expires** | **23 h 56 m from 9:17 AM ⇒ Wed Oct 14, 7:14 AM Central** |
+| 🔴 eBay's own wording | **"You'll get charged as soon as the offer price is accepted."** |
+
+### 🔴 THE CONSTRAINT THAT DECIDES HOW TO PLAY DOUG
+**There is NO retract option.** Checked the offer row's "More actions" menu at 9:17 AM — it offers
+only **Edit note**, **Delete** (removes the row from the list view, *not* the offer),
+**View seller's other items** and **Visit Seller's store**. No *Retract* or *Withdraw*.
+⇒ **The $43 offer is live and binding until Wed 7:14 AM, and acceptance charges PayPal
+automatically with no confirmation step.** If Doug comes back cheaper inside that window and Jeff
+buys from Doug, he can still get auto-charged by kunparts and would be cancelling a second order.
+
+### ▶ HOW TO HANDLE DOUG — SET THE BAR, DON'T DOUBLE-BUY
+Tell Doug the number. It costs nothing, it is true, and it stops two sets arriving:
+```text
+Quick heads up - I've got an offer in on a set online at $43 delivered,
+arriving Oct 16-21, and it's good until tomorrow morning. If you can beat
+that on price or get it to me faster, I'd rather buy it from you. Just let
+me know either way before tomorrow.
+```
+- **Doug beats it** → wait for kunparts to decline or let the offer lapse at **Wed 7:14 AM**, then buy
+  from Doug. **Do not buy from Doug while the offer is live** unless he is willing to cancel.
+- **Doug can't beat it / doesn't answer by Wed 7:14 AM** → the offer simply expires. Jeff can then
+  re-offer (eBay allows **3 offers** per listing) or just hit Buy It Now at $50.22.
+- **kunparts accepts $43 first** → it is paid and done; tell Doug never mind, and the **donor-TV
+  question is still worth asking** for the next one.
+
+⚠️ **Tax is added at checkout** — the cancelled order was $36.16 + $3.53 TN tax, so **$43 lands near
+$47 out the door.** That is the real number to hold Doug against, not $43.
