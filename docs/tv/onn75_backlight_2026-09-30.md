@@ -1652,3 +1652,57 @@ appears for `LED75D07A-ZC66AG-05` / `30375007007`.** onn is a Walmart house bran
 distributor channel does not stock it.
 ⚠️ A search snippet claimed TvPartsGuy shows *"Current Stock: 1"* at $74.99. **Its live page at
 8:37 AM says `"availability": "OutOfStock"` and $87.49.** The index is stale; the live read wins.
+
+---
+
+## 2026-10-13 8:51 AM — ✅ **NASHVILLE SHOPS LISTED + THE EBAY UNIVERSE IS NOW CLOSED, NOT SAMPLED.**
+
+Jeff: *"Look again"* → *"Did you check all the Nashville parts places"*. **Honest answer: no, I had
+only checked Doug's.** Both gaps closed below.
+
+### 🔑 THE SEARCH THAT ACTUALLY CLOSES EBAY — I HAD BEEN SEARCHING TITLES ONLY
+Every earlier eBay sweep used title search. **eBay's `LH_TitleDesc=1` searches descriptions too**,
+and the A-version carries one token nothing else does: **`LED75D07A-ZC66AG-05D`**.
+`_nkw="LED75D07A-ZC66AG-05D"&LH_TitleDesc=1&_sop=15&_ipg=240` returns **exactly 5 listings on all of
+eBay.** That is the complete universe, not a sample.
+
+| # | Item | Price | MPN verdict |
+|---|---|---|---|
+| 1 | **`156740373272`** US | **$50.22** | ✅ **all-A, and description says "12 PCS "A""** |
+| 2 | **`198045329154`** China | **$45.04 / $42.79 w-coupon** | ✅ all-A MPN, **count not stated** |
+| 3 | `198496888408` US $48.44 | — | ❌ MPN has **`LED75D07B-ZC66AG-05` + `30375007008`** |
+| 4 | `128081277576` US $54.09 | — | ❌ title says `-05D`, **MPN is `-06` + `005/006`** |
+| 5 | `357086037360` Canada $48.31 | — | ❌ **+$59.56 ship +$5.58 import ≈ $113**, Oct 28–30 |
+
+🔑 **`156740373272` carries Best Offer** — the $50.22 is not fixed. An offer is free to make.
+
+### 🏠 NASHVILLE-AREA SHOPS — READ OFF GOOGLE'S LOCAL PANEL 8:51 AM
+| Shop | Phone | Address | Rating |
+|---|---|---|---|
+| **Capital City Computers and TV Repair** | **(615) 562-2494** | 1106 Gallatin Ave, Nashville 37206 | **4.9** (378) |
+| **Doug's TV Repair** | **(615) 945-4977** | 104 Sarver Ave, Madison 37115 | 4.3 (131) |
+| **Tusculum TV Service** | **(615) 832-2128** | 4717 Nolensville Pike, Nashville 37211 · **Mon–Fri 9–5** | — |
+| **Tele-Quick TV Repair** | **(615) 833-2320** | 3716 Nolensville Pike Ste A, Nashville 37211 | 4.1 (46) |
+| **After Hours TV Repair** | **(615) 851-5957** | 223 Gleaves St — **mobile/in-home** | 4.1 (46) |
+| — (Yelp listing) | **(615) 928-8108** | 4121 Hillsboro Pike Ste 105, Nashville 37215 | 4.3 (821) |
+| Electronic Express 100 Oaks | 615-297-1000 | 719 Thompson Ln, Nashville 37204 | **retail store, not a parts counter** |
+
+⚠️ **State plainly: every one of these is a REPAIR SERVICE, not a parts distributor.** None of them
+advertises an over-the-counter parts department, and an onn 75" backlight set is not a stocked item
+anywhere in the Nashville area. **The realistic ask on each call is the donor question:**
+> *"Do you have a dead 75-inch onn 100044717, Element E4FAA75R or Westinghouse WR75UT4210 in the
+> back? I want to buy the 12 backlight strips off it — the all-A set."*
+
+### ONLINE PARTS HOUSES — THREE MORE CHECKED, ALL DEAD
+| Site | Result |
+|---|---|
+| **tvpartstoday.com** | **"0 results found for 30375007007"** — read live 8:51 AM. Confirms the 10-12 finding. |
+| **tvchopshop.com** | product search returns the homepage, **no hit** for `30375007007`. Not carried. |
+| **tvtechparts.com** | **`ERR_CONNECTION_REFUSED`** — site would not load at all. Not checkable. |
+| **Temu** | **forces a login before showing any search result.** Not checked — and it ships from China, so it cannot beat Oct 16 regardless. |
+| Encompass · TVServiceParts · PartsForYourTV · eReplacementParts | part number returns nothing — onn is a Walmart house brand, outside the authorized channel. |
+
+### ▶ WHERE IT STANDS
+- **$50.22, US, Oct 16–21, "12 PCS "A"" in writing, Best Offer available** — `156740373272`
+- **$42.79–45.04, China, Oct 20 – Nov 2, count unconfirmed** — `198045329154`
+- **$0–? local** — six phone numbers above; the donor-TV question is the only thing that beats both.
