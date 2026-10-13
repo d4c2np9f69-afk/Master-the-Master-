@@ -146,3 +146,32 @@ what the history points to, but the office run may be shorter and shorter is che
 3. **$9.99–13.89** — only if it is truly dead, swap the whole cable. **Never re-crimp 30 AWG flat.**
 4. 🔑 **Re-route it so it is not underfoot.** It got stepped on once; the clips in the box exist for
    exactly this.
+
+---
+
+## 2026-10-13 9:42 AM — ⛔ **CORRECTION: THE PHOTOGRAPHED PLUG IS THE GOOD END.**
+
+Jeff: ***"That is not the broken end."***
+
+**Struck: the entire "the locking latch is snapped off → the plug crept out of the port → $0 reseat"
+theory from the 9:40 AM entry.** I built it on the plug in Jeff's photo. **That plug is the intact
+end.** He sent it to show me the cable and connector type, not the damage. **The broken end has not
+been photographed and I know nothing about its condition — do not guess at it.**
+
+### WHAT SURVIVES THE CORRECTION, AND WHY
+🔑 **The 30 AWG finding is independent of which end is damaged.** Read off the manufacturer's own
+spec bullet at 9:40 AM — Jadaol Cat6/Cat6A Flat: *"High Performance Cat6, **30 AWG**…"*
+**Standard RJ45 plugs are built for 23–26 AWG; their blades frequently miss the copper on 30 AWG,**
+producing a crimp that looks and seats perfectly and tests dead.
+⇒ **REPLACE THE CABLE. DO NOT RE-CRIMP IT.** That holds no matter what the far end looks like.
+
+### STILL THE ANSWER
+| | |
+|---|---|
+| **Jadaol Cat6/Cat6A Flat, WHITE 50 FT** `B00WD017GQ` | **$9.99**, **FREE delivery TODAY** |
+| Jadaol Cat6/Cat6A Flat, WHITE 25 FT `B018BCJKE0` | **$9.99**, **TODAY** |
+| Jadaol Cat6/Cat6A Flat, BLACK 50 FT `B00WD017FW` | $13.89, tomorrow — **the one Amazon shows "Purchased Nov 2017"**, matching the black jacket in the photo |
+
+⚠️ **Measure the run first.** Available 1 · 3 · 5 · 10 · 15 · 20 · 25 · 30 · 35 · 50 · 60 · 75 · 100 ·
+150 · 200 FT. Shorter is cheaper, and the 50 FT is only what the purchase history suggests.
+🔑 **Ships with clips — route it off the floor this time.**
