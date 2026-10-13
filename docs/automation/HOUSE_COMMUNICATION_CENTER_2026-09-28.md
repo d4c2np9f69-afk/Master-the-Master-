@@ -532,3 +532,38 @@ announcing at 22:00 would report lights on while they were still being turned of
 The shutdown turns them off, but either being switched back on at bedtime is **normal**, and
 announcing it nightly is the crying-wolf that teaches people to stop listening. Same reasoning as the
 Mercedes-lock and spare-contact exclusions in the 09-20 baseline.
+
+### 🔍 6:45 PM — PROVING THE FILTER DID NOT BLIND THE REPORT
+> **Jeff 6:45 PM:** *"No I agree we want to know when it is a legitimate error, that's what it's for.
+> Just don't want the noise."*
+
+**Claimed it, then measured it.** Every FAIL/CRIT the audit has produced in 46 days, by which check
+found it:
+
+| check | findings | share | touched today? |
+|---|---|---|---|
+| **entities** | 4049 | **46.0%** | ❌ untouched |
+| log | 3534 | 40.2% | ⚠️ **one signature narrowed, nothing else** |
+| integration | 801 | 9.1% | ❌ untouched |
+| zigbee | 196 | 2.2% | ❌ untouched |
+| app · tasks · cam-alert · feeds · ai-detect · meters · beast · repair | 219 | 2.5% | ❌ untouched |
+
+**Real faults those untouched paths have already caught:** weather station frozen 64 min · a Zigbee
+device silent 24.5 h while Z2M still said "online" · water heartbeat unavailable · the AI server
+unreachable · an integration stuck in setup · a re-auth repair · `/api/forecast` timing out.
+⇒ **Jeff's own example — "if a camera is down" — reaches him through FOUR independent paths, none of
+them altered.** The only thing changed was a single cloud-push signature that has never once cost
+availability in 46 days.
+
+### 🔴 AND THAT SWEEP CAUGHT A FAULT I HAD JUST CREATED MYSELF
+`[tasks] HCC Blink Battery Log last ran 1.2 h ago (limit 1 h)`
+
+**I moved that logger 15 min → hourly an hour earlier and did not move its staleness limit.** At 15
+min a grace of `1` was four cycles of slack; against an hourly trigger it is **less than one**, so an
+ordinary on-time run would have reported late **every night** — manufacturing exactly the noise Jeff
+had just asked me to remove.
+✅ **Grace raised 1 → 2**, the same value the hourly `HCC Whole-Stack Audit` already uses, honouring
+this file's own stated rule: *"a job that is a full cycle late is a real miss."* Backup
+`HCC-Audit.py.bak-20261013-batterycadence`. Re-run: **`0 actionable`.**
+🔑 **THE LESSON IS THE 08-11 ONE AGAIN: after changing a cadence, sweep for everything that MEASURES
+that cadence.** A schedule and its watchdog are one unit; moving half of it is a bug.
