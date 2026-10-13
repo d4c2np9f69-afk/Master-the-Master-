@@ -1074,3 +1074,28 @@ the jumper run shortest. Polarity marking on the pads is `A` = anode (+), `K` = 
 | T-con `BG000N700`/`ZAZZ` — eBay 126326188707 | $24.09 |
 | 12 strips `30375007007` — eBay 389576068118 | $39.69 |
 | **Total** | **$82.77** vs $398 new, on a TV that was going in the dumpster |
+
+## 2026-10-12 7:20 PM — ❌ **THE REFLECTOR SHEET CANNOT BE ORDERED. SEARCHED THIS SESSION.**
+Jeff: *"So where can I order a new white thin plastic sheet from."* Searched in Chrome 7:17–7:20 PM.
+
+**No reflector sheet exists as a sellable part for the onn 100044717 / `LED75D07A`.** It has no part
+number anywhere. What the search actually returns:
+
+| Source | Price | Why it does NOT solve this |
+|---|---|---|
+| eBay `moon_star_tech`, `ctaylorparty2`-type sellers — 75" reflector/filter sheets | $25–$40 | **Salvaged pulls from OTHER models** (LG 75QNED80, Sony XBR-75X900H, Samsung UN75H6350, Toshiba 75C350, TCL 75S535). The lens-hole pattern is cut for THAT set's strips. Raw material at best, never a drop-in. |
+| Plazmo Industries `LCDRS-0320.0170` "LCD Panel Reflector Sheet" | $7.95 (was $9.95), in stock, 95% reflectivity, 0.188 mm | **Stock sizes are 320×170 / 165×221 / 335×211 mm** — laptop/monitor sized. Custom only **up to 1 m²**, and a 75" 16:9 panel is ~1660 × 930 mm = **~1.55 m²**. ⇒ **PATCH MATERIAL ONLY.** |
+| AliExpress / DHgate "TV LED Backlight Reflective Paper … Reflective hole opener" | $2 – $31 | Raw film **plus a hole punch**, which is the only "make your own" kit found. **China, 2+ weeks** — the exact delay Jeff rejected on the strips. |
+
+🔑 **The blocker is not the material, it is the 84 lens holes.** Jeff's sheet needs a hole at every
+one of 12 strips × 7 beads, each in exactly the right place. Cutting and punching that by hand is
+the entire job; the white film itself is a few dollars.
+
+### ▶️ THE ANSWER, CHEAPEST FIRST
+1. **$0 — REUSE HIS. Patch any tear with white tape on the BACK side.** It sits behind the diffuser
+   and is never seen through the screen. This is not a compromise, it is the correct repair.
+2. **$7.95 Plazmo** only if he wants proper 95% white film instead of tape for a patch.
+3. Buying a sheet is **not an option at any price** — nobody cuts one for this panel.
+
+⇒ The 12:46 PM note ("REUSE IT, KITS DO NOT INCLUDE ONE") is now **confirmed by a real search**,
+not just inferred from iFixit teardowns.
