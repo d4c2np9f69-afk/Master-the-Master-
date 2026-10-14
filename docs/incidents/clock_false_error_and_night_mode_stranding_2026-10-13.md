@@ -372,3 +372,73 @@ every `homeassistant/expose_entity/*` and `cloud/alexa/entities/update` name ret
 ```
 
 Jeff asking her every night was the last manual step in the 10 PM shutdown. It is gone.
+
+
+---
+
+## 9. 🔴 RETRACTION — section 8 above is WRONG. Route A is DEAD.
+
+**Section 8 claimed Route A was proven. It was not. Jeff caught it:**
+
+> *"No the lamps have been off you will have to turn them on first to test if they go off"*
+
+The 9:38 PM test fired "turn **off** the living room lamps" at lamps **that had already been off
+for hours**. Jeff's *"The lamps are out"* was a description of the pre-existing state, not evidence
+that anything happened. **A test whose expected result equals the current state cannot fail, so it
+cannot prove anything** — and I wrote PROVEN into a memory, this document and commit `effc070` on
+the strength of it.
+
+**The test that could fail, run at 9:40:35 PM:**
+
+```
+media_player.play_media   media_content_type=custom
+media_content_id = "turn on the living room lamps"      -> HTTP 200, []
+```
+
+**Jeff: "No they did not come on."**
+
+✅ **So the 08-13 memory was RIGHT all along** — `media_content_type: custom` *"returns OK but
+nothing happens, Amazon closed that API."* The web search that said the feature exists in 3.4.0+
+is true about the integration and irrelevant about Amazon's endpoint. **The local note was written
+against this hardware; the search was not.**
+
+**Why there is no signal in HA:** the call returns `HTTP 200` with an empty `[]` body and the
+Echo's `last_changed` never moves — identically, whether it worked or not.
+
+### What was changed, 9:41 PM
+
+- **The dead `media_player.play_media` step is REMOVED** from `hcc_house_shutdown_10_pm`.
+- **Route B restored and is now the live path.** `input_boolean.living_room_lamps` is exposed to
+  Alexa again and the shutdown pulses it on for 5 s, then off to re-arm, both with
+  `continue_on_error`. The re-enable of `hcc_night_mode_lights` is still last.
+
+```
+ 1. automation.turn_off      hcc_night_mode_lights
+ 2. input_boolean.turn_off   night_mode                              [continue_on_error]
+ 3. light.turn_off           living / kitchen-dining / bedroom cans   [continue_on_error]
+ 4. switch.turn_off          masterbath + both bed lamps              [continue_on_error]
+ 5. delay 3 s
+ 6. input_boolean.turn_on    living_room_lamps                        [continue_on_error]
+ 7. delay 5 s
+ 8. input_boolean.turn_off   living_room_lamps  (re-arm)              [continue_on_error]
+ 9. automation.turn_on       hcc_night_mode_lights
+```
+
+### 🟠 OPEN — one thing only Jeff can do
+
+**Alexa app → More → Routines → +**
+- **When:** Smart Home → **"Living Room Lamps"** → *turns on*
+- **Then:** Smart Home → turn **off** the living room lamps
+
+If "Living Room Lamps" is not offered as a trigger, say **"Alexa, discover devices"** once.
+
+Until that Routine exists the nightly pulse is a harmless no-op and he still has to ask her.
+🔴 **Do not claim the 10 PM lamp shutoff works until he confirms it on a night the lamps
+were ON beforehand.**
+
+### The lesson, recorded in memory
+
+A test must be able to fail. If the expected result equals the current state, drive the device to
+the opposite state first. `HTTP 200` is not a result, and for a device HA cannot see the only
+evidence is a human looking at it — so the question has to be one a human can answer
+unambiguously.
