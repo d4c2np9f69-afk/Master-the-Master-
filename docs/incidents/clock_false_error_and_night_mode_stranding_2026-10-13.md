@@ -315,3 +315,60 @@ switch.
 
 ⚠️ **HA cannot see these lamps at all** — they are not HA entities. No instrument here can
 confirm the lamps went off. **Only Jeff can.**
+
+
+---
+
+## 8. ✅ RESOLVED 9:38 PM — Jeff said "Test it", and ROUTE A WORKS
+
+He did not want to wait for 10 PM. Fired live at **9:38:02 PM**:
+
+```
+media_player.play_media
+   entity_id          = media_player.living_room_echo_dot
+   media_content_type = custom
+   media_content_id   = turn off the living room lamps
+-> HTTP 200, response []
+```
+
+**Jeff, 9:38 PM: "The lamps are out."**
+
+🔴 **So the 08-13 record was WRONG** — that call does NOT silently no-op today. Either Amazon
+re-opened the path or alexa_media fixed it in the versions since. `system_log/list` logged no error
+for it (the only Alexa entry in the whole log is an unrelated 6:00:10 PM state-report timeout on
+`binary_sensor.front_right_motion`).
+
+⚠️ **How this nearly got called a failure:** the Echo's own state does **not** change
+(`last_changed` stayed at 5:55 PM) and the response body is an empty `[]`. From HA's side the call
+looks exactly like a no-op — which is almost certainly how the 08-13 session reached the wrong
+conclusion. **Nothing in HA can see these plugs.** Only Jeff looking at the lamps could settle it,
+and that is why he was asked rather than told.
+
+### Route B removed the same minute, and its exposure REVERTED
+
+Route A is proven, so the `input_boolean.living_room_lamps` pulse was dead weight — stripped out,
+shutdown back to **7 steps**. More important, the helper was **un-exposed from Alexa at 9:39 PM**
+(`homeassistant/expose_entity/list` → `None`): leaving an HA switch named **"Living Room Lamps"**
+sitting beside the real Sylvania group is precisely how the spoken phrase that just worked would
+have been broken later. That risk was mine, created minutes earlier, and removed as soon as Route A
+proved out.
+
+**The capability it uncovered is kept in memory anyway**, because it is genuinely useful and the
+08-13 session had concluded it was impossible: `config/entity_registry/update` with
+`options_domain="cloud.alexa"` and `options={"should_expose": true}` works on HA 2026.10.1, while
+every `homeassistant/expose_entity/*` and `cloud/alexa/entities/update` name returns
+`unknown_command`.
+
+### Final state of the 10 PM shutdown
+
+```
+ 1. automation.turn_off      hcc_night_mode_lights
+ 2. input_boolean.turn_off   night_mode                                 [continue_on_error]
+ 3. light.turn_off           living / kitchen-dining / bedroom cans      [continue_on_error]
+ 4. switch.turn_off          masterbath + both bed lamps                 [continue_on_error]
+ 5. delay 3 s
+ 6. media_player.play_media  Echo Dot "turn off the living room lamps"    [continue_on_error]
+ 7. automation.turn_on       hcc_night_mode_lights
+```
+
+Jeff asking her every night was the last manual step in the 10 PM shutdown. It is gone.
