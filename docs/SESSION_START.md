@@ -168,9 +168,8 @@ not a gate.*
 Get it the way `ACCESS_MAP.md` §1 documents; every script in `HCC-Scripts/` already has the
 pattern. Without the flag the runner **skips them and says so** — a skip is not a pass.
 
-**Last full run: 2026-10-11 06:3x — `node scripts/run-all-gates.js` → 22/22 PASS, exit 0, and
-then the 5 the runner skipped were RUN BY HAND AND ALSO PASS. 🟢 27 OF 27 GREEN, NOTHING
-SKIPPED — the first time, so there is no "a skip is not a pass" hole left to argue about.**
+**Last full run: 2026-10-13 11:2x PM — `node scripts/run-all-gates.js` → 22/22 PASS, exit 0, and the 5 the runner skips were RUN BY HAND AND ALSO PASS. 🟢 27 OF 27 GREEN, NOTHING SKIPPED.**
+`package-gate-test.js` was the one FAIL on the first run — the handover package in `iCloudDrive\HCC-PROJECT` was stale against `service-worker.js` (bumped to hcc-v133) and `docs/OPEN_ITEMS.md` (cleaned up from 242 KB to 131 KB). Re-synced the 4 paired files and it went green: 711 files checked. **That gate works — it caught a real staleness the same hour it was created.**
 How to run the 5 the runner cannot: `sensor-liveness-test.js`, `doors-entity-test.js` and
 `garage-entity-test.js` take a states dump as a **POSITIONAL** argument — the runner's
 *"needs `--states=<file>`"* wording is WRONG, that flag is read as a filename and it skips
