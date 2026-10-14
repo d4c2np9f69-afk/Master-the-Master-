@@ -230,3 +230,88 @@ minutes after a change had silently killed the TV popups. It does not prove a po
 The siren / panic chain (5-second siren + clock voice + phone + watch) and the leak alarm. Both
 were proven earlier today (`chime.log` 19:32:30, *"Attention. Panic button."*), and after the
 lights incident nothing audible gets fired at 9:25 PM without him saying so.
+
+
+---
+
+## 7. THE SYLVANIA LIVING ROOM LAMPS — 9:29 PM, and a capability the record said we did not have
+
+**Jeff:** *"I know you can't turn off the living room lamps because they are the Sylvania but Alexa
+can turn them off so if you could tell her to turn the living room lamps off when you do the 10pm
+shut down."* Then: *"She turns them off every night but we have to ask her to."* Then:
+**"I call them living room lamps."**
+
+So the phrase is `turn off the living room lamps`. `docs/beehive/alexa_exposure_cleanup_2026-08-14.md`
+had recorded the Alexa group as "Living Room Lights" — **that is not what he says to her, and that
+doc has been corrected in place** so a later session does not "fix" the working phrase into a broken
+one.
+
+This is squarely his own design rule: **"a feature that needs Jeff to remember to trigger it is not
+finished."** Asking her every night was the last manual step in the 10 PM shutdown.
+
+### Route A — built, but the record says it is dead
+
+`media_player.play_media` + `media_content_type: custom` to `media_player.living_room_echo_dot`
+("Run Custom Command"). A web search confirms the feature exists in alexa_media_player **3.4.0+**
+and the installed version is **5.16.2**.
+
+🔴 **But this project's own 08-13 memory had already recorded that exact call as "returns OK
+but nothing happens — Amazon closed that API", tested on these very plugs.** The record and the
+internet disagree. **Nothing is claimed until a real 10 PM run is observed** — which is why a
+watcher was set rather than a prediction written.
+
+### Route B — the 08-13 "impossible" was a wrong command NAME
+
+`input_boolean.living_room_lamps` has existed since 08-13. That session could not expose it to
+Alexa, got `unknown_command`, and wrote the capability off as unavailable. It is available:
+
+```
+config/entity_registry/update
+    entity_id      = "input_boolean.living_room_lamps"
+    options_domain = "cloud.alexa"
+    options        = {"should_expose": true}      -> success=True
+verified: homeassistant/expose_entity/list -> {"cloud.alexa": True}
+```
+
+Probed all six candidates in one pass; only the last works:
+
+| command | result |
+|---|---|
+| `homeassistant/expose_entity/expose` | `unknown_command` |
+| `homeassistant/expose_entity/set` | `unknown_command` |
+| `homeassistant/expose_entity/update` | `unknown_command` |
+| `homeassistant/expose_entity/expose_new` | `unknown_command` |
+| `cloud/alexa/entities/update` | `unknown_command` |
+| **`config/entity_registry/update` + `options_domain`** | **success** |
+
+`homeassistant/expose_entity/list` **reads** fine — only the setters are missing, which is exactly
+the trap: a working read makes the write look like it should exist under a matching name. The same
+`options_domain` route works for `conversation` and `cloud.google_assistant`.
+
+### The shutdown now runs both, 10 steps, re-enable always last
+
+```
+ 1. automation.turn_off      hcc_night_mode_lights
+ 2. input_boolean.turn_off   night_mode                                  [continue_on_error]
+ 3. light.turn_off           living / kitchen-dining / bedroom cans       [continue_on_error]
+ 4. switch.turn_off          masterbath + both bed lamps                  [continue_on_error]
+ 5. delay 3 s
+ 6. media_player.play_media  Echo Dot "turn off the living room lamps"     [continue_on_error]   <- Route A
+ 7. input_boolean.turn_on    living_room_lamps                            [continue_on_error]   <- Route B
+ 8. delay 5 s
+ 9. input_boolean.turn_off   living_room_lamps  (re-arm)                   [continue_on_error]
+10. automation.turn_on       hcc_night_mode_lights
+```
+
+**Every intermediate step carries `continue_on_error`** so neither Alexa route can abort the
+re-enable — the exact failure mode fixed in section 3 above.
+
+### The one thing only Jeff can do
+
+Route B needs an Alexa Routine: **When "Living Room Lamps" turns on → turn off the living room
+lamps.** Until that Routine exists the pulse is a harmless no-op, so it is safe to leave wired.
+He may also need to say *"Alexa, discover devices"* once for her to pick up the newly exposed
+switch.
+
+⚠️ **HA cannot see these lamps at all** — they are not HA entities. No instrument here can
+confirm the lamps went off. **Only Jeff can.**
