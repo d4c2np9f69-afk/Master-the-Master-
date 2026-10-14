@@ -312,12 +312,35 @@ function logEntryFrom(body) {
     if (!Object.prototype.hasOwnProperty.call(body, k)) continue;
     // `secret` is the box's shared credential — never persist it into the log, which
     // is served (unauthenticated) via ?log=1.
-    if (k === 'track' || k === '__cmd' || k === 'secret') continue;
+    // `secret` is the box's credential; `token`/`password` are the CONTROL-CHANNEL
+    // credentials (see ctrlAuthorised). 2026-10-13: a malformed maintenance POST that
+    // omitted `__cmd` fell through to this telemetry path, so its `token` was stored in
+    // hours_data AND written here — and both are served UNAUTHENTICATED (`/api/hours`
+    // and `?log=1`). A 64-char maintenance token was public until it was cleared.
+    // This is the same class as BUG 4 in docs/mower/gps_firmware_coworker_findings_2026-08-11.md.
+    if (k === 'track' || k === '__cmd' || k === 'secret' ||
+        k === 'token' || k === 'password') continue;
     entry[k] = body[k];
   }
   entry.track_points = Array.isArray(body.track) ? body.track.length : null;
   if (!entry.source) entry.source = (body.engine_running === false) ? 'heartbeat' : 'live';
   return entry;
+}
+
+// Redact anything credential-shaped on the way OUT. Fixes 1 and 2 stop NEW leaks, but a
+// value already written to KV would keep being served until it rolled off — on 2026-10-13
+// one log row held a live 64-char maintenance token and the log keeps 5,000 rows.
+function redact(o) {
+  if (Array.isArray(o)) return o.map(redact);
+  if (o && typeof o === 'object') {
+    const out = {};
+    for (const [k, v] of Object.entries(o)) {
+      if (k === 'token' || k === 'password' || k === 'secret') continue;
+      out[k] = redact(v);
+    }
+    return out;
+  }
+  return o;
 }
 
 export async function onRequestGet({ env, request }) {
@@ -334,7 +357,7 @@ export async function onRequestGet({ env, request }) {
     if (kv) {
       try {
         const logRaw = await kv.get(SENSOR_LOG_KEY);
-        return Response.json({ log: logRaw ? JSON.parse(logRaw) : [] });
+        return Response.json({ log: redact(logRaw ? JSON.parse(logRaw) : []) });
       } catch (_) {}
     }
     return Response.json({ log: [] });
@@ -380,7 +403,7 @@ export async function onRequestGet({ env, request }) {
         // This endpoint is public and unauthenticated. Echoing the whole stored body
         // was publishing the box's `secret` to anyone who asked for it.
         const { secret, ...stored } = JSON.parse(raw);
-        return Response.json({ ...stored, history, coverage_n, tracking_paused: paused, paused_since: pausedAt || null });
+        return Response.json(redact({ ...stored, history, coverage_n, tracking_paused: paused, paused_since: pausedAt || null }));
       }
       return Response.json({
         hours: 0, lastSync: null, battery: null,
@@ -590,6 +613,10 @@ export async function onRequestPost({ request, env }) {
   // mow's hours, RPM, distance, or GPS track. Merging onto the last full reading
   // (instead of overwriting it) means parking the mower to charge doesn't erase
   // what it just recorded; the heartbeat only refreshes the fields it actually has.
+  // 2026-10-13: strip control-channel credentials before anything is persisted.
+  // hours_data is returned verbatim by the unauthenticated GET, so a credential that
+  // reaches it is published. Deleting here covers BOTH the overwrite and merge paths.
+  delete body.token; delete body.password; delete body.secret;
   let merged = body;
   if (isHeartbeat && prev) {
     merged = { ...prev, ...body };

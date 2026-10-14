@@ -10572,10 +10572,27 @@ setTimeout(function() {
 //     visible again, so reopening the app never shows minute-old data.
 var HCC_TICK_MS = (window.hccKioskMode && window.hccKioskMode()) ? 5*60*1000 : 60000;
 var _hccLastTick = Date.now();
+// OPEN_ITEMS #224, fixed 2026-10-13 11:0x PM - THE CLOUDFLARE FREE-TIER CEILING.
+// The app hit "KV daily operation limit" across 42 alerts and "Workers daily request limit
+// exceeded" on NINE days (Sep 2,3,4,11x2,12x2,13x2). On those days the app was degraded or
+// down and nothing told Jeff.
+// MEASURED CAUSE: one plain GET /api/hours performs SIX KV reads (functions/api/hours.js
+// lines 370/371/373/376/378 plus the control key). Called from this tick every 60 s that is
+// 1,440 calls x 6 = ~8,640 KV reads/day PER OPEN CLIENT, before counting Jeff's phone,
+// Angela's phone, the desktop and the wall iPad against a 100k/day free tier.
+// WHY 5 MINUTES COSTS NOTHING: the mower box's own firmware uploads every
+// IDLE_INTERVAL_S = 300 s while parked, and NEVER posts during a mow at all - WiFi is
+// deliberately off while cutting (docs/mower/gps_firmware_coworker_findings_2026-08-11.md).
+// Polling at 60 s asked 5x more often than the data can change. 288 x 6 = ~1,728 reads/day:
+// an 80% cut with ZERO loss of freshness.
+// Manual sync and opening YARD are untouched - mowerSync(true) behind the button and the
+// hccSection('yard') call both still fire immediately.
+var MOWER_SYNC_MS = 5 * 60 * 1000;
+var _mowerLastSync = 0;
 function hccTick(){
   if (document.hidden) return;
   _hccLastTick = Date.now();
-  mowerSync(false);
+  if (Date.now() - _mowerLastSync >= MOWER_SYNC_MS) { _mowerLastSync = Date.now(); mowerSync(false); }
   loadThermostat(); loadStation();
   if (getHaToken()) { checkBeehive(false); loadLights(); loadGarage(); loadMail(); loadVacuum(); loadClock(); loadCar(); }
 }

@@ -361,5 +361,46 @@ console.log('\n-- one-time parked-drift cleanup (2026-09-24) --');
   check('cleanup runs only ONCE', (await cover(kv))['3647664,-8666015'] === 9, JSON.stringify(await cover(kv)));
 }
 
+console.log('');
+console.log('-- CREDENTIAL LEAK GATE (2026-10-13) --');
+// WHY THIS EXISTS: on 2026-10-13 11:0x PM a maintenance POST was sent WITHOUT `__cmd`, so it
+// missed the control-channel branch and fell through to the telemetry path. The body's
+// `token` was stored verbatim in `hours_data` and written into the sensor log - and BOTH are
+// served by the UNAUTHENTICATED GET. A live 64-char maintenance token was published at
+// https://toro1-5rz.pages.dev/api/hours until it was noticed and cleared.
+// Same class as BUG 4 in docs/mower/gps_firmware_coworker_findings_2026-08-11.md, where the
+// box's `secret` was echoed. `secret` had been fixed; `token`/`password` had not.
+{
+  const kv = mockKV();
+  await post(kv, parked({ token: TOKEN, password: 'family-password', secret: 'box-secret' }));
+  const bad = (t) => t.includes(TOKEN) || t.includes('family-password') || t.includes('box-secret');
+
+  const storedRaw = await kv.get('hours_data');
+  check('a credential in a stray POST is never STORED in hours_data', !bad(storedRaw), storedRaw.slice(0, 150));
+
+  const logRaw = (await kv.get('sensor_log')) || '';
+  check('a credential is never written to the sensor log', !bad(logRaw), logRaw.slice(0, 150));
+
+  const body = await (await get(kv)).text();
+  check('the unauthenticated GET serves no credential', !bad(body), body.slice(0, 150));
+
+  const logBody = await (await get(kv, '?log=1')).text();
+  check('?log=1 serves no credential', !bad(logBody), logBody.slice(0, 150));
+}
+{
+  // The redactor must also scrub a value ALREADY in KV from before the fix - that is the real
+  // 10-13 situation: one log row still held the token after the live reading was cleared,
+  // and the log keeps 5,000 rows so it would not roll off for a long time.
+  const kv = mockKV({
+    hours_data: JSON.stringify({ hours: 6.65, token: TOKEN }),
+    sensor_log: JSON.stringify([{ date: '2026-10-13T04:04:00.000Z', source: 'live', token: TOKEN }]),
+  });
+  const body = await (await get(kv)).text();
+  check('a PRE-EXISTING stored credential is redacted on output', !body.includes(TOKEN), body.slice(0, 150));
+  const logBody = await (await get(kv, '?log=1')).text();
+  check('a PRE-EXISTING logged credential is redacted on ?log=1', !logBody.includes(TOKEN), logBody.slice(0, 150));
+  check('redaction does not damage the real data', JSON.parse(body).hours === 6.65, body.slice(0, 150));
+}
+
 console.log(`\n${pass} passed, ${fail} failed\n`);
 process.exit(fail ? 1 : 0);
