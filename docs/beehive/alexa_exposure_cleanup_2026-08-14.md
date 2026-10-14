@@ -41,6 +41,23 @@ in automations, and in the HCC app. Only the Alexa duplicate disappears.
 but were NOT confirmed as unwanted — ask before removing.
 
 ## Note on the Sylvania plugs
+
+🔴 **CORRECTED 2026-10-13 9:32 PM BY JEFF — the phrase is "living room LAMPS", not
+"lights".** Jeff, verbatim: *"I call them living room lamps"*, and *"She turns them off every
+night but we have to ask her to."* The "Living Room Lights" wording below was this document's
+own note about an Alexa group name and it is NOT what Jeff says to her. **The working spoken
+phrase is `turn off the living room lamps`.** Do not "correct" it to "lights".
+
+**They are now turned off automatically at 10 PM** — `automation.hcc_house_shutdown_10_pm`
+step 6 sends that exact phrase to `media_player.living_room_echo_dot` via alexa_media_player's
+Run Custom Command (`media_player.play_media` + `media_content_type: custom`, a feature since
+alexa_media 3.4.0; installed 5.16.2). `continue_on_error: true` is set so an Alexa cloud hiccup
+cannot abort the `hcc_night_mode_lights` re-enable that follows it. **Why this was worth doing:
+Jeff's own design rule — "a feature that needs Jeff to remember to trigger it is not
+finished."** Asking her every night was the last manual step in the 10 PM shutdown.
+
+⚠️ The lamps are NOT in HA, so HA cannot confirm they went off. Only Jeff can.
+
 They are NOT in HA (vendor-locked, settled 08-13) but ARE in Alexa via Sylvania's own skill,
 grouped as "Living Room Lights" (a favourite). One showed **Unresponsive** on 08-14 — that was
 the plug reset during the failed Smart Life experiment; Jeff re-paired it in the Sylvania app.
