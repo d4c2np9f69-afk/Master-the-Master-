@@ -442,3 +442,57 @@ A test must be able to fail. If the expected result equals the current state, dr
 the opposite state first. `HTTP 200` is not a result, and for a device HA cannot see the only
 evidence is a human looking at it — so the question has to be one a human can answer
 unambiguously.
+
+
+---
+
+## 10. ✅ THE REAL 10 PM RUN — observed, not predicted
+
+Captured at 10:06:30 PM by a watcher that fired nothing and only read state.
+
+**The night-mode stranding fix held on its first real run:**
+
+```
+automation.hcc_night_mode_lights   10:00:00 PM -> off
+                                   10:00:08 PM -> on
+```
+
+On 10-12 it went off at 22:00:00 and **never came back**, which is what killed the nightly dim for
+23 hours. Tonight it returned in 8 seconds and `hcc_night_mode_lights_watchdog` did **not** need to
+fire (`last_triggered` still 9:20:42 PM, from the deliberate test) — so the sequence completed on
+its own and the watchdog is a backstop, not a crutch.
+
+**Route B's HA half works exactly as designed:**
+
+```
+input_boolean.living_room_lamps    10:00:03 PM -> on
+                                   10:00:08 PM -> off      (the 5 s pulse, then re-armed)
+```
+
+🟠 The lamps themselves could not be judged — they were already off, and no Alexa Routine
+exists yet to catch the pulse. **Still OPEN, still needs the Routine, still unproven until a night
+the lamps are ON beforehand.**
+
+**All three 10 PM automations fired on time:**
+
+| automation | last_triggered |
+|---|---|
+| `hcc_house_shutdown_10_pm_night_mode_off_every_light_off` | 10:00:00 PM |
+| `hcc_garage_secure_at_10_pm_door_fan_man_door` | 10:00:00 PM |
+| `hcc_house_secure_and_lights_off_10_pm` | 10:05:00 PM |
+
+**What the clock actually said** (`chime.log`, the only instrument that proves Angela heard it):
+
+```
+22:00:00 hour x10: playing on "Headphones (QFX PBX-BF120)" (77.8s)
+22:01:20 speak: "Good evening. Tonight, expect clear skies with a low of 71 degrees. Th" (9.5s)
+22:05:02 speak: "The house is secure. All doors are closed. All lights are off." (6.1s)
+```
+
+That is the exact string the template rendered silently at 9:26 PM, spoken 39 minutes later. The
+9 PM "we have an error" is gone and the 10 PM all-clear is intact.
+
+⚠️ **Flaw in my own watcher, for the next session:** it read `/api/error_log`, which is
+**404 on HA 2026.10.1**. Use the WebSocket `system_log/list` instead (that is how the Alexa check
+earlier tonight was done). The Alexa/media error section of that capture is therefore EMPTY because
+the endpoint is gone, not because the log was clean.
