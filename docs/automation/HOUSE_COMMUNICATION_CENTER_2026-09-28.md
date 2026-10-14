@@ -567,3 +567,41 @@ this file's own stated rule: *"a job that is a full cycle late is a real miss."*
 `HCC-Audit.py.bak-20261013-batterycadence`. Re-run: **`0 actionable`.**
 🔑 **THE LESSON IS THE 08-11 ONE AGAIN: after changing a cadence, sweep for everything that MEASURES
 that cadence.** A schedule and its watchdog are one unit; moving half of it is a bug.
+
+### 🔔 7:30 PM — "THE CLOCK SHOULD BE PLAYING ANY ALARMS AS WELL — IS THAT SHOWING?"
+> **Jeff 7:30 PM**, asking whether alarms were part of the clock programming.
+
+**Enumerated rather than recalled.** Every automation's config was read and grepped for `hcc_speak`:
+
+| speaks on the clock TODAY | |
+|---|---|
+| 💧 `hcc_water_leak_alarm_all_zigbee_leak_sensors` | ✅ prelude + voice |
+| 🌪️ NWS warnings | ✅ — **not an automation**, `HCC-WeatherWarning.py` calls `events/hcc_speak` direct from the Beast, which is why it does not appear in an automation grep |
+| 6 AM weather · noon temps · 10 PM forecast · Angela 15 min out · lightning geofence | ✅ |
+| 🔒 `hcc_house_secure_and_lights_off_10_pm` | ✅ added earlier today |
+
+🔴 **THE GAP — THE TWO LOUDEST EVENTS IN THE HOUSE WERE THE TWO THE CLOCK SAID NOTHING ABOUT:**
+- **`hcc_panic_button_v2`** — sirens, both phones, every Echo… and **silence on the clock**.
+- **`hcc_house_alarm_siren`** — 120 dB with no explanation of why it was screaming.
+- 🚪 **`hcc_door_opened_while_away`** — phone push only. **STILL NOT ON THE CLOCK — Jeff's call** (an
+  audible "door opened" is a deterrent, but it is also a tactical choice while someone is inside).
+
+### ✅ FIXED AT THE SINGLE OWNER, NOT IN EACH CALLER
+`hcc_house_alarm_siren` now fires `hcc_speak` itself, so **everything that fires `hcc_siren`
+automatically explains itself** — panic, tornado, and anything added later, with no second place to
+remember. Action order: notification → plug ON → 301 ON → **speak** → 30 s → OFF → stop 301.
+
+🔑 **PRELUDE `weather_siren.wav` IS DELIBERATE, NOT DECORATION.** `chime_config` maps preludes to
+levels (`leak_alarm.wav`→leak −3, `weather_siren.wav`→warning **0**, the loudest). **Plain speech
+plays at the chime level and would be inaudible under a 120 dB siren.** The text is templated from
+`trigger.event.data.reason`, so the words always match what actually fired.
+
+🟢 **PROVEN 7:32 PM — not assumed.** `chime.log`:
+```
+19:32:28 prelude: PC side clean (no underflow)
+19:32:30 speak: "Attention. Panic button. Attention. Panic button."
+         on "Headphones (QFX PBX-BF120)" (5.8s)
+19:32:35 speak: PC side clean (no underflow)
+```
+⚠️ Tested via a direct `hcc_speak` **on purpose** — firing the whole automation would have run the
+siren 30 s, and Jeff had already said *"don't run that loud ass siren for 30 seconds."*
