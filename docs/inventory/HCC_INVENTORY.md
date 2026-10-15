@@ -90,6 +90,8 @@ multimeter · wire strippers/cutters · headlamp · screwdrivers · Energetic re
 |---|---|---|---|---|
 | ESP32-D on screw-terminal breakout | 1 | INSTALLED | — | fw 1.4.0, OTA-ready pending private hosting |
 | Spare ESP32 | 1 | TO ORDER (~$9) | — | Jeff committed 08-11 — flash + bench-soak on arrival; unblocks OTA proof + watchdog test |
+| **Gasket sheet material (AutoZone)** | 1 sheet, **part-cut** | **ON HAND — ⚠️ NOT YET IDENTIFIED** | **$21.00** (2026-10-14) | 🔴 **PRODUCT NOT IDENTIFIED — do not guess it, and do not recommend a use until it is.** Bought to cut a muffler/exhaust gasket for the Briggs after `793497` could not be sourced locally; **Jeff cut it and it did not work**, so it is **non-returnable**. Jeff 2026-10-15: *"that sheet is in inventory and we need to find other uses for it I don't want to waste it but I can't take it back because I cut it."* ⚠️ **What it is usable for depends entirely on the material** — a high-temp exhaust/graphite composite and an ordinary cork/nitrile sheet have almost no overlap in use. **Needs one look at the label: brand, material, thickness, and whether it is reinforced.** Superseded for its original job by the **WFCYQ exhaust gasket 6-pack**, Amazon `113-6137857-4684234`, $9.09, delivered 2026-10-15. |
+| **WFCYQ exhaust gasket, Briggs & Stratton 692236 / 272293 / 270917 / 692236S** | 6-pack | **ON HAND 2026-10-15** | **$9.09** | Amazon `113-6137857-4684234`, ordered 10-14. The muffler gasket the cut-your-own attempt was replacing. 5 spares after the repair — the muffler **vibrated off** once already, so keeping spares is the right call. |
 
 ## Garage door
 
