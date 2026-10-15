@@ -162,8 +162,38 @@ Result 'GarageLaptop - Bitwarden BROWSER EXTENSION' ($out -match '^[1-9]') $(if(
 $out = RemoteRun $LENOVO 'du -s ~/.config/google-chrome/Default/Local*Extension*Settings/nngceckbapebfimnlniiiahkandclblb 2>/dev/null | cut -f1'
 Result 'GarageLaptop - extension has been signed in' ($out -match '^[1-9]') $(if($out -match '^[1-9]'){"has vault storage ($out KB) - signed in at least once"}else{'never signed in - it will sit there doing nothing'})
 
-$out = RemoteRun $ACER 'if exist "%LOCALAPPDATA%\Google\Chrome\User Data\Default\Extensions\nngceckbapebfimnlniiiahkandclblb" (echo yes) else (echo no)'
-Result 'JeffsLapTop - Bitwarden BROWSER EXTENSION' ($out -match 'yes') $(if($out -match 'yes'){'extension installed'}else{'NO Chrome extension - the desktop app is installed but no website will ever offer to fill'})
+# 🔴 2026-10-15, SECOND correction in one hour: the first version of this line checked only
+# CHROME on the Acer and reported FAIL - "no website will ever offer to fill". That was WRONG.
+# CHROME IS NOT INSTALLED ON THE ACER AT ALL (its Chrome User Data folder is a leftover dated
+# 2023-07-17). The Acer runs EDGE, and Bitwarden is force-installed there by Edge policy.
+# Checking one browser and calling the machine broken is the same mistake in a new place:
+# assert the FEATURE ("a password manager is available in the browser he actually uses"),
+# never one implementation of it.
+# Extension IDs differ per store: Chrome/Chromium = nngceckbapebfimnlniiiahkandclblb,
+# Edge Add-ons = jbkfoedolllekgbhcbcoahefnbanhhlh.
+# ⚠️ TWO FLAT CHECKS, NOT ONE NESTED ONE. A nested `if exist (...) else (if exist (...))`
+# silently mis-parses through the remote shell and reported "NOT in Chrome OR Edge" while the
+# Edge extension folder plainly existed - a THIRD false failure on the same line in one hour.
+# Keep remote cmd one-liners flat and combine the answers here.
+# 🔴 -EncodedCommand, and here is why it is worth the ugliness. This check failed THREE times
+# in a row while the extension plainly existed, and every failure was a QUOTING artefact, not
+# a missing file:
+#   1. cmd `if exist (...) else (if exist (...))` - nested parens mis-parse through ssh
+#   2. cmd `dir /b "%LOCALAPPDATA%\..."`          - came back "cannot find the path specified"
+#   3. PowerShell `Test-Path "$env:...\User Data\..."` - PowerShell's native-argument handling
+#      strips the inner double quotes, so the remote saw an unquoted path WITH SPACES
+# Same family as the recorded trap "PowerShell has no backslash escape", which once made a gate
+# report credentials wide open when every one was denied.
+# Base64 removes every layer of quoting from the problem. A check that cannot survive its own
+# transport is not a check.
+function RemoteBool($target, $psCmd) {
+    $b64 = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($psCmd))
+    (RemoteRun $target "powershell -NoProfile -EncodedCommand $b64")
+}
+$bwChromeAcer = RemoteBool $ACER 'Test-Path "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Extensions\nngceckbapebfimnlniiiahkandclblb"'
+$bwEdgeAcer   = RemoteBool $ACER 'Test-Path "$env:LOCALAPPDATA\Microsoft\Edge\User Data\Default\Extensions\jbkfoedolllekgbhcbcoahefnbanhhlh"'
+$bwAcerOk = ($bwChromeAcer -match 'True') -or ($bwEdgeAcer -match 'True')
+Result 'JeffsLapTop - Bitwarden BROWSER EXTENSION' $bwAcerOk $(if($bwEdgeAcer -match 'True'){'installed in EDGE, force-installed by policy - Chrome is not on this machine at all'}elseif($bwChromeAcer -match 'True'){'installed in Chrome'}else{'NOT in Chrome OR Edge - no website will offer to fill'})
 
 $bwExtBeast = Test-Path "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Extensions\nngceckbapebfimnlniiiahkandclblb"
 Result '301SERVER - Bitwarden BROWSER EXTENSION' $bwExtBeast $(if($bwExtBeast){'extension installed in Chrome'}else{'NO Chrome extension on the Beast'})
