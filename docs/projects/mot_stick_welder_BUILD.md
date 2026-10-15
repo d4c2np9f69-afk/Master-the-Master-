@@ -76,6 +76,42 @@ than a few percent, wire primaries in PARALLEL on a dedicated **120 V 30 A** cir
 
 ---
 
+## 3b. 🔑 WHY A SECOND MOT — the two reasons, and the second is the hard one
+
+Jeff asked directly, 2026-10-15 09:56. The answer is not "because the forums say so."
+
+### Reason 1 — POWER. One MOT is about half a welder.
+**1/8" 6013 draws roughly 90–130 A at an arc voltage of ~22–26 V. That is 2.1–3.4 kW at the
+arc**, before transformer losses. Even 3/32" at 70–90 A is ~1.8–2.3 kW.
+
+**The donor oven's whole input is 1.58 kW.** Its transformer is a ~1.2–1.5 kW class part. One MOT
+is simply not a 3 kW machine — it will sag, overheat and stall in the middle of a bead.
+
+### Reason 2 — WINDOW SPACE, and this is the one that actually stops you.
+Output voltage is **turns × volts-per-turn**, and a MOT runs roughly **0.5–0.7 V per turn**. To
+reach a 38 V striking voltage you need **~60–65 turns total**.
+
+**They have to physically fit through the core window, in #6 cable.** After the HV secondary and
+the shunts come out, one MOT window holds somewhere around **15–25 turns of #6** — and no more,
+because #6 welding cable is about ⅓ of an inch thick with insulation.
+
+```
+   one MOT   ≈ 15–25 turns × ~0.6 V/turn   ≈   9–15 V OCV     ← will not strike
+   two MOTs  ≈ twice that                  ≈   ~38 V measured ← strikes 6013
+```
+
+🔴 **That is exactly where the "12 V" on your first planning graphic came from.** It was not a
+typo and it was not invented — **12 V is the honest output of a one-MOT rewind.** And it is
+precisely why single-transformer builds disappoint: the rod sticks and never lights.
+
+### Why not just wind more turns on the one you have?
+Because the only way to fit 60 turns in one window is thinner wire, and **thinner wire cooks.**
+At 100+ A, #10 or #12 will heat, melt its insulation and short turn-to-turn inside the core where
+you cannot see it or fix it. **The cable gauge is set by the welding current, not by convenience** —
+so once #6 is fixed, the turns you need simply do not fit in one transformer. Hence two cores.
+
+---
+
 ## 4. 🔬 THE REWIND — how to get the turns right, by measurement
 
 **Do not take a turns count off the internet.** MOT cores differ. Yours is measurable in five
@@ -96,15 +132,29 @@ minutes, and you have the meter.
 4. **Volts per turn = V10 ÷ 10.** *(Expect roughly 0.5–0.7 V/turn — but use YOUR number.)*
 
 ### Step 3 — calculate the turns you need
-**Target open-circuit voltage: 45–55 V AC across the pair.** That is the band that strikes and
-holds a 6013 arc; the 16–24 V in the planning graphic is arc voltage, not OCV.
+> ⚠️ **CORRECTION, 2026-10-15 09:5x. The first version of this sheet said "target 45–55 V". That
+> is not reachable with two MOTs and I should not have written it.** Measured two-MOT builds land
+> at **~38 V**; it takes four to reach 47 V. 45–55 V is a 3–4 transformer target. The numbers
+> below are the corrected ones.
+
+**Target open-circuit voltage: ~35–40 V AC across the pair — that is what two MOTs actually give.**
+It strikes and holds 6013. It is **on the low side** and you will feel that as a rod that wants a
+decisive scratch start rather than a lazy one. A **third MOT takes it to the mid-40s** and makes
+striking noticeably easier — worth doing later if a third turns up free, and the tap arrangement
+in Step 6 already accommodates it.
+
+For reference, the planning graphic's 16–24 V is **arc** voltage — what sits across a burning arc,
+not what strikes it.
 
 ```
 Turns per transformer  =  (target OCV ÷ 2) ÷ volts-per-turn
 
-Worked example at 0.6 V/turn and a 50 V target:
-        (50 ÷ 2) ÷ 0.6  =  ~42 turns on each transformer
+Worked example at 0.6 V/turn and a 38 V target:
+        (38 ÷ 2) ÷ 0.6  =  ~32 turns on each transformer
 ```
+
+🔑 **If ~32 turns of #6 will not physically fit the window, that is the design telling you
+something true — see §3b. Do not solve it with thinner wire.**
 
 ### Step 4 — wind it
 - **#6 welding cable**, wound through the window, as many turns as §3 says — **and if the full
