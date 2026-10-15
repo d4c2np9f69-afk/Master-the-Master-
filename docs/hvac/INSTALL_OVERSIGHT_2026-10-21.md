@@ -68,23 +68,42 @@ ICP is a Carrier Global company.)*
 
 ## 2. 🔴 DECIDE BEFORE WEDNESDAY
 
-### 2a. 16" return or 18" (+$400) — the one that affects every running hour
-Rev D did the arithmetic: at the design airflow a **16" return runs ≈713 ft/min, which the
-drawing itself calls "the ACCA Manual D maximum for flex."** **18" runs ≈563 ft/min.**
+### 2a. ✅ SETTLED 2026-10-15 09:23 — **16". DECIDED BY JEFF. DO NOT RE-PITCH THE 18".**
+**Jeff, 2026-10-15: *"Candy confirmed the quote is solid and we are going with the 16”."***
+So the contract total stays **$9,760** with no +$400 line. **This question is closed.**
 
-Buying 16" is buying **zero margin** — and what eats margin all happens later: a loaded filter, a
-sag, a kink, a crushed bend. **$400 is 4% of the job, paid once, on the part nobody opens again.**
-**Recommendation: take the 18".** The extended *labour* warranties are not worth it; this is.
+*The analysis that was offered and declined, kept only so nobody re-opens it:* Rev D put a 16"
+return at **≈713 ft/min**, which the drawing calls the ACCA Manual D maximum for flex; 18" would
+have been ≈563. The recommendation was the 18"; Jeff's call went the other way. **His money, his
+house, his decision — it is made.**
 
-*(For reference, the competing Peters bid priced the same upsize at only +$160.)*
+🔴 **WHAT THE DECISION CHANGES ON INSTALL DAY — this is the useful part now.**
+At the Manual D maximum there is **no spare margin in the return**, so the things that eat margin
+stop being theoretical and become the install-quality checklist:
+
+| Because the return is 16" | So |
+|---|---|
+| **TESP is now the acceptance test, not a formality** | §6 was always required by the contract. It is now **the** proof the $1,800 duct line worked. **Do not let the truck leave without the static and airflow numbers on the invoice.** |
+| A loaded filter costs real airflow | Keep a stock of **2 × 20×12×1** and change them on schedule, not when they look dirty |
+| A sag, kink or compressed bend costs real airflow | §4 item 7 — **every flex fully extended and properly supported**, walked and looked at, not taken on trust |
+| The 20×25 filter grille stays (287 ft/min) | Already under the 300 target — §4 item 3, nothing to do |
+
+**If TESP comes in over the blower table's rated maximum, the job is not finished** — and that is
+far cheaper to raise while the crew is still in the driveway than after.
 
 ### 2b. Extended labour warranty — recommend skipping
 1 year is included and parts run 10 years **if registered**. $864 for 5-year labour is 9% of the
 job for years 2–5 only and **excludes refrigeration**, which is where the expensive labour is.
 
-### 2c. The quote has EXPIRED — get the price reconfirmed in writing
-Dated **2026-09-17**, marked **"Valid for 15 Days"** → lapsed **2026-10-02**. Get one line by
-text or email confirming **$9,760 holds, plus the 18" if taken.** Cheapest protection here.
+### 2c. ✅ CLOSED 2026-10-15 09:23 — the price is reconfirmed
+Dated **2026-09-17**, marked **"Valid for 15 Days"**, so it had lapsed **2026-10-02**.
+**Jeff, 2026-10-15: *"Candy confirmed the quote is solid."*** **$9,760 holds**, and with the 16"
+chosen in §2a there is no +$400 line, so **$9,760 is the number that should appear on the
+invoice.** Contact: **Candy**, Goodlettsville Heating & Cooling, (615) 479-0886.
+
+⚠️ **One thing to carry to install day:** that reconfirmation was verbal. If it is easy, get it in
+a text or email too — not because anyone expects trouble, but because the written quote on file
+still reads "Valid for 15 Days" and lapsed six weeks before the work.
 
 ### 2d. Customer-supplied items must be ON SITE Wednesday morning
 Both are named in the contract as **Jeff's to provide**.
@@ -146,7 +165,7 @@ Duct design **995 CFM**; unit AHRI rating **950 CFM**. Print this page.
 | # | Required work | Done |
 |---|---|---|
 | 1 | **New square-to-round transitions on BOTH supply and return.** **The existing twisted connections REMOVED** | ☐ |
-| 2 | **New return**: insulated flex straight back, **sheet-metal 90 across the supply trunk**, **second sheet-metal 90 into the filter grille** (16" or 18" per §2a) | ☐ |
+| 2 | **New return — 16", DECIDED** (§2a): insulated flex straight back, **sheet-metal 90 across the supply trunk**, **second sheet-metal 90 into the filter grille**. 🔴 At 16" there is no spare margin, so **fully extended, properly supported, no kinks or sags** is not a nicety here — it is the difference between hitting the airflow and not | ☐ |
 | 3 | **Existing 20×25 filter grille STAYS** — 287 ft/min, already under the 300 target. **Nothing to price here** | ☐ |
 | 4 | **6"→8" upgrades: Dining room, Master bedroom, Living room** — each a NEW saddle tap, balancing damper and boot | ☐ |
 | 5 | **New 7" garage run**: saddle tap **on the SIDE of the 12" trunk, not off the end**; core through brick and **seal**; up the garage wall to a boot + **brown register**; **balancing damper AT THE REGISTER, inside the garage** | ☐ |
