@@ -168,7 +168,10 @@ not a gate.*
 Get it the way `ACCESS_MAP.md` §1 documents; every script in `HCC-Scripts/` already has the
 pattern. Without the flag the runner **skips them and says so** — a skip is not a pass.
 
-**Last full run: 2026-10-13 11:2x PM — `node scripts/run-all-gates.js` → 22/22 PASS, exit 0, and the 5 the runner skips were RUN BY HAND AND ALSO PASS. 🟢 27 OF 27 GREEN, NOTHING SKIPPED.**
+**Last full run: 2026-10-14 9:5x PM — `node scripts/run-all-gates.js` → 🟢 23/23 PASS, exit 0.** ⚠️ **The 5 the runner skips were NOT run tonight, and a skip is not a pass** (`doors-entity`, `garage-entity`, `sensor-liveness` want a states dump; `sensor-coverage`, `live-e2e` want `HCC_HA_TOKEN`). On 2026-10-13 all 5 were run by hand and passed.
+**New gate this session: `crash-watchdog-gate-test.js`** — asserts the crash watchdog can actually SEE a crash. It exists because on 10-14 a real `0xEF` bugcheck went unreported: the watchdog had its dump directory pinned to `C:\Windows\Minidump` while the dump destination had been moved to `D:\Minidump` on 10-06, so it logged *"no new crash"* and texted Jeff nothing (OPEN_ITEMS #238). **Proven RED against a fixture of the original bug — all 4 checks fail, including the one naming `d:\minidump` as uncovered — and green against the fixed script.** Point it at a fixture with `HCC_CRASH_WATCHDOG=<path>`; never edit the live watchdog to test it.
+⚠️ **`package-gate-test.js` goes RED the moment `docs/OPEN_ITEMS.md` is edited** — it compares the repo against `iCloudDrive\HCC-PROJECT`. Re-copy the paired file and it passes (711 files checked). That happened and was fixed this session.
+**Earlier stamp, kept for the lesson: 2026-10-13 11:2x PM — 22/22 PASS plus the 5 by hand, 27 of 27 green.**
 `package-gate-test.js` was the one FAIL on the first run — the handover package in `iCloudDrive\HCC-PROJECT` was stale against `service-worker.js` (bumped to hcc-v133) and `docs/OPEN_ITEMS.md` (cleaned up from 242 KB to 131 KB). Re-synced the 4 paired files and it went green: 711 files checked. **That gate works — it caught a real staleness the same hour it was created.**
 How to run the 5 the runner cannot: `sensor-liveness-test.js`, `doors-entity-test.js` and
 `garage-entity-test.js` take a states dump as a **POSITIONAL** argument — the runner's
