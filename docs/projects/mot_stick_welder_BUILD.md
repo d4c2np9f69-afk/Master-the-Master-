@@ -6,6 +6,55 @@ Donor: **Samsung ME16K3000**, June 2019, 1.58 kW, 120 V 60 Hz, FCC `A3LOTR16M3`.
 
 ---
 
+## 0b. 🟢 BUILD IT IN TWO PHASES — start with the ONE transformer you already have
+
+**Jeff, 2026-10-15 10:00, showing the single-MOT wiring diagram: *"Why not like this"*.**
+**Answer: do exactly that first.** Nothing in the two-MOT design is wasted by starting with one,
+and it replaces an argument about numbers with a measurement.
+
+| | **PHASE 1 — one MOT, as his diagram draws it** | **PHASE 2 — add the second** |
+|---|---|---|
+| Supply | **120 V, 15–20 A — a normal outlet** | 240 V 30 A, primaries in series (§3) |
+| OCV | **~9–15 V** | ~38 V |
+| Honestly good for | **tacking and thin sheet, 1/16"–3/32" rod, short bursts** | 1/8" 6013, plate, trailer and farm repair |
+| What it will do badly | **striking and holding an arc.** Expect sticking | — |
+| Cost to find out | **$0 beyond cable and a holder** | one free MOT |
+
+🔑 **Phase 1 is not a throwaway.** You wind MOT #1, you measure its real volts-per-turn and its
+real OCV on YOUR core, and that number settles the whole design — it is the same winding, the same
+cable and the same chassis that Phase 2 uses. **Phase 2 is literally "wind the second one the same
+way and series them."** Nothing gets undone.
+
+⚠️ The only thing to decide up front is **cable length**: buy enough #6 to wind BOTH transformers
+now (~25–30 ft), so Phase 2 does not need a second, possibly mismatched, cable order.
+
+---
+
+## 0c. 🔴 ONE REAL ERROR IN THAT DIAGRAM — the current control is on the wrong side
+
+The diagram puts **"Current Control (variac or tap)" in the SECONDARY**, between the transformer
+and the welding leads — i.e. in the **60–200 A** path its own note describes.
+
+**Nothing affordable survives there.** A variac is a wound autotransformer; the ones you can buy
+are rated for a handful of amps up to maybe 20–30 A. Put one in a 200 A welding circuit and it is
+scrap on the first arc. A **tap** selector can live there, but it has to be a genuine 200 A rotary
+switch or a bolted link — not the small panel knob drawn.
+
+**Two correct ways to do it:**
+1. 🟢 **$0, and what this build uses — TAPS on the secondary winding.** Bring flying leads out at
+   roughly ⅓ and ⅔ of the turns and land each on its own output stud. Change current by moving the
+   electrode lead to a different stud. Coarse, free, indestructible.
+2. **A variac on the PRIMARY side** — where the current is ~20–30 A instead of 200 A, so an
+   affordable variac actually survives. Smooth control, real money, and not needed for 6013.
+
+**Either way it does not belong where that diagram has it.**
+
+⚠️ Minor, same diagram: the **12 V fan is drawn fed from the 120 V switch** with no power supply
+between them. Check the donor's own fan first — over-the-range fans are usually **120 V AC**, in
+which case it wires straight across the incoming supply and the problem disappears.
+
+---
+
 ## 1. THE DESIGN IN ONE PARAGRAPH
 
 Two microwave transformers, **shunts removed**, **primaries in SERIES across 240 V**, secondaries
