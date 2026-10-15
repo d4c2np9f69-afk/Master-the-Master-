@@ -398,3 +398,33 @@ Xfinity, Google and each site — nothing on the router or on the LAN can waive 
 here will stop them asking. **That is what Bitwarden is for**, and the split is deliberate: the
 same §6 that proves no password is needed on the LAN also proves `.ssh`, `.claude`, `AppData` and
 `iCloudDrive\HCC-secrets` are still **refused to guest**. Open network, fenced keys.
+
+### 2026-10-15 17:2x — Acer → Beast PROVEN, and how to prove it next time
+
+🔴 **The actual bug: the Acer's `map-beast.cmd` opened a Guest IPC$ session to `\BEAST` but
+never to `\301SERVER`.** `BEAST` is only a hosts-file alias; **`301SERVER` is the real computer
+name, and that is what Explorer's Network node connects to.** To the SMB redirector those are two
+different servers — the identical trap already recorded for `\NAME` vs `\IP`, wearing an alias
+this time. Added the `301SERVER` line; backup `map-beast.cmd.bak-20261015`.
+
+⚠️ **`net use` over SSH CANNOT verify this, and I wasted two rounds proving it to myself.** Each
+SSH login is its own logon session with its own SMB session table, so a session opened by Jeff's
+logon task is invisible to an SSH probe, and a session opened over SSH vanishes with it. The
+Acer's `net use` read "no entries" the whole time the task was working perfectly.
+**[[reference_ssh_cannot_prove_console_session]] says exactly this. Read it before testing SMB.**
+
+✅ **What IS valid evidence: make the task log its own result, then run the task.** The script was
+writing `>nul 2>&1`, so three weeks of runs proved nothing. Now it appends every `net use` result
+plus a `net view \301SERVER` proof. Fired it at 17:2x and it recorded, from inside Jeff's session:
+
+```
+net view \301SERVER -> ClipArchive, D, HP printer, Jeff, OneDrive, SETUP, Users
+OK    \301SERVER\IPC$     Microsoft Windows Network
+OK    \BEAST\IPC$         Microsoft Windows Network
+```
+
+🔑 **A silent command cannot be audited later.** If a scheduled task matters, it logs what it did.
+
+⚠️ Noted, not yet a fault: the Acer's `\GARAGELAPTOP\IPC$` shows **Disconnected** rather than OK.
+Windows reconnects those on access, so it is normal idle behaviour — **but if the Lenovo ever asks
+the Acer for a password, that line is the first place to look.**
