@@ -266,3 +266,51 @@ $120–150, an afternoon)** roughly doubles what the vent does — the ceiling i
 | Duct drawing, 995 CFM | `iCloudDrive\HCC AC Quotes\AC duct drawing 995cfm.jpg` |
 | Full bid history (75 dated rows) | `docs/hvac/BID_TRACKER.md` |
 | Manufacturer product data | Catalog **PGB4-51-02PD** (39 pp) · warranty **40122063003** |
+
+---
+
+## 10. 🔧 SALVAGE OFF THE OLD UNIT — before it is hauled away
+
+**Jeff, 2026-10-15: *"check the old AC unit that's getting replaced next week and see if there is
+anything I need to keep before they haul it away."***
+
+**The old unit: Nordyne R4GD-030K072C**, ~2007, 2.5 ton, 72,000 BTU gas input, **R-22**, SEER 13,
+AFUE 78. Outdoors on a slab, cabinet has water ingress and rust. **Nineteen years old — almost
+everything in it is at or past end of life, so this is a short list on purpose.** The things worth
+pulling are the ones Jeff himself paid for recently.
+
+### ✅ PULL THESE — all now on the Tuesday night reminder
+
+| Part | Why it is worth the trip |
+|---|---|
+| 🔴 **SONOFF MINI-D** (`switch.ac_relay`) | Already in §3a. Wired into the old control circuit, directly in the demolition path |
+| 🟢 **BOJACK BJ-1P/30A contactor** | **The newest part in that cabinet.** Jeff fitted it himself and it is what runs the unit today. A known-good 30 A contactor is genuinely useful stock |
+| 🟡 **Draft inducer motor — IF it is the Fasco** | Jeff bought a **Fasco 702110381 furnace draft inducer motor** on eBay 2025-01-02 for **$65.85**, delivered. ⚠️ **The record does NOT say it went into this unit — that is an inference from his purchase history, not a fact.** If it did, it is ~21 months old on a 19-year-old machine and clearly worth pulling. One look settles it |
+
+### ⛔ DO NOT TOUCH — this one is legal, not cautionary
+
+🔴 **The refrigerant side is R-22 and must be recovered by the EPA-certified crew.** Venting it is
+illegal. **Nothing on the sealed system comes apart before they recover it** — no cutting lines, no
+pulling the coil, no taking the compressor. Electrical and control parts are fine to remove the
+night before; the sealed system is theirs.
+
+### ⚠️ ASK CANDY BEFORE WEDNESDAY — the scrap belongs to somebody
+
+The contract includes **"old equipment and all debris removed"** (§4 item 10). **On a haul-away the
+scrap value normally goes to the installer** — it is part of what the price assumes. The copper
+coil and cabinet are worth something. **If Jeff wants to keep the carcass or strip it for scrap,
+that is one sentence to Candy BEFORE the day**, not a surprise in the driveway, and it may change
+the number.
+
+### 💭 NOT worth keeping, and why
+
+Blower motor and wheel, gas valve, igniter, flame sensor, limit and rollout switches, pressure
+switch and the run capacitors are all **original 2007 parts on a rusted unit**. Wear items at the
+end of their life, they do not fit the new Tempstar, and a shelf of nineteen-year-old HVAC spares
+is clutter, not inventory.
+
+⚠️ **One thing that dies with the unit, and good riddance:** the old 24 V control circuit has a
+**dead short that blows its 3 A fuse and was never found** — which is why the contactor coil ended
+up on a jumper and the compressor could not cycle. The quote includes **new thermostat wire**, so
+the fault does not follow into the new unit. 🔴 **Do not salvage the old 24 V transformer** — it
+sits in the circuit with the unexplained short.
