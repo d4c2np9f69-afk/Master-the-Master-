@@ -146,8 +146,27 @@ Say "5. SAME EXPERIENCE ON EACH? (Job A - what Jeff actually asked for)"
 $out = RemoteRun $LENOVO 'command -v google-chrome'
 Result 'GarageLaptop - Chrome' ($out -match 'chrome') 'same browser as the Beast, profile carries bookmarks'
 
+# 2026-10-15: this used to be `snap list bitwarden` alone, and it reported PASS while the
+# desktop app on that machine had NEVER BEEN SIGNED IN. Jeff asked "is Bitwarden on all the
+# computers? I didn't see it on the Lenovo" and the gate said it was fine.
+# A package being present is not a password manager being usable - the project's oldest
+# failure, a component check standing in for a feature check.
+# What matters to Jeff is "does it offer to log me in", so check the BROWSER EXTENSION and
+# whether anything has ever signed in, not just that a package exists.
 $out = RemoteRun $LENOVO 'snap list bitwarden'
-Result 'GarageLaptop - Bitwarden' ($out -match 'bitwarden') 'same vault as the Beast'
+Result 'GarageLaptop - Bitwarden app installed' ($out -match 'bitwarden') 'snap present'
+
+$out = RemoteRun $LENOVO 'ls -d ~/.config/google-chrome/Default/Extensions/nngceckbapebfimnlniiiahkandclblb 2>/dev/null | wc -l'
+Result 'GarageLaptop - Bitwarden BROWSER EXTENSION' ($out -match '^[1-9]') $(if($out -match '^[1-9]'){'extension installed - this is what offers to fill a login'}else{'NO extension: websites will never offer to log him in, whatever the desktop app does'})
+
+$out = RemoteRun $LENOVO 'du -s ~/.config/google-chrome/Default/Local*Extension*Settings/nngceckbapebfimnlniiiahkandclblb 2>/dev/null | cut -f1'
+Result 'GarageLaptop - extension has been signed in' ($out -match '^[1-9]') $(if($out -match '^[1-9]'){"has vault storage ($out KB) - signed in at least once"}else{'never signed in - it will sit there doing nothing'})
+
+$out = RemoteRun $ACER 'if exist "%LOCALAPPDATA%\Google\Chrome\User Data\Default\Extensions\nngceckbapebfimnlniiiahkandclblb" (echo yes) else (echo no)'
+Result 'JeffsLapTop - Bitwarden BROWSER EXTENSION' ($out -match 'yes') $(if($out -match 'yes'){'extension installed'}else{'NO Chrome extension - the desktop app is installed but no website will ever offer to fill'})
+
+$bwExtBeast = Test-Path "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Extensions\nngceckbapebfimnlniiiahkandclblb"
+Result '301SERVER - Bitwarden BROWSER EXTENSION' $bwExtBeast $(if($bwExtBeast){'extension installed in Chrome'}else{'NO Chrome extension on the Beast'})
 
 # count on the REMOTE side. Counting locally meant parsing line endings that came
 # back over ssh, and that miscounted 2 real shortcuts as 1 on 09-18.
