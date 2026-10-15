@@ -282,3 +282,43 @@ all rows promoted to ON HAND, photo-confirmed, not unboxed per Jeff's order.)
 
 **Probe-style leak sensor assignments (Jeff 08-18): water heater drip pan + washing machine.**
 (HVAC pan not needed — package unit, everything outside.)
+
+---
+
+## Microwave salvage — Samsung ME16K3000, stripped 2026-10-15
+
+**Jeff killed the welder build the same morning** (*"it's a no-brainer... I'm not gonna build the
+welder I'll just buy one"* — a commercial inverter stick welder is $70–170 against $220–345 to
+build). So the oven gets stripped for parts stock instead. Specs below checked by search
+2026-10-15, not asserted from memory.
+
+### ✅ KEEP — these have real jobs here
+
+| Part | Qty | Verified spec | Why it is worth the shelf space |
+|---|---|---|---|
+| **Door interlock microswitches** | 2–3 | **SPDT, 15 A, 125/250 V, 3/16" spade terminals** (OEM kits list two 15 A 125/250 V SPDT switches) | 🟢 **The best thing in the box.** Proper snap-action limit switches — end-stops, position sensing, any "is this open or closed" job. A few dollars each to buy; free here |
+| **Steel chassis + case panels** | — | sheet steel | 🟢 **Worth more now that a welder is coming.** Practice stock and bracket material |
+| **Power cord** | 1 | 3-wire grounded, moulded plug | Any mains project |
+| **Wiring harness** | — | high-temp appliance wire + spade terminals | Shop stock. Strip and keep the connectors |
+| **Thermal cutouts / thermostats** | 2+ | bimetallic | Over-temp protection on any enclosure or project |
+| **Blower / cooling fan + motor** | 1–2 | 120 V AC | Enclosure cooling, or bench extraction for solder fumes |
+| **Turntable motor** | 1 | **120 V 60 Hz, ~3 rpm, 2.1 W synchronous** | A genuinely slow, self-contained gear motor. Novelty unless a job turns up — keep it, it is small |
+| Mounting hardware | — | — | Screws and brackets |
+
+### ⛔ DISPOSE — do not keep
+
+| Part | Why |
+|---|---|
+| 🔴 **HV capacitor** | **Discharge it, confirm 0 V, then get rid of it.** It holds a lethal charge with the oven unplugged. Do not keep a part like that on a shelf where someone else finds it |
+| 🔴 **Magnetron** | **Out whole, disposed whole.** Its ceramic can contain beryllium oxide — harmless intact, hazardous as dust. Do not cut, grind or smash it. Not worth the magnets |
+| HV diode | High-voltage, low-current, no general use |
+| Control board + keypad | Mains-connected, model-specific, useless outside this oven |
+| Grease / charcoal filters | Consumables |
+
+### ⚖️ THE TRANSFORMER — judgement call
+
+With the welder build dead the MOT has no planned job. It is ~15–20 lb of steel and copper, so it
+has scrap value. **The one thing a SINGLE MOT genuinely does is a SPOT welder** — no arc to
+strike, so the low voltage that killed the stick-welder idea is not a problem there. **Keep it only
+if that ever appeals; otherwise scrap it.** Not re-pitching it — recorded so a future session does
+not rediscover the stick-welder idea from scratch.
