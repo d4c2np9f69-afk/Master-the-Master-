@@ -428,3 +428,52 @@ OK    \BEAST\IPC$         Microsoft Windows Network
 ⚠️ Noted, not yet a fault: the Acer's `\GARAGELAPTOP\IPC$` shows **Disconnected** rather than OK.
 Windows reconnects those on access, so it is normal idle behaviour — **but if the Lenovo ever asks
 the Acer for a password, that line is the first place to look.**
+
+### 2026-10-15 18:3x — the video handoff was DEAD in one direction, silently
+
+**Jeff:** *"if I need to finish a utube vidio out there it will pull up."*
+That is the 2026-09-19 feature. It was **half broken, and the status check said nothing.**
+
+🔴 **BOTH WINDOWS RECEIVERS WERE NOT RUNNING.** `HCC-HandoffWatcher` on the Beast and the Acer
+both read state **Ready** (= not running) with `LastTaskResult 3221225786` = **0xC000013A**, the
+process was killed. The Beast's own log shows `watcher up` at the 10-14 logon and then **nothing
+for 21 hours.** The relay was fine and the Lenovo's `garage-handoff.service` was fine — so
+**Beast → garage worked and nothing could come back.** `Verify-Network` §8 passed throughout,
+because it checks the watchers are *armed*, not that they are *alive*.
+
+✅ **Started both** (Beast PID 3320, Acer PID 14372) and **proved the round trip**: posted to
+`/send?to=beast`, and 3 s later the watcher logged
+`18:39:48 OPEN https://toro1-5rz.pages.dev/?handoff-test=1`, queue `consumed: True`.
+
+✅ **Durable fix: a 10-minute repeating trigger on both watcher tasks**, with
+`MultipleInstances=IgnoreNew` so a live watcher is left alone and a dead one is replaced within
+ten minutes. They were logon-only, so once killed they stayed dead until the next logon — the
+same shape as the clock not coming back after an unattended reboot.
+
+🔑 **"Ready" on a task that is supposed to run FOREVER means DEAD, not healthy.** A long-running
+watcher must be checked by live PID, not by task state. Verify-Network should assert a PID here.
+
+### Where the two halves live — they are NOT in the same browser
+
+| Machine | Browser | Bitwarden | SEND TO bookmarklets |
+|---|---|---|---|
+| Beast | **Edge** | ✅ | ✅ |
+| Beast | **Chrome** | ✅ | ❌ **none** |
+| Acer | Edge | ✅ (policy) | ✅ |
+| Lenovo | Chrome | ✅ signed in | via its own installer |
+
+⚠️ **On the Beast, only EDGE has both.** `Install-GarageBookmarklet.ps1` writes to Edge's
+bookmarks bar only; Chrome's bar is empty. **If Jeff watches YouTube in Chrome on the Beast, he
+has no SEND TO button.** Deliberately not fixed blind — that installer's own header records that
+editing a Chromium bookmarks file without clearing the integrity MAC makes the browser **silently
+discard every bookmark**, which has already cost this project a bookmarks bar once.
+
+⚠️ **I reported "Bitwarden not in Edge on the Beast" earlier today. Wrong** — I tested the CHROME
+extension id against Edge. The store ids differ: Chrome `nngceckbapebfimnlniiiahkandclblb`,
+Edge `jbkfoedolllekgbhcbcoahefnbanhhlh`. An Edge force-install policy was added on the Beast
+anyway, so a profile reset cannot lose it.
+
+**How the timestamp works**, so nobody re-derives it: the bookmarklet reads
+`document.querySelector('video').currentTime`, strips any existing `&t=`, and appends
+`&t=<seconds>s`. It is **not** YouTube's own Continue-watching — that was evaluated 2026-09-19 and
+rejected as a maybe rather than a will. It works on **any HTML5 `<video>`**, not just YouTube.
