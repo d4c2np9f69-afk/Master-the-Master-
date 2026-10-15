@@ -327,3 +327,74 @@ parsing digits out of the name.
 `.198 CMWC1ZZABR` · `.166 dp-730602E4` · `.183 espressif` (`28:05:A5`, an **RE200 client**) ·
 `.82 none-3` · `.161 none-4` · `.182` (RE200 client, `BE-79-DD-6C-A6-5B`, locally-administered
 address = a randomised phone/tablet MAC).
+
+---
+
+## 2026-10-15 — "I want to go to Network and see all the computers" — THREE separate faults
+
+**Jeff:** *"the ability to work with the other computers is still sketchy I want to be able to go
+to network and see all the computers, also there is to be no passwords behind the router."*
+
+`Verify-Network.ps1` gave **44 PASS / 2 FAIL**, both on the Acer. Three independent problems were
+stacked on top of each other, and only one of them was the SMB credential issue everyone assumes.
+
+### 🔴 FAULT 1 — one dark laptop killed the logon script for every machine
+
+`C:\Users\jeffl\map-network.log`, from the 10-14 logon:
+
+```
+==== Wed 10/14/2026 21:24:44 ====
+-- IPC$ Guest sessions BY NAME
+The command completed successfully.     <- JEFFSLAPTOP worked
+^C                                      <- died here on the dead GARAGELAPTOP
+```
+
+**`net use` against a switched-off host BLOCKS.** The Lenovo was unplugged in the garage, so one
+dark machine took down the script and every machine after it in the list. Proven by hand:
+`net view \JEFFSLAPTOP` returned **`System error 5, Access is denied`**, and after a single
+`net use \JEFFSLAPTOP\IPC$ /user:Guest ""` it listed `C`, `jeffl`, `Users` and the printer.
+
+✅ **Fixed:** `HCC-Scripts\Map-NetworkNames.ps1` replaces the `.cmd` body. Every host is
+**reachability-tested with a short timeout and SKIPPED if dark**, so an off machine is a logged
+skip that can never block the others — proven with a fake dead host, **2 seconds instead of a
+hang**. And it now runs **every 15 minutes as well as at logon**, because IPC$ sessions are torn
+down when idle and a machine that was off at logon used to stay unbrowsable until the next logon.
+Task `HCC-Map-Lenovo-SMB` repointed at it, hidden window, result 0.
+
+### 🔴 FAULT 2 — `fdPHost` was STOPPED on the Beast
+
+**`fdPHost` (Function Discovery Provider Host) is the CLIENT half of discovery** — it is what lets
+*this* PC find others. `FDResPub` is the publisher half, which lets others find *this* PC. FDResPub
+was running; **fdPHost was Stopped despite being set to Automatic**, and it had been Running
+twenty minutes earlier in the same session, so it stops on its own.
+
+**With fdPHost stopped, Explorer's Network node cannot discover anything** — which is exactly the
+reported symptom, and it is invisible unless you check both halves. ✅ Started, confirmed
+Automatic. **If "see all the computers" regresses, check fdPHost FIRST** — not shares, not
+permissions.
+
+### ✅ NOT A FAULT — wsdd on the Lenovo, and a correction
+
+A Linux/Samba box is invisible in Windows Explorer's Network without a WS-Discovery daemon.
+⚠️ **I first reported wsdd as inactive. That was wrong — I checked the wrong unit name.** The unit
+is **`wsdd-host.service`**, not `wsdd.service`; it is **active and enabled**, bound to
+`192.168.1.158:3702` and the multicast group `239.255.255.250:3702`, and it started at
+**13:03 today** when Jeff plugged the laptop back in. Ubuntu 26.04, package `wsdd 2:0.8-5ubuntu1`.
+**Use `systemctl is-active wsdd-host`, never `wsdd`.**
+
+### ⚠️ `net view` with no arguments is NOT a discovery test
+
+It returns **`System error 6118 — the list of servers for this workgroup is not currently
+available`**. That is the old **Computer Browser** list, which is dead on modern Windows. Explorer
+uses WS-Discovery instead. **6118 is not evidence of a fault** and chasing it wastes a session.
+
+### 📌 "No passwords behind the router" — what that rule can and cannot cover
+
+It covers **LAN resources**: machine-to-machine file shares, printers, the Beehive. Those are
+Guest/no-password and guarded by `Verify-Network.ps1` §6/§7.
+
+🔴 **It cannot cover email, websites, or any internet service.** Those credentials are checked by
+Xfinity, Google and each site — nothing on the router or on the LAN can waive them, and no setting
+here will stop them asking. **That is what Bitwarden is for**, and the split is deliberate: the
+same §6 that proves no password is needed on the LAN also proves `.ssh`, `.claude`, `AppData` and
+`iCloudDrive\HCC-secrets` are still **refused to guest**. Open network, fenced keys.
