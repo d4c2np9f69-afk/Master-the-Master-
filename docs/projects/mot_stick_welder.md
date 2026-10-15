@@ -10,10 +10,31 @@ reference guides and the repo. The project lived only in conversation. It is wri
 
 ---
 
+## 0. THE DONOR UNIT — read off its own data plate 2026-10-15
+
+| | |
+|---|---|
+| **Model** | **Samsung ME16K3000** (over-the-range) |
+| **Manufactured** | **JUNE 2019** |
+| **Input** | **1.58 kW**, 120 V, 60 Hz |
+| **FCC ID** | `A3LOTR16M3` |
+| Serial / build | `WTM602671V` · made in Malaysia |
+
+1.58 kW input puts it in the ~1000 W-output class, i.e. **an ordinary full-size MOT** — the right
+kind of donor, nothing exotic. It is **one** transformer, which is the whole problem in §1.
+
+---
+
 ## 🔴 1. THE ONE THING THAT BLOCKS THE BUILD: ONE TRANSFORMER IS NOT ENOUGH
 
-**The reference graphic says "12V – 200A (EST)". That figure does not work for stick welding, and
-it is the number the whole project rests on.**
+🔴 **BOTH of Jeff's reference graphics quote the WRONG voltage, and they are wrong the same way.**
+Graphic 1 says **"12V – 200A (EST)"**. Graphic 2 says **"Output Voltage: 16–24 VAC (typical for
+stick welding)"**.
+
+**16–24 V is the ARC voltage — what sits across the arc once it is already burning. It is NOT the
+OPEN-CIRCUIT VOLTAGE the machine needs to STRIKE that arc.** Conflating the two is the single
+most common error in these build guides, and it is why a one-MOT machine disappoints: the rod
+sticks to the work and never lights.
 
 Stick welding needs enough **open-circuit voltage (OCV)** to strike and then hold an arc. Checked
 by real search 2026-10-15, against builds that reported measured numbers:
@@ -42,22 +63,54 @@ more wraps = more volts, fewer amps. So the rewind is a tuning step, not a fixed
 
 ---
 
-## 🔴 2. SAFETY — the two hazards the reference graphic does NOT mention
+## 1b. 🔴 "DC STICK WELDER" — graphic 2 contradicts itself, and it matters for 7018
 
-The graphic covers grounding, fusing and ventilation. It leaves out the two that actually hurt
-people during **teardown**, which is the step Jeff is about to do.
+The machine in graphic 2 is lettered **"DC STICK WELDER"** on the front panel. But its own spec
+block says **"16–24 VAC"**, its note repeats **"low voltage (16–24V AC)"**, and **its wiring
+diagram contains no rectifier and no inductor** — 120 V in, transformer, current control, leads
+out. **As drawn, that is an AC machine wearing a DC label.**
 
-### 2a. THE HIGH-VOLTAGE CAPACITOR CAN HOLD A LETHAL CHARGE WITH THE OVEN UNPLUGGED
+That difference is not cosmetic:
+- **6013 runs acceptably on AC.** It is the forgiving rod and the right one to learn on.
+- **7018 strongly prefers DC.** On AC it is harder to strike and prone to arc blow — and 7018 is
+  on the graphic's own recommended rod list.
+
+▶ **If DC is actually wanted, the build needs two parts that appear on NEITHER graphic: a bridge
+rectifier rated for the real welding current (well over 100 A, on a heatsink) and a smoothing
+inductor/choke.** Decide AC-or-DC up front, because it changes the parts list and the budget.
+**Starting AC with 6013 is the honest, cheap first version.**
+
+---
+
+## 🔴 2. SAFETY — what each graphic gets right, and what BOTH leave out
+
+✅ **Credit where it is due: graphic 2 gets the capacitor right**, in red: *"The microwave's
+original high-voltage secondary and capacitor must be removed and NOT used. The capacitor can hold
+a lethal charge even when unplugged."* That is correct and it is the most important line on the
+page. Graphic 1 omits it entirely.
+
+### 2a. THE HIGH-VOLTAGE CAPACITOR — confirmed by graphic 2, repeated here because it kills
 A microwave's HV capacitor stores enough energy to kill and can stay charged after the unit is
 disconnected. **Discharge it deliberately before touching anything inside** — short it across the
 terminals, and to the chassis, through an insulated screwdriver or a resistor, and confirm it
-reads zero. Treat it as live until measured dead. Many units have a bleeder resistor; **do not
+reads zero. Treat it as live until **measured** dead. Many units have a bleeder resistor; **do not
 assume it worked.**
 
-### 2b. DO NOT BREAK OR GRIND THE MAGNETRON'S CERAMIC
-Magnetron insulators can contain **beryllium oxide**, which is hazardous if the dust is inhaled.
-Intact it is harmless. **Do not cut, grind, smash or sand it** — if the magnetron is not being
-used, set it aside whole and dispose of it intact.
+### 2b. 🔴 THE MAGNETRON — and graphic 2 actively steers into this one
+Graphic 2's internal view labels the magnetron **"keep magnets"** and its parts list includes
+**"Magnetron magnets (optional)"**. The magnets themselves are fine — but **getting them out means
+breaking the magnetron open, which is exactly the scenario the hazard applies to.**
+
+Magnetron insulators can contain **beryllium oxide**. Intact, it is harmless. **Broken, cut, ground
+or sanded, the dust is the hazard.** So: if the magnets are not genuinely needed — and they are
+worth very little — **leave the magnetron whole and set it aside.** If they are wanted, do it
+outdoors, do not grind, do not smash the ceramic, and do not breathe anything it produces.
+
+### 2c. Things graphic 2 lists that are NOT worth keeping
+- **"Control board (keep, if useful)"** — mains-connected, model-specific, and of no use in a
+  welder. Skip it.
+- **"Current control (variac or tap)"** — a variac is the nice version and is **not cheap**;
+  **tapping the rewound secondary is the $0 way** to get coarse current steps. Start there.
 
 ### 2c. The finished welder is not a toy either
 A patent on welding-equipment isolation notes OCV **can reach 100 V, and that level can be fatal
@@ -137,4 +190,4 @@ MEASURE the real OCV on the bench.** The fatality note on OCV is from
 [US Patent 7,193,176, safety isolation of arc welding
 equipment](https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/7193176).
 
-Reference infographic supplied by Jeff: `docs/projects/mot_stick_welder_reference.jpg`.
+Supplied by Jeff: `mot_stick_welder_reference.jpg` (graphic 1, enclosure options), `mot_stick_welder_plan.jpg` (graphic 2, THE PLAN - wiring diagram + what to save), `mot_stick_welder_donor_dataplate.jpg` (the Samsung ME16K3000 data plate).
