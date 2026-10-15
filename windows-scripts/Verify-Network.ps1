@@ -156,6 +156,16 @@ Result 'GarageLaptop - Chrome' ($out -match 'chrome') 'same browser as the Beast
 $out = RemoteRun $LENOVO 'snap list bitwarden'
 Result 'GarageLaptop - Bitwarden app installed' ($out -match 'bitwarden') 'snap present'
 
+# 🔴 2026-10-15: I reported this app "NEVER SIGNED IN" twice, from checking
+# ~/snap/bitwarden/current/.config/Bitwarden - a path that does not exist for this snap.
+# Jeff had signed in that afternoon. The real store is the Electron user-data dir,
+# ~/snap/bitwarden/<rev>/appdata/data.json, and a synced vault makes it MEGABYTES.
+# Check the file that would actually exist, and judge by size: an app that has never been
+# signed in has no data.json at all.
+$out = RemoteRun $LENOVO 'find ~/snap/bitwarden -name data.json -printf "%s\n" 2>/dev/null | sort -n | tail -1'
+$bwAppKB = 0; [int]::TryParse(($out -replace '\D',''), [ref]$bwAppKB) | Out-Null
+Result 'GarageLaptop - Bitwarden DESKTOP APP signed in' ($bwAppKB -gt 100000) $(if($bwAppKB -gt 100000){"vault on disk, data.json = $([math]::Round($bwAppKB/1MB,2)) MB"}else{'no data.json of any size - the app has never been signed in'})
+
 $out = RemoteRun $LENOVO 'ls -d ~/.config/google-chrome/Default/Extensions/nngceckbapebfimnlniiiahkandclblb 2>/dev/null | wc -l'
 Result 'GarageLaptop - Bitwarden BROWSER EXTENSION' ($out -match '^[1-9]') $(if($out -match '^[1-9]'){'extension installed - this is what offers to fill a login'}else{'NO extension: websites will never offer to log him in, whatever the desktop app does'})
 
