@@ -279,3 +279,40 @@ winding — a variac does it smoothly, but costs real money and is not needed fo
 ## 8. THE ONE OPEN ITEM
 
 🔴 **A second full-size microwave transformer.** Free, but it is the gate on every other step.
+
+---
+
+## 🔴 9. THE VERDICT — Jeff asked the question I should have asked first
+
+**Jeff, 2026-10-15 10:09: *"Now look up on Amazon an equivalent welder and ask yourself why
+wouldn't I just buy a new one if it's gonna cost that much to build one?"***
+
+**He is right. Checked the same minute: a 160 A dual-voltage inverter stick welder is $70–170**
+— Home Depot $69.99, ARCCAPTAIN $98.99 at Walmart, ~$139.99 on eBay — **and it ships with the
+holder, clamp and leads.** This build is **$220–345**.
+
+| | Build | Buy |
+|---|---|---|
+| Cost | $220–345 | **$70–170** |
+| Output | AC only | **DC — 7018 runs properly** |
+| Striking | ~38 V, scratchy | hot start, anti-stick |
+| Current control | 3 coarse taps | continuously adjustable |
+| Duty cycle | 10–20% | rated and published |
+| Supply | 240 V circuit + an obsolete Challenger breaker | **runs on 110 V as sold** |
+| Still needed | a second MOT he does not have | nothing |
+
+🔑 **The detail that settles it: Phase 1's ~$150 is almost entirely holder, clamp and cable — the
+exact accessories a $99 welder ships with.** Spend it here and you own $150 of accessories and
+still have no welder.
+
+▶ **RECOMMENDATION: buy the welder.** Build this only if the building is the point — a real
+reason, but not a money-saving one. Everything above stays valid for that case.
+
+⚠️ **MY PROCESS FAILURE, recorded because it is the useful part:** every PART in this sheet was
+priced by real search, per the standing rule. **I never priced the THING.** Costing a build's
+components is not the same as costing the build against buying it finished. **The first search on
+any build is "what does the finished thing cost?"** — one search, and it decides whether the
+design work should happen at all. Memory: `feedback_price_the_alternative_first`.
+
+✅ **Nothing is wasted either way:** the microwave's fan, cord, chassis and thermal cutouts are
+useful shop stock, and the $21 Fel-Pro sheet was always for exhaust gaskets.
