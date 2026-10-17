@@ -176,25 +176,48 @@ UPS are all in that one corner by design (`NETWORK_MAP.md`, Jeff 09-22).
 + service loop · ×1.15 routing slack · rounded up to 5 ft. Coordinates straight out of
 `docs/house-plan/plan-data.js`.
 
-| Run | Pull | Lands at |
-|---|---|---|
-| Master bedroom, west end (AP + TV wall) | **20 ft** | register under the arched window |
-| Hallway centre — **the main AP** | **35 ft** | dead centre of the house |
-| Living room, TV / fireplace wall | **50 ft** | new 7" register |
-| **Living room, grandfather-clock corner** | **55 ft** | clock + QFX speaker |
-| Kitchen / dining | **55 ft** | new 7" register |
-| KitchenPC | **60 ft** | position provisional on the plan — confirm |
-| Back deck TV / Roku | **60 ft** | keep the splice inside the wall |
-| Garage workbench / GaragePC | **85 ft** | follows the new garage branch through the brick |
-| **8 new runs** | **≈ 420 ft** | |
-| *Guest bedroom* | *existing jack* | 🔑 **TEST IT FIRST — there is already a jack there** |
-| *Office / Bed 3* | *existing jack + the 2nd switch* | 🔑 **TEST IT FIRST** |
+### 🔴 REV 2, 10-17 10:1x — JEFF: *"the runs are not correct."* HE WAS RIGHT. FIVE REAL ERRORS.
 
-🟢 **One 1000 ft box covers all of it with ~580 ft spare** — enough to re-pull the two existing runs
-later, plus mistakes. A 500 ft box is too tight to be comfortable.
-🔑 **Test the two existing jacks before pulling anything** — if they link at 1000 Mbps, that is two
-runs you neither pay for nor crawl for. ⚠️ Guest bath and master bath are deliberately **not** on
-this list.
+| # | What rev 1 got wrong | Effect |
+|---|---|---|
+| 1 | **Ceiling APs were costed as CRAWL runs.** An AP in a ceiling is an **attic** run — up ~10 ft, across, down 3 — not down into the crawl and back up | hallway AP 35 → **45 ft** |
+| 2 | **The living-room run landed on the back-wall register, ~11 ft from the TV it is for.** A data jack goes to the device, not to a duct boot | re-aimed at the fireplace wall |
+| 3 | **The kitchen was counted twice** — once at its register, once at KitchenPC, 5 ft apart, as two separate pulls | one run |
+| 4 | **Rooms were missing** against *"ethernet in each room"* — no laundry/pantry, no foyer | 8 runs → **11** |
+| 5 | **Terminations under-counted** at 10 ft for both ends. A patch-panel dressing plus a far-end service loop is **12 ft** | every run +2 |
+| | **TOTAL WAS 420 ft. IT IS 580–605 ft — rev 1 was ~30% short** | a 500 ft box would NOT have done it |
+
+**Model:** straight-line distance from the core × **1.20** for real routing (joists, piers, pulling
+round corners) as the LOW figure; strict right-angle routing as the HIGH. Plus the vertical leg
+(crawl 4+4, attic 10+3) and 12 ft of terminations. Re-run it any time:
+`python -I scratchpad/cable_runs_2026-10-17.py`.
+
+| Run | Route | Buy |
+|---|---|---|
+| **AP 1 — hallway centre (ceiling)** | attic | **45 ft** |
+| **AP 2 — kitchen/living (ceiling, at the half wall)** | attic | **50–55 ft** |
+| **AP 3 — garage** | attic | **65–70 ft** |
+| Living room TV — **fireplace wall**, not the register | crawl | **45–50 ft** |
+| Grandfather clock corner | crawl | **55–60 ft** ⚠️ position unmeasured |
+| Kitchen / dining — one run, at KitchenPC | crawl | **60–65 ft** ⚠️ position unmeasured |
+| Master bedroom, west end | crawl | **40 ft** |
+| Garage workbench (GaragePC + garage TV) | crawl | **75–85 ft** |
+| Back deck TV / Roku | crawl | **60 ft** — exterior penetration, different cable |
+| Laundry / pantry alcove | crawl | **50 ft** |
+| Foyer | crawl | **30 ft** |
+| **11 NEW RUNS** | | **580–605 ft** |
+| *Guest bedroom* | *jack already there* | 🔑 **TEST FIRST** (35 ft if re-pulled) |
+| *Office / Bed 3* | *jack + 2nd switch already there* | 🔑 **TEST FIRST** (65 ft if re-pulled) |
+
+🟢 **One 1000 ft box still covers it — but the spare is ~395 ft, not the 580 rev 1 claimed**, and
+**705 ft if the two existing jacks get re-pulled too.** ⚠️ Both baths are deliberately **not** on
+this list. ⚠️ **The clock and KitchenPC positions are the two soft numbers** — `plan-data.js` marks
+KitchenPC *"position provisional"* and the clock speaker *"PORTABLE — confirm its real spot."*
+
+🔴 **AND A CONTRACT DISCREPANCY FOUND WHILE CHECKING THIS:** `plan-data.js` has the Dining, Master
+bedroom and Living room branches going to **7"** (`size: 7, was: 6`). **The install pack §4 item 4
+says `6"→8" upgrades: Dining room, Master bedroom, Living room`.** The contract is the authority —
+**the plan data is wrong, and it is the file every session reads.**
 
 ### Also buy (the small stuff that stops the job)
 Keystone jacks (**shielded if you run Cat8**) · a wall plate per room · a punch-down tool · old-work
