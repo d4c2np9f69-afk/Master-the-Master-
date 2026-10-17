@@ -1,0 +1,264 @@
+# Structured wiring + PoE + the clock speaker — what each choice actually buys
+**Opened 2026-10-17 9:0x AM**, four days before the duct crew (Wed 10-21 / Thu 10-22).
+
+Jeff: *"I made a mistake with my choice in cat6 I'm going to go to cat8 and a PoE switch 8 port
+so I can power things off of it… I need a report on what I will gain… use the home map to see how
+many runs I need and how long each run needs to be… send the runs down the same duct and come out
+of the register… could have ethernet in each room which could enable a great mesh network"*
+Plus 9:13 AM: *"I want a cheap mesh extenders in every room even if we have to reprogram them like
+you did with the RE200 in the office."*
+
+---
+
+## 🔴 THE ONE THING TO CHANGE BEFORE WEDNESDAY: NOT *INSIDE* THE DUCT — *BESIDE* IT
+
+**The timing instinct is exactly right. The route is the one part that has to change.**
+
+### Why not inside
+1. **Code.** NEC **300.22(B)** limits what may be installed inside a duct fabricated to carry
+   environmental air to a short list of metal wiring methods (MC, MI, EMT, RMC/IMC) — and equipment
+   only when it acts on or senses the air itself. **Plenum-rated cable is for plenum SPACES
+   (300.22(C)), not for the inside of a duct.** A data cable pulled through a supply duct for
+   convenience is not a permitted method in any reading I found, and the AHJ has final say.
+2. 🔴 **It collides with your own acceptance test.** You took the **16" return**, which the Rev D
+   drawing itself puts at **≈713 ft/min — the ACCA Manual D maximum for flex.** There is no spare
+   static-pressure margin, and the contract obliges them to **record supply/return static pressure
+   and airflow on the invoice.** Cable in the airstream adds resistance and turbulence to the one
+   number that proves the $1,800 duct line worked. Do not hand the system a self-inflicted
+   handicap on the morning it gets measured.
+3. **Mechanically it does not work anyway.** Insulated flex is a corrugated plastic liner on a wire
+   helix — you cannot pull 8 runs through it without tearing the liner, and every register
+   penetration becomes a permanent conditioned-air leak at the one joint nobody opens again.
+4. **Nobody will warrant it.** The crew will refuse, and they should.
+
+### What to do instead — same crawl, same trip, zero downside
+🔑 **Your trunk and every branch already run in the CRAWL SPACE under the hallway line**
+(`plan-data.js` duct block: *"Trunk + return run in the crawl space under the hallway line"*; the
+new garage branch is explicitly *"south in the crawl space · through the brick by the water
+heater"*). **That is a free, open, legal pathway to every room in the house.**
+
+- Run the cable **in the crawl, alongside the new flex — stapled to the joists, 12" off any
+  Romex, crossing power at 90°.**
+- Come up **next to the register boot** into a low-voltage ring / old-work box and a wall plate.
+  Floor registers mean the boot is already coming through the floor there — the hole is a drill
+  and a plate, not a renovation.
+- **The real timing win is the crawl being clear and the floor open while they work**, not the duct
+  interior. You keep 100% of the advantage you were after.
+
+---
+
+## 1. CAT8 vs CAT6 — the honest answer: **Cat6 was not a mistake, and Cat8 buys you nothing here**
+
+### What your network actually runs at — measured, not assumed
+| Measurement | Value | Source |
+|---|---|---|
+| **WAN right now** | **144.9 ↓ / 44.24 ↑ Mbit/s, 154 ms** | `sensor.speedtest_*`, live read 2026-10-17 08:36 CT |
+| **WAN over 24 h** | **min 24.8 · max 528.7 · avg 243.7 Mbit/s** (25 samples) | HA history, same read |
+| Recorded 2026-09-17 | 476 ↓ / 104 ↑ / 32 ms | `IDEAS_FROM_WHAT_WE_OWN_2026-09-17.md` |
+| LAN links at the gateway | **1 G** on every wired port | gateway census, `NETWORK_MAP.md` |
+
+🔴 **Your internet never touches 1 Gb, and it swings by a factor of 20 across a single day.** No
+cable category anywhere in that chain changes a single one of those numbers.
+
+### The cable facts that decide it
+| | Cat6 | Cat6A | **Cat8** |
+|---|---|---|---|
+| 1 Gb | **328 ft** | 328 ft | 328 ft |
+| 10 Gb | ~165–180 ft | **328 ft** | 328 ft |
+| 25 / 40 Gb | — | — | **98 ft only** |
+| Conductor | 23 AWG | 23 AWG | **22 AWG, fully shielded S/FTP — stiff, big bend radius** |
+| Terminates with | your crimper + standard tips | same | 🔴 **shielded plugs/keystones + a bonded shield, or the shield does nothing** |
+| **1000 ft bulk, US** | **$160–$185** | — | **$428 (Newegg) · $558 (Home Depot) · $699 (Monoprice)** |
+
+**The decider: every 8-port PoE switch in this price class is a GIGABIT switch.** It caps every
+port at 1 Gb no matter what cable is behind it. To use even 2.5 Gb you would have to buy a 2.5 Gb
+switch *and* 2.5 Gb network cards in the Beast and whatever it talks to; 25/40 Gb gear costs more
+than this entire house network. **Cat8 at 1 Gb is just an expensive, stiff, harder-to-terminate
+Cat6.**
+
+### The call
+- **Run Cat6 (or Cat6A if you want the 10 Gb headroom).** On ~420 ft of runs that is roughly
+  **$70–$80 of Cat6** against **$180–$295 of Cat8** — for zero measurable difference.
+- **If you have already bought the Cat8, run it** — it works perfectly well at 1 Gb. Buy
+  **shielded** keystones and plugs to match (your existing tips are for unshielded 23–26 AWG; the
+  10-13 fit note is the same trap in a new size), and expect no speed change.
+- ⚠️ **Cat8 is also the wrong cable to want for PoE heat** in a tight bundle — the 22 AWG copper
+  helps, the foil does not. Not a problem at 4 APs; worth knowing if the bundle ever grows.
+
+---
+
+## 2. THE 8-PORT PoE SWITCH — right idea, **and it is half the switch you need**
+
+### What PoE actually gains you *in this house*
+| Candidate | PoE gain | Verdict |
+|---|---|---|
+| **Wired access points** | **One cable carries data + power. No outlet needed at ceiling height, no wall wart, and on a managed switch you can power-cycle a hung AP from your chair.** | 🟢 **This is the whole payoff** |
+| Blink cameras | **None — battery/cloud, no Ethernet at all.** The port scan of `192.168.1.214` found every port closed. | ⛔ Cameras are FROZEN; not re-opening it |
+| Beehive (J45) | Needs a ~$10 PoE splitter, and it is **already on the APC BN600** | 🟡 no real gain |
+| Future doorbell / sensors | Real, but nothing bought | 🔵 later |
+
+### 🔴 PORT COUNT — count it before you buy
+| At the core today | | New runs | |
+|---|---|---|---|
+| Uplink to the BGW320 | 1 | Living room TV wall | 1 |
+| The Beast | 1 | Clock corner | 1 |
+| Beehive | 1 | Kitchen / dining | 1 |
+| | | KitchenPC | 1 |
+| | | Garage | 1 |
+| | | Hallway AP | 1 |
+| | | Deck TV | 1 |
+| | | Master bedroom west | 1 |
+| **subtotal 3** | | **subtotal 8** | |
+
+**= 11 ports minimum, before Angela's jack, the soundbar, the NTV300 or anything in the office.**
+An 8-port is not enough **as your only switch**.
+
+**Two ways out, cheapest first:**
+1. **$0-leaning — keep the 8-port PoE for the APs and PoE loads only, and hang the dumb devices
+   off the unmanaged switches you already own** (the LAN-1 fan-out at the core and the one in the
+   office). This is the cheap, correct answer.
+2. Buy **16 ports with ≥8 PoE+** instead and collapse it all into one box.
+
+### 🔴 Watch the PoE *budget*, not the port count
+- Wi-Fi 5 APs (802.3af, ~13 W each): a **64 W** budget switch runs 4. Fine.
+- Wi-Fi 6 APs (802.3at, up to ~20 W each): 4 of those is ~80 W — **over a 64 W budget.** You need a
+  ~120 W model.
+- 🔴 **Cheap extenders are NOT PoE-powered.** If you go the RE200-conversion route, every one still
+  needs a wall wart, and **the PoE switch buys you nothing at all.** *The AP decision and the
+  switch decision are the same decision — make them together.*
+
+Prices found this session were mostly CAD/EUR/GBP listings (TL-SG1008P ≈ $57–60 CAD; TL-SG108PE
+≈ $70 CAD). **US prices need one click in your Chrome — say the word and I will price it there
+before you buy, the same way we did the TV strips.**
+
+---
+
+## 3. "CHEAP MESH EXTENDERS IN EVERY ROOM" — run the wire everywhere, hang 3–4 APs
+
+**Start with $0: you already own two RE200s** (one at the core, one in the office) and both are
+already proven convertible to wired APs — you did it on 08-13.
+
+### 🔴 But more APs is not more coverage, and your own house already proved the failure mode
+- **The house is ~1,200 sq ft on one floor** (39.42 × 29.25 plus the kitchen bump-out). **Three
+  well-placed wired APs blanket that. Eight would fight each other** — 2.4 GHz has only **three**
+  non-overlapping channels, so AP five onward is pure co-channel interference, and the gateway
+  radio was already measured at **44% channel utilisation** on 09-03.
+- **Cheap extenders-as-APs have no roaming assist (no 802.11k/v/r).** The client decides, and it
+  has no obligation to move. **This is exactly the B-Hyve story:** it held the gateway at
+  **256 ms / 5% loss** across the whole house while the RE200 sat **one brick wall away at 1 ms**,
+  and a reset made it *worse*. **Eight identical cheap APs multiplies that hazard, it does not
+  solve it.**
+
+### The plan that gets you what you want
+1. 🔑 **Run the cable to every room now.** The wire is the cheap part today and the expensive part
+   forever after. A jack in a room with no AP costs you a $2 keystone.
+2. **Hang APs in 3 places to start — hallway centre (dead centre of the house), kitchen/living,
+   and the garage.** The office already has one.
+3. **Use the two RE200s you own first. $0.** If roaming misbehaves, the fix order is free before
+   it is paid: **turn their TX power down** so clients have a reason to leave, and keep the
+   **separate `Loewen301-IoT` SSID for the sticky fixed devices** — the decision you already made
+   for the B-Hyve on 09-22.
+4. **Only if that is not good enough**, replace one at a time with real PoE APs that do 802.11k/v
+   under one controller (TP-Link Omada EAPs are the cheap end; the controller software is free and
+   runs on the Beast or Beehive). Listed abroad at ≈ €62–75 / £65 — **US price needs the click.**
+
+⚠️ **Not convertible, already settled:** the **D-Link DAP-1520 has no Ethernet port** — it cannot
+become a wired AP, established 08-13.
+
+---
+
+## 4. HOW MANY RUNS, AND HOW LONG — computed from the plan, not estimated
+
+**Head end = the network switch in the master-bedroom NE corner** — gateway, Beast, Beehive and the
+UPS are all in that one corner by design (`NETWORK_MAP.md`, Jeff 09-22).
+
+**Model:** 5 ft down into the crawl + service slack · Manhattan run in the crawl · 5 ft up the wall
++ service loop · ×1.15 routing slack · rounded up to 5 ft. Coordinates straight out of
+`docs/house-plan/plan-data.js`.
+
+| Run | Pull | Lands at |
+|---|---|---|
+| Master bedroom, west end (AP + TV wall) | **20 ft** | register under the arched window |
+| Hallway centre — **the main AP** | **35 ft** | dead centre of the house |
+| Living room, TV / fireplace wall | **50 ft** | new 7" register |
+| **Living room, grandfather-clock corner** | **55 ft** | clock + QFX speaker |
+| Kitchen / dining | **55 ft** | new 7" register |
+| KitchenPC | **60 ft** | position provisional on the plan — confirm |
+| Back deck TV / Roku | **60 ft** | keep the splice inside the wall |
+| Garage workbench / GaragePC | **85 ft** | follows the new garage branch through the brick |
+| **8 new runs** | **≈ 420 ft** | |
+| *Guest bedroom* | *existing jack* | 🔑 **TEST IT FIRST — there is already a jack there** |
+| *Office / Bed 3* | *existing jack + the 2nd switch* | 🔑 **TEST IT FIRST** |
+
+🟢 **One 1000 ft box covers all of it with ~580 ft spare** — enough to re-pull the two existing runs
+later, plus mistakes. A 500 ft box is too tight to be comfortable.
+🔑 **Test the two existing jacks before pulling anything** — if they link at 1000 Mbps, that is two
+runs you neither pay for nor crawl for. ⚠️ Guest bath and master bath are deliberately **not** on
+this list.
+
+### Also buy (the small stuff that stops the job)
+Keystone jacks (**shielded if you run Cat8**) · a wall plate per room · a punch-down tool · old-work
+low-voltage rings · a cheap cable tester · J-hooks or staples rated for data cable.
+**Do not reuse flat 30 AWG cable for anything in-wall** — that is what the 10-13 note was about.
+
+---
+
+## 5. THE CLOCK SPEAKER AUDIO RUN — **yes, and it kills a whole documented failure class**
+
+*(Reading "auto wire" as **audio** wire — a line-level run from the Beast to the QFX.)*
+
+### What you gain — every one of these is in our own record
+| Gain | The evidence it fixes |
+|---|---|
+| 🔴 **The Bluetooth dropout class disappears** | the clock was silent **Sep 29 → Oct 6** and the cause was the speaker/BT link |
+| **The keepalive hack becomes unnecessary** | the listener holds a **−80 dBFS stream open 24/7** for one reason: to stop the BT link going idle |
+| **No more eaten first words** | the code carries a deliberate pause + `speech_lead_s 0.8` because *"the Bluetooth link / QFX waking after the 1.5 s pause eats the first words"* |
+| **No re-pairing after a reboot** | a wired output is just there |
+| **Better sound** | no A2DP/SBC compression on the chimes |
+
+### What it costs
+- 🔴 **The speaker stops being portable.** The plan already flags it: *"Speaker is PORTABLE —
+  confirm its real spot before trusting the distance."* **Pick its permanent home first.**
+- **Hum risk.** ~55 ft of unbalanced line level sharing a crawl with Romex is the classic buzz
+  setup. Mitigate: shielded cable, 12" away from power, cross at 90°, and a **ground-loop isolator
+  (~$10)** if it hums — the Beast is on the UPS in the master bedroom and the speaker is on a
+  different circuit across the house, which is precisely the ground-loop recipe.
+- **Confirm the input.** The QFX PBX family lists a **1/8" (3.5 mm) stereo aux in**; I could not
+  find a spec sheet for the **PBX-BF120** exactly. **Read the back of the unit before buying a
+  cable.**
+
+### What changes in software: **one line**
+`C:\Users\jeffl\HCC-Scripts\chime_config.json` → `"speaker": "Headphones (QFX PBX-BF120)"` becomes
+the name of the wired output. The listener matches a WASAPI output by **name substring** and
+re-queries it every play. ⚠️ **Leave `auto_convert` alone** — without it every play fails
+(`Invalid sample rate`, found 09-24).
+
+### What it does **not** fix
+⛔ **A Beast crash still takes the clock down** — that is **#238**, unchanged, and the 10-16 crash
+proves it is still live. Wiring the speaker does not touch it.
+
+---
+
+## 6. WHAT I WOULD DO, IN ORDER
+
+1. **Today/Monday:** decide cable, get it on site. **Cat6 or Cat6A unless you have already bought
+   the Cat8 — in which case run the Cat8 and buy shielded keystones.**
+2. **Tell the crew: cable goes in the crawl BESIDE the duct, never inside it**, and ask them not to
+   block crawl access when they are done.
+3. **Test the guest-bedroom and office jacks.** Two runs you may not need.
+4. **Pull 8 runs, ~420 ft, off one 1000 ft box** while the crawl is clear and the floor is open.
+5. **Switch:** 8-port PoE **for the APs**, with the dumb devices staying on the unmanaged switches
+   you already own. Size the PoE **budget** to the APs you actually pick.
+6. **APs: the two RE200s you own, wired, $0.** Add a third only if there is a dead spot you can
+   measure. Upgrade to 802.11k/v APs one at a time only if roaming annoys you.
+7. **Audio run to the clock last** — it is the easiest one and it is pure gain.
+
+---
+
+## Sources checked this session
+Live: `sensor.speedtest_download/upload/ping` + 24 h history off Beehive · `chime_config.json` ·
+`chime_listener.py`. Repo: `docs/house-plan/plan-data.js` (geometry, devices, duct block) ·
+`docs/inventory/NETWORK_MAP.md` · `docs/network/re200_cat6_reterminate_2026-10-13.md` ·
+`docs/hvac/INSTALL_OVERSIGHT_2026-10-21.md` + OPEN_ITEMS #233. Web: NEC 300.22(B) discussion ·
+bulk Cat6/Cat8 spool pricing · TL-SG1008P / TL-SG108PE and Omada EAP listings (non-US currencies —
+**US prices still need one click**) · QFX PBX aux-input listings.
