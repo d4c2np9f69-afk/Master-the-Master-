@@ -114,10 +114,12 @@ Cat6.**
 An 8-port is not enough **as your only switch**.
 
 **Two ways out, cheapest first:**
-1. **$0-leaning — keep the 8-port PoE for the APs and PoE loads only, and hang the dumb devices
-   off the unmanaged switches you already own** (the LAN-1 fan-out at the core and the one in the
-   office). This is the cheap, correct answer.
-2. Buy **16 ports with ≥8 PoE+** instead and collapse it all into one box.
+1. ✅ **$0 — AND HE ALREADY OWNS THE SECOND SWITCH.** Verified in his orders 2026-10-17:
+   **Hgcorenet 8-Port Gigabit Ethernet Switch, unmanaged 10/100/1000, ordered 2026-09-24.**
+   So: **the new 8-port PoE switch carries the APs and PoE loads only, and the dumb devices hang
+   off the Hgcorenet plus the LAN-1 fan-out and the office switch already in service.** Nothing
+   extra to buy for the port count.
+2. Buy **16 ports with ≥8 PoE+** instead and collapse it all into one box — unnecessary now.
 
 ### 🔴 Watch the PoE *budget*, not the port count
 - Wi-Fi 5 APs (802.3af, ~13 W each): a **64 W** budget switch runs 4. Fine.
@@ -224,6 +226,19 @@ Keystone jacks (**shielded if you run Cat8**) · a wall plate per room · a punc
 low-voltage rings · a cheap cable tester · J-hooks or staples rated for data cable.
 **Do not reuse flat 30 AWG cable for anything in-wall** — that is what the 10-13 note was about.
 
+✅ **ALREADY BOUGHT, verified in his orders 2026-10-17: `VCE Cat6 RJ45 Pass Through Connectors,
+gold-plated 8P8C, UL listed, 25 pcs` × 2 = 50 ends, ordered 2026-10-13.**
+⚠️ 🔴 **BUT PASS-THROUGH ENDS NEED A PASS-THROUGH CRIMPER** — the tool has a blade that shears the
+8 conductors flush with the plug nose as it crimps. The record describes his tool only as *"a cat
+five crimper"* (Jeff, 10-13 9:34 AM). **If it is a plain crimper, these 50 connectors will leave
+the wires standing proud of the plug and the ends will not seat.** Workable with flush cutters,
+properly fixed with a pass-through tool. **Check the crimper before the pull, not during it.**
+
+🔑 **NO BULK SPOOL HAS BEEN BOUGHT YET** — his whole Ethernet order history is patch cables
+(Seedato Cat6 50 ft ×2, flat Cat6 10 ft 2-pack, Monoprice 1 ft, Ciwoda Cat8 short ×2, GLANICS Cat8
+3 ft 2-pack, Cat8 3 ft outdoor, Cat6 3 ft 2-pack). **So the Cat6-vs-Cat8 decision in §1 is still
+live and the $180–295 is still on the table — it is not a sunk cost.**
+
 ---
 
 ## 5. THE CLOCK SPEAKER AUDIO RUN — **already designed on 2026-09-28. Do not re-derive it.**
@@ -275,18 +290,34 @@ have done that. **This is the strongest argument for the run and I had it backwa
 (4.6★/1.8K, sold by Amazon), chosen after **Jeff 14:22: *"The run is under the floor in the crawl
 space to the clock"*** — ~37 ft on the plan + 2 drops ≈ 45 ft → a 50 ft cable.
 
-⚠️ **The record's last word is that it was NEVER ORDERED.** At 09-28 17:10 Jeff said *"That is just
-fine leave that set up the way it is… we need nothing else"*, the QFX stayed on Bluetooth, and the
-siren + 12 V adapter + 50 ft aux were all logged as *"NOT needed — never ordered."*
-🔑 **But the sirens from that same cart DID arrive** — confirmed 10-13 by Jeff's own photo
-(`B07K2Z76NB` Xnrtop 2-pack). So the cart was checked out later and the cable most likely came with
-it. **Jeff 10-17: *"I already have the audio aux cable."* His word on hardware in his hand is
-primary evidence and it outranks my search** (the rule earned 10-15 on the UV light).
+✅✅ **SETTLED 2026-10-17 10:2x — HE HAS IT, AND I READ IT OFF HIS OWN ORDER, NOT OFF A GUESS.**
 
-🔴 **THE NUMBER THAT MATTERS: it has to be ~50 ft.** My own geometry says a **55 ft pull**; 09-28
-said 45 ft raw. **A 50 ft cable therefore has 3–5 ft of margin and no more.**
-**Measure the real route with a string before committing to it**, and know that the 6 ft, 10 ft and
-3 ft patch cables in his cable inventory are useless for this run.
+> **Monoprice 100647 50' 3.5mm Stereo Plug/Plug M/M Cable, Black — $4.99, sold by Amazon.com**
+> **Order `113-9229160-3734636`, placed September 29 2026, DELIVERED September 30**
+> *"Your package was left near the front door or porch."* Returnable through 2026-10-30.
+
+🔴 **THE RECORD WAS WRONG AND THIS CORRECTS IT.** `HOUSE_COMMUNICATION_CENTER_2026-09-28.md` and
+OPEN_ITEMS #214 both say the 50 ft aux was *"NOT needed — never ordered"*, written when Jeff kept
+Bluetooth at 17:10 on 09-28. **He ordered it the next morning anyway.** It has been in the house
+for 17 days while two separate documents said it did not exist. **Jeff 10-17: *"I already have the
+audio aux cable"* — he was right, and the files were wrong.**
+
+Also in the house, same search: **KabelDirekt 20 ft 3.5 mm aux** (Sept 2019) — too short for this
+run, fine for anything local.
+
+### ✅ AND IT REACHES
+**For a MOLDED patch cable the 12 ft termination allowance does not apply** — there are no keystones
+to dress and no service loop to leave, so the number that matters is the routed path alone:
+
+| | |
+|---|---|
+| Straight line, core → clock corner | **27 ft** |
+| Strict right-angle routing | **36 ft** |
+| Plus the vertical legs (down 4, up 4) | **35–44 ft routed** |
+| **Cable in hand** | **50 ft → 6–15 ft of slack** |
+
+🟢 **It fits.** ⚠️ Still run a string along the real crawl path first — **a molded cable cannot be
+lengthened**, so if the route wanders it is a new purchase, not a re-crimp.
 
 ### What changes in software — **not one line; this is the real work**
 A wired QFX fed by the **Beast** would be one line (`"speaker"` in `chime_config.json`, which
