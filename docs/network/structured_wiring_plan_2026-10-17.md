@@ -203,9 +203,29 @@ low-voltage rings · a cheap cable tester · J-hooks or staples rated for data c
 
 ---
 
-## 5. THE CLOCK SPEAKER AUDIO RUN — **yes, and it kills a whole documented failure class**
+## 5. THE CLOCK SPEAKER AUDIO RUN — **already designed on 2026-09-28. Do not re-derive it.**
 
-*(Reading "auto wire" as **audio** wire — a line-level run from the Beast to the QFX.)*
+🔴 **CORRECTION TO MY OWN FIRST DRAFT OF THIS SECTION (written 10-17 9:4x, fixed 9:5x).** I wrote
+this as *"a line-level run from the Beast to the QFX"* and described the change as one line in
+`chime_config.json`. **That is the wrong source and it understates the gain.** The design was
+settled three weeks ago in `docs/automation/HOUSE_COMMUNICATION_CENTER_2026-09-28.md` §"RE-STUDY
+14:00–14:21", after Jeff asked *"do you have tunnel vision… make sure we are not buying a bunch of
+shit that could be run just as well with something we already have"*:
+
+> **CHOSEN DIRECTION = A: HA box 3.5 mm out → long aux cable → QFX AUX IN.** Removes the Beast,
+> Bluetooth, the ESP32 and the DAC from the chain. HA plays chimes/voice/alarms directly.
+
+**Source is the Beehive J45, not the Beast** (Jeff 09-28 14:21: *"The j45 had a audio jack."*).
+✅ **Still true today, checked live 2026-10-17 09:4x: `media_player.vlc_telnet` = `idle`** — the
+VLC add-on is installed and running on Beehive, and the Supervisor audio card has an analog stereo
+output profile.
+
+🔑 **AND THAT CHANGES THE VERDICT AT THE BOTTOM OF THIS SECTION.** With the Beast out of the audio
+chain, **a Beast crash or an unattended reboot no longer silences the clock at all** — which is the
+*whole* of #239 and the clock half of #238. The Beast-sourced version I first described would not
+have done that. **This is the strongest argument for the run and I had it backwards.**
+
+*(Reading "auto wire" as **audio** wire.)*
 
 ### What you gain — every one of these is in our own record
 | Gain | The evidence it fixes |
@@ -227,15 +247,36 @@ low-voltage rings · a cheap cable tester · J-hooks or staples rated for data c
   find a spec sheet for the **PBX-BF120** exactly. **Read the back of the unit before buying a
   cable.**
 
-### What changes in software: **one line**
-`C:\Users\jeffl\HCC-Scripts\chime_config.json` → `"speaker": "Headphones (QFX PBX-BF120)"` becomes
-the name of the wired output. The listener matches a WASAPI output by **name substring** and
-re-queries it every play. ⚠️ **Leave `auto_convert` alone** — without it every play fails
-(`Invalid sample rate`, found 09-24).
+### 🔌 THE CABLE — what the record says, and the one number that decides it
+**In the 09-28 cart: Monoprice 100647, 50 ft 3.5 mm stereo male/male, ASIN `B0015V5KPI`, $4.99**
+(4.6★/1.8K, sold by Amazon), chosen after **Jeff 14:22: *"The run is under the floor in the crawl
+space to the clock"*** — ~37 ft on the plan + 2 drops ≈ 45 ft → a 50 ft cable.
 
-### What it does **not** fix
-⛔ **A Beast crash still takes the clock down** — that is **#238**, unchanged, and the 10-16 crash
-proves it is still live. Wiring the speaker does not touch it.
+⚠️ **The record's last word is that it was NEVER ORDERED.** At 09-28 17:10 Jeff said *"That is just
+fine leave that set up the way it is… we need nothing else"*, the QFX stayed on Bluetooth, and the
+siren + 12 V adapter + 50 ft aux were all logged as *"NOT needed — never ordered."*
+🔑 **But the sirens from that same cart DID arrive** — confirmed 10-13 by Jeff's own photo
+(`B07K2Z76NB` Xnrtop 2-pack). So the cart was checked out later and the cable most likely came with
+it. **Jeff 10-17: *"I already have the audio aux cable."* His word on hardware in his hand is
+primary evidence and it outranks my search** (the rule earned 10-15 on the UV light).
+
+🔴 **THE NUMBER THAT MATTERS: it has to be ~50 ft.** My own geometry says a **55 ft pull**; 09-28
+said 45 ft raw. **A 50 ft cable therefore has 3–5 ft of margin and no more.**
+**Measure the real route with a string before committing to it**, and know that the 6 ft, 10 ft and
+3 ft patch cables in his cable inventory are useless for this run.
+
+### What changes in software — **not one line; this is the real work**
+A wired QFX fed by the **Beast** would be one line (`"speaker"` in `chime_config.json`, which
+matches a WASAPI output by name substring — and ⚠️ **leave `auto_convert` alone**, without it every
+play fails with `Invalid sample rate`, found 09-24).
+
+**Direction A is bigger than that:** the chimes, voice, preludes and levels all live in the Beast's
+Python listener — the approved chime set, `ceiling` 0.355 (the clean −9 dBFS point Jeff set by ear),
+the `levels` map, the bass blend, `alarm_preludes`. Moving them to HA means rebuilding that as HA
+automations playing through VLC, with the Supervisor audio output switched to analog and the files
+in `/media`. **09-28's own instruction: keep the Beast listener as the fallback until HA is
+proven.** 🔴 **Do not change the chime sound without Jeff's ears** — that set is frozen in
+`chimes-thunder-APPROVED\`.
 
 ---
 
