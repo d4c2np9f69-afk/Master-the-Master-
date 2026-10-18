@@ -1819,3 +1819,567 @@ me know either way before tomorrow.
 
 ⚠️ **Tax is added at checkout** — the cancelled order was $36.16 + $3.53 TN tax, so **$43 lands near
 $47 out the door.** That is the real number to hold Doug against, not $43.
+
+---
+
+## 2026-10-18 1:53 PM — 🔴 **REASSEMBLED AND COMPLETELY DEAD. NO BACKLIGHT, NO SOUND. THIS IS A REGRESSION, NOT A BAD BOARD.**
+
+Jeff: *"I got the backlights all changed on the tv and they all work but it is still not working so think
+it's the board that may be bad too I need to get a board for the tv."* Then: *"I put the new tecon board on."*
+
+**State of the set:** 12 new strips fitted and confirmed lit on the bench · new T-con `BG000N700`/`ZAZZ`
+(eBay `126326188707`, $24.09, open box) installed · reassembled · **no backlight AND no sound.**
+
+### 🔑 WHY "BUY A BOARD" IS THE WRONG MOVE RIGHT NOW
+**Before teardown this TV booted.** Faint Roku logo under a flashlight, sound working — that is in this
+file, measured, not remembered. So on 10-11 the **main board was alive and the panel was being driven.**
+A main board does not die lying on a bench.
+
+Both boards Jeff was about to buy are argued *good* by his own evidence:
+- **Power board** — its LED driver is the one function that was ever in doubt, and ⚠️ **the TD2B tester
+  does NOT clear it**: the tester drives strips directly, off the board entirely. *The bench test proved
+  the STRIPS. It proved nothing about the power board and nothing about the harness wiring.*
+- **Main board** — proven booting on 10-11 by the visible logo + working sound.
+
+**Every symptom present today was absent before the bench work. That is the definition of a regression,
+and it is where the fault should be hunted first.**
+
+### ▶ THE ORDER OF WORK GIVEN TO JEFF (all $0, all with his own meter)
+1. **Standby LED with it plugged in — the whole problem splits here.** Glowing ⇒ standby rail alive and
+   the main board has power ⇒ hunt the on-signal / key-IR ribbon. Dead ⇒ no standby rail ⇒ fuse / power
+   board / AC.
+2. **Bleed the board (resistor, confirm 0 V), check the AC fuse for continuity.** If it is open, find
+   what opened it — do not just replace it.
+3. 🔴 **MOST LIKELY: a reversed strand or a solder short on the newly fitted strips.** Polarity is already
+   settled in this file off the board's own silkscreen — **`LED+` under `CON301`**, cathodes return to
+   `CON302`. New strips ship with **bare pads and no connectors** and Jeff reused the old jumper harness,
+   so a backwards strand or an A–K solder bridge is entirely possible. The driver trips protection
+   instantly and the set presents as stone dead. Meter each strand at the harness: expect a diode string,
+   **not** a dead short, **not** open.
+4. **Standby present but will not start** ⇒ recheck the key / IR board ribbon. Without it the TV cannot be
+   commanded on, which reads as silence + dark screen on an otherwise healthy set.
+
+### 📸 THE ASSET
+**Jeff photographed every connector before unplugging anything** (teardown procedure, 10-11 11:22 AM —
+*"photograph every connector"*). Those photos are the answer key for a reassembly fault. Compare against
+them before buying a single part.
+
+### 💵 BOARDS PRICED, IF AND ONLY IF THE ABOVE CLEARS THEM
+| Board | Part | Source | Price |
+|---|---|---|---|
+| Main | `M21123-MT` (board nos. `20210813` / `20100966` / `MS16010-ZC01-01`) 🔑 **`20210813` matches this TV's own main-board date code read off Jeff's 10-11 photos** | tvpartstoday, 30-day warranty | **$39.99** |
+| Main | same `M21123-MT` | ShopJimmy | varies |
+| Power | `514C7001M27` new (**M17 ↔ M27 interchangeable**, established earlier in this file) | eBay `134967221758`, Lansing MI | **~$65.95** |
+
+⚠️ **The open-box T-con is NOT cleared either** — $24.09, open box, flagged in this file on 10-12 as a
+condition risk. If steps 1–4 clear the wiring and the power rails, the new T-con being bad is back on the
+table before either board is bought.
+
+🔴 **STILL UNANSWERED FROM 10-12, AND IT MATTERS:** *"Jeff to check the ribbon's contact end — if it
+delaminated when the connector let go, the ribbon is needed too, not just the board."* Never confirmed.
+A new T-con does nothing if the FFC that plugs into it was damaged when `CNC1` tore off.
+
+## 2026-10-18 2:05 PM — ✅ **STRIPS CLEARED BY TEST. THE DECISION RULE WRITTEN ON 10-11 HAS FIRED: IT IS THE BOARD.**
+
+**Jeff:** *"The power button comes on then it starts blinking and it blinks about 40 seconds stays solid
+for 3 seconds and then blinks for 40 seconds and just keeps repeating."*
+Then, after running the TD2B: *"All the backlights work both on the whole set and the individual strips."*
+
+### 🔑 THE BLINK PATTERN DECODED — IT CLEARS TWO BOARDS FOR FREE
+**40 s blinking = the Roku booting. 3 s solid = the backlight being commanded on. Then protection trips
+and it restarts.** Therefore:
+- **Main board: GOOD.** It completes a full boot every cycle, repeatedly.
+- **T-con: not implicated.** The trip happens before the image path matters. The open-box risk flagged
+  on 10-12 is moot for this fault.
+- **The fault is in the BACKLIGHT CIRCUIT** — strips-as-wired, or the driver on the power board.
+
+This is the **same loop stage the TV was in before the strips failed hard open** (see the 10-12
+progression note: *intermittent open → protection trips → reboot loop → hard open → black screen*).
+New strips moved it back up that chain from "hard open" to "looping."
+
+### ✅ THE TEST THAT SETTLED IT
+TD2B across `CON301` (`LED+`) / `CON302` (`LED-`), all four wire combinations, plus each strip
+individually. **Everything lights.** Per the decision table written 2026-10-11 2:55 PM:
+> *"2 of 4 light, similar voltage → both strings good → **the fault is the BOARD, not the strips**"*
+
+And per the order-of-work Jeff himself corrected on 10-11 3:08 PM:
+> *"both strings light ⇒ fault is on the BOARD ⇒ **the cap swap becomes a targeted repair**, and the old
+> cap can be measured out of circuit afterwards to confirm it had actually failed"*
+
+🔑 **Two decision rules written days in advance both fired correctly on the live fault. Diagnosing before
+intervening — Jeff's call on 10-11 — is what made today a $0 answer instead of a $65.95 guess.**
+
+### ▶ THE REPAIR, AND IT IS $0
+Matches the badcaps thread for **this exact model** (*"Onn 100044717 Black screen 75 *Solved"*):
+*"The defect is the power board capacitor near the backlight connection … Look for a bulged cap."* ~10 min.
+Jeff has a **box of new capacitors incl. 450 V on hand ⇒ no purchase.**
+
+1. **Bleed the board through a resistor, confirm 0 V.** LED rail runs 100–126 V; mains-side caps hold 300 V+.
+2. **Inspect `EC210` and every electrolytic around the backlight connector** — domed/bulged top, split X,
+   crust or weeping at the base, cap sitting cocked. Compare against neighbours.
+3. 🔴 **DO NOT SOLDER UNTIL THE PRINTING IS READ.** Jeff sends µF / voltage / temp rating / can diameter;
+   Claude matches it against his box first. Standing instruction from this file: *"If no exact 10 µF, check
+   with Claude before substituting."* Forum reports 10 µF.
+4. **Measure the old cap out of circuit after removal** to confirm it had actually failed — evidence, not
+   assumption.
+
+### ⚠️ THE ONE THING THE TESTER CANNOT SEE
+**A cold / high-resistance solder joint passes a backlight tester and still trips the board under load.**
+The TD2B sources a few mA; the board drives **710–790 mA** (silkscreen: `LED:100-126V 710MA--790MA`).
+Jeff soldered 12 bare-pad strips reusing the old jumper harness. **While the board is out: tug-test every
+joint he made and reflow anything dull or balled rather than shiny and wetted.** If the cap swap does not
+clear the loop, this is the next suspect — ahead of buying any board.
+
+### 💵 STILL NOT BOUGHT, AND SHOULD NOT BE UNTIL THE ABOVE IS DONE
+Power board `514C7001M27` eBay `134967221758` ~$65.95 · Main board `M21123-MT` tvpartstoday $39.99.
+**Running total on this TV remains ≈ $71 spent against a $398 replacement.**
+
+## 2026-10-18 2:06 PM — ❌ **CAP SWAPPED, NO CHANGE. + 🔴 A CLAUDE ERROR CORRECTED: THE T-CON *IS* IMPLICATED.**
+
+**Jeff:** *"I changed the cap and that wasn't it either."* `EC210` replaced from his own stock, loop unchanged.
+
+### 🔴 CORRECTION TO THE 2:05 PM ENTRY — "T-con: not implicated" WAS WRONG
+That was reasoned from the **picture path** (the trip happens before an image matters). **Electrically it
+does not hold.** The T-con sits on the main board's 12 V rail; a shorted or damaged T-con loads that rail
+and produces **exactly this boot loop**. The entry above should not have cleared it.
+
+🔑 **And it is the least-trusted part in the set:** the `BG000N700`/`ZAZZ` board is **open box**, condition
+unverified (flagged as a risk in this file on 10-12), and it was installed immediately before this symptom
+was reported. **Newest, least-proven component + new symptom = first suspect.**
+
+⚠️ **Also flagged honestly to Jeff: the 40 s / 3 s blink decode is an INFERENCE, not a measurement.** It fits,
+but the cap result means it should not be leaned on. The test below is deliberately chosen because it does
+**not** depend on that interpretation being correct.
+
+### ▶ NEXT TEST — FREE, 2 MINUTES, DEFINITIVE
+**Disconnect the T-con entirely** (power/LVDS feed from the main board **and** the panel ribbons), power up:
+| Result | Verdict |
+|---|---|
+| **Loop stops, backlight lights and STAYS on** (blank screen expected — no T-con) | **The T-con is the fault.** Open-box board is bad ⇒ **return, not repair.** |
+| **Still loops with the T-con out of circuit** | T-con innocent ⇒ power-board driver side, or the strip wiring. |
+
+🔴 **ONE QUESTION THAT MAY SHORT-CIRCUIT ALL OF IT, ASKED OF JEFF:** *was the TV already doing the 40 s blink
+loop BEFORE the new T-con went in?* The sequencing was never established. If the loop began only after, that
+is the answer and no further testing is needed.
+
+### ▶ IF THE T-CON IS INNOCENT — ORDER OF WORK, STILL $0 BEFORE ANY PURCHASE
+1. 🔴 **Reflow / tug-test every strip joint.** The failure the tester **structurally cannot see**: a cold or
+   high-resistance joint passes at the few mA a TD2B sources and fails at the **710–790 MA** the board drives
+   (board silkscreen `LED:100-126V 710MA--790MA`). 12 bare-pad strips + reused jumper harness = many joints.
+   Reflow anything dull, grainy or balled rather than shiny and wetted.
+2. **Power-board driver side** — boost transformer `MSC ZY-T0204` (date code `2051`), backlight MOSFET,
+   current-sense resistors near `CON301`/`CON302`, and the driver IC. **Jeff photographs that area + the
+   driver IC part number; Claude pulls the datasheet and names the measurements.** (Same method already
+   planned in this file for the current-limit mod.)
+
+### 📓 STATE OF THE SET AFTER TODAY
+| Part | Status |
+|---|---|
+| 12 backlight strips | ✅ **PROVEN GOOD** — TD2B, whole set across `CON301`/`CON302` and each strip individually |
+| `EC210` cap | ✅ **REPLACED** — not the fault |
+| Main board `M21123-MT` | ✅ boots fully, every cycle |
+| T-con `BG000N700`/`ZAZZ` (open box, $24.09) | ⚠️ **UNVERIFIED — NOW THE PRIME SUSPECT** |
+| Power board `514C7001M17` driver side | ⚠️ unverified beyond the cap |
+| Strip solder joints (Jeff's, 12 strips) | ⚠️ **unverified under load** — tester cannot see this class of fault |
+
+## 2026-10-18 2:40 PM — 🔄 **IT IS A MAIN-BOARD RESET LOOP, NOT A BACKLIGHT FAULT. THE WHOLE DIAGNOSIS MOVED.**
+
+Three answers from Jeff in sequence rewrote this:
+1. *"All the backlights work both on the whole set and the individual strips."*
+2. *"Yes it's always done the blinking loop."*
+3. *"No the screen never lights up"* (during the 3-second solid window)
+4. *"The t con is a new board."*
+
+### 🔑 WHAT EACH ONE ELIMINATED
+| Evidence | Eliminates |
+|---|---|
+| Strips light, whole set + individually, on the TD2B | **The strips.** Closed. |
+| `EC210` replaced, no change | **The cap.** The badcaps match for this model did not apply. |
+| **Screen NEVER lights during the 3 s solid** | 🔑 **The backlight is never COMMANDED ON ⇒ the trip happens UPSTREAM of backlight-enable ⇒ the power board's LED DRIVER is not what is killing it.** This is what took the $65.95 power board off the front burner. |
+| **The loop predates every part replaced** | **The new T-con, as a cause.** 🔴 **Jeff's call, and he was right** — Claude had made the T-con prime suspect at 2:06 PM on "newest, least-proven part" reasoning. That reasoning was defeated by sequencing: the loop existed before the new T-con, before the old T-con was damaged, and before the teardown. |
+
+### ▶ WHAT IT ACTUALLY IS
+**A main-board reset loop:** boots ~40 s → asserts "on" for 3 s → browns out → repeats. **No sound at any
+point**, consistent with never completing boot. **The fault was present from the very beginning** —
+therefore it is the **power board** or the **main board**, and always was.
+
+### ▶ NEXT, IN ORDER. ONE IS FREE.
+1. **Physical RESET button (pinhole, back panel), held ~15 s with the set powered.** An interrupted
+   firmware update produces this exact loop, and this TV has been power-cut repeatedly on the bench.
+   ⚠️ **Claude's honest read: unlikely** — a software boot loop still lights the backlight (you would see
+   the Roku logo) and this one never lights the screen at all. But it is free and 30 seconds, so it goes
+   before any purchase. (Web search found **nothing model-specific** for 100044717; general Roku sources only.)
+2. 🔑 **THE MEASUREMENT THAT NAMES THE BOARD** — 12 V rail on the power-board → main-board harness, black
+   lead to chassis, watched through a full cycle:
+
+| 12 V behaviour | Verdict | Part | Price |
+|---|---|---|---|
+| **Steady** through the 3 s mark and the reset | Power board delivering fine ⇒ **MAIN BOARD** | `M21123-MT` tvpartstoday, 30-day warranty | **$39.99** |
+| **Sags / drops out** at the 3 s mark | Rail collapsing under load ⇒ **POWER BOARD** | `514C7001M27` eBay `134967221758` | **~$65.95** |
+
+**With the T-con eliminated there is no third suspect, so this one measurement buys one board instead of two.**
+
+### 🧾 KIT ROUTE CLOSED (checked 2026-10-18)
+ShopJimmy "complete kit" for this model is **out of stock**, and the listed Version 11 is **not Jeff's TV**
+(main `M23162-MT`, T-con `513C55B0M51` — neither matches his `M21123-MT` / `ZBZZ`). Version `K9` was already
+confirmed out of stock 10-12. ⇒ **standalone boards only.**
+
+### 💵 WHERE THE MONEY STANDS
+≈ **$90 spent** (tester $18.99 + T-con $24.09 + strips ~$47). One board takes it to **$130–156** against a
+**$398** replacement. 🔴 **Which is exactly why the 12 V measurement happens before the purchase** — at this
+point a wrong guess is a third of a new TV.
+
+---
+
+## 2026-10-18 3:45 PM — T-CON CLEARED BY LOAD TEST. POWER BOARD HUMS AT PLUG-IN — NEW LEAD.
+
+**Jeff, at the bench:** *"Still blinks when the tecon board is unplugged. I notice that the power
+board makes a humming/ static sound when first plugged in and then the blinking starts"*
+
+### What this closes
+
+**T-CON: CLOSED, TWICE OVER.** It was already exonerated by sequencing (the loop predates the new
+board — Jeff's call, 2:40 PM entry). Now it is exonerated by **load**: physically disconnected, the
+loop still runs. Nobody should reopen this thread.
+
+### What this opens
+
+**A healthy switching supply is SILENT.** Audible hum or static at plug-in means one of:
+
+1. **Hiccup mode** — the supply starts, hits current limit, shuts down, retries. The retry cycle
+   itself is what you hear. This is the most likely reading, and it matches the 40 s / 3 s / reset
+   loop exactly.
+2. **A physically sick primary or secondary** — failing transformer, cracked joint arcing (the
+   "static" half of Jeff's description), or a dried secondary-side electrolytic.
+
+⚠️ **DO NOT jump to "power board" off the hum alone.** A main board shorting a rail makes a
+**perfectly good** power board hiccup and hum identically. The hum proves *a rail is being
+overloaded*. It does not say which board is doing the overloading. That distinction is the whole
+remaining question.
+
+### Next tests — all $0, in order
+
+**TEST B — strip the load down to one thing.** `CON301` + `CON302` off, T-con still off, **only the
+main-board harness connected.**
+
+| Result | Meaning |
+|---|---|
+| Still hums + loops | Only load left is the main board → fault is main board OR power board, nothing else |
+| Goes quiet / loop stops | LED driver section was being overloaded → **power board**, and the backlight-enable reasoning from 2:40 PM needs revisiting |
+
+**TEST C — locate the noise + look for physical damage.** Dark room, ear close, **hands off — mains
+live, primary caps hold charge.** Which part sings: big main transformer, small standby transformer,
+or a coil? Then look for **carbon tracking / black streaks** at transformer pins, and **domed or
+weeping small secondary electrolytics (16 V / 25 V)** — NOT the 450 V `EC210` already swapped.
+Carbon track or ozone smell ⇒ stop testing, the power board is dead.
+
+**TEST D — meter TWO rails, not one.** Correction to the 2:40 PM table, which only called for 12 V.
+The standby rail matters just as much: if standby sags, the main board browns out and resets, which
+reproduces this loop with a perfectly good 12 V.
+
+| Reading | Verdict | Part |
+|---|---|---|
+| Standby + 12 V both steady through the 3 s mark | Power board fine → **main board** | `M21123-MT`, **$39.99**, tvpartstoday, 30-day warranty |
+| 12 V sags/collapses at the 3 s mark | Rail folding under load → **power board** | `514C7001M27`, **~$65.95**, eBay `134967221758` |
+| Standby low/wobbling from plug-in | Standby section sick → **power board** | same |
+
+**Asked Jeff to read the harness connector silkscreen** (12V / GND / ST-BY / PS-ON / BL-ON / DIM)
+rather than me guessing a pinout off the model number. Awaiting that + Test B.
+
+### Money position unchanged
+~$90 spent (tester $18.99 + T-con $24.09 + strips ~$47) against a $398 TV. One board takes it to
+$130–156. Still refusing to name a board without the measurement — two candidates, $26 apart, one
+test separates them.
+
+---
+
+## 2026-10-18 3:53 PM — THE STATIC IS COMING FROM THE TWO SWITCHING TRANSFORMERS.
+
+**Jeff sent a close photo of the power board:** two identical transformers, **`MSC ZY-T0203  2052 09`**,
+side by side next to the main heatsink. Board silkscreen visible: **`TV7001-ZC02-01`** — confirms the
+`514C7001` family already recorded here. Nearby refs in frame: `M9`, `M10`, `M11`, `PL2`.
+Jeff: *"It sounds like the static sound is coming from these"*
+
+### What an audible transformer actually means
+
+These switch at **50–100 kHz — above human hearing.** A transformer you can HEAR is a transformer
+being **restarted at an audible rate.** That is the definition of **hiccup mode**: start → hit
+current limit → shut down → retry, several times a second. The "static" Jeff hears IS the retry
+cycle.
+
+🔴 **DO NOT BUY OR REPLACE THE TRANSFORMERS.** They are the loudest component on the board, so they
+announce the fault — they are almost never the fault. The sound says *a rail is being pulled down
+and the controller keeps retrying*. It does not say by what.
+
+### What the photo does NOT establish
+
+**Which section these two transformers belong to.** A matched pair sharing the main heatsink could be
+either the **main rail** pair OR **two LED boost channels** — and this set runs exactly **2 parallel
+LED strings**, which makes the LED-boost reading genuinely plausible. NOT GUESSED. Test B decides it.
+
+No carbon tracking, cracked joint or domed cap is identifiable at this photo's resolution. Recorded
+as "not visible," **NOT** as "not present."
+
+### TEST B now does double duty — it identifies the transformers for free
+
+`CON301` + `CON302` off, T-con off, main-board harness only. Plug in and LISTEN:
+
+| Static behaviour | These transformers are | Fault location |
+|---|---|---|
+| **STOPS** | the **LED boost** pair | LED driver section ⇒ **POWER BOARD**, and the 2:40 PM "backlight-enable never reached" conclusion is WRONG and must be struck |
+| **CONTINUES** | the **main rail** pair | rail loaded by the main board, or the supply itself is sick |
+
+### $0 shot while the board is open
+**Reflow the solder joints on both transformers' pins** + the big filter cap legs. Cracked
+transformer-pin joints are a common failure mode on these boards (thermal cycling + part mass).
+Logged as a cheap shot, **not** a diagnosis — the photo does not show a cracked joint.
+
+### Two timing questions put to Jeff (unanswered as of this entry)
+1. **Static at plug-in, or at the 3 s "on" mark?** He said plug-in — if confirmed, this is happening
+   in **STANDBY**, before the set is ever commanded on, which is a much shorter suspect list.
+2. **Continuous through the 40 s blink, or only at the start?**
+
+Safety reminded once: mains live, primary caps hold charge after unplug.
+
+---
+
+## 2026-10-18 4:00 PM — ⭐ POWER→MAIN HARNESS PINOUT CAPTURED. LEDs OFF AND IT STILL SINGS.
+
+**Jeff:** *"Led are unplugged and the static sound is still there"* then, sending the connector and
+board-marking photos: *"You have all these pictures damn it"* — fair hit. **The photos carry the
+answer; read them instead of asking Jeff to re-read a board that is already on screen.**
+
+### RESULT OF TEST B — decisive
+
+T-con **off**, `CON301`/`CON302` **off**, main-board harness **on** → **static still present.**
+
+Per the decision table written at 3:53 PM, that means:
+- The singing `MSC ZY-T0203` pair are the **MAIN RAIL** transformers, **NOT** LED boost.
+- The **LED driver section is CLEARED.** The 2:40 PM "backlight-enable is never reached" conclusion
+  **STANDS** — it does not get struck.
+- Remaining suspects: **MAIN BOARD** or **POWER BOARD**. Nothing else is in the circuit.
+
+### 🔑 THE PINOUT — power board → main board connector (13 pin, silkscreened, read off Jeff's photo)
+
+```
+1  GND        8  NC
+2  ADJ        9  GND
+3  BK        10  GND
+4  +5V       11  GND
+5  PSON      12  +12V
+6  +5VSB     13  +12V
+7  NC
+```
+
+**Probing is easy: the two `+12V` pins are the BOTTOM TWO, with three `GND` pins directly above.**
+Bottom pin ↔ three pins up. No counting across the connector.
+
+`ADJ` = dimming, `BK` = backlight enable, `PSON` = power-on (**sourced BY THE MAIN BOARD**),
+`+5VSB` = standby rail.
+
+### Other markings captured from the same photos
+- PCB fab marking **`E021M509-B2`**, **AMTC REV:1.0**, UL **`E168066`**, MW-CEM1 94V-0, CQC KB-5150.
+- **A THIRD transformer: `ZY-T0199 ...22 B9`** — different part number from the `ZY-T0203` pair.
+  So: matched `T0203` pair at the heatsink (main rail) + at least one `T0199`.
+- `25V 470µF` secondary filter cap, **flat top, no doming**.
+- Pinkish/orange stain near `JMP22` and under the `AMTC` marking — reads as **adhesive or flux
+  residue, not a burn**. Recorded as an observation, not a finding.
+
+### The pinout explains the whole sequence
+`PSON` comes FROM the main board. At plug-in: main board wakes on `+5VSB` → asserts `PSON` almost
+immediately (Roku boots on plug-in — that IS why the LED blinks right away) → main rail tries to
+come up → overloads → **hiccups (the static)** → main board browns out → 40 s blink → 3 s solid →
+reset. **This makes `+12V` the prime suspect.**
+
+⚠️ Note this also means "unplug the main board and listen" is **NOT** conclusive on the quiet branch:
+with no main board there is no `PSON`, so the main rail would never be commanded on regardless of
+health. Flagged to Jeff before he ran it.
+
+### TEST E — COLD RESISTANCE. No power, no ambiguity.
+Unplug from mains, wait 5 min to discharge. Meter on **200 Ω**. **Watch the CLIMB, not just the
+number** — both sides have bulk caps, so a healthy rail starts low and walks up; a short sits still.
+
+| Side | Pins | Healthy | Bad ⇒ part |
+|---|---|---|---|
+| **MAIN BOARD** harness | `+12V` ↔ `GND` | climbs, settles high | **< ~1 Ω, no climb** ⇒ main board shorting ⇒ **`M21123-MT` $39.99** |
+| **POWER BOARD** connector | `+12V` ↔ `GND` | climbs | **< ~1 Ω** ⇒ shorted output rectifier/cap ⇒ **`514C7001M27` ~$65.95** |
+| both sides | `+5VSB` ↔ `GND` | climbs | short here = standby hiccups the instant mains is applied — matches "static at plug-in" exactly |
+
+Awaiting Jeff's four readings.
+
+---
+
+## 2026-10-18 4:09 PM — RESISTANCE READINGS: +12V = 3 Ω, +5VSB = 34 Ω. SUSPICIOUS, NOT CONCLUSIVE.
+
+**Jeff:** *"Both 12 v read 3 and the 5v reads 34"*
+
+### Reading the numbers
+
+**3 Ω on +12 V is LOW.** Not a dead short (a shorted cap or rectifier reads 0.1–0.5 Ω), but low
+enough to be a genuine finding.
+
+🔑 **The ASYMMETRY is the real signal: +12 V (3 Ω) reads LOWER than +5VSB (34 Ω). That is backwards.**
+`+12V` feeds DC-DC converters that are **off** — it should read HIGH, climbing as the bulk caps
+charge. `+5VSB` is actively powering a live MCU — it should read LOWER. This set is inverted, which
+leans toward **the +12 V input being shorted**, most likely a shorted input cap or a shorted
+high-side buck FET on the main board.
+
+### ❌ NOT CALLING A BOARD ON THIS. Two gaps, stated plainly:
+
+1. **WHICH SIDE?** Not established. If the harness was still mated, the reading is **both boards in
+   parallel** and cannot attribute the fault. Needs the power-board connector and the main-board
+   connector read **separately, harness apart**.
+2. **POLARITY NOT CHECKED.** Semiconductor junctions read differently by lead polarity; a true short
+   reads the same both ways. 3 Ω one way + much higher reversed = **a diode junction, not a fault**.
+
+### ⭐ TEST F — THE ONE WITH NO AMBIGUOUS BRANCH
+
+The pinout makes it possible to **run the power board standalone**, which defeats the `PSON`
+problem noted at 4:00 PM. Main board harness **fully disconnected**. Clip-lead **`PSON` → `+5VSB`**
+(pin 5 → pin 6) **BEFORE applying mains** — no poking a live board. Plug in, measure `+12V` ↔ `GND`
+at pins 12/13.
+
+| Result | Verdict | Part |
+|---|---|---|
+| **Clean steady ~12 V, no static** | Power board is GOOD — it only misbehaves with the main board attached ⇒ **MAIN BOARD** | `M21123-MT`, **$39.99**, tvpartstoday, 30-day warranty |
+| **Static returns, 12 V low / pulsing / absent** | Power board hiccups with NOTHING connected ⇒ **POWER BOARD** | `514C7001M27`, **~$65.95**, eBay `134967221758` |
+
+⚠️ **`PSON` polarity is NOT verified on this board.** Active-high is the common convention on these
+Chinese TV supplies, but it is an assumption. If tying it to `+5VSB` does nothing at all, **try
+`GND`** before concluding the board is dead. Told to Jeff explicitly rather than letting a wrong
+assumption read as a dead board.
+
+**This test has no ambiguous branch. Either way it lands, exactly one board gets bought.**
+
+---
+
+## 2026-10-18 4:15 PM — 🟢 DECISION MADE: BUY THE MAIN BOARD. Testing stopped at Jeff's call.
+
+**Jeff:** *"Fuck that I'm not doing all that"* — Test F (PSON jumper) **NOT RUN and will not be run.**
+He has done enough bench work. Decision made on evidence in hand. **Do not send him back to the
+bench for this.**
+
+### THE CALL: main board `M21123-MT`
+**[ShopJimmy — $43.21, 18 in stock, 180-day warranty](https://www.shopjimmy.com/onn-m21123-mt-main-board-for-100044717/)**,
+ships same business day if ordered before 4 PM CT. Visible numbers on listing: `M21123-MT`,
+`MS16010-ZC01-01`, `515C16010M08`.
+
+### Why main board over power board
+`+12V` = **3 Ω**, `+5VSB` = **34 Ω** — **INVERTED.** The rail feeding switched-OFF DC-DC converters
+should read HIGHER than the rail running a live MCU. Something on 12 V is dragging it down, and the
+**main board is what sits on that rail**. The power board transformers singing is the **symptom** of
+that load (hiccup/overcurrent retry), not the cause.
+
+### Why ShopJimmy over the cheaper listing
+| Seller | Price | Stock | Warranty |
+|---|---|---|---|
+| **ShopJimmy** ✅ | **$43.21** | **18 available** | **180 day** |
+| tvpartstoday | $39.99 | page reads **Unavailable** | 30 day |
+
+$3.22 more for 6× the warranty and stock that actually exists. On a bet made from **evidence rather
+than a confirmed measurement**, the 180-day window is the point.
+
+### Part match CONFIRMED — Jeff does not need to re-check the sticker
+Listing board numbers: `20210813`, `20100966`, `MS16010-ZC01-01`.
+This log already records: `M21123-MT`, date code **2021-08-13** = **`20210813`**. Same board.
+
+### Kit route re-checked and CLOSED AGAIN (a kit would have covered both boards)
+| Kit | Boards | Price | Stock |
+|---|---|---|---|
+| **Version 2** — EXACT match | `M21123-MT` + `514C7001M17` + `BG000N701` (his ZBZZ/BG000N700/701 family) | $74.99 | ❌ **OUT** |
+| Version 13 | `515CT9640M10Y` / `514C7002M08` / `513C75A0M42` | $64.99 | ❌ OUT |
+| Version 4 | `515C90100M13` / `514C7001M27` / `167011545A` | $74.99 | ❌ OUT |
+| Version 5 | `260102018780` / `260132008850` / `BG000N901` | $53.99 | ✅ in stock, **WRONG BOARDS** |
+| Version 11, K9 | — | — | ❌ OUT (checked 10-12 / earlier today) |
+
+No Lutema-branded kit listing found; the Amazon `B0BYTR9SXM` page returned HTTP 500.
+
+### Risk stated plainly to Jeff
+This is **the stronger read, not a certainty.** If the board lands and the loop continues, next is
+power board **`514C7001M27` ~$65.95** (eBay `134967221758`) → ~**$109 total** on a **$398** TV.
+The 180-day warranty means the $43.21 is not stranded.
+
+### Running money position
+~$90 already in (tester $18.99 + T-con $24.09 + strips ~$47). With the main board: **~$133**.
+Worst case with both boards: **~$199** against a $398 set.
+
+---
+
+## 2026-10-18 4:25 PM — ⭐ CORRECTION: eBay HAS IT AT **$23.80**. My 4:15 PM $43.21 call was overpriced.
+
+**Jeff:** *"Well fucking find the right one"* — and he was right to push.
+
+### 🔴 MY MISTAKE, NAMED
+Jeff's ORIGINAL request (and the one before compaction) was **"find me the correct one on eBay or
+Amazon."** I searched parts sites (ShopJimmy / tvpartstoday / Newegg / Torres) and recommended
+**ShopJimmy $43.21** — **I never actually looked at eBay.** Web search for `"M21123-MT" eBay`
+returned only eBay.**de** junk and reported "no eBay listing found." **That search result was WRONG.**
+Driving a real browser to `ebay.com/sch/i.html?_nkw=M21123-MT` returned **8 genuine US listings.**
+
+🔑 **LESSON: a web-search tool reporting "not found on eBay/Amazon" is NOT evidence of absence.
+Drive the actual site.** Same shape as the standing `feedback_not_found_is_not_absent` rule.
+Also: when Jeff names a marketplace, search THAT marketplace first, not parts sites.
+
+### ✅ THE BUY — verified live in-browser, not from a search snippet
+**https://www.ebay.com/itm/920016212943** — "ONN 100044717 Main Board 515C16010M08 / M21123-MT"
+- **US $23.80**, **Open box**, free delivery
+- **30-day returns** (buyer pays return shipping)
+- Seller **99.8%**, 1,826 feedback, ships from 91775 (California)
+- **$19.41 CHEAPER than the ShopJimmy link given at 4:15 PM.**
+
+### Full eBay field (all verified present, cheapest first)
+| Price | Condition | Item # |
+|---|---|---|
+| $21.99 + $6.99 ship = $28.98 | Pre-owned, Best Offer | `306449916014` |
+| **$23.80 free ship** ✅ **BUY** | Open box | `920016212943` |
+| $36.95 | Open box, Best Offer | (in search results) |
+| $39.99 | Open box | `158188858207` |
+| $44.95 + $8.80 | Pre-owned, **free returns** | `145651291073` |
+| $54.99 | Pre-owned, **free returns**, last one | `203874542196` |
+
+### Amazon
+**No standalone `M21123-MT` listing exists.** Only the Lutema bundle `B0BYTR9SXM` (main + power +
+T-con + cables), whose page returns **HTTP 500 on every fetch** — price and stock UNVERIFIED, so it
+was NOT recommended.
+
+### Revised money position
+Main board at **$23.80** (not $43.21): ~$90 already spent → **~$114 total.**
+Worst case if the power board is also needed: ~$180 against a **$398** TV.
+
+**Nothing purchased.** Listing left open in Jeff's browser for him to hit Buy It Now.
+
+---
+
+## 2026-10-18 4:30 PM — POWER SUPPLY BOARD SOURCED. Jeff: *"I need the board that the power plugs in"*
+
+= the **power supply board** (AC cord goes into it). His exact board, confirmed off his own photos:
+**`TV7001-ZC02-01`** (silkscreen) / **`E021M509-B2`** (PCB fab) / **`514C7001M27`**
+(`M17` ↔ `M27` interchangeable, per the earlier entry in this log).
+
+### All three real eBay options — each opened and verified in-browser, not from search snippets
+
+| Delivered | Condition | Returns | Ships from | Item # |
+|---|---|---|---|---|
+| **$101.05** ($89.95 + $11.10) ✅ **RECOMMENDED** | Open box | **FREE returns** | Lansing, MI — 2–4 days. Seller **99.8%, 75,627** fb | `134967221758` |
+| $78.78 | Used | ⚠️ **NO return policy listed** | Indian Head, MD — est. Oct 23–29. Seller 97.3%, 1,450 fb | `137722920620` |
+| $76.50 | Used | 30-day, buyer pays return shipping | ⚠️ **Guangzhou, CHINA** — weeks. Seller 99.6%, 3,043 fb | `226090206725` |
+
+**Why the $101.05 over the $76.50:** $24.55 more buys days instead of weeks, free returns, and a
+75k-feedback seller. **Why NOT the $78.78:** no returns AND slow — worst of both.
+
+### ⚠️ WRONG POWER BOARDS that also list under "100044717" — DO NOT BUY THESE
+Model 100044717 shipped with several different power boards. These came up cheap and are **NOT his**:
+- `260132008850` / `HKL-750206C1` — **$28.65** and **$36.95** (this is the Version-5 kit board)
+- `K-P300-FM1` / `9012-112154-30004014-S` — $57.00
+- `514C7002M05` / `TV7002-ZC02-01` — $79.95 (note **7002**, not **7001**)
+
+**The listing must say `TV7001-ZC02-01` or `514C7001M17/M27`.**
+
+### Price contrast put to Jeff plainly
+- Power board: **$101.05**
+- Main board: **$23.80** (`920016212943`)
+- **Both: ~$125** — ends the question regardless of which diagnosis is right.
+
+My read still favors the **main board** (+12 V at 3 Ω vs +5VSB at 34 Ω is inverted; the singing
+transformers are the overload being **announced**, not caused). Said once, not pushed — **Jeff's
+call, and he asked for the power board.** Nothing purchased.

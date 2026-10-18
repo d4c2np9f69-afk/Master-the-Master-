@@ -542,7 +542,7 @@ html,body{
    overlay sits at the TOP (same treatment as the weather hero). Own aspect
    ratio = the image's true 1200x900 so the baked-in title never crops. */
 .sec-hero-guardian{aspect-ratio:1200/900;height:auto;max-height:480px;background:#0a1224}
-/* ── The 8 live house checks, inlaid on the Guardian photo ────────────────
+/* ── The 9 live house checks, inlaid on the Guardian photo ────────────────
    NOTE: grdSet() does `el.className = 'hs-val ' + cls`, which wipes any class
    set on the value span itself. So everything here is styled through the
    PARENT (.grd-hero-cell .hs-val), which survives that overwrite. Don't move
@@ -558,6 +558,17 @@ html,body{
   box-shadow:0 20px 60px rgba(0,0,0,.4),inset 0 1px rgba(255,255,255,.12);
 }
 .grd-hero-cell{min-width:0;display:flex;flex-direction:column;align-items:center;text-align:center;gap:1px}
+/* SMOKE & CO is the 9th check and takes the whole last row (Jeff, 2026-10-18).
+   The first 8 fill two clean rows of 4; a 9th cell on its own would leave a ragged
+   row, so this one spans the grid and lays out horizontally instead of stacking.
+   The prominence is deliberate, not a layout accident - Jeff's standing priority is
+   "tons of LIFE-SAFETY, lean intrusion" (SESSION_START 2b), and this is the only
+   fire chip on the page. */
+.grd-hero-cell.grd-hero-wide{
+  grid-column:1/-1;flex-direction:row;justify-content:center;align-items:center;
+  gap:clamp(4px,1.1vw,12px);padding-top:clamp(3px,.7vw,7px);
+  border-top:1px solid rgba(255,255,255,.10);
+}
 .grd-hero-ico{font-size:clamp(11px,2.4vw,32px);line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,.8))}
 .grd-hero-lbl{
   /* max raised so this keeps growing through web/TV widths — see wx-hero-lbl note above */
@@ -2265,8 +2276,9 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
     <img src="./images/hero-guardian.jpg" alt="Home Guardian — Protect · Monitor · Automate" loading="lazy" onerror="this.style.display='none'">
     <div class="sec-hero-overlay">
       <div class="sec-hero-status" id="guardianHeroStatus">Standing watch over 301</div>
-      <!-- The 8 live house checks, inlaid on the photo of the actual house
-           (Jeff, 08-06). MOVED from the Home Guardian card, not copied. -->
+      <!-- The 9 live house checks, inlaid on the photo of the actual house
+           (Jeff, 08-06). MOVED from the Home Guardian card, not copied.
+           9th added 2026-10-18: SMOKE & CO, for the Kidde hardwired alarms. -->
       <div class="grd-hero-readout" id="grdHeroReadout">
         <div class="grd-hero-cell"><span class="grd-hero-ico">&#128101;</span><span class="grd-hero-lbl">People</span><span class="hs-val hs-dim grd-hero-val" id="grd-people">&mdash;</span></div>
         <div class="grd-hero-cell"><span class="grd-hero-ico">&#128167;</span><span class="grd-hero-lbl">Water</span><span class="hs-val hs-dim grd-hero-val" id="grd-water">&mdash;</span></div>
@@ -2276,6 +2288,7 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
         <div class="grd-hero-cell"><span class="grd-hero-ico">&#128663;</span><span class="grd-hero-lbl">Garage</span><span class="hs-val hs-dim grd-hero-val" id="grd-garage">&mdash;</span></div>
         <div class="grd-hero-cell"><span class="grd-hero-ico">&#128682;</span><span class="grd-hero-lbl">Doors</span><span class="hs-val hs-dim grd-hero-val" id="grd-doors">&mdash;</span></div>
         <div class="grd-hero-cell"><span class="grd-hero-ico">&#128225;</span><span class="grd-hero-lbl">Devices</span><span class="hs-val hs-dim grd-hero-val" id="grd-devices">&mdash;</span></div>
+        <div class="grd-hero-cell grd-hero-wide"><span class="grd-hero-ico">&#128680;</span><span class="grd-hero-lbl">Smoke &amp; CO</span><span class="hs-val hs-dim grd-hero-val" id="grd-smoke">&mdash;</span></div>
       </div>
     </div>
   </div>
@@ -3607,6 +3620,23 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
 
       <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadGuardian()">&#128260; Refresh</button>
       <div class="wx-note">Live from Beehive &middot; auto-refreshes every minute</div>
+    </div>
+
+    <!-- SMOKE & CO — Jeff, 2026-10-18: "This is the smoke/carbon monoxide detector I went with.
+         I want to integrate this into HA and the app loewenhome.com. I also want it to trigger
+         the siren if it goes off and it shows up in the Guardian page."
+         Kidde 20SAR-W (smoke) / 30CUAR-W (smoke + CO), via the Kidde-HomeSafe HACS integration.
+         The siren half is automation `hcc_smoke_co_alarm`, which fires the `hcc_siren` EVENT
+         rather than touching switch.house_alarm directly -- the same single-owner rule the panic
+         button follows, which also buys the grandfather-clock announcement for free.
+         Like Doors & Contacts below, this card exists because the hero chip can only show one
+         word, and in a fire Jeff needs to know WHICH alarm. -->
+    <div class="card cat-safety" id="smokeCard" style="display:none">
+      <div class="card-title">&#128680; Smoke &amp; CO <span id="smokeConn" class="irr-conn"></span></div>
+      <div id="smokeBanner" class="wx-banner wx-load">&#128260; Loading&hellip;</div>
+      <ul class="spec-list" id="smokeList" style="display:none"></ul>
+      <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadGuardian()">&#128260; Refresh</button>
+      <div class="wx-note" id="smokeNote">Live from Beehive</div>
     </div>
 
     <!-- DOORS & CONTACTS — Jeff, 2026-08-26: "there is no where in the Guardian section that
@@ -11476,7 +11506,106 @@ function grdPlaceholder(){
   grdSet('grd-garage', 'Sensor pending', 'hs-dim');
   grdSet('grd-doors', 'Sensor pending', 'hs-dim');
   grdSet('grd-devices', '—', 'hs-dim');
+  grdSet('grd-smoke', 'Sensor pending', 'hs-dim');
   var s = document.getElementById('guardianSetupCard'); if (s) s.style.display = 'block';
+}
+// ── SMOKE & CO ────────────────────────────────────────────────────────────
+// The Kidde hardwired alarms (Jeff, 2026-10-18: "I want it to trigger the siren if it goes
+// off and it shows up in the Guardian page"). Models 20SAR-W / 30CUAR-W, via the
+// Kidde-HomeSafe HACS integration.
+//
+// MATCHES ON device_class, NEVER ON AN ENTITY ID. The integration names its entities after
+// whatever Jeff calls each alarm inside the Kidde app, so a hardcoded id list would be wrong
+// the day he renames one or adds a fourth. device_class is set by the integration itself and
+// cannot drift. This is the same hardening WATER and GAS already carry above, and it exists
+// for the same reason: a substring match on 'smoke' is exactly what made the WATER chip read
+// LEAK permanently off a connectivity sensor (2026-09-16).
+//
+// EXCLUDES 'too_much_smoke'. The integration ships that as a DIAGNOSTIC entity carrying
+// device_class `smoke`, and it is the one most likely to trip on cooking. The siren
+// automation `hcc_smoke_co_alarm` rejects the identical string, so the chip and the siren
+// can never disagree about what counts as a fire.
+function hccSmokeDetectors(states){
+  var cls = { smoke: 1, carbon_monoxide: 1 };
+  return states.filter(function(s){
+    return s.entity_id.indexOf('binary_sensor.') === 0
+        && s.attributes && cls[s.attributes.device_class]
+        && s.entity_id.toLowerCase().indexOf('too_much') < 0;
+  });
+}
+// Battery lives on a sibling sensor, but the Kidde naming is not known until the integration
+// is actually installed, so rather than guess one scheme this walks progressively shorter
+// bases (x_co_alarm -> x_co -> x) and takes the first match. Finds nothing => shows nothing.
+function hccSmokeBattery(states, det){
+  var parts = det.entity_id.replace(/^binary_sensor\./, '').split('_');
+  for (var n = parts.length; n > 0; n--){
+    var want = 'sensor.' + parts.slice(0, n).join('_') + '_battery';
+    for (var i = 0; i < states.length; i++){
+      if (states[i].entity_id === want && /^\d+$/.test(String(states[i].state))) return states[i];
+    }
+  }
+  return null;
+}
+// Smoke & CO card. Same shape as Doors & Contacts, and for the same reason Jeff gave there:
+// a chip can only show a count or a word, and in a fire he needs to know WHICH alarm.
+function renderSmokeCard(states){
+  var card   = document.getElementById('smokeCard');
+  var banner = document.getElementById('smokeBanner');
+  var list   = document.getElementById('smokeList');
+  var conn   = document.getElementById('smokeConn');
+  var note   = document.getElementById('smokeNote');
+  if (!card) return;
+  var det = hccSmokeDetectors(states);
+  card.style.display = '';
+  if (!det.length){
+    if (banner){ banner.style.display = ''; banner.className = 'wx-banner wx-no';
+      banner.innerHTML = '&#128680; No smoke or CO alarm in Beehive yet'; }
+    if (list) list.style.display = 'none';
+    if (conn) conn.textContent = '';
+    if (note) note.textContent = 'Kidde 20SAR-W / 30CUAR-W — integration not installed yet';
+    return;
+  }
+  if (banner) banner.style.display = 'none';
+  if (conn){ conn.textContent = '● LIVE'; conn.style.color = 'var(--ok)'; }
+  det.sort(function(a, b){
+    var ao = a.state === 'on' ? 0 : 1, bo = b.state === 'on' ? 0 : 1;   // alarming first
+    if (ao !== bo) return ao - bo;
+    return String(a.entity_id).localeCompare(String(b.entity_id));
+  });
+  var firingN = 0, rows = '';
+  det.forEach(function(d){
+    var on = d.state === 'on'; if (on) firingN++;
+    var co = d.attributes.device_class === 'carbon_monoxide';
+    var nm = (d.attributes && d.attributes.friendly_name) || d.entity_id;
+    nm = String(nm).replace(/\s+(Smoke|CO|Carbon Monoxide)?\s*(Alarm|Detector)$/i, '');
+    var kind = ' <span style="font-size:10px;color:var(--muted)">' + (co ? 'CO' : 'Smoke') + '</span>';
+    var bat = hccSmokeBattery(states, d);
+    var batTxt = '';
+    if (bat){
+      var lowB = Number(bat.state) <= 20;
+      batTxt = ' <span style="font-size:10px;color:' + (lowB ? 'var(--bad)' : 'var(--muted)') + '">'
+             + (lowB ? '&#9888;&#65039; ' : '') + bat.state + '%</span>';
+    }
+    var since = '';
+    if (d.last_changed){
+      try {
+        var mins = Math.round((Date.now() - new Date(d.last_changed).getTime()) / 60000);
+        since = mins < 1 ? 'just now'
+              : mins < 60 ? mins + 'm'
+              : mins < 1440 ? Math.round(mins / 60) + 'h'
+              : Math.round(mins / 1440) + 'd';
+      } catch(e){ since = ''; }
+    }
+    rows += '<li><span class="sk">' + nm + kind + batTxt + '</span>'
+          + '<span class="sv"><span class="' + (on ? 's-bad' : 's-ok') + '">'
+          + (on ? (co ? 'CO ALARM' : 'SMOKE ALARM') : 'Off') + '</span>'
+          + (since ? ' <span style="font-size:10px;color:var(--muted)">' + since + '</span>' : '')
+          + '</span></li>';
+  });
+  if (list){ list.innerHTML = rows; list.style.display = ''; }
+  if (note) note.innerHTML = firingN
+    ? '<b style="color:var(--bad)">' + firingN + ' ALARMING</b> of ' + det.length + ' &middot; siren is running'
+    : 'All ' + det.length + ' clear &middot; siren armed &middot; live from Beehive';
 }
 // Doors & Contacts card. Shows every real contact by name, with state, battery and how long it
 // has been that way. Jeff asked for this because a count cannot tell him WHICH door is open.
@@ -11603,7 +11732,12 @@ function loadGuardian(){
     // NOTE: the record is clear that NO smoke/CO detector exists on this mesh yet
     // (OPEN_ITEMS, alarm subsystem). A green 'NORMAL' here has never meant fire
     // detection is covered - it means a gas METER is reporting.
-    var fireCls = { gas: 1, smoke: 1, carbon_monoxide: 1 };
+    // 2026-10-18: NARROWED from { gas, smoke, carbon_monoxide } to gas only, because smoke
+    // and CO now have their own dedicated chip below. Total coverage is unchanged - every
+    // device_class that used to land here still lands somewhere - but one Kidde alarm no
+    // longer lights two chips and pushes two near-identical lines into alertReasons.
+    // Do NOT widen this back without first deleting the SMOKE & CO chip.
+    var fireCls = { gas: 1 };
     var firing = states.filter(function(s){
       return s.entity_id.indexOf('binary_sensor.') === 0
           && s.attributes && fireCls[s.attributes.device_class]
@@ -11612,10 +11746,28 @@ function loadGuardian(){
     if (firing.length) {
       var fName = (firing[0].attributes && firing[0].attributes.friendly_name) || firing[0].entity_id;
       grdSet('grd-gas', 'ALERT', 'hs-red');
-      alertReasons.push('Gas / smoke alarm: ' + fName);
+      alertReasons.push('Gas alarm: ' + fName);
     }
     else if (hasSensor('gas_meter')) grdSet('grd-gas', 'NORMAL', 'hs-ok');
     else grdSet('grd-gas', 'Sensor pending', 'hs-dim');
+
+    // SMOKE & CO — the Kidde hardwired alarms. See hccSmokeDetectors() for why this matches
+    // on device_class and why 'too_much_smoke' is excluded.
+    // "Off" is the clear-state word by Jeff's explicit instruction, 2026-10-18.
+    // Until the Kidde integration is installed this reads "Sensor pending", which is honest.
+    // It must NEVER show a green word while no detector exists - that is the exact trap the
+    // GAS comment above warns about ("a green NORMAL has never meant fire detection is covered").
+    var smokeDet = hccSmokeDetectors(states);
+    var smokeOn  = smokeDet.filter(function(s){ return s.state === 'on'; });
+    if (smokeOn.length){
+      var isCO  = smokeOn.some(function(s){ return s.attributes.device_class === 'carbon_monoxide'; });
+      var sName = (smokeOn[0].attributes && smokeOn[0].attributes.friendly_name) || smokeOn[0].entity_id;
+      grdSet('grd-smoke', isCO ? 'CO ALARM' : 'SMOKE ALARM', 'hs-red');
+      alertReasons.push((isCO ? 'Carbon monoxide' : 'Smoke') + ' alarm: ' + sName);
+    }
+    else if (smokeDet.length) grdSet('grd-smoke', 'Off', 'hs-ok');
+    else grdSet('grd-smoke', 'Sensor pending', 'hs-dim');
+    renderSmokeCard(states);
 
     // ELECTRIC — a power sensor (W/kW or device_class power) means the energy monitor is in
     var hasPower = states.some(function(s){
