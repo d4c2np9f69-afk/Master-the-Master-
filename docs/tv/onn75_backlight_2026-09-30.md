@@ -2383,3 +2383,62 @@ Model 100044717 shipped with several different power boards. These came up cheap
 My read still favors the **main board** (+12 V at 3 Ω vs +5VSB at 34 Ω is inverted; the singing
 transformers are the overload being **announced**, not caused). Said once, not pushed — **Jeff's
 call, and he asked for the power board.** Nothing purchased.
+
+---
+
+## 2026-10-19 10:42 AM — ✅ ORDERED: MAIN BOARD `M21123-MT` $23.80. Jeff's call, and it matches the evidence.
+
+**Jeff:** *"I ordered the M21123-MT so when it lands we will know if that one is the issue if it's
+not I will get the expensive one."*
+
+**That is the cheap-test-first order and it is the right one.** It is also the board the measurement
+already pointed at (+12 V = 3 Ω vs +5VSB = 34 Ω is **inverted**; the singing main-rail transformers
+are the overload being *announced*, not the cause). $23.80 to answer a question whose other answer
+costs $101.05.
+
+### ⭐ THE TEST WHEN IT LANDS — ONE OBSERVATION, NO METER, NO BENCH WORK
+
+Jeff already ran the exact configuration this needs, on 10-18: **LEDs unplugged, T-con off,
+`CON301`/`CON302` off, main-board harness ON → static still present.** So reproduce *that same
+setup* with the NEW main board and just listen:
+
+| What he hears | Verdict | Next |
+|---|---|---|
+| **Static GONE**, set powers up and stays up | ✅ **It was the main board.** | Fit the T-con + strips, done |
+| **Static still there** (same several-times-a-second retry) | ❌ Main board was not it ⇒ **POWER BOARD** | Order `514C7001M27` **$101.05**, eBay `134967221758` — **and RETURN the main board** |
+
+🔑 **"Static" = hiccup mode** — start → hit current limit → shut down → retry, several times a
+second. It is the same sound he has been hearing, so the comparison is direct.
+
+### ⚠️ DEFINE SUCCESS CORRECTLY — THE TRAP THAT WOULD MAKE A GOOD BOARD LOOK BAD
+
+**The backlight strips are a SEPARATE, ALREADY-CONFIRMED FAULT** (diagnosis closed by Jeff 10-13:
+*"there's no amount of testing that's gonna replace the strips"*). So for THIS test, success is
+**no static + the set powers up and stays up** — **NOT a good picture.** A dark or dim screen after
+the board swap is the strips, which are a separate part already bought and in transit. Do not read
+a dark screen as "the main board didn't fix it."
+
+### ⏱️ RETURN WINDOW — this is what caps the downside
+
+Item `920016212943` carries **30-day returns, buyer pays return shipping**. **If the static is still
+there after the swap, send it back inside that window** rather than eating the $23.80 — then the
+real cost of testing the cheap theory first is only return postage.
+
+### 💰 MONEY POSITION — and a CORRECTION to this log's own number
+
+Already in: tester **$18.99** + T-con **$24.09** + strips **$47.19** = **$90.27**.
+With the main board: **$114.07.**
+
+🔴 **CORRECTION: the 10-18 4:25 PM entry said worst case "~$180". That is WRONG now.** It was
+computed against a $65.95 power board that was superseded 5 minutes later by the actually-sourced
+one at **$101.05**. **True worst case, both boards: $215.12** — against a TV that cost **$398**.
+Stated plainly because Jeff acts on these numbers: if the main board does not fix it, the decision
+to spend another $101 is a real one, not a formality.
+
+### ⛔ DO NOT re-open
+
+- **Test F (the `PSON` jumper)** — Jeff 10-18: *"Fuck that I'm not doing all that."* Not run, will
+  not be run. Do not send him back to the bench for it.
+- The **wrong power boards** that list under model `100044717` are catalogued at 4:30 PM above
+  (`260132008850` / `HKL-750206C1`, `K-P300-FM1`, `514C7002M05`). **The listing must say
+  `TV7001-ZC02-01` or `514C7001M17/M27`.**
