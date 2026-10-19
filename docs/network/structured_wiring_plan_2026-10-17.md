@@ -49,6 +49,36 @@ heater"*). **That is a free, open, legal pathway to every room in the house.**
 
 ## 1. CAT8 vs CAT6 — the honest answer: **Cat6 was not a mistake, and Cat8 buys you nothing here**
 
+> ## 🔒 SETTLED 2026-10-19 11:09 — **JEFF WENT CAT8. IT IS BOUGHT AND IN HAND. DO NOT RE-PITCH CAT6.**
+>
+> Jeff: *"I have all cat8 now."* The cost analysis below is kept as the record of *why* the question
+> was asked, **not as a live recommendation.** Re-opening it now costs him money he has already spent
+> and reads as second-guessing a decision he made with the numbers in front of him.
+>
+> ✅ **And functionally there is nothing to fix: Cat8 is fully backward compatible and carries
+> gigabit and PoE without issue.** It is 22 AWG, which is *thicker* than Cat6 — so it actually drops
+> slightly **less** voltage on a long PoE run. That is a small genuine plus for the access points.
+>
+> 🔑 **The hardware ceiling, measured on the Beast 2026-10-19 11:09, so nobody expects a speed
+> jump that cannot happen:** its NIC is a **Realtek PCIe GbE Family Controller**, currently linked at
+> **1 Gbps** on 192.168.1.194 (gw 192.168.1.254), Speed & Duplex on Auto Negotiation. **GbE means
+> 1 Gb is the card's hardware maximum** — no cable can exceed it. Cat8's 25/40 Gb needs 25/40 Gb
+> switches *and* NICs at both ends. So Cat8 here is not slower, not a problem, and not faster: it is
+> gigabit, same as everything else, with headroom nobody will use.
+>
+> ⚠️ **The ONE practical thing Cat8 actually changes, and it is a termination issue, not a speed
+> issue: Cat8 is fully SHIELDED (S/FTP) and stiff.** Shielded cable wants **shielded** keystones and
+> plugs; terminated into ordinary unshielded parts the foil simply floats and does nothing — harmless,
+> but it is the part that was paid for. The record already flagged that his **VCE pass-through
+> connectors (50, ordered 10-13) are Cat6 UTP ends and need a pass-through crimper**. Check the ends
+> and the crimper **before** going under the house, not during. Also respect bend radius — 22 AWG
+> shielded does not like sharp corners.
+>
+> ➡ Flat "Cat8" patch cables are what was bought (Jovmoxz 4×, ~$8.99 each). **At gigabit this is a
+> non-issue** — anything Cat5e or better carries 1 Gb. Verify by link rate once connected, not by
+> what the jacket is printed with.
+
+
 ### What your network actually runs at — measured, not assumed
 | Measurement | Value | Source |
 |---|---|---|
