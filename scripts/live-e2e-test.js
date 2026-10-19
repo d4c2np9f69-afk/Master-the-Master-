@@ -87,9 +87,34 @@ const check = (name, ok, detail) => {
   // no-ops on a missing element, so nothing errored and the gate just went red forever.
   // A gate that fails on working code is worse than no gate: it trains you to ignore it.
   // Pointed at the hero ids, which is where the feature actually lives now.
+  // 2026-10-19: the OUTDOOR assertion is now conditional on the hardware, for the same reason
+  // the comment above exists. The Ambient outdoor array died on 10-17 (railing to -40 / 140 F,
+  // then to NULL) and this check went red against a perfectly correct app — the cell is SUPPOSED
+  // to read "--" then, because Jeff's 2026-09-16 rule is that an outdoor cell with no station
+  // reading shows a dash rather than falling back to a forecast. Left as-is it would have been
+  // permanently red until he replaced a $40 sensor, and a permanently red gate gets ignored.
+  //
+  // The INDOOR and PRESSURE checks stay unconditional on purpose: the barometer and the indoor
+  // thermo-hygrometer are inside the CONSOLE, a different radio from the pole, and they kept
+  // working right through the outdoor failure. Those two going blank is a real app bug — it WAS
+  // one, found by this gate on 10-19 and fixed the same morning (see weather-console-gate-test.js).
+  // Do not make them conditional too; that would hide the exact bug this caught.
+  let outdoorLive = true;
+  try {
+    const r = await fetch('http://192.168.1.66:8123/api/states/sensor.my_weather_station_temperature',
+      { headers: { Authorization: 'Bearer ' + TOKEN } });
+    if (r.ok) { const s = await r.json(); outdoorLive = /^-?\d+(\.\d+)?$/.test(s.state); }
+  } catch (e) { /* unreachable HA: fall through and assert, so a real outage still shows up */ }
+
   await page.click('#snav-weather'); await page.waitForTimeout(4000);
   check('station indoor temperature on the hero',  /\d+(\.\d+)?°F/.test(await txt('wxInTemp')),   await txt('wxInTemp'));
-  check('station outdoor temperature on the hero', /\d+(\.\d+)?°F/.test(await txt('wxTemp')),     await txt('wxTemp'));
+  if (outdoorLive) {
+    check('station outdoor temperature on the hero', /\d+(\.\d+)?°F/.test(await txt('wxTemp')),   await txt('wxTemp'));
+  } else {
+    console.log('  NOTE  outdoor temperature SKIPPED — the station\'s outdoor array is not reporting'
+      + ' (sensor.my_weather_station_temperature is not numeric). A dash on the hero is CORRECT'
+      + ' while that is true; this re-arms by itself when the array is replaced.');
+  }
   check('station barometric pressure on the hero', /inHg/.test(await txt('wxPressure')),          await txt('wxPressure'));
 
   await page.click('#snav-irr'); await page.waitForTimeout(6000);
