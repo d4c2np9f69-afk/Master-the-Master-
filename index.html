@@ -7049,14 +7049,52 @@ function stRender(d){
   // AIR QUALITY and LIGHTNING are deliberately NOT in this list - the station has
   // no sensor for either, so they keep their own sources and are not duplicates.
   STATION_HA_LIVE = (out != null || dew != null);
+  var hset = function(id, html, color){
+    var el = document.getElementById(id);
+    if (el) { el.innerHTML = html; if (color != null) el.style.color = color; }
+  };
+
+  // ── THE CONSOLE AND THE OUTDOOR ARRAY ARE TWO DIFFERENT RADIOS ───────────────
+  // 2026-10-19: found by live-e2e-test.js going red while the outdoor array was dead.
+  // Every cell below used to sit inside `if (STATION_HA_LIVE)`, and STATION_HA_LIVE is
+  // computed from OUTDOOR temp/dew point. So when the outdoor array failed on 10-17 the
+  // app also blanked Indoor, Indoor Humidity, Pressure and the observation clock — four
+  // readings that were still arriving perfectly well. Measured at 08:1x: indoor 62.6 F,
+  // indoor humidity 65 %, relative pressure 30.12 inHg, all updating within the minute,
+  // all showing "--" on the hero.
+  //
+  // The barometer and the indoor thermo-hygrometer are INSIDE the console; temp, humidity,
+  // dew point, wind, rain, UV and solar come from the pole outside over a separate 915 MHz
+  // link. One can die while the other is fine, which is exactly what happened, so they get
+  // separate liveness flags. Do not merge them back.
+  //
+  // ⚠ The outdoor cells deliberately stay EMPTY rather than falling back to Open-Meteo —
+  // Jeff, 2026-09-16 05:32: "I would like to get rid of any sensor reading that is not
+  // listing live data from the real weather station ... I don't want it coming from a
+  // source that is not real from the weather station." A dash is the honest answer there.
+  var CONSOLE_HA_LIVE = (ind != null || indH != null || p != null);
+  if (CONSOLE_HA_LIVE) {
+    if (ind  != null) hset('wxInTemp', Math.round(ind) + '&deg;F');
+    if (indH != null) hset('wxInHum',  Math.round(indH) + '%');
+    if (p    != null) hset('wxPressure', p + ' inHg');
+    if (ap   != null) hset('wxAbsPress', ap + ' inHg');
+    // The clock is the console's OWN observation time, not the phone's — if the console
+    // stops uploading, this freezes and that is the tell. 12-hour, Jeff's ask.
+    hset('wxObsTime', (function(){
+      var v = d && d.indoor_reported;
+      var ms = v ? Date.parse(v) : NaN;
+      if (!isFinite(ms)) return '--';
+      return new Date(ms).toLocaleTimeString([], {hour:'numeric', minute:'2-digit', hour12:true});
+    })());
+    var hnote = document.getElementById('wxStationNote');
+    if (hnote) hnote.textContent = '\ud83d\udce1 KTNWHITE21 \u00b7 '
+      + (STATION_HA_LIVE ? 'live from the console'
+                         : 'console live \u00b7 OUTDOOR ARRAY NOT REPORTING')
+      + (d && d.indoor_reported ? ' \u00b7 ' + acAgo(d.indoor_reported) : '');
+  }
+
   if (STATION_HA_LIVE) {
-    var hset = function(id, html, color){
-      var el = document.getElementById(id);
-      if (el) { el.innerHTML = html; if (color != null) el.style.color = color; }
-    };
-    // ROW 1 — indoor pair, then the four comfort numbers.
-    if (ind   != null) hset('wxInTemp',   Math.round(ind) + '&deg;F');
-    if (indH  != null) hset('wxInHum',    Math.round(indH) + '%');
+    // ROW 1 — the four comfort numbers, all from the pole.
     if (out   != null) hset('wxTemp',     Math.round(out) + '&deg;F');
     if (feels != null) hset('wxFeels',    Math.round(feels) + '&deg;F',
                             feels >= 103 ? '#ff6262' : feels >= 90 ? '#ff8c42' : '');
@@ -7074,16 +7112,9 @@ function stRender(d){
       hset('wxHeroGust', (g == null ? '--' : (g * 1 === 0 ? 'Calm' : g))
                        + (mg != null ? ' / ' + mg : '') + ' mph');
     }
-    if (p  != null) hset('wxPressure', p + ' inHg');
-    if (ap != null) hset('wxAbsPress', ap + ' inHg');
-    // The clock is the station's OWN observation time, not the phone's - if the
-    // console stops uploading, this freezes and that is the tell. 12-hour, Jeff's ask.
-    hset('wxObsTime', (function(){
-      var v = d && d.indoor_reported;
-      var ms = v ? Date.parse(v) : NaN;
-      if (!isFinite(ms)) return '--';
-      return new Date(ms).toLocaleTimeString([], {hour:'numeric', minute:'2-digit', hour12:true});
-    })());
+    // Pressure, the indoor pair, the observation clock and the station note all moved
+    // UP into the CONSOLE_HA_LIVE block on 2026-10-19 — they are console readings and
+    // must not be gated on the outdoor array. See the note above.
 
     // ROW 3 — the whole rain story, which is what decides whether the yard needs water.
     if (r    != null) hset('wxRainDay',  Number(r).toFixed(2) + '"', r * 1 > 0 ? 'var(--info)' : '');
@@ -7120,9 +7151,6 @@ function stRender(d){
     // Mirror onto the LUX card's outdoor patch, same instrument, same numbers.
     if (out   != null) hset('luxOutTemp',   Math.round(out) + '&deg;');
     if (feels != null) hset('luxFeelsLike', Math.round(feels) + '&deg;');
-    var hnote = document.getElementById('wxStationNote');
-    if (hnote) hnote.textContent = '📡 KTNWHITE21 · live from the console'
-      + (d && d.indoor_reported ? ' · ' + acAgo(d.indoor_reported) : '');
   }
 
   var conn = document.getElementById('stConn');
