@@ -56,27 +56,47 @@ heater"*). **That is a free, open, legal pathway to every room in the house.**
 > and reads as second-guessing a decision he made with the numbers in front of him.
 >
 > ✅ **And functionally there is nothing to fix: Cat8 is fully backward compatible and carries
-> gigabit and PoE without issue.** It is 22 AWG, which is *thicker* than Cat6 — so it actually drops
-> slightly **less** voltage on a long PoE run. That is a small genuine plus for the access points.
+> gigabit and PoE without issue.**
 >
-> 🔑 **The hardware ceiling, measured on the Beast 2026-10-19 11:09, so nobody expects a speed
-> jump that cannot happen:** its NIC is a **Realtek PCIe GbE Family Controller**, currently linked at
-> **1 Gbps** on 192.168.1.194 (gw 192.168.1.254), Speed & Duplex on Auto Negotiation. **GbE means
-> 1 Gb is the card's hardware maximum** — no cable can exceed it. Cat8's 25/40 Gb needs 25/40 Gb
-> switches *and* NICs at both ends. So Cat8 here is not slower, not a problem, and not faster: it is
-> gigabit, same as everything else, with headroom nobody will use.
+> 🔴🔴 **CORRECTED 2026-10-19 11:16 — JEFF IS RUNNING PRE-TERMINATED PATCH CABLE. HE IS NOT
+> CRIMPING ANYTHING. AN EARLIER VERSION OF THIS NOTE WARNED HIM ABOUT CRIMPERS AND SHIELDED
+> KEYSTONES. THAT WAS WRONG AND IT IS DELETED.** Jeff: *"If you look at the Amazon purchases you will
+> see the cat 8 wire I'm running I'm not crimping anything and you should have known that."* He was
+> right — the evidence was already in this session: the record named *"Jovmoxz Cat 8 flat 50 ft"* and
+> his own browser history showed a 75 ft flat Cat 8 search. **Read the actual orders before writing a
+> caution about tools.**
 >
-> ⚠️ **The ONE practical thing Cat8 actually changes, and it is a termination issue, not a speed
-> issue: Cat8 is fully SHIELDED (S/FTP) and stiff.** Shielded cable wants **shielded** keystones and
-> plugs; terminated into ordinary unshielded parts the foil simply floats and does nothing — harmless,
-> but it is the part that was paid for. The record already flagged that his **VCE pass-through
-> connectors (50, ordered 10-13) are Cat6 UTP ends and need a pass-through crimper**. Check the ends
-> and the crimper **before** going under the house, not during. Also respect bend radius — 22 AWG
-> shielded does not like sharp corners.
+> 📦 **WHAT HE ACTUALLY OWNS, read from Amazon order history 2026-10-19:**
 >
-> ➡ Flat "Cat8" patch cables are what was bought (Jovmoxz 4×, ~$8.99 each). **At gigabit this is a
-> non-issue** — anything Cat5e or better carries 1 Gb. Verify by link rate once connected, not by
-> what the jacket is printed with.
+> | Ordered | Item |
+> |---|---|
+> | 2026-10-17 | **Sokqovt Cat 8 Slim 75 ft**, pure copper, **waterproof / direct burial** rated, white |
+> | 2026-10-17 | **Smolink Cat 8 50 ft**, nylon braided, **shielded U/FTP**, RJ45 |
+> | 2026-10-17 | 8-Port Gigabit PoE Switch + 2 uplink, 802.3af/at, 120 W — the SG10P |
+> | 2026-01-20 | **Ciwoda Cat 8** assorted lengths to 200 ft, **26 AWG**, S/FTP |
+>
+> **Every one is a finished patch cable with moulded RJ45 ends.** The **VCE Cat6 pass-through
+> connectors (25 pcs, 2026-10-13) are Cat6 and are NOT part of these runs** — do not tie them together
+> again.
+>
+> 🔴 **AND A SECOND CORRECTION, which actually matters for PoE: I said Cat8 is 22 AWG and therefore
+> drops LESS voltage than Cat6 on a long PoE run. THAT IS BACKWARDS FOR WHAT HE BOUGHT.** 22 AWG is
+> bulk Cat8. These are **slim / flexible patch cables**, and the one that states its gauge is **26 AWG
+> — THINNER than the ~23 AWG solid in bulk Cat6, so it drops MORE voltage, not less.** PoE standards
+> assume 24 AWG or better for a full 100 m; 26 AWG patch cord is permitted but carries a length
+> derating. ⚠️ **Consequence, only if an access point is later powered over the 75 ft run: check the
+> AP still gets its class power at that distance.** At gigabit data it is a non-issue.
+>
+> ✅ **The one real practical consequence of pre-terminated cable, and it is a pulling problem, not a
+> tooling one: the moulded RJ45 head has to physically fit through whatever it is pulled through.**
+> Bulk cable is terminated after the pull; these cannot be. Size the holes and the register openings
+> for the connector plus its boot before Wednesday.
+>
+> 🔑 **The hardware ceiling, measured on the Beast 2026-10-19 11:09:** its NIC is a **Realtek PCIe
+> GbE Family Controller**, linked at **1 Gbps** on 192.168.1.194 (gw 192.168.1.254), auto-negotiate.
+> **GbE means 1 Gb is the card's hardware maximum** — no cable exceeds it. So Cat8 here is not slower,
+> not a problem and not faster: gigabit, with headroom nobody will use. **Verify any run by its link
+> rate, never by what the jacket is printed with.**
 
 
 ### What your network actually runs at — measured, not assumed
@@ -96,8 +116,8 @@ cable category anywhere in that chain changes a single one of those numbers.
 | 1 Gb | **328 ft** | 328 ft | 328 ft |
 | 10 Gb | ~165–180 ft | **328 ft** | 328 ft |
 | 25 / 40 Gb | — | — | **98 ft only** |
-| Conductor | 23 AWG | 23 AWG | **22 AWG, fully shielded S/FTP — stiff, big bend radius** |
-| Terminates with | your crimper + standard tips | same | 🔴 **shielded plugs/keystones + a bonded shield, or the shield does nothing** |
+| Conductor | 23 AWG | 23 AWG | **22 AWG, fully shielded S/FTP — stiff, big bend radius** ⚠️ **BULK figure. The patch cable Jeff actually bought is 26 AWG — THINNER, so it drops MORE voltage on a PoE run, not less.** |
+| Terminates with | your crimper + standard tips | same | 🔴 **shielded plugs/keystones + a bonded shield** — ⚠️ **BULK ONLY. Jeff bought PRE-TERMINATED patch cable, so this row does not apply to his job. See the SETTLED block at the top of section 1.** |
 | **1000 ft bulk, US** | **$160–$185** | — | **$428 (Newegg) · $558 (Home Depot) · $699 (Monoprice)** |
 
 **The decider: every 8-port PoE switch in this price class is a GIGABIT switch.** It caps every
@@ -263,6 +283,14 @@ gold-plated 8P8C, UL listed, 25 pcs` × 2 = 50 ends, ordered 2026-10-13.**
 five crimper"* (Jeff, 10-13 9:34 AM). **If it is a plain crimper, these 50 connectors will leave
 the wires standing proud of the plug and the ends will not seat.** Workable with flush cutters,
 properly fixed with a pass-through tool. **Check the crimper before the pull, not during it.**
+
+> 🔴 **MOOT AS OF 2026-10-19 — DO NOT ACT ON THE PARAGRAPH ABOVE FOR THE WEDNESDAY RUN.** Jeff is
+> running **pre-terminated Cat8 patch cable** (Sokqovt 75 ft, Smolink 50 ft, Ciwoda assorted — all
+> with moulded RJ45 ends). **He is not terminating anything, so the crimper question does not arise.**
+> Jeff, 11:16 AM: *"I'm not crimping anything and you should have known that."* The 50 VCE Cat6
+> pass-through ends are still in a drawer for some future Cat6 job; they are **not** part of these
+> runs. Leaving the paragraph above intact because the crimper fact is true and will matter if bulk
+> cable is ever pulled — but it is **not a Wednesday action item.**
 
 🔑 **NO BULK SPOOL HAS BEEN BOUGHT YET** — his whole Ethernet order history is patch cables
 (Seedato Cat6 50 ft ×2, flat Cat6 10 ft 2-pack, Monoprice 1 ft, Ciwoda Cat8 short ×2, GLANICS Cat8
