@@ -3635,6 +3635,18 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
       <div class="card-title">&#128680; Smoke &amp; CO <span id="smokeConn" class="irr-conn"></span></div>
       <div id="smokeBanner" class="wx-banner wx-load">&#128260; Loading&hellip;</div>
       <ul class="spec-list" id="smokeList" style="display:none"></ul>
+      <!-- 2026-10-19, Jeff: "I want it reporting everything it can report to the app" / "All those
+           sensor readings need to show in the app". The Kidde integration exposes 28 device
+           entities, not the 3 alarms. Every measurable one goes in smokeDetail; the 8 fault
+           sensors collapse into smokeFaults so a healthy unit shows ONE green line instead of
+           eight rows of "off" that nobody would ever read -- and any fault that IS set gets its
+           own loud red row naming it.
+           DELIBERATELY NOT ADDED: the hush, test and identify controls. Those SOUND THE ALARM, and
+           Jeff's standing rule (2026-10-13, after a night-mode test turned on five things he had
+           off) is never to set off a house device unannounced. A stray tap in a family app is
+           exactly that. This card REPORTS; it does not actuate. -->
+      <ul class="spec-list" id="smokeDetail" style="display:none"></ul>
+      <div id="smokeFaults" class="wx-banner" style="display:none"></div>
       <button class="btn-full btn-gray" style="margin-top:8px" onclick="loadGuardian()">&#128260; Refresh</button>
       <div class="wx-note" id="smokeNote">Live from Beehive</div>
     </div>
@@ -11574,6 +11586,31 @@ function hccSmokeBattery(states, det){
   }
   return null;
 }
+// ── EVERYTHING ELSE THE DETECTOR REPORTS (Jeff, 2026-10-19) ──────────────────────────────────
+// "I want it reporting everything it can report to the app" / "All those sensor readings need to
+// show in the app". The Kidde integration creates 28 device entities, not 3. The same rule the
+// siren and the chip already follow applies here: the integration names EVERY entity after
+// whatever Jeff called the unit in the Kidde app, so a hardcoded entity-id list would be wrong
+// the day he renames it or adds a second detector. So: take a detector we already matched by
+// device_class, derive the device's id base from it, and find siblings by suffix.
+function hccSmokeBase(det){
+  return String(det.entity_id).replace(/^binary_sensor\./, '')
+         .replace(/_(hardwire_smoke|smoke|co|carbon_monoxide)_alarm$/, '');
+}
+function hccSmokeSib(states, base, domain, suffix){
+  var want = domain + '.' + base + suffix;
+  for (var i = 0; i < states.length; i++) if (states[i].entity_id === want) return states[i];
+  return null;
+}
+// The 8 self-check sensors all carry device_class 'problem'. They are COLLAPSED on purpose: a
+// healthy unit shows one green line, because eight rows reading "off" is noise nobody scans, and
+// noise is how a real one gets missed. Any fault that IS set gets named in full and in red.
+function hccSmokeFaults(states, base){
+  var pre = 'binary_sensor.' + base + '_';
+  return states.filter(function(s){
+    return s.entity_id.indexOf(pre) === 0 && s.attributes && s.attributes.device_class === 'problem';
+  });
+}
 // Smoke & CO card. Same shape as Doors & Contacts, and for the same reason Jeff gave there:
 // a chip can only show a count or a word, and in a fire he needs to know WHICH alarm.
 function renderSmokeCard(states){
@@ -11589,6 +11626,8 @@ function renderSmokeCard(states){
     if (banner){ banner.style.display = ''; banner.className = 'wx-banner wx-no';
       banner.innerHTML = '&#128680; No smoke or CO alarm in Beehive yet'; }
     if (list) list.style.display = 'none';
+    var d0 = document.getElementById('smokeDetail'); if (d0) d0.style.display = 'none';
+    var f0 = document.getElementById('smokeFaults'); if (f0) f0.style.display = 'none';
     if (conn) conn.textContent = '';
     if (note) note.textContent = 'Kidde 20SAR-W / 30CUAR-W — integration not installed yet';
     return;
@@ -11631,6 +11670,100 @@ function renderSmokeCard(states){
           + '</span></li>';
   });
   if (list){ list.innerHTML = rows; list.style.display = ''; }
+
+  // ── EVERY OTHER READING THE UNIT PUBLISHES (Jeff, 2026-10-19) ───────────────────────────────
+  // Nothing below is allowed to contain the word ALARM while the house is clear -- the fire-chip
+  // gate asserts exactly that, because a card that cries fire while nothing is burning is how a
+  // real one stops being read.
+  var detail   = document.getElementById('smokeDetail');
+  var faultBox = document.getElementById('smokeFaults');
+  var base     = hccSmokeBase(det[0]);
+  var drows    = '';
+  var numOf = function(s){
+    return (s && /^-?\d+(\.\d+)?$/.test(String(s.state))) ? Number(s.state) : null;
+  };
+  var put = function(label, value, cls){
+    if (value === null || value === undefined || value === '') return;
+    drows += '<li><span class="sk">' + label + '</span><span class="sv">'
+           + (cls ? '<span class="' + cls + '">' + value + '</span>' : value) + '</span></li>';
+  };
+
+  var ppmS = hccSmokeSib(states, base, 'sensor', '_co_ppm'), ppm = numOf(ppmS);
+  if (ppm !== null) put('CO level', ppm + ' ppm', ppm >= 35 ? 's-bad' : ppm > 0 ? 's-warn' : 's-ok');
+
+  var lvl = numOf(hccSmokeSib(states, base, 'sensor', '_smoke_level'));
+  if (lvl !== null) put('Smoke level', String(lvl), lvl > 0 ? 's-warn' : 's-ok');
+
+  // device_class battery: ON means LOW. Reading it the other way round would report a dying
+  // detector as healthy, which is the worst direction to be wrong in.
+  var bat2 = hccSmokeSib(states, base, 'binary_sensor', '_battery_state');
+  if (bat2) put('Battery', bat2.state === 'on' ? 'LOW' : 'OK', bat2.state === 'on' ? 's-bad' : 's-ok');
+
+  var onl = hccSmokeSib(states, base, 'binary_sensor', '_online');
+  if (onl) put('Connection', onl.state === 'on' ? 'Online' : 'OFFLINE',
+               onl.state === 'on' ? 's-ok' : 's-bad');
+
+  var rssiS = hccSmokeSib(states, base, 'sensor', '_signal_strength'), rssi = numOf(rssiS);
+  var ssid  = hccSmokeSib(states, base, 'sensor', '_ssid');
+  if (rssi !== null || (ssid && ssid.state && ssid.state !== 'unknown')){
+    var unit = (rssiS && rssiS.attributes && rssiS.attributes.unit_of_measurement) || 'dB';
+    var wifi = (rssi !== null ? rssi + ' ' + unit : '')
+             + ((ssid && ssid.state && ssid.state !== 'unknown') ? (rssi !== null ? ' &middot; ' : '') + ssid.state : '');
+    put('Wi-Fi', wifi, (rssi !== null && rssi < -75) ? 's-warn' : 's-ok');
+  }
+
+  var ls = hccSmokeSib(states, base, 'sensor', '_last_seen');
+  if (ls && ls.state && ls.state !== 'unknown' && ls.state !== 'unavailable'){
+    try {
+      var lm = Math.round((Date.now() - new Date(ls.state).getTime()) / 60000);
+      put('Last seen', lm < 1 ? 'just now' : lm < 60 ? lm + 'm ago' : Math.round(lm / 60) + 'h ago',
+          lm > 120 ? 's-warn' : 's-ok');
+    } catch(e){}
+  }
+
+  // The unit has a hard end-of-life date. Days are unreadable; a month and a year are not.
+  var d2r = numOf(hccSmokeSib(states, base, 'sensor', '_days_to_replace'));
+  if (d2r !== null){
+    var when = new Date(Date.now() + d2r * 86400000), ds = '';
+    try { ds = when.toLocaleDateString(undefined, { month: 'short', year: 'numeric' }); } catch(e){ ds = ''; }
+    put('Replace by', (ds ? ds : d2r + ' d')
+      + ' <span style="font-size:10px;color:var(--muted)">' + (d2r / 365.25).toFixed(1) + ' yr</span>',
+      d2r < 180 ? 's-warn' : 's-ok');
+  }
+
+  // Kidde's own "excess smoke" DIAGNOSTIC. Shown because Jeff asked for everything, and labelled
+  // as diagnostic because it is the one most likely to trip on cooking -- which is exactly why
+  // the siren and the hero chip both reject it.
+  var tms = hccSmokeSib(states, base, 'binary_sensor', '_too_much_smoke');
+  if (tms) put('Excess smoke <span style="font-size:10px;color:var(--muted)">diagnostic</span>',
+               tms.state === 'on' ? 'Detected' : 'Off', tms.state === 'on' ? 's-warn' : 's-ok');
+
+  var hush = hccSmokeSib(states, base, 'binary_sensor', '_smoke_hushed');
+  if (hush) put('Hushed', hush.state === 'on' ? 'SILENCED' : 'No',
+                hush.state === 'on' ? 's-warn' : 's-ok');
+
+  if (detail){ detail.innerHTML = drows; detail.style.display = drows ? '' : 'none'; }
+
+  var faults = hccSmokeFaults(states, base);
+  var bad    = faults.filter(function(f){ return f.state === 'on'; });
+  if (faultBox){
+    if (bad.length){
+      var names = bad.map(function(f){
+        var fn = String((f.attributes && f.attributes.friendly_name) || f.entity_id);
+        return fn.split(' ').slice(base.split('_').length).join(' ') || fn;
+      }).join(', ');
+      faultBox.style.display = '';
+      faultBox.className = 'wx-banner wx-no';
+      faultBox.innerHTML = '&#9888;&#65039; ' + bad.length + ' FAULT' + (bad.length > 1 ? 'S' : '') + ': ' + names;
+    } else if (faults.length){
+      faultBox.style.display = '';
+      faultBox.className = 'wx-banner wx-go';
+      faultBox.innerHTML = '&#10003; All ' + faults.length + ' self-checks OK &middot; sensors, battery, end-of-life';
+    } else {
+      faultBox.style.display = 'none';
+    }
+  }
+
   if (note) note.innerHTML = firingN
     ? '<b style="color:var(--bad)">' + firingN + ' ALARMING</b> of ' + det.length + ' &middot; siren is running'
     : 'All ' + det.length + ' clear &middot; siren armed &middot; live from Beehive';
