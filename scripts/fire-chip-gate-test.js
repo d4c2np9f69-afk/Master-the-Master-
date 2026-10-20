@@ -80,6 +80,12 @@ function mockStates(opts) {
       attributes: { device_class: 'moisture', friendly_name: 'Kitchen Sink Leak' } },
     { entity_id: 'sensor.hallway_smoke_alarm_battery',
       state: '87', attributes: { device_class: 'battery' } },
+    // 2026-10-19: the detector's own cloud check-in time. `opts.stale` reproduces the real
+    // failure of that day — a detector on WiFi, answering ping, whose last report to Kidde was
+    // 9 h old while the card rendered every reading in green and said "LIVE".
+    { entity_id: 'sensor.hallway_last_seen',
+      state: new Date(Date.now() - (opts.stale ? 9 * 3600000 : 60000)).toISOString(),
+      attributes: { friendly_name: 'Hallway Last Seen' } },
   ];
   if (opts.none) {
     return S.filter((s) => s.attributes.device_class !== 'smoke'
@@ -93,8 +99,12 @@ async function main() {
 
   // ── Source-level assertions: intent a DOM check cannot see. ──
   const src = fs.readFileSync(APP, 'utf8');
-  check('chip clear-state word is exactly "Off" (Jeff 2026-10-18)',
-    /grdSet\('grd-smoke',\s*'Off'/.test(src));
+  // 2026-10-19 SUPERSEDES the 10-18 "Off" instruction. Jeff, seeing it rendered in context:
+  // "off looks like it's not on and not monitored". "Off" is a power state; "Clear" is a status.
+  check('chip clear-state word is "Clear", never "Off" (Jeff 2026-10-19)',
+    /grdSet\('grd-smoke',\s*'Clear'/.test(src) && !/grdSet\('grd-smoke',\s*'Off'/.test(src));
+  check('chip reports staleness instead of a green lie (Jeff 2026-10-19)',
+    /grdSet\('grd-smoke',\s*'Not reporting'/.test(src));
   check('hccSmokeDetectors exists and excludes too_much',
     /function hccSmokeDetectors/.test(src) && /too_much/.test(src));
   check('filter keys off device_class, not the entity id',
@@ -157,10 +167,35 @@ async function main() {
     return { note: (document.getElementById('smokeNote') || {}).textContent || '',
              rows: l.innerText || '', shown: (l.style || {}).display !== 'none' };
   }, { fn });
-  check('all-clear card says "Off" on each row', /Off/.test(quiet.rows), quiet.rows.slice(0, 70));
+  check('all-clear card says "Clear" on each row, never "Off" (Jeff 2026-10-19)',
+    /Clear/.test(quiet.rows) && !/\bOff\b/.test(quiet.rows), quiet.rows.slice(0, 70));
   check('all-clear card never says ALARM', !/ALARM/.test(quiet.rows));
   check('all-clear note reports both as clear', /All 2 clear/.test(quiet.note), quiet.note);
+  check('all-clear note says it is actively monitoring (Jeff 2026-10-19)',
+    /Monitoring/i.test(quiet.note), quiet.note);
   check('all-clear card shows its list', quiet.shown);
+  check('rows name the function, not the raw entity (Jeff 2026-10-19)',
+    /Carbon monoxide/.test(quiet.rows) && /Smoke/.test(quiet.rows), quiet.rows.slice(0, 90));
+
+  // ── STALE DATA. The 2026-10-19 failure: every reading correct, all of it 9 h old, card green
+  // and badged "LIVE". A safety card must never present stale data as current. ──
+  const old = await page.evaluate((a) => {
+    const mockStates = eval('(' + a.fn + ')');
+    window.renderSmokeCard(mockStates({ stale: true }));
+    const b = document.getElementById('smokeBanner') || {};
+    return { note: (document.getElementById('smokeNote') || {}).textContent || '',
+             rows: (document.getElementById('smokeList') || {}).innerText || '',
+             banner: b.innerText || '',
+             bannerShown: (b.style || {}).display !== 'none',
+             conn: (document.getElementById('smokeConn') || {}).textContent || '' };
+  }, { fn });
+  check('STALE: a warning banner is shown', old.bannerShown && /NOT REPORTING/i.test(old.banner),
+    old.banner.slice(0, 90));
+  check('STALE: the badge no longer claims LIVE', !/LIVE/i.test(old.conn), old.conn);
+  check('STALE: rows use the past tense, not a bare "Clear"',
+    /Was clear/i.test(old.rows), old.rows.slice(0, 90));
+  check('STALE: the note says it is not reporting', /Not reporting/i.test(old.note), old.note);
+  check('STALE: it still never cries ALARM while nothing is burning', !/ALARM/.test(old.rows));
 
   const smoking = await page.evaluate((a) => {
     const mockStates = eval('(' + a.fn + ')');

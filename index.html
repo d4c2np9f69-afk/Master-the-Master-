@@ -11632,8 +11632,33 @@ function renderSmokeCard(states){
     if (note) note.textContent = 'Kidde 20SAR-W / 30CUAR-W — integration not installed yet';
     return;
   }
-  if (banner) banner.style.display = 'none';
-  if (conn){ conn.textContent = '● LIVE'; conn.style.color = 'var(--ok)'; }
+  // ── IS THIS DATA ACTUALLY CURRENT? (Jeff, 2026-10-19) ──────────────────────────────────────
+  // On 10-19 the detector sat on WiFi, answering ping at 192.168.1.134, while Kidde's cloud had
+  // not heard from it in 9 h. Every reading was CORRECT and nine hours old, and this card said
+  // "LIVE" over the top of it. A safety card that cannot tell "all clear" from "I have not heard
+  // anything since lunch" is worse than no card. Staleness is computed FIRST and outranks every
+  // other state except a real alarm.
+  var baseEarly = hccSmokeBase(det[0]);
+  var lsEarly   = hccSmokeSib(states, baseEarly, 'sensor', '_last_seen');
+  var staleMin  = null;
+  if (lsEarly && lsEarly.state && lsEarly.state !== 'unknown' && lsEarly.state !== 'unavailable'){
+    try { staleMin = Math.round((Date.now() - new Date(lsEarly.state).getTime()) / 60000); } catch(e){}
+  }
+  var stale    = (staleMin !== null && staleMin > 120);
+  var staleTxt = staleMin === null ? ''
+               : staleMin >= 60 ? Math.round(staleMin / 60) + ' h' : staleMin + ' min';
+  if (banner){
+    if (stale){
+      banner.style.display = '';
+      banner.className = 'wx-banner wx-no';
+      banner.innerHTML = '&#9888;&#65039; <b>NOT REPORTING</b> &mdash; the detector last checked in '
+        + staleTxt + ' ago. Everything below is from then, not now.';
+    } else banner.style.display = 'none';
+  }
+  if (conn){
+    conn.textContent = stale ? '● ' + staleTxt + ' OLD' : '● LIVE';
+    conn.style.color = stale ? 'var(--bad)' : 'var(--ok)';
+  }
   det.sort(function(a, b){
     var ao = a.state === 'on' ? 0 : 1, bo = b.state === 'on' ? 0 : 1;   // alarming first
     if (ao !== bo) return ao - bo;
@@ -11643,9 +11668,19 @@ function renderSmokeCard(states){
   det.forEach(function(d){
     var on = d.state === 'on'; if (on) firingN++;
     var co = d.attributes.device_class === 'carbon_monoxide';
-    var nm = (d.attributes && d.attributes.friendly_name) || d.entity_id;
-    nm = String(nm).replace(/\s+(Smoke|CO|Carbon Monoxide)?\s*(Alarm|Detector)$/i, '');
-    var kind = ' <span style="font-size:10px;color:var(--muted)">' + (co ? 'CO' : 'Smoke') + '</span>';
+    // Jeff, 2026-10-19: the raw friendly names rendered as "SMOKE AND CO2 CO" and "SMOKE AND CO2
+    // HARDWIRE SMOKE" — the device name repeated on every row, and the thing being watched buried
+    // at the end. Name the FUNCTION, not the entity.
+    var eid = String(d.entity_id), nm;
+    if      (/_hardwire_smoke_alarm$/.test(eid)) nm = 'Hardwired network';
+    else if (/_co_alarm$/.test(eid))             nm = 'Carbon monoxide';
+    else if (/_smoke_alarm$/.test(eid))          nm = 'Smoke';
+    else {
+      nm = (d.attributes && d.attributes.friendly_name) || eid;
+      nm = String(nm).replace(/\s+(Smoke|CO|Carbon Monoxide)?\s*(Alarm|Detector)$/i, '');
+    }
+    var kind = /_hardwire_smoke_alarm$/.test(eid)
+      ? ' <span style="font-size:10px;color:var(--muted)">every alarm on the chain</span>' : '';
     var bat = hccSmokeBattery(states, d);
     var batTxt = '';
     if (bat){
@@ -11663,9 +11698,13 @@ function renderSmokeCard(states){
               : Math.round(mins / 1440) + 'd';
       } catch(e){ since = ''; }
     }
+    // Jeff, 2026-10-19: "off looks like it's not on and not monitored". It read as the SENSOR
+    // being switched off rather than as "nothing detected". "Clear" is a status; "Off" is a
+    // power state. And when the data is stale the honest word is the past tense — the detector
+    // WAS clear when it last spoke, which is not the same as being clear now.
     rows += '<li><span class="sk">' + nm + kind + batTxt + '</span>'
-          + '<span class="sv"><span class="' + (on ? 's-bad' : 's-ok') + '">'
-          + (on ? (co ? 'CO ALARM' : 'SMOKE ALARM') : 'Off') + '</span>'
+          + '<span class="sv"><span class="' + (on ? 's-bad' : (stale ? 's-warn' : 's-ok')) + '">'
+          + (on ? (co ? 'CO ALARM' : 'SMOKE ALARM') : (stale ? 'Was clear' : 'Clear')) + '</span>'
           + (since ? ' <span style="font-size:10px;color:var(--muted)">' + since + '</span>' : '')
           + '</span></li>';
   });
@@ -11736,10 +11775,10 @@ function renderSmokeCard(states){
   // the siren and the hero chip both reject it.
   var tms = hccSmokeSib(states, base, 'binary_sensor', '_too_much_smoke');
   if (tms) put('Excess smoke <span style="font-size:10px;color:var(--muted)">diagnostic</span>',
-               tms.state === 'on' ? 'Detected' : 'Off', tms.state === 'on' ? 's-warn' : 's-ok');
+               tms.state === 'on' ? 'Detected' : 'None', tms.state === 'on' ? 's-warn' : 's-ok');
 
   var hush = hccSmokeSib(states, base, 'binary_sensor', '_smoke_hushed');
-  if (hush) put('Hushed', hush.state === 'on' ? 'SILENCED' : 'No',
+  if (hush) put('Alarm sounder', hush.state === 'on' ? 'SILENCED' : 'Active',
                 hush.state === 'on' ? 's-warn' : 's-ok');
 
   if (detail){ detail.innerHTML = drows; detail.style.display = drows ? '' : 'none'; }
@@ -11766,7 +11805,10 @@ function renderSmokeCard(states){
 
   if (note) note.innerHTML = firingN
     ? '<b style="color:var(--bad)">' + firingN + ' ALARMING</b> of ' + det.length + ' &middot; siren is running'
-    : 'All ' + det.length + ' clear &middot; siren armed &middot; live from Beehive';
+    : stale
+      ? '<b style="color:var(--bad)">Not reporting</b> &middot; All ' + det.length + ' clear as of '
+        + staleTxt + ' ago &middot; siren armed'
+      : 'Monitoring &middot; All ' + det.length + ' clear &middot; siren armed &middot; live from Beehive';
 }
 // Doors & Contacts card. Shows every real contact by name, with state, battery and how long it
 // has been that way. Jeff asked for this because a count cannot tell him WHICH door is open.
@@ -11926,7 +11968,19 @@ function loadGuardian(){
       grdSet('grd-smoke', isCO ? 'CO ALARM' : 'SMOKE ALARM', 'hs-red');
       alertReasons.push((isCO ? 'Carbon monoxide' : 'Smoke') + ' alarm: ' + sName);
     }
-    else if (smokeDet.length) grdSet('grd-smoke', 'Off', 'hs-ok');
+    else if (smokeDet.length){
+      // Jeff, 2026-10-19: this chip read "Off", which looks like the detector is switched off
+      // rather than like nothing is burning. And a green chip over a detector that has not
+      // reported since lunch is the same lie the card was telling — so staleness shows here too.
+      var sBase = hccSmokeBase(smokeDet[0]);
+      var sLs   = hccSmokeSib(states, sBase, 'sensor', '_last_seen');
+      var sMin  = null;
+      if (sLs && sLs.state && sLs.state !== 'unknown' && sLs.state !== 'unavailable'){
+        try { sMin = Math.round((Date.now() - new Date(sLs.state).getTime()) / 60000); } catch(e){}
+      }
+      if (sMin !== null && sMin > 120) grdSet('grd-smoke', 'Not reporting', 'hs-warn');
+      else grdSet('grd-smoke', 'Clear', 'hs-ok');
+    }
     else grdSet('grd-smoke', 'Sensor pending', 'hs-dim');
     renderSmokeCard(states);
 
