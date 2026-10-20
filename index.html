@@ -12187,7 +12187,15 @@ function haToggleSvc(service, body){
 // Device-config toggles that arrive as switch.* but are settings, not lights.
 // Anchored to the END of the entity_id so a plug legitimately named e.g.
 // "switch.shed_led" is not caught by a bare "contains".
-var LIGHT_CONFIG_SUFFIX = /(_auto_update_enabled|_led|_permit_join|_do_not_disturb|_shuffle|_repeat|_camera_motion_detection|_pre_entry_climate_control|_auxiliary_heating|_child_lock|_locate|_find_robot)$/;
+// 2026-10-20: two more joined this list, found by running this very filter against a live
+// /api/states dump instead of trusting the card to look right.
+//   _amazon_kids  - 5 Alexa "Amazon Kids" setting toggles were in Lights & Plugs, so ALL ON
+//                   switched Amazon Kids on across every Echo. Same class as the shuffle/repeat/
+//                   DND switches disabled 2026-08-19 under Jeff's rule: "If it's not a physical
+//                   device that turns on and off, or we didn't put it in, it's got to go."
+//   _identifying  - switch.smoke_and_co2_identifying fires the KIDDE'S OWN CHIRP. A life-safety
+//                   device's locate function is not a light, and ALL ON was chirping it.
+var LIGHT_CONFIG_SUFFIX = /(_auto_update_enabled|_led|_permit_join|_do_not_disturb|_shuffle|_repeat|_camera_motion_detection|_pre_entry_climate_control|_auxiliary_heating|_child_lock|_locate|_find_robot|_amazon_kids|_identifying)$/;
 
 function lightIsIrrigation(s){
   var id = s.entity_id.toLowerCase(), a = s.attributes || {};

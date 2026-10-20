@@ -42,13 +42,18 @@ const states = [
   // "Socket 1"), which made ALL ON a button that sounds the 120 dB house siren. Jeff: "the siren
   // plug needs to be relabeled and moved out of the light chain and protected with the alarm."
   st('switch.house_alarm', { device_class: 'outlet' }),
+  // 2026-10-20, found by running this filter against a LIVE /api/states dump rather than trusting
+  // the card to look right: the card held 16 entities and only 9 were lights or plugs.
+  st('switch.smoke_and_co2_identifying'),            // fires the Kidde's own chirp
+  st('switch.living_room_echo_dot_amazon_kids'),     // an Alexa setting, not a device
   st('light.livingroom_cans'), st('light.bedroom_cans'), st('light.kitchen_dining_room_cans'), // must be IN
   st('switch.bed_lamp_socket_1', { device_class: 'outlet' }), st('switch.masterbath_cans'),
 ];
 const kept = run(states, eval(sfx[1]), () => false, () => false);
 
 const mustOut = ['light.garage_repeater', 'light.floating_repeater', 'switch.ac_relay',
-  'switch.garage_garage_door_opener', 'switch.301_alarm_light', 'switch.house_alarm'];
+  'switch.garage_garage_door_opener', 'switch.301_alarm_light', 'switch.house_alarm',
+  'switch.smoke_and_co2_identifying', 'switch.living_room_echo_dot_amazon_kids'];
 const mustIn = ['light.livingroom_cans', 'light.bedroom_cans', 'light.kitchen_dining_room_cans',
   'switch.bed_lamp_socket_1', 'switch.masterbath_cans'];
 
@@ -56,4 +61,4 @@ let bad = 0;
 for (const id of mustOut) if (kept.includes(id)) { bad++; console.error('✗ ' + id + ' is controllable from Lights & Plugs (ALL OFF would switch it)'); }
 for (const id of mustIn) if (!kept.includes(id)) { bad++; console.error('✗ ' + id + ' is MISSING from Lights & Plugs'); }
 if (bad) { console.error('✗ lights-exclusion-test: ' + bad + ' failure(s)'); process.exit(1); }
-console.log('✓ lights-exclusion-test: ' + mustOut.length + ' excluded (repeaters, A/C, garage door, strobe, house siren), ' + mustIn.length + ' real lights kept');
+console.log('✓ lights-exclusion-test: ' + mustOut.length + ' excluded (repeaters, A/C, garage door, strobe, house siren, Kidde chirp, Alexa Kids), ' + mustIn.length + ' real lights kept');
