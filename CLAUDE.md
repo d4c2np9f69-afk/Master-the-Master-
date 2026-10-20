@@ -231,6 +231,51 @@ separately; this rule is the HA-side half.
 
 ### 🧯 Other settled calls
 - 🔴 **THE FIRE/SMOKE SIREN IS MEANT TO RUN LONG — NEVER CAP IT.** Jeff 2026-10-20 07:46, after a live chain test: *"it needs to be that long if it's a real fire 🔥"*. `hcc_smoke_co_alarm` re-fires `hcc_siren` in a loop while smoke is present and `hcc_house_alarm_siren` runs 30 s a burst; the deadman (+2 min), the runaway watchdog and the handler's own guaranteed-off already bound it. **Do not shorten the siren, remove the re-arm loop, or add a short 'test mode' to the production chain** — a short test stops the LOOP.
+- 🔴 **NO VPN SOFTWARE ON THE BEAST — REMOVED 2026-10-20, DO NOT RE-INSTALL OR RE-PITCH ONE.**
+  Jeff: *"I don't need a tunnel slow mode"* · *"Get it off the beast if I need a privet browser I will
+  use Thor and duck duck go"* · *"All the shit just slows it down"*. Cloudflare One Client (WARP) was
+  uninstalled (msiexec exit 0); Windscribe was already gone. **Measured the same hour, 200 MB over
+  cachefly: 834.3 → 942.1 Mbps down and 218.4 → 370.8 Mbps up just from removing the agent** — 942 is
+  the gigabit NIC's ceiling, so the Beast is maxed. ⚠️ **WARP had written `127.0.2.2/127.0.2.3`
+  STATICALLY onto the NIC** — pulling it without restoring DNS strands the machine. DNS is now
+  `1.1.1.1` + `8.8.8.8`. 🔑 **The old "we need WARP to protect DNS" rationale does not hold: the
+  one "cannot find DNS server" event was AT&T's resolvers failing ONCE, months before 08-19, and
+  measured 2026-10-20 all five resolvers answer 5/5 — AT&T's primary is merely slow (56.6 ms avg,
+  249 ms outlier) vs ~13 ms.** Privacy is now Tor + DuckDuckGo by Jeff's choice. `Go-Fast.ps1`,
+  `Go-Private.ps1`, `VPN-On.cmd`, `VPN-Off.cmd` were rewritten to be truthful buttons (originals in
+  `HCC-Scripts/backups/*.bak-20261020-warpremoved`); `Go-Anonymous.ps1` (Tor) still works as-is.
+- 🔴🔴 **NEVER BLAME DISTANCE, AND NEVER OPEN A WIRING PROJECT INSTEAD OF FINDING THE FAULT.**
+  **Jeff, 2026-10-20 5:48 PM:** *"I just don't want to hear another one of y'all tell me something
+  isn't working because of distance. There 1400 square foot house doesn't need all that shit — you
+  have me wiring this place like a four story office building and costing me a fortune upgrading
+  shit because you want to theorize and use excuses that the distance is what's making shit drop
+  when it's that you're too lazy to find out what the actual problem is... It's much easier to tell
+  me to go buy new cat eight cable and run it throughout the house, new switch boxes, new Wi-Fi
+  extenders, new Bluetooth long range class one radios. It's just bullshit. You need to learn how to
+  fix this shit instead of putting me on projects and spending my money."*
+  **THE HOUSE IS ~1,200–1,400 SQ FT ON ONE FLOOR. Nothing in it is ever out of range.**
+  🔑 **Four times now the record shows distance was blamed and was NOT the cause:**
+  • the Zigbee **mailbox was ORPHANED, never "too far"** — `docs/zigbee/zigbee_mesh_routers_2026-08-27.md`
+  item 5: *"The mailbox fix was the RE-PAIR... Jeff's 08-24 'it's too far, accepted' is retired — it
+  was never distance."*
+  • the office cable run was documented **65 ft and is 40 ft** (Jeff measured it 10-20 with a 50 ft
+  cable and 10 ft left over).
+  • the **dragging chimes** of 10-20 were a PortAudio handle leak + two scheduled tasks firing on the
+  chime second + a WDM-KS device index — **all three fixed at $0, no hardware.**
+  • the clock Bluetooth: `plan-data.js` D86 records the dongle is **in the hallway, 15 ft
+  line-of-sight to the QFX — NOT at the Beast 27.7 ft away**, written down precisely so no session
+  blames a distance that is not the real one.
+  **MANDATORY ORDER, before distance or hardware is mentioned even once:**
+  1. **Measure it against `docs/house-plan/plan-data.js`** (`H = hx => G + hx`, a pure offset, so
+     deltas are exact arithmetic and take seconds). **If it was not measured, it may not be said.**
+  2. **Find the actual fault** — logs, handle counts, device indexes, join/availability state, config.
+  3. **Only then**, if a part is truly required, lead with what he already owns ($0).
+  ⚠️ **A padded purchase quantity is NOT a distance.** That 65 ft came from `+5 down, +5 up, ×1.15
+  slack, +12 terminations, round up` on a correct 41 ft — **+22 ft of margin reported as "how far it
+  is."** Quote the measured run, then state margin separately AS margin.
+  🔴 **Do not re-order cable off the 580–605 ft total in
+  `docs/network/structured_wiring_plan_2026-10-17.md`** — every run in it uses that same padded
+  model, so the true figure is nearer 360–380 ft and a 1000 ft box is close to double the job.
 - **Sylvania WiFi plugs are vendor-locked and CANNOT join HA.** Settled — do not retry Smart Life.
 - **Garage 2-location switch:** the old HS200-vs-HS210 question is dead; solved by config, not by
   buying a premium switch.

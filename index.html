@@ -11790,6 +11790,32 @@ function renderSmokeCard(states){
   var sirenOn = !!(sirenS && sirenS.state === 'on');
   if (sirenS) put('House siren', sirenOn ? 'SOUNDING' : 'Ready &middot; silent', sirenOn ? 's-bad' : 's-ok');
 
+  // SELF-TEST DUE - Jeff, 2026-10-20: "add that to the app make it green when no test is needed
+  // and red when it's due". The detector publishes `last_test_time` and it is accurate to the
+  // second (he pressed the button at 08:40:00 and the cloud read 13:40:00Z the same minute), but
+  // the kidde_homesafe integration does NOT expose it as an entity - it exists only in the config
+  // entry's diagnostics. HCC-Scripts\Update-SmokeTest.py reads it hourly and publishes it into
+  // input_datetime.smoke_detector_last_test, which is what this row reads.
+  // 30 days because manufacturers and NFPA 72 say test a smoke alarm monthly.
+  // Deliberately NOT wired to the hero fire chip: an overdue test is maintenance, not a fire, and
+  // the fire chip must never go red while nothing is burning.
+  var SMOKE_TEST_DUE_DAYS = 30;
+  var lastTest = null;
+  for (var ti = 0; ti < states.length; ti++) {
+    if (states[ti].entity_id === 'input_datetime.smoke_detector_last_test') lastTest = states[ti];
+  }
+  if (lastTest && lastTest.state && ['unknown', 'unavailable', ''].indexOf(lastTest.state) === -1) {
+    var tms = Date.parse(String(lastTest.state).replace(' ', 'T'));
+    if (!isNaN(tms)) {
+      var tDays = Math.floor((Date.now() - tms) / 86400000);
+      var tDue  = tDays >= SMOKE_TEST_DUE_DAYS;
+      put('Self-test',
+          tDue ? 'TEST DUE &middot; ' + tDays + ' days'
+               : (tDays <= 0 ? 'Tested today' : 'Tested ' + tDays + 'd ago'),
+          tDue ? 's-bad' : 's-ok');
+    }
+  }
+
   if (detail){ detail.innerHTML = drows; detail.style.display = drows ? '' : 'none'; }
 
   var faults = hccSmokeFaults(states, base);

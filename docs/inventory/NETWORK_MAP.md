@@ -477,3 +477,87 @@ anyway, so a profile reset cannot lose it.
 `document.querySelector('video').currentTime`, strips any existing `&t=`, and appends
 `&t=<seconds>s`. It is **not** YouTube's own Continue-watching — that was evaluated 2026-09-19 and
 rejected as a maybe rather than a will. It works on **any HTML5 `<video>`**, not just YouTube.
+
+---
+
+# ✅ RE-VERIFIED TOPOLOGY — Tue 2026-10-20 5:20 PM, after Jeff's office cable run + new 10-port switch
+
+**Every line below was read from the BGW320's own `devices.ha` / `lanstatistics.ha` /
+`broadbandstatistics.ha` tables this evening, not carried forward.** Jeff: *"I got the new
+ethernet cable run back to the office so the RE 200 is back up. I also installed the new 10 port
+switch."* (**"RW 200" = the RE200.** It had been **down 2 weeks** — Jeff, same conversation.)
+
+## Which gateway port is which — settled by arithmetic, not assumption
+`lanstatistics.ha` reports two Ethernet interfaces: **`5G Ethernet` = 4 active / 2 inactive** and
+**`Ethernet` = 3 active / 1 inactive**. Those counts match the device table exactly, which is what
+identifies the ports:
+
+| Port | Speed class | What is on it |
+|---|---|---|
+| **LAN-1** | **the 5 Gbps port** | 🆕 **THE NEW 10-PORT SWITCH** — 4 live behind it: `.66` Beehive · `.104` Main-Bedroom-2 · `.184` AirTV3 · `.222` NTV300. Inactive: VIZIOCastAudio9927, JeffsLapTop |
+| **LAN-2** | 1 Gbps | **the Beast `.194`** — ⚠️ **wired STRAIGHT to the router, NOT through the switch** (Jeff corrected this mid-session; a 1 Gbps reading on the Beast proves the gateway port, *not* the switch) · KitchenPC `.192` off |
+| **LAN-3** | 1 Gbps | 🆕 **the office cable → RE200 `.196`**, plus `.164` WS-SD00PJBA appearing on the same port = a client the RE200 is bridging |
+
+🔑 **The RE200's office cable lands on the gateway's LAN-3 directly — it does NOT go through the
+new switch.** Do not "tidy" it onto the switch; a dedicated port is better.
+
+## PROOF THE SWITCH IS WORKING — three devices migrated WiFi → gigabit Ethernet
+Not "the link is up". The same three devices appear **twice** in the device table, the WiFi entry
+going `off` and the Ethernet entry coming `on`, inside a 40-minute window:
+
+| Device | Was | Became |
+|---|---|---|
+| WS-SD00PJBA | `.173` Wi-Fi 5 GHz, off **16:46:56** | `.164` **Ethernet LAN-3**, on 17:17:51 |
+| Main-Bedroom-2 | `.229` Wi-Fi 2.4 GHz, off **16:57:48** | `.104` **Ethernet LAN-1**, on 17:18:01 |
+| NETGEAR NTV300 | `.201` Wi-Fi 2.4 GHz, off **17:01:38** | `.222` **Ethernet LAN-1**, on 17:17:51 |
+
+All four LAN-1 devices negotiate **1000Mbps fullduplex**. Side benefit: three clients left the
+2.4 GHz radio, which had 27 of them.
+
+## 🔎 A DOCUMENTED UNKNOWN IS NOW CLOSED: the AirTV is `.184`, WIRED
+`.184` reports itself **`AirTV3`**, MAC **`88-b6-ee-c7-06-e4`** — the AirTV's physical label reads
+`88:B6:EE:C7:06:E5`, i.e. **the adjacent MAC on the same device** (its wired NIC vs its radio).
+It is on **Ethernet LAN-1**, through the new switch, last activity 17:17:53.
+⚠️ **This does NOT revive the old `.166` guess.** `.166` (`dp-730602E4`, `00-fc-8b-23-64-87`) is a
+different OUI and **remains unidentified** — the 2026-08-27 disproof stands. Also re-confirmed by
+OUI tonight: **`.187` = `44:67:55` Orbit Irrigation = the B-Hyve**, exactly as the 09-03 correction said.
+
+## WAN — healthy, zero errors
+`FIBER` · `Broadband Connection: Up` · Lightspeed · WAN IP `208.188.36.113` ·
+**Current Speed 10000 Mbps full duplex** (that is the ONT/PON link rate, not the plan tier) ·
+`PON Link Status: OPERATION (O5)` · **Receive Errors 0 · Transmit Errors 0 · Collisions 0 ·
+Drops 0** across 654 M received / 222 M transmitted packets. DHCP: 52 of 443 leases allocated.
+
+## Measured throughput, 5:15 PM
+**834.3 Mbps down** (200 MB in 2.01 s, cachefly) · **218.4 Mbps up** (50 MB in 1.83 s, Cloudflare).
+🔑 **Un-tunnelled — verified, not assumed:** `warp-cli settings` reports `Mode: DnsOverHttps` and
+`Packet Tunnel: false`, and `api.ipify.org` returns **`208.188.36.113`, the gateway's own WAN IP**.
+That is FAST mode (`Go-Fast.ps1` = `mode doh`), so there is no VPN speed cost in these numbers.
+⚠️ `warp-cli status` saying **`Connected`** does NOT mean a tunnel — in DoH mode it only means the
+DNS proxy is up. **Read the mode and the public IP; never infer a tunnel from `Connected`.**
+`speed.cloudflare.com/__down` returns **403** on this machine — use another source for down tests.
+
+## Max-speed audit of the Beast's NIC — nothing left to tune
+Realtek PCIe GbE, **1 Gbps full duplex, Auto Negotiation**, `MediaConnectionState=Connected`,
+and over 23.42 GB received / 4.76 GB sent: **RX errors 0 · RX discards 0 · TX errors 0 · TX discards 0.**
+Energy-Efficient Ethernet **Disabled** · Green Ethernet **Disabled** · Power Saving Mode **Disabled** ·
+Flow Control Rx & Tx · all IPv4/IPv6/TCP/UDP checksum offloads on · LSO v2 on · Interrupt Moderation on ·
+Jumbo Frames off (**correct** — enabling it without end-to-end support breaks mixed networks) ·
+TCP autotuning `Normal`, congestion provider `CUBIC`.
+🔑 **834 of a theoretical ~940 Mbps is ~89% of a gigabit NIC on a single TCP stream — this machine
+is done.** Its ceiling is the **gigabit NIC itself**, so moving it to the 5 Gbps LAN-1 port would
+gain nothing. Beyond 1 Gbps needs a 2.5G/5G NIC; price one before naming any model.
+
+## Radios as configured
+2.4 GHz `Loewen301` ch **1 fixed**, 20 MHz, 27 active clients · 5 GHz `Loewen301-5G` ch **52+149
+automatic**, 80 MHz, N/AC/AX, 4 active clients · Guest `LoewenGuest` **ON**, WPA-2, `192.168.2.0/24`.
+Radio error counters: 2.4 GHz TX-err 413 / RX-err 4; 5 GHz RX-err 1742 — small against 83 M / 45 M packets.
+⚠️ **Weak 2.4 GHz clients dragging airtime** (a slow client holds the channel): **`.109` android at
+-75 dBm with 8,774 TX errors** and **`.209` TY_WR at -78 dBm** (342 err, 13 disassoc / 23 deauth).
+Both are at the far end that **had no RE200 for two weeks** — re-measure their dBm now the office AP
+is back before doing anything about them. `.214` Blink shows 96 disassoc / 189 deauth (its own churn).
+
+## Still dark after the rewiring — none of these are switch or cable faults
+- 🔴 **Kidde `.134`** — gateway last activity **10:33:20**, `Status off`, **absent from ARP entirely**; 26 HA entities `unavailable` ~5 h. **Tested and disproven tonight: it is NOT part of a network event** — a scan of every client whose last activity is today shows the Kidde is the *only* device that dropped at 10:33. The RE200 cannot be the cause either (down 2 weeks).
+- 🔴 **`light.garage_repeater`** — `unavailable` 6.8 h. Zigbee, so unaffected by any of tonight's Ethernet work. Its 10:33 coincidence with the Kidde is **a coincidence, not a shared cause** — different radios, and no other client dropped then.
+- 🟡 **Weather station outdoor array** — 16 of 21 entities `unavailable` ~8 h while the **indoor** ones are live and fresh (inside temp 68.2 °F, humidity 52, pressure 29.42 at 0.9 min old). **The console is fine; the outdoor unit is not reporting** — consistent with the standing lithium-AA + solar-panel item, not with anything rewired today.

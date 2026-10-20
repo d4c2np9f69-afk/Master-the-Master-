@@ -415,3 +415,68 @@ Live: `sensor.speedtest_download/upload/ping` + 24 h history off Beehive · `chi
 `docs/hvac/INSTALL_OVERSIGHT_2026-10-21.md` + OPEN_ITEMS #233. Web: NEC 300.22(B) discussion ·
 bulk Cat6/Cat8 spool pricing · TL-SG1008P / TL-SG108PE and Omada EAP listings (non-US currencies —
 **US prices still need one click**) · QFX PBX aux-input listings.
+
+---
+
+## 🔴 MEASURED REALITY BEATS THE MODEL — Jeff pulled the office run, Tue 2026-10-20
+
+> Jeff, 5:40 PM: *"another thing you told me I needed 75" of cat8 to reach the office I ran a 50ft
+> piece and had 10 ft left over you need to get your distances correct but that is par for the
+> course anytime you or any session can't get something to work (like the Bluetooth) it's always
+> because the distance is too far and that is just not right !!!!"*
+
+**He is right, and this file was the source of the bad number.** The table above says
+*"Office / Bed 3 — 65 ft if re-pulled"*, and a 75 ft Sokqovt Cat 8 was bought for it.
+**He ran 50 ft and had ~10 ft left: the real run is ≈ 40 ft.**
+
+### The house map was ACCURATE. The padding was not.
+`docs/house-plan/plan-data.js` (`H = hx => G + hx`, a pure offset, so deltas are exact):
+
+| From (master-bedroom rack) | To (office) | Straight | Manhattan |
+|---|---|---|---|
+| network switch D4 `(17.5, 2.2)` | office jack D71 `(36.2, 24.9)` | 29.4 ft | **41.4 ft** |
+| gateway D1 `(16.3, 0.9)` | office RE200 D69 `(37.3, 22.8)` | 30.3 ft | **42.9 ft** |
+
+**Manhattan routing off the map = 41–43 ft. Jeff used ~40 ft. The map was right to within a
+foot.** The 65 ft was produced by stacking margins on top of a correct figure: `+5 ft down the
+crawl, +5 ft up the wall, ×1.15 routing slack, +12 ft terminations, round up to 5` — **+22 ft of
+margin presented to him as a distance.**
+
+🔑 **THE LESSON, AND IT IS A CLASS OF ERROR NOT A TYPO: a purchase quantity and a distance are
+two different numbers.** Quote the measured run, then state the margin separately and say it is
+margin. Never let a padded buy-figure be read as "how far it is."
+
+### ⚠️ CONSEQUENCE FOR THE BOX OF CABLE — RE-CALIBRATE BEFORE BUYING 1000 ft
+**Every run in the table above came out of the same padded model**, and the rev-2 audit *raised*
+them all by ~30%. One real calibration point now exists: **65 ft modelled → 40 ft actual, a factor
+of 0.62 on that run.** If that holds even roughly, the **580–605 ft total is nearer 360–380 ft**
+and a 1000 ft box is close to double what the job needs.
+▶ **Do not re-order cable off the old total.** Re-run `scratchpad/cable_runs_2026-10-17.py` with the
+margin reported SEPARATELY, and treat the office's 40 ft as the model's calibration.
+⚠️ Honest limit on that: the office is one of the **shorter** runs and Jeff's pull may have taken an
+easier path than a full crawl route, so 0.62 is one data point, not a proven constant for the garage
+or the clock. Measure a long one before trusting it there.
+
+### 🔑 AND THE BIGGER POINT HE MADE: THIS HOUSE SHOULD NOT NEED A REPEATER
+> Jeff: *"my house is so small that it should not even need the re200, that is what I don't understand."*
+
+**He is right again, and this file already contains the reason** — it says *"The house is ~1,200 sq
+ft on one floor"* (39.42 × 29.25 = **1,153 sq ft** from the map). A single decent AP covers that.
+**The problem is PLACEMENT, not size: the gateway sits at `(16.3, 0.9)` — hard against the front
+wall** — so its coverage is lopsided and the office, 21 ft across and 22 ft back, is **30 ft away
+diagonally through interior walls.** That is fine for 2.4 GHz and poor for 5 GHz, which is the
+whole reason a second AP earns its keep at that end.
+**An AP at the house centre `(19.7, 14.6)` would be ~19 ft from the office instead of 30** — which
+is exactly **`AP 1 — hallway centre (ceiling)`, already the first row of the run table.** Build that
+and the office RE200 becomes optional rather than load-bearing.
+**Do not answer a coverage question with "the house is too big." It is 1,153 sq ft. It isn't.**
+
+### 🔴 THE PATTERN HE NAMED — "it's always because the distance is too far"
+This is now a **documented repeat**, not a one-off, and the record already contains the correction:
+**`project_hcc_zigbee_mesh_2026_08_27` — "The mailbox was ORPHANED, never 'too far'."** Same shape:
+a thing did not work, distance got blamed, and the real cause was a join/config fault.
+**RULE: distance is never the explanation until it has been MEASURED against the house map.** The
+map exists, the coordinates are in `plan-data.js`, and the arithmetic takes seconds. Measure it or
+do not say it. The Bluetooth link is the live example to apply this to: `plan-data.js` D86 already
+records that the dongle is **in the hallway on a USB extension, 15 ft line-of-sight to the QFX —
+NOT at the Beast 27.7 ft away** — precisely so nobody blames a distance that isn't the real one.
