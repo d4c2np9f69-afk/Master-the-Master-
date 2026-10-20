@@ -11781,6 +11781,15 @@ function renderSmokeCard(states){
   if (hush) put('Alarm sounder', hush.state === 'on' ? 'SILENCED' : 'Active',
                 hush.state === 'on' ? 's-warn' : 's-ok');
 
+  // 2026-10-20, Jeff: "make the alarm show working instead of off". switch.house_alarm reading
+  // "off" in the lights list read as a disabled alarm. Off means the siren is SILENT, which is its
+  // correct resting state - so say what it is DOING, not what position a switch is in. Proven live
+  // 07:41:18 when the real chain turned it on and the stop turned it back off.
+  var sirenS = null;
+  for (var si = 0; si < states.length; si++) if (states[si].entity_id === 'switch.house_alarm') sirenS = states[si];
+  var sirenOn = !!(sirenS && sirenS.state === 'on');
+  if (sirenS) put('House siren', sirenOn ? 'SOUNDING' : 'Ready &middot; silent', sirenOn ? 's-bad' : 's-ok');
+
   if (detail){ detail.innerHTML = drows; detail.style.display = drows ? '' : 'none'; }
 
   var faults = hccSmokeFaults(states, base);
@@ -12248,7 +12257,14 @@ function loadLights(){
       // Same sweep: the garage-door relay (Matter MINI-D, reports device_class 'outlet') would be
       // PULSED by "ALL ON"/"ALL OFF" — both move the door — and the siren's strobe is not a light.
       // The garage has its own card (cover.garage_door); the siren belongs to the alarm work.
-      if (s.entity_id === 'switch.garage_garage_door_opener' || s.entity_id === 'switch.301_alarm_light') return false;
+      // 2026-10-20, Jeff: "the siren plug needs to be relabeled and moved out of the light chain
+      // and protected with the alarm". switch.house_alarm (its original_name is literally
+      // "Socket 1") was in this list reading OFF, which reads as "the alarm is disabled" when it
+      // actually means the siren is not sounding — and it was a target of ALL ON, so one tap on
+      // the lights card would have sounded the 120 dB siren. It is not a light. Its real status
+      // now lives on the Smoke & CO card as "House siren: Ready - silent", read-only.
+      if (s.entity_id === 'switch.garage_garage_door_opener' || s.entity_id === 'switch.301_alarm_light'
+          || s.entity_id === 'switch.house_alarm') return false;
       // 2026-08-19: this card was showing 54 entities of which 9 were lights or plugs.
       // Everything else was a DEVICE CONFIG toggle that happened to be a switch.*, so
       // "ALL ON" would have re-enabled Kasa auto-firmware-update on all three dimmers

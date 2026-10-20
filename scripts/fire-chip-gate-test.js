@@ -117,8 +117,18 @@ async function main() {
   // app deliberately does NOT touch this entity, and the first draft of this check matched
   // that comment and reported a failure against perfectly correct code. A gate that cries
   // wolf gets ignored, which is worse than no gate (SESSION_START 3b).
-  check('the siren stays single-owner: the app never calls switch.house_alarm in code',
-    !/['"]switch\.house_alarm['"]/.test(src));
+  // 2026-10-20: tightened. The rule is that the app must never COMMAND the siren — the single
+  // owner is automation hcc_smoke_co_alarm, which fires the hcc_siren event. Reading the switch's
+  // state to DISPLAY it, and naming it to EXCLUDE it from the lights toggle list, are the opposite
+  // of the mistake this guards: before today switch.house_alarm sat in Lights & Plugs reading
+  // "OFF" and was a target of ALL ON, i.e. one tap sounded the 120 dB siren. A check that forbade
+  // the fix as well as the fault would have blocked the safety change (SESSION_START 3b: a gate
+  // that cries wolf is worse than no gate). So: flag it only where the entity is being SENT to HA.
+  const sirenCmd = src.split('\n').filter((ln) =>
+    /['"]switch\.house_alarm['"]/.test(ln) &&
+    /(lightToggle\s*\(|JSON\.stringify|body\s*:|api\/services|turn_on|turn_off|\btoggle\s*\()/.test(ln));
+  check('the siren stays single-owner: the app never COMMANDS switch.house_alarm',
+    sirenCmd.length === 0, sirenCmd.join(' | ').slice(0, 160));
 
   const launchOpts = { args: ['--no-sandbox', '--disable-setuid-sandbox'] };
   if (usingSandbox) launchOpts.executablePath = SANDBOX_CHROME;

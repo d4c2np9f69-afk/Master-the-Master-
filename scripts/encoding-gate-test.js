@@ -52,12 +52,38 @@ function walk(dir, out = []) {
   return out;
 }
 
-const files = walk(REPO);
+// 2026-10-20: this gate scanned ONLY markdown, and that is exactly how index.html got wrecked.
+// A PowerShell restore wrote it back with `Set-Content -Encoding utf8` (which is UTF-8 WITH BOM on
+// 5.1) after reading it with Get-Content, so every em dash went E2 80 94 -> C3 A2 E2 82 AC E2 80 9D
+// and a BOM was prepended to a 930 KB file. The "restored byte-identical" check that was supposed
+// to catch it compared the file to itself THROUGH THE SAME BROKEN ENCODER, so it reported True.
+// kiosk-test.js caught it only by accident, via a pill whose em dash no longer matched.
+// The app's shipping files are now scanned too, and a BOM is a failure in its own right.
+const APP_FILES = ['index.html', 'service-worker.js', 'manifest.json'];
+const appPaths = APP_FILES.map((f) => path.join(REPO, f)).filter((p) => fs.existsSync(p));
+const files = walk(REPO).concat(appPaths);
 console.log('\nencoding-gate-test.js — no document may contain mojibake\n');
-console.log(`  scanning ${files.length} markdown files\n`);
+console.log(`  scanning ${files.length - appPaths.length} markdown files + ${appPaths.length} app files\n`);
 
 let fails = 0;
 const report = [];
+
+// A BOM on a file we SERVE is a bug by itself: it is the fingerprint of a PowerShell round-trip,
+// and the three bytes land before <!doctype, which puts the browser into quirks mode.
+const bomHits = [];
+for (const p of appPaths) {
+  const b = fs.readFileSync(p);
+  if (b.length >= 3 && b[0] === 0xef && b[1] === 0xbb && b[2] === 0xbf) bomHits.push(path.relative(REPO, p));
+}
+if (bomHits.length) {
+  for (const f of bomHits) console.log(`  FAIL  ${f} starts with a UTF-8 BOM (EF BB BF)`);
+  console.log('\nENCODING GATE FAILED — a served file carries a BOM.');
+  console.log('Cause: PowerShell 5.1 `Set-Content -Encoding utf8` writes UTF-8 WITH BOM. Restore the');
+  console.log('file with `git checkout -- <file>` and re-apply the change with an editor, never with');
+  console.log('Get-Content/Set-Content. Verify with raw bytes, never by re-reading through the same encoder.\n');
+  process.exit(1);
+}
+console.log(`  PASS  no BOM on any of the ${appPaths.length} served app files`);
 for (const f of files) {
   // read as UTF-8 explicitly; a correct file round-trips, a corrupted one carries the signature
   let t;

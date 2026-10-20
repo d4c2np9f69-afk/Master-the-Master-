@@ -38,13 +38,17 @@ const states = [
   st('switch.ac_relay', { device_class: 'outlet' }),
   st('switch.garage_garage_door_opener', { device_class: 'outlet' }),
   st('switch.301_alarm_light'),
+  // 2026-10-20: the siren's own switch sat in Lights & Plugs reading "OFF" (its original_name is
+  // "Socket 1"), which made ALL ON a button that sounds the 120 dB house siren. Jeff: "the siren
+  // plug needs to be relabeled and moved out of the light chain and protected with the alarm."
+  st('switch.house_alarm', { device_class: 'outlet' }),
   st('light.livingroom_cans'), st('light.bedroom_cans'), st('light.kitchen_dining_room_cans'), // must be IN
   st('switch.bed_lamp_socket_1', { device_class: 'outlet' }), st('switch.masterbath_cans'),
 ];
 const kept = run(states, eval(sfx[1]), () => false, () => false);
 
 const mustOut = ['light.garage_repeater', 'light.floating_repeater', 'switch.ac_relay',
-  'switch.garage_garage_door_opener', 'switch.301_alarm_light'];
+  'switch.garage_garage_door_opener', 'switch.301_alarm_light', 'switch.house_alarm'];
 const mustIn = ['light.livingroom_cans', 'light.bedroom_cans', 'light.kitchen_dining_room_cans',
   'switch.bed_lamp_socket_1', 'switch.masterbath_cans'];
 
@@ -52,4 +56,4 @@ let bad = 0;
 for (const id of mustOut) if (kept.includes(id)) { bad++; console.error('✗ ' + id + ' is controllable from Lights & Plugs (ALL OFF would switch it)'); }
 for (const id of mustIn) if (!kept.includes(id)) { bad++; console.error('✗ ' + id + ' is MISSING from Lights & Plugs'); }
 if (bad) { console.error('✗ lights-exclusion-test: ' + bad + ' failure(s)'); process.exit(1); }
-console.log('✓ lights-exclusion-test: ' + mustOut.length + ' excluded (repeaters, A/C, garage door, strobe), ' + mustIn.length + ' real lights kept');
+console.log('✓ lights-exclusion-test: ' + mustOut.length + ' excluded (repeaters, A/C, garage door, strobe, house siren), ' + mustIn.length + ' real lights kept');
