@@ -230,6 +230,7 @@ toggle, its LED toggle) — which is what Jeff saw as "double entries". App-side
 separately; this rule is the HA-side half.
 
 ### 🧯 Other settled calls
+- 🔴 **THE FIRE/SMOKE SIREN IS MEANT TO RUN LONG — NEVER CAP IT.** Jeff 2026-10-20 07:46, after a live chain test: *"it needs to be that long if it's a real fire 🔥"*. `hcc_smoke_co_alarm` re-fires `hcc_siren` in a loop while smoke is present and `hcc_house_alarm_siren` runs 30 s a burst; the deadman (+2 min), the runaway watchdog and the handler's own guaranteed-off already bound it. **Do not shorten the siren, remove the re-arm loop, or add a short 'test mode' to the production chain** — a short test stops the LOOP.
 - **Sylvania WiFi plugs are vendor-locked and CANNOT join HA.** Settled — do not retry Smart Life.
 - **Garage 2-location switch:** the old HS200-vs-HS210 question is dead; solved by config, not by
   buying a premium switch.
