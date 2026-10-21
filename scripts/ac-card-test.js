@@ -163,7 +163,19 @@ async function run(browser, { payload, token = true, status = 200 }) {
   check('runtime with a duty cycle', r.acRuntime, '28 m today • 7 h 39 m in 24 h (32% duty)');
   check('boot made exactly ONE A/C request', r.acCallsBoot, 1);
   check('a refresh adds exactly ONE request', r.acCallsAfterRefresh - r.acCallsBoot, 1);
-  check('no /api/climate calls any more', r.climateCalls, 0);
+  // 🔴 CHANGED 2026-10-21. This asserted ZERO /api/climate calls, which encoded the hard
+  // LUX_RETIRED switch. Jeff reversed that on A/C install day — "The LUX is most likely fine
+  // it was the thermostat wire that was chewed up... make sure it's ready in the app" — so the
+  // app now PROBES for the thermostat and switches to it with no deploy.
+  //
+  // The budget concern this check was written for is still real and is still guarded: the probe
+  // is throttled to one per 10 minutes while the stat is absent and stops entirely once it
+  // answers. Boot plus a refresh is ONE window, so exactly one probe is correct here. The
+  // switchover itself is covered end to end by lux-return-gate-test.js.
+  // NOTE: check() here is (name, ACTUAL, EXPECTED) — not the (name, cond, got) form the
+  // newer gates use. Passing a boolean as ACTUAL against a count silently reads "want 1".
+  check('at most ONE /api/climate probe across boot + refresh (throttled, not retired)',
+    r.climateCalls <= 1, true);
   check('no page errors', r.errors, []);
 
   console.log('\n  RESTING (relay off)');

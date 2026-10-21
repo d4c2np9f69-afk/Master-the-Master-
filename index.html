@@ -2442,8 +2442,10 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
          air conditioner"); automation.hcc_ac_master_switch turns the thermostat automation on/off
          with it and opens the relay on OFF, so OFF stays off until someone turns it back on.
          The 69/71 band below is display text — keep it in step with the automation.
-         OPEN_ITEMS #185. Remove this card (and set LUX_RETIRED false or delete the LUX card)
-         when the ecobee goes in. -->
+         OPEN_ITEMS #185. 2026-10-21: the "when the ecobee goes in" plan is DEAD — Jeff is
+         reusing the LUX (the chewed thermostat wire was the fault, not the stat), and
+         LUX_RETIRED is gone: loadThermostat() now probes for the thermostat and switches to
+         it by itself. This relay card stays until the SONOFF's future is settled. -->
     <div class="card" id="acCard">
       <div class="card-title">&#10052;&#65039; A/C &mdash; Master Bedroom <span id="acConn" class="irr-conn"></span></div>
       <div id="acBanner" class="wx-banner wx-load">&#128260; Loading A/C&hellip;</div>
@@ -2459,9 +2461,10 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
       <button type="button" id="acMasterBtn" class="btn-full btn-gray" onclick="acMasterToggle()" disabled>A/C switch&hellip;</button>
     </div>
 
-    <!-- LUX THERMOSTAT (moved here from GUARDIAN 08-03, right under cameras)
-         2026-09-15: HIDDEN — the LUX died in a power surge (see acCard above). Markup and
-         loadClimate() kept intact so scripts/creds-gate-test.js still covers them. -->
+    <!-- LUX THERMOSTAT (moved here from GUARDIAN 08-03)
+         Starts hidden and is UNHIDDEN BY loadThermostat() the moment /api/climate answers with
+         a real thermostat — so when the new wire goes in, the card appears on its own with no
+         deploy. Markup and loadClimate() kept intact so scripts/creds-gate-test.js covers them. -->
     <div class="card" id="luxCard" style="display:none">
       <div class="card-title">&#127777;&#65039; LUX Thermostat <span id="luxConn" class="irr-conn"></span></div>
       <div id="luxBanner" class="wx-banner wx-load">&#128260; Loading thermostat&hellip;</div>
@@ -6863,10 +6866,15 @@ function luxSendControl(action,opts){
 }
 
 // ── A/C RELAY CARD (2026-09-15) ──────────────────────────────────────────────────────
-// The LUX died in a power surge. While LUX_RETIRED, every automatic caller of loadClimate()
-// (boot, opening HOME, the 60 s self-heal) goes through loadThermostat() and draws the A/C
-// card instead — so no more failing /api/climate round trips against the Cloudflare budget
-// (OPEN_ITEMS #183). loadClimate() itself is untouched so creds-gate-test.js still covers it.
+// Built 2026-09-15 as the stand-in while the thermostat was out of service. Every automatic
+// caller of loadClimate() (boot, opening HOME, the 60 s self-heal) goes through
+// loadThermostat(), which drew this card instead — no failing /api/climate round trips against
+// the Cloudflare budget (OPEN_ITEMS #183, closed 09-20). loadClimate() itself is untouched so
+// creds-gate-test.js still covers it.
+// 🔴 2026-10-21: the "died in a power surge" line that used to head this comment was an
+// INFERENCE and the owner corrected it on install day — the chewed THERMOSTAT WIRE was the
+// fault and the stat itself is expected to be fine. loadThermostat() now probes and switches
+// over on its own; see its comment below.
 //
 // ONE request per refresh: a single HA template returns every field as JSON, the same
 // POST /api/template pattern the lightning card already uses. Four haFetch state reads would
@@ -6874,8 +6882,59 @@ function luxSendControl(action,opts){
 //
 // The Echo entity id starts with a digit, so `states.sensor.3rd_…` is a template syntax error;
 // it must be `states.sensor['3rd_…']`. Verified against live HA 2026-09-15 16:08.
-var LUX_RETIRED = true;
-function loadThermostat(){ if (LUX_RETIRED) loadAcRelay(); else loadClimate(); }
+// 🔴 2026-10-21 18:3x — THE LUX IS COMING BACK, AND THE APP MUST NOT NEED A DEPLOY TO NOTICE.
+// Jeff, on A/C install day: "The LUX is most likely fine it was the thermostat wire that was
+// chewed up so that is what they are installing. So the Lux should be ready to comeback online
+// when they get it put in make sure it's ready in the app."
+//
+// That also revises the record: this file said the LUX "died in a power surge" on 09-15. The
+// owner says the chewed THERMOSTAT WIRE is what failed, and the quote includes new 18 AWG with
+// a C wire. He was there; the note was an inference. A dead wire explains a stat that neither
+// controls nor reports while being perfectly good hardware.
+//
+// So this is no longer a hard retirement with a boolean somebody has to remember to flip
+// while standing in a hallway next to an installer. The app PROBES for the thermostat and
+// switches to it BY ITSELF the moment it answers.
+//
+// Guard rails, because the hard-off existed for a reason — failing /api/climate round trips
+// against the Cloudflare request budget (OPEN_ITEMS #183, since CLOSED 2026-09-20 after 7 days
+// measured under the cap):
+//   - at most ONE probe per LUX_PROBE_MS while the stat is still absent, NOT one per refresh
+//     cycle. loadThermostat() is called on boot, on opening HOME and by the 60 s self-heal;
+//     without this throttle that is ~60 failing calls an hour from every open client.
+//   - once it answers we stop probing entirely and just use it;
+//   - if it later stops answering, loadClimate()'s own error path shows the fault on the LUX
+//     card, and the A/C relay card keeps rendering underneath either way.
+var LUX_PROBE_MS = 10 * 60 * 1000;
+var luxLastProbe = 0;
+var luxIsLive = false;
+
+function luxShowCard(live){
+  var lc = document.getElementById('luxCard');
+  if (lc) lc.style.display = live ? '' : 'none';
+}
+
+function loadThermostat(){
+  // The relay card is always drawn: until the new stat is wired in it is the only honest
+  // picture of the A/C, and it costs nothing once the LUX takes over.
+  loadAcRelay();
+  if (luxIsLive) { loadClimate(); return; }
+  var now = Date.now();
+  if (now - luxLastProbe < LUX_PROBE_MS) return;
+  luxLastProbe = now;
+  fetch('/api/climate', { cache: 'no-store' })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){
+      // Success is {ok:true, thermostat:{...}} — see functions/api/climate.js onRequestGet.
+      // Anything else (403 location_user, 404 no_device_found, 503) means not back yet.
+      if (d && d.ok === true && d.thermostat){
+        luxIsLive = true;
+        luxShowCard(true);
+        loadClimate();
+      }
+    })
+    .catch(function(){ /* still not back — try again after the next window */ });
+}
 
 // 2026-09-15 9:25 PM — the A/C moved off the Echo Dot onto Jeff's OWN weather station.
 // The Echo read up to 4 F high and the error DRIFTED (-3.2 in the afternoon, -4.0 at night), so any
@@ -8177,7 +8236,7 @@ setInterval(function(){
 // boot — so hccSection('home')'s own loadClimate()/loadStation() calls never fire on a
 // normal app open (only on manual nav away-and-back). Load it directly here too, same
 // as loadWeather()/loadIrrigation() above, so it's populated the moment the app opens.
-// 2026-09-15: loadThermostat() (A/C relay card while LUX_RETIRED). Deferred with setTimeout
+// 2026-09-15: loadThermostat() (A/C relay card, plus a throttled LUX probe since 10-21). Deferred with setTimeout
 // because it uses haFetch(), and HA_BASE is only assigned much further down this script —
 // called synchronously here it would read HA_BASE as undefined.
 setTimeout(loadThermostat, 0);
