@@ -65,7 +65,7 @@ export async function onRequestGet({ env } = {}) {
       'https://api.open-meteo.com/v1/forecast' +
       '?latitude=36.477&longitude=-86.66' +
       '&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,surface_pressure' +
-      '&hourly=dewpoint_2m,apparent_temperature,windgusts_10m,precipitation,uv_index' +
+      '&hourly=dewpoint_2m,apparent_temperature,windgusts_10m,precipitation,uv_index,shortwave_radiation' +
       '&temperature_unit=fahrenheit&windspeed_unit=mph&precipitation_unit=inch' +
       '&timezone=America%2FChicago&forecast_days=1',
       { headers: { 'User-Agent': 'HCC-PWA/1.0' }, cf: { cacheTtl: 300 } }
@@ -101,7 +101,10 @@ export async function onRequestGet({ env } = {}) {
       windDirCard:    toCard(wd),
       pressure:       presHpa ? Math.round(presHpa * 0.02953 * 100) / 100 : null,
       uv:             h.uv_index?.[idx] ?? null,
-      solarRadiation: null
+      // Same unit the PWS reports (W/m2), so the Solar cell reads correctly instead of
+      // "--" while the array is dark. Honest because the payload is already labelled
+      // `station: "... array dark - Open-Meteo"` and `stationDark: true`.
+      solarRadiation: h.shortwave_radiation?.[idx] ?? null
     };
   }
 

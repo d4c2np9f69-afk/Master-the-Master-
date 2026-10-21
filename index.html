@@ -5869,6 +5869,7 @@ function loadStation(){
       var STATION_CELLS = { wxTemp:1, wxFeels:1, wxDew:1, wxHumidity:1, wxWindDir:1,
                             wxUV:1, wxPressure:1, wxRainDay:1, wxHeroRain7d:1,
                             wxHeroGust:1, wxHeatStress:1, wxStationNote:1,
+                            wxWindSpd:1, wxHeroHeat:1, wxRainRate:1, wxSolarRad:1,
                             luxOutTemp:1, luxFeelsLike:1 };
       function blocked(id){ return STATION_HA_LIVE && STATION_CELLS[id]; }
       function set(id,val){ if(blocked(id)) return; var e=document.getElementById(id); if(e) e.innerHTML=val;}
@@ -5899,6 +5900,19 @@ function loadStation(){
         var wdDeg=s.winddir!=null?(s.winddir+'&#176; '):'';
         set('wxWindDir', wdDeg+s.windDirCard);
       }
+      // WIND SPEED, HEAT LEVEL AND RAIN RATE WERE NEVER SET ON THIS PATH (2026-10-20 21:50).
+      // Found by reading the WEATHER tab after the array-dark fallback went live: gust and
+      // direction filled from this very payload while SPEED sat at "--" right between them.
+      // Every one of these three values was already present in `s` and simply had no writer
+      // here - stRender() set them, and stRender() only runs when the console's own outdoor
+      // feed is live. So any time the station is dark the cells stayed blank for no reason.
+      if(s.windSpeed!=null) set('wxWindSpd', s.windSpeed*1===0 ? 'Calm' : s.windSpeed+' mph');
+      if(feels!=null){
+        var hlv=feels<80?['LOW','#22c55e']:feels<90?['MODERATE','#ffd24a']
+               :feels<103?['HIGH','#ff8c42']:['EXTREME','#ff6262'];
+        setc('wxHeroHeat', hlv[0], hlv[1]);
+      }
+      if(s.precipRate!=null) set('wxRainRate', Number(s.precipRate).toFixed(2)+'"/hr');
       // UV index with color scale
       if(s.uv!=null){
         var uvV=s.uv, uvC=uvV<3?'#22c55e':uvV<6?'#ffd24a':uvV<8?'#f97316':uvV<11?'#ff6262':'#8b5cf6';
