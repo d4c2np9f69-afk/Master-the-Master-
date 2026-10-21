@@ -62,14 +62,14 @@ function mockStates(opts) {
   opts = opts || {};
   const S = [
     { entity_id: 'binary_sensor.hallway_smoke_alarm',
-      state: opts.smokeOn ? 'on' : 'off',
+      state: opts.unavail ? 'unavailable' : (opts.smokeOn ? 'on' : 'off'),
       last_changed: new Date(Date.now() - 3600000).toISOString(),
-      last_reported: new Date(Date.now() - (opts.notFed ? 45 * 60000 : 20000)).toISOString(),
+      last_reported: new Date(Date.now() - (opts.staleWrite ? 90 * 60000 : 20000)).toISOString(),
       attributes: { device_class: 'smoke', friendly_name: 'Hallway Smoke Alarm' } },
     { entity_id: 'binary_sensor.hallway_co_alarm',
-      state: opts.coOn ? 'on' : 'off',
+      state: opts.unavail ? 'unavailable' : (opts.coOn ? 'on' : 'off'),
       last_changed: new Date(Date.now() - 7200000).toISOString(),
-      last_reported: new Date(Date.now() - (opts.notFed ? 45 * 60000 : 20000)).toISOString(),
+      last_reported: new Date(Date.now() - (opts.staleWrite ? 90 * 60000 : 20000)).toISOString(),
       attributes: { device_class: 'carbon_monoxide', friendly_name: 'Hallway CO Alarm' } },
     { entity_id: 'binary_sensor.hallway_too_much_smoke',
       state: 'on',
@@ -85,12 +85,12 @@ function mockStates(opts) {
     // 2026-10-21: the signals the cloud actually keeps CURRENT. `online`/`lost` are the
     // detector's real liveness; `last_reported` is how long since HA fetched at all.
     { entity_id: 'binary_sensor.hallway_online',
-      state: opts.offline ? 'off' : 'on',
-      last_reported: new Date(Date.now() - (opts.notFed ? 45 * 60000 : 20000)).toISOString(),
+      state: opts.unavail ? 'unavailable' : (opts.offline ? 'off' : 'on'),
+      last_reported: new Date(Date.now() - (opts.staleWrite ? 90 * 60000 : 20000)).toISOString(),
       attributes: { device_class: 'connectivity', friendly_name: 'Hallway Online' } },
     { entity_id: 'binary_sensor.hallway_lost',
       state: opts.lost ? 'on' : 'off',
-      last_reported: new Date(Date.now() - (opts.notFed ? 45 * 60000 : 20000)).toISOString(),
+      last_reported: new Date(Date.now() - (opts.staleWrite ? 90 * 60000 : 20000)).toISOString(),
       attributes: { friendly_name: 'Hallway Lost' } },
     // 2026-10-19: the detector's own cloud check-in time. `opts.stale` reproduces the real
     // failure of that day — a detector on WiFi, answering ping, whose last report to Kidde was
@@ -125,6 +125,13 @@ async function main() {
     /grdSet\('grd-smoke',\s*'(Offline|Not updating|No check-in|Not reporting)'/.test(src));
   check('chip liveness is NOT judged by last_seen alone (Jeff 2026-10-21)',
     /sOffline/.test(src) && /_online'\)/.test(src) && !/sMin !== null && sMin > 120/.test(src));
+  // Both 2026-10-21 mistakes, nailed shut at the source.
+  // ⚠️ The first draft of this check used /sFetch/ and went red on `haStatsFetch`, an unrelated
+  // electric-statistics function — rule 3b's "a test that cries wolf" caught in the test itself.
+  // Anchor on the variable declarations, which only the deleted timer had.
+  check('liveness never uses a last_reported AGE THRESHOLD (the 10-21 10:2x false alarm)',
+    !/var\s+fetchAge\b/.test(src) && !/var\s+sFetch\b/.test(src)
+    && !/function\s+repAgeMin\b/.test(src) && !/function\s+sRepAge\b/.test(src));
   check('hccSmokeDetectors exists and excludes too_much',
     /function hccSmokeDetectors/.test(src) && /too_much/.test(src));
   check('filter keys off device_class, not the entity id',
@@ -250,10 +257,25 @@ async function main() {
   check('LOST: the cloud\'s lost flag also warns',
     lost.bannerShown && /OFFLINE/i.test(lost.banner), lost.banner.slice(0, 90));
 
-  // REAL FAILURE 2 — OUR side stopped fetching. Caught by last_reported, which moves on every
-  // write even when the value is unchanged; last_seen cannot see this at all.
-  const cold = await render({ notFed: true });
-  check('NOT UPDATING: warns when HA has stopped fetching from Kidde',
+  // THE SECOND REGRESSION TEST FOR 2026-10-21, written 40 minutes after the first fix shipped
+  // BROKE THIS EXACT WAY. That fix called it "not updating" when last_reported was older than
+  // 15 min. Measured live at 10:25: every Kidde entity read last_reported 66.9 min old while
+  // the coordinator debug log proved successful fetches every 30 s. last_reported moves when a
+  // state is WRITTEN, and HA's DataUpdateCoordinator does not notify listeners when the newly
+  // fetched payload is identical - so steady readings write nothing for hours. One crying-wolf
+  // card was swapped for another in under an hour. A stale WRITE CLOCK is not a dead feed.
+  const quietWrites = await render({ staleWrite: true });
+  check('STALE WRITE CLOCK: 90 min since the last state write is NOT a fault',
+    !quietWrites.bannerShown || !/NOT UPDATING|OFFLINE|NOT REPORTING/i.test(quietWrites.banner),
+    quietWrites.banner.slice(0, 90) || '(no banner)');
+  check('STALE WRITE CLOCK: the badge still reads LIVE',
+    /LIVE/i.test(quietWrites.conn), quietWrites.conn);
+
+  // REAL FAILURE 2 — OUR side broke. When a coordinator update fails, HA's own
+  // CoordinatorEntity.available goes false and every entity reads `unavailable`. That is the
+  // honest signal, and it needs no timer and no threshold.
+  const cold = await render({ unavail: true });
+  check('NOT UPDATING: warns when HA cannot read the detector',
     cold.bannerShown && /NOT UPDATING/i.test(cold.banner), cold.banner.slice(0, 90));
   check('NOT UPDATING: the badge no longer claims LIVE', !/LIVE/i.test(cold.conn), cold.conn);
 

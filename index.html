@@ -11716,16 +11716,23 @@ function renderSmokeCard(states){
   var onlineE   = hccSmokeSib(states, baseEarly, 'binary_sensor', '_online');
   var lostE     = hccSmokeSib(states, baseEarly, 'binary_sensor', '_lost');
 
-  function repAgeMin(ent){
-    if (!ent) return null;
-    var t = ent.last_reported || ent.last_updated;
-    if (!t) return null;
-    try { return Math.round((Date.now() - new Date(t).getTime()) / 60000); } catch(e){ return null; }
-  }
-  // How long since HA last wrote ANY of this device's entities = how long since we fetched.
-  var fetchAge = repAgeMin(onlineE);
-  var sibAge   = repAgeMin(det[0]);
-  if (fetchAge === null || (sibAge !== null && sibAge < fetchAge)) fetchAge = sibAge;
+  // 🔴 CORRECTED AGAIN, 2026-10-21 10:2x, ~40 minutes after the first fix shipped.
+  // The first version of this used last_reported age > 15 min as "HA has stopped fetching".
+  // THAT WAS WRONG AND IT WAS A NEW FALSE ALARM - measured live at 10:25, every Kidde entity
+  // read last_reported 66.9 min old while the coordinator debug log proved successful fetches
+  // every 30 s. last_reported moves when a state is WRITTEN, and HA's DataUpdateCoordinator
+  // does not notify its listeners when the freshly fetched payload is identical to the last
+  // one - so a device whose readings are steady for hours writes nothing for hours.
+  // The sun/camera entities that "proved" last_reported moves on unchanged values were real
+  // but IRRELEVANT: those integrations write every cycle regardless. I generalised from the
+  // wrong sample and swapped one card that cried wolf for another.
+  //
+  // THE HONEST SIGNAL FOR "OUR SIDE BROKE" IS HA'S OWN: when a coordinator update fails,
+  // CoordinatorEntity.available goes false and every entity reads `unavailable`. That needs
+  // no timer and no threshold.
+  var unavail = det.length > 0 && det.every(function(d){
+    return d.state === 'unavailable' || d.state === 'unknown';
+  });
 
   var seenMin = null;
   if (lsEarly && lsEarly.state && lsEarly.state !== 'unknown' && lsEarly.state !== 'unavailable'){
@@ -11733,12 +11740,11 @@ function renderSmokeCard(states){
   }
 
   var offline   = (onlineE && onlineE.state === 'off') || (lostE && lostE.state === 'on');
-  var notFed    = (fetchAge !== null && fetchAge > 15);          // our side stopped fetching
   var noCheckIn = (seenMin !== null && seenMin > 26 * 60);       // 26 h backstop
-  var stale     = offline || notFed || noCheckIn;
+  var stale     = offline || unavail || noCheckIn;
 
   function ago(m){ return m === null ? '' : m >= 60 ? Math.round(m / 60) + ' h' : m + ' min'; }
-  var staleTxt = offline ? 'OFFLINE' : notFed ? ago(fetchAge) + ' OLD' : ago(seenMin) + ' OLD';
+  var staleTxt = offline ? 'OFFLINE' : unavail ? 'NO DATA' : ago(seenMin) + ' OLD';
 
   if (banner){
     if (stale){
@@ -11747,9 +11753,9 @@ function renderSmokeCard(states){
       banner.innerHTML = offline
         ? '&#9888;&#65039; <b>DETECTOR OFFLINE</b> &mdash; Kidde reports it is not connected. '
           + 'Everything below is its last known state, not now.'
-        : notFed
-          ? '&#9888;&#65039; <b>NOT UPDATING</b> &mdash; Home Assistant has not fetched from Kidde in '
-            + ago(fetchAge) + '. The detector may well be fine; this card is not live.'
+        : unavail
+          ? '&#9888;&#65039; <b>NOT UPDATING</b> &mdash; Home Assistant cannot read the detector '
+            + 'right now. The detector may well be fine; this card is not live.'
           : '&#9888;&#65039; <b>NO CHECK-IN</b> &mdash; Kidde has not logged a check-in in '
             + ago(seenMin) + '.';
     } else banner.style.display = 'none';
@@ -12118,22 +12124,17 @@ function loadGuardian(){
       var sLs   = hccSmokeSib(states, sBase, 'sensor', '_last_seen');
       var sOn   = hccSmokeSib(states, sBase, 'binary_sensor', '_online');
       var sLost = hccSmokeSib(states, sBase, 'binary_sensor', '_lost');
-      function sRepAge(ent){
-        if (!ent) return null;
-        var t = ent.last_reported || ent.last_updated;
-        if (!t) return null;
-        try { return Math.round((Date.now() - new Date(t).getTime()) / 60000); } catch(e){ return null; }
-      }
-      var sFetch = sRepAge(sOn);
-      var sSib   = sRepAge(smokeDet[0]);
-      if (sFetch === null || (sSib !== null && sSib < sFetch)) sFetch = sSib;
+      // Same correction as renderSmokeCard: last_reported is NOT a fetch clock here.
+      var sUnavail = smokeDet.every(function(d){
+        return d.state === 'unavailable' || d.state === 'unknown';
+      });
       var sMin  = null;
       if (sLs && sLs.state && sLs.state !== 'unknown' && sLs.state !== 'unavailable'){
         try { sMin = Math.round((Date.now() - new Date(sLs.state).getTime()) / 60000); } catch(e){}
       }
       var sOffline = (sOn && sOn.state === 'off') || (sLost && sLost.state === 'on');
       if (sOffline) grdSet('grd-smoke', 'Offline', 'hs-warn');
-      else if (sFetch !== null && sFetch > 15) grdSet('grd-smoke', 'Not updating', 'hs-warn');
+      else if (sUnavail) grdSet('grd-smoke', 'Not updating', 'hs-warn');
       else if (sMin !== null && sMin > 26 * 60) grdSet('grd-smoke', 'No check-in', 'hs-warn');
       else grdSet('grd-smoke', 'Clear', 'hs-ok');
     }
