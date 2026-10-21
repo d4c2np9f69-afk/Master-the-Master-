@@ -64,10 +64,12 @@ function mockStates(opts) {
     { entity_id: 'binary_sensor.hallway_smoke_alarm',
       state: opts.smokeOn ? 'on' : 'off',
       last_changed: new Date(Date.now() - 3600000).toISOString(),
+      last_reported: new Date(Date.now() - (opts.notFed ? 45 * 60000 : 20000)).toISOString(),
       attributes: { device_class: 'smoke', friendly_name: 'Hallway Smoke Alarm' } },
     { entity_id: 'binary_sensor.hallway_co_alarm',
       state: opts.coOn ? 'on' : 'off',
       last_changed: new Date(Date.now() - 7200000).toISOString(),
+      last_reported: new Date(Date.now() - (opts.notFed ? 45 * 60000 : 20000)).toISOString(),
       attributes: { device_class: 'carbon_monoxide', friendly_name: 'Hallway CO Alarm' } },
     { entity_id: 'binary_sensor.hallway_too_much_smoke',
       state: 'on',
@@ -80,11 +82,22 @@ function mockStates(opts) {
       attributes: { device_class: 'moisture', friendly_name: 'Kitchen Sink Leak' } },
     { entity_id: 'sensor.hallway_smoke_alarm_battery',
       state: '87', attributes: { device_class: 'battery' } },
+    // 2026-10-21: the signals the cloud actually keeps CURRENT. `online`/`lost` are the
+    // detector's real liveness; `last_reported` is how long since HA fetched at all.
+    { entity_id: 'binary_sensor.hallway_online',
+      state: opts.offline ? 'off' : 'on',
+      last_reported: new Date(Date.now() - (opts.notFed ? 45 * 60000 : 20000)).toISOString(),
+      attributes: { device_class: 'connectivity', friendly_name: 'Hallway Online' } },
+    { entity_id: 'binary_sensor.hallway_lost',
+      state: opts.lost ? 'on' : 'off',
+      last_reported: new Date(Date.now() - (opts.notFed ? 45 * 60000 : 20000)).toISOString(),
+      attributes: { friendly_name: 'Hallway Lost' } },
     // 2026-10-19: the detector's own cloud check-in time. `opts.stale` reproduces the real
     // failure of that day — a detector on WiFi, answering ping, whose last report to Kidde was
     // 9 h old while the card rendered every reading in green and said "LIVE".
     { entity_id: 'sensor.hallway_last_seen',
-      state: new Date(Date.now() - (opts.stale ? 9 * 3600000 : 60000)).toISOString(),
+      state: new Date(Date.now() - (opts.deadCheckIn ? 30 * 3600000
+                                  : opts.stale ? 9 * 3600000 : 60000)).toISOString(),
       attributes: { friendly_name: 'Hallway Last Seen' } },
   ];
   if (opts.none) {
@@ -103,8 +116,15 @@ async function main() {
   // "off looks like it's not on and not monitored". "Off" is a power state; "Clear" is a status.
   check('chip clear-state word is "Clear", never "Off" (Jeff 2026-10-19)',
     /grdSet\('grd-smoke',\s*'Clear'/.test(src) && !/grdSet\('grd-smoke',\s*'Off'/.test(src));
+  // 2026-10-21: this used to demand the literal 'Not reporting'. The chip now distinguishes
+  // the three things that were being conflated under that one word - the cloud says the
+  // detector is OFFLINE, we have stopped FETCHING, or there has been no CHECK-IN in 26 h -
+  // so assert the intent (a non-green staleness state exists, driven by online/lost rather
+  // than by last_seen alone) instead of one wording.
   check('chip reports staleness instead of a green lie (Jeff 2026-10-19)',
-    /grdSet\('grd-smoke',\s*'Not reporting'/.test(src));
+    /grdSet\('grd-smoke',\s*'(Offline|Not updating|No check-in|Not reporting)'/.test(src));
+  check('chip liveness is NOT judged by last_seen alone (Jeff 2026-10-21)',
+    /sOffline/.test(src) && /_online'\)/.test(src) && !/sMin !== null && sMin > 120/.test(src));
   check('hccSmokeDetectors exists and excludes too_much',
     /function hccSmokeDetectors/.test(src) && /too_much/.test(src));
   check('filter keys off device_class, not the entity id',
@@ -187,25 +207,60 @@ async function main() {
   check('rows name the function, not the raw entity (Jeff 2026-10-19)',
     /Carbon monoxide/.test(quiet.rows) && /Smoke/.test(quiet.rows), quiet.rows.slice(0, 90));
 
-  // ── STALE DATA. The 2026-10-19 failure: every reading correct, all of it 9 h old, card green
-  // and badged "LIVE". A safety card must never present stale data as current. ──
-  const old = await page.evaluate((a) => {
+  // ── LIVENESS. Two real failures, and one FALSE alarm that cost a morning. ──
+  //
+  // 2026-10-19: every reading correct, all of it 9 h old, card green and badged "LIVE".
+  // 2026-10-21: the fix for that judged liveness by `_last_seen` at a 2-HOUR threshold, and
+  //   `_last_seen` is NOT a heartbeat. Measured over 4 days of recorder history its gaps were
+  //   19.0 h, 7.7 h and 14.1 h, while coordinator debug logging showed HA polling Kidde every
+  //   30 s, succeeding every time, each poll returning the SAME last_seen with online/lost/rssi
+  //   all current. So the card screamed NOT REPORTING at a perfectly healthy detector most of
+  //   every day. Jeff: "Why is the Kidde not reporting it is online and everything is working
+  //   in the kiddie app." A card that cries wolf gets ignored, which is worse than no card.
+  const render = async (opts) => page.evaluate((a) => {
     const mockStates = eval('(' + a.fn + ')');
-    window.renderSmokeCard(mockStates({ stale: true }));
+    window.renderSmokeCard(mockStates(a.opts));
     const b = document.getElementById('smokeBanner') || {};
     return { note: (document.getElementById('smokeNote') || {}).textContent || '',
              rows: (document.getElementById('smokeList') || {}).innerText || '',
              banner: b.innerText || '',
              bannerShown: (b.style || {}).display !== 'none',
              conn: (document.getElementById('smokeConn') || {}).textContent || '' };
-  }, { fn });
-  check('STALE: a warning banner is shown', old.bannerShown && /NOT REPORTING/i.test(old.banner),
-    old.banner.slice(0, 90));
-  check('STALE: the badge no longer claims LIVE', !/LIVE/i.test(old.conn), old.conn);
-  check('STALE: rows use the past tense, not a bare "Clear"',
-    /Was clear/i.test(old.rows), old.rows.slice(0, 90));
-  check('STALE: the note says it is not reporting', /Not reporting/i.test(old.note), old.note);
-  check('STALE: it still never cries ALARM while nothing is burning', !/ALARM/.test(old.rows));
+  }, { fn, opts });
+
+  // THE REGRESSION TEST FOR 2026-10-21 — a slow cloud check-in is NOT a fault.
+  const slow = await render({ stale: true });
+  check('SLOW CHECK-IN: 9 h since the cloud logged one is NOT called a fault',
+    !slow.bannerShown || !/NOT REPORTING|OFFLINE|NOT UPDATING/i.test(slow.banner),
+    slow.banner.slice(0, 90) || '(no banner)');
+  check('SLOW CHECK-IN: the badge still reads LIVE', /LIVE/i.test(slow.conn), slow.conn);
+
+  // REAL FAILURE 1 — the cloud itself says the detector is not connected.
+  const off = await render({ offline: true });
+  check('OFFLINE: a warning banner is shown',
+    off.bannerShown && /OFFLINE/i.test(off.banner), off.banner.slice(0, 90));
+  check('OFFLINE: the badge no longer claims LIVE', !/LIVE/i.test(off.conn), off.conn);
+  check('OFFLINE: rows use the past tense, not a bare "Clear"',
+    /Was clear/i.test(off.rows), off.rows.slice(0, 90));
+  check('OFFLINE: the note says it is not reporting', /Not reporting/i.test(off.note), off.note);
+  check('OFFLINE: it still never cries ALARM while nothing is burning', !/ALARM/.test(off.rows));
+
+  // REAL FAILURE 1b — the `lost` flag is the same verdict by another name.
+  const lost = await render({ lost: true });
+  check('LOST: the cloud\'s lost flag also warns',
+    lost.bannerShown && /OFFLINE/i.test(lost.banner), lost.banner.slice(0, 90));
+
+  // REAL FAILURE 2 — OUR side stopped fetching. Caught by last_reported, which moves on every
+  // write even when the value is unchanged; last_seen cannot see this at all.
+  const cold = await render({ notFed: true });
+  check('NOT UPDATING: warns when HA has stopped fetching from Kidde',
+    cold.bannerShown && /NOT UPDATING/i.test(cold.banner), cold.banner.slice(0, 90));
+  check('NOT UPDATING: the badge no longer claims LIVE', !/LIVE/i.test(cold.conn), cold.conn);
+
+  // REAL FAILURE 3 — the long backstop, past the measured 19.0 h worst case.
+  const dead = await render({ deadCheckIn: true });
+  check('NO CHECK-IN: the 26 h backstop still fires on a truly dead device',
+    dead.bannerShown && /NO CHECK-IN/i.test(dead.banner), dead.banner.slice(0, 90));
 
   const smoking = await page.evaluate((a) => {
     const mockStates = eval('(' + a.fn + ')');

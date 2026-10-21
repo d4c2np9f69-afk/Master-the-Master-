@@ -11688,25 +11688,74 @@ function renderSmokeCard(states){
   // "LIVE" over the top of it. A safety card that cannot tell "all clear" from "I have not heard
   // anything since lunch" is worse than no card. Staleness is computed FIRST and outranks every
   // other state except a real alarm.
+  // 🔴 CORRECTED 2026-10-21 09:3x. THE 120-MINUTE RULE ABOVE WAS CRYING WOLF EVERY DAY.
+  // Jeff: "Why is the Kidde not reporting, it is online and everything is working in the
+  // Kidde app." He was right and this card was wrong.
+  //
+  // `_last_seen` IS NOT A HEARTBEAT. Measured from HA's recorder over 4 days, the gaps
+  // between advances of sensor.smoke_and_co2_last_seen were 19.0 h, 7.7 h and 14.1 h.
+  // Proven at the source with coordinator debug logging on 10-21 09:26-09:27:
+  //     Finished fetching kidde_homesafe data in 0.214 seconds (success: True)   09:26:13
+  //     Finished fetching kidde_homesafe data in 0.184 seconds (success: True)   09:26:43
+  //     Finished fetching kidde_homesafe data in 0.206 seconds (success: True)   09:27:43
+  // - exactly the configured 30 s apart, every one succeeding, and EVERY ONE returning the
+  // same last_seen of 2026-10-21T13:18:37Z while online/lost/rssi/ssid all came back current.
+  // So Kidde advances last_seen only occasionally by design; a 2-hour threshold on it marks a
+  // perfectly healthy detector dead for most of every day. A card that cries wolf gets
+  // ignored, which is worse than no card (SESSION_START rule 3b).
+  //
+  // The 10-19 incident this check was written for is still covered, by better instruments:
+  //   1. the cloud's own verdict - online=off / lost=on - which it keeps CURRENT.
+  //   2. whether WE are still fetching at all, via last_reported, which moves on every write
+  //      even when the value is unchanged. That is the real heartbeat: it answers "how long
+  //      since Home Assistant actually heard from Kidde", which last_seen cannot.
+  //   3. last_seen, demoted to a long backstop at 26 h - comfortably past the measured 19.0 h
+  //      worst case, so it fires only on a genuinely dead device.
   var baseEarly = hccSmokeBase(det[0]);
   var lsEarly   = hccSmokeSib(states, baseEarly, 'sensor', '_last_seen');
-  var staleMin  = null;
-  if (lsEarly && lsEarly.state && lsEarly.state !== 'unknown' && lsEarly.state !== 'unavailable'){
-    try { staleMin = Math.round((Date.now() - new Date(lsEarly.state).getTime()) / 60000); } catch(e){}
+  var onlineE   = hccSmokeSib(states, baseEarly, 'binary_sensor', '_online');
+  var lostE     = hccSmokeSib(states, baseEarly, 'binary_sensor', '_lost');
+
+  function repAgeMin(ent){
+    if (!ent) return null;
+    var t = ent.last_reported || ent.last_updated;
+    if (!t) return null;
+    try { return Math.round((Date.now() - new Date(t).getTime()) / 60000); } catch(e){ return null; }
   }
-  var stale    = (staleMin !== null && staleMin > 120);
-  var staleTxt = staleMin === null ? ''
-               : staleMin >= 60 ? Math.round(staleMin / 60) + ' h' : staleMin + ' min';
+  // How long since HA last wrote ANY of this device's entities = how long since we fetched.
+  var fetchAge = repAgeMin(onlineE);
+  var sibAge   = repAgeMin(det[0]);
+  if (fetchAge === null || (sibAge !== null && sibAge < fetchAge)) fetchAge = sibAge;
+
+  var seenMin = null;
+  if (lsEarly && lsEarly.state && lsEarly.state !== 'unknown' && lsEarly.state !== 'unavailable'){
+    try { seenMin = Math.round((Date.now() - new Date(lsEarly.state).getTime()) / 60000); } catch(e){}
+  }
+
+  var offline   = (onlineE && onlineE.state === 'off') || (lostE && lostE.state === 'on');
+  var notFed    = (fetchAge !== null && fetchAge > 15);          // our side stopped fetching
+  var noCheckIn = (seenMin !== null && seenMin > 26 * 60);       // 26 h backstop
+  var stale     = offline || notFed || noCheckIn;
+
+  function ago(m){ return m === null ? '' : m >= 60 ? Math.round(m / 60) + ' h' : m + ' min'; }
+  var staleTxt = offline ? 'OFFLINE' : notFed ? ago(fetchAge) + ' OLD' : ago(seenMin) + ' OLD';
+
   if (banner){
     if (stale){
       banner.style.display = '';
       banner.className = 'wx-banner wx-no';
-      banner.innerHTML = '&#9888;&#65039; <b>NOT REPORTING</b> &mdash; the detector last checked in '
-        + staleTxt + ' ago. Everything below is from then, not now.';
+      banner.innerHTML = offline
+        ? '&#9888;&#65039; <b>DETECTOR OFFLINE</b> &mdash; Kidde reports it is not connected. '
+          + 'Everything below is its last known state, not now.'
+        : notFed
+          ? '&#9888;&#65039; <b>NOT UPDATING</b> &mdash; Home Assistant has not fetched from Kidde in '
+            + ago(fetchAge) + '. The detector may well be fine; this card is not live.'
+          : '&#9888;&#65039; <b>NO CHECK-IN</b> &mdash; Kidde has not logged a check-in in '
+            + ago(seenMin) + '.';
     } else banner.style.display = 'none';
   }
   if (conn){
-    conn.textContent = stale ? '● ' + staleTxt + ' OLD' : '● LIVE';
+    conn.textContent = stale ? '● ' + staleTxt : '● LIVE';
     conn.style.color = stale ? 'var(--bad)' : 'var(--ok)';
   }
   det.sort(function(a, b){
@@ -11891,8 +11940,9 @@ function renderSmokeCard(states){
   if (note) note.innerHTML = firingN
     ? '<b style="color:var(--bad)">' + firingN + ' ALARMING</b> of ' + det.length + ' &middot; siren is running'
     : stale
-      ? '<b style="color:var(--bad)">Not reporting</b> &middot; All ' + det.length + ' clear as of '
-        + staleTxt + ' ago &middot; siren armed'
+      ? '<b style="color:var(--bad)">Not reporting</b> &middot; All ' + det.length
+        + (offline ? ' clear when it was last connected' : ' clear as of ' + staleTxt)
+        + ' &middot; siren armed'
       : 'Monitoring &middot; All ' + det.length + ' clear &middot; siren armed &middot; live from Beehive';
 }
 // Doors & Contacts card. Shows every real contact by name, with state, battery and how long it
@@ -12057,13 +12107,34 @@ function loadGuardian(){
       // Jeff, 2026-10-19: this chip read "Off", which looks like the detector is switched off
       // rather than like nothing is burning. And a green chip over a detector that has not
       // reported since lunch is the same lie the card was telling — so staleness shows here too.
+      // 🔴 2026-10-21: this chip carried the SAME 120-minute `_last_seen` bug the card did,
+      // and it is the "NOT REPORTING" Jeff was actually looking at on the GUARDIAN tab.
+      // `_last_seen` is not a heartbeat (measured gaps 19.0 h / 7.7 h / 14.1 h while HA polled
+      // Kidde successfully every 30 s), so judge the chip the same way the card now does:
+      // the cloud's own online/lost verdict, then whether WE are still fetching, then a long
+      // backstop. Kept deliberately identical to renderSmokeCard so the chip and the card can
+      // never disagree about the same detector.
       var sBase = hccSmokeBase(smokeDet[0]);
       var sLs   = hccSmokeSib(states, sBase, 'sensor', '_last_seen');
+      var sOn   = hccSmokeSib(states, sBase, 'binary_sensor', '_online');
+      var sLost = hccSmokeSib(states, sBase, 'binary_sensor', '_lost');
+      function sRepAge(ent){
+        if (!ent) return null;
+        var t = ent.last_reported || ent.last_updated;
+        if (!t) return null;
+        try { return Math.round((Date.now() - new Date(t).getTime()) / 60000); } catch(e){ return null; }
+      }
+      var sFetch = sRepAge(sOn);
+      var sSib   = sRepAge(smokeDet[0]);
+      if (sFetch === null || (sSib !== null && sSib < sFetch)) sFetch = sSib;
       var sMin  = null;
       if (sLs && sLs.state && sLs.state !== 'unknown' && sLs.state !== 'unavailable'){
         try { sMin = Math.round((Date.now() - new Date(sLs.state).getTime()) / 60000); } catch(e){}
       }
-      if (sMin !== null && sMin > 120) grdSet('grd-smoke', 'Not reporting', 'hs-warn');
+      var sOffline = (sOn && sOn.state === 'off') || (sLost && sLost.state === 'on');
+      if (sOffline) grdSet('grd-smoke', 'Offline', 'hs-warn');
+      else if (sFetch !== null && sFetch > 15) grdSet('grd-smoke', 'Not updating', 'hs-warn');
+      else if (sMin !== null && sMin > 26 * 60) grdSet('grd-smoke', 'No check-in', 'hs-warn');
       else grdSet('grd-smoke', 'Clear', 'hs-ok');
     }
     else grdSet('grd-smoke', 'Sensor pending', 'hs-dim');
