@@ -122,6 +122,26 @@ Both are named in the contract as **Jeff's to provide**.
   🔴 *Correction trail: Rev 1 of this pack said LUX, Rev 2 "corrected" it to the ecobee off the
   September record, and Jeff corrected that back the same minute. The record held an old PLAN; the
   owner holds the DECISION.*
+
+  ✅ **RESOLVED ON INSTALL DAY, 2026-10-21 6:3x PM — AND IT WAS NEVER THE THERMOSTAT.**
+  **Jeff: *"The LUX is most likely fine it was the thermostat wire that was chewed up so that is
+  what they are installing. So the Lux should be ready to comeback online when they get it put in
+  make sure it's ready in the app."*** 🔴 **So the "died in a power surge 09-15" line carried in
+  `index.html` and the project record for five weeks was an INFERENCE, not a fact** — a chewed
+  24 V wire explains a stat that neither controls nor reports while being perfectly good hardware,
+  and the quote's new 18 AWG with a C wire replaces exactly that. **No ecobee purchase. No
+  fallback needed.** ⚠️ The §2d test ("confirm it powers up and holds a setpoint") is therefore
+  moot as a pre-install gate — it is answered by the new wire going in.
+
+  🟢 **THE APP SIDE IS READY, AND READY MEANS WITHOUT A DEPLOY (`ff07fa6`).** It used to carry
+  `var LUX_RETIRED = true`, so the thermostat could have come back tonight and the app would have
+  shown nothing until somebody edited `index.html` and redeployed. `loadThermostat()` now probes
+  `/api/climate` and switches to the real thermostat the moment it answers `{ok:true,
+  thermostat:{…}}`, unhiding the LUX card and handing off to `loadClimate()`. Throttled to **one
+  probe per 10 minutes** while absent and **none once it answers**, which protects the Cloudflare
+  request budget the retirement was guarding (#183). Gated by `scripts/lux-return-gate-test.js`,
+  15 checks, proven RED against the old behaviour. **Expected lag after the stat rejoins WiFi:
+  under 10 minutes, with no action from anyone.**
 - 🔴 **UV light = REKO R2000**, customer-provided. ⚠️ **It must be installed FACING THE COIL.**
   A competing bidder put that wording in writing; **Goodlettsville's quote only says "installing UV
   light supplied by customer"** — so say it out loud on the day.
@@ -155,6 +175,14 @@ and back on only once the new unit runs and 3a is settled:
 
 ✅ **Done 2026-10-13:** deleted `automation.hcc_ac_bid_deadline` — its own name said *"delete
 after"* and its trigger was a **daily** 16:00, not the one-off it claimed.
+
+✅ **ALL THREE CONFIRMED OFF 2026-10-21 18:2x.** The 06:30 reminder fired and
+`hcc_ac_relay_thermostat` was off, but **`hcc_ac_master_switch` and the relay offline watchdog
+were still ON** — and `switch.ac_relay` had gone `unavailable` at **~11:36 AM**, so the watchdog
+that *"fires the moment the relay loses power"* sat armed over dead hardware for about seven
+hours. It had not actually fired yet (`last_triggered: None`); that was timing, not design. Both
+turned off and verified. **The Friday 2026-10-23 09:00 task re-arms all three** — it is still
+scheduled (`Get-ScheduledTask "HCC AC Install - register + rearm"`, next run confirmed).
 
 ---
 
