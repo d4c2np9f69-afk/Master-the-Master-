@@ -5913,6 +5913,11 @@ function loadStation(){
         setc('wxHeroHeat', hlv[0], hlv[1]);
       }
       if(s.precipRate!=null) set('wxRainRate', Number(s.precipRate).toFixed(2)+'"/hr');
+      // Added in the same pass and then MISSED: wxSolarRad was put in STATION_CELLS above
+      // without ever being given a writer here, so it stayed '--' while the payload carried
+      // a real number. Guarding a cell you never fill is exactly the dead-code class this
+      // project keeps paying for. 0 W/m2 at night is a correct reading, not a missing one.
+      if(s.solarRadiation!=null) set('wxSolarRad', Math.round(s.solarRadiation)+' W/m&sup2;');
       // UV index with color scale
       if(s.uv!=null){
         var uvV=s.uv, uvC=uvV<3?'#22c55e':uvV<6?'#ffd24a':uvV<8?'#f97316':uvV<11?'#ff6262':'#8b5cf6';
