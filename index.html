@@ -10153,6 +10153,24 @@ function loadCar() {
     }
     function set(id, txt) { var el = document.getElementById(id); if (el) el.textContent = txt; }
 
+    // A ROW THE CAR NEVER REPORTS MUST NOT LOOK LIKE A BROKEN ROW.
+    // Measured 2026-10-20 21:30 against the live HA registry: mbapi2020 publishes
+    // 57 entities for this GLE 350 and ZERO of them are disabled or hidden. So oil
+    // life, interior/exterior temp, rear climate, seat heat, seat ventilation,
+    // steering-wheel heat and defrost are not "missing data" - they are simply not
+    // in the Mercedes me feed for this vehicle. The card was showing a permanent
+    // "--" for four of them and, worse, a CONFIDENT "Off" for six more that nothing
+    // ever set, which asserts a fact about the car that was never measured.
+    // Hide the row instead. It comes back by itself the day the car reports it.
+    function setOrHide(id, txt) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      var row = el.closest ? el.closest('li, .car-stat') : null;
+      if (txt == null) { if (row) row.style.display = 'none'; return; }
+      if (row) row.style.display = '';
+      el.textContent = txt;
+    }
+
     var odo = val('odometer');
     if (odo) { set('carOdo', parseFloat(odo.state).toLocaleString());
                set('carScrOdo', parseFloat(odo.state).toLocaleString()); }
@@ -10192,7 +10210,7 @@ function loadCar() {
     }
 
     var oil = val('oil_level') || val('oil');
-    if (oil) set('carOil', oil.state + '%');
+    setOrHide('carOil', oil ? oil.state + '%' : null);
 
     // The tile is labelled "BATTERY (V)" but sensor.gle_350_starter_battery_state
     // is NOT volts — it's mbapi2020's condition code. Jeff's screenshot showed a
@@ -10261,28 +10279,41 @@ function loadCar() {
       set('carNextSvc', dist ? dist + ' mi' : svc.state);
     }
 
-    var precond = val('precond') || val('preheat');
-    if (precond) set('carAC', precond.state === 'on' ? 'Pre-conditioning' : 'Off');
+    // REAL MISS, not missing data: this car DOES publish pre-conditioning, as
+    // switch.gle_350_pre_entry_climate_control. Neither 'precond' nor 'preheat' is a
+    // substring of "pre_entry_climate_control", so the A/C row sat at "--" while the
+    // entity was live in HA the whole time. Matched explicitly rather than by the
+    // looser 'preclimate', which would hit button.gle_350_preclimate_start first -
+    // a never-pressed button whose state is 'unknown', which val() rejects, putting
+    // the row straight back to "--".
+    var precond = val('precond') || val('preheat') || val('pre_entry_climate');
+    setOrHide('carAC', precond ? (precond.state === 'on' ? 'Pre-conditioning' : 'Off') : null);
 
     var intTemp = val('interior_temperature') || val('incar_temp');
-    if (intTemp && intTemp.state !== 'unknown') set('carInteriorTemp', parseFloat(intTemp.state).toFixed(0) + '°');
+    setOrHide('carInteriorTemp', (intTemp && intTemp.state !== 'unknown') ? parseFloat(intTemp.state).toFixed(0) + '°' : null);
     var extTemp = val('exterior_temperature') || val('outcar_temp') || val('outside_temp');
-    if (extTemp && extTemp.state !== 'unknown') set('carExteriorTemp', parseFloat(extTemp.state).toFixed(0) + '°');
+    setOrHide('carExteriorTemp', (extTemp && extTemp.state !== 'unknown') ? parseFloat(extTemp.state).toFixed(0) + '°' : null);
 
     var seatHL = val('seat_heat_left') || val('seat_heater_front_left') || val('heated_seat_front_left');
-    if (seatHL) set('carSeatL', seatHL.state === 'off' || seatHL.state === '0' ? 'Off' : 'Level ' + seatHL.state);
+    setOrHide('carSeatL', seatHL ? (seatHL.state === 'off' || seatHL.state === '0' ? 'Off' : 'Level ' + seatHL.state) : null);
     var seatHR = val('seat_heat_right') || val('seat_heater_front_right') || val('heated_seat_front_right');
-    if (seatHR) set('carSeatR', seatHR.state === 'off' || seatHR.state === '0' ? 'Off' : 'Level ' + seatHR.state);
+    setOrHide('carSeatR', seatHR ? (seatHR.state === 'off' || seatHR.state === '0' ? 'Off' : 'Level ' + seatHR.state) : null);
 
     var seatAL = val('seat_vent_left') || val('seat_ventilation_front_left') || val('ventilated_seat_front_left');
-    if (seatAL) set('carSeatAirL', seatAL.state === 'off' || seatAL.state === '0' ? 'Off' : 'Level ' + seatAL.state);
+    setOrHide('carSeatAirL', seatAL ? (seatAL.state === 'off' || seatAL.state === '0' ? 'Off' : 'Level ' + seatAL.state) : null);
     var seatAR = val('seat_vent_right') || val('seat_ventilation_front_right') || val('ventilated_seat_front_right');
-    if (seatAR) set('carSeatAirR', seatAR.state === 'off' || seatAR.state === '0' ? 'Off' : 'Level ' + seatAR.state);
+    setOrHide('carSeatAirR', seatAR ? (seatAR.state === 'off' || seatAR.state === '0' ? 'Off' : 'Level ' + seatAR.state) : null);
 
     var steerHeat = val('steering_heat') || val('heated_steering');
-    if (steerHeat) set('carSteeringHeat', steerHeat.state === 'on' ? 'On' : 'Off');
+    setOrHide('carSteeringHeat', steerHeat ? (steerHeat.state === 'on' ? 'On' : 'Off') : null);
     var defrost = val('defrost') || val('defroster');
-    if (defrost) set('carDefrost', defrost.state === 'on' ? 'On' : 'Off');
+    setOrHide('carDefrost', defrost ? (defrost.state === 'on' ? 'On' : 'Off') : null);
+
+    // Nothing in this file has EVER set carRearClimate - grepped 2026-10-20, zero
+    // setters - so it has shown a permanent "--" since the card was built. The GLE's
+    // feed has no rear-climate entity. Hide it on the same rule as the rows above.
+    var rearClim = val('rear_climate') || val('rear_ac');
+    setOrHide('carRearClimate', rearClim ? rearClim.state : null);
 
     var tracker = val('device_tracker.');
     if (tracker && tracker.attributes) {

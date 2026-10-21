@@ -50,6 +50,61 @@ export async function onRequestGet({ env } = {}) {
   const live = v => (typeof v === 'number' && isFinite(v) && !SENTINELS.has(v)) ? v : null;
   const num = (v, f) => { const x = live(v); return x == null ? null : (f ? f(x) : Math.round(x)); };
 
+  // -- THE OUTDOOR ARRAY CAN DIE WHILE WU STILL RETURNS HTTP 200 --------------
+  // Found live 2026-10-20 21:20 by reading the WEATHER tab the way Jeff reads it:
+  // 15 fields showing "--". The Open-Meteo fallback at the bottom of this file has
+  // existed for months, but it only ran when the WU fetch THREW. With the array
+  // dark, WU answered 200 with a complete-looking observation whose every outdoor
+  // field was the -32768 sentinel; the sentinel guard above correctly turned those
+  // into null; and the function returned a successful 200 with temp, humidity,
+  // wind, dewpoint and uv all null. So the fallback never fired and the app went
+  // blank with a working, free, key-less data source one call away.
+  // A station that reports nothing measurable IS unavailable, whatever its HTTP code.
+  async function openMeteo() {
+    const r2 = await fetch(
+      'https://api.open-meteo.com/v1/forecast' +
+      '?latitude=36.477&longitude=-86.66' +
+      '&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,surface_pressure' +
+      '&hourly=dewpoint_2m,apparent_temperature,windgusts_10m,precipitation,uv_index' +
+      '&temperature_unit=fahrenheit&windspeed_unit=mph&precipitation_unit=inch' +
+      '&timezone=America%2FChicago&forecast_days=1',
+      { headers: { 'User-Agent': 'HCC-PWA/1.0' }, cf: { cacheTtl: 300 } }
+    );
+    if (!r2.ok) throw new Error('fallback ' + r2.status);
+    const d2 = await r2.json();
+    const c = d2.current || {};
+    const h = d2.hourly || {};
+    const times = h.time || [];
+    const nowMs = Date.now();
+    let idx = 0;
+    for (let i = 0; i < times.length; i++) if (new Date(times[i]).getTime() <= nowMs) idx = i;
+    const t = c.temperature_2m;
+    const hum = c.relative_humidity_2m;
+    // Refuse a body we cannot actually read. Without this, a malformed or unexpected
+    // response yields Math.round(undefined) === NaN in every field, and JSON.stringify
+    // turns NaN into null - so a broken fallback would be indistinguishable from the
+    // dead station it is supposed to rescue. Throw instead and keep the honest nulls.
+    if (typeof t !== 'number' || !isFinite(t)) throw new Error('fallback: no temperature');
+    const dew = h.dewpoint_2m?.[idx] ?? (t - ((100 - hum) / 5));
+    const wd = c.wind_direction_10m ?? null;
+    const presHpa = c.surface_pressure ?? null;
+    return {
+      temp:           Math.round(t),
+      dewpt:          Math.round(dew),
+      heatIndex:      Math.round(h.apparent_temperature?.[idx] ?? t),
+      humidity:       Math.round(hum),
+      precipTotal:    Math.round((h.precipitation?.[idx] ?? 0) * 100) / 100,
+      precipRate:     0,
+      windSpeed:      Math.round(c.wind_speed_10m),
+      windGust:       Math.round(h.windgusts_10m?.[idx] ?? c.wind_speed_10m),
+      winddir:        wd,
+      windDirCard:    toCard(wd),
+      pressure:       presHpa ? Math.round(presHpa * 0.02953 * 100) / 100 : null,
+      uv:             h.uv_index?.[idx] ?? null,
+      solarRadiation: null
+    };
+  }
+
   try {
     const r = await fetch(
       `https://api.weather.com/v2/pws/observations/current?stationId=${WU_STATION}&format=json&units=e&apiKey=${WU_KEY}&numericPrecision=decimal`,
@@ -88,7 +143,7 @@ export async function onRequestGet({ env } = {}) {
     const imp = obs.imperial || {};
     const wdDeg = live(obs.winddir);
 
-    return Response.json({
+    const core = {
       // Core temps
       temp:           num(imp.temp),
       dewpt:          num(imp.dewpt),
@@ -97,9 +152,6 @@ export async function onRequestGet({ env } = {}) {
       humidity:       num(obs.humidity),
       precipTotal:    num(imp.precipTotal, x => Math.round(x * 100) / 100) ?? 0,
       precipRate:     num(imp.precipRate,  x => Math.round(x * 100) / 100) ?? 0,
-      // Rolling 7 days from the same gauge. Turf target is 1.0-1.5 in/week.
-      rain7d,
-      rain7dDays,
       // Wind
       windSpeed:      num(imp.windSpeed),
       windGust:       num(imp.windGust),
@@ -109,55 +161,51 @@ export async function onRequestGet({ env } = {}) {
       pressure:       num(imp.pressure, x => Math.round(x * 100) / 100),
       // Solar
       uv:             num(obs.uv, x => Math.round(x * 10) / 10),
-      solarRadiation: num(obs.solarRadiation),
+      solarRadiation: num(obs.solarRadiation)
+    };
+
+    // PRESSURE IS DELIBERATELY NOT IN THIS TEST. The indoor console carries the
+    // barometer and kept reporting a healthy 29.94 all day with the outdoor array
+    // dead, so including it would mask exactly the failure being caught here.
+    const arrayDark = core.temp == null && core.humidity == null &&
+                      core.windSpeed == null && core.dewpt == null;
+
+    let out = core;
+    let station = obs.stationID || WU_STATION;
+    if (arrayDark) {
+      try {
+        const om = await openMeteo();
+        // Keep whatever the console itself still measures; take the rest from the model.
+        out = { ...om,
+                pressure:    core.pressure ?? om.pressure,
+                precipTotal: core.precipTotal || om.precipTotal };
+        station = (obs.stationID || WU_STATION) + ' array dark - Open-Meteo';
+      } catch (eDark) { /* keep the honest nulls rather than invent numbers */ }
+    }
+
+    return Response.json({
+      ...out,
+      // Rolling 7 days from the same gauge. Turf target is 1.0-1.5 in/week.
+      rain7d,
+      rain7dDays,
       // Meta
-      station:        obs.stationID || WU_STATION,
+      station,
+      stationDark:    arrayDark,
       neighborhood:   obs.neighborhood  || 'White House, TN',
       obsTimeLocal:   obs.obsTimeLocal  || new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' })
     }, { headers: { 'Cache-Control': 'public, max-age=300' } });
 
   } catch (e) {
-    // WU unavailable — fall back to Open-Meteo so the app keeps working
+    // WU unreachable or malformed - same helper as the array-dark path above, so the
+    // two fallbacks can never drift apart again.
     try {
-      const r2 = await fetch(
-        'https://api.open-meteo.com/v1/forecast' +
-        '?latitude=36.477&longitude=-86.66' +
-        '&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,surface_pressure' +
-        '&hourly=dewpoint_2m,apparent_temperature,windgusts_10m,precipitation' +
-        '&temperature_unit=fahrenheit&windspeed_unit=mph&precipitation_unit=inch' +
-        '&timezone=America%2FChicago&forecast_days=1',
-        { headers: { 'User-Agent': 'HCC-PWA/1.0' }, cf: { cacheTtl: 300 } }
-      );
-      if (!r2.ok) throw new Error('fallback ' + r2.status);
-      const d2 = await r2.json();
-      const c = d2.current;
-      const h = d2.hourly || {};
-      const now = Date.now();
-      const times = h.time || [];
-      let idx = 0;
-      for (let i = 0; i < times.length; i++) {
-        if (new Date(times[i]).getTime() <= now) idx = i;
-      }
-      const temp = c.temperature_2m;
-      const hum  = c.relative_humidity_2m;
-      const dew  = h.dewpoint_2m?.[idx] ?? (temp - ((100 - hum) / 5));
-      const wdDeg = c.wind_direction_10m ?? null;
-      const presHpa = c.surface_pressure ?? null;
+      const om = await openMeteo();
       return Response.json({
-        temp:         Math.round(temp),
-        dewpt:        Math.round(dew),
-        heatIndex:    Math.round(h.apparent_temperature?.[idx] ?? temp),
-        humidity:     Math.round(hum),
-        precipTotal:  Math.round((h.precipitation?.[idx] ?? 0) * 100) / 100,
-        precipRate:   0,
-        windSpeed:    Math.round(c.wind_speed_10m),
-        windGust:     Math.round(h.windgusts_10m?.[idx] ?? c.wind_speed_10m),
-        winddir:      wdDeg,
-        windDirCard:  ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round((wdDeg??0)/22.5)%16],
-        pressure:     presHpa ? Math.round(presHpa * 0.02953 * 100) / 100 : null,
-        uv:           null,
-        solarRadiation: null,
-        station:      'Open-Meteo (WU offline)',
+        ...om,
+        rain7d: null,
+        rain7dDays: null,
+        station: 'Open-Meteo (WU offline)',
+        stationDark: true,
         neighborhood: 'White House, TN',
         obsTimeLocal: new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' })
       }, { headers: { 'Cache-Control': 'public, max-age=300' } });
