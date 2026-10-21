@@ -37,6 +37,19 @@ export async function onRequestGet({ env } = {}) {
     return DIRS[Math.round(deg / 22.5) % 16];
   }
 
+  // A DEAD SENSOR DOES NOT REPORT "NOTHING" - IT REPORTS A SENTINEL.
+  // Found live 2026-10-20: the outdoor array stopped transmitting to the console, and
+  // Weather Underground passed the station's raw -32768 straight through. Every field
+  // here was guarded with `!= null`, which accepts -32768 happily BECAUSE IT IS A NUMBER.
+  // So /api/weather served `humidity: -32768` and `winddir: -32768`, and toCard() turned
+  // that into a confident `windDirCard: "N"` - a wind direction that does not exist.
+  // The app would have shown -32768% humidity next to a fake N wind.
+  // NULL IS THE HONEST ANSWER, and every consumer already handles null (temp, dewpt,
+  // windSpeed and uv were correctly null in the same payload).
+  const SENTINELS = new Set([-32768, 32767, -9999, 9999, -999]);
+  const live = v => (typeof v === 'number' && isFinite(v) && !SENTINELS.has(v)) ? v : null;
+  const num = (v, f) => { const x = live(v); return x == null ? null : (f ? f(x) : Math.round(x)); };
+
   try {
     const r = await fetch(
       `https://api.weather.com/v2/pws/observations/current?stationId=${WU_STATION}&format=json&units=e&apiKey=${WU_KEY}&numericPrecision=decimal`,
@@ -73,30 +86,30 @@ export async function onRequestGet({ env } = {}) {
     if (!obs) throw new Error('no observation');
 
     const imp = obs.imperial || {};
-    const wdDeg = obs.winddir ?? null;
+    const wdDeg = live(obs.winddir);
 
     return Response.json({
       // Core temps
-      temp:           imp.temp    != null ? Math.round(imp.temp)    : null,
-      dewpt:          imp.dewpt   != null ? Math.round(imp.dewpt)   : null,
-      heatIndex:      imp.heatIndex != null ? Math.round(imp.heatIndex) : (imp.temp != null ? Math.round(imp.temp) : null),
+      temp:           num(imp.temp),
+      dewpt:          num(imp.dewpt),
+      heatIndex:      num(imp.heatIndex) ?? num(imp.temp),
       // Humidity + precip
-      humidity:       obs.humidity != null ? Math.round(obs.humidity) : null,
-      precipTotal:    imp.precipTotal != null ? Math.round(imp.precipTotal * 100) / 100 : 0,
-      precipRate:     imp.precipRate  != null ? Math.round(imp.precipRate  * 100) / 100 : 0,
+      humidity:       num(obs.humidity),
+      precipTotal:    num(imp.precipTotal, x => Math.round(x * 100) / 100) ?? 0,
+      precipRate:     num(imp.precipRate,  x => Math.round(x * 100) / 100) ?? 0,
       // Rolling 7 days from the same gauge. Turf target is 1.0-1.5 in/week.
       rain7d,
       rain7dDays,
       // Wind
-      windSpeed:      imp.windSpeed != null ? Math.round(imp.windSpeed) : null,
-      windGust:       imp.windGust  != null ? Math.round(imp.windGust)  : null,
+      windSpeed:      num(imp.windSpeed),
+      windGust:       num(imp.windGust),
       winddir:        wdDeg,
       windDirCard:    toCard(wdDeg),
       // Pressure
-      pressure:       imp.pressure != null ? Math.round(imp.pressure * 100) / 100 : null,
+      pressure:       num(imp.pressure, x => Math.round(x * 100) / 100),
       // Solar
-      uv:             obs.uv             != null ? Math.round(obs.uv * 10) / 10 : null,
-      solarRadiation: obs.solarRadiation != null ? Math.round(obs.solarRadiation) : null,
+      uv:             num(obs.uv, x => Math.round(x * 10) / 10),
+      solarRadiation: num(obs.solarRadiation),
       // Meta
       station:        obs.stationID || WU_STATION,
       neighborhood:   obs.neighborhood  || 'White House, TN',
