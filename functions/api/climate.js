@@ -271,17 +271,42 @@ async function luxAuth(email, password) {
   return tokens;
 }
 
+// 🔴 2026-10-22. Two things, both aimed at ONE unanswered question.
+//
+// Jeff put the LUX back on the wall with its new thermostat wire and /api/climate still
+// returned `location_user: 403`. The 403-re-auth fix earlier today proved it is NOT a stale
+// token - the error now reads "(after a fresh login)", so the Azure B2C login SUCCEEDS and
+// then myluxstat.io refuses the account.
+//
+// 1. A CLOUDFLARE WORKER SENDS NO User-Agent UNLESS YOU SET ONE. The login that works is on
+//    Microsoft's b2clogin.com; the call that 403s is on myluxstat.io. A UA-less request is
+//    the classic thing a WAF drops, and it would explain a path that worked for months and
+//    then stopped without us touching it. Sending a normal UA costs nothing and is not a
+//    trick - it is what every other client on earth already sends.
+// 2. THE STATUS CODE ALONE IS NOT EVIDENCE. 403 from an API and 403 from a bot-blocker look
+//    identical until you read the body. Carry the first 160 characters into the error so the
+//    next reading says WHICH, instead of sending somebody back to guess again.
+const LUX_HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 '
+    + '(KHTML, like Gecko) Mobile/15E148',
+  'Accept': 'application/json',
+};
+
 async function getLocationUser(accessToken) {
   const r = await fetch(`${API_BASE}/location/user`, {
-    headers: { 'Authorization': `Bearer ${accessToken}` },
+    headers: { ...LUX_HEADERS, 'Authorization': `Bearer ${accessToken}` },
   });
-  if (!r.ok) throw new Error(`location_user: ${r.status}`);
+  if (!r.ok) {
+    const body = await r.text().catch(() => '');
+    throw new Error(`location_user: ${r.status} ${body.slice(0, 160).replace(/\s+/g, ' ')}`);
+  }
   return await r.json();
 }
 
 async function getDeviceState(accessToken, deviceId) {
   const r = await fetch(`${API_BASE}/device`, {
     headers: {
+      ...LUX_HEADERS,
       'Authorization': `Bearer ${accessToken}`,
       'Deviceid': deviceId,
     },
