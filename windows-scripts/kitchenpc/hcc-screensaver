@@ -1,0 +1,68 @@
+#!/bin/sh
+# ============================================================================
+# HCC kiosk / "app screensaver" — LINUX PORT of the Beast's Start-HCCKiosk.ps1
+# Written 2026-09-23. Deliberately mirrors the Windows original; read that
+# script's header before changing anything here.
+#
+# Jeff, 2026-08-20: "make loewenhome.com my screen saver and if you could make
+# it rotate to a different page every 1 min or so so it doesn't screen burn.
+# But I want it to be live so I can use it in that mode and then X out to go
+# back to the computer."
+#
+# 2026-09-24: now launches FIREFOX (--kiosk + the dom.allow_scripts_to_close_windows
+# policy replaces Chrome's --app=), per OPEN_ITEMS #205. The idle logic is unchanged.
+#
+# THREE THINGS ARE DELIBERATE. DO NOT "TIDY" THEM AWAY:
+#
+#   1. NO --user-data-dir. The kiosk runs in Jeff's NORMAL Chrome profile on
+#      purpose. The app keeps his Home Assistant token in localStorage, so a
+#      fresh profile shows "connect to Beehive" and parades broken GUARDIAN and
+#      camera panels across the screen. (A first port of this script got this
+#      wrong and used a separate profile.)
+#
+#   2. --app=, NOT --kiosk. Chrome only lets a page call window.close() on a
+#      window it owns; an --app window qualifies, so the app's own X button
+#      genuinely closes it. --kiosk gives the user no way out.
+#
+#   3. ?kiosk=1&rot=60 — the APP does its own section rotation from these query
+#      parameters. That is what prevents burn-in, which matters more on a
+#      wall-mounted panel than on a TV.
+# ============================================================================
+
+export DISPLAY="${DISPLAY:-:0}"
+ROT="${1:-60}"
+URL="https://loewenhome.com/?kiosk=1&rot=${ROT}"
+# NOTE: pgrep -f takes an EXTENDED REGEX, so the "?" must be escaped or it means
+# "optional" and the pattern can never match its own window. That bug shipped once.
+MARK='loewenhome\.com/\?kiosk=1'
+
+# already up? leave it alone
+if pgrep -f "$MARK" >/dev/null 2>&1; then
+  exit 0
+fi
+
+firefox --kiosk "$URL" >/dev/null 2>&1 &
+
+sleep 4
+
+# Close it as soon as Jeff is back. xprintidle is the same idea as the Windows
+# original's GetLastInputInfo: exact, and the threshold is ours.
+# The X button can also close it, in which case the loop simply ends.
+while pgrep -f "$MARK" >/dev/null 2>&1; do
+  idle=$(xprintidle 2>/dev/null || echo 999999)
+  if [ "$idle" -lt 3000 ]; then
+    pkill -f "$MARK"
+    break
+  fi
+  sleep 1
+done
+
+# RE-ARM GUARD, the bit that is easy to get wrong: do not return until Jeff is
+# genuinely active again, or xautolock can immediately relaunch the kiosk while
+# he is still idle and he can never get back to his desktop.
+while :; do
+  idle=$(xprintidle 2>/dev/null || echo 0)
+  [ "$idle" -lt 10000 ] && break
+  sleep 2
+done
+exit 0
