@@ -114,7 +114,15 @@ async function withAuth(env, email, password, fn) {
   const cached = await getCachedTokens(env);
   if (accessTokenStillValid(cached)) {
     try { return await fn(cached.access_token); }
-    catch (e) { if (!/\b401\b/.test(e.message)) throw e; }
+    // 🔴 2026-10-22: this tested 401 ONLY, and it wedged the whole card.
+    // The LUX was off the wall for weeks while its chewed thermostat wire was replaced.
+    // When Jeff put it back, /api/climate returned `location_user: 403` on every call and
+    // never recovered - because a cached token that has NOT expired yet but is no longer
+    // accepted comes back 403, not 401, so this line rethrew instead of re-authenticating.
+    // The cached token stays "valid" by its own clock, so the card could sit broken for an
+    // hour at a time with a perfectly good thermostat on the wall.
+    // A rejected token is a rejected token: re-auth on 401 OR 403.
+    catch (e) { if (!/\b40[13]\b/.test(e.message)) throw e; }
   }
   if (cached && cached.refresh_token) {
     try {
@@ -125,7 +133,15 @@ async function withAuth(env, email, password, fn) {
   }
   const tokens = await luxAuth(email, password);
   await cacheTokens(env, tokens, null);
-  return await fn(tokens.access_token);
+  // Mark a failure that survives a FRESH login. Without this the error reads identically
+  // whether the cause is a stale cache or the LUX account itself - and that is the
+  // difference between "it fixes itself on the next call" and "stop changing the app".
+  try {
+    return await fn(tokens.access_token);
+  } catch (e) {
+    e.message = `${e.message} (after a fresh login)`;
+    throw e;
+  }
 }
 
 async function generatePKCE() {
