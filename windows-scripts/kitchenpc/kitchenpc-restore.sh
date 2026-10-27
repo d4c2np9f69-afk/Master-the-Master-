@@ -21,7 +21,7 @@
 #   fonts-liberation fonts-liberation2 fonts-crosextra-{carlito,caladea} papirus-icon-theme
 #   greybird-gtk-theme xprintidle wmctrl xdotool smartmontools alsa-utils lm-sensors
 #   build-essential linux-headers-$(uname -r) dkms git autoconf xutils-dev libtool xserver-xorg-dev
-#   libc6-i386 pkg-config evtest
+#   libc6-i386 pkg-config evtest xserver-xorg-input-evdev
 # ============================================================================
 set -u
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -44,7 +44,51 @@ cd "$H/nwfermi" || exit 1
 sudo install -m755 usr/sbin/nwfermi_daemon usr/sbin/fwprod /usr/sbin/
 sudo install -m644 etc/udev/rules.d/40-nw-fermi.rules /etc/udev/rules.d/
 sudo install -m644 etc/systemd/system/nwfermi@.service /etc/systemd/system/
-sudo mkdir -p /etc/X11/xorg.conf.d && sudo install -m644 etc/X11/xorg.conf.d/10-nwfermi.conf /etc/X11/xorg.conf.d/
+sudo mkdir -p /etc/X11/xorg.conf.d
+sudo install -m644 etc/X11/xorg.conf.d/10-nwfermi.conf /etc/X11/xorg.conf.d/ 2>/dev/null || true
+# 🔴 2026-10-26: THE KIT'S OWN 10-nwfermi.conf IS DELIBERATELY OVERWRITTEN BELOW. DO NOT REMOVE.
+# The kit ships a single InputClass with MatchProduct + Driver "nextwindow" and NO
+# MatchDevicePath. The nwfermi daemon publishes ONE virtual device through THREE nodes
+# (mouse0, js0, event7), so that section matched all three and forced the legacy
+# out-of-tree driver onto each. X built three devices; two ended up disabled+floating and
+# the third spewed "Read error: Resource temporarily unavailable" because that 2010-era
+# driver cannot parse evdev packets. Touch MOVED the pointer but never produced a BUTTON
+# PRESS. Jeff, 2026-10-26: "The mouse moves but the buttons don't."
+# Handing event7 to libinput fixed the buttons and broke the motion instead (udev tags this
+# panel ID_INPUT_MOUSE=1, so libinput treats it as a RELATIVE pointer and ignores its
+# absolute axes - and it has no EV_REL at all). evdev in Absolute mode is the only one that
+# does both: Xorg then logs "Found absolute touchscreen ... type: TOUCHSCREEN".
+# The nwfermi DKMS kernel module above is STILL REQUIRED - it creates input7 and was never
+# the fault. The xf86-input-nextwindow build below is now unused but harmless.
+sudo tee /etc/X11/xorg.conf.d/10-nwfermi.conf >/dev/null <<'NWEOF'
+# KitchenPC NextWindow (HP TouchSmart 520) touch panel. Written by kitchenpc-restore.sh.
+# 2026-10-26: see the comment block in that script before changing ANY of this.
+# Working axes are ABS_X / ABS_Y (0-32767). The ABS_MT_* axes are a malformed type-A
+# multitouch stream - no ABS_MT_SLOT, and libevdev throws "double tracking ID in slot 0".
+# DO NOT re-add a bare MatchProduct section, and do not put the "nextwindow" driver back.
+
+Section "InputClass"
+        Identifier      "Nextwindow Fermi Touchscreen"
+        MatchProduct    "Nextwindow Fermi Touchscreen"
+        MatchDevicePath "/dev/input/event*"
+        Driver          "evdev"
+        Option          "Mode" "Absolute"
+EndSection
+
+Section "InputClass"
+        Identifier      "Nextwindow Fermi - ignore the legacy mouse node"
+        MatchProduct    "Nextwindow Fermi Touchscreen"
+        MatchDevicePath "/dev/input/mouse*"
+        Option          "Ignore" "true"
+EndSection
+
+Section "InputClass"
+        Identifier      "Nextwindow Fermi - ignore the joystick node"
+        MatchProduct    "Nextwindow Fermi Touchscreen"
+        MatchDevicePath "/dev/input/js*"
+        Option          "Ignore" "true"
+EndSection
+NWEOF
 if [ ! -f /usr/lib/xorg/modules/input/nextwindow_drv.so ]; then
   cd usr/src/xf86-input-nextwindow-0.3.4 && chmod +x autogen.sh
   ./autogen.sh >/tmp/nw-agen.log 2>&1 && make >/tmp/nw-make.log 2>&1 && sudo make install >/tmp/nw-mi.log 2>&1
@@ -123,7 +167,42 @@ for L in "Sling TV|https://watch.sling.com" "Braves|https://braves.tv"; do
   printf '[Desktop Entry]\nVersion=1.0\nType=Application\nName=%s\nExec=firefox --new-window %s\nIcon=firefox\nTerminal=false\n' "$n" "$url" > "$H/Desktop/$n.desktop"
   chmod +x "$H/Desktop/$n.desktop"
 done
-say "Sling + Braves launchers (desktop)" "Firefox"
+
+# 🔴 2026-10-26: MARK EVERY DESKTOP LAUNCHER AS TRUSTED, OR THEY DO NOT RUN.
+# xfdesktop refuses a .desktop launcher unless the GIO attribute
+# `metadata::xfce-exe-checksum` equals the SHA-256 of the file CONTENT. Instead of
+# launching it throws "Untrusted application launcher - the desktop file ... is in an
+# insecure location and not marked as secure". chmod +x alone is NOT enough. This stamp is
+# exactly what that dialog's "Mark As Secure And Launch" button writes. Without it Jeff
+# gets the box on EVERY launcher on first use - found 2026-10-26 when he tapped Sling TV
+# to watch Fox News with his coffee and got the dialog instead.
+# The checksum covers the CONTENT, so editing a launcher correctly invalidates its stamp:
+# re-run this loop after changing one. Stamps persist in ~/.local/share/gvfs-metadata.
+for f in "$H"/Desktop/*.desktop; do
+  [ -e "$f" ] || continue
+  chmod +x "$f"
+  gio set -t string "$f" metadata::xfce-exe-checksum "$(sha256sum "$f" | cut -d' ' -f1)" 2>/dev/null
+done
+say "Sling + Braves launchers (desktop)" "Firefox, $(ls "$H"/Desktop/*.desktop 2>/dev/null | wc -l) trusted"
+
+# 2026-10-27: xfdesktop CACHES the trust state in memory, so stamping the launchers above
+# is not enough on its own - without a reload xfdesktop keeps serving the OLD cache and every
+# double-tap on the kitchen touchscreen does nothing. Jeff morning: "I go in the kitchen this
+# morning... the fucking computer is still not fixed". The autostart below reloads xfdesktop
+# ~5s after every login so a reboot or re-login can never leave the icons dead again.
+mkdir -p "$H"/.config/autostart
+cat > "$H"/.config/autostart/hcc-xfdesktop-reload.desktop <<'XFDR'
+[Desktop Entry]
+Type=Application
+Name=HCC - reload xfdesktop so icon trust state is fresh
+Comment=Yesterday's fix (per-launcher StartupNotify=false and xfce-exe-checksum stamps) did not take effect until xfdesktop was reloaded. Doing it on every login so a reboot/relogin never leaves the kitchen touchscreen with dead icons again.
+Exec=bash -c 'sleep 5; xfdesktop --reload'
+X-GNOME-Autostart-enabled=true
+Hidden=false
+XFDR
+# And reload it RIGHT NOW so the current session picks the stamps up immediately.
+if [ -n "${DISPLAY:-}" ]; then xfdesktop --reload 2>/dev/null & fi
+say "xfdesktop trust-cache reload" "autostart written, reload fired"
 
 # ---- 6. CLOCK: Central -------------------------------------------------------------------
 sudo timedatectl set-timezone America/Chicago; sudo timedatectl set-ntp true
