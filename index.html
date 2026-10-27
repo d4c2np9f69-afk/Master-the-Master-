@@ -2496,11 +2496,11 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
               <button class="lux-refresh-btn" onclick="tstatRefresh()">&#128260;</button>
             </div>
           </div>
-
-          <div class="lux-wx-patch">
-            <div><div id="tsOutTemp" class="lux-wx-val">--&deg;</div><div class="lux-wx-lbl">Outside</div></div>
-            <div><div id="tsFeelsLike" class="lux-wx-val">--&deg;</div><div class="lux-wx-lbl">Feels Like</div></div>
-          </div>
+          <!-- 2026-10-27: the weather patch (outside/feels-like) is GONE on this card.
+               It existed only to cover the fake weather numbers printed on the old LUX render.
+               Jeff's Meross hero has no fake numbers to hide, and the patch floated over the
+               MTS300 badge and looked wrong (simulated the overlay zones before removing it).
+               Outside temp + feels-like live on the WEATHER section. -->
         </div>
       </div>
 
