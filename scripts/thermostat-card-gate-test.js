@@ -129,13 +129,25 @@ async function main() {
   st = await page.evaluate(() => ({
     cur: (document.getElementById('tsCur') || {}).textContent,
     set: (document.getElementById('tsSet') || {}).textContent,
-    mode: (document.getElementById('tsMode') || {}).textContent,
+    coolBtn: ((document.getElementById('tsBtnCool') || {}).className || ''),
+    heatBtn: ((document.getElementById('tsBtnHeat') || {}).className || ''),
     cal: (document.getElementById('tsCal') || {}).textContent,
     banner: (document.getElementById('tsBanner') || {}).className,
+    hasBumpBtn: !!document.querySelector('button[onclick*="tstatBump"]'),
+    hasModeBtns: !!document.querySelector('button[onclick*="tstatMode"]'),
+    hasFanBtns: !!document.querySelector('button[onclick*="tstatFan"]'),
+    hasLockBtn: !!document.querySelector('button[onclick*="tstatLockToggle"]'),
   }));
   check('LIVE: the room temperature is shown', /69/.test(st.cur || ''), st.cur);
   check('LIVE: the setpoint is shown', /72/.test(st.set || ''), st.set);
-  check('LIVE: the mode is shown', /COOL/i.test(st.mode || ''), st.mode);
+  // Mode is signalled by which button is highlighted (primary vs secondary), not a label.
+  check('LIVE: the active mode button is highlighted',
+    /primary/.test(st.coolBtn) && !/primary/.test(st.heatBtn),
+    { cool: st.coolBtn.slice(0, 40), heat: st.heatBtn.slice(0, 40) });
+  check('CONTROLS: setpoint arrows are wired', st.hasBumpBtn);
+  check('CONTROLS: mode buttons are wired', st.hasModeBtns);
+  check('CONTROLS: fan speed buttons are wired', st.hasFanBtns);
+  check('CONTROLS: child lock toggle is wired', st.hasLockBtn);
   // 1.6 C of trim is 2.9 F — the card must speak Fahrenheit (Jeff's standing rule).
   check('LIVE: the trim is shown in FAHRENHEIT, not celsius', /2\.9/.test(st.cal || ''), st.cal);
   check('LIVE: no error banner on a healthy thermostat', !/wx-no/.test(st.banner || ''), st.banner);

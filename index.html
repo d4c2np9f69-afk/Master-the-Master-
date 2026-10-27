@@ -2448,12 +2448,48 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
       <div id="tsBanner" class="wx-banner wx-load">&#128260; Loading thermostat&hellip;</div>
       <ul class="spec-list">
         <li><span class="sk">Reading</span><span class="sv" id="tsCur">--</span></li>
-        <li><span class="sk">Set to</span><span class="sv" id="tsSet">--</span></li>
-        <li><span class="sk">Mode</span><span class="sv" id="tsMode">--</span></li>
+        <li><span class="sk">Humidity</span><span class="sv" id="tsHum">--</span></li>
+        <li>
+          <span class="sk">Set to</span>
+          <span class="sv" style="display:flex;align-items:center;gap:8px;justify-content:flex-end">
+            <button type="button" class="mbtn secondary" style="min-width:36px;padding:4px 8px" onclick="tstatBump(-1)" aria-label="Lower setpoint 1 degree">&#9660;</button>
+            <span id="tsSet" data-sp="" style="min-width:52px;text-align:center;font-weight:600">--</span>
+            <button type="button" class="mbtn secondary" style="min-width:36px;padding:4px 8px" onclick="tstatBump(1)" aria-label="Raise setpoint 1 degree">&#9650;</button>
+          </span>
+        </li>
+        <li id="tsRangeRow" style="display:none"><span class="sk">Auto range</span><span class="sv" id="tsRange">--</span></li>
+        <li>
+          <span class="sk">Mode</span>
+          <span class="sv" style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end">
+            <button type="button" id="tsBtnCool" class="mbtn secondary" style="padding:4px 10px" onclick="tstatMode('cool')">&#10052;&#65039; Cool</button>
+            <button type="button" id="tsBtnHeat" class="mbtn secondary" style="padding:4px 10px" onclick="tstatMode('heat')">&#128293; Heat</button>
+            <button type="button" id="tsBtnAuto" class="mbtn secondary" style="padding:4px 10px" onclick="tstatMode('heat_cool')">&#128260; Auto</button>
+            <button type="button" id="tsBtnOff" class="mbtn secondary" style="padding:4px 10px" onclick="tstatMode('off')">&#9646;&#9646; Off</button>
+          </span>
+        </li>
+        <li>
+          <span class="sk">Fan</span>
+          <span class="sv" style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end">
+            <button type="button" id="tsFanAuto" class="mbtn secondary" style="padding:4px 10px" onclick="tstatFan('auto')">Auto</button>
+            <button type="button" id="tsFanLow" class="mbtn secondary" style="padding:4px 10px" onclick="tstatFan('low')">Low</button>
+            <button type="button" id="tsFanMed" class="mbtn secondary" style="padding:4px 10px" onclick="tstatFan('medium')">Med</button>
+            <button type="button" id="tsFanHigh" class="mbtn secondary" style="padding:4px 10px" onclick="tstatFan('high')">High</button>
+          </span>
+        </li>
         <li><span class="sk">Right now</span><span class="sv" id="tsAct">--</span></li>
+        <li><span class="sk">Output</span><span class="sv" id="tsOut">--</span></li>
         <li><span class="sk">Trim</span><span class="sv" id="tsCal">--</span></li>
+        <li><span class="sk">Signal</span><span class="sv" id="tsSignal">--</span></li>
         <li><span class="sk">Filter</span><span class="sv" id="tsFilter">--</span></li>
+        <li>
+          <span class="sk">Child lock</span>
+          <span class="sv" style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+            <span id="tsLockState" style="min-width:40px;text-align:right">--</span>
+            <button type="button" id="tsLockBtn" class="mbtn secondary" style="padding:4px 10px" onclick="tstatLockToggle()">Toggle</button>
+          </span>
+        </li>
       </ul>
+      <button type="button" class="btn-full btn-gray" style="margin-top:8px" onclick="tstatRefresh()">&#128260; Pull fresh from the thermostat</button>
     </div>
 
     <!-- A/C RELAY — 2026-09-15. The LUX died in a power surge. Until the ecobee is installed,
@@ -7004,8 +7040,16 @@ var AC_TPL = "{%- set i = states.sensor.my_weather_station_inside_temperature -%
   // Entity ids verified against live HA 2026-10-26 19:30 - do not retype them from memory.
   + " 'ts_cur': state_attr('climate.hcc_thermostat','current_temperature'),"
   + " 'ts_set': state_attr('climate.hcc_thermostat','temperature'),"
+  + " 'ts_hum': state_attr('climate.hcc_thermostat','current_humidity'),"
+  + " 'ts_tlo': state_attr('climate.hcc_thermostat','target_temp_low'),"
+  + " 'ts_thi': state_attr('climate.hcc_thermostat','target_temp_high'),"
   + " 'ts_mode': states('climate.hcc_thermostat'),"
+  + " 'ts_fan': state_attr('climate.hcc_thermostat','fan_mode'),"
   + " 'ts_act': state_attr('climate.hcc_thermostat','hvac_action'),"
+  + " 'ts_cool': states('sensor.hcc_thermostat_cooling'),"
+  + " 'ts_heat': states('sensor.hcc_thermostat_heating'),"
+  + " 'ts_aux': states('sensor.hcc_thermostat_aux'),"
+  + " 'ts_lock': states('switch.smart_thermostat_25101126854698601201c4e7ae2244b2_lock'),"
   + " 'ts_cal': states('number.smart_thermostat_25101126854698601201c4e7ae2244b2_calibration'),"
   + " 'ts_filter': states('sensor.hcc_thermostat_filter'),"
   + " 'ts_signal': states('sensor.hcc_thermostat_signal'),"
@@ -7029,6 +7073,13 @@ function acAgo(iso){
 // payload the A/C card already fetches. Read-only on purpose for now: the stat keeps its own
 // control loop and compressor protection, and putting setpoint buttons here before that is
 // settled would mean two things driving one unit.
+// 🔴 FULL CONTROL + REPORTING - Jeff, 2026-10-26 10:24 PM: "I want it full control and
+// reporting all that it can". The card now surfaces every meaningful field the MTS300
+// exposes (humidity, fan speed, heat/cool/aux output, child lock, WiFi signal, filter
+// life, calibration trim) and drives every control the device supports: setpoint,
+// mode, fan speed, child lock, and a hard-refresh. The thermostat's own cycling logic
+// and compressor protection are UNTOUCHED - HA just sets the user-facing setpoint and
+// the hardware honours its own anti-short-cycle rules, so a double tap can't do harm.
 function tsRender(d){
   var set = function(id, html, color){
     var el = document.getElementById(id); if (!el) return;
@@ -7047,10 +7098,19 @@ function tsRender(d){
     if (b) { b.className = 'wx-banner wx-no'; b.innerHTML = '&#9888;&#65039; Thermostat not reporting'; }
     if (conn) { conn.innerHTML = ' &#9679; OFFLINE'; conn.style.color = 'var(--bad)'; }
     set('tsCur', 'no reading', 'var(--bad)');
-    set('tsSet', '--'); set('tsMode', '--'); set('tsAct', '--'); set('tsCal', '--'); set('tsFilter', '--');
+    ['tsHum','tsSet','tsAct','tsOut','tsCal','tsSignal','tsFilter','tsLockState'].forEach(function(id){ set(id,'--'); });
+    var sps = document.getElementById('tsSet'); if (sps) sps.setAttribute('data-sp','');
+    // Grey the button rows so nothing fires against a dead device
+    ['tsBtnCool','tsBtnHeat','tsBtnAuto','tsBtnOff','tsFanAuto','tsFanLow','tsFanMed','tsFanHigh','tsLockBtn'].forEach(function(id){
+      var el=document.getElementById(id); if (el) { el.disabled = true; el.style.opacity='.5'; }
+    });
     return;
   }
   if (conn) { conn.innerHTML = ' &#11044; BEEHIVE'; conn.style.color = 'var(--gold)'; }
+  // Re-enable the buttons once alive again
+  ['tsBtnCool','tsBtnHeat','tsBtnAuto','tsBtnOff','tsFanAuto','tsFanLow','tsFanMed','tsFanHigh','tsLockBtn'].forEach(function(id){
+    var el=document.getElementById(id); if (el) { el.disabled = false; el.style.opacity=''; }
+  });
 
   var running = (act === 'cooling' || act === 'heating');
   if (b) {
@@ -7059,22 +7119,138 @@ function tsRender(d){
     else                { b.className = 'wx-banner';  b.innerHTML = '&#9989; Idle at ' + cur.toFixed(0) + '&deg;' + (sp != null ? ' &bull; set ' + sp.toFixed(0) + '&deg;' : ''); }
   }
 
+  // Readings
   set('tsCur', cur.toFixed(0) + '&deg;F');
-  set('tsSet', sp != null ? sp.toFixed(0) + '&deg;F' : '--');
-  set('tsMode', String(mode).toUpperCase(), mode === 'off' ? 'var(--warn)' : '');
+  var hum = num(d && d.ts_hum);
+  set('tsHum', hum != null ? hum.toFixed(0) + '%' : '--');
+
+  // Setpoint - also stash the live value so tstatBump() does not drift against a stale display
+  var sps = document.getElementById('tsSet');
+  if (sps) {
+    sps.textContent = sp != null ? sp.toFixed(0) + '°F' : '--';
+    sps.setAttribute('data-sp', sp != null ? String(sp) : '');
+  }
+
+  // Auto-mode range (target_temp_low / target_temp_high)
+  var tlo = num(d && d.ts_tlo), thi = num(d && d.ts_thi);
+  var rangeRow = document.getElementById('tsRangeRow');
+  if (mode === 'heat_cool' && tlo != null && thi != null) {
+    if (rangeRow) rangeRow.style.display = '';
+    set('tsRange', tlo.toFixed(0) + '&deg;F &mdash; ' + thi.toFixed(0) + '&deg;F');
+  } else if (rangeRow) rangeRow.style.display = 'none';
+
+  // Mode button highlight
+  var modeBtns = {cool:'tsBtnCool', heat:'tsBtnHeat', heat_cool:'tsBtnAuto', off:'tsBtnOff'};
+  Object.keys(modeBtns).forEach(function(m){
+    var el = document.getElementById(modeBtns[m]); if (!el) return;
+    if (m === mode) { el.classList.remove('secondary'); el.classList.add('primary'); }
+    else            { el.classList.remove('primary'); el.classList.add('secondary'); }
+  });
+
+  // Fan mode highlight
+  var fanBtns = {auto:'tsFanAuto', low:'tsFanLow', medium:'tsFanMed', high:'tsFanHigh'};
+  var fanMode = (d && d.ts_fan) || 'auto';
+  Object.keys(fanBtns).forEach(function(f){
+    var el = document.getElementById(fanBtns[f]); if (!el) return;
+    if (f === fanMode) { el.classList.remove('secondary'); el.classList.add('primary'); }
+    else               { el.classList.remove('primary'); el.classList.add('secondary'); }
+  });
+
+  // Right now (hvac_action)
   set('tsAct', act ? String(act).charAt(0).toUpperCase() + String(act).slice(1) : '--',
       running ? 'var(--info)' : '');
 
-  // Trim: the device calibration automation #251 keeps retuned against the living-room station.
+  // Output rail - cooling/heating/aux relay states straight off the device
+  var cool = num(d && d.ts_cool), heat = num(d && d.ts_heat), aux = num(d && d.ts_aux);
+  var parts = [];
+  if (cool != null) parts.push('Cool ' + (cool > 0 ? 'ON' : 'off'));
+  if (heat != null) parts.push('Heat ' + (heat > 0 ? 'ON' : 'off'));
+  if (aux  != null) parts.push('Aux '  + (aux  > 0 ? 'ON' : 'off'));
+  set('tsOut', parts.length ? parts.join(' &bull; ') : '--',
+      (cool > 0 || heat > 0 || aux > 0) ? 'var(--info)' : '');
+
+  // Trim - calibration automation #251 keeps this retuned against the living-room station.
   var cal = num(d && d.ts_cal);
   var tracking = (d && d.ts_track) === 'on';
   if (cal == null) set('tsCal', '--');
   else set('tsCal', (cal >= 0 ? '+' : '') + (cal * 1.8).toFixed(1) + '&deg;F to match the living room'
        + (tracking ? '' : ' &bull; TRACKING OFF'), tracking ? '' : 'var(--warn)');
 
-  var fl = num(d && d.ts_filter), sg = num(d && d.ts_signal);
-  set('tsFilter', fl != null ? Math.round(fl) + '% life' + (sg != null ? ' &bull; signal ' + Math.round(sg) + '%' : '') : '--',
+  // Signal + filter on their own rows so each tells you one specific thing
+  var sg = num(d && d.ts_signal);
+  set('tsSignal', sg != null ? Math.round(sg) + '%' : '--',
+      (sg != null && sg < 30) ? 'var(--warn)' : '');
+  var fl = num(d && d.ts_filter);
+  set('tsFilter', fl != null ? Math.round(fl) + '% life' : '--',
       (fl != null && fl < 10) ? 'var(--warn)' : '');
+
+  // Child lock - render state and set the button label to the action it will perform
+  var lock = (d && d.ts_lock) || 'off';
+  set('tsLockState', String(lock).toUpperCase(), lock === 'on' ? 'var(--warn)' : '');
+  var lb = document.getElementById('tsLockBtn');
+  if (lb) lb.innerHTML = lock === 'on' ? 'Unlock' : 'Lock';
+}
+
+// ── CONTROL ── all talk to HA directly through haFetch; no climate.js round trip.
+var _TS_ENT = 'climate.hcc_thermostat';
+var _TS_LOCK = 'switch.smart_thermostat_25101126854698601201c4e7ae2244b2_lock';
+var _TS_REFRESH = 'button.smart_thermostat_25101126854698601201c4e7ae2244b2_refresh';
+var _TS_BUMP_TIMER = null, _TS_BUMP_TARGET = null;
+
+function tstatHaCall(path, payload){
+  // 🔴 Common path: shows "Sending…" immediately so a tap is never silent, then kicks a
+  // template refresh at 1.5 s to pull the new state back. If HA rejects the call we land
+  // a red banner that NAMES the HTTP code so a 401 vs 503 is distinguishable, not a
+  // generic "could not reach" that reads the same in every failure mode.
+  var b = document.getElementById('tsBanner');
+  if (b) { b.className = 'wx-banner wx-load'; b.innerHTML = '&#128260; Sending to the thermostat&hellip;'; }
+  return haFetch('/api/services/' + path, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  }).then(function(r){
+    if (!r.ok) throw new Error('HA ' + r.status);
+    setTimeout(loadAcRelay, 1500);  // one shared payload redraws tstat + ac + station
+  }).catch(function(err){
+    if (b) { b.className = 'wx-banner wx-no'; b.innerHTML = '&#9888;&#65039; Thermostat command failed: ' + (err && err.message || 'network'); }
+  });
+}
+
+function tstatBump(delta){
+  // 🔴 DEBOUNCED. Setpoint arrows can be tapped three times in a second; without this each
+  // tap fires its own set_temperature and the device fights its own queue. The last target
+  // after an 800 ms quiet window is the one that actually ships.
+  var el = document.getElementById('tsSet');
+  var base = el ? parseFloat(el.getAttribute('data-sp')) : NaN;
+  if (!isFinite(base)) return;
+  if (_TS_BUMP_TARGET == null) _TS_BUMP_TARGET = base;
+  _TS_BUMP_TARGET = Math.max(41, Math.min(95, _TS_BUMP_TARGET + delta));
+  if (el) { el.textContent = _TS_BUMP_TARGET.toFixed(0) + '°F'; el.setAttribute('data-sp', String(_TS_BUMP_TARGET)); }
+  clearTimeout(_TS_BUMP_TIMER);
+  _TS_BUMP_TIMER = setTimeout(function(){
+    var t = _TS_BUMP_TARGET; _TS_BUMP_TARGET = null;
+    tstatHaCall('climate/set_temperature', {entity_id:_TS_ENT, temperature:t});
+  }, 800);
+}
+
+function tstatMode(hvac_mode){
+  tstatHaCall('climate/set_hvac_mode', {entity_id:_TS_ENT, hvac_mode:hvac_mode});
+}
+
+function tstatFan(fan_mode){
+  tstatHaCall('climate/set_fan_mode', {entity_id:_TS_ENT, fan_mode:fan_mode});
+}
+
+function tstatLockToggle(){
+  var el = document.getElementById('tsLockState');
+  var cur = (el && el.textContent || '').toLowerCase();
+  var svc = cur.indexOf('on') === 0 ? 'turn_off' : 'turn_on';
+  tstatHaCall('switch/' + svc, {entity_id:_TS_LOCK});
+}
+
+function tstatRefresh(){
+  // Button entities take press, not turn_on - the Meross integration's own refresh button
+  // asks the device to re-report everything, used for a stale value that hasn't rolled over.
+  tstatHaCall('button/press', {entity_id:_TS_REFRESH});
 }
 
 function acRender(d){
