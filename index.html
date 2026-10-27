@@ -2443,40 +2443,70 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
          (Jeff: "our bedroom always runs hotter the living room where I would like it to match
          the weather station"). Showing the trim is how a drifting or stuck tracker becomes
          visible instead of silently lying about the room temperature. -->
+    <!-- THERMOSTAT - 2026-10-26 10:34 PM. Jeff: "What happened to my LUX picture why can't that
+         be changed and show the new one". The picture is the beloved part. The LUX card wrapped
+         the fireplace photo (hero-lux.jpg) with a glass panel that held every control. This card
+         is the same wrap, driven by climate.hcc_thermostat (Meross MTS300) instead of the LUX.
+         The lux-* CSS classes are shared on purpose - the visual language is the thermostat's,
+         not any one device's, so if the Meross is ever replaced the card does not shift look.
+         Below the photo panel sits a compact strip for Humidity / Trim / Signal / Filter / Lock
+         - the status detail that would clutter the hero. -->
     <div class="card" id="tstatCard">
       <div class="card-title">&#127777;&#65039; Thermostat &mdash; Tempstar <span id="tsConn" class="irr-conn"></span></div>
       <div id="tsBanner" class="wx-banner wx-load">&#128260; Loading thermostat&hellip;</div>
+
+      <div style="margin:-18px -18px 14px -18px">
+        <div class="lux-photo-wrap">
+          <img src="./images/hero-lux.jpg" alt="Master bedroom thermostat" loading="lazy">
+
+          <div class="lux-fp-panel">
+            <div class="lux-fp-top">
+              <div>
+                <div id="tsCur" class="lux-fp-temp-big">--&deg;</div>
+                <div class="lux-fp-temp-lbl">Room Temp</div>
+              </div>
+              <div style="text-align:right">
+                <div class="lux-fp-set-row">
+                  <button class="lux-adj-btn" onclick="tstatBump(-1)" aria-label="Lower setpoint 1 degree">&#9660;</button>
+                  <span id="tsSet" data-sp="" class="lux-fp-temp-big lux-fp-temp-set">--&deg;</span>
+                  <button class="lux-adj-btn" onclick="tstatBump(1)" aria-label="Raise setpoint 1 degree">&#9650;</button>
+                </div>
+                <div class="lux-fp-temp-lbl">Set Temp</div>
+              </div>
+            </div>
+            <div class="lux-fp-badges">
+              <span id="tsModeBadge" class="lux-badge lux-badge-off">MODE</span>
+              <span id="tsFanBadge" class="lux-badge lux-badge-fan">FAN</span>
+              <span id="tsActBadge" class="lux-badge lux-badge-off" style="display:none">IDLE</span>
+            </div>
+            <div class="lux-mode-grid">
+              <button class="lux-mode-btn" id="tsBtnCool" onclick="tstatMode('cool')">&#10052;&#65039; COOL</button>
+              <button class="lux-mode-btn" id="tsBtnHeat" onclick="tstatMode('heat')">&#128293; HEAT</button>
+              <button class="lux-mode-btn" id="tsBtnAuto" onclick="tstatMode('heat_cool')">&#128260; AUTO</button>
+              <button class="lux-mode-btn" id="tsBtnOff" onclick="tstatMode('off')">&#9646;&#9646; OFF</button>
+            </div>
+            <div class="lux-fan-grid" style="grid-template-columns:repeat(4,1fr)">
+              <button class="lux-fan-btn" id="tsFanAuto" onclick="tstatFan('auto')">Auto</button>
+              <button class="lux-fan-btn" id="tsFanLow" onclick="tstatFan('low')">Low</button>
+              <button class="lux-fan-btn" id="tsFanMed" onclick="tstatFan('medium')">Med</button>
+              <button class="lux-fan-btn" id="tsFanHigh" onclick="tstatFan('high')">High</button>
+            </div>
+            <div class="lux-fp-foot">
+              <span><span id="tsDevName">301 Thermostat</span> &bull; <span id="tsLastSync">--</span></span>
+              <button class="lux-refresh-btn" onclick="tstatRefresh()">&#128260;</button>
+            </div>
+          </div>
+
+          <div class="lux-wx-patch">
+            <div><div id="tsOutTemp" class="lux-wx-val">--&deg;</div><div class="lux-wx-lbl">Outside</div></div>
+            <div><div id="tsFeelsLike" class="lux-wx-val">--&deg;</div><div class="lux-wx-lbl">Feels Like</div></div>
+          </div>
+        </div>
+      </div>
+
       <ul class="spec-list">
-        <li><span class="sk">Reading</span><span class="sv" id="tsCur">--</span></li>
         <li><span class="sk">Humidity</span><span class="sv" id="tsHum">--</span></li>
-        <li>
-          <span class="sk">Set to</span>
-          <span class="sv" style="display:flex;align-items:center;gap:8px;justify-content:flex-end">
-            <button type="button" class="mbtn secondary" style="min-width:36px;padding:4px 8px" onclick="tstatBump(-1)" aria-label="Lower setpoint 1 degree">&#9660;</button>
-            <span id="tsSet" data-sp="" style="min-width:52px;text-align:center;font-weight:600">--</span>
-            <button type="button" class="mbtn secondary" style="min-width:36px;padding:4px 8px" onclick="tstatBump(1)" aria-label="Raise setpoint 1 degree">&#9650;</button>
-          </span>
-        </li>
         <li id="tsRangeRow" style="display:none"><span class="sk">Auto range</span><span class="sv" id="tsRange">--</span></li>
-        <li>
-          <span class="sk">Mode</span>
-          <span class="sv" style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end">
-            <button type="button" id="tsBtnCool" class="mbtn secondary" style="padding:4px 10px" onclick="tstatMode('cool')">&#10052;&#65039; Cool</button>
-            <button type="button" id="tsBtnHeat" class="mbtn secondary" style="padding:4px 10px" onclick="tstatMode('heat')">&#128293; Heat</button>
-            <button type="button" id="tsBtnAuto" class="mbtn secondary" style="padding:4px 10px" onclick="tstatMode('heat_cool')">&#128260; Auto</button>
-            <button type="button" id="tsBtnOff" class="mbtn secondary" style="padding:4px 10px" onclick="tstatMode('off')">&#9646;&#9646; Off</button>
-          </span>
-        </li>
-        <li>
-          <span class="sk">Fan</span>
-          <span class="sv" style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end">
-            <button type="button" id="tsFanAuto" class="mbtn secondary" style="padding:4px 10px" onclick="tstatFan('auto')">Auto</button>
-            <button type="button" id="tsFanLow" class="mbtn secondary" style="padding:4px 10px" onclick="tstatFan('low')">Low</button>
-            <button type="button" id="tsFanMed" class="mbtn secondary" style="padding:4px 10px" onclick="tstatFan('medium')">Med</button>
-            <button type="button" id="tsFanHigh" class="mbtn secondary" style="padding:4px 10px" onclick="tstatFan('high')">High</button>
-          </span>
-        </li>
-        <li><span class="sk">Right now</span><span class="sv" id="tsAct">--</span></li>
         <li><span class="sk">Output</span><span class="sv" id="tsOut">--</span></li>
         <li><span class="sk">Trim</span><span class="sv" id="tsCal">--</span></li>
         <li><span class="sk">Signal</span><span class="sv" id="tsSignal">--</span></li>
@@ -2489,7 +2519,6 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
           </span>
         </li>
       </ul>
-      <button type="button" class="btn-full btn-gray" style="margin-top:8px" onclick="tstatRefresh()">&#128260; Pull fresh from the thermostat</button>
     </div>
 
     <!-- A/C RELAY — 2026-09-15. The LUX died in a power surge. Until the ecobee is installed,
@@ -7097,8 +7126,8 @@ function tsRender(d){
   if (cur == null || mode === 'unavailable' || mode === 'unknown' || mode == null) {
     if (b) { b.className = 'wx-banner wx-no'; b.innerHTML = '&#9888;&#65039; Thermostat not reporting'; }
     if (conn) { conn.innerHTML = ' &#9679; OFFLINE'; conn.style.color = 'var(--bad)'; }
-    set('tsCur', 'no reading', 'var(--bad)');
-    ['tsHum','tsSet','tsAct','tsOut','tsCal','tsSignal','tsFilter','tsLockState'].forEach(function(id){ set(id,'--'); });
+    set('tsCur', '--&deg;', 'var(--bad)');
+    ['tsHum','tsSet','tsOut','tsCal','tsSignal','tsFilter','tsLockState','tsOutTemp','tsFeelsLike'].forEach(function(id){ set(id,'--'); });
     var sps = document.getElementById('tsSet'); if (sps) sps.setAttribute('data-sp','');
     // Grey the button rows so nothing fires against a dead device
     ['tsBtnCool','tsBtnHeat','tsBtnAuto','tsBtnOff','tsFanAuto','tsFanLow','tsFanMed','tsFanHigh','tsLockBtn'].forEach(function(id){
@@ -7119,16 +7148,29 @@ function tsRender(d){
     else                { b.className = 'wx-banner';  b.innerHTML = '&#9989; Idle at ' + cur.toFixed(0) + '&deg;' + (sp != null ? ' &bull; set ' + sp.toFixed(0) + '&deg;' : ''); }
   }
 
-  // Readings
-  set('tsCur', cur.toFixed(0) + '&deg;F');
+  // HERO: Room temp big - just the number + the degree sign because the "Room Temp" label
+  // sits right under it. A trailing F in the big font would overflow the glass panel on phone.
+  set('tsCur', cur.toFixed(0) + '&deg;');
   var hum = num(d && d.ts_hum);
   set('tsHum', hum != null ? hum.toFixed(0) + '%' : '--');
 
-  // Setpoint - also stash the live value so tstatBump() does not drift against a stale display
+  // HERO: Setpoint - also stash the live value so tstatBump() does not drift against a stale display
   var sps = document.getElementById('tsSet');
   if (sps) {
-    sps.textContent = sp != null ? sp.toFixed(0) + '°F' : '--';
+    sps.textContent = sp != null ? sp.toFixed(0) + '°' : '--°';
     sps.setAttribute('data-sp', sp != null ? String(sp) : '');
+  }
+
+  // HERO: weather patch (reuses sensor.my_weather_station fields from AC_TPL)
+  var ot = num(d && d.out_temp), fl2 = num(d && d.feels);
+  set('tsOutTemp',  ot  != null ? ot.toFixed(0)  + '&deg;' : '--&deg;');
+  set('tsFeelsLike', fl2 != null ? fl2.toFixed(0) + '&deg;' : '--&deg;');
+
+  // HERO: last sync pulled off climate state's last_reported if present, else "now".
+  var ls = document.getElementById('tsLastSync');
+  if (ls) {
+    try { ls.textContent = new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}); }
+    catch (e) { ls.textContent = 'now'; }
   }
 
   // Auto-mode range (target_temp_low / target_temp_high)
@@ -7139,26 +7181,41 @@ function tsRender(d){
     set('tsRange', tlo.toFixed(0) + '&deg;F &mdash; ' + thi.toFixed(0) + '&deg;F');
   } else if (rangeRow) rangeRow.style.display = 'none';
 
-  // Mode button highlight
-  var modeBtns = {cool:'tsBtnCool', heat:'tsBtnHeat', heat_cool:'tsBtnAuto', off:'tsBtnOff'};
+  // HERO: Mode badge (text + color via lux-badge-cool/heat/auto/off), and the active mode button
+  // highlighted via lmb-active-cool/heat/auto/off. One source of truth: `mode`.
+  var modeLabel = {cool:'COOL', heat:'HEAT', heat_cool:'AUTO', off:'OFF'}[mode] || String(mode).toUpperCase();
+  var badgeClass = {cool:'lux-badge-cool', heat:'lux-badge-heat', heat_cool:'lux-badge-auto', off:'lux-badge-off'}[mode] || 'lux-badge-off';
+  var mb = document.getElementById('tsModeBadge');
+  if (mb) { mb.className = 'lux-badge ' + badgeClass; mb.textContent = modeLabel; }
+  var modeBtns = {cool:['tsBtnCool','lmb-active-cool'], heat:['tsBtnHeat','lmb-active-heat'],
+                  heat_cool:['tsBtnAuto','lmb-active-auto'], off:['tsBtnOff','lmb-active-off']};
   Object.keys(modeBtns).forEach(function(m){
-    var el = document.getElementById(modeBtns[m]); if (!el) return;
-    if (m === mode) { el.classList.remove('secondary'); el.classList.add('primary'); }
-    else            { el.classList.remove('primary'); el.classList.add('secondary'); }
+    var el = document.getElementById(modeBtns[m][0]); if (!el) return;
+    el.classList.remove('lmb-active-cool','lmb-active-heat','lmb-active-auto','lmb-active-off');
+    if (m === mode) el.classList.add(modeBtns[m][1]);
   });
 
-  // Fan mode highlight
-  var fanBtns = {auto:'tsFanAuto', low:'tsFanLow', medium:'tsFanMed', high:'tsFanHigh'};
+  // HERO: Fan badge + button highlight. The device reports fan_mode = auto/low/medium/high.
   var fanMode = (d && d.ts_fan) || 'auto';
+  var fb = document.getElementById('tsFanBadge');
+  if (fb) fb.textContent = 'FAN ' + String(fanMode).toUpperCase();
+  var fanBtns = {auto:'tsFanAuto', low:'tsFanLow', medium:'tsFanMed', high:'tsFanHigh'};
   Object.keys(fanBtns).forEach(function(f){
     var el = document.getElementById(fanBtns[f]); if (!el) return;
-    if (f === fanMode) { el.classList.remove('secondary'); el.classList.add('primary'); }
-    else               { el.classList.remove('primary'); el.classList.add('secondary'); }
+    if (f === fanMode) el.classList.add('lux-fan-active');
+    else               el.classList.remove('lux-fan-active');
   });
 
-  // Right now (hvac_action)
-  set('tsAct', act ? String(act).charAt(0).toUpperCase() + String(act).slice(1) : '--',
-      running ? 'var(--info)' : '');
+  // HERO: Right-now badge (hvac_action) - only when it says something useful
+  var ab = document.getElementById('tsActBadge');
+  if (ab) {
+    if (act && act !== 'idle' && act !== 'off') {
+      ab.style.display = ''; ab.textContent = String(act).toUpperCase();
+      ab.className = 'lux-badge ' + (act === 'cooling' ? 'lux-badge-cool' : act === 'heating' ? 'lux-badge-heat' : 'lux-badge-off');
+    } else {
+      ab.style.display = 'none';
+    }
+  }
 
   // Output rail - cooling/heating/aux relay states straight off the device
   var cool = num(d && d.ts_cool), heat = num(d && d.ts_heat), aux = num(d && d.ts_aux);

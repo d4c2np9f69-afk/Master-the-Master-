@@ -140,10 +140,13 @@ async function main() {
   }));
   check('LIVE: the room temperature is shown', /69/.test(st.cur || ''), st.cur);
   check('LIVE: the setpoint is shown', /72/.test(st.set || ''), st.set);
-  // Mode is signalled by which button is highlighted (primary vs secondary), not a label.
+  // Mode is signalled by which button is highlighted. 2026-10-26 10:34 PM Jeff asked for the
+  // photo-based LUX-style card back; the active mode button now carries lmb-active-<mode> on
+  // top of the lux-mode-btn base class, same way the LUX card does. The check is on the active
+  // marker, not a text label.
   check('LIVE: the active mode button is highlighted',
-    /primary/.test(st.coolBtn) && !/primary/.test(st.heatBtn),
-    { cool: st.coolBtn.slice(0, 40), heat: st.heatBtn.slice(0, 40) });
+    /lmb-active-cool/.test(st.coolBtn) && !/lmb-active/.test(st.heatBtn),
+    { cool: st.coolBtn.slice(0, 60), heat: st.heatBtn.slice(0, 60) });
   check('CONTROLS: setpoint arrows are wired', st.hasBumpBtn);
   check('CONTROLS: mode buttons are wired', st.hasModeBtns);
   check('CONTROLS: fan speed buttons are wired', st.hasFanBtns);
@@ -170,8 +173,13 @@ async function main() {
     banner: (document.getElementById('tsBanner') || {}).className,
     conn: (document.getElementById('tsConn') || {}).textContent,
   }));
-  check('DEAD: it says no reading instead of printing a number',
-    /no reading/i.test(st.cur || '') && !/\d+°/.test(st.cur || ''), st.cur);
+  // 2026-10-26 10:37 PM: when Jeff asked for the photo-based card back, "no reading" moved
+  // out of the hero panel (it would overflow the 48px glass font) and the dead state is now
+  // signalled by (a) the big temp showing dashes, (b) the red banner and (c) the OFFLINE chip
+  // on the title. The point of this check is UNCHANGED: it must never print a stale number
+  // that looks like a real reading. --° is a non-number sentinel, which is correct.
+  check('DEAD: it shows dashes, never a stale number',
+    /^--?°?$/.test((st.cur || '').trim()) && !/\d/.test(st.cur || ''), st.cur);
   check('DEAD: the banner goes red', /wx-no/.test(st.banner || ''), st.banner);
   check('DEAD: the connection chip says OFFLINE', /OFFLINE/i.test(st.conn || ''), st.conn);
 
