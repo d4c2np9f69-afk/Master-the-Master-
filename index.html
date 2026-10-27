@@ -2434,6 +2434,28 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
       <a href="https://claude.ai/artifact/5PbCGCLjeADgGDuGBLUsHX" target="_blank" rel="noopener" class="btn-full btn-green" style="display:block;text-align:center;text-decoration:none">&#128506; Open the House Plan &#8599;</a>
     </div>
 
+    <!-- THERMOSTAT - 2026-10-26. Meross MTS300 wired to the Tempstar packaged unit, live in HA
+         as climate.hcc_thermostat. This REPLACES the LUX card, which is now permanently hidden:
+         the LUX never came back and /api/climate has answered 503 since 10-15, so probing for it
+         was spending requests on a thermostat that does not exist any more.
+         The "Trim" row is not cosmetic - automation #251 retunes the device's own calibration
+         every 15 min so the bedroom stat reads what the LIVING-ROOM weather station reads
+         (Jeff: "our bedroom always runs hotter the living room where I would like it to match
+         the weather station"). Showing the trim is how a drifting or stuck tracker becomes
+         visible instead of silently lying about the room temperature. -->
+    <div class="card" id="tstatCard">
+      <div class="card-title">&#127777;&#65039; Thermostat &mdash; Tempstar <span id="tsConn" class="irr-conn"></span></div>
+      <div id="tsBanner" class="wx-banner wx-load">&#128260; Loading thermostat&hellip;</div>
+      <ul class="spec-list">
+        <li><span class="sk">Reading</span><span class="sv" id="tsCur">--</span></li>
+        <li><span class="sk">Set to</span><span class="sv" id="tsSet">--</span></li>
+        <li><span class="sk">Mode</span><span class="sv" id="tsMode">--</span></li>
+        <li><span class="sk">Right now</span><span class="sv" id="tsAct">--</span></li>
+        <li><span class="sk">Trim</span><span class="sv" id="tsCal">--</span></li>
+        <li><span class="sk">Filter</span><span class="sv" id="tsFilter">--</span></li>
+      </ul>
+    </div>
+
     <!-- A/C RELAY — 2026-09-15. The LUX died in a power surge. Until the ecobee is installed,
          a SONOFF MINI-D (switch.ac_relay) closes the cooling call, run by the HA automation
          automation.hcc_ac_relay_thermostat off the master BEDROOM Echo Dot + an offset helper.
@@ -6918,22 +6940,19 @@ function loadThermostat(){
   // The relay card is always drawn: until the new stat is wired in it is the only honest
   // picture of the A/C, and it costs nothing once the LUX takes over.
   loadAcRelay();
-  if (luxIsLive) { loadClimate(); return; }
-  var now = Date.now();
-  if (now - luxLastProbe < LUX_PROBE_MS) return;
-  luxLastProbe = now;
-  fetch('/api/climate', { cache: 'no-store' })
-    .then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(d){
-      // Success is {ok:true, thermostat:{...}} — see functions/api/climate.js onRequestGet.
-      // Anything else (403 location_user, 404 no_device_found, 503) means not back yet.
-      if (d && d.ok === true && d.thermostat){
-        luxIsLive = true;
-        luxShowCard(true);
-        loadClimate();
-      }
-    })
-    .catch(function(){ /* still not back — try again after the next window */ });
+  // 🔴 2026-10-26 — THE PROBE IS OFF, AND THIS IS THE REASON, NOT AN OVERSIGHT.
+  // The LUX never came back. A Meross MTS300 was wired to the Tempstar on 2026-10-26 and is
+  // live in HA as climate.hcc_thermostat; tsRender() above draws it from the A/C card's own
+  // template, so the app has a REAL thermostat again and does not need /api/climate at all.
+  // /api/climate has answered 503 since 10-15 (dead Azure B2C device), so every probe was a
+  // guaranteed-failing Pages Function request charged against the Cloudflare budget — the exact
+  // cost OPEN_ITEMS #183 was opened over.
+  // loadClimate(), luxShowCard() and the whole LUX card markup are DELIBERATELY LEFT INTACT:
+  // scripts/creds-gate-test.js covers that path, and deleting them to tidy up would break the
+  // test for no gain. The card simply stays hidden.
+  // If a LUX (or any myluxstat device) is ever put back, turn the probe back on here — do not
+  // rebuild it from scratch.
+  luxShowCard(false);
 }
 
 // 2026-09-15 9:25 PM — the A/C moved off the Echo Dot onto Jeff's OWN weather station.
@@ -6979,6 +6998,18 @@ var AC_TPL = "{%- set i = states.sensor.my_weather_station_inside_temperature -%
   + " 'run_24h': states('sensor.a_c_relay_a_c_runtime_24h'),"
   + " 'relay': r.state if r else 'missing', 'relay_changed': r.last_changed.isoformat() if r else none,"
   + " 'auto': a.state if a else 'missing',"
+  // 2026-10-26 - THE REAL THERMOSTAT. The LUX never came back; a Meross MTS300 is wired to the
+  // Tempstar (R/W/Y/G/C, Rc-Rh jumper kept) and is live in HA as climate.hcc_thermostat. These
+  // ride along on the template the A/C card already sends, so the card costs ZERO extra requests.
+  // Entity ids verified against live HA 2026-10-26 19:30 - do not retype them from memory.
+  + " 'ts_cur': state_attr('climate.hcc_thermostat','current_temperature'),"
+  + " 'ts_set': state_attr('climate.hcc_thermostat','temperature'),"
+  + " 'ts_mode': states('climate.hcc_thermostat'),"
+  + " 'ts_act': state_attr('climate.hcc_thermostat','hvac_action'),"
+  + " 'ts_cal': states('number.smart_thermostat_25101126854698601201c4e7ae2244b2_calibration'),"
+  + " 'ts_filter': states('sensor.hcc_thermostat_filter'),"
+  + " 'ts_signal': states('sensor.hcc_thermostat_signal'),"
+  + " 'ts_track': states('automation.hcc_thermostat_tracks_the_living_room_weather_station_calibration'),"
   + " 'master': states('input_boolean.air_conditioner')} | tojson }}";
 
 function acClock(iso){
@@ -6993,12 +7024,81 @@ function acAgo(iso){
 }
 
 // Pure renderer — takes the template's JSON object, touches only the A/C card.
+// THE THERMOSTAT CARD - 2026-10-26.
+// Reads climate.hcc_thermostat (Meross MTS300, wired to the Tempstar) out of the SAME template
+// payload the A/C card already fetches. Read-only on purpose for now: the stat keeps its own
+// control loop and compressor protection, and putting setpoint buttons here before that is
+// settled would mean two things driving one unit.
+function tsRender(d){
+  var set = function(id, html, color){
+    var el = document.getElementById(id); if (!el) return;
+    el.innerHTML = html; el.style.color = color || '';
+  };
+  var b = document.getElementById('tsBanner');
+  var conn = document.getElementById('tsConn');
+  var num = function(v){ var x = parseFloat(v); return isFinite(x) ? x : null; };
+
+  var cur = num(d && d.ts_cur), sp = num(d && d.ts_set);
+  var mode = d && d.ts_mode, act = d && d.ts_act;
+
+  // 'unavailable'/'unknown' is what a dropped LAN device looks like - say so, never render it
+  // as a number. A frozen value that still prints is the #240 Kidde failure in a new costume.
+  if (cur == null || mode === 'unavailable' || mode === 'unknown' || mode == null) {
+    if (b) { b.className = 'wx-banner wx-no'; b.innerHTML = '&#9888;&#65039; Thermostat not reporting'; }
+    if (conn) { conn.innerHTML = ' &#9679; OFFLINE'; conn.style.color = 'var(--bad)'; }
+    set('tsCur', 'no reading', 'var(--bad)');
+    set('tsSet', '--'); set('tsMode', '--'); set('tsAct', '--'); set('tsCal', '--'); set('tsFilter', '--');
+    return;
+  }
+  if (conn) { conn.innerHTML = ' &#11044; BEEHIVE'; conn.style.color = 'var(--gold)'; }
+
+  var running = (act === 'cooling' || act === 'heating');
+  if (b) {
+    if (mode === 'off') { b.className = 'wx-banner wx-caution'; b.innerHTML = '&#9646;&#9646; Thermostat is OFF'; }
+    else if (running)   { b.className = 'wx-banner wx-go';      b.innerHTML = (act === 'cooling' ? '&#10052;&#65039; COOLING' : '&#128293; HEATING') + ' &bull; ' + cur.toFixed(0) + '&deg; now, set ' + (sp != null ? sp.toFixed(0) + '&deg;' : '--'); }
+    else                { b.className = 'wx-banner';  b.innerHTML = '&#9989; Idle at ' + cur.toFixed(0) + '&deg;' + (sp != null ? ' &bull; set ' + sp.toFixed(0) + '&deg;' : ''); }
+  }
+
+  set('tsCur', cur.toFixed(0) + '&deg;F');
+  set('tsSet', sp != null ? sp.toFixed(0) + '&deg;F' : '--');
+  set('tsMode', String(mode).toUpperCase(), mode === 'off' ? 'var(--warn)' : '');
+  set('tsAct', act ? String(act).charAt(0).toUpperCase() + String(act).slice(1) : '--',
+      running ? 'var(--info)' : '');
+
+  // Trim: the device calibration automation #251 keeps retuned against the living-room station.
+  var cal = num(d && d.ts_cal);
+  var tracking = (d && d.ts_track) === 'on';
+  if (cal == null) set('tsCal', '--');
+  else set('tsCal', (cal >= 0 ? '+' : '') + (cal * 1.8).toFixed(1) + '&deg;F to match the living room'
+       + (tracking ? '' : ' &bull; TRACKING OFF'), tracking ? '' : 'var(--warn)');
+
+  var fl = num(d && d.ts_filter), sg = num(d && d.ts_signal);
+  set('tsFilter', fl != null ? Math.round(fl) + '% life' + (sg != null ? ' &bull; signal ' + Math.round(sg) + '%' : '') : '--',
+      (fl != null && fl < 10) ? 'var(--warn)' : '');
+}
+
 function acRender(d){
   var set = function(id, html, color){
     var el = document.getElementById(id); if (!el) return;
     el.innerHTML = html; el.style.color = color || '';
   };
   var b = document.getElementById('acBanner');
+
+  // 🔴 2026-10-26 — THE SONOFF RELAY IS GONE FROM HA, AND ITS ABSENCE IS NOT A FAULT.
+  // switch.ac_relay no longer exists (checked against live /api/states 2026-10-26 19:4x: no
+  // switch entity with 'relay' in its id at all). It was the stand-in that closed the cooling
+  // call while the house had no working thermostat; the Tempstar install put a real Meross
+  // MTS300 on the unit, so the relay's job is finished.
+  // Left as-is this card renders 'OFFLINE' in red on the HOME screen forever — a permanent
+  // false alarm for hardware that was deliberately removed. So: if the relay is missing AND a
+  // real thermostat is answering, hide the card. If the relay ever comes back it reappears by
+  // itself, the same way the thermostat card does — no deploy needed either direction.
+  var tsMode = d && d.ts_mode;
+  var tsLive = !!(tsMode && tsMode !== 'unavailable' && tsMode !== 'unknown');
+  var acEl = document.getElementById('acCard');
+  if (acEl) acEl.style.display = ((!d || d.relay === 'missing') && tsLive) ? 'none' : '';
+  if ((!d || d.relay === 'missing') && tsLive) return;
+
   var room = parseFloat(d && d.indoor);
   var haveTemp = isFinite(room);
 
@@ -7278,6 +7378,7 @@ function loadAcRelay(){
       var d;
       try { d = JSON.parse(body); } catch (e) { throw new Error('bad reply'); }
       acRender(d);
+      tsRender(d);          // and the real thermostat card
       stRender(d);          // same payload draws the station card on WEATHER
     })
     .catch(function(err){
@@ -7285,6 +7386,10 @@ function loadAcRelay(){
       b.innerHTML = '&#9888;&#65039; A/C status unavailable: ' + (err && err.message || 'network');
       var conn = document.getElementById('acConn');
       if (conn) { conn.innerHTML = ' &#9679; OFFLINE'; conn.style.color = 'var(--bad)'; }
+      var tb = document.getElementById('tsBanner');
+      if (tb) { tb.className = 'wx-banner wx-no'; tb.innerHTML = '&#9888;&#65039; Thermostat unavailable: ' + (err && err.message || 'network'); }
+      var tc = document.getElementById('tsConn');
+      if (tc) { tc.innerHTML = ' &#9679; OFFLINE'; tc.style.color = 'var(--bad)'; }
       var sb = document.getElementById('stBanner');
       if (sb) { sb.className = 'wx-banner wx-no'; sb.innerHTML = '&#9888;&#65039; Station unavailable: ' + (err && err.message || 'network'); }
     });
