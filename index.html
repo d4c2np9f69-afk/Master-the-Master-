@@ -2511,13 +2511,6 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
         <li><span class="sk">Trim</span><span class="sv" id="tsCal">--</span></li>
         <li><span class="sk">Signal</span><span class="sv" id="tsSignal">--</span></li>
         <li><span class="sk">Filter</span><span class="sv" id="tsFilter">--</span></li>
-        <li>
-          <span class="sk">Child lock</span>
-          <span class="sv" style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
-            <span id="tsLockState" style="min-width:40px;text-align:right">--</span>
-            <button type="button" id="tsLockBtn" class="mbtn secondary" style="padding:4px 10px" onclick="tstatLockToggle()">Toggle</button>
-          </span>
-        </li>
       </ul>
     </div>
 
@@ -7078,7 +7071,6 @@ var AC_TPL = "{%- set i = states.sensor.my_weather_station_inside_temperature -%
   + " 'ts_cool': states('sensor.hcc_thermostat_cooling'),"
   + " 'ts_heat': states('sensor.hcc_thermostat_heating'),"
   + " 'ts_aux': states('sensor.hcc_thermostat_aux'),"
-  + " 'ts_lock': states('switch.smart_thermostat_25101126854698601201c4e7ae2244b2_lock'),"
   + " 'ts_cal': states('number.smart_thermostat_25101126854698601201c4e7ae2244b2_calibration'),"
   + " 'ts_filter': states('sensor.hcc_thermostat_filter'),"
   + " 'ts_signal': states('sensor.hcc_thermostat_signal'),"
@@ -7127,17 +7119,17 @@ function tsRender(d){
     if (b) { b.className = 'wx-banner wx-no'; b.innerHTML = '&#9888;&#65039; Thermostat not reporting'; }
     if (conn) { conn.innerHTML = ' &#9679; OFFLINE'; conn.style.color = 'var(--bad)'; }
     set('tsCur', '--&deg;', 'var(--bad)');
-    ['tsHum','tsSet','tsOut','tsCal','tsSignal','tsFilter','tsLockState','tsOutTemp','tsFeelsLike'].forEach(function(id){ set(id,'--'); });
+    ['tsHum','tsSet','tsOut','tsCal','tsSignal','tsFilter','tsOutTemp','tsFeelsLike'].forEach(function(id){ set(id,'--'); });
     var sps = document.getElementById('tsSet'); if (sps) sps.setAttribute('data-sp','');
     // Grey the button rows so nothing fires against a dead device
-    ['tsBtnCool','tsBtnHeat','tsBtnAuto','tsBtnOff','tsFanAuto','tsFanLow','tsFanMed','tsFanHigh','tsLockBtn'].forEach(function(id){
+    ['tsBtnCool','tsBtnHeat','tsBtnAuto','tsBtnOff','tsFanAuto','tsFanLow','tsFanMed','tsFanHigh'].forEach(function(id){
       var el=document.getElementById(id); if (el) { el.disabled = true; el.style.opacity='.5'; }
     });
     return;
   }
   if (conn) { conn.innerHTML = ' &#11044; BEEHIVE'; conn.style.color = 'var(--gold)'; }
   // Re-enable the buttons once alive again
-  ['tsBtnCool','tsBtnHeat','tsBtnAuto','tsBtnOff','tsFanAuto','tsFanLow','tsFanMed','tsFanHigh','tsLockBtn'].forEach(function(id){
+  ['tsBtnCool','tsBtnHeat','tsBtnAuto','tsBtnOff','tsFanAuto','tsFanLow','tsFanMed','tsFanHigh'].forEach(function(id){
     var el=document.getElementById(id); if (el) { el.disabled = false; el.style.opacity=''; }
   });
 
@@ -7240,17 +7232,10 @@ function tsRender(d){
   var fl = num(d && d.ts_filter);
   set('tsFilter', fl != null ? Math.round(fl) + '% life' : '--',
       (fl != null && fl < 10) ? 'var(--warn)' : '');
-
-  // Child lock - render state and set the button label to the action it will perform
-  var lock = (d && d.ts_lock) || 'off';
-  set('tsLockState', String(lock).toUpperCase(), lock === 'on' ? 'var(--warn)' : '');
-  var lb = document.getElementById('tsLockBtn');
-  if (lb) lb.innerHTML = lock === 'on' ? 'Unlock' : 'Lock';
 }
 
 // ── CONTROL ── all talk to HA directly through haFetch; no climate.js round trip.
 var _TS_ENT = 'climate.hcc_thermostat';
-var _TS_LOCK = 'switch.smart_thermostat_25101126854698601201c4e7ae2244b2_lock';
 var _TS_REFRESH = 'button.smart_thermostat_25101126854698601201c4e7ae2244b2_refresh';
 var _TS_BUMP_TIMER = null, _TS_BUMP_TARGET = null;
 
@@ -7295,13 +7280,6 @@ function tstatMode(hvac_mode){
 
 function tstatFan(fan_mode){
   tstatHaCall('climate/set_fan_mode', {entity_id:_TS_ENT, fan_mode:fan_mode});
-}
-
-function tstatLockToggle(){
-  var el = document.getElementById('tsLockState');
-  var cur = (el && el.textContent || '').toLowerCase();
-  var svc = cur.indexOf('on') === 0 ? 'turn_off' : 'turn_on';
-  tstatHaCall('switch/' + svc, {entity_id:_TS_LOCK});
 }
 
 function tstatRefresh(){

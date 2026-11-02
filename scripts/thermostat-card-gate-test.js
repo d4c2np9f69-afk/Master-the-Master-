@@ -150,7 +150,8 @@ async function main() {
   check('CONTROLS: setpoint arrows are wired', st.hasBumpBtn);
   check('CONTROLS: mode buttons are wired', st.hasModeBtns);
   check('CONTROLS: fan speed buttons are wired', st.hasFanBtns);
-  check('CONTROLS: child lock toggle is wired', st.hasLockBtn);
+  // Jeff 2026-11-02: the keypad lock caused the LC code at the wall; he had it removed.
+  check('CONTROLS: the child lock control stays removed', !st.hasLockBtn);
   // 1.6 C of trim is 2.9 F — the card must speak Fahrenheit (Jeff's standing rule).
   check('LIVE: the trim is shown in FAHRENHEIT, not celsius', /2\.9/.test(st.cal || ''), st.cal);
   check('LIVE: no error banner on a healthy thermostat', !/wx-no/.test(st.banner || ''), st.banner);
