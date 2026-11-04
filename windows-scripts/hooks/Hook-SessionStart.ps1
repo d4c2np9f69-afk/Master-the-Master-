@@ -84,14 +84,10 @@ $out += ""
 $oi = Join-Path $repo 'docs\OPEN_ITEMS.md'
 if (Test-Path $oi) {
   $lines = Get-Content $oi -Encoding UTF8
-  $rows  = @($lines | Where-Object { $_ -match '^\|\s*\d+\s*\|' })
-  $p1 = @(); $sec = ''
-  foreach ($l in $lines) {
-    if ($l -match '^##\s') { $sec = $l }
-    elseif ($l -match '^\|\s*\d+\s*\|' -and $sec -match 'P1') { $p1 += $l }
-  }
+  # Rows have read "| <status> **#N** |" since the 09-16 split; the old '| 123 |' pattern counted 0.
+  $rows  = @($lines | Where-Object { $_ -match '^\|[^|]*\*\*#\d+' })
   $stale = [int]((Get-Date) - (Get-Item $oi).LastWriteTime).TotalDays
-  $out += ("OPEN ITEMS: {0} open, {1} P1, list last updated {2}d ago. docs\OPEN_ITEMS.md" -f $rows.Count, $p1.Count, $stale)
+  $out += ("OPEN ITEMS: {0} rows, list last updated {1}d ago. docs\OPEN_ITEMS.md (full text per row: OPEN_ITEMS_DETAIL.md)" -f $rows.Count, $stale)
   if ($stale -ge 2) { $out += "  *** STALE - work was done and never struck off. Update it THIS session. ***" }
   $out += "  An owed item handed off in prose sat FOUR DAYS. Put yours on the list."
   $out += ""
@@ -175,8 +171,17 @@ try {
       $out += "      IT WILL LOOK HEALTHY. ping=200, camera_ai_server_reachable=on, and"
       $out += "      Verify-CameraStreams.ps1 prints ALL GOOD 6/6. Those test go2rtc PLUMBING,"
       $out += "      not whether anything is DETECTED. Do not be reassured by them."
-      $out += "      🛑 READ docs\OPEN_ITEMS.md #167 IN FULL BEFORE TOUCHING ANYTHING."
-      $out += "      Root cause 5 times out of 5 so far is ON THE BEAST, not in HA:"
+      $out += "      🛑 READ docs\OPEN_ITEMS_CLOSED.md #167 IN FULL BEFORE TOUCHING ANYTHING."
+      $out += "      (#167 was FIXED 09-09 and MOVED to OPEN_ITEMS_CLOSED.md. This line said"
+      $out += "       OPEN_ITEMS.md until 11-04, sending every session to hunt a row that is"
+      $out += "       not in that file - it is at OPEN_ITEMS_CLOSED.md line 649.)"
+      $out += "      PROVE WHICH HALF IS DEAD BEFORE YOU RESTART ANYTHING. On 11-04 2:05 PM"
+      $out += "      this banner fired while the engine was FINE: a real jpg POST returned"
+      $out += "      success:true, person 94.5%, GPU, YOLOv5 6.2. A restart would have been"
+      $out += "      the SIXTH wrong theory. POST FIRST - success:true means the engine is"
+      $out += "      NOT the fault and the dead half is the HA scanner entities, which sit"
+      $out += "      inside the FROZEN subsystem: that is JEFF'S CALL, not a free fix."
+      $out += "      Root cause 5 times out of 5 BEFORE 11-04 was ON THE BEAST, not in HA:"
       $out += "        Restart-Service -Name `"CodeProject.AI Server`" -Force"
       $out += "      Then PROVE it - POST a real jpg to http://127.0.0.1:32168/v1/vision/detection"
       $out += "      and assert `"success`":true. A ping is NOT proof."
@@ -258,7 +263,7 @@ $out += "IF JEFF TELLS YOU TO GO READ THE RECORD, HE MEANS THESE - GO READ THEM:
 # It does NOT fix the real problem, which is a session choosing not to open the file -
 # see CASE_STUDY_FOR_ANTHROPIC.md: "rules that depend on a session choosing to read
 # them do not survive session boundaries." Mechanism beats prose; this is only prose.
-$out += "  docs\NEXT_SESSION.md ................. WHAT THE LAST SESSION DID - open this FIRST"
+$out += "  docs\NEXT_SESSION.md ................. WHAT THE LAST SESSION DID - grep the JOB you need; 70 KB, never read it whole"
 $out += "  docs\COST_LEDGER.md .................. what the failures cost"
 $out += "  docs\CAMERA_ACCOUNTING_2026-08-22.md . the 3 questions, answered from the record"
 $out += "  iCloudDrive\HCC-Archive\MASTER-RECORD\ every word ever said (Search-HCC.ps1)"
@@ -266,10 +271,17 @@ $out += "    ...\CLOUD_SESSION\sections\22-cost-accounting.md = the audited numb
 $out += "  The full story is deliberately NOT in this briefing - it is one command away."
 $out += "=========================================================================="
 
-@{
+# 2026-11-02: this briefing was not being delivered - all 36 startups/compactions checked in the
+# transcripts recorded "not valid JSON". The console codepage turns the double-bang emoji in the
+# first line into raw byte 0x13, and a raw control character is illegal inside a JSON string. A
+# manual run through a pipe parsed fine, so only the harness's recorded stdout showed it.
+# Escaping everything non-ASCII makes the output independent of the codepage.
+$json = @{
   hookSpecificOutput = @{
     hookEventName     = 'SessionStart'
     additionalContext = ($out -join "`n")
   }
-} | ConvertTo-Json -Depth 5 -Compress | Write-Output
+} | ConvertTo-Json -Depth 5 -Compress
+$esc = [System.Text.RegularExpressions.MatchEvaluator]{ param($m) '\u{0:x4}' -f [int][char]$m.Value }
+[regex]::Replace($json, '[^\x00-\x7F]', $esc) | Write-Output
 exit 0

@@ -11,6 +11,73 @@
 
 ---
 
+# 🟢 2026-11-04 WEDNESDAY — CURRENT STATE (read this before the older sections below)
+
+**Why this block exists:** the briefing dates this file from its mtime. Editing it for any reason
+makes a 45-day-old brief announce itself as "written 0d ago" and silently drops the
+"confirm it is still the plan" warning. So if you touch this file, re-date THIS block too.
+
+**JOB 1 and JOB 2 further down are still the plan** — both are PHYSICAL tasks waiting on Jeff
+(sensor mounting, and the MINI-D step he wants announced first). Nothing was dropped.
+
+## What this session proved, with the command that proved it
+
+| Thing | State | Proof |
+|---|---|---|
+| Driver Verifier for crash #272 | 🟢 **ARMED AND LIVE** | Jeff's 1:59:49 PM reboot armed it. `verifier /query` 2:04:12 PM returned live per-**MODULE** pool blocks + `Verifier Flags: 0x001209bb`; registry `VerifyDriverLevel=1182139`, 11 drivers. CONFIGURED ≠ LIVE — the query is what separates them. |
+| That 1:59 PM reboot | **clean, NOT crash #11** | System event **109** (kernel power manager initiated shutdown) at 1:59:02 PM; no 41/1001/6008 after 12:44:33; newest minidump still `110426-12468-01.dmp` (#10). |
+| The watchdog could see Verifier | 🟢 **fixed — it could not before** | `Watch-Crashes.ps1` measured SATA LPM but **not** Verifier, and `Resetonbootfail` lets Windows disarm Verifier silently — days of quiet would have read as "no driver fault". Now logs `DRIVER_VERIFIER=LIVE flags=0x001209bb drivers=11` (crash-watch.log 14:16:54); branch logic red-proved 4/4 against stubs. |
+| The house AI engine | 🟢 **detecting** | Real jpg POST to `/v1/vision/detection` 2:05:45 PM → `"success":true`, person **94.5%**, GPU, YOLOv5 6.2. **A ping is not this.** |
+| The AI **feature** | 🔴 still dead, and it is **Jeff's call** | 6/6 scanners dead per live state. The engine is proven fine, so the dead half is the HA scanner entities — inside the FROZEN subsystem. Do not "fix" it unasked. |
+| The live house app | 🟢 **works end to end** | `node scripts/live-e2e-test.js` → 17 PASS, "clean — the deployed app works end to end" (v111). |
+| The gate suite | **33/34**, then 34/34 after the fix below | `node scripts/run-all-gates.js --live --states=<dump>`. |
+
+## 🔴 The thing worth remembering from today
+
+**`live-e2e-test.js` — the project's ONLY whole-app feature test — had been dead red for 9 days
+and nobody knew, because it self-skips when `HCC_HA_TOKEN` is unset.** The routine "29/29 clean"
+never ran it. On 10-26 commit `d5e5b10` retired the Sonoff relay card, after which `acRender()`
+hides `#acCard` and returns *before* writing `#acBanner` (index.html:7311) — so the gate waited
+45 s for a banner inside a `display:none` card. Measured: `acCard display=none`,
+`offsetParent=null`, 0×0 box. **The app was right; the gate was wrong — third time in that file.**
+Fixed by accepting either outcome and asserting the THERMOSTAT card (`#tsCur`, `#tsBanner`) when
+the relay card is retired. Red-proved 10/10 against stubs, so it still goes red on a dead card.
+
+**SESSION_START is literal: a SKIP IS NOT A PASS. Run the five by hand or you are not testing.**
+Pull a dump once and feed all of them:
+
+```
+$env:HCC_HA_TOKEN = (Get-Content <path from HCC_ACCESS.md §1> -Raw).Trim()
+node scripts/run-all-gates.js --live --states=<states.json>
+```
+
+## Also fixed today
+
+- **`#167` pointed at the wrong file everywhere.** It was FIXED 09-09 and moved, so it lives in
+  `docs/OPEN_ITEMS_CLOSED.md` (line 649), **not** `OPEN_ITEMS.md`. The SessionStart banner and
+  two lines in this file all sent sessions hunting it in a file it had left. All three corrected.
+- That banner now says **POST before you restart**: on 11-04 it fired while the engine was
+  healthy, so a reflex `Restart-Service` would have been the SIXTH wrong theory.
+- `docs/OPEN_ITEMS.md` 204 lines/77.0 KB → 196/39.5 KB by moving full row text into
+  `OPEN_ITEMS_DETAIL.md` (caps are 200/45 KB — moved content, did **not** raise the cap).
+  The handoff package had **no** DETAIL file at all, so every pointer dangled; copied in, and a
+  new check (TEST 4b in `package-gate-test.js`) now fails if any pointer dangles.
+
+## Still owed — NOT done, do not report these as finished
+
+- **Deploy the three fixes already written in `functions/api/hours.js`** (uncommitted): #266 span
+  gate + `clear_coverage` on the 56 hot cells, #267 lost-mow recovery, #270 `clampCfgForDevice`
+  + clear the ghost `cfg` field. Gates green; owner **CLAUDE**. The 08-11 firmware findings are
+  the contract to code against: the box sends `hours` (not `hours_seconds`),
+  `source: mow_end|heartbeat|buffered` with `age_s`, and `track[]` as array-of-arrays.
+- Nothing from this session is committed or pushed. **Push auto-deploys to the live house app.**
+- Awaiting Jeff: #269 (a/b/c), #268 MINI-D announced step, #252/#253/#254 physical,
+  #255 ship/refunds, HA core 2026.11.0b4 → b5. #262 mailbox is **PARKED BY JEFF** — do not touch.
+- Noted, not chased: `HCC-HandoffWatcher` LastTaskResult 2147946720; `HCC-WatchAcer` stale since 9/19.
+
+
+---
+
 # 🔴 2026-09-20 SUNDAY 15:45 — SESSION CLOSED BY JEFF. Session ***session_015ohmTqvSVtZzStYLmzL1Ke***
 
 🔴🔴 **THE CAUSE, IN JEFF'S WORDS — 15:52, entered at his instruction: "This all happened because you
@@ -115,7 +182,7 @@ model yolov5m"* — so its reply had no `predictions` key, which raised `KeyErro
 HA scanner `unknown → 2`; the annotated red-box file rewrote (09-04 16:51:57 → 09-09 15:25:58 GMT);
 `hcc_ai_alert_cooldown` + `hcc_clip_archive` + `ai_object_detected_notify` all fired at 15:25:58;
 **all 6 scanners live, 0 unknown.** `Verify-CameraStreams.ps1` 6/6 before AND after — camera stack
-untouched. Full write-up: **OPEN_ITEMS #167.**
+untouched. Full write-up: **OPEN_ITEMS_CLOSED.md #167** (fixed 09-09, so it is in the CLOSED file).
 
 ## 🔴 WHY IT HID — every instrument lied, and they will lie to you too
 `/v1/status/ping` = 200 the whole time. `binary_sensor.camera_ai_server_reachable` = `on`.
@@ -135,7 +202,7 @@ reason**). Detail in COST_LEDGER.md, 2026-09-09.
 ## Built the same session
 - **SessionStart hook now alarms the SESSION, never Jeff's phone** (his instruction — he gets ~25
   alerts/day already). It reports AI scanner health from the existing HA call and, when dead, orders
-  the session to read OPEN_ITEMS #167 before touching anything. Tested: healthy path and a synthetic
+  the session to read OPEN_ITEMS_CLOSED.md #167 before touching anything. Tested: healthy path and a synthetic
   fault path both correct.
 - **Fixed a false alarm in that same hook.** It judged Zigbee liveness by `last_updated` age, so dry
   leak sensors and closed doors read as "DATA IS BEING LOST RIGHT NOW". Proven false 09-09: all 12

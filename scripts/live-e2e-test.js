@@ -67,7 +67,24 @@ const check = (name, ok, detail) => {
   page.on('requestfailed', r => failedReqs.push(r.url() + ' :: ' + ((r.failure() || {}).errorText || '')));
 
   await page.goto(URL + '/?cb=' + Date.now(), { waitUntil: 'domcontentloaded' });
+  // 2026-11-04: this waited ONLY for #acBanner to stop saying "Loading A/C", and so it hung
+  // the full 45 s and reported HARNESS FAILED against a perfectly correct app on every run
+  // since 2026-10-26 (d5e5b10). That commit retired the Sonoff relay card: when the relay is
+  // gone AND the real thermostat is answering, acRender() hides #acCard and RETURNS BEFORE it
+  // ever writes the banner (index.html:7311), so the banner keeps its initial "Loading A/C"
+  // text forever - inside a display:none card. Measured on the live site 2026-11-04 2:46 PM:
+  // acCard display=none, acBanner offsetParent=null, 0x0 box, relay="missing", ts_mode="cool".
+  // Jeff never sees that text. The app was right and the gate was wrong - the same shape as
+  // the 2026-09-17 and 2026-10-19 notes below, for the third time.
+  // So the wait now accepts EITHER outcome, because both prove acRender() actually ran:
+  //   - the banner resolved           (relay still present, old hardware path)
+  //   - or #acCard went display:none  (relay retired, thermostat live - today's house)
+  // WHY NOBODY CAUGHT IT FOR 9 DAYS: this gate self-skips with exit 0 when HCC_HA_TOKEN is
+  // unset, so the routine "29/29 clean" run never executed it. SESSION_START is literal about
+  // this - a SKIP IS NOT A PASS - and running the five by hand is what surfaced it.
   await page.waitForFunction(() => {
+    const c = document.getElementById('acCard');
+    if (c && c.style.display === 'none') return true;
     const b = document.getElementById('acBanner');
     return b && !/Loading A\/C/.test(b.textContent);
   }, null, { timeout: 45000 });
@@ -75,9 +92,26 @@ const check = (name, ok, detail) => {
 
   const txt = id => page.evaluate(i => { const e = document.getElementById(i); return e ? e.textContent.trim() : ''; }, id);
 
-  const acTemp = await txt('acTemp'), acSensor = await txt('acEcho');
-  check('A/C card shows a real temperature', /\d+(\.\d+)?°/.test(acTemp), acTemp);
-  check('A/C card reads the weather station, not the Echo', /station/i.test(acSensor), acSensor);
+  // The cooling feature moved cards on 10-26. Assert it where it LIVES now instead of where it
+  // used to live: if the relay card is retired, the Meross MTS300 card is the A/C readout, so
+  // #tsCur must show a real temperature and #tsBanner must have resolved. If the relay ever
+  // comes back the card un-hides by itself and the original two checks re-arm - no edit needed.
+  const acHidden = await page.evaluate(() => {
+    const c = document.getElementById('acCard');
+    return !!(c && c.style.display === 'none');
+  });
+  if (!acHidden) {
+    const acTemp = await txt('acTemp'), acSensor = await txt('acEcho');
+    check('A/C card shows a real temperature', /\d+(\.\d+)?°/.test(acTemp), acTemp);
+    check('A/C card reads the weather station, not the Echo', /station/i.test(acSensor), acSensor);
+  } else {
+    const tsCur = await txt('tsCur'), tsBan = await txt('tsBanner');
+    console.log('  NOTE  the Sonoff relay card is hidden (relay retired 10-26, thermostat live).'
+      + ' Asserting the THERMOSTAT card instead - that is the A/C readout now.');
+    check('thermostat card shows a real temperature', /\d+°/.test(tsCur), tsCur);
+    check('thermostat banner resolved (not stuck loading)',
+      tsBan.length > 0 && !/Loading/i.test(tsBan), tsBan);
+  }
 
   // 2026-09-17: these three asserted on stIndoor/stOutdoor/stPressure and FAILED against a
   // correct app. Those ids belonged to the separate station CARD, which Jeff had deleted on

@@ -102,5 +102,24 @@ console.log('  ' + (ran - failed) + '/' + ran + ' passed' +
   (LIVE ? '' : '   (live gates skipped - add --live)'));
 
 if (failed) { console.log('\n  ' + failed + ' GATE(S) FAILED.\n'); process.exit(1); }
-console.log('\n  all gates clean.\n');
+
+// 2026-11-04: this printed "all gates clean." on any run where nothing FAILED - including
+// runs where five gates asserted NOTHING. That one sentence is how live-e2e-test.js, the
+// only whole-app feature test in this repo, stayed red for 9 days (10-26 d5e5b10 -> 11-04)
+// with nobody knowing: it self-skips with exit 0 when HCC_HA_TOKEN is unset, the summary
+// said clean, and "29/29 clean" is what got reported to Jeff. SESSION_START already says
+// A SKIP IS NOT A PASS - the runner now refuses to say otherwise.
+// Exit stays 0 on purpose: a run that goes red merely because a local secret is unset
+// trains you to ignore the runner, which is the same failure one level up.
+const skipped = results.filter((r) => r.code === null);
+if (skipped.length) {
+  console.log('\n  ' + (ran - failed) + ' ran clean, but ' + skipped.length + ' GATE(S) ASSERTED NOTHING.');
+  console.log('  THIS IS NOT AN ALL CLEAR. These were never executed:');
+  for (const sk of skipped) console.log('    - ' + sk.gate.padEnd(34) + sk.note);
+  console.log('\n  Run them - one states dump feeds all of them:');
+  console.log('    $env:HCC_HA_TOKEN = (Get-Content <path from HCC_ACCESS.md section 1> -Raw).Trim()');
+  console.log('    node scripts/run-all-gates.js --live --states=<states.json>\n');
+  process.exit(0);
+}
+console.log('\n  all gates clean - nothing skipped.\n');
 process.exit(0);

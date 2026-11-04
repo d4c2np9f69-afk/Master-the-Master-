@@ -110,6 +110,11 @@ const pairs = [
   ['app/index.html', 'index.html'],
   ['app/service-worker.js', 'service-worker.js'],
   ['docs/OPEN_ITEMS.md', 'docs/OPEN_ITEMS.md'],
+  // 2026-11-04: OPEN_ITEMS.md is now mostly HEADLINES — the full text of each long row lives in
+  // OPEN_ITEMS_DETAIL.md. Ship one without the other and the package reads like a list of
+  // truncated sentences pointing at a file that is not there. It shipped that way from the day
+  // the first 21 rows were moved until this gate line was added.
+  ['docs/OPEN_ITEMS_DETAIL.md', 'docs/OPEN_ITEMS_DETAIL.md'],
   ['rules/CLAUDE.md', 'CLAUDE.md'],
 ];
 for (const [inPkg, inRepo] of pairs) {
@@ -117,6 +122,29 @@ for (const [inPkg, inRepo] of pairs) {
   if (!fs.existsSync(a) || !fs.existsSync(b)) { check('package has ' + inPkg, false, 'missing'); continue; }
   const same = fs.readFileSync(a).equals(fs.readFileSync(b));
   check('package ' + inPkg + ' matches the repo', same, 'STALE — rebuild the package before handing it over');
+}
+
+// ── TEST 4b: every "full: OPEN_ITEMS_DETAIL.md #N" pointer must RESOLVE inside the package.
+// A pointer to a row that is not there is worse than a truncated row: it reads as though the
+// detail exists and was simply not looked up. Checked against the PACKAGED copies, because the
+// package is what gets handed over.
+{
+  const oiP = path.join(PKG, 'docs/OPEN_ITEMS.md');
+  const dtP = path.join(PKG, 'docs/OPEN_ITEMS_DETAIL.md');
+  if (fs.existsSync(oiP) && fs.existsSync(dtP)) {
+    const oi = fs.readFileSync(oiP, 'utf8');
+    const dt = fs.readFileSync(dtP, 'utf8');
+    const have = new Set();
+    for (const m of dt.matchAll(/^## (\S+)\s*$/gm)) have.add(m[1]);
+    const want = new Set();
+    for (const m of oi.matchAll(/full: OPEN_ITEMS_DETAIL\.md (#\S+?)\)/g)) want.add(m[1]);
+    const dangling = [...want].filter(x => !have.has(x));
+    check('every OPEN_ITEMS pointer resolves in OPEN_ITEMS_DETAIL (' + want.size + ' pointers)',
+          dangling.length === 0,
+          'DANGLING: ' + dangling.slice(0, 6).join(', '));
+  } else {
+    check('OPEN_ITEMS + OPEN_ITEMS_DETAIL both present for pointer check', false, 'one of them is missing');
+  }
 }
 
 // ── TEST 5: no backup or scratch files masquerading as documents
