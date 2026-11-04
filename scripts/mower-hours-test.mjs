@@ -402,5 +402,108 @@ console.log('-- CREDENTIAL LEAK GATE (2026-10-13) --');
   check('redaction does not damage the real data', JSON.parse(body).hours === 6.65, body.slice(0, 150));
 }
 
+
+// ---- #270 - THE GHOST `cfg` FIELD (2026-11-04) -------------------------------------
+// The 10-13 control POST in commit 3194249 omitted `__cmd`, missed the authorised branch
+// and fell through to the telemetry path carrying a token AND a cfg patch. The token was
+// deleted, the cfg was not, so `cfg: {"idle_interval_s": 3600}` merged into hours_data and
+// the PUBLIC GET served it as telemetry for three weeks. It was never live - the box
+// measured 894 s - and it cost a session a false alarm that an hour-long interval was
+// queued to ship. Measured still present on the live endpoint 2026-11-04 2:52 PM.
+{
+  console.log('\n-- ghost cfg field (#270, 2026-11-04) --');
+  const ghost = { hours: 7.7583, dist_total_m: 9541, cfg: { idle_interval_s: 3600 } };
+
+  const kv = mockKV({ hours_data: JSON.stringify(ghost) });
+  const served = await (await get(kv)).json();
+  check('the public GET no longer serves the ghost cfg',
+        served.cfg === undefined, JSON.stringify(served.cfg));
+  check('stripping cfg does not damage the real telemetry',
+        served.hours === 7.7583 && served.dist_total_m === 9541, JSON.stringify(served).slice(0, 120));
+
+  // A heartbeat merges `{ ...prev, ...body }`, so a cfg in `prev` SURVIVES a body without
+  // one. Deleting it from the incoming body alone would never evict the stored ghost -
+  // this is the check that proves the eviction actually happens.
+  await post(kv, { source: 'heartbeat', engine_running: false, hours: 7.7583, battery: 12.4 });
+  const stored = JSON.parse(await kv.get('hours_data'));
+  check('the next heartbeat EVICTS the ghost from stored hours_data',
+        stored.cfg === undefined, JSON.stringify(stored.cfg));
+  check('that heartbeat still keeps the real stored telemetry',
+        stored.dist_total_m === 9541, JSON.stringify(stored).slice(0, 120));
+
+  // The origin itself: a control POST that forgot __cmd.
+  const kv2 = mockKV({ mower_ctrl_token: TOKEN });
+  await post(kv2, { token: TOKEN, cfg: { idle_interval_s: 3600 }, hours: 1.5 });
+  const stored2 = JSON.parse(await kv2.get('hours_data'));
+  check('a stray control POST can no longer plant a new cfg ghost',
+        stored2.cfg === undefined, JSON.stringify(stored2.cfg));
+  check('and that stray POST still never stores the token',
+        stored2.token === undefined, JSON.stringify(stored2.token));
+
+  // REGRESSION GUARD: `down.cfg` is built from CTRL_KEY, not from the telemetry body, so
+  // scrubbing the body must not stop the box from receiving its real config.
+  const kv3 = mockKV({ mower_ctrl_token: TOKEN });
+  await post(kv3, { __cmd: 'set_cfg', token: TOKEN, cfg: { idle_interval_s: 600 } });
+  const reply = await (await post(kv3, { source: 'heartbeat', engine_running: false, cfg_rev: 0 })).json();
+  check('the BOX still receives cfg downstream (control channel intact)',
+        !!reply.cfg && reply.cfg.idle_interval_s === 600, JSON.stringify(reply.cfg));
+}
+
+
+// ---- #267 - THE LOST MOW ON A BUFFERED REPLAY ------------------------------------
+// Diagnosed 2026-11-03, fix written the same day, and it had NO test until 11-04.
+// Jeff: "why did it lose my data ??? That's bull shit." The box was not at fault: when a
+// mow ends out of WiFi range the firmware resends the reading from a 20-slot ring buffer
+// in RTC RAM, but that buffer is a 64-byte packed struct with no room for a "this was a
+// mow end" flag. The replay therefore arrives as source:"buffered" with mow_ended null,
+// matched neither trigger, and the mow was dropped with no error while the reading was
+// still logged, merged into coverage and shown on the card.
+// Measured over the whole sensor log: every engine-hours value that ever arrived buffered
+// was lost, 3 for 3, 88 minutes of mowing - 6.3833 (09-24), 7.0833 (10-23), 7.7583 (11-03).
+// Untested, this silently regresses, which is exactly the 50-day hour-meter failure again.
+{
+  console.log('\n-- lost mow on buffered replay (#267) --');
+  // Dated well back so the MERGE_GAP_MIN rule cannot fold these into the previous entry -
+  // that merge is a separate behaviour with its own tests above.
+  const seed = () => mockKV({
+    hours_history: JSON.stringify([
+      { date: '2026-10-23T18:00:00.000Z', hours_end: 7.0833, dist_total_m: 9100, rpm_avg: 2700 },
+    ]),
+  });
+
+  // The real 11-03 case, replayed.
+  let kv = seed();
+  await post(kv, { source: 'buffered', age_s: 600, engine_running: false,
+                   hours: 7.7583, dist_total_m: 9541, rpm_peak: 3100, rpm_avg: 2800 });
+  let h = await hist(kv);
+  check('a buffered replay carrying unrecorded runtime IS recorded', h.length === 2, `${h.length} entries`);
+  check('it is recorded with the replayed end-hours',
+        h.length === 2 && h[1].hours_end === 7.7583, JSON.stringify(h[h.length - 1]).slice(0, 150));
+
+  // The ring buffer flushes several slots back-to-back carrying identical hours. Only the
+  // first can ever record - the test is self-idempotent, which is why it needs no new
+  // firmware field.
+  await post(kv, { source: 'buffered', age_s: 540, engine_running: false, hours: 7.7583, dist_total_m: 9541 });
+  check('a second replay of the SAME hours records nothing (idempotent)',
+        (await hist(kv)).length === 2, `${(await hist(kv)).length} entries`);
+
+  // A parked heartbeat must never invent a mow out of nothing.
+  kv = seed();
+  await post(kv, { source: 'heartbeat', engine_running: false, hours: 7.0833, battery: 12.4 });
+  check('a heartbeat with no new runtime records nothing',
+        (await hist(kv)).length === 1, `${(await hist(kv)).length} entries`);
+
+  // MIN_LOST_MOW_H = one minute. Below that it is noise, not a mow.
+  kv = seed();
+  await post(kv, { source: 'heartbeat', engine_running: false, hours: 7.0833 + 0.008, battery: 12.4 });
+  check('under a minute of new runtime is NOT a mow (MIN_LOST_MOW_H)',
+        (await hist(kv)).length === 1, `${(await hist(kv)).length} entries`);
+
+  kv = seed();
+  await post(kv, { source: 'heartbeat', engine_running: false, hours: 7.0833 + 0.02, battery: 12.4 });
+  check('just over a minute of new runtime IS recorded',
+        (await hist(kv)).length === 2, `${(await hist(kv)).length} entries`);
+}
+
 console.log(`\n${pass} passed, ${fail} failed\n`);
 process.exit(fail ? 1 : 0);

@@ -34,6 +34,9 @@ const COVERAGE_PAUSED_KEY = 'coverage_paused';
 const COVERAGE_PAUSED_AT_KEY = 'coverage_paused_at';
 const COVERAGE_MAX = 60000;         // ~60,000 m2 ≈ 15 acres — far beyond one yard
 const COVERAGE_SEG_MAX_M = 40;      // longer than this = GPS dropout, don't fill in
+// FOURTH PASS, 2026-11-03. How far apart a track's two most distant points must be
+// before it counts as travel. See the gate below for the measurements behind 15.
+const COVERAGE_MIN_SPAN_M = 15;
 const GRID = 1e5;                   // 1e-5 deg ≈ 1.1 m lat / 0.9 m lon at 36.5N
 
 // ---- REMOTE CONTROL / CONFIG CHANNEL ------------------------------------------
@@ -66,7 +69,19 @@ const CFG_LIMITS = {
   vib_threshold:     [0.005, 1.0],   // floor sits just above the measured parked
                                      // noise floor (0.003-0.005 g), so no setting
                                      // can make idle vibration read as "running"
-  idle_interval_s:   [60, 3600],
+  // 🔴 THIS CEILING *IS* THE HOUR-METER ERROR, AND IT IS NOT A FREE BATTERY KNOB.
+  // Measured 2026-11-03, 6 mows for 6: every engine start loses almost exactly one
+  // idle interval of engine time (16.9/15.1/16.1/15.1/15.7/15.1 min against a
+  // measured 894 s interval). The cause is structural — line 1052 of the firmware
+  // enables ONLY esp_sleep_enable_timer_wakeup, the MPU's INT line is not wired to
+  // any RTC GPIO, so the box physically cannot be woken by vibration and does not
+  // learn the engine is running until its next scheduled wake. Jeff's mower meter
+  // read 15.5 h against the box's 7.76 h; the gap / 15.1 min = ~31 engine starts,
+  // which is the whole discrepancy.
+  // The old ceiling of 3600 meant one setting could lose a FULL HOUR per start, and
+  // 3600 was in fact already stored and waiting to ship. Until the INT wire exists,
+  // raising this ceiling trades Jeff's engine hours for radio battery. Don't.
+  idle_interval_s:   [60, 900],
   sample_interval_s: [10, 120],
   track_min_step_m:  [1, 20],
   gps_step_max_m:    [5, 200],
@@ -159,11 +174,60 @@ function sanitiseCfg(patch) {
   return { accepted, rejected };
 }
 
+// Clamp config on the way OUT to the box as well, not just on the way in.
+//
+// 2026-11-03: sanitiseCfg ran only when a patch was accepted, and the downlink then
+// served whatever was in storage verbatim. So a value that was legal when it was
+// stored keeps shipping forever after the limit is tightened — and one was: an
+// idle_interval_s of 3600 was sitting in mower_ctrl, accepted under the old 3600
+// ceiling, queued to reach the box on its next cfg_rev mismatch. That single value
+// would have cost an hour of engine time on every start.
+//
+// Coerces into range rather than dropping the key: a box given no value keeps its
+// old one, which is the setting being corrected. Unknown keys are dropped.
+function clampCfgForDevice(cfg) {
+  const out = {};
+  for (const [k, v] of Object.entries(cfg || {})) {
+    const lim = CFG_LIMITS[k];
+    if (!lim) continue;
+    const n = Number(v);
+    if (!isFinite(n)) continue;
+    out[k] = Math.min(Math.max(n, lim[0]), lim[1]);
+  }
+  return out;
+}
+
 function metresBetween(la1, lo1, la2, lo2) {
   const cosL = Math.cos(la1 * Math.PI / 180) || 1;
   const dx = (lo2 - lo1) * 111320 * cosL;
   const dy = (la2 - la1) * 111320;
   return Math.sqrt(dx * dx + dy * dy);
+}
+
+// How far apart a track's two most distant points are, in metres.
+//
+// This is the measure of "did the mower actually GO anywhere", and it is
+// deliberately not path length: a parked box's drift wanders back and forth over
+// the same few metres, so its accumulated path length grows without bound while
+// its span stays pinned to the GPS error circle. Span cannot be inflated by
+// sitting still, which is exactly the property the coverage gate needs.
+//
+// O(n^2) is fine — a whole mow is ~100 points, and the firmware caps the array.
+function trackSpanM(track) {
+  if (!Array.isArray(track) || track.length < 2) return 0;
+  const pts = [];
+  for (const p of track) {
+    if (Array.isArray(p) && typeof p[0] === 'number' && typeof p[1] === 'number') pts.push([p[0], p[1]]);
+    else if (p && typeof p.lat === 'number' && typeof p.lon === 'number') pts.push([p.lat, p.lon]);
+  }
+  let best = 0;
+  for (let i = 0; i < pts.length; i++) {
+    for (let j = i + 1; j < pts.length; j++) {
+      const d = metresBetween(pts[i][0], pts[i][1], pts[j][0], pts[j][1]);
+      if (d > best) best = d;
+    }
+  }
+  return best;
 }
 
 // Clean a GPS path before it becomes permanent coverage.
@@ -402,7 +466,10 @@ export async function onRequestGet({ env, request }) {
       if (raw) {
         // This endpoint is public and unauthenticated. Echoing the whole stored body
         // was publishing the box's `secret` to anyone who asked for it.
-        const { secret, ...stored } = JSON.parse(raw);
+        // `cfg` goes out with `secret` (#270): a stale config on a public endpoint reads
+        // like a live setting. Stripping it on OUTPUT too means the lie stops the moment
+        // this deploys, rather than at the next upload.
+        const { secret, cfg, ...stored } = JSON.parse(raw);
         return Response.json(redact({ ...stored, history, coverage_n, tracking_paused: paused, paused_since: pausedAt || null }));
       }
       return Response.json({
@@ -586,8 +653,33 @@ export async function onRequestPost({ request, env }) {
         // ground the mower genuinely covered, with no dependence on engine state
         // at all. The bare lat/lon is no longer merged under any circumstance —
         // a single position is a snapshot, never evidence of travel.
+        // FOURTH PASS, 2026-11-03. The third pass's rule was "2+ points = travel",
+        // and it rested on one stated premise: "a parked box emits exactly ONE point
+        // per upload." That premise was true in August and is now FALSE. Cutting the
+        // radio duty cycle stretched the idle interval from 5 to ~15 minutes, and
+        // across 15 minutes of sitting still GPS drift crosses the firmware's 3 m
+        // step gate several times — so a parked heartbeat now ships a handful of
+        // points and sails straight through a point-count gate.
+        //
+        // Measured 2026-11-03 over the 4,996 parked readings in the sensor log:
+        //   0 or 1 point ... 4,940 readings  (the gate holds)
+        //   2+ points .....    55 readings  (the gate leaks — one shipped FIFTY,
+        //                                    engine off, engine hours unchanged)
+        // That is why the 09-24 cleanup did not stick: cells over the parking spot
+        // were back to 163 visits by today, because mergeCoverage interpolates along
+        // every leg and 50 drift points inside a 6 m circle repaint the same cells.
+        //
+        // The fix is to stop counting points and measure SPAN — how far apart the
+        // track's two most distant points are. Drift cannot fake distance it never
+        // travelled. Measured, both sides of the threshold:
+        //   parked drift footprint .. every repainted cell within 6.1 m of the spot
+        //                             (so span <= ~12 m)
+        //   smallest real mow ....... 28.3 m span (then 33.1 m, then 63.0 m)
+        // 15 m sits between them with ~2x margin either way. A buffered mow-end
+        // replay — the case the third pass was protecting — spans the whole yard and
+        // still passes, so no real mow's map is lost.
         const trackN = Array.isArray(body.track) ? body.track.length : 0;
-        const reallyMoved = trackN >= 2;
+        const reallyMoved = trackN >= 2 && trackSpanM(body.track) >= COVERAGE_MIN_SPAN_M;
         const pts = gpsPointsFrom(body, false, reallyMoved);
         if (pts.length > 0) {
           const covRaw = await kv.get(COVERAGE_KEY);
@@ -616,7 +708,14 @@ export async function onRequestPost({ request, env }) {
   // 2026-10-13: strip control-channel credentials before anything is persisted.
   // hours_data is returned verbatim by the unauthenticated GET, so a credential that
   // reaches it is published. Deleting here covers BOTH the overwrite and merge paths.
-  delete body.token; delete body.password; delete body.secret;
+  // 2026-11-04 (#270): `cfg` is scrubbed here for exactly the reason the three above are.
+  // The 10-13 stray control POST (commit 3194249) omitted `__cmd`, missed the authorised
+  // branch and fell through to this telemetry path carrying BOTH a token and a cfg patch.
+  // The token was deleted; the cfg was not, so it merged into hours_data and the public GET
+  // served `cfg: {"idle_interval_s": 3600}` as telemetry for three weeks - a value that was
+  // never live (the box measured 894 s) and that cost a session a false alarm. The firmware
+  // never sends `cfg` at all (it sends `cfg_rev`), so on this path the field is always junk.
+  delete body.token; delete body.password; delete body.secret; delete body.cfg;
   let merged = body;
   if (isHeartbeat && prev) {
     merged = { ...prev, ...body };
@@ -683,8 +782,33 @@ export async function onRequestPost({ request, env }) {
   // The firmware now marks the one upload that carries a finished mow's totals. Read
   // from `body`, NOT `prev`: on a mow_end post it is the BODY that holds this mow's
   // rpm_peak / dist_session_m / track.
+  //
+  // 2026-11-03 — THE BUFFERED REPLAY LOSES THE LABEL, AND WITH IT THE MOW.
+  // Jeff: "why did it lose my data ??? That's bull shit." He was right, and the box
+  // was not at fault. When a mow ends out of WiFi range the firmware saves the
+  // reading into a 20-slot ring buffer in RTC RAM and resends it later — that works.
+  // But the buffer is a 64-byte packed struct with no room for a "this was a mow
+  // end" flag, so the replay arrives as source:"buffered", mow_ended:null and
+  // matched NEITHER condition above. The reading was logged, merged into coverage
+  // and shown on the live card, while the mow record was dropped with no error.
+  //
+  // Measured over the whole sensor log: every distinct engine-hours value that ever
+  // arrived "buffered" was lost — 3 for 3, 88 minutes of mowing:
+  //   6.3833 (48.5 min, 09-24) · 7.0833 (26.0 min, 10-23) · 7.7583 (13.5 min, 11-03)
+  // It also CORRUPTED the surviving rows: the 11-03 1:55 PM mow was recorded as
+  // 0.5083 h because the lost 10-23 runtime got absorbed into the next record that
+  // happened to land. Only 0.075 h of it was that mow.
+  //
+  // So an unlabelled reading is treated as a finished mow when it carries runtime
+  // that is not in the history yet. That test is self-idempotent and needs no new
+  // firmware field: once the mow is recorded, hours_end matches and every later
+  // replay or heartbeat of the same value advances nothing and is ignored. The ring
+  // buffer flushes several slots back-to-back with identical hours; only the first
+  // can ever record.
+  const MIN_LOST_MOW_H = 1 / 60;   // one minute of engine time; below that, not a mow
   const isMowEnd = body.mow_ended === true || body.source === 'mow_end';
-  if (isMowEnd && kv) {
+  const mayBeLostMowEnd = !isMowEnd && (body.source === 'buffered' || isHeartbeat);
+  if ((isMowEnd || mayBeLostMowEnd) && kv) {
     try {
       const histRaw = await kv.get(MOW_HISTORY_KEY);
       const hist = histRaw ? JSON.parse(histRaw) : [];
@@ -699,6 +823,20 @@ export async function onRequestPost({ request, env }) {
         : (prev && Array.isArray(prev.track) && prev.track.length ? prev.track : null);
       const distTotal = pick('dist_total_m');
       const last = hist.length ? hist[hist.length - 1] : null;
+      // When the mow actually ENDED, not when the radio finally got through. A
+      // buffered replay carries age_s (measured: up to 1,860 s), and stamping it
+      // with the arrival time put mows up to half an hour late and poisoned the
+      // merge-gap arithmetic below, which is all timestamp differences. Clamped to a
+      // day so a garbage age can never date a record into the distant past.
+      const ageS = Math.min(Math.max(num(body.age_s) || 0, 0), 86400);
+      const readAt = Date.now() - ageS * 1000;
+      // Does this reading carry engine time the history has never recorded? For a
+      // labelled mow_end that is irrelevant — it records either way. For an
+      // unlabelled one it is the ONLY evidence that a mow happened, and it is what
+      // makes the recovery idempotent across a multi-slot buffer flush.
+      const lastEnd = last ? num(last.hours_end) : null;
+      const unrecordedRun = (hoursEnd !== null && lastEnd !== null) ? hoursEnd - lastEnd : null;
+      const recordThis = isMowEnd || (unrecordedRun !== null && unrecordedRun >= MIN_LOST_MOW_H);
       // 2026-09-24: the box's dist_session_m restarts whenever the engine restarts, so a
       // gas/water stop made "This Mow" report only the last stretch (376 m of a 1,477 m
       // mow). The lifetime odometer does not restart — the difference from the previous
@@ -760,7 +898,13 @@ export async function onRequestPost({ request, env }) {
           track: track,
         });
       }
-      await kv.put(MOW_HISTORY_KEY, JSON.stringify(hist.slice(-MOW_HISTORY_MAX)));
+      // THE one gate that makes a mow permanent. Guarding the write alone is enough
+      // and is deliberate: everything above mutates a locally-parsed copy of the
+      // history, so an unlabelled reading that turns out to carry no new engine time
+      // simply never persists and leaves the record untouched.
+      if (recordThis) {
+        await kv.put(MOW_HISTORY_KEY, JSON.stringify(hist.slice(-MOW_HISTORY_MAX)));
+      }
     } catch (_) {}
   }
 
@@ -777,6 +921,12 @@ export async function onRequestPost({ request, env }) {
   }
 
   const data = { ...merged, lastSync: new Date().toISOString() };
+  // Deleting it from `body` above is NOT enough to clear the one already stored: the
+  // heartbeat path merges `{ ...prev, ...body }`, so a `cfg` in `prev` survives a body that
+  // has none. Deleting it from the object actually persisted is what evicts the ghost, and
+  // it self-heals - the box posts about every 900 s, so the field is gone within ~15 min of
+  // deploy with no KV dashboard trip and no one-off admin command.
+  delete data.cfg;
 
   if (kv) {
     await kv.put('hours_data', JSON.stringify(data));
@@ -815,7 +965,9 @@ export async function onRequestPost({ request, env }) {
       // Only ship the config body when the box is actually behind. Steady state is
       // a two-field reply the firmware can parse without a JSON library.
       if ((body.cfg_rev || 0) !== (ctrl.cfg_rev || 0) && Object.keys(ctrl.cfg).length) {
-        down.cfg = ctrl.cfg;
+        // Re-clamped on serve — see clampCfgForDevice. A value stored under an older,
+        // looser limit must never reach the hardware.
+        down.cfg = clampCfgForDevice(ctrl.cfg);
       }
       // Oldest first, exactly one. It stays queued until acked, so a box that dies
       // mid-command simply gets it again on its next successful upload.
