@@ -69,21 +69,21 @@ const CFG_LIMITS = {
   vib_threshold:     [0.005, 1.0],   // floor sits just above the measured parked
                                      // noise floor (0.003-0.005 g), so no setting
                                      // can make idle vibration read as "running"
-  // 🔴 THIS CEILING *IS* THE HOUR-METER ERROR, AND IT IS NOT A FREE BATTERY KNOB.
-  // Measured 2026-11-03, 6 mows for 6: every engine start loses almost exactly one
-  // idle interval of engine time (16.9/15.1/16.1/15.1/15.7/15.1 min against a
-  // measured 894 s interval). The cause is structural — line 1052 of the firmware
-  // enables ONLY esp_sleep_enable_timer_wakeup, the MPU's INT line is not wired to
-  // any RTC GPIO, so the box physically cannot be woken by vibration and does not
-  // learn the engine is running until its next scheduled wake. Jeff's mower meter
-  // read 15.5 h against the box's 7.76 h; the gap / 15.1 min = ~31 engine starts,
-  // which is the whole discrepancy.
-  // The old ceiling of 3600 meant one setting could lose a FULL HOUR per start, and
-  // 3600 was in fact already stored and waiting to ship. Until the INT wire exists,
-  // raising this ceiling trades Jeff's engine hours for radio battery. Don't.
+  // How often a parked box POSTS. Jeff, 10-13: "it's running down my battery".
+  // Up to 1.4.0 it was also how often a parked box SENSED, so every engine start sat
+  // somewhere inside a blind window this long. That is why the ceiling came down from
+  // 3600: one setting could blind the meter for an hour, and 3600 was in fact already
+  // stored and waiting to ship. From 1.5.0 sensing is sample_interval_s, so this only
+  // sets radio time and how long a queued command waits.
+  // The 15-17 min per-mow gaps measured 2026-11-03 span a window that contains one whole
+  // sleep by construction: the most a start could lose, not what it lost (#269).
   idle_interval_s:   [60, 900],
   sample_interval_s: [10, 120],
   track_min_step_m:  [1, 20],
+  // 1.5.0. See TrackLimits in firmware/mower_hours_esp32/mower_logic.h. A value that stops
+  // points being recorded loses map, never hours, so these only need to be sane.
+  track_min_mps:     [0, 2],
+  track_max_hdop:    [1, 99],
   gps_step_max_m:    [5, 200],
   // How often engine seconds are written to flash while running. This is the
   // exposure window for the EN reset button on the box: anything already flushed
@@ -228,6 +228,166 @@ function trackSpanM(track) {
     }
   }
   return best;
+}
+
+// ---- THE TRACK FILE (firmware 1.5.0 and up) ----------------------------------------
+// The box reads GPS once a second while the engine runs, so a mow is now hundreds or
+// thousands of points rather than ~100, kept in a file on its flash. The whole file comes up
+// as one binary POST (?track_file=1), BEFORE the mow_end post of the same wake:
+//   - Each mow's points go under their own key, mow_trk:<id>. Nothing here reads or writes
+//     hours_history, hours_data or sensor_log, so it cannot race the JSON posts on them:
+//     that race lost readings at ~1 s spacing on 2026-08-11. History has one writer.
+//   - mow_end then attaches them. KV is eventually consistent, so that read may miss a key
+//     written 2 s ago. The record then says track_pts < track_want, and the next post fills
+//     it in. A file that arrives late (the POST failed) is handled by that same path.
+//   - A resend is harmless: same id + same first point + no more points = already have it.
+//     That covers an OK lost on the way back. Comparing the first point is what stops a
+//     board with wiped NVS, whose ids restart at 1, losing its mows to old keys.
+const TRACK_FILE_PARAM = 'track_file';
+const TRACK_FILE_MAX_BYTES = 256 * 1024;  // the box caps its file at 128 KB
+const TRK_MARKER = -2147483648;           // INT32_MIN: first word of a "new mow" record
+const TRK_KEY = (id) => `mow_trk:${id}`;
+const HIST_TRACK_MAX = 100;               // points kept in hours_history per mow (50 mows)
+const MOW_IDS_MAX = 10;                   // ids one record will sweep up
+const TRACK_RETRY_MS = 48 * 3600 * 1000;  // stop looking for points that never came
+
+function fwUsesTrackFile(fw) {
+  const m = /^(\d+)\.(\d+)/.exec(typeof fw === 'string' ? fw : '');
+  return !!m && (+m[1] > 1 || (+m[1] === 1 && +m[2] >= 5));
+}
+
+// Records are 8 bytes, little-endian: latE6, lonE6, or TRK_MARKER, mowId. Returns
+// [{id, pts}] or null if the length is not a whole number of records. Points before any
+// marker cannot be attributed to a mow and are dropped.
+function parseTrackFile(buf) {
+  if (buf.byteLength % 8) return null;
+  const dv = new DataView(buf);
+  const byId = new Map();
+  let cur = null;
+  for (let o = 0; o < buf.byteLength; o += 8) {
+    const a = dv.getInt32(o, true), b = dv.getInt32(o + 4, true);
+    if (a === TRK_MARKER) {
+      const id = b >>> 0;
+      if (!byId.has(id)) byId.set(id, { id, pts: [] });
+      cur = byId.get(id);
+      continue;
+    }
+    if (!cur || (a === 0 && b === 0)) continue;
+    const lat = a / 1e6, lon = b / 1e6;
+    if (Math.abs(lat) > 90 || Math.abs(lon) > 180) continue;
+    cur.pts.push([lat, lon]);
+  }
+  return [...byId.values()];
+}
+
+// trackSpanM is O(n^2), fine for ~100 points and not for thousands. The bounding box's
+// diagonal answers the same question, "did it go anywhere", to within a factor of 1.41, and
+// drift can't inflate it any more than it can inflate span.
+function bboxDiagM(pts) {
+  if (pts.length < 2) return 0;
+  let la0 = Infinity, la1 = -Infinity, lo0 = Infinity, lo1 = -Infinity;
+  for (const [la, lo] of pts) {
+    if (la < la0) la0 = la; if (la > la1) la1 = la;
+    if (lo < lo0) lo0 = lo; if (lo > lo1) lo1 = lo;
+  }
+  return metresBetween(la0, lo0, la1, lo1);
+}
+
+async function readStoredTrack(kv, id) {
+  try {
+    const raw = await kv.get(TRK_KEY(id));
+    const o = raw ? JSON.parse(raw) : null;
+    return o && Array.isArray(o.pts) ? o.pts : null;
+  } catch (_) { return null; }
+}
+
+async function readStoredTracks(kv, ids) {
+  let pts = [];
+  for (const id of ids) {
+    const p = await readStoredTrack(kv, id);
+    if (p) pts = pts.concat(p);
+  }
+  return pts;
+}
+
+// Evenly spaced, always keeping both ends. No smoothing: this is what gets drawn.
+function decimateTrack(pts, max = HIST_TRACK_MAX) {
+  if (pts.length <= max) return pts;
+  const out = [];
+  for (let i = 0; i < max; i++) out.push(pts[Math.round(i * (pts.length - 1) / (max - 1))]);
+  return out;
+}
+
+// Which mow ids a record for mow `id` takes: everything since the last id on record. A mow
+// cut by a reset never got a mow_end of its own, so its track travels with the next one.
+function mowIdsToAttach(hist, id) {
+  let top = 0;
+  for (const e of hist) {
+    for (const i of (Array.isArray(e.mow_ids) ? e.mow_ids : [])) if (i > top) top = i;
+  }
+  if (!top || id <= top) return [id];   // first on record, a resend, or a wiped board
+  const ids = [];
+  for (let i = Math.max(top + 1, id - MOW_IDS_MAX + 1); i <= id; i++) ids.push(i);
+  return ids;
+}
+
+// True if the record changed.
+function fillEntryTrack(entry, pts) {
+  if (!pts.length || pts.length === entry.track_pts) return false;
+  entry.track = decimateTrack(pts);
+  entry.track_pts = pts.length;
+  return true;
+}
+
+async function handleTrackFile(request, kv) {
+  if (!kv) return Response.json({ ok: false, error: 'no_kv' }, { status: 503 });
+  if (Number(request.headers.get('content-length') || 0) > TRACK_FILE_MAX_BYTES) {
+    return Response.json({ ok: false, error: 'too_big' }, { status: 413 });
+  }
+  const buf = await request.arrayBuffer();
+  if (buf.byteLength > TRACK_FILE_MAX_BYTES) {
+    return Response.json({ ok: false, error: 'too_big' }, { status: 413 });
+  }
+  const mows = parseTrackFile(buf);
+  if (!mows) return Response.json({ ok: false, error: 'not_whole_records' }, { status: 400 });
+
+  const fresh = [];
+  let newPts = 0;
+  try {
+    for (const m of mows) {
+      if (!m.pts.length) continue;
+      const have = await readStoredTrack(kv, m.id);
+      const sameMow = have && have.length && have[0][0] === m.pts[0][0] && have[0][1] === m.pts[0][1];
+      const haveN = sameMow ? have.length : 0;
+      if (haveN >= m.pts.length) continue;
+      await kv.put(TRK_KEY(m.id), JSON.stringify({ id: m.id, pts: m.pts, at: new Date().toISOString() }));
+      // Only the part not already merged, so a longer resend can't count a pass twice.
+      fresh.push(m.pts.slice(Math.max(haveN - 1, 0)));
+      newPts += m.pts.length - haveN;
+    }
+  } catch (_) {
+    // Not ok: the box keeps its file and sends it again.
+    return Response.json({ ok: false, error: 'kv_write' }, { status: 503 });
+  }
+
+  // After the points are safe, and outside the try above: a failure here costs some map
+  // shading, and must not make the box resend a file the server already holds.
+  let cells = 0;
+  try {
+    if (fresh.length && (await kv.get(COVERAGE_PAUSED_KEY)) !== '1') {
+      const covRaw = await kv.get(COVERAGE_KEY);
+      let cov = covRaw ? JSON.parse(covRaw) : {};
+      let touched = false;
+      for (const pts of fresh) {
+        if (bboxDiagM(pts) < COVERAGE_MIN_SPAN_M) continue;
+        const r = mergeCoverage(cov, gpsPointsFrom({ track: pts }, false, true));
+        cov = r.cells; cells += r.added; touched = true;
+      }
+      if (touched) await kv.put(COVERAGE_KEY, JSON.stringify(cov));
+    }
+  } catch (_) {}
+
+  return Response.json({ ok: true, mows: mows.length, new_pts: newPts, new_cells: cells });
 }
 
 // Clean a GPS path before it becomes permanent coverage.
@@ -452,6 +612,34 @@ export async function onRequestGet({ env, request }) {
     return Response.json({ coverage: {}, coverage_n: 0, paused: false });
   }
 
+  // ?track=latest or ?track=<mow id> -- a mow's full-resolution path, one array per engine
+  // stretch so a line is never drawn across a gas stop. Fetched on demand: a mow can be
+  // tens of KB, and the normal sync runs every 60 s.
+  const trackParam = param('track');
+  if (trackParam !== null) {
+    let ids = [];
+    if (kv) {
+      try {
+        if (trackParam === 'latest') {
+          const histRaw = await kv.get(MOW_HISTORY_KEY);
+          const hist = histRaw ? JSON.parse(histRaw) : [];
+          for (let i = hist.length - 1; i >= 0 && !ids.length; i--) {
+            if (Array.isArray(hist[i].mow_ids)) ids = hist[i].mow_ids;
+          }
+        } else if (/^\d+$/.test(trackParam)) {
+          ids = [Number(trackParam)];
+        }
+        const tracks = [];
+        for (const id of ids) {
+          const pts = await readStoredTrack(kv, id);
+          if (pts) tracks.push({ id, pts });
+        }
+        return Response.json({ ok: true, mow_ids: ids, tracks });
+      } catch (_) {}
+    }
+    return Response.json({ ok: true, mow_ids: [], tracks: [] });
+  }
+
   if (kv) {
     try {
       const raw = await kv.get('hours_data');
@@ -490,6 +678,11 @@ export async function onRequestGet({ env, request }) {
 }
 
 export async function onRequestPost({ request, env }) {
+  // Binary, so it has to branch off before the JSON parse.
+  let isTrackFile = false;
+  try { isTrackFile = new URL(request.url).searchParams.get(TRACK_FILE_PARAM) === '1'; } catch (_) {}
+  if (isTrackFile) return handleTrackFile(request, getKV(env));
+
   let body;
   try { body = await request.json(); } catch (_) {
     return Response.json({ ok: false, error: 'invalid_json' }, { status: 400 });
@@ -598,7 +791,14 @@ export async function onRequestPost({ request, env }) {
   // while real mown grass (443 cells at 1 visit) has a median distance of 23 m. Only
   // two mows are on record, so no real grass can reach 4. Runs once, on the box's
   // next upload, and records what it removed under the flag key.
-  const COVERAGE_CLEANUP_FLAG = 'coverage_cleanup_2026_09_24';
+  //
+  // RUN AGAIN, 2026-11-05, under a new flag. That cleanup was right but the leak was still
+  // open: a parked 1.4.0 heartbeat kept painting through the path the span gate has since
+  // closed, and the same spot grew back to 95 cells at 4+ visits. Measured on the live map
+  // today (819 cells, 4 mows on record): every one of the 95 lies within 9.0 m of the
+  // parking spot, median 3.9 m, and beyond 12 m nothing reaches 4. This time the removed
+  // cells are kept in the flag, so it can be undone.
+  const COVERAGE_CLEANUP_FLAG = 'coverage_cleanup_2026_11_05';
   const COVERAGE_DRIFT_VISITS = 4;
   if (kv) {
     try {
@@ -606,13 +806,14 @@ export async function onRequestPost({ request, env }) {
         const covRaw = await kv.get(COVERAGE_KEY);
         const cov = covRaw ? JSON.parse(covRaw) : {};
         let removed = 0, kept = 0;
+        const cells = {};
         if (!Array.isArray(cov)) {
           for (const k of Object.keys(cov)) {
-            if (cov[k] >= COVERAGE_DRIFT_VISITS) { delete cov[k]; removed++; } else kept++;
+            if (cov[k] >= COVERAGE_DRIFT_VISITS) { cells[k] = cov[k]; delete cov[k]; removed++; } else kept++;
           }
           await kv.put(COVERAGE_KEY, JSON.stringify(cov));
         }
-        await kv.put(COVERAGE_CLEANUP_FLAG, JSON.stringify({ at: new Date().toISOString(), removed, kept, threshold: COVERAGE_DRIFT_VISITS }));
+        await kv.put(COVERAGE_CLEANUP_FLAG, JSON.stringify({ at: new Date().toISOString(), removed, kept, threshold: COVERAGE_DRIFT_VISITS, cells }));
       }
     } catch (_) {}
   }
@@ -818,9 +1019,13 @@ export async function onRequestPost({ request, env }) {
       const pick = (k) => num(body[k] !== undefined ? body[k] : (prev ? prev[k] : undefined));
       const hoursEnd = num(body.hours) !== null ? num(body.hours)
                      : (num(body.hours_seconds) !== null ? +(body.hours_seconds / 3600).toFixed(4) : null);
-      const track = Array.isArray(body.track) && body.track.length
-        ? body.track
-        : (prev && Array.isArray(prev.track) && prev.track.length ? prev.track : null);
+      // From 1.5.0 the track never rides in this post, and the fallback must stay off: it
+      // would stamp the previous mow's path onto every mow.
+      const usesTrackFile = fwUsesTrackFile(body.fw);
+      const track = usesTrackFile ? null
+        : Array.isArray(body.track) && body.track.length
+          ? body.track
+          : (prev && Array.isArray(prev.track) && prev.track.length ? prev.track : null);
       const distTotal = pick('dist_total_m');
       const last = hist.length ? hist[hist.length - 1] : null;
       // When the mow actually ENDED, not when the radio finally got through. A
@@ -848,14 +1053,14 @@ export async function onRequestPost({ request, env }) {
       // started within MERGE_GAP_MIN of the previous mow ending, it is the same mow:
       // fold it into that entry instead of adding a second one.
       const MERGE_GAP_MIN = 20;
-      let merged = false;
+      let folded = false;
       if (last && hoursEnd !== null && num(last.hours_end) !== null && last.date) {
         const runMin = Math.max(0, (hoursEnd - last.hours_end) * 60);
-        const gapMin = (Date.now() - Date.parse(last.date)) / 60000 - runMin;
+        const gapMin = (readAt - Date.parse(last.date)) / 60000 - runMin;
         if (isFinite(gapMin) && gapMin <= MERGE_GAP_MIN) {
           const prevRun = num(last.hours_mow) !== null ? last.hours_mow * 60 : runMin;
           const ra = pick('rpm_avg'), la = num(last.rpm_avg);
-          last.date = new Date().toISOString();
+          last.date = new Date(readAt).toISOString();
           last.rpm_avg = (ra !== null && la !== null && prevRun + runMin > 0)
             ? Math.round((la * prevRun + ra * runMin) / (prevRun + runMin)) : (ra !== null ? ra : la);
           last.rpm_peak = Math.max(num(last.rpm_peak) || 0, pick('rpm_peak') || 0) || null;
@@ -874,13 +1079,13 @@ export async function onRequestPost({ request, env }) {
             last.track = same ? track : lt.concat(track);
           }
           last.segments = (num(last.segments) || 1) + 1;
-          merged = true;
+          folded = true;
         }
       }
-      if (!merged) {
+      if (!folded) {
         const hoursPrev = last ? num(last.hours_end) : null;
         hist.push({
-          date: new Date().toISOString(),
+          date: new Date(readAt).toISOString(),
           hours_end: hoursEnd,
           hours_mow: (hoursEnd !== null && hoursPrev !== null) ? +Math.max(0, hoursEnd - hoursPrev).toFixed(4) : null,
           rpm_peak: pick('rpm_peak'),
@@ -903,7 +1108,30 @@ export async function onRequestPost({ request, env }) {
       // history, so an unlabelled reading that turns out to carry no new engine time
       // simply never persists and leaves the record untouched.
       if (recordThis) {
+        const mowId = num(body.mow_id);
+        if (usesTrackFile && isMowEnd && mowId) {
+          const entry = hist[hist.length - 1];
+          const had = Array.isArray(entry.mow_ids) ? entry.mow_ids : [];
+          entry.mow_ids = [...new Set(had.concat(mowIdsToAttach(hist, mowId)))];
+          // A resent mow_end has already been counted.
+          entry.track_want = (num(entry.track_want) || 0) + (had.includes(mowId) ? 0 : (num(body.trk_pts) || 0));
+          if (num(entry.track_pts) === null) entry.track_pts = 0;
+          fillEntryTrack(entry, await readStoredTracks(kv, entry.mow_ids));
+          merged.track = Array.isArray(entry.track) ? entry.track : [];
+        }
         await kv.put(MOW_HISTORY_KEY, JSON.stringify(hist.slice(-MOW_HISTORY_MAX)));
+      } else if (histRaw) {
+        // Re-parsed because the fold above has already changed `last` in the local copy, on
+        // the understanding that it is thrown away. This path writes.
+        const fresh = JSON.parse(histRaw);
+        const tail = fresh[fresh.length - 1];
+        if (tail && Array.isArray(tail.mow_ids) && (num(tail.track_pts) || 0) < (num(tail.track_want) || 0) &&
+            Date.now() - Date.parse(tail.date) < TRACK_RETRY_MS) {
+          if (fillEntryTrack(tail, await readStoredTracks(kv, tail.mow_ids))) {
+            await kv.put(MOW_HISTORY_KEY, JSON.stringify(fresh));
+            merged.track = tail.track;
+          }
+        }
       }
     } catch (_) {}
   }

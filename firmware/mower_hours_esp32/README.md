@@ -48,6 +48,11 @@ arduino-cli compile --fqbn esp32:esp32:esp32 .
 arduino-cli upload -p COM<n> --fqbn esp32:esp32:esp32 .
 ```
 
+**Compile with `--output-dir` pointing OUTSIDE the repo** (e.g. a temp folder). On 2026-11-05 a
+compile wrote a `build/` folder beside the sketch as well, and those `.bin`/`.elf` files carry the
+WiFi password in the clear. `.gitignore` now blocks `firmware/**/build/` and firmware binaries, and
+`scripts/firmware-binary-gate-test.js` fails the gate if any of them could be committed.
+
 `arduino-cli` on Jeff's PC:
 `%LOCALAPPDATA%\Programs\arduino-ide\resources\app\lib\backend\resources\arduino-cli.exe`
 

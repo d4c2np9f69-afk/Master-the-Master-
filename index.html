@@ -3406,7 +3406,7 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
     <div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5">Records <strong>automatically</strong> from the sensor box's first GPS fix to its last &mdash; nothing to start or stop, and the app doesn't need to be open. Every mow adds to a permanent map: <strong style="color:#7ee787">green</strong> is ground covered over time, <strong style="color:#ff6262">red</strong> is your latest mow. With satellite on it's real imagery of your property, oriented <strong>true north</strong> and aligned automatically &mdash; nothing to line up.</div>
     <div id="trackPauseNote" style="display:none;font-size:11px;color:#ffb454;margin-bottom:8px;font-weight:600">&#9208; GPS tracking is paused &mdash; nothing is being added to the map.</div>
     <div style="position:relative">
-      <canvas id="yardMap" style="width:100%;height:320px;display:block;border-radius:8px"></canvas>
+      <canvas id="yardMap" style="width:100%;height:clamp(320px,52vw,500px);display:block;border-radius:8px"></canvas>
     </div>
     <div id="yardMapMsg" style="font-size:10px;color:#666;text-align:center;margin-top:6px">No GPS track yet &mdash; it&rsquo;ll appear after your first mow with the sensor installed.</div>
     <div id="yardCoverStats" style="font-size:10px;color:var(--muted);text-align:center;margin-top:4px"></div>
@@ -8746,7 +8746,10 @@ setInterval(loadAlerts, 5*60*1000);
         // is emptied by the box after every delivery, so it held 2 points on 2026-09-24
         // while the saved mow had 111.
         var histTrack = (lastMow && Array.isArray(lastMow.track) && lastMow.track.length>=2) ? lastMow.track : null;
-        var trackToShow = histTrack || freshTrack || (typeof S!=='undefined' && S.sensorTrack.length>=2 ? S.sensorTrack : []);
+        // From 1.5.0 histTrack is a sketch; the full track replaces it as soon as it's down.
+        if(typeof syncMowTrack==='function') syncMowTrack(lastMow);
+        var fullTrack = (typeof fullMowTrack==='function') ? fullMowTrack(lastMow) : null;
+        var trackToShow = fullTrack || histTrack || freshTrack || (typeof S!=='undefined' && S.sensorTrack.length>=2 ? S.sensorTrack : []);
         if(typeof drawYardMap==='function') drawYardMap(trackToShow);
         if(Array.isArray(d.history)){
           window._serverMowCount=d.history.length;
@@ -9221,6 +9224,65 @@ setInterval(loadAlerts, 5*60*1000);
       .catch(function(){});
   }
 
+  // Sort a mow's legs by what the gap between two points can honestly claim.
+  //   up to TRACK_PATH_MAX_M  drawn as a line: short enough that it IS the path
+  //   up to TRACK_GAP_MAX_M   dashed: same stretch of mowing, but the route between is unknown
+  //   beyond that             not joined: a dropout or a new stretch (same 40 m as the server)
+  // 1.5.0 records a point every ~3 m. 1.4.0 logged one per 30 s and uploaded a handful, so
+  // its "line" was 8 dots joined across the house, which is what made the map look broken.
+  var TRACK_PATH_MAX_M=15, TRACK_GAP_MAX_M=40;
+  function _trackLegs(track){
+    var solid=[], dashed=[], prev=null;
+    for(var i=0;i<(track?track.length:0);i++){
+      var t=track[i];
+      if(!t||typeof t[0]!=='number'||typeof t[1]!=='number') continue;
+      if(prev){
+        var dy=(t[0]-prev[0])*111320, dx=(t[1]-prev[1])*111320*Math.cos(t[0]*Math.PI/180);
+        var d=Math.sqrt(dx*dx+dy*dy);
+        if(d<=TRACK_PATH_MAX_M) solid.push([prev,t]);
+        else if(d<=TRACK_GAP_MAX_M) dashed.push([prev,t]);
+      }
+      prev=t;
+    }
+    return {solid:solid, dashed:dashed};
+  }
+  window._trackLegs=_trackLegs;
+
+  // ---- FULL MOW TRACK ---------------------------------------------------------
+  // From 1.5.0 the history keeps a 100-point sketch of a mow and the whole track sits under
+  // its own key, because thousands of points in every 60 s sync would cost real money. Same
+  // rule as coverage: only download when what's on record changes. Kept in memory only.
+  var _fullTrack=null, _fullTrackKey='', _fullTrackBusy='';
+  function _mowTrackKey(m){
+    return (m && m.track_pts>0 && Array.isArray(m.mow_ids) && m.mow_ids.length)
+      ? m.mow_ids.join(',')+':'+m.track_pts : '';
+  }
+  function fullMowTrack(lastMow){
+    var key=_mowTrackKey(lastMow);
+    return (key && key===_fullTrackKey) ? _fullTrack : null;
+  }
+  function syncMowTrack(lastMow){
+    var key=_mowTrackKey(lastMow);
+    if(!key || key===_fullTrackKey || key===_fullTrackBusy) return;
+    _fullTrackBusy=key;
+    var ids=lastMow.mow_ids.join(',');
+    fetch('/api/hours?track=latest',{cache:'no-store'})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        _fullTrackBusy='';
+        // A newer mow may have landed since this sync started; that one gets its own turn.
+        if(!d||!Array.isArray(d.tracks)||!Array.isArray(d.mow_ids)||d.mow_ids.join(',')!==ids) return;
+        var pts=[];
+        d.tracks.forEach(function(t){ if(t&&Array.isArray(t.pts)) pts=pts.concat(t.pts); });
+        if(pts.length<2) return;
+        _fullTrack=pts; _fullTrackKey=key;
+        drawYardMap(pts);
+      })
+      .catch(function(){ _fullTrackBusy=''; });
+  }
+  window.fullMowTrack=fullMowTrack;
+  window.syncMowTrack=syncMowTrack;
+
   function _reflectPauseState(paused, since){
     window._trackingPaused=!!paused;
     if(since!==undefined) window._pausedSince=since;
@@ -9281,7 +9343,12 @@ setInterval(loadAlerts, 5*60*1000);
     var ctx=c.getContext('2d');
     window._lastTrack=track;
     var w=c.clientWidth||300, h=c.clientHeight||320;
-    c.width=w; c.height=h;
+    // Backing store at the screen's real pixels. It used to be CSS pixels, so a phone or
+    // iPad at 2x-3x stretched every tile and dot to mush. Everything below still draws in
+    // CSS pixels; the transform does the rest.
+    var dpr=Math.min(window.devicePixelRatio||1,3);
+    c.width=Math.round(w*dpr); c.height=Math.round(h*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
     ctx.clearRect(0,0,w,h);
 
     var coverage=Array.isArray(_coverageCells)?_coverageCells:[];
@@ -9351,9 +9418,18 @@ setInterval(loadAlerts, 5*60*1000);
     //    GPS error is random, so real grass gets hit again and again and darkens to
     //    solid, while a one-off drift stray stays faint and never firms up. A plain
     //    union would instead just accumulate every stray forever and bloat outward.
+    //    On satellite each cell is painted at its true size on the ground, one flat fill
+    //    per shade, so neighbours join into mown ground instead of a string of beads and
+    //    overlaps can't darken a cell it hasn't earned. The photo fallback has a user
+    //    rotation and no real scale, so it keeps its dots.
     if(coverage.length>0){
       var dotR=Math.max(1.6,Math.min(5,photo.w/220));
-      var confirmed=0;
+      var confirmed=0, shade, shades=[[],[],[]];
+      var cellW=0, cellH=0;
+      if(usedSatellite){
+        var c0=project(coverage[0][0],coverage[0][1]), c1=project(coverage[0][0]+1e-5,coverage[0][1]+1e-5);
+        cellW=Math.abs(c1.x-c0.x)+0.5; cellH=Math.abs(c1.y-c0.y)+0.5;
+      }
       for(var i=0;i<coverage.length;i++){
         var cp=coverage[i];
         if(!cp||typeof cp[0]!=='number') continue;
@@ -9362,40 +9438,70 @@ setInterval(loadAlerts, 5*60*1000);
         if(p.x<-40||p.x>w+40||p.y<-40||p.y>h+40) continue;
         var visits=(typeof cp[2]==='number'&&cp[2]>0)?cp[2]:1;
         if(visits>=COVERAGE_CONFIDENT) confirmed++;
-        // 1 visit ≈ faint, 3+ ≈ solid.
-        var alpha=0.18+0.62*Math.min(1,(visits-1)/(COVERAGE_CONFIDENT-1));
-        ctx.fillStyle='rgba(80,200,90,'+alpha.toFixed(3)+')';
-        ctx.beginPath(); ctx.arc(p.x,p.y,dotR,0,Math.PI*2); ctx.fill();
+        // 1 pass, 2 passes, 3+ passes.
+        shades[Math.min(visits,COVERAGE_CONFIDENT)-1].push(p);
+      }
+      var shadeAlpha=usedSatellite?[0.42,0.62,0.82]:[0.18,0.49,0.80];
+      for(shade=0;shade<shades.length;shade++){
+        if(!shades[shade].length) continue;
+        ctx.fillStyle='rgba(80,200,90,'+shadeAlpha[shade]+')';
+        ctx.beginPath();
+        for(var si=0;si<shades[shade].length;si++){
+          var sp=shades[shade][si];
+          if(usedSatellite){ ctx.rect(sp.x-cellW/2,sp.y-cellH/2,cellW,cellH); }
+          else { ctx.moveTo(sp.x+dotR,sp.y); ctx.arc(sp.x,sp.y,dotR,0,Math.PI*2); }
+        }
+        ctx.fill();
       }
       window._coverConfirmed=confirmed;
     }
 
     // 2) Latest mow on top, in Toro red, with the current position in blue
     if(hasTrack){
-      var pts=[];
+      var legs=_trackLegs(track), pts=[];
       for(var j=0;j<track.length;j++){
         if(!track[j]||typeof track[j][0]!=='number') continue;
         var q=project(track[j][0],track[j][1]);
         if(isFinite(q.x)&&isFinite(q.y)) pts.push(q);
       }
       if(pts.length>=2){
+        var traced=function(list){
+          ctx.beginPath();
+          for(var li=0;li<list.length;li++){
+            var la=project(list[li][0][0],list[li][0][1]), lb=project(list[li][1][0],list[li][1][1]);
+            ctx.moveTo(la.x,la.y); ctx.lineTo(lb.x,lb.y);
+          }
+          ctx.stroke();
+        };
+        ctx.lineJoin='round'; ctx.lineCap='round';
         // Jeff's deck is 30" (0.76 m). Paint that true width under the centre line so a
         // mow reads as mown ground, not a thread — only where the map has a real scale.
         var o1=project(track[0][0],track[0][1]), o2=project(track[0][0]+1/111320,track[0][1]);
         var pxPerM=Math.abs(o2.y-o1.y);
-        if(usedSatellite && isFinite(pxPerM) && pxPerM>0){
-          ctx.lineJoin='round'; ctx.lineCap='round';
-          ctx.lineWidth=Math.max(3,0.762*pxPerM); ctx.strokeStyle='rgba(204,0,0,0.35)';
-          ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
-          for(var k0=1;k0<pts.length;k0++) ctx.lineTo(pts[k0].x,pts[k0].y);
-          ctx.stroke();
+        if(usedSatellite && isFinite(pxPerM) && pxPerM>0 && legs.solid.length){
+          ctx.lineWidth=Math.max(3,0.762*pxPerM); ctx.strokeStyle='rgba(255,80,70,0.38)';
+          traced(legs.solid);
         }
-        ctx.shadowColor='#cc0000'; ctx.shadowBlur=5;
-        ctx.lineWidth=3; ctx.strokeStyle='#cc0000';
-        ctx.lineJoin='round'; ctx.lineCap='round';
-        ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
-        for(var k=1;k<pts.length;k++) ctx.lineTo(pts[k].x,pts[k].y);
-        ctx.stroke(); ctx.shadowBlur=0;
+        // A handful of samples gets a bold line, each sample marked. A real 1.5.0 mow has
+        // hundreds to thousands: a thin line lets the mown ground under it show, and no glow,
+        // which is what makes a canvas crawl at that count.
+        var sparse=track.length<=60;
+        if(sparse){ ctx.shadowColor='#cc0000'; ctx.shadowBlur=5; }
+        ctx.lineWidth=sparse?3:1.5; ctx.strokeStyle=sparse?'#cc0000':'rgba(255,60,50,0.9)';
+        traced(legs.solid);
+        ctx.shadowBlur=0;
+        // Too far apart to be a path: all that's known is the two ends. Say so with the
+        // line itself, rather than drawing a confident stroke across the house.
+        if(legs.dashed.length){
+          ctx.lineWidth=1.5; ctx.strokeStyle='rgba(255,90,90,0.85)';
+          ctx.setLineDash([3,5]);
+          traced(legs.dashed);
+          ctx.setLineDash([]);
+        }
+        if(sparse){
+          ctx.fillStyle='#ff3b30';
+          for(var pd=0;pd<pts.length;pd++){ ctx.beginPath(); ctx.arc(pts[pd].x,pts[pd].y,2.5,0,Math.PI*2); ctx.fill(); }
+        }
         var last=pts[pts.length-1];
         ctx.fillStyle='#4da3ff'; ctx.shadowColor='#4da3ff'; ctx.shadowBlur=8;
         ctx.beginPath(); ctx.arc(last.x,last.y,6,0,Math.PI*2); ctx.fill();

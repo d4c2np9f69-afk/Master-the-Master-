@@ -46,10 +46,12 @@ const HAVE_HA_TOKEN = !!(process.env.HCC_HA_TOKEN || '').trim();
 
 // Audits that report rather than assert pass/fail - not run as gates.
 const NOT_GATES = new Set(['run-all-gates.js', 'button-audit.js', 'contrast-check.js',
-  'image-fit-audit.js', 'mower-hours-test.mjs']);
+  'image-fit-audit.js']);
 
 const gates = fs.readdirSync(DIR)
-  .filter((f) => /-(test|gate-test)\.js$/.test(f) || f === 'lint-app.js')
+  // mower-hours-test.mjs asserts and exits non-zero, and sat outside the runner until 11-05 on
+  // a NOT_GATES line for scripts that only report. It is the only test of functions/api/hours.js.
+  .filter((f) => /-(test|gate-test)\.js$/.test(f) || f === 'lint-app.js' || f === 'mower-hours-test.mjs')
   .filter((f) => !NOT_GATES.has(f))
   .sort();
 

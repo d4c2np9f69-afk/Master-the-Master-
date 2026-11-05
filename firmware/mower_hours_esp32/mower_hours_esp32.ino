@@ -1,36 +1,38 @@
 /*
  * ============================================================
- *  Mower Hour Meter — ESP32-C3 firmware (+ experimental RPM)
+ *  Mower Hour Meter + yard GPS -- ESP32 firmware
  * ============================================================
  *  Board: ESP32-WROOM-32 30-pin NodeMCU dev board (Silicon Labs
  *  CP2102 USB, USB-C). Flash with a DATA USB-C cable. Arduino IDE
  *  board: "ESP32 Dev Module". If the COM port doesn't appear, install
  *  the Silicon Labs CP210x driver. Hold BOOT while connecting if the
  *  upload won't start.
- *  NOTE: pins below are remapped for the classic ESP32-WROOM-32.
+ *  NOTE: pins below are mapped for the classic ESP32-WROOM-32.
  *  Do NOT use GPIO6-11 (wired to flash) or ADC2 pins for the battery
  *  (ADC2 can't be read while WiFi is on).
  * ------------------------------------------------------------
  *  What it does:
- *    - Wakes periodically, reads the MPU6050, decides engine
- *      on/off from vibration, and counts lifetime engine hours.
- *    - EXPERIMENTAL: while running it also estimates RPM from the
- *      vibration spectrum (a Goertzel scan of the expected band)
- *      and tracks this mow's peak & average RPM.
- *    - When parked (engine off, WiFi in range) it uploads hours +
- *      RPM stats to your Cloudflare Pages endpoint.
+ *    - PARKED: wakes every SAMPLE_INTERVAL_S (30 s), reads the MPU-6050 with
+ *      the radio off, and goes back to sleep if the engine is not running.
+ *      Posts to the server every IDLE_INTERVAL_S.
+ *    - ENGINE RUNNING: stays awake with the radio off. Reads the MPU about once
+ *      a second, credits real elapsed time to the hour meter, and logs a GPS
+ *      track point to flash every 3 m of real movement.
+ *    - ENGINE OFF for 30 s: closes the mow, brings WiFi up, sends the track file,
+ *      then posts the mow's totals.
  *
- *  About the RPM number: it is a best-effort estimate from
- *  vibration, NOT a true tachometer. It may land on your real
- *  speed (~3000), or get fooled by a deck/chassis resonance, or
- *  report "--" when the signal is too noisy. If it's junk, ignore
- *  the RPM panel — hours are unaffected. Use CALIBRATION_MODE to
- *  watch the detected RPM with the engine running and tune the band.
+ *  The decisions (hour meter, GPS parsing, which fixes go on the map) live in
+ *  mower_logic.h, which has no hardware in it and is tested on a PC by
+ *  scripts/mower-logic-test.cpp. Change them there, and run that test.
  *
- *  No external libraries — only built-in ESP32 ones.
+ *  RPM is a best-effort estimate from vibration, NOT a true tachometer. Its
+ *  clean-peak test is what tells a running engine from someone scrubbing the
+ *  deck; the number itself is informational.
+ *
+ *  No external libraries -- only ones built into the ESP32 core.
  *
  *  FIRST TIME:
- *    1) Fill in the CONFIG block.
+ *    1) Fill in secrets.h.
  *    2) CALIBRATION_MODE = true, upload, open Serial Monitor (115200).
  *       Engine OFF: note the vibration (g) number. Engine ON: note
  *       vibration + detected RPM. Set VIB_THRESHOLD about halfway
@@ -45,6 +47,7 @@
 #include <HTTPClient.h>
 #include <Wire.h>
 #include <Preferences.h>
+#include <LittleFS.h>
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
@@ -52,36 +55,26 @@
 #include <HTTPUpdate.h>
 #include "esp_system.h"
 #include "esp_task_wdt.h"
+#include "esp_ota_ops.h"
+#include "esp_partition.h"
+#include "mower_logic.h"
 
 // Hardware watchdog. Jeff's words for why this exists: "I would only push it if it
-// got hung up." A wedged wake — GPS never returning, a WiFi stack stuck below its
-// own timeout — used to mean the box was silently dead until someone noticed and
-// walked to the garage to press EN. With this, the chip resets itself.
-//
-// 180 s against a normal wake of roughly 25 s (2.5 s GPS + up to 15 s WiFi +
-// posts), so it can only fire on a genuine hang, never on a slow-but-working one.
-// A trip shows up as reset_reason in the next payload, so a self-heal is visible
-// rather than invisible — "it hung and recovered" is worth knowing about.
+// got hung up." A wedged wake -- a WiFi stack stuck below its own timeout -- used to
+// mean the box was silently dead until someone walked to the garage to press EN.
+// Fed on every tick of the run loop and between uploads.
 const int WDT_TIMEOUT_S = 180;
 
 // Bumped on every flash. Reported in every upload so there is never any doubt
-// about which build is actually on the mower — the single most useful field
-// when something starts behaving differently and nobody remembers what changed.
-#define FW_VERSION "1.4.0"
+// about which build is actually on the mower.
+#define FW_VERSION "1.5.0"
 
-// RPM analysis result type — declared up here so the Arduino IDE's
+// RPM analysis result type -- declared up here so the Arduino IDE's
 // auto-generated function prototypes can see it (fixes 'does not name a type').
 struct RpmResult{ float rpm; float stdG; bool valid; };
 
 // ----------------------- CONFIG -----------------------
-// ###########################################################
-// #  GPS-FIXED BUILD (2026-06-19): now reads the GPS on EVERY wake, so
-// #  the app's GPS status is truthful and it works on the bench. See setup().
-// #  >>> BEFORE FLASHING, fill in the 3 lines below. DEVICE_SECRET must
-// #      EXACTLY match Cloudflare Pages > Settings > Variables, or uploads
-// #      will return 401. (This file ships with placeholders.)
-// ###########################################################
-// Credentials live in secrets.h, which is gitignored — this repo is PUBLIC.
+// Credentials live in secrets.h, which is gitignored -- this repo is PUBLIC.
 // Copy secrets.example.h to secrets.h and fill it in on any new machine.
 // NOTE: the COMPILED BINARY still contains these as plaintext strings, so a
 // firmware .bin must never be served from a public URL either. Verified by
@@ -92,16 +85,27 @@ const char* WIFI_PASS     = HCC_WIFI_PASS;
 const char* ENDPOINT      = "https://toro1-5rz.pages.dev/api/hours";  // live project + KV
 const char* DEVICE_SECRET = HCC_DEVICE_SECRET;       // see secrets.h
 
-// NOT const any more: these are live config, restored from NVS at boot and
-// settable from the server over the control channel. Values here are only the
-// factory defaults used before anything has ever been pushed down.
-int         SAMPLE_INTERVAL_S = 30;    // check interval while running (granularity)
-int         IDLE_INTERVAL_S   = 300;   // wake interval when parked (and try upload)
+// NOT const: live config, restored from NVS at boot and settable from the server over
+// the control channel. Values here are only the factory defaults.
+//
+// 🔴 SENSE AND POST ARE TWO DIFFERENT INTERVALS.
+//   SENSE = wake, read the MPU, sleep. Radio off. Every SAMPLE_INTERVAL_S, parked.
+//   POST  = bring up WiFi, associate, HTTP. Every IDLE_INTERVAL_S, parked.
+// 1.4.0 slept IDLE_INTERVAL_S when parked, so a parked box sensed only as often as it
+// posted: every start sat somewhere inside a 15-minute blind window, and a short run could
+// fall between two wakes and never be seen. HOW MUCH that cost is NOT established: the
+// 15-17 min per-mow gaps in #269 are measured across a window that contains one whole sleep
+// by construction, so they are the most a start could lose, not what it lost.
+// The 30 s sense is what Jeff built and described; IDLE_INTERVAL_S keeps its server clamp
+// [60,900] and now only means how often to post. Sensing every 30 s instead of every
+// 15 min costs battery that has NOT been measured -- batt in the log is how to see it.
+int         SAMPLE_INTERVAL_S = 30;    // parked: how often to check for the engine
+int         IDLE_INTERVAL_S   = 300;   // parked: how often to post
 
 // Bench-test hook, left in place (disabled) because it proved genuinely useful:
 // set to 1 and the first SF_TEST_FAILS parked wakes point at a bogus SSID, forcing a
 // REAL WiFi timeout so the store-and-forward buffer can be verified end to end.
-// Must run inside ONE boot session — a reflash causes POWERON_RESET, which wipes RTC
+// Must run inside ONE boot session -- a reflash causes POWERON_RESET, which wipes RTC
 // memory and would destroy the buffer under test.
 // Verified working 2026-08-11: 3 readings buffered across 3 deep sleeps, then flushed
 // oldest-first with ages 90s / 60s / 30s.
@@ -113,52 +117,47 @@ int         IDLE_INTERVAL_S   = 300;   // wake interval when parked (and try upl
 // POSTs landing within ~1s of each other can read the same state and clobber one
 // another. Measured live 2026-08-11: three buffered readings all returned HTTP 200
 // but only two survived in the log. Spacing the flush cuts that window.
-// NOTE: this REDUCES the race, it does not eliminate it — the real fix is server-side
-// (accept a batched array in one write, or serialise via a Durable Object).
+// NOTE: this REDUCES the race, it does not eliminate it.
 const int   FLUSH_GAP_MS      = 2000;
-// How often engine seconds get written to flash WHILE RUNNING. This is exactly
-// the exposure window for the EN reset button on the outside of the box: hours
-// already banked to flash always survive, hours since the last flush do not.
-// Dropped 300 -> 60 so a mid-mow reset can cost at most a minute instead of five.
-// Writes only happen while the engine runs (~1800/year at Jeff's usage), which is
-// nowhere near NVS wear limits. Live config, so it can be tuned without a flash.
-int         FLUSH_EVERY_S     = 60;    // save to flash at least this often while running
+// How often engine seconds get written to flash WHILE RUNNING. This is exactly the
+// exposure to a power cut or the EN button: hours already banked always survive, hours
+// since the last flush do not. Live config.
+int         FLUSH_EVERY_S     = 60;
 
 float       VIB_THRESHOLD     = 0.06;  // g of vibration that means ENGINE ON (calibrate)
 bool        CALIBRATION_MODE  = false; // true = print vibration + RPM so you can tune
 
+// How long without vibration before the engine is called off. Jeff, describing what he
+// programmed and watched: "It would turn off after 30 seconds."
+const uint32_t STOP_HOLD_MS   = 30000;
+// How often the run loop reads the MPU. One capture takes 0.512 s of this.
+const uint32_t RUN_TICK_MS    = 1000;
+
 // --- Battery voltage (HiLetgo 0-25V voltage-sensor module) ---
 // The module is a fixed 5:1 divider (30k/7.5k) on a board with a screw
-// terminal for the battery and an S/+/- header. Wire:
-//   screw terminal:  VCC <- battery +,   GND <- battery -
-//   header:  S -> ESP32 GPIO34 (ADC),  (-) -> ESP32 GND,  (+) -> leave unconnected
-// GPIO34 is ADC1 (input-only). MUST be ADC1 on classic ESP32 because the
-// battery is read while WiFi is ON, and ADC2 pins can't be read with WiFi up.
-// 5:1 keeps a charging ~14.5V battery at ~2.9V on the pin, under the 3.3V ceiling.
+// terminal for the battery and an S/+/- header.
+// MUST be ADC1 on classic ESP32 because the battery is read while WiFi is ON, and ADC2
+// pins can't be read with WiFi up. 5:1 keeps ~14.5V at ~2.9V on the pin.
 const int   BATTERY_ADC_PIN   = 35;    // GPIO35 = ADC1_CH7, input-only, WiFi-safe (D34 channel damaged)
 const float BATTERY_DIVIDER   = 5.0;   // fixed 5:1 ratio of the 0-25V module
 
-// --- GPS (u-blox NEO-6M, e.g. HiLetgo GY-NEO6MV2) on a 2nd UART ---
+// --- GPS (u-blox NEO-6M, GY-NEO6MV2) on a 2nd UART ---
 // Wire: GPS VCC->5V, GPS GND->GND, GPS TX -> ESP32 GPIO16 (RX2; we only READ).
-// GPIO16 is free on WROOM-32 (no PSRAM). Do NOT use GPIO6-11 (flash) for this.
-// The module's onboard regulator makes its TX 3.3V, so no level shifter needed.
-// Keep the GPS powered continuously (off the 5V buck rail) so it holds its fix
-// between deep-sleep wakes. Antenna patch must face the SKY, not the deck.
+// Powered continuously off the 5V buck rail so it holds its fix between deep-sleep
+// wakes. Antenna patch must face the SKY, not the deck. Its RX is not wired, so its
+// config cannot be changed from here: it sends every sentence once a second at 9600.
 #define     GPS_SERIAL         Serial1
-const int   GPS_RX_PIN        = 16;    // GPIO16 (RX2) receives GPS TX
-const int   GPS_TX_PIN        = -1;    // not used (read-only); leaves the pin free
-const long  GPS_BAUD          = 9600;  // NEO-6M default
-const unsigned long GPS_READ_MS = 2500;// how long to listen each wake (widened for cold-start re-locks)
-const float GPS_STEP_MIN_M    = 0.5;   // ignore sub-half-metre jitter (parked)
-float       GPS_STEP_MAX_M    = 100.0; // reject teleport glitches between fixes (live config)
-const int   GPS_TRACK_MAX     = 150;   // max points buffered per mow (yard map track)
-// Minimum movement between two RECORDED track points. The track is now logged
-// whenever there's a fix (not just while the engine runs — see setup()), so this
-// gate is what stops a parked mower's GPS drift from being logged as if it were
-// mowing. Consumer GPS wanders a few metres while stationary; a mower at walking
-// pace covers 3 m in about 2 seconds, so 3 m drops the drift and keeps every real
-// pass. Without this the yard map fills with a dense blob at the parking spot.
-float       TRACK_MIN_STEP_M  = 3.0;   // live config
+const int   GPS_RX_PIN        = 16;
+const int   GPS_TX_PIN        = -1;
+const long  GPS_BAUD          = 9600;
+// A vibration capture blocks for 0.512 s, during which ~490 bytes arrive at 9600 baud.
+// The core's default UART buffer is 256 bytes: every capture would lose GPS data.
+const int   GPS_RX_BUFFER     = 1024;
+const unsigned long GPS_READ_MS = 2500;   // parked: how long to listen for one position
+// Live config. See TrackLimits in mower_logic.h for what each one does.
+float       TRACK_MIN_STEP_M  = 3.0;
+float       TRACK_MIN_MPS     = 0.2;
+float       TRACK_MAX_HDOP    = 5.0;
 
 // --- Experimental RPM estimator ---
 const int      RPM_SAMPLES   = 512;    // samples per capture
@@ -168,16 +167,20 @@ const float    RPM_MAX       = 3800;   // search band high
 const float    RPM_STEP      = 30;     // scan resolution (RPM)
 const float    RPM_MIN_SNR   = 4.0;    // peak/avg power ratio needed to trust a reading
 
-// MPU6050 I2C — classic ESP32 default I2C pins (clearly labeled D21/D22).
+// MPU6050 I2C -- classic ESP32 default I2C pins (clearly labeled D21/D22).
 const int     I2C_SDA = 21;
 const int     I2C_SCL = 22;
 const uint8_t MPU_ADDR = 0x68;         // 0x69 if the module's AD0 pin is high
 const float   ACCEL_LSB_PER_G = 4096.0;// matches the +/-8g range set in mpuInit()
 // ------------------------------------------------------
 
+// Changed from 1.4.0's value so this build always takes the cold-boot path once and never
+// reads RTC variables laid out by different firmware. Hours are in NVS and are untouched.
+const uint32_t RTC_MAGIC = 0xCAFE1500;
 RTC_DATA_ATTR uint32_t rtcMagic        = 0;
 RTC_DATA_ATTR uint32_t lifetimeSeconds = 0;
 RTC_DATA_ATTR uint32_t secsSinceFlush  = 0;
+RTC_DATA_ATTR uint32_t msCarry         = 0;  // sub-second remainder of the hour meter
 RTC_DATA_ATTR float    rpmPeak  = 0;   // this mowing session
 RTC_DATA_ATTR float    rpmSum   = 0;
 RTC_DATA_ATTR uint32_t rpmCount = 0;
@@ -185,37 +188,34 @@ RTC_DATA_ATTR uint32_t rpmCount = 0;
 // --- GPS state (survives deep sleep) ---
 RTC_DATA_ATTR float    gpsTotalMeters   = 0; // lifetime distance mowed
 RTC_DATA_ATTR float    gpsSessionMeters = 0; // this mow only
-RTC_DATA_ATTR float    gpsPrevLat = 0, gpsPrevLon = 0; // last fix used for stepping
-RTC_DATA_ATTR float    gpsLat = 0, gpsLon = 0;          // last good fix (for display)
-RTC_DATA_ATTR uint8_t  gpsHaveLast = 0;                 // have a prev fix this session
-RTC_DATA_ATTR uint8_t  gpsHaveFix  = 0;                 // ever got a fix (report flag)
-// Track buffer for the yard map (microdegrees, survives deep sleep)
-RTC_DATA_ATTR int32_t  gpsTrackLat[GPS_TRACK_MAX];
-RTC_DATA_ATTR int32_t  gpsTrackLon[GPS_TRACK_MAX];
-RTC_DATA_ATTR uint16_t gpsTrackN = 0;
-// Last point actually WRITTEN to the track (not just the last fix seen) — the
-// TRACK_MIN_STEP_M gate measures against this, so slow drift can't creep the
-// track along one sub-threshold step at a time.
-RTC_DATA_ATTR float    trkPrevLat = 0, trkPrevLon = 0;
-RTC_DATA_ATTR uint8_t  trkHavePrev = 0;
+RTC_DATA_ATTR float    gpsLat = 0, gpsLon = 0; // last good fix (for display)
 
-// --- Engine state across wakes (for mow-end detection) ---
-// The box only uploads while PARKED, so the server can't see a mow happen live.
-// It needs to be told which upload is the one carrying a finished mow's totals.
-RTC_DATA_ATTR uint8_t  wasRunning = 0;
+// --- This mow. Every one of these is reported: #269 took three wrong theories before
+// measurement settled it, so the next question gets answered from data first. ---------
+RTC_DATA_ATTR uint32_t curMowId      = 0;  // from NVS; ties the track file to the mow_end post
+RTC_DATA_ATTR uint32_t startGapS     = 0;  // the sleep before the start was noticed
+RTC_DATA_ATTR uint32_t startCreditS  = 0;  // what was credited for it
+RTC_DATA_ATTR uint32_t runSecThisMow = 0;  // engine seconds credited to this mow
+RTC_DATA_ATTR uint32_t runTicks      = 0;  // MPU reads during this mow
+RTC_DATA_ATTR uint32_t runNoRpm      = 0;  // ...of those, hot with no clean RPM peak
+RTC_DATA_ATTR uint32_t runColdTicks  = 0;  // ...of those, below threshold (a dip or the hold)
+RTC_DATA_ATTR uint32_t runFixes      = 0;  // GPS positions seen during this mow
+RTC_DATA_ATTR uint32_t trkPtsMow     = 0;  // ...of those, kept as track points
+RTC_DATA_ATTR uint32_t trkRejSlow    = 0;  // rejected: not moving (Doppler)
+RTC_DATA_ATTR uint32_t trkRejHdop    = 0;  // rejected: poor geometry
+RTC_DATA_ATTR uint32_t trkRejSpike   = 0;  // rejected: faster than the mower can go
+RTC_DATA_ATTR float    battRunMin    = 0;  // battery WHILE RUNNING
+RTC_DATA_ATTR float    battRunMax    = 0;
+RTC_DATA_ATTR float    battAtStart   = 0;
+RTC_DATA_ATTR uint32_t awakeSecLast  = 0;  // seconds awake on the previous wake
+RTC_DATA_ATTR uint32_t wakeCount     = 0;  // wakes since cold boot
+RTC_DATA_ATTR uint32_t secsSincePost = 0;  // parked seconds since the last upload
 
-// ---- TASK 2: store-and-forward buffer (survives deep sleep) ------------------
-// Previously a failed POST simply threw the reading away — weak WiFi at the far
-// end of the yard meant those readings were lost forever. Now every reading that
-// can't be sent is held in RTC memory and flushed oldest-first on reconnect.
-//
-// Stored as a packed struct, NOT as the JSON string: ~64 bytes each instead of
-// ~450, which is what makes a useful backlog fit in the ESP32's small RTC RAM
-// alongside the 1.2 KB GPS track buffer.
-//
-// Each entry keeps the uptime second it was captured at, so the flush sends a real
-// `age_s` and the server can stamp it with when it actually happened rather than
-// with the flush time.
+// ---- Store-and-forward buffer (survives deep sleep) ---------------------------------
+// A reading that can't be sent is held in RTC memory and flushed oldest-first on
+// reconnect. Each entry keeps the uptime second it was captured at, so the flush sends a
+// real `age_s`. mowEnded + mowId travel WITH the reading (#267): by flush time the engine
+// state they describe is long gone, so they can't be re-derived.
 #define SF_MAX 20
 struct SfReading {
   uint32_t stampS;                 // uptimeS at capture
@@ -226,7 +226,10 @@ struct SfReading {
   uint32_t gpsLines;
   int16_t  rpmPeak, rpmAvg, rssi;
   uint16_t shocks;
-  uint8_t  hasFix, mpu, engineRunning;
+  uint8_t  hasFix, mpu, engineRunning, mowEnded, mowCut;
+  uint32_t mowId, startGapS, startCreditS, runSec, runTicks, runNoRpm, runColdTicks;
+  uint32_t runFixes, trkPts, rejSlow, rejHdop, rejSpike;
+  float    battRunMin, battRunMax, battAtStart;
 };
 RTC_DATA_ATTR SfReading sfBuf[SF_MAX];
 RTC_DATA_ATTR uint16_t  sfHead  = 0;   // next write slot
@@ -235,6 +238,61 @@ RTC_DATA_ATTR uint32_t  uptimeS = 0;   // monotonic seconds across deep sleeps
 #if SF_BENCH_TEST
 RTC_DATA_ATTR uint8_t   testWakes = 0; // TEMP: counts forced-failure wakes
 #endif
+
+// ---- The yard-map track: in FLASH, not RTC RAM ---------------------------------------
+// Measured 11-03 (mow 2): the box cold-booted about 4 minutes before the mow ended. Hours
+// survived in NVS; the RTC track did not, and 37 points were gone. A track in RTC RAM is
+// lost to any power blip, so it goes to a file, written every 30 s. A cut costs at most
+// the last 30 s of points.
+//
+// A file is a run of 8-byte records: latE6, lonE6, little-endian. A record whose first word
+// is TRK_MARKER opens a mow and carries its id in the second. The whole file goes up as ONE
+// POST, ahead of the mow_end post, and is deleted on the server's OK. Not chunks: each chunk
+// would read-modify-write the same KV keys seconds apart, and that exact race lost readings
+// at ~1 s spacing (see FLUSH_GAP_MS). One request has nothing to race and nothing to resume.
+// A failed upload simply goes again, and the server skips what it already has.
+//
+// If the board's partition table has no data partition for it (or it won't mount) the
+// track falls back to RTC RAM: shorter, and lost to a power cut, as 1.4.0 was. `trk_store`
+// in the payload says which is in use. NOT KNOWN YET which this board has: the record does
+// not say which partition scheme it was flashed with.
+struct TrkRec { int32_t a, b; };
+const int32_t  TRK_MARKER     = INT32_MIN;
+const char*    TRK_PATH       = "/track.bin";
+const uint32_t TRK_FILE_MAX   = 16000;     // records = 128 KB; ~13 hours of mowing
+const int      TRK_BUF_N      = 64;        // RAM buffer between flash writes
+const uint32_t TRK_FLUSH_MS   = 30000;
+const int      RTC_TRK_MAX    = 400;
+
+enum { FS_UNKNOWN = 0, FS_OK = 1, FS_NO_PARTITION = 2, FS_MOUNT_FAILED = 3 };
+RTC_DATA_ATTR uint8_t  fsState    = FS_UNKNOWN;
+RTC_DATA_ATTR uint32_t fsPartKb   = 0;
+RTC_DATA_ATTR TrkRec   rtcTrk[RTC_TRK_MAX];
+RTC_DATA_ATTR uint32_t trkRecs    = 0;   // records stored, waiting to go up
+RTC_DATA_ATTR uint32_t trkDropped = 0;   // points lost because storage was full / failed
+RTC_DATA_ATTR uint32_t trkFails   = 0;   // uploads the server didn't confirm
+bool     fsMounted = false;
+TrkRec   trkBuf[TRK_BUF_N];
+int      trkBufN = 0;
+uint32_t trkLastFlushMs = 0;
+
+// ---- Self-rollback -------------------------------------------------------------------
+// The invariant: an image that can POST can be fixed remotely. So a new image is on trial
+// until its first successful POST, and goes back to the previous one if it can't get there.
+//   Layer 1, the bootloader: core 3.3.11's sdkconfig has CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE
+//     (sdkconfig line 286). If this board's bootloader has it too, an OTA image that resets
+//     before it is marked valid is rolled back automatically. A deep-sleep wake also goes
+//     through the bootloader, so it must be marked valid before the first deep sleep.
+//   Layer 2, this firmware: the board's bootloader is whatever flashed it, and which core
+//     that was is NOT known, so layer 1 can't be relied on. FW_TRIAL_MAX failures (a cold
+//     boot, or a POST that failed) with no successful POST ever and it switches itself back.
+// During a trial it posts on every wake, so the trial ends in minutes rather than hours.
+const uint32_t FW_TRIAL_MAX = 10;
+RTC_DATA_ATTR uint8_t fwConfirmed = 0;
+uint32_t fwTrialFails = 0;
+
+// Runs instead of the core's default, which marks every image valid before setup().
+extern "C" bool verifyRollbackLater(){ return true; }
 
 Preferences prefs;
 
@@ -292,7 +350,6 @@ float bx[RPM_SAMPLES], by[RPM_SAMPLES], bz[RPM_SAMPLES];
 
 // ---- sensor health (reported in every upload) ----
 bool     mpuOK        = false;  // true if MPU6050 answered on I2C
-uint32_t gpsLineCount = 0;      // NMEA sentences received this wake (proves GPS wiring)
 float    lastVib      = -1.0f;  // most recent vibration stdG
 float    tiltPitch    = 0.0f;   // deg, deck pitch (fore/aft) from gravity vector
 float    tiltRoll     = 0.0f;   // deg, deck roll (side slope) from gravity vector
@@ -463,52 +520,128 @@ float readBattery(){
   return (raw/4095.0f)*3.3f*BATTERY_DIVIDER;
 }
 
-// ---- GPS: minimal inline NMEA parser (no external library) ----
-// Convert NMEA "ddmm.mmmm" + hemisphere to decimal degrees.
-static double gpsToDeg(const char* dm, char hemi){
-  double v = atof(dm);
-  int    deg = (int)(v / 100.0);
-  double minutes = v - deg * 100.0;
-  double dec = deg + minutes / 60.0;
-  if(hemi=='S' || hemi=='W') dec = -dec;
-  return dec;
+// ---- GPS ---------------------------------------------------------------------------
+ml::NmeaParser nmea;
+ml::TrackGate  trkGate;
+bool gotFixNow = false;        // a position arrived during THIS wake
+uint32_t lastMpuReadMs = 0;    // when the engine was last looked at, for startGapS
+
+void considerTrackPoint(){
+  ml::TrackLimits lim;
+  lim.minStepM = TRACK_MIN_STEP_M;
+  lim.minSpeed = TRACK_MIN_MPS;
+  lim.maxHdop  = TRACK_MAX_HDOP;
+  float step = 0;
+  ml::Verdict v = trkGate.check(nmea.lat, nmea.lon, millis(), nmea.speedMps, nmea.hdop, lim, &step);
+  switch(v){
+    case ml::ACCEPT:
+      trackPut((int32_t)llround(nmea.lat*1e6), (int32_t)llround(nmea.lon*1e6));
+      trkPtsMow++;
+      // Distance counts accepted steps only. Summing every 1 Hz fix would add up the
+      // receiver's noise and report a mower that travels while it sits idling.
+      gpsSessionMeters += step; gpsTotalMeters += step;
+      break;
+    case ml::TOO_SLOW: trkRejSlow++;  break;
+    case ml::POOR_FIX: trkRejHdop++;  break;
+    case ml::SPIKE:    trkRejSpike++; break;
+    default: break;
+  }
 }
 
-// Great-circle distance in metres.
-static double haversineM(double la1,double lo1,double la2,double lo2){
-  const double R=6371000.0, D=M_PI/180.0;
-  double dLat=(la2-la1)*D, dLon=(lo2-lo1)*D;
-  double a=sin(dLat/2)*sin(dLat/2)
-          +cos(la1*D)*cos(la2*D)*sin(dLon/2)*sin(dLon/2);
-  return 2.0*R*atan2(sqrt(a),sqrt(1.0-a));
-}
-
-// Listen on GPS_SERIAL up to GPS_READ_MS for a *valid* RMC fix.
-// Returns true and sets lat/lon (decimal degrees) on success.
-bool readGPS(double &lat,double &lon){
-  char line[100]; int idx=0;
-  unsigned long start=millis();
-  while(millis()-start < GPS_READ_MS){
-    while(GPS_SERIAL.available()){
-      char c=GPS_SERIAL.read();
-      if(c=='\n' || c=='\r'){
-        line[idx]=0;
-        if(idx>0 && line[0]=='$') gpsLineCount++;   // any NMEA sentence = GPS wired & talking
-        if(idx>6 && (!strncmp(line,"$GPRMC",6) || !strncmp(line,"$GNRMC",6))){
-          // split on ',' keeping empty fields: f[2]=status f[3]=lat f[4]=N/S f[5]=lon f[6]=E/W
-          char* f[13]; int nf=0; f[nf++]=line;
-          for(char* q=line; *q && nf<13; q++){ if(*q==','){ *q=0; f[nf++]=q+1; } }
-          if(nf>=7 && f[2][0]=='A' && f[3][0] && f[5][0]){
-            double la=gpsToDeg(f[3],f[4][0]);
-            double lo=gpsToDeg(f[5],f[6][0]);
-            if(la!=0.0 || lo!=0.0){ lat=la; lon=lo; return true; }
-          }
-        }
-        idx=0;
-      } else if(idx<99){ line[idx++]=c; } else { idx=0; }
+// Drain whatever the UART holds. Never blocks. `recording` = engine confirmed hot.
+void pumpGps(bool recording){
+  while(GPS_SERIAL.available()){
+    if(nmea.feed((char)GPS_SERIAL.read())){
+      gotFixNow = true;
+      gpsLat = (float)nmea.lat; gpsLon = (float)nmea.lon;
+      if(recording){ runFixes++; considerTrackPoint(); }
     }
   }
-  return false;
+}
+
+// Parked, about to post: listen long enough to report where the mower is sitting.
+void readFixForDisplay(){
+  unsigned long start = millis();
+  while(!gotFixNow && millis()-start < GPS_READ_MS){ pumpGps(false); delay(5); }
+}
+
+// ---- Track store -------------------------------------------------------------------
+bool fsMount(){
+  if(fsMounted) return true;
+  const esp_partition_t* p = esp_partition_find_first(ESP_PARTITION_TYPE_DATA,
+                                                      ESP_PARTITION_SUBTYPE_DATA_SPIFFS, NULL);
+  if(!p){ fsState = FS_NO_PARTITION; return false; }
+  fsPartKb = p->size / 1024;
+  // formatOnFail = true: first use on this board formats the partition. Nothing has ever
+  // used it, and a mount failure must never stop the hour meter.
+  fsMounted = LittleFS.begin(true, "/littlefs", 3, p->label);
+  if(!fsMounted){
+    // The records counted so far are in a file that can no longer be read. Writing them off
+    // keeps the RTC fallback from reading those positions out of its own array.
+    fsState = FS_MOUNT_FAILED;
+    trkDropped += trkRecs;
+    trkRecs = 0; trkBufN = 0;
+    return false;
+  }
+  fsState = FS_OK;
+  return true;
+}
+
+void trackClear(){
+  if(fsState == FS_OK && fsMount() && LittleFS.exists(TRK_PATH)) LittleFS.remove(TRK_PATH);
+  trkRecs = 0; trkBufN = 0;
+}
+
+// Cold boot only: RTC is gone, so rebuild the count from the file. A mow cut off by a reset
+// keeps its track this way, which is the reason it is in a file at all.
+void trackRecover(){
+  trkRecs = 0; trkDropped = 0; trkFails = 0;
+  fsState = FS_UNKNOWN; fsPartKb = 0;
+  if(!fsMount()) return;
+  if(LittleFS.exists(TRK_PATH)){
+    File f = LittleFS.open(TRK_PATH, "r");
+    size_t bytes = 0;
+    if(f){ bytes = f.size(); f.close(); }
+    if(bytes % sizeof(TrkRec)){
+      // LittleFS commits on close, so this should not happen. If it ever does, appending
+      // after a torn record would shift every later point into nonsense. Hours are not in
+      // this file; losing the track is the cheap side of that trade.
+      Serial.printf("track file misaligned (%u bytes): discarding\n", (unsigned)bytes);
+      trkDropped += bytes / sizeof(TrkRec);
+      LittleFS.remove(TRK_PATH);
+    } else {
+      trkRecs = bytes / sizeof(TrkRec);
+    }
+  }
+  Serial.printf("track file: %lu records, partition %lu KB\n",
+                (unsigned long)trkRecs, (unsigned long)fsPartKb);
+}
+
+void trackFlush(){
+  trkLastFlushMs = millis();
+  if(fsState != FS_OK || trkBufN == 0) return;
+  size_t want = trkBufN * sizeof(TrkRec), wrote = 0;
+  if(fsMount()){
+    File f = LittleFS.open(TRK_PATH, "a");
+    if(f){ wrote = f.write((const uint8_t*)trkBuf, want); f.close(); }
+  }
+  trkRecs += wrote / sizeof(TrkRec);
+  if(wrote != want){
+    trkDropped += (want - wrote) / sizeof(TrkRec);
+    Serial.printf("track: flash write short, %u of %u bytes\n", (unsigned)wrote, (unsigned)want);
+  }
+  trkBufN = 0;
+}
+
+void trackPut(int32_t a, int32_t b){
+  if(fsState == FS_OK){
+    if(trkRecs + trkBufN >= TRK_FILE_MAX){ trkDropped++; return; }
+    trkBuf[trkBufN].a = a; trkBuf[trkBufN].b = b; trkBufN++;
+    if(trkBufN >= TRK_BUF_N) trackFlush();
+  } else {
+    if(trkRecs >= (uint32_t)RTC_TRK_MAX){ trkDropped++; return; }
+    rtcTrk[trkRecs].a = a; rtcTrk[trkRecs].b = b; trkRecs++;
+  }
 }
 
 void flushToFlash(){ prefs.begin("mower",false); prefs.putUInt("life",lifetimeSeconds); prefs.putFloat("gpsm",gpsTotalMeters); prefs.end(); secsSinceFlush=0; }
@@ -516,13 +649,15 @@ void loadFromFlash(){ prefs.begin("mower",true); lifetimeSeconds=prefs.getUInt("
 
 // Live config + level reference, restored at every boot. Anything never pushed
 // down keeps the compiled-in default, so a fresh board behaves exactly as before.
+uint32_t coldReason = 0;
 void loadConfig(){
   prefs.begin("mower", true);
   VIB_THRESHOLD     = prefs.getFloat("vibthr",  VIB_THRESHOLD);
   IDLE_INTERVAL_S   = prefs.getInt  ("idles",   IDLE_INTERVAL_S);
   SAMPLE_INTERVAL_S = prefs.getInt  ("samps",   SAMPLE_INTERVAL_S);
   TRACK_MIN_STEP_M  = prefs.getFloat("trkstep", TRACK_MIN_STEP_M);
-  GPS_STEP_MAX_M    = prefs.getFloat("gpsmax",  GPS_STEP_MAX_M);
+  TRACK_MIN_MPS     = prefs.getFloat("trkmps",  TRACK_MIN_MPS);
+  TRACK_MAX_HDOP    = prefs.getFloat("trkhdop", TRACK_MAX_HDOP);
   FLUSH_EVERY_S     = prefs.getInt  ("flushs",  FLUSH_EVERY_S);
   serviceMode       = prefs.getBool ("svcmode", false);
   cfgRev            = prefs.getUInt ("cfgrev",  0);
@@ -534,10 +669,12 @@ void loadConfig(){
   // command must survive the reboot it causes, or the box would come back up,
   // fail to acknowledge, be handed the same command again, and reboot forever.
   pendingAck = prefs.getUInt("ack", 0);
-  // Read here too, not just on cold boot: this is a plain global, so it would
-  // otherwise report 0 on every deep-sleep wake and look like the box had never
-  // booted at all.
   bootCount  = prefs.getUInt("boots", 0);
+  // Why the last COLD boot happened. esp_reset_reason() on its own is useless for this:
+  // it reports the reason for THIS wake, which is "deep sleep" on all but one. 4,998 of
+  // the 5,000 logged rows say 8, including the rows around the 11-03 mid-mow reset, whose
+  // real cause was never recorded anywhere.
+  coldReason = prefs.getUInt("coldrsn", 0);
   prefs.end();
 }
 
@@ -568,14 +705,13 @@ bool jsonStr(const String &s, const char* key, String &out){
   return true;
 }
 
-// Pull a new firmware image. Deliberately the rarest path: routine tuning goes
-// through the config channel and needs no new image at all.
+// Pull a new firmware image. Deliberately the rarest path: routine tuning goes through
+// the config channel. See "Self-rollback" near the top for what protects a bad image.
+// The server's sha256 is not checked here: esp_ota_end() validates the image's own
+// checksum, and HTTPUpdate honours an x-MD5 header if the file server sends one.
+// A firmware .bin holds the WiFi password in plaintext, so it is only ever served on the LAN.
 //
-// Known limit, stated plainly: the Arduino ESP32 core does not enable bootloader
-// rollback, so an image that boots but is logically broken (never joins WiFi,
-// crashes early) cannot be recovered over the air — that means pulling the box.
-// The sha256 the server pins protects against a corrupt or truncated download,
-// not against bad code. Every image goes on the bench over USB first.
+// 🔴 As far as the record shows this path has never been run on real hardware.
 bool doOta(const String &url){
   Serial.printf("OTA: fetching %s\n", url.c_str());
   // A firmware download legitimately runs longer than the watchdog window, so
@@ -608,7 +744,8 @@ void handleDownlink(const String &resp){
       if(jsonNum(resp,"idle_interval_s",v))   { IDLE_INTERVAL_S=(int)v;   prefs.putInt("idles",(int)v); }
       if(jsonNum(resp,"sample_interval_s",v)) { SAMPLE_INTERVAL_S=(int)v; prefs.putInt("samps",(int)v); }
       if(jsonNum(resp,"track_min_step_m",v))  { TRACK_MIN_STEP_M=v;       prefs.putFloat("trkstep",v); }
-      if(jsonNum(resp,"gps_step_max_m",v))    { GPS_STEP_MAX_M=v;         prefs.putFloat("gpsmax",v); }
+      if(jsonNum(resp,"track_min_mps",v))     { TRACK_MIN_MPS=v;          prefs.putFloat("trkmps",v); }
+      if(jsonNum(resp,"track_max_hdop",v))    { TRACK_MAX_HDOP=v;         prefs.putFloat("trkhdop",v); }
       if(jsonNum(resp,"flush_every_s",v))     { FLUSH_EVERY_S=(int)v;     prefs.putInt("flushs",(int)v); }
       if(jsonNum(resp,"service_mode",v))      { serviceMode=(v>=0.5f);    prefs.putBool("svcmode",serviceMode); }
       cfgRev = serverRev;
@@ -624,12 +761,12 @@ void handleDownlink(const String &resp){
     uint32_t id = (uint32_t)idf;
     Serial.printf("command %lu: %s\n", (unsigned long)id, doWhat.c_str());
     // Acknowledge BEFORE acting. Both `reboot` and a successful `ota` never
-    // return, so an ack written afterwards would never be written at all — and
+    // return, so an ack written afterwards would never be written at all -- and
     // the box would be handed the same command again on the next upload.
     setPendingAck(id);
     lastCmdId = id;
     if(doWhat == "zero_tilt")         lastCmdOk = zeroTilt() ? 1 : 0;
-    else if(doWhat == "clear_track")  { gpsTrackN=0; trkHavePrev=0; lastCmdOk=1; }
+    else if(doWhat == "clear_track")  { trackClear(); lastCmdOk=1; }
     else if(doWhat == "flush_buffer") { sfCount=0; lastCmdOk=1; }
     else if(doWhat == "reboot")       { Serial.println("rebooting"); delay(200); ESP.restart(); }
     else if(doWhat == "ota")          { String u; lastCmdOk = (jsonStr(resp,"url",u) && doOta(u)) ? 1 : 0; }
@@ -641,7 +778,7 @@ void handleDownlink(const String &resp){
 }
 
 // Snapshot everything this wake measured into a packed reading.
-void captureCurrent(SfReading &r, bool running){
+void captureCurrent(SfReading &r, bool mowEnded, bool mowCut){
   r.stampS       = uptimeS;
   r.hoursSec     = lifetimeSeconds;
   r.battery      = readBattery();
@@ -654,29 +791,50 @@ void captureCurrent(SfReading &r, bool running){
   r.lon          = gpsLon;
   r.distTotal    = (int32_t)(gpsTotalMeters+0.5f);
   r.distSession  = (int32_t)(gpsSessionMeters+0.5f);
-  r.gpsLines     = gpsLineCount;
+  r.gpsLines     = nmea.lines;
   r.rpmPeak      = (int16_t)(rpmPeak+0.5f);
   r.rpmAvg       = (rpmCount>0)?(int16_t)(rpmSum/rpmCount+0.5f):0;
   r.rssi         = 0;                       // filled in once WiFi is actually up
   r.shocks       = shockCount;
-  r.hasFix       = gpsHaveFix;
+  r.hasFix       = gotFixNow?1:0;           // THIS wake, not "ever"
   r.mpu          = mpuOK?1:0;
-  r.engineRunning= running?1:0;
+  r.engineRunning= 0;                       // the box only ever posts with the engine off
+  r.mowEnded     = mowEnded?1:0;
+  r.mowCut       = mowCut?1:0;
+  r.mowId        = curMowId;
+  r.startGapS    = startGapS;
+  r.startCreditS = startCreditS;
+  r.runSec       = runSecThisMow;
+  r.runTicks     = runTicks;
+  r.runNoRpm     = runNoRpm;
+  r.runColdTicks = runColdTicks;
+  r.runFixes     = runFixes;
+  r.trkPts       = trkPtsMow;
+  r.rejSlow      = trkRejSlow;
+  r.rejHdop      = trkRejHdop;
+  r.rejSpike     = trkRejSpike;
+  r.battRunMin   = battRunMin;
+  r.battRunMax   = battRunMax;
+  r.battAtStart  = battAtStart;
+}
+
+int otaStateNow(){
+  esp_ota_img_states_t st;
+  const esp_partition_t* run = esp_ota_get_running_partition();
+  if(!run || esp_ota_get_state_partition(run, &st) != ESP_OK) return -1;
+  return (int)st;
 }
 
 // Build the upload body.
-//   src       — "mow_end" (this upload carries a finished mow's totals),
-//               "heartbeat" (parked idle report), or "buffered" (a replayed
-//               reading that failed to send earlier).
-//   ageS      — seconds between when the reading was CAPTURED and now. 0 = live.
-//   withTrack — only the current reading carries the GPS breadcrumb array;
-//               replayed ones don't (the track lives in its own RTC buffer and is
-//               only cleared once it has actually been delivered).
-String buildJson(const SfReading &r, const char* src, bool mowEnded, uint32_t ageS, bool withTrack){
+//   src  -- "mow_end" (this upload closes a mow), "heartbeat" (parked report), or
+//           "buffered" (a replayed reading that failed to send earlier).
+//   ageS -- seconds between when the reading was CAPTURED and now. 0 = live.
+String buildJson(const SfReading &r, const char* src, bool mowEnded, uint32_t ageS, bool live){
   String b = String("{\"secret\":\"") + DEVICE_SECRET + "\"";
   b += ",\"source\":\"" + String(src) + "\"";
   b += ",\"engine_running\":" + String(r.engineRunning ? "true" : "false");
   if(mowEnded) b += ",\"mow_ended\":true";
+  if(r.mowCut) b += ",\"mow_cut\":true";
   if(ageS > 0) b += ",\"age_s\":" + String((unsigned long)ageS);
   b += ",\"hours_seconds\":" + String((unsigned long)r.hoursSec);
   // Decimal engine hours. The app reads `hours`; it has never read hours_seconds,
@@ -685,7 +843,7 @@ String buildJson(const SfReading &r, const char* src, bool mowEnded, uint32_t ag
   b += ",\"battery\":" + String(r.battery, 2);
   b += ",\"rpm_peak\":" + String((int)r.rpmPeak);
   b += ",\"rpm_avg\":" + String((int)r.rpmAvg);
-  // Real JSON boolean, not 0/1 — the server tests `has_fix !== false`, which a
+  // Real JSON boolean, not 0/1 -- the server tests `has_fix !== false`, which a
   // numeric 0 would silently pass, letting a no-fix 0,0 reach the yard map.
   b += ",\"has_fix\":" + String(r.hasFix ? "true" : "false");
   if(r.hasFix) b += ",\"lat\":" + String(r.lat,6) + ",\"lon\":" + String(r.lon,6);
@@ -708,16 +866,52 @@ String buildJson(const SfReading &r, const char* src, bool mowEnded, uint32_t ag
   }
   b += ",\"shock_events\":" + String((unsigned long)r.shocks);
   b += ",\"esp_temp_f\":" + String(r.espTemp, 1);
-  // ---- Identity, config state and health --------------------------------------
-  // These describe the BOX, not this reading, so they ride on every payload —
-  // including replayed ones. The point is that "which build is on the mower, what
-  // config is it running, and is anything degrading" is answerable from the
-  // endpoint at any moment, without anyone walking to the garage.
+  // These describe the BOX, not this reading, so they ride on every payload.
   b += ",\"fw\":\"" FW_VERSION "\"";
   b += ",\"cfg_rev\":" + String((unsigned long)cfgRev);
+  b += ",\"sample_s\":" + String(SAMPLE_INTERVAL_S);
+  b += ",\"idle_s\":" + String(IDLE_INTERVAL_S);
+  b += ",\"wakes\":" + String((unsigned long)wakeCount);
+  b += ",\"wake_s\":" + String((unsigned long)awakeSecLast);
+  b += ",\"trk_pending\":" + String((unsigned long)trkRecs);
+  if(trkDropped) b += ",\"trk_drop\":" + String((unsigned long)trkDropped);
+  if(trkFails)   b += ",\"trk_fails\":" + String((unsigned long)trkFails);
+  b += ",\"trk_store\":\"" + String(fsState == FS_OK ? "flash" : "rtc") + "\"";
+  b += ",\"fs_state\":" + String((int)fsState);
+  b += ",\"fs_part_kb\":" + String((unsigned long)fsPartKb);
+  b += ",\"ota_state\":" + String(otaStateNow());
+  if(!fwConfirmed) b += ",\"fw_trial_fails\":" + String((unsigned long)fwTrialFails);
+  b += ",\"gps_bad\":" + String((unsigned long)nmea.bad);
+  if(live && nmea.hdop >= 0) b += ",\"hdop\":" + String(nmea.hdop, 1);
+  if(live && nmea.sats >= 0) b += ",\"sats\":" + String(nmea.sats);
+  // This mow. Everything needed to judge the hour meter and the track from the log,
+  // without anyone walking to the garage.
+  // Only on the post that closes a mow: the server's heartbeat merge carries them forward,
+  // and sending them every 15 min would add ~250 bytes to all 5,000 rows of the sensor log.
+  if(mowEnded && r.mowId){
+    b += ",\"mow_id\":"        + String((unsigned long)r.mowId);
+    b += ",\"start_gap_s\":"   + String((unsigned long)r.startGapS);
+    b += ",\"start_credit_s\":"+ String((unsigned long)r.startCreditS);
+    b += ",\"run_s\":"         + String((unsigned long)r.runSec);
+    b += ",\"run_ticks\":"     + String((unsigned long)r.runTicks);
+    b += ",\"run_no_rpm\":"    + String((unsigned long)r.runNoRpm);
+    b += ",\"run_cold\":"      + String((unsigned long)r.runColdTicks);
+    b += ",\"run_fixes\":"     + String((unsigned long)r.runFixes);
+    b += ",\"trk_pts\":"       + String((unsigned long)r.trkPts);
+    b += ",\"rej_slow\":"      + String((unsigned long)r.rejSlow);
+    b += ",\"rej_hdop\":"      + String((unsigned long)r.rejHdop);
+    b += ",\"rej_spike\":"     + String((unsigned long)r.rejSpike);
+  }
+  // Battery WHILE THE ENGINE RAN. Nothing in the record has ever measured it.
+  if(mowEnded && r.battRunMax > 0.0f){
+    b += ",\"batt_run_min\":"  + String(r.battRunMin, 2);
+    b += ",\"batt_run_max\":"  + String(r.battRunMax, 2);
+    b += ",\"batt_at_start\":" + String(r.battAtStart, 2);
+  }
   b += ",\"service_mode\":" + String(serviceMode ? "true" : "false");
   b += ",\"boot_count\":" + String((unsigned long)bootCount);
   b += ",\"reset_reason\":" + String((int)esp_reset_reason());
+  b += ",\"cold_reason\":" + String((unsigned long)coldReason);
   b += ",\"i2c_errors\":" + String((unsigned long)i2cErrors);
   b += ",\"mpu_reinits\":" + String((unsigned long)mpuReinits);
   if(otaFails)   b += ",\"ota_fails\":" + String((unsigned long)otaFails);
@@ -726,7 +920,7 @@ String buildJson(const SfReading &r, const char* src, bool mowEnded, uint32_t ag
     b += ",\"last_cmd\":" + String((unsigned long)lastCmdId);
     b += ",\"last_cmd_ok\":" + String(lastCmdOk ? "true" : "false");
   }
-  // Vibration across the whole window since the last upload — this is what makes
+  // Vibration across the whole window since the last upload -- this is what makes
   // VIB_THRESHOLD calibratable from one real mow instead of guessed.
   if(vibN){
     b += ",\"vib_max\":" + String(vibMax, 4);
@@ -734,21 +928,14 @@ String buildJson(const SfReading &r, const char* src, bool mowEnded, uint32_t ag
     b += ",\"vib_n\":" + String((unsigned long)vibN);
   }
   // Raw gravity vector, current reading only (a replayed one would carry today's
-  // orientation, not the one it was captured at). Lets the tilt maths be checked
-  // server-side instead of taken on trust.
-  if(withTrack && r.mpu){
+  // orientation, not the one it was captured at).
+  if(live && r.mpu){
     b += ",\"ax\":" + String(gravX / ACCEL_LSB_PER_G, 4);
     b += ",\"ay\":" + String(gravY / ACCEL_LSB_PER_G, 4);
     b += ",\"az\":" + String(gravZ / ACCEL_LSB_PER_G, 4);
   }
-  b += ",\"track\":[";
-  if(withTrack){
-    for(uint16_t i=0;i<gpsTrackN;i++){
-      if(i) b += ",";
-      b += "[" + String(gpsTrackLat[i]/1e6,6) + "," + String(gpsTrackLon[i]/1e6,6) + "]";
-    }
-  }
-  b += "]}";
+  // Always empty from 1.5.0: the track travels as its own file, see uploadTrack().
+  b += ",\"track\":[]}";
   return b;
 }
 
@@ -759,7 +946,7 @@ bool postJson(const String &body){
   http.addHeader("Content-Type","application/json");
   int code = http.POST(body);
   // The response was always being read and thrown away. Keeping it is what turns
-  // every upload into a two-way exchange — no extra connection, no extra radio
+  // every upload into a two-way exchange -- no extra connection, no extra radio
   // time, no extra battery.
   lastResp = http.getString();
   Serial.printf("  POST %d  resp=%s\n", code, lastResp.c_str());
@@ -773,8 +960,96 @@ void sfPush(const SfReading &r){
   if(sfCount < SF_MAX) sfCount++;    // full buffer drops the OLDEST reading
 }
 
-bool uploadData(bool running, bool mowEnded){
-  SfReading cur; captureCurrent(cur, running);
+// Send the whole track file. One request, ahead of the mow_end post, so the server has the
+// points in hand when that post arrives and can attach them in the same history write.
+bool uploadTrack(){
+  trackFlush();
+  if(trkRecs == 0) return true;
+  esp_task_wdt_reset();
+  const size_t bytes = trkRecs * sizeof(TrkRec);
+  WiFiClientSecure client; client.setInsecure();
+  HTTPClient http;
+  if(!http.begin(client, String(ENDPOINT) + "?track_file=1")){ trkFails++; return false; }
+  http.setTimeout(20000);
+  http.addHeader("Content-Type", "application/octet-stream");
+  http.addHeader("X-Mower-Fw", FW_VERSION);
+  int code = -1;
+  if(fsState == FS_OK){
+    File f;
+    if(fsMount()) f = LittleFS.open(TRK_PATH, "r");
+    if(!f){
+      http.end();
+      Serial.println("track: file unreadable, discarding");
+      trkDropped += trkRecs;
+      trackClear();
+      return true;
+    }
+    code = http.sendRequest("POST", &f, bytes);
+    f.close();
+  } else {
+    code = http.sendRequest("POST", (uint8_t*)rtcTrk, bytes);
+  }
+  String resp = http.getString();
+  http.end();
+  Serial.printf("  track: %u bytes, POST %d  resp=%s\n", (unsigned)bytes, code, resp.c_str());
+  esp_task_wdt_reset();
+  // Delete only on the server's own word that it has them. Anything else goes again.
+  if(code == 200 && resp.indexOf("\"ok\":true") >= 0){ trackClear(); return true; }
+  trkFails++;
+  return false;
+}
+
+// A POST got through, so this image can be fixed remotely. End the trial.
+void fwConfirm(){
+  if(fwConfirmed) return;
+  esp_ota_mark_app_valid_cancel_rollback();
+  prefs.begin("mower", false);
+  prefs.putString("fw_ok", FW_VERSION);
+  prefs.putUInt("fw_try", 0);
+  prefs.end();
+  fwConfirmed = 1; fwTrialFails = 0;
+  Serial.println("fw " FW_VERSION " confirmed: a POST got through");
+}
+
+// Count a failure against an image on trial. Enough of them and it goes back to the other
+// slot. If there is no good image there, there is nowhere to go, so end the trial and run.
+void fwTrialFail(){
+  if(fwConfirmed) return;
+  prefs.begin("mower", false);
+  fwTrialFails = prefs.getUInt("fw_try", 0) + 1;
+  prefs.putUInt("fw_try", fwTrialFails);
+  prefs.end();
+  Serial.printf("fw trial: failure %lu of %lu\n", (unsigned long)fwTrialFails, (unsigned long)FW_TRIAL_MAX);
+  if(fwTrialFails < FW_TRIAL_MAX) return;
+  const esp_partition_t* other = esp_ota_get_next_update_partition(NULL);
+  prefs.begin("mower", false);
+  prefs.putUInt("fw_try", 0);
+  prefs.end();
+  if(other && esp_ota_set_boot_partition(other) == ESP_OK){
+    Serial.printf("fw trial failed: rolling back to %s\n", other->label);
+    Serial.flush();
+    ESP.restart();
+  }
+  Serial.println("fw trial failed but the other slot holds no good image: carrying on");
+  prefs.begin("mower", false);
+  prefs.putString("fw_ok", FW_VERSION);
+  prefs.end();
+  fwConfirmed = 1;
+}
+
+// Top of setup(). Cheap once confirmed: RTC remembers it between wakes.
+void fwTrialAtBoot(bool cold){
+  if(fwConfirmed) return;
+  prefs.begin("mower", true);
+  String ok = prefs.getString("fw_ok", "");
+  fwTrialFails = prefs.getUInt("fw_try", 0);
+  prefs.end();
+  if(ok == FW_VERSION){ fwConfirmed = 1; esp_ota_mark_app_valid_cancel_rollback(); return; }
+  if(cold) fwTrialFail();
+}
+
+bool uploadData(bool mowEnded, bool mowCut){
+  SfReading cur; captureCurrent(cur, mowEnded, mowCut);
 
   const char* ssid = WIFI_SSID;
 #if SF_BENCH_TEST
@@ -798,36 +1073,44 @@ bool uploadData(bool running, bool mowEnded){
                     : "not connected";
     Serial.printf("WiFi: FAILED  status=%d -> %s\n", st, why);
     WiFi.disconnect(true); WiFi.mode(WIFI_OFF);
-    sfPush(cur);                                  // TASK 2: hold it, don't lose it
+    sfPush(cur);                                  // hold it, don't lose it
     Serial.printf("buffered this reading (%u held)\n", (unsigned)sfCount);
     return false;
   }
   Serial.println("WiFi: connected OK");
   cur.rssi = (int16_t)WiFi.RSSI();
 
+  // Track first: any mow_end below finds its points already on the server.
+  if(trkRecs || trkBufN){
+    uploadTrack();
+    delay(FLUSH_GAP_MS);
+  }
+
   // Flush the backlog OLDEST-FIRST, before the current reading, so the server
   // receives them in the order they actually happened.
-  // The delay sits INSIDE the loop, after each successful send — so it also provides
-  // the gap before the current reading's own POST, while a normal upload with an
-  // empty backlog (the common case) is never slowed down at all.
   while(sfCount > 0){
+    esp_task_wdt_reset();
     uint16_t idx = (sfHead + SF_MAX - sfCount) % SF_MAX;
     uint32_t age = uptimeS - sfBuf[idx].stampS;
     Serial.printf("flushing buffered reading (%lus old, %u left)\n",
                   (unsigned long)age, (unsigned)sfCount);
-    if(!postJson(buildJson(sfBuf[idx], "buffered", false, age, false))) break;
+    // #267: the reading's OWN mow-end flag. A mow whose only upload failed is still a
+    // mow when it finally gets through.
+    if(!postJson(buildJson(sfBuf[idx], "buffered", sfBuf[idx].mowEnded != 0, age, false))) break;
     sfCount--;
-    delay(FLUSH_GAP_MS);                   // see FLUSH_GAP_MS — KV write-race window
+    delay(FLUSH_GAP_MS);                   // see FLUSH_GAP_MS -- KV write-race window
   }
 
-  const char* src = mowEnded ? "mow_end" : (running ? "live" : "heartbeat");
+  esp_task_wdt_reset();
+  const char* src = mowEnded ? "mow_end" : "heartbeat";
   uint32_t ackSent = pendingAck;
   bool ok = postJson(buildJson(cur, src, mowEnded, 0, true));
   if(!ok){
     sfPush(cur);
-    Serial.printf("upload failed — buffered (%u held)\n", (unsigned)sfCount);
+    Serial.printf("upload failed -- buffered (%u held)\n", (unsigned)sfCount);
   } else {
-    // The ack rode out with this payload, so retire it — but only the exact id we
+    fwConfirm();
+    // The ack rode out with this payload, so retire it -- but only the exact id we
     // sent, and before handleDownlink runs, since that may queue a NEW ack.
     if(ackSent && pendingAck == ackSent) setPendingAck(0);
     // Act on the reply while the radio is still up: an OTA needs the connection,
@@ -840,7 +1123,11 @@ bool uploadData(bool running, bool mowEnded){
 
 void setup(){
   Serial.begin(115200); delay(50);
-  // Live config and the level reference come back before anything uses them —
+  const bool coldBoot = (rtcMagic != RTC_MAGIC);
+  // First, before anything that could crash: if this image is on trial and keeps resetting,
+  // this is what gets the box back to the image before it.
+  fwTrialAtBoot(coldBoot);
+  // Live config and the level reference come back before anything uses them --
   // intervals, thresholds and tilt all depend on this having run first.
   loadConfig();
 
@@ -859,43 +1146,53 @@ void setup(){
                 (unsigned long)cfgRev, VIB_THRESHOLD, IDLE_INTERVAL_S,
                 SAMPLE_INTERVAL_S, TRACK_MIN_STEP_M, serviceMode?1:0, refOK?1:0);
 
+  wakeCount++;
+
   Wire.begin(I2C_SDA,I2C_SCL);
   mpuInit(); delay(20);
-  // A sensor that has gone quiet is the normal failure here — the AD0 line came
+  // A sensor that has gone quiet is the normal failure here -- the AD0 line came
   // loose once already and cost weeks of tilt data AND every engine hour, since
   // hour counting keys off vibration. One free retry per wake turns most of those
   // into a self-heal, and the counters make a marginal connection visible in the
   // data long before it fails outright.
   if(!mpuOK){
     i2cErrors++;
-    Serial.println("MPU silent — re-initialising");
+    Serial.println("MPU silent -- re-initialising");
     delay(50); mpuInit(); delay(20);
     if(mpuOK){ mpuReinits++; Serial.println("MPU recovered on retry"); }
-    else       Serial.println("MPU still silent — check the AD0/SDA/SCL wiring");
+    else       Serial.println("MPU still silent -- check the AD0/SDA/SCL wiring");
   }
+  GPS_SERIAL.setRxBufferSize(GPS_RX_BUFFER);    // must come before begin()
   GPS_SERIAL.begin(GPS_BAUD, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN);
 
-  if(rtcMagic!=0xCAFEBABE){            // cold boot: reload total, fresh RPM session
-    rtcMagic=0xCAFEBABE;
+  bool mowWasCut = false;
+  if(coldBoot){
+    rtcMagic = RTC_MAGIC;
     loadFromFlash();
     // Boot count lives in flash, not RTC, so it survives the power cut that RTC
-    // memory does not — which is exactly the event worth counting.
+    // memory does not -- which is exactly the event worth counting.
+    coldReason = (uint32_t)esp_reset_reason();
     prefs.begin("mower", false);
     bootCount = prefs.getUInt("boots", 0) + 1;
     prefs.putUInt("boots", bootCount);
+    prefs.putUInt("coldrsn", coldReason);
+    mowWasCut = prefs.getBool("mowopen", false);
+    curMowId  = prefs.getUInt("mowid", 0);
     prefs.end();
-    Serial.printf("cold boot #%lu (reset reason %d)\n",
-                  (unsigned long)bootCount, (int)esp_reset_reason());
+    Serial.printf("cold boot #%lu (reset reason %lu)%s\n", (unsigned long)bootCount,
+                  (unsigned long)coldReason, mowWasCut ? " -- a mow was open" : "");
     vibMax=0; vibSum=0; vibN=0;
     lastCmdId=0; lastCmdOk=0;
-    secsSinceFlush=0; rpmPeak=0; rpmSum=0; rpmCount=0;
-    gpsSessionMeters=0; gpsHaveLast=0; // fresh distance session; lifetime kept
-    gpsTrackN=0;                        // fresh yard-map track
-    trkHavePrev=0;
-    wasRunning=0;
-    // RTC RAM is undefined after a power cut — zero the backlog explicitly so a
+    secsSinceFlush=0; msCarry=0; rpmPeak=0; rpmSum=0; rpmCount=0;
+    gpsSessionMeters=0;
+    runSecThisMow=0; runTicks=0; runNoRpm=0; runColdTicks=0; runFixes=0;
+    trkPtsMow=0; trkRejSlow=0; trkRejHdop=0; trkRejSpike=0;
+    battRunMin=0; battRunMax=0; battAtStart=0;
+    startGapS=0; startCreditS=0; awakeSecLast=0; secsSincePost=0;
+    // RTC RAM is undefined after a power cut -- zero the backlog explicitly so a
     // cold boot can't replay garbage as if it were real readings.
-    sfHead=0; sfCount=0; uptimeS=0;
+    sfHead=0; sfCount=0; uptimeS=0; wakeCount=1;
+    trackRecover();
 #if SF_BENCH_TEST
     testWakes=0;
 #endif
@@ -903,6 +1200,7 @@ void setup(){
 
   if(CALIBRATION_MODE){
     while(true){
+      esp_task_wdt_reset();
       float fs=captureSamples();
       RpmResult r=analyze(fs);
       Serial.print("vib(g)="); Serial.print(r.stdG,4);
@@ -913,141 +1211,172 @@ void setup(){
     }
   }
 
-  float fs=captureSamples();
-  computeTilt();                 // pitch/roll + shock — must run before analyze() removes DC
-  RpmResult r=analyze(fs);
-  lastVib = r.stdG;
-  // Track what vibration actually looks like between uploads. A single sample at
-  // upload time says nothing about a mow the box slept through, and VIB_THRESHOLD
-  // has been a guess marked "(calibrate)" since day one. With max and average
-  // reported, one real mow is enough to set it correctly over the air.
-  if(r.stdG > vibMax) vibMax = r.stdG;
-  vibSum += r.stdG; vibN++;
+  // ===== THE RUN LOOP ==================================================================
+  // Parked, this runs exactly once: one MPU reading, no engine, straight on to sleep.
+  // Engine running, the box stays in here with the radio off until 30 s after vibration
+  // stops. Three things that changes from 1.4.0, which deep-slept 30 s between every read:
+  //   Hours are real elapsed time from the crystal, not a flat 30 s per wake counted on the
+  //   deep-sleep clock. (#269 measured the surviving rate error at 1.6-4.7%.)
+  //   GPS is read every second, so 3 m of movement sets the point spacing instead of the
+  //   sleep schedule (1.4.0 got one point per ~12 m, ~100 a mow).
+  //   Power: the MPU loop runs off the battery the whole mow. Estimate ~16 mA at 12 V
+  //   (~165 mW through the buck); NOT measured. batt_run_min/max in the payload show it.
+  ml::RunMeter meter(STOP_HOLD_MS);
+  uint32_t loopT0   = millis();
+  bool     ranThisWake = false;
+  bool     mowEnded    = false;
+  bool     mowCut      = false;
+  RpmResult r;
 
-  // Engine detection. STARTING the clock is strict; KEEPING it running is lenient.
-  // The asymmetry is deliberate: a false start banks hours that were never worked,
-  // a false stop loses hours that were — and losing real hours is the failure that
-  // already cost months here, so the hold condition stays forgiving.
-  //
-  // Strict entry needs all of:
-  //   - vibration above threshold
-  //   - a plausible RPM actually detected. A running engine is a strong periodic
-  //     signal; scrubbing under the deck or wrenching a blade bolt is broadband
-  //     noise with no clean spectral peak, so amplitude alone can't tell them
-  //     apart and a 20-minute oil change would otherwise bank 20 minutes of hours.
-  //   - the mower upright (you don't run one on its side)
-  //   - service mode off
-  // Lenient hold: vibration alone, so an SNR dip mid-mow never stops the clock.
-  bool vibHot = (r.stdG >= VIB_THRESHOLD);
-  bool canRun = uprightNow && !serviceMode;
-  bool running = wasRunning ? (vibHot && canRun)
-                            : (vibHot && r.valid && canRun);
-  String rpmStr = r.valid ? String((int)r.rpm) : String("--");
-  Serial.printf("vib=%.4f running=%d Fs=%.0f rpm=%s life=%us\n",
-                r.stdG, running, fs, rpmStr.c_str(), lifetimeSeconds);
+  for(;;){
+    uint32_t tickT0 = millis();
+    esp_task_wdt_reset();
 
-  // --- GPS: read on EVERY wake (bench + parked + mowing) ----------------
-  // Old behavior read the GPS only while the engine vibrated, so it could
-  // never lock on a bench and the upload (a parked wake) always reported
-  // gps_rx=0 -> "GPS silent". Reading here, before the branch, makes the
-  // health count (gpsLineCount, set inside readGPS) and the fix current on
-  // the very wake that uploads. gps_rx is finally truthful.
-  double clat, clon;
-  bool gotFix = readGPS(clat, clon);
-  if(gotFix){ gpsLat=(float)clat; gpsLon=(float)clon; gpsHaveFix=1; }
-  Serial.printf("GPS: nmea_lines=%lu fix=%d lat=%.6f lon=%.6f\n",
-                (unsigned long)gpsLineCount, gpsHaveFix, gpsLat, gpsLon);
+    float fs = captureSamples();
+    computeTilt();               // pitch/roll + shock -- before analyze() removes DC
+    r = analyze(fs);
+    lastMpuReadMs = millis();
+    lastVib = r.stdG;
+    if(r.stdG > vibMax) vibMax = r.stdG;
+    vibSum += r.stdG; vibN++;
 
-  // --- TASK 1: log the yard-map track on ANY fix, not just while the engine runs.
-  // Jeff: "it needs to start recording from when it gets its first signal to its
-  // last." The old code buffered points inside the `running` branch only, so if the
-  // vibration threshold dipped below VIB_THRESHOLD mid-mow — or the mower was moved
-  // under low throttle — those points were never recorded at all.
-  // TRACK_MIN_STEP_M is what keeps this honest: without a movement gate, logging on
-  // every fix would record a parked mower's GPS drift as if it were mowing.
-  if(gotFix){
-    double stepFromTrack = trkHavePrev ? haversineM(trkPrevLat, trkPrevLon, clat, clon)
-                                       : (double)TRACK_MIN_STEP_M;
-    if(stepFromTrack >= TRACK_MIN_STEP_M && stepFromTrack <= GPS_STEP_MAX_M){
-      if(gpsTrackN < GPS_TRACK_MAX){
-        gpsTrackLat[gpsTrackN] = (int32_t)(clat*1e6);
-        gpsTrackLon[gpsTrackN] = (int32_t)(clon*1e6);
-        gpsTrackN++;
-      }
-      trkPrevLat=(float)clat; trkPrevLon=(float)clon; trkHavePrev=1;
+    const bool vibHot = (r.stdG >= VIB_THRESHOLD);
+    const bool canRun = uprightNow && !serviceMode;
+    ml::RunMeter::Event ev = meter.tick(millis(), vibHot, r.valid, canRun);
+
+    if(ev == ml::RunMeter::STARTED){
+      // Per-mow stats clear when the next mow STARTS, not when an upload succeeds.
+      // Jeff, 2026-08-11: "even if the mower is off and just sitting in the garage
+      // the sensors [should] still [be] reporting... showing their last reading."
+      ranThisWake = true;
+      rpmPeak=0; rpmSum=0; rpmCount=0;
+      gpsSessionMeters=0;
+      runTicks=0; runNoRpm=0; runColdTicks=0; runFixes=0;
+      trkPtsMow=0; trkRejSlow=0; trkRejHdop=0; trkRejSpike=0;
+      battAtStart = readBattery();
+      battRunMin  = battAtStart;
+      battRunMax  = battAtStart;
+      // Credit the sleep this start happened inside: see startCreditS() in mower_logic.h.
+      startCreditS = ml::startCreditS(startGapS, coldBoot);
+      lifetimeSeconds += startCreditS;
+      secsSinceFlush  += startCreditS;
+      runSecThisMow    = startCreditS;
+      // Flash: a new mow id, and the "a mow is open" flag a power cut will leave behind.
+      prefs.begin("mower", false);
+      curMowId = prefs.getUInt("mowid", 0) + 1;
+      prefs.putUInt("mowid", curMowId);
+      prefs.putBool("mowopen", true);
+      prefs.end();
+      trkGate.reset();
+      trackPut(TRK_MARKER, (int32_t)curMowId);
+      trackFlush();
+      Serial.printf("MOW %lu START  slept %lus, credited %lus, batt=%.2fV\n",
+                    (unsigned long)curMowId, (unsigned long)startGapS,
+                    (unsigned long)startCreditS, battAtStart);
     }
+
+    // The credit: real milliseconds, sub-second remainder carried so nothing rounds away.
+    msCarry += meter.takeCreditMs();
+    const uint32_t addS = msCarry / 1000;
+    msCarry %= 1000;
+    lifetimeSeconds += addS;
+    secsSinceFlush  += addS;
+    runSecThisMow   += addS;
+
+    if(ev == ml::RunMeter::STOPPED){
+      mowEnded = true;
+      trackFlush();
+      flushToFlash();
+      prefs.begin("mower", false);
+      prefs.putBool("mowopen", false);
+      prefs.end();
+      Serial.printf("MOW %lu END  %lus, %lu ticks, %lu fixes, %lu track points\n",
+                    (unsigned long)curMowId, (unsigned long)runSecThisMow, (unsigned long)runTicks,
+                    (unsigned long)runFixes, (unsigned long)trkPtsMow);
+    }
+
+    if(!meter.running()) break;       // engine off, or was never on
+
+    runTicks++;
+    if(!meter.hot()) runColdTicks++;
+    else if(!r.valid) runNoRpm++;
+    if(meter.hot() && r.valid){ if(r.rpm>rpmPeak) rpmPeak=r.rpm; rpmSum+=r.rpm; rpmCount++; }
+    float bv = readBattery();
+    if(bv > 0){
+      if(battRunMin <= 0 || bv < battRunMin) battRunMin = bv;
+      if(bv > battRunMax) battRunMax = bv;
+    }
+    if(secsSinceFlush >= (uint32_t)FLUSH_EVERY_S) flushToFlash();
+    if(millis() - trkLastFlushMs >= TRK_FLUSH_MS) trackFlush();
+
+    if((runTicks % 30) == 1){
+      Serial.printf("vib=%.4f hot=%d Fs=%.0f life=%us mow=%lus fixes=%lu trk=%lu hdop=%.1f sats=%d bad=%lu\n",
+                    r.stdG, meter.hot(), fs, lifetimeSeconds, (unsigned long)runSecThisMow,
+                    (unsigned long)runFixes, (unsigned long)trkPtsMow, nmea.hdop, nmea.sats,
+                    (unsigned long)nmea.bad);
+    }
+
+    // Fill the rest of the tick reading GPS. The UART buffer carried it through the capture.
+    do { pumpGps(meter.hot()); delay(5); } while(millis() - tickT0 < RUN_TICK_MS);
+  }
+  // ===== end of the run loop -- from here down, the engine is OFF ========================
+
+  // A mow was open when the power went, and the engine is off now: close it, so the hours
+  // it banked don't wait for the next mow to be recorded. If the engine WAS running when
+  // the box came back, that stretch closed normally above and the server merges the two.
+  if(mowWasCut && !ranThisWake){
+    mowEnded = true; mowCut = true;
+    prefs.begin("mower", false);
+    prefs.putBool("mowopen", false);
+    prefs.end();
   }
 
-  // Did a mow just finish? (was running on the previous wake, isn't now.) The box
-  // only uploads while parked, so this flag is the only way the server can tell
-  // WHICH upload carries a completed mow's totals rather than an idle report.
-  bool mowEnded   = (wasRunning && !running);
-  bool mowStarted = (running && !wasRunning);
-  wasRunning = running ? 1 : 0;
+  uint32_t awakeS = (millis() - loopT0 + 500) / 1000;
+  awakeSecLast    = awakeS;
+  uptimeS        += awakeS;
+  secsSincePost  += awakeS;
 
-  // Per-mow stats are cleared when the NEXT mow actually STARTS — not when the
-  // upload succeeds. Jeff, 2026-08-11: "even if the mower is off and just sitting in
-  // the garage the sensors [should] still [be] reporting... showing their last
-  // reading." Zeroing on upload meant RPM, this-mow distance and speed all dropped to
-  // "—" in the app about five minutes after every mow, which reads as a dead sensor.
-  // Holding them until a new mow begins means the parked box keeps reporting the last
-  // real mow's numbers, so the card always shows live, meaningful values.
-  if(mowStarted){
-    rpmPeak=0; rpmSum=0; rpmCount=0;
-    gpsSessionMeters=0; gpsHaveLast=0;
-  }
+  if(secsSinceFlush > 0) flushToFlash();
 
-  int sleepSeconds;
-  if(running){
-    lifetimeSeconds+=SAMPLE_INTERVAL_S;
-    secsSinceFlush +=SAMPLE_INTERVAL_S;
-    if(r.valid){ if(r.rpm>rpmPeak) rpmPeak=r.rpm; rpmSum+=r.rpm; rpmCount++; }
-    // Distance still accumulates only while mowing — "this mow" distance would be
-    // inflated by parked drift otherwise. (The track above is drift-gated instead.)
-    if(gotFix){
-      if(gpsHaveLast){
-        double step=haversineM(gpsPrevLat, gpsPrevLon, clat, clon);
-        if(step>=GPS_STEP_MIN_M && step<=GPS_STEP_MAX_M){
-          gpsSessionMeters+=(float)step; gpsTotalMeters+=(float)step;
-        }
-      }
-      gpsPrevLat=(float)clat; gpsPrevLon=(float)clon; gpsHaveLast=1;
-    }
-    if(secsSinceFlush>=FLUSH_EVERY_S) flushToFlash();
-    sleepSeconds=SAMPLE_INTERVAL_S;          // no WiFi while mowing
-  } else {
-    if(secsSinceFlush>0) flushToFlash();
-    bool ok=uploadData(running, mowEnded);
-    Serial.println(ok?"uploaded":"no wifi / upload skipped");
+  // --- POST or stay quiet -------------------------------------------------------
+  // The box wakes to SENSE every 30 s; the radio is what Jeff objected to on 10-13
+  // ("it's running down my battery"), so posting keeps its slow cadence. Forced:
+  //   mowEnded      the mow_end payload, which the app and the server both key on
+  //   wakeCount<=1  a reflash or reset shows up immediately instead of in 15 minutes
+  //   !fwConfirmed  an image on trial: see Self-rollback
+  // A track upload that failed goes again with the next one of these.
+  bool postDue = mowEnded || (wakeCount <= 1) || !fwConfirmed ||
+                 (secsSincePost >= (uint32_t)IDLE_INTERVAL_S);
+
+  if(postDue){
+    readFixForDisplay();
+    bool ok = uploadData(mowEnded, mowCut);
+    Serial.println(ok ? "uploaded" : "no wifi / buffered");
+    // Reset on the ATTEMPT, not on success: a box out of WiFi range must not retry
+    // every 30 s -- that is exactly the radio drain this split exists to avoid. The
+    // store-and-forward buffer already carries the reading forward with its real age_s.
+    secsSincePost = 0;
     if(ok){
-      // NOTE: rpmPeak/rpmAvg/gpsSessionMeters are deliberately NOT cleared here any
-      // more — they're cleared when the next mow starts (see mowStarted above), so a
-      // parked box keeps reporting the last real mow's numbers instead of zeros.
-      // Only the track buffer clears on delivery, so its points can't be sent twice.
-      //
-      // FIXED 2026-08-11: this used to also clear trkHavePrev, which threw away the
-      // movement gate's reference point. With nothing to compare against, the very
-      // next fix ALWAYS passed the >=3 m test — so every parked heartbeat recorded
-      // and shipped one track point sitting on the parking spot, and the server
-      // merged it into the yard map. Measured live: the garage cell gaining a visit
-      // every five minutes while real grass sat at one or two. Carrying the last
-      // delivered point across uploads makes the 3 m gate mean what it says.
-      if(gpsTrackN > 0){
-        trkPrevLat  = gpsTrackLat[gpsTrackN-1]/1e6f;
-        trkPrevLon  = gpsTrackLon[gpsTrackN-1]/1e6f;
-        trkHavePrev = 1;
-      }
-      gpsTrackN=0;                           // track delivered; clear for next mow
-      // Vibration stats describe the window since the last upload, so they reset
-      // with it.
-      vibMax=0; vibSum=0; vibN=0;
+      vibMax=0; vibSum=0; vibN=0;           // these describe the window since upload
+    } else {
+      fwTrialFail();
     }
-    sleepSeconds=IDLE_INTERVAL_S;
   }
 
-  // Monotonic clock across deep sleeps — this is what gives every buffered
-  // reading a real `age_s` instead of all of them arriving stamped "now".
-  uptimeS += (uint32_t)sleepSeconds;
+  // --- Sleep -------------------------------------------------------------------------
+  // Jeff's 30 s, always.
+  int sleepSeconds = SAMPLE_INTERVAL_S;
+  if(sleepSeconds < 10) sleepSeconds = 10;         // floor: never thrash
+
+  // What the next start could have missed: the sleep, plus any upload since the last MPU read.
+  startGapS      = (uint32_t)sleepSeconds + (millis() - lastMpuReadMs + 500) / 1000;
+  uptimeS       += (uint32_t)sleepSeconds;
+  secsSincePost += (uint32_t)sleepSeconds;
+
+  // Layer 1 of Self-rollback: a bootloader with rollback rolls back an image still pending
+  // verification at the next boot, and a deep-sleep wake is a boot. A WiFi blip during the
+  // trial must not do that; layer 2 (the failure count) carries the trial from here.
+  if(!fwConfirmed) esp_ota_mark_app_valid_cancel_rollback();
 
   esp_sleep_enable_timer_wakeup((uint64_t)sleepSeconds*1000000ULL);
   Serial.printf("sleeping %ds\n", sleepSeconds);

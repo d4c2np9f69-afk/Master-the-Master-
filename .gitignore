@@ -11,3 +11,12 @@ docs/OPEN_ITEMS.md.bak-*
 
 # Local safety backups made before a trim/edit - never repo content
 *.bak-*
+
+# Compiled firmware - the .bin/.elf files carry the WiFi password and device secret in PLAIN
+# TEXT. arduino-cli drops a build/ folder beside the sketch even with --output-dir set (11-05).
+# Gate: scripts/firmware-binary-gate-test.js
+firmware/**/build/
+firmware/**/*.bin
+firmware/**/*.elf
+firmware/**/*.map
+firmware/**/*.hex

@@ -361,6 +361,26 @@ console.log('\n-- one-time parked-drift cleanup (2026-09-24) --');
   check('cleanup runs only ONCE', (await cover(kv))['3647664,-8666015'] === 9, JSON.stringify(await cover(kv)));
 }
 
+console.log('\n-- second one-time parked-drift cleanup (2026-11-05) --');
+{
+  // The 09-24 cleanup ran on the live KV, so its flag is set. The leak carried on after it,
+  // through the hole the span gate closes, and repainted the same spot. Made-up mid-ocean cells.
+  const kv = mockKV({
+    coverage_cleanup_2026_09_24: JSON.stringify({ removed: 184 }),
+    yard_coverage: JSON.stringify({ '1000000,2000000': 410, '1000001,2000000': 4, '1000100,2000100': 1, '1000101,2000101': 2, '1000102,2000102': 3 }),
+  });
+  await post(kv, parked());
+  const c = await cover(kv);
+  check('runs even though the 09-24 flag is already set', !c['1000000,2000000'] && !c['1000001,2000000'], JSON.stringify(c));
+  check('1, 2 and 3-visit cells are kept', c['1000100,2000100'] === 1 && c['1000101,2000101'] === 2 && c['1000102,2000102'] === 3, JSON.stringify(c));
+  const flag = JSON.parse((await kv.get('coverage_cleanup_2026_11_05')) || '{}');
+  check('records what it removed, cell by cell, so it can be put back',
+        flag.removed === 2 && flag.cells && flag.cells['1000000,2000000'] === 410 && flag.cells['1000001,2000000'] === 4, JSON.stringify(flag));
+  await kv.put('yard_coverage', JSON.stringify({ ...c, '1000000,2000000': 9 }));
+  await post(kv, parked());
+  check('and it runs only once', (await cover(kv))['1000000,2000000'] === 9);
+}
+
 console.log('');
 console.log('-- CREDENTIAL LEAK GATE (2026-10-13) --');
 // WHY THIS EXISTS: on 2026-10-13 11:0x PM a maintenance POST was sent WITHOUT `__cmd`, so it
@@ -503,6 +523,304 @@ console.log('-- CREDENTIAL LEAK GATE (2026-10-13) --');
   await post(kv, { source: 'heartbeat', engine_running: false, hours: 7.0833 + 0.02, battery: 12.4 });
   check('just over a minute of new runtime IS recorded',
         (await hist(kv)).length === 2, `${(await hist(kv)).length} entries`);
+}
+
+// ---- Firmware 1.5.0: the track arrives as one binary file, ahead of the mow_end post ----
+// Coordinates are made up (mid-ocean), never the yard: this repo is public.
+const TRK_MARKER = -2147483648;
+const trkFile = (mows) => {
+  const n = mows.reduce((s, m) => s + 1 + m.pts.length, 0);
+  const dv = new DataView(new ArrayBuffer(n * 8));
+  let o = 0;
+  for (const m of mows) {
+    dv.setInt32(o, TRK_MARKER, true); dv.setInt32(o + 4, m.id, true); o += 8;
+    for (const p of m.pts) {
+      dv.setInt32(o, Math.round(p[0] * 1e6), true); dv.setInt32(o + 4, Math.round(p[1] * 1e6), true); o += 8;
+    }
+  }
+  return dv.buffer;
+};
+const postRaw = (kv, buf) =>
+  onRequestPost({ request: new Request('https://x/api/hours?track_file=1', {
+    method: 'POST', headers: { 'content-type': 'application/octet-stream' }, body: buf,
+  }), env: { MOWER_KV: kv } });
+const postTrk = (kv, mows) => postRaw(kv, trkFile(mows));
+const walk = (n, startLat = 10.0, stepM = 3) =>
+  Array.from({ length: n }, (_, i) => [+(startLat + i * stepM / 111320).toFixed(6), 20.0]);
+const stored = async (kv, id) => { const r = await kv.get(`mow_trk:${id}`); return r ? JSON.parse(r).pts : null; };
+const histOf = async (kv) => JSON.parse((await kv.get('hours_history')) || '[]');
+const mowEnd15 = (id, hours, over = {}) => ({
+  source: 'mow_end', mow_ended: true, engine_running: false, fw: '1.5.0', hours, track: [],
+  mow_id: id, trk_pts: 0, dist_total_m: 1000, ...over,
+});
+const FW15_HB = (hours, over = {}) => ({ source: 'heartbeat', engine_running: false, fw: '1.5.0', hours, track: [], ...over });
+const minsAgo = (m) => new Date(Date.now() - m * 60000).toISOString();
+
+console.log('\n-- track file: parsing and storage --');
+{
+  const kv = mockKV();
+  const res = await postTrk(kv, [{ id: 5, pts: walk(20) }]);
+  const j = await res.json();
+  check('a good file answers 200 ok:true (the box deletes its copy on exactly this)',
+        res.status === 200 && j.ok === true, JSON.stringify(j));
+  const got = await stored(kv, 5);
+  check('every point is stored under the mow id, to the microdegree',
+        got && got.length === 20 && got[19][0] === walk(20)[19][0] && got[19][1] === 20,
+        JSON.stringify(got && got[19]));
+
+  check('a file not a whole number of records is refused',
+        (await postRaw(kv, new ArrayBuffer(9))).status === 400);
+  check('an oversized file is refused',
+        (await postRaw(kv, new ArrayBuffer(257 * 1024))).status === 413);
+
+  const kv2 = mockKV();
+  await postTrk(kv2, [{ id: 1, pts: [[10, 20], [95, 20], [10, 200], [0, 0], [10.00003, 20]] }]);
+  const g2 = await stored(kv2, 1);
+  check('impossible positions and 0,0 are dropped, good ones kept',
+        g2 && g2.length === 2, JSON.stringify(g2));
+
+  const kv3 = mockKV();
+  const buf = trkFile([{ id: 9, pts: walk(3) }]);
+  await postRaw(kv3, buf.slice(8));
+  check('points with no marker to name their mow are not guessed at',
+        kv3._m.size === 0 || !(await stored(kv3, 0)), [...kv3._m.keys()].join());
+
+  const kv4 = mockKV();
+  const r4 = await postTrk(kv4, [{ id: 3, pts: walk(30) }, { id: 4, pts: walk(40, 10.001) }]);
+  check('one file holding two mows stores both',
+        (await stored(kv4, 3)).length === 30 && (await stored(kv4, 4)).length === 40 && (await r4.json()).ok);
+
+  const kv5 = mockKV();
+  await postTrk(kv5, [{ id: 7, pts: walk(30) }]);
+  for (const k of ['hours_history', 'sensor_log', 'hours_data']) {
+    check(`the track POST does not write ${k} (one writer, nothing to race)`, !kv5._m.has(k));
+  }
+}
+
+console.log('\n-- track file: resends --');
+{
+  // The box resends whenever it did not get a clean OK, including when the server's answer
+  // was lost on the way back. So a resend must cost nothing and change nothing.
+  const kv = mockKV();
+  await postTrk(kv, [{ id: 21, pts: walk(30) }]);
+  const puts = [];
+  const realPut = kv.put.bind(kv);
+  kv.put = async (k, v) => { puts.push(k); return realPut(k, v); };
+  const before = JSON.stringify(await cover(kv));
+  const r = await postTrk(kv, [{ id: 21, pts: walk(30) }]);
+  check('an identical resend still answers ok, so the box can delete its copy',
+        (await r.json()).ok === true);
+  check('an identical resend writes nothing at all to KV', puts.length === 0, puts.join());
+  check('an identical resend leaves the map alone', JSON.stringify(await cover(kv)) === before);
+
+  // Longer resend: the first upload got through, the OK did not, and the file then grew.
+  const kv2 = mockKV();
+  await postTrk(kv2, [{ id: 22, pts: walk(30) }]);
+  const firstCells = await cover(kv2);
+  await postTrk(kv2, [{ id: 22, pts: walk(60) }]);
+  const after = await cover(kv2);
+  const twice = Object.keys(firstCells).filter((k) => after[k] > 1);
+  check('a longer resend stores the longer track', (await stored(kv2, 22)).length === 60);
+  check('a longer resend paints the new ground', Object.keys(after).length > Object.keys(firstCells).length);
+  // The new stretch starts ON the last point already merged, so the join can touch a cell
+  // or two. What must not happen is the first 30 points counting as a second pass.
+  check('a longer resend does not count the ground it already merged as a second pass',
+        Object.keys(firstCells).length > 10 && twice.length <= 2,
+        `${twice.length} of ${Object.keys(firstCells).length} cells counted twice`);
+}
+
+console.log('\n-- track file: coverage --');
+{
+  const kv = mockKV();
+  await postTrk(kv, [{ id: 1, pts: walk(30) }]);
+  const n1 = await nCells(kv);
+  check('a track that went somewhere paints the map', n1 > 30, `${n1} cells`);
+
+  const before = JSON.stringify(await cover(kv));
+  const res = await postTrk(kv, [{ id: 1, pts: walk(30) }]);
+  check('a resend (the OK was lost on the way back) still answers ok', (await res.json()).ok === true);
+  check('a resend changes no visit count', JSON.stringify(await cover(kv)) === before);
+
+  const kv2 = mockKV();
+  await postTrk(kv2, [{ id: 2, pts: walk(4, 10.0, 1.5) }]);
+  check('a track spanning under 15 m paints nothing (idling, parked drift)', (await nCells(kv2)) === 0);
+
+  const kv3 = mockKV();
+  await kv3.put('coverage_paused', '1');
+  await postTrk(kv3, [{ id: 3, pts: walk(30) }]);
+  check('paused: the map is left alone', (await nCells(kv3)) === 0);
+  check('paused: the track itself is still kept', (await stored(kv3, 3)).length === 30);
+
+  const kv4 = mockKV();
+  await postTrk(kv4, [{ id: 4, pts: walk(30) }]);
+  await postTrk(kv4, [{ id: 5, pts: walk(30) }]);
+  const twice = Object.values(await cover(kv4));
+  check('two real mows over the same ground do count two visits', twice.every((v) => v === 2), twice.slice(0, 5).join());
+
+  // NVS erased (board swapped): ids restart and collide with an old mow's key. Length alone
+  // would call the new mow "already have it" and lose it.
+  const kv5 = mockKV();
+  await postTrk(kv5, [{ id: 1, pts: walk(50) }]);
+  await postTrk(kv5, [{ id: 1, pts: walk(20, 10.01) }]);
+  check('same id but different ground is a different mow: it replaces, not skips',
+        (await stored(kv5, 1))[0][0] === 10.01);
+}
+
+console.log('\n-- mow_end attaches the stored track --');
+{
+  let kv = mockKV();
+  await postTrk(kv, [{ id: 6, pts: walk(400) }]);
+  await post(kv, mowEnd15(6, 8, { trk_pts: 400 }));
+  let h = await histOf(kv);
+  check('history entry records the mow id and the full count',
+        h.length === 1 && h[0].mow_ids && h[0].mow_ids[0] === 6 && h[0].track_pts === 400, JSON.stringify(h[0]).slice(0, 160));
+  check('history keeps a decimated copy, so 50 mows stay a small value',
+        h[0].track.length > 50 && h[0].track.length <= 100, `${h[0].track && h[0].track.length} pts`);
+  check('the decimated copy keeps both ends of the mow',
+        h[0].track[0][0] === walk(400)[0][0] && h[0].track[h[0].track.length - 1][0] === walk(400)[399][0]);
+  const live = await (await get(kv)).json();
+  check('the live reading carries the new track for the app', live.track && live.track.length === h[0].track.length);
+
+  // The trap in the old code: a mow with no track of its own copied the previous one.
+  kv = mockKV({ hours_data: JSON.stringify({ hours: 7, track: walk(50, 20.0) }),
+                hours_history: JSON.stringify([{ date: minsAgo(600), hours_end: 7, track: walk(50, 20.0) }]) });
+  await post(kv, mowEnd15(1, 8, { trk_pts: 0 }));
+  h = await histOf(kv);
+  check('a 1.5.0 mow with no track never inherits the previous mow\'s', h[1].track === null, JSON.stringify(h[1].track).slice(0, 80));
+  check('...and the live reading drops the stale 1.4.0 track', ((await (await get(kv)).json()).track || []).length === 0);
+
+  // 1.4.0 must carry on working: it is what is on the mower today.
+  kv = mockKV({ hours_data: JSON.stringify({ hours: 7, track: walk(50, 20.0) }) });
+  await post(kv, { source: 'mow_end', mow_ended: true, engine_running: false, fw: '1.4.0', hours: 8, track: [] });
+  h = await histOf(kv);
+  check('1.4.0 still gets its old fallback track', h[0].track && h[0].track.length === 50);
+  kv = mockKV();
+  await post(kv, { source: 'mow_end', mow_ended: true, engine_running: true, fw: '1.4.0', hours: 8, track: walk(30) });
+  check('1.4.0 still paints coverage from a JSON track', (await nCells(kv)) > 30);
+
+  // A cut mow never got a mow_end. Its track must stay with the record that follows it.
+  kv = mockKV({ hours_history: JSON.stringify([{ date: minsAgo(9000), hours_end: 7, mow_ids: [3], track_pts: 10, track_want: 10 }]) });
+  await postTrk(kv, [{ id: 4, pts: walk(20) }, { id: 5, pts: walk(20, 10.001) }, { id: 6, pts: walk(20, 10.002) }]);
+  await post(kv, mowEnd15(6, 8, { trk_pts: 20 }));
+  h = await histOf(kv);
+  check('ids since the last record all go on this one', JSON.stringify(h[1].mow_ids) === '[4,5,6]', JSON.stringify(h[1].mow_ids));
+  check('and all their points are counted', h[1].track_pts === 60, `${h[1].track_pts}`);
+
+  // First 1.5.0 mow after 1.4.0 history: no earlier id to count from.
+  kv = mockKV({ hours_history: JSON.stringify([{ date: minsAgo(9000), hours_end: 7, track: walk(9) }]) });
+  await post(kv, mowEnd15(12, 8));
+  check('with no earlier id it attaches only its own', JSON.stringify((await histOf(kv))[1].mow_ids) === '[12]');
+}
+
+console.log('\n-- a gas stop folds into one mow; a resend does not double it --');
+{
+  const kv = mockKV();
+  await postTrk(kv, [{ id: 1, pts: walk(30) }]);
+  await post(kv, mowEnd15(1, 8, { trk_pts: 30 }));
+  await postTrk(kv, [{ id: 2, pts: walk(30, 10.001) }]);
+  await post(kv, mowEnd15(2, 8.01, { trk_pts: 30 }));
+  let h = await histOf(kv);
+  check('two stretches minutes apart are one record', h.length === 1 && JSON.stringify(h[0].mow_ids) === '[1,2]', JSON.stringify(h.map((e) => e.mow_ids)));
+  check('holding both stretches\' points', h[0].track_pts === 60, `${h[0].track_pts}`);
+  await post(kv, mowEnd15(2, 8.01, { trk_pts: 30 }));
+  h = await histOf(kv);
+  check('the same mow_end twice does not double the points', h[0].track_pts === 60 && h[0].mow_ids.length === 2, `${h[0].track_pts}`);
+  check('nor raises what it is waiting for', h[0].track_want === 60, `${h[0].track_want}`);
+}
+
+console.log('\n-- a track that arrives after its mow_end (late, or KV not yet consistent) --');
+{
+  const kv = mockKV();
+  await post(kv, mowEnd15(8, 8, { trk_pts: 25 }));
+  let h = await histOf(kv);
+  check('the mow is recorded without it, and says what it is waiting for',
+        h[0].track === null && h[0].track_pts === 0 && h[0].track_want === 25, JSON.stringify(h[0]).slice(0, 200));
+  const frozen = { date: h[0].date, hours_mow: h[0].hours_mow, segments: h[0].segments };
+
+  await postTrk(kv, [{ id: 8, pts: walk(25) }]);
+  check('the track POST still leaves history alone', (await histOf(kv))[0].track === null);
+
+  await post(kv, FW15_HB(8));
+  h = await histOf(kv);
+  check('the next post fills it in', h[0].track && h[0].track.length === 25 && h[0].track_pts === 25, JSON.stringify(h[0]).slice(0, 160));
+  check('the live reading gets it too', ((await (await get(kv)).json()).track || []).length === 25);
+  check('and nothing else about the record moved (a heartbeat must not "fold" into it)',
+        h[0].date === frozen.date && h[0].hours_mow === frozen.hours_mow && h[0].segments === frozen.segments,
+        JSON.stringify(h[0]).slice(0, 160));
+
+  const raw = await kv.get('hours_history');
+  await post(kv, FW15_HB(8));
+  check('once filled, a heartbeat writes nothing to history', (await kv.get('hours_history')) === raw);
+
+  // A heartbeat inside the merge window, with nothing to fill, must leave it untouched.
+  const kv2 = mockKV();
+  await post(kv2, mowEnd15(9, 8));
+  const raw2 = await kv2.get('hours_history');
+  await post(kv2, FW15_HB(8));
+  check('nothing due: history is byte-identical after a heartbeat', (await kv2.get('hours_history')) === raw2);
+
+  // Points that will never come (file lost): stop asking after two days.
+  const kv3 = mockKV({ hours_history: JSON.stringify([{ date: minsAgo(3000), hours_end: 8, mow_ids: [1], track_pts: 0, track_want: 9 }]) });
+  await postTrk(kv3, [{ id: 1, pts: walk(9) }]);
+  await post(kv3, FW15_HB(8));
+  check('past 48 h it stops looking', (await histOf(kv3))[0].track_pts === 0);
+}
+
+console.log('\n-- GET ?track= --');
+{
+  const kv = mockKV();
+  await postTrk(kv, [{ id: 1, pts: walk(30) }]);
+  await post(kv, mowEnd15(1, 8, { trk_pts: 30 }));
+  await postTrk(kv, [{ id: 2, pts: walk(30, 10.001) }]);
+  await post(kv, mowEnd15(2, 8.01, { trk_pts: 30 }));
+  let j = await (await get(kv, '?track=latest')).json();
+  check('latest returns every stretch of the latest mow, full resolution',
+        j.ok && j.tracks.length === 2 && j.tracks[0].pts.length === 30 && j.tracks[1].id === 2, JSON.stringify(j).slice(0, 120));
+  j = await (await get(kv, '?track=1')).json();
+  check('a number means that mow id, not "latest"', j.tracks.length === 1 && j.tracks[0].id === 1, JSON.stringify(j).slice(0, 120));
+  j = await (await get(kv, '?track=99')).json();
+  check('an unknown id is empty, not an error', j.ok && j.tracks.length === 0);
+  j = await (await get(mockKV(), '?track=latest')).json();
+  check('no mows yet is empty, not an error', j.ok && j.tracks.length === 0);
+  j = await (await get(mockKV({ hours_history: JSON.stringify([{ hours_end: 7, track: walk(5) }]) }), '?track=latest')).json();
+  check('1.4.0-only history is empty, not an error', j.ok && j.tracks.length === 0);
+}
+
+console.log('\n-- a replayed mow keeps the time it actually ended --');
+{
+  // Comment at readAt says stamping arrival time poisoned the merge. readAt was computed and
+  // never used, so it still did.
+  const seed = () => mockKV({ hours_history: JSON.stringify([{ date: minsAgo(60), hours_end: 7, hours_mow: 0.5 }]) });
+  let kv = seed();
+  await post(kv, { source: 'buffered', mow_ended: true, engine_running: false, fw: '1.4.0', age_s: 3000, hours: 7.001, track: [] });
+  let h = await histOf(kv);
+  check('a mow replayed from 50 min ago, started 10 min after the last, folds in',
+        h.length === 1 && h[0].hours_end === 7.001, `${h.length} entries`);
+  kv = mockKV({ hours_history: JSON.stringify([{ date: minsAgo(600), hours_end: 7 }]) });
+  await post(kv, { source: 'buffered', mow_ended: true, engine_running: false, fw: '1.4.0', age_s: 1800, hours: 7.5, track: [] });
+  h = await histOf(kv);
+  const ago = (Date.now() - Date.parse(h[1].date)) / 60000;
+  check('its record is dated when it ended, not when the radio got through', Math.abs(ago - 30) < 1, `${ago.toFixed(1)} min ago`);
+}
+
+console.log('\n-- the 1.5.0 tunables can be set --');
+{
+  const kv = mockKV({ mower_ctrl_token: TOKEN });
+  const j = await (await post(kv, { __cmd: 'set_cfg', token: TOKEN, cfg: { track_min_mps: 0.3, track_max_hdop: 4 } })).json();
+  check('track_min_mps and track_max_hdop are accepted', j.accepted && j.accepted.track_min_mps === 0.3 && j.accepted.track_max_hdop === 4, JSON.stringify(j).slice(0, 160));
+  const j2 = await (await post(kv, { __cmd: 'set_cfg', token: TOKEN, cfg: { track_min_mps: 9 } })).json();
+  check('and clamped', j2.rejected.length === 1);
+}
+
+// How heavy is one mow's file? A Pages Function has a CPU budget, and if this POST were ever
+// killed for it the box would resend the same file forever. Printed, not asserted: Node on
+// this PC is not a Cloudflare isolate, so a pass/fail number here would prove nothing.
+{
+  const kv = mockKV();
+  const big = []; for (let r = 0; r < 40; r++) for (let i = 0; i < 50; i++) big.push([+(10 + r * 2e-5).toFixed(6), +(20 + (r % 2 ? 49 - i : i) * 2.7e-5).toFixed(6)]);
+  const t0 = performance.now();
+  await postTrk(kv, [{ id: 1, pts: big }]);
+  console.log(`  note: ${big.length}-point file (~6 km mow), first request on a cold JIT: ${(performance.now() - t0).toFixed(1)} ms in Node, ${await nCells(kv)} cells`);
 }
 
 console.log(`\n${pass} passed, ${fail} failed\n`);
