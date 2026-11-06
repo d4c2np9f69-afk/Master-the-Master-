@@ -1,0 +1,652 @@
+input_number:
+  mower_hours:
+    name: Mower Engine Hours
+    min: 0
+    max: 10000
+    step: 0.1
+    unit_of_measurement: h
+    icon: mdi:timer-outline
+  mower_battery_voltage:
+    name: Mower Battery Voltage
+    min: 0
+    max: 16
+    step: 0.01
+    unit_of_measurement: V
+    icon: mdi:battery
+input_text:
+  mower_last_sync:
+    name: Mower Sensor Last Sync
+    max: 64
+input_boolean:
+  hcc_panic_active:
+    name: HCC Panic Active
+    icon: mdi:alarm-light
+template:
+  - sensor:
+      - name: "HCC Mower Hours"
+        unit_of_measurement: "h"
+        icon: mdi:timer-outline
+        state: "{{ states('input_number.mower_hours') | float(0) | round(1) }}"
+      - name: "HCC Mower Battery"
+        unit_of_measurement: "V"
+        icon: mdi:battery
+        state: "{{ states('input_number.mower_battery_voltage') | float(0) | round(2) }}"
+      - name: "HCC Mower Status"
+        icon: mdi:tractor
+        state: >
+          {% set h = states('input_number.mower_hours') | float(0) %}
+          {% if h > 0 %}{{ h }} hrs{% else %}Unknown{% endif %}
+      - name: "Water Gallons"
+        unique_id: hcc_water_gallons
+        unit_of_measurement: "gal"
+        device_class: water
+        state_class: total_increasing
+        availability: "{{ states('sensor.water_meter_reading') not in ['unknown','unavailable',none] }}"
+        state: "{{ (states('sensor.water_meter_reading') | float / 10) | round(1) }}"
+      - name: "Gas CCF"
+        unique_id: hcc_gas_ccf
+        unit_of_measurement: "CCF"
+        device_class: gas
+        state_class: total_increasing
+        availability: "{{ states('sensor.gas_meter_reading') not in ['unknown','unavailable',none] }}"
+        state: "{{ (states('sensor.gas_meter_reading') | float / 100) | round(2) }}"
+      - name: "Gas Cost"
+        unique_id: hcc_gas_cost
+        unit_of_measurement: "USD"
+        device_class: monetary
+        availability: "{{ states('sensor.gas_month') not in ['unknown','unavailable',none] }}"
+        state: >-
+          {% set ccf = states('sensor.gas_month') | float(0) %}
+          {% set therms = (ccf * 1.068) | round(0) %}
+          {{ ((13.44 + therms * 1.235) * 1.05) | round(2) }}
+automation:
+  - id: hcc_panic_button
+    alias: "HCC — Panic Button"
+    mode: single
+    trigger:
+      - platform: webhook
+        webhook_id: hcc-panic-button
+        allowed_methods: [POST, GET]
+        local_only: false
+    action:
+      - service: input_boolean.turn_on
+        target: { entity_id: input_boolean.hcc_panic_active }
+      - service: light.turn_on
+        target: { entity_id: all }
+        data: { flash: long }
+      - service: persistent_notification.create
+        data:
+          title: "🚨 EMERGENCY ALERT"
+          message: "HCC Panic triggered at {{ now().strftime('%I:%M %p') }}"
+          notification_id: hcc_panic
+      - delay: "00:00:30"
+      - service: input_boolean.turn_off
+        target: { entity_id: input_boolean.hcc_panic_active }
+  - id: hcc_mower_sensor_sync
+    alias: "HCC — Mower Sensor Sync"
+    mode: single
+    trigger:
+      - platform: webhook
+        webhook_id: hcc-mower-sensor
+        allowed_methods: [POST]
+        local_only: false
+    action:
+      - variables:
+          payload: "{{ trigger.json }}"
+      - if:
+          - condition: template
+            value_template: "{{ payload.hours is defined and payload.hours | float(0) > 0 }}"
+        then:
+          - service: input_number.set_value
+            target: { entity_id: input_number.mower_hours }
+            data:
+              value: "{{ [payload.hours | float(0), states('input_number.mower_hours') | float(0)] | max | round(1) }}"
+      - if:
+          - condition: template
+            value_template: "{{ payload.battery is defined and payload.battery | float(0) > 0 }}"
+        then:
+          - service: input_number.set_value
+            target: { entity_id: input_number.mower_battery_voltage }
+            data:
+              value: "{{ payload.battery | float(0) | round(2) }}"
+      - service: input_text.set_value
+        target: { entity_id: input_text.mower_last_sync }
+        data:
+          value: "{{ now().isoformat() }}"
+  - id: hcc_weather_severe
+    alias: "HCC — Severe Weather Alert"
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: weather.home
+        to: [lightning, lightning-rainy, exceptional, hail]
+    action:
+      - service: persistent_notification.create
+        data:
+          title: "⛈ Severe Weather"
+          message: "Conditions: {{ states('weather.home') | title }}"
+          notification_id: hcc_weather_severe
+  - id: bd1bcc46-b3b1-484b-9405-117d470cd263
+    alias: "AI Camera Scan on Motion"
+    description: "On real Blink motion: waits for the actual recorded clip, downloads it, extracts the exact frame, then scans that frame with CodeProject.AI"
+    mode: parallel
+    max: 10
+    trigger:
+      - platform: state
+        entity_id:
+          - binary_sensor.301_backyard_motion
+          - binary_sensor.301_driveway_motion
+          - binary_sensor.301_front_doorbell_motion
+          - binary_sensor.front_right_motion
+          - binary_sensor.back_left_motion
+          - binary_sensor.garage_motion
+        to: "on"
+    condition: []
+    action:
+      - variables:
+          cam_map:
+            binary_sensor.301_backyard_motion: "301_backyard"
+            binary_sensor.301_driveway_motion: "301_driveway"
+            binary_sensor.301_front_doorbell_motion: "301_front_doorbell"
+            binary_sensor.front_right_motion: "front_right"
+            binary_sensor.back_left_motion: "back_left"
+            binary_sensor.garage_motion: "garage"
+          cam: "{{ cam_map[trigger.entity_id] }}"
+          camera_entity: "camera.{{ cam }}"
+          clipframe_entity: "camera.{{ cam }}_clipframe"
+          scan_entity: "image_processing.codeproject_ai_object_{{ cam }}_clipframe"
+          last_record_before: "{{ state_attr('camera.' ~ cam, 'last_record') }}"
+      - repeat:
+          while:
+            - condition: template
+              value_template: "{{ state_attr(camera_entity, 'last_record') == last_record_before }}"
+            - condition: template
+              value_template: "{{ repeat.index <= 10 }}"
+          sequence:
+            - service: homeassistant.update_entity
+              target:
+                entity_id: "{{ camera_entity }}"
+            - delay: "00:00:03"
+      - service: blink.save_video
+        target:
+          entity_id: "{{ camera_entity }}"
+        data:
+          filename: "/config/www/blink_clips/{{ cam }}.mp4"
+      - delay: "00:00:02"
+      - service: shell_command.extract_clip_frame
+        data:
+          cam: "{{ cam }}"
+      - delay: "00:00:01"
+      - service: homeassistant.update_entity
+        target:
+          entity_id: "{{ clipframe_entity }}"
+      - delay: "00:00:01"
+      - service: image_processing.scan
+        target:
+          entity_id: "{{ scan_entity }}"
+  - {
+      alias: "AI Object Detected Notify",
+      description: "Notifies and fires an event when CodeProject.AI detects a person, vehicle, or animal",
+      mode: single,
+      trigger:
+        [{ platform: event, event_type: codeproject_ai.object_detected }],
+      condition: [],
+      action:
+        [
+          {
+            variables:
+              {
+                camera_key: "{{ trigger.event.data.entity_id.split('.')[1] | replace('codeproject_ai_object_', '') | replace('_clipframe','') }}",
+                camera_name: "{{ trigger.event.data.entity_id.split('.')[1] | replace('codeproject_ai_object_', '') | replace('_clipframe', '') | replace('301_', '') | replace('_', ' ') | title }}",
+                obj_name: "{{ trigger.event.data.name }}",
+                obj_type: "{{ trigger.event.data.object_type }}",
+                obj_confidence: "{{ trigger.event.data.confidence }}",
+                snap_url: "{{ ('/local/' + trigger.event.data.saved_file.split('/www/')[-1]) if trigger.event.data.saved_file else '' }}",
+                tap_url: "/home/areas-{{ trigger.event.data.entity_id.split('.')[1] | replace('codeproject_ai_object_', '') }}",
+              },
+          },
+          {
+            event: hcc_ai_detection,
+            event_data:
+              {
+                camera: "{{ camera_name }}",
+                label: "{{ obj_name }}",
+                object_type: "{{ obj_type }}",
+                confidence: "{{ obj_confidence }}",
+              },
+          },
+          {
+            condition: template,
+            value_template: "{{ not (states('input_datetime.hcc_ai_mute_' ~ camera_key) not in ['unknown','unavailable',none] and (states('input_datetime.hcc_ai_mute_' ~ camera_key) | as_datetime | as_local > now())) }}",
+          },
+          {
+            choose:
+              [
+                {
+                  conditions:
+                    [
+                      {
+                        condition: template,
+                        value_template: "{{ obj_type == 'person' }}",
+                      },
+                    ],
+                  sequence:
+                    [
+                      {
+                        service: notify.mobile_app_jeffs_iphone,
+                        data:
+                          {
+                            title: "👤 Person at",
+                            message: "{{ camera_name }} — person detected",
+                            data:
+                              {
+                                push:
+                                  {
+                                    interruption-level: time-sensitive,
+                                    sound:
+                                      {
+                                        name: default,
+                                      },
+                                  },
+                                tag: "ai-person-{{ camera_name }}",
+                                image: "{{ snap_url }}",
+                                url: "{{ tap_url }}",
+                                actions:
+                                  [
+                                    {
+                                      action: "MUTE_CAM_{{ camera_key }}",
+                                      title: "🔇 Mute 15 min",
+                                    },
+                                  ],
+                              },
+                          },
+                      },
+                    ],
+                },
+                {
+                  conditions:
+                    [
+                      {
+                        condition: template,
+                        value_template: "{{ obj_type == 'vehicle' }}",
+                      },
+                    ],
+                  sequence:
+                    [
+                      {
+                        service: notify.mobile_app_jeffs_iphone,
+                        data:
+                          {
+                            title: "🚗 Vehicle detected",
+                            message: "{{ camera_name }} — {{ obj_name }} detected",
+                            data:
+                              {
+                                push: { interruption-level: time-sensitive },
+                                tag: "ai-vehicle-{{ camera_name }}",
+                                image: "{{ snap_url }}",
+                                url: "{{ tap_url }}",
+                                actions:
+                                  [
+                                    {
+                                      action: "MUTE_CAM_{{ camera_key }}",
+                                      title: "🔇 Mute 15 min",
+                                    },
+                                  ],
+                              },
+                          },
+                      },
+                    ],
+                },
+                {
+                  conditions:
+                    [
+                      {
+                        condition: template,
+                        value_template: "{{ obj_type == 'animal' }}",
+                      },
+                    ],
+                  sequence:
+                    [
+                      {
+                        service: notify.mobile_app_jeffs_iphone,
+                        data:
+                          {
+                            title: "🐾 Animal spotted",
+                            message: "{{ camera_name }} — {{ obj_name }} spotted",
+                            data:
+                              {
+                                push: { interruption-level: time-sensitive },
+                                tag: "ai-animal-{{ camera_name }}",
+                                image: "{{ snap_url }}",
+                                url: "{{ tap_url }}",
+                                actions:
+                                  [
+                                    {
+                                      action: "MUTE_CAM_{{ camera_key }}",
+                                      title: "🔇 Mute 15 min",
+                                    },
+                                  ],
+                              },
+                          },
+                      },
+                    ],
+                },
+              ],
+          },
+        ],
+    }
+  - {
+      alias: "AI Notify Mute Action",
+      description: "Mutes a camera's AI push notifications for 15 minutes when the notification action button is tapped",
+      mode: single,
+      trigger:
+        [{ platform: event, event_type: mobile_app_notification_action }],
+      condition:
+        [
+          {
+            condition: template,
+            value_template: "{{ trigger.event.data.action.startswith('MUTE_CAM_') }}",
+          },
+        ],
+      action:
+        [
+          {
+            variables:
+              {
+                cam: "{{ trigger.event.data.action.replace('MUTE_CAM_', '') }}",
+              },
+          },
+          {
+            service: input_datetime.set_datetime,
+            target: { entity_id: "input_datetime.hcc_ai_mute_{{ cam }}" },
+            data:
+              {
+                datetime: "{{ (now() + timedelta(minutes=15)).strftime('%Y-%m-%d %H:%M:%S') }}",
+              },
+          },
+        ],
+    }
+  - {
+      alias: "AI Show Camera on Fire TV",
+      description: "Pops the alerting camera on the Fire TV when AI detects a person or vehicle, unless muted",
+      initial_state: false,
+      mode: queued,
+      max: 20,
+      trigger:
+        [{ platform: event, event_type: codeproject_ai.object_detected }],
+      variables:
+        {
+          camera_key: "{{ trigger.event.data.entity_id.split('.')[1] | replace('codeproject_ai_object_', '') | replace('_clipframe','') }}",
+        },
+      condition:
+        [
+          {
+            condition: template,
+            value_template: "{{ trigger.event.data.object_type in ['person','vehicle'] }}",
+          },
+          {
+            condition: template,
+            value_template: "{{ not (states('input_datetime.hcc_ai_mute_' ~ camera_key) not in ['unknown','unavailable', none] and (states('input_datetime.hcc_ai_mute_' ~ camera_key) | as_datetime | as_local > now())) }}",
+          },
+        ],
+      action:
+        [
+          {
+            service: androidtv.adb_command,
+            target: { entity_id: media_player.fire_tv_viewing_room },
+            data: { command: "cmd media_session dispatch pause" },
+          },
+          {
+            service: androidtv.adb_command,
+            target: { entity_id: media_player.fire_tv_viewing_room },
+            data:
+              {
+                command: 'am start -a android.intent.action.VIEW -d "http://192.168.1.66:8123{{ (''/local/'' + trigger.event.data.saved_file.split(''/www/'')[-1]) if trigger.event.data.saved_file else state_attr(''camera.'' ~ camera_key, ''entity_picture'') }}"',
+              },
+          },
+          { delay: { seconds: 8 } },
+          {
+            service: androidtv.adb_command,
+            target: { entity_id: media_player.fire_tv_viewing_room },
+            data: { command: "input keyevent 3" },
+          },
+          { delay: { seconds: 1 } },
+          {
+            service: androidtv.adb_command,
+            target: { entity_id: media_player.fire_tv_viewing_room },
+            data: { command: "cmd media_session dispatch play" },
+          },
+        ],
+    }
+  - {
+      alias: "AI Arrival Suppression",
+      description: "Mutes AI camera alerts for ~10 min when Jeff or Angela arrives home, so walking in the door doesn't trigger camera alerts",
+      mode: parallel,
+      trigger:
+        [
+          {
+            platform: state,
+            entity_id: [person.jeff_loewen, person.angela_loewen],
+            from: "not_home",
+            to: "home",
+          },
+        ],
+      action:
+        [
+          {
+            repeat:
+              {
+                for_each:
+                  [
+                    "301_backyard",
+                    "301_driveway",
+                    "301_front_doorbell",
+                    "front_right",
+                    "back_left",
+                    "garage",
+                  ],
+                sequence:
+                  [
+                    {
+                      service: input_datetime.set_datetime,
+                      target:
+                        {
+                          entity_id: "input_datetime.hcc_ai_mute_{{ repeat.item }}",
+                        },
+                      data:
+                        {
+                          datetime: "{{ (now() + timedelta(minutes=10)).strftime('%Y-%m-%d %H:%M:%S') }}",
+                        },
+                    },
+                  ],
+              },
+          },
+        ],
+    }
+  - {
+      alias: "Angela Almost Home",
+      description: "Notifies Jeff when Angela enters the 10-mile Almost Home zone",
+      trigger:
+        [
+          {
+            platform: zone,
+            entity_id: person.angela_loewen,
+            zone: zone.almost_home,
+            event: enter,
+          },
+          {
+            platform: numeric_state,
+            entity_id: person.angela_loewen,
+            value_template: "{{ distance('zone.home', 'person.angela_loewen') }}",
+            below: 10,
+          },
+          {
+            platform: zone,
+            entity_id: device_tracker.gle_350_device_tracker,
+            zone: zone.almost_home,
+            event: enter,
+          },
+        ],
+      action:
+        [
+          {
+            service: notify.mobile_app_jeffs_iphone,
+            data:
+              {
+                title: "Angela's on her way",
+                message: "Angela is about 10 minutes out",
+              },
+          },
+        ],
+    }
+  - alias: "Blink Fast Motion Poll"
+    description: "Forces a Blink refresh every 30s so AI alerts aren't delayed by the default 5min poll"
+    mode: single
+    trigger:
+      - platform: time_pattern
+        seconds: "/10"
+    action:
+      - service: homeassistant.update_entity
+        target:
+          entity_id:
+            - binary_sensor.301_driveway_motion
+            - binary_sensor.front_right_motion
+            - binary_sensor.back_left_motion
+            - binary_sensor.301_backyard_motion
+            - binary_sensor.garage_motion
+            - binary_sensor.301_front_doorbell_motion
+script:
+  hcc_good_night:
+    alias: "HCC — Good Night"
+    icon: mdi:weather-night
+    sequence:
+      - service: light.turn_off
+        target: { entity_id: all }
+      - service: persistent_notification.create
+        data:
+          title: "🌙 Good Night"
+          message: "HCC locked down at {{ now().strftime('%I:%M %p') }}"
+  hcc_resume_fire_tv:
+    alias: "HCC — Resume Fire TV Show"
+    icon: mdi:play-circle
+    sequence:
+      - service: androidtv.adb_command
+        target: { entity_id: media_player.fire_tv_viewing_room }
+        data: { command: "cmd media_session dispatch play" }
+
+  hcc_skip_commercial:
+    alias: "HCC — Skip Commercial Break"
+    icon: mdi:fast-forward
+    sequence:
+      - service: androidtv.adb_command
+        target: { entity_id: media_player.fire_tv_viewing_room }
+        data: { command: "input keyevent 90" }
+      - delay: { milliseconds: 1200 }
+      - service: androidtv.adb_command
+        target: { entity_id: media_player.fire_tv_viewing_room }
+        data: { command: "input keyevent 126" }
+  hcc_open_sling:
+    {
+      alias: "HCC — Open Sling TV",
+      icon: mdi:television-play,
+      sequence:
+        [
+          {
+            service: androidtv.adb_command,
+            target: { entity_id: media_player.fire_tv_viewing_room },
+            data:
+              {
+                command: "monkey -p com.sling -c android.intent.category.LAUNCHER 1",
+              },
+          },
+        ],
+    }
+  hcc_check_current_app:
+    {
+      alias: "HCC — Check Current TV App",
+      icon: mdi:television-guide,
+      sequence:
+        [
+          {
+            service: androidtv.adb_command,
+            target: { entity_id: media_player.fire_tv_viewing_room },
+            data:
+              {
+                command: "dumpsys activity activities | grep mResumedActivity",
+              },
+          },
+        ],
+    }
+input_datetime:
+  hcc_ai_mute_301_backyard:
+    name: "AI Mute - Backyard"
+    has_date: true
+    has_time: true
+    initial: "2020-01-01 00:00:00"
+  hcc_ai_mute_301_driveway:
+    name: "AI Mute - Driveway"
+    has_date: true
+    has_time: true
+    initial: "2020-01-01 00:00:00"
+  hcc_ai_mute_301_front_doorbell:
+    name: "AI Mute - Front Doorbell"
+    has_date: true
+    has_time: true
+    initial: "2020-01-01 00:00:00"
+  hcc_ai_mute_front_right:
+    name: "AI Mute - Front Right"
+    has_date: true
+    has_time: true
+    initial: "2020-01-01 00:00:00"
+  hcc_ai_mute_back_left:
+    name: "AI Mute - Back Left"
+    has_date: true
+    has_time: true
+    initial: "2020-01-01 00:00:00"
+  hcc_ai_mute_garage:
+    name: "AI Mute - Garage"
+    has_date: true
+    has_time: true
+    initial: "2020-01-01 00:00:00"
+
+rest:
+  - resource: !secret weather_pws_resource_url
+    scan_interval: 300
+    sensor:
+      - name: Backyard Temperature
+        unique_id: hcc_backyard_temperature
+        value_template: "{{ value_json.observations[0].imperial.temp | round(0) }}"
+        unit_of_measurement: "°F"
+        device_class: temperature
+      - name: Backyard Feels Like
+        unique_id: hcc_backyard_feels_like
+        value_template: "{{ value_json.observations[0].imperial.heatIndex | round(0) }}"
+        unit_of_measurement: "°F"
+        device_class: temperature
+      - name: Backyard Humidity
+        unique_id: hcc_backyard_humidity
+        value_template: "{{ value_json.observations[0].humidity | round(0) }}"
+        unit_of_measurement: "%"
+        device_class: humidity
+      - name: Backyard Wind
+        unique_id: hcc_backyard_wind
+        value_template: "{{ value_json.observations[0].imperial.windSpeed | round(0) }}"
+        unit_of_measurement: "mph"
+
+utility_meter:
+  water_month:
+    source: sensor.water_gallons
+    name: Water Month
+    cycle: monthly
+  gas_month:
+    source: sensor.gas_ccf
+    name: Gas Month
+    cycle: monthly
+
+sensor:
+  - platform: derivative
+    source: sensor.water_gallons
+    name: "Water Flow"
+    unique_id: hcc_water_flow
+    unit_time: min
+    time_window: "00:05:00"
