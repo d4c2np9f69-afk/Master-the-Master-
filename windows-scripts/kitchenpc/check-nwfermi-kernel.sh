@@ -1,0 +1,37 @@
+#!/bin/bash
+# KitchenPC touchscreen: is the nw-fermi kernel module built for the kernel it is filed under?
+#
+# Why it exists (2026-11-06): the touchscreen died at the 11-04 4:04 PM reboot. Unattended-upgrades
+# installed kernel 7.0.0-42 on 11-03 06:09 while 7.0.0-38 was RUNNING; the driver's Makefile picks
+# headers with $(shell uname -r) and dkms.conf never overrode it, so DKMS compiled against 38 and
+# filed the result under 42 (vermagic 7.0.0-38 in /lib/modules/7.0.0-42-generic). On boot into 42 the
+# kernel refused it ("nw_fermi: disagrees about version of symbol module_layout"), no input device,
+# no daemon, no touch. DKMS reported "installed" the whole time. This repeats on EVERY kernel update
+# unless dkms.conf passes KERNEL_SOURCE=$kernel_source_dir.
+#
+# Checks: (1) every installed nw-fermi module's vermagic matches its kernel directory,
+#         (2) dkms.conf builds against the target kernel, not the running one,
+#         (3) the running kernel has it loaded.
+# usage: bash check-nwfermi-kernel.sh      exit 0 = all pass
+ok=0; fail=0
+pass() { ok=$((ok+1)); echo "  ok    $*"; }
+bad()  { fail=$((fail+1)); echo "  FAIL  $*"; }
+
+found=0
+for f in /lib/modules/*/updates/dkms/nw-fermi.ko*; do
+  [ -e "$f" ] || continue; found=1
+  k=$(echo "$f" | cut -d/ -f4)
+  vm=$(modinfo -F vermagic "$f" 2>/dev/null | awk '{print $1}')
+  if [ "$vm" = "$k" ]; then pass "$k: module built for $vm"
+  else bad "$k: module built for '$vm' (kernel will refuse it)"; fi
+done
+[ $found = 1 ] || bad "no nw-fermi module installed for any kernel"
+
+conf=/usr/src/nwfermi-0.7.0.1/dkms.conf
+if grep -q 'KERNEL_SOURCE=' "$conf" 2>/dev/null; then pass "dkms.conf passes KERNEL_SOURCE (builds for the target kernel)"
+else bad "dkms.conf lets the Makefile use 'uname -r' (builds for the RUNNING kernel)"; fi
+
+if lsmod | grep -q '^nw_fermi'; then pass "loaded in running kernel $(uname -r)"
+else bad "not loaded in running kernel $(uname -r)"; fi
+
+echo; echo "$ok passed, $fail failed"; [ $fail = 0 ]

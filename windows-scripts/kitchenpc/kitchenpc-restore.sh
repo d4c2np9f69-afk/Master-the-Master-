@@ -36,6 +36,10 @@ echo "=== KitchenPC restore on $(hostname) as $U ==="
 if ! dkms status 2>/dev/null | grep -q 'nwfermi.*installed'; then
   rm -rf "$H/nwfermi" && git clone -q --depth 1 https://github.com/glorang/nwfermi.git "$H/nwfermi"
   sudo cp -r "$H/nwfermi/usr/src/nwfermi-0.7.0.1" /usr/src/
+  # 2026-11-06: upstream's Makefile builds against $(shell uname -r) = the RUNNING kernel, so a kernel
+  # update built a module for the OLD kernel and filed it under the new one - touch died at the next
+  # reboot (11-04) while dkms said "installed". Make DKMS pass the TARGET kernel's headers.
+  sudo sed -i 's#^MAKE\[0\]="make module #MAKE[0]="make module KERNEL_SOURCE=$kernel_source_dir #' /usr/src/nwfermi-0.7.0.1/dkms.conf
   sudo dkms add -m nwfermi -v 0.7.0.1 >/dev/null 2>&1
   sudo dkms build -m nwfermi -v 0.7.0.1 >/dev/null 2>&1
   sudo dkms install -m nwfermi -v 0.7.0.1 >/dev/null 2>&1
@@ -97,6 +101,8 @@ fi
 sudo usermod -a -G input "$U"
 sudo systemctl daemon-reload; sudo udevadm control --reload-rules; sudo udevadm trigger --subsystem-match=usb --action=add
 say "touchscreen driver (3 pieces)" "dkms:$(dkms status 2>/dev/null | grep -c 'nwfermi.*installed') xorg:$(ls /usr/lib/xorg/modules/input/nextwindow_drv.so 2>/dev/null | wc -l)"
+# "dkms installed" is NOT proof - it said that through 11-04..11-06 while touch was dead. Check vermagic.
+bash "$(dirname "$0")/check-nwfermi-kernel.sh" || echo "!! TOUCH DRIVER CHECK FAILED - see output above"
 cd "$H"
 
 # ---- 2. AUDIO (#203 final) ---------------------------------------------------------------
