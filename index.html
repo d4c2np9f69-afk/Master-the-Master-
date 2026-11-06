@@ -3341,7 +3341,7 @@ html.light .emg-amber {background:rgba(146,64,14,.06); border-color:rgba(146,64,
 
   <div class="card cat-sensor">
     <div class="card-title">&#128225; Engine Hour Sensor Data</div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">Pulls engine hours, battery, RPM, GPS distance, and mowing speed from the WiFi/GPS sensor. Hours only ever move forward.</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">Pulls engine hours, battery, RPM, GPS distance, and mowing speed from the WiFi/GPS sensor. Hours = your last hour-meter reading plus the engine time the box has counted since. A reading entered on any device updates every device.</div>
     <div class="sensor-grid">
       <div class="sensor-row"><span>&#9889; Battery Voltage</span><span id="sensorBatt">&mdash;</span></div>
       <div id="sensorBatteryAlert" class="sensor-alert">Battery status waiting for sensor</div>
@@ -5069,6 +5069,23 @@ var logFilter  = 'ALL';
 
 function hc(v){ return v>=90?'var(--ok)':v>=75?'var(--warn)':'var(--bad)'; }
 
+// Mows typed into this device's log, the 2 from before the app, and every mow the box recorded
+// that no typed entry already covers (within 36 h). The wall iPad never typed a mow, so before
+// 2026-11-05 it was stuck at 3 (the 2 + the built-in Mow #3). A box record under 6 minutes of engine time is a start or an
+// idle test, not a mow (08-12 was Jeff calibrating in the garage, 3 min).
+function totalMowCount(){
+  var typed = S.log.filter(function(x){ return x.type==='mow'; });
+  var n = typed.length + 2;
+  var box = Array.isArray(S.sensorMowHist) ? S.sensorMowHist : [];
+  for(var i=0;i<box.length;i++){
+    var e=box[i]; if(!(typeof e.run==='number' && e.run>=0.1)) continue;
+    var t=Date.parse(e.date); if(!isFinite(t)) continue;
+    var dup=typed.some(function(x){ var u=Date.parse(x.date); return isFinite(u) && Math.abs(u-t)<=36*3600*1000; });
+    if(!dup) n++;
+  }
+  return n;
+}
+
 function updateDashboard(){
   var h = calcHealth();
   var hrs = S.hours;
@@ -5119,8 +5136,7 @@ function updateDashboard(){
         +'</div>';
     }).join('');
   }
-  var mows = S.log.filter(function(x){ return x.type==='mow'; }).length + 2;
-  el=document.getElementById('totalMows'); if(el) el.textContent=mows;
+  el=document.getElementById('totalMows'); if(el) el.textContent=totalMowCount();
 
   var hg=document.getElementById('healthGrid');
   if(hg){
@@ -7975,7 +7991,7 @@ function showModal(type, preKey){
       +'<div class="mbtns"><button class="mbtn primary" onclick="saveMow()">&#128190; Save Mow</button><button class="mbtn secondary" onclick="closeModal()">Cancel</button></div>';
   } else if(type==='hours'){
     mc.innerHTML='<div class="modal-title">&#9201; MASTER HOUR CALIBRATION</div>'
-      +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">Set the <b>true</b> engine hours from the mower&rsquo;s physical hour meter. This is the master override &mdash; it sets the hours <b>everywhere</b> and re-syncs the sensor baseline so future hours stay correct. Use it any time the sensor misses a mow.</div>'
+      +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">Set the <b>true</b> engine hours from the mower&rsquo;s physical hour meter. It is saved to the server, so your phone, the wall iPad and every other device show the same number, and the box&rsquo;s engine time is added on top from here. Use it any time the app and the meter disagree.</div>'
       +'<label class="mlabel">True Hour Meter Reading</label>'
       +'<input class="minput" id="mi-newhrs" type="number" step="0.1" inputmode="decimal" value="'+S.hours.toFixed(1)+'">'
       +'<div style="font-size:10px;color:var(--muted);margin-bottom:8px">App currently shows: '+S.hours.toFixed(1)+' hrs &middot; read the real number off the mower and enter it here'+(S.hoursCalibratedAt?(' &middot; last set by hand '+new Date(S.hoursCalibratedAt).toLocaleDateString()):'')+'</div>'
@@ -8055,6 +8071,31 @@ function saveMow(){
   S.log.unshift({id:uid(),date:new Date().toISOString().slice(0,10),hrs:n,type:'mow',title:'Mow #'+num,note:noteTxt,gain:(mi>0?'&#128694; +'+mi.toFixed(1)+' mi':''),miles:mi});
   S.miles=(S.miles||0)+mi;
   S.hours=n; if(!save()) return; closeModal(); renderAll();
+  pushMeterReading(n);
+}
+
+// A meter reading typed into the app goes to the server (functions/api/hours.js set_hours), so
+// every device shows the same hours. Jeff 2026-11-05: "The hours say 14.5 instead of 15.5" -
+// each device used to keep its own baseline. Until the server takes it the reading is held as
+// pending, so the next sync neither overwrites it nor forgets to retry.
+function pushMeterReading(n, quiet){
+  if(typeof n!=='number' || !isFinite(n)) return;
+  if(!S.meterPending || S.meterPending.meter!==n){ S.meterPending={meter:n, at:Date.now()}; save(); }
+  fetch('/api/hours',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({__cmd:'set_hours', meter:n, ctrl_token:getCtrlToken()})})
+    .then(function(r){ return r.json().then(function(j){ return {status:r.status, j:j}; }); })
+    .then(function(x){
+      if(x.j && x.j.ok){
+        if(S.meterPending && S.meterPending.meter===n) delete S.meterPending;
+        if(x.j.meter_cal && x.j.meter_cal.at){ var ca=Date.parse(x.j.meter_cal.at); if(isFinite(ca)) S.hoursCalibratedAt=ca; }
+        save();
+        if(!quiet && typeof toast==='function') toast('✓ '+n.toFixed(1)+' hrs saved — every device shows it now');
+      } else if(!quiet && typeof toast==='function'){
+        var why=(x.j && x.j.error)||('HTTP '+x.status);
+        toast('⚠ Saved on this device only ('+(why==='unauthorised'?'log in again to save it for every device':why)+') — will retry');
+      }
+    })
+    .catch(function(){ if(!quiet && typeof toast==='function') toast('⚠ Saved on this device only (offline) — will retry'); });
 }
 
 function saveHours(){
@@ -8069,7 +8110,7 @@ function saveHours(){
   S.hours = n;
   S.hoursCalibratedAt = Date.now();
   if(!save()) return; closeModal(); renderAll();
-  if(typeof toast==='function') toast('✓ Master hours set to '+n.toFixed(1)+' hrs');
+  pushMeterReading(n);
 }
 
 // Match a free-text custom title to a service RULE by keywords
@@ -8621,10 +8662,24 @@ setInterval(loadAlerts, 5*60*1000);
         if(typeof S!=='undefined' && typeof d.hours === 'number') S.lastSensorHours = sensorHrs;
         // Read the baseline LIVE each sync (calibration can change S.hoursBaseline).
         var baseHrs = (typeof S!=='undefined' && typeof S.hoursBaseline==='number') ? S.hoursBaseline : MOWER_BASELINE;
-        var total = Math.round((baseHrs + sensorHrs)*10)/10;
+        // The server keeps Jeff's last meter reading and adds the box's engine time since
+        // (meter_hours, functions/api/hours.js). That is the same number on every device and
+        // it is allowed to go DOWN: the meter is the truth. The per-device baseline below is
+        // only the fallback for a server that does not send it.
+        var meterHrs = (typeof d.meter_hours==='number' && isFinite(d.meter_hours)) ? d.meter_hours : null;
+        var pending = (typeof S!=='undefined' && S.meterPending) ? S.meterPending : null;
+        if(pending && meterHrs!==null && d.meter_cal && Date.parse(d.meter_cal.at) >= pending.at){ delete S.meterPending; pending=null; }
+        if(pending){ pushMeterReading(pending.meter, true); meterHrs=null; }
+        if(meterHrs!==null && typeof S!=='undefined' && d.meter_cal && d.meter_cal.at){
+          var calAt=Date.parse(d.meter_cal.at); if(isFinite(calAt)) S.hoursCalibratedAt=calAt;
+        }
+        if(typeof S!=='undefined' && Array.isArray(d.history)){
+          S.sensorMowHist = d.history.map(function(e){ return {date:e.date, run:(typeof e.hours_mow==='number'?e.hours_mow:null)}; });
+        }
+        var total = meterHrs!==null ? Math.round(meterHrs*10)/10 : Math.round((baseHrs + sensorHrs)*10)/10;
         var changed = false;
-        // Never move hours backward; only advance when the sensor total is higher.
-        if(typeof S!=='undefined' && total > S.hours){
+        // Without a server reading: never move hours backward, only advance.
+        if(typeof S!=='undefined' && (meterHrs!==null ? total !== S.hours : (!pending && total > S.hours))){
           S.hours = total;
           if(typeof save==='function') save();
           if(typeof renderAll==='function') renderAll();

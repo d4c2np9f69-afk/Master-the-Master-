@@ -103,6 +103,161 @@ const CMDS_ALLOWED = ['zero_tilt', 'clear_track', 'flush_buffer', 'reboot', 'ota
 // beats a trip to the Cloudflare dashboard every time the map needs resetting.
 const SERVER_CMDS_ALLOWED = ['clear_coverage'];
 
+// ---- THE HOUR METER, AS JEFF READS IT ------------------------------------------------
+// Jeff, 2026-11-05: "The hours say 14.5 instead of 15.5" / "Make sure the app all matches
+// the box". The app used to compute hours on each device from a baseline stored in that
+// device's localStorage, so his phone, the wall iPad and a fresh browser could each show a
+// different number, and none of them knew what he last read off the mower.
+//
+// The meter is the truth; the box is the odometer since. The calibration lives HERE, once:
+//   meter_hours = meter (what Jeff read) + box hours counted since he read it
+// Every device shows the same number, and a new reading from any device updates them all.
+// The box is known to miss engine time on some starts (#269), so this can drift low between
+// readings; a new reading from Set Hours / Log Mow puts it back on the meter.
+const METER_CAL_KEY = 'meter_cal';
+// Jeff's own reading, 2026-11-05T20:49:22Z (2:49 PM CT): 15.5 on the meter while the box
+// held 7.7583. Used only until the first reading is saved through set_hours.
+const SEED_METER_CAL = { meter: 15.5, box: 7.7583, at: '2026-11-05T20:49:22.000Z', by: 'jeff_message' };
+const METER_MAX = 100000;
+
+async function loadMeterCal(kv) {
+  try {
+    const raw = kv ? await kv.get(METER_CAL_KEY) : null;
+    const c = raw ? JSON.parse(raw) : null;
+    if (c && typeof c.meter === 'number' && typeof c.box === 'number') return c;
+  } catch (_) {}
+  return SEED_METER_CAL;
+}
+
+// A box with wiped flash restarts its count from 0; that must not take hours off the meter.
+function meterHoursFrom(cal, boxHours) {
+  if (!cal || typeof boxHours !== 'number' || !isFinite(boxHours)) return null;
+  return +(cal.meter + Math.max(0, boxHours - cal.box)).toFixed(4);
+}
+
+// set_hours is a reading, not a hardware change, so it also takes the app's family-login
+// ctrl_token (minted by auth.js, same check as climate.js). Kept to this one command: the
+// box-control commands stay on the password / maintenance token only.
+async function meterAuthorised(kv, body) {
+  if (await ctrlAuthorised(kv, body)) return true;
+  const ct = body && body.ctrl_token;
+  if (kv && typeof ct === 'string' && ct) {
+    const want = await kv.get('ctrl_token');
+    if (want && want.length >= 16 && ct === want) return true;
+  }
+  return false;
+}
+
+// ---- ONE-TIME HISTORY REPAIR, 2026-11-05 ------------------------------------------------
+// The buffered-replay bug (#267) left wrong records, all checked against sensor_log:
+//   - the 10-23 mow (box 7.0833, ended 21:58:25Z) was never recorded, and its 26 minutes
+//     were added to the 11-03 1:55 PM record, which showed 0.5083 h for a 4.5-minute run;
+//   - the 11-03 3:17 PM stretch (box 7.7583) was recorded at 2:45 PM on 11-05, when the fix
+//     went live, instead of when it ran. It started 15 min after the 2:48 PM stretch ended,
+//     so under MERGE_GAP_MIN it is part of that mow;
+//   - the 08-12 and 09-24 records carry no hours_mow at all.
+// Every value is read from sensor_log at run time, nothing is typed in, and each step checks
+// the record still looks the way it did when this was written. Runs once, on the box's next
+// upload; what it did, and what it skipped and why, are kept under the flag key.
+const HIST_REPAIR_FLAG = 'history_repair_2026_11_05';
+const BOX_HOURS_AT_INSTALL = 5.525;   // first upload, 2026-08-11 (gps_firmware_coworker_findings)
+
+function repairHistory(hist, log) {
+  const near = (a, b) => typeof a === 'number' && Math.abs(a - b) < 1e-6;
+  const isNum = (v) => typeof v === 'number' && isFinite(v);
+  const seen = (h) => log.find((r) => near(r.hours, h));
+  const endedAt = (r) => Date.parse(r.date) - Math.min(Math.max(+r.age_s || 0, 0), 86400) * 1000;
+  const idx = (h) => hist.findIndex((e) => near(e.hours_end, h));
+  const done = [], skipped = [];
+
+  // 09-24's odometer, so the 10-23 mow's distance can be measured from it.
+  const i924 = idx(6.65), r924 = seen(6.65);
+  if (i924 >= 0 && r924 && !isNum(hist[i924].dist_total_m) && isNum(r924.dist_total_m)) {
+    hist[i924].dist_total_m = r924.dist_total_m;
+    done.push('09-24 dist_total_m ' + r924.dist_total_m);
+  }
+
+  // The missing 10-23 mow.
+  const r1023 = seen(7.0833), i1103 = idx(7.1583);
+  if (idx(7.0833) >= 0) skipped.push('10-23 already recorded');
+  else if (!r1023) skipped.push('10-23: no sensor_log row with hours 7.0833');
+  else if (i1103 < 1 || !near(hist[i1103 - 1].hours_end, 6.65)) skipped.push('10-23: the record around it has changed');
+  else {
+    const prev = hist[i1103 - 1];
+    const dist = isNum(r1023.dist_total_m) && isNum(prev.dist_total_m) && r1023.dist_total_m >= prev.dist_total_m
+      ? +(r1023.dist_total_m - prev.dist_total_m).toFixed(1) : (isNum(r1023.dist_session_m) ? r1023.dist_session_m : null);
+    const v = (k) => (isNum(r1023[k]) ? r1023[k] : null);
+    hist.splice(i1103, 0, {
+      date: new Date(endedAt(r1023)).toISOString(),
+      hours_end: 7.0833,
+      hours_mow: +(7.0833 - prev.hours_end).toFixed(4),
+      rpm_peak: v('rpm_peak'), rpm_avg: v('rpm_avg'),
+      dist_session_m: v('dist_session_m'), dist_total_m: v('dist_total_m'), dist_mow_m: dist,
+      battery: v('battery'), esp_temp_f: v('esp_temp_f'), shock_events: v('shock_events'),
+      track: null,
+      repaired: HIST_REPAIR_FLAG,
+    });
+    done.push('inserted 10-23 mow ending ' + new Date(endedAt(r1023)).toISOString());
+  }
+
+  // 11-03 1:55 PM: its own run only.
+  const j1103 = idx(7.1583);
+  if (j1103 >= 1 && near(hist[j1103 - 1].hours_end, 7.0833)) {
+    const e = hist[j1103], p = hist[j1103 - 1];
+    const run = +(e.hours_end - p.hours_end).toFixed(4);
+    if (!near(e.hours_mow, run)) { done.push('11-03 1:55 PM hours_mow ' + e.hours_mow + ' -> ' + run); e.hours_mow = run; }
+    if (isNum(e.dist_total_m) && isNum(p.dist_total_m) && e.dist_total_m >= p.dist_total_m) {
+      const d = +(e.dist_total_m - p.dist_total_m).toFixed(1);
+      if (e.dist_mow_m !== d) { done.push('11-03 1:55 PM dist_mow_m -> ' + d); e.dist_mow_m = d; }
+    }
+  }
+
+  // 11-03 3:17 PM, filed under 11-05.
+  const iLate = idx(7.7583), rLate = seen(7.7583);
+  if (iLate < 1) skipped.push('7.7583: not in the record');
+  else if (!rLate) skipped.push('7.7583: no sensor_log row');
+  else if (!near(hist[iLate - 1].hours_end, 7.5333)) skipped.push('7.7583: the entry before it has changed');
+  else {
+    const e = hist[iLate], p = hist[iLate - 1];
+    const realEnd = endedAt(rLate);
+    const runMin = (e.hours_end - p.hours_end) * 60;
+    const gapMin = (realEnd - Date.parse(p.date)) / 60000 - runMin;
+    if (Math.abs(Date.parse(e.date) - realEnd) < 60000) skipped.push('7.7583 already dated correctly');
+    else if (isFinite(gapMin) && gapMin <= 20) {
+      const prevRun = isNum(p.hours_mow) ? p.hours_mow * 60 : 0;
+      p.date = new Date(realEnd).toISOString();
+      if (isNum(p.rpm_avg) && isNum(e.rpm_avg) && prevRun + runMin > 0) {
+        p.rpm_avg = Math.round((p.rpm_avg * prevRun + e.rpm_avg * runMin) / (prevRun + runMin));
+      }
+      p.rpm_peak = Math.max(+p.rpm_peak || 0, +e.rpm_peak || 0) || null;
+      p.hours_end = e.hours_end;
+      if (isNum(p.hours_mow)) p.hours_mow = +(p.hours_mow + runMin / 60).toFixed(4);
+      if (isNum(e.dist_mow_m)) p.dist_mow_m = +((+p.dist_mow_m || 0) + e.dist_mow_m).toFixed(1);
+      p.dist_session_m = e.dist_session_m; p.dist_total_m = e.dist_total_m;
+      p.battery = e.battery; p.esp_temp_f = e.esp_temp_f; p.shock_events = e.shock_events;
+      if (Array.isArray(e.track) && e.track.length) p.track = (Array.isArray(p.track) ? p.track : []).concat(e.track);
+      p.segments = (+p.segments || 1) + 1;
+      hist.splice(iLate, 1);
+      done.push('folded 7.7583 into the 11-03 mow, now ending ' + p.date);
+    } else {
+      e.date = new Date(realEnd).toISOString();
+      done.push('re-dated 7.7583 to ' + e.date);
+    }
+  }
+
+  // Any record still without its own run time.
+  for (let i = 0; i < hist.length; i++) {
+    const e = hist[i];
+    if (isNum(e.hours_mow) || !isNum(e.hours_end)) continue;
+    const before = i ? hist[i - 1].hours_end : BOX_HOURS_AT_INSTALL;
+    if (isNum(before) && e.hours_end >= before) {
+      e.hours_mow = +(e.hours_end - before).toFixed(4);
+      done.push(String(e.date || '?').slice(0, 10) + ' hours_mow ' + e.hours_mow);
+    }
+  }
+  return { hist, done, skipped };
+}
+
 function emptyCtrl() { return { cfg_rev: 0, cfg: {}, cmds: [], next_id: 1 }; }
 
 async function loadCtrl(kv) {
@@ -658,7 +813,10 @@ export async function onRequestGet({ env, request }) {
         // like a live setting. Stripping it on OUTPUT too means the lie stops the moment
         // this deploys, rather than at the next upload.
         const { secret, cfg, ...stored } = JSON.parse(raw);
-        return Response.json(redact({ ...stored, history, coverage_n, tracking_paused: paused, paused_since: pausedAt || null }));
+        const meter_cal = await loadMeterCal(kv);
+        const meter_hours = meterHoursFrom(meter_cal, stored.hours);
+        return Response.json(redact({ ...stored, history, coverage_n, tracking_paused: paused, paused_since: pausedAt || null,
+                                      meter_hours, meter_cal }));
       }
       return Response.json({
         hours: 0, lastSync: null, battery: null,
@@ -705,6 +863,24 @@ export async function onRequestPost({ request, env }) {
       await kv.put(COVERAGE_PAUSED_AT_KEY, body.value ? new Date().toISOString() : '');
     }
     return Response.json({ ok: true, paused: !!body.value });
+  }
+
+  // A meter reading from the app (Set Hours / Log Mow). See METER_CAL_KEY.
+  if (body.__cmd === 'set_hours') {
+    if (!kv) return Response.json({ ok: false, error: 'no_kv' }, { status: 503 });
+    if (!(await meterAuthorised(kv, body))) {
+      return Response.json({ ok: false, error: 'unauthorised' }, { status: 401 });
+    }
+    const meter = Number(body.meter);
+    if (body.meter === null || body.meter === '' || !isFinite(meter) || meter < 0 || meter > METER_MAX) {
+      return Response.json({ ok: false, error: 'bad_meter' }, { status: 400 });
+    }
+    let boxHours = null;
+    try { const d = JSON.parse((await kv.get('hours_data')) || 'null'); if (d && typeof d.hours === 'number') boxHours = d.hours; } catch (_) {}
+    if (boxHours === null) return Response.json({ ok: false, error: 'no_box_hours' }, { status: 409 });
+    const cal = { meter: +meter.toFixed(2), box: boxHours, at: new Date().toISOString(), by: 'app' };
+    await kv.put(METER_CAL_KEY, JSON.stringify(cal));
+    return Response.json({ ok: true, meter_cal: cal, meter_hours: meterHoursFrom(cal, boxHours) });
   }
 
   // ---- Control-channel endpoints (authorised; never sent by the sensor box) ----
@@ -894,6 +1070,18 @@ export async function onRequestPost({ request, env }) {
     } catch (_) {}
   }
 
+  if (kv) {
+    try {
+      if (!(await kv.get(HIST_REPAIR_FLAG))) {
+        const histRaw = await kv.get(MOW_HISTORY_KEY);
+        const logRaw = await kv.get(SENSOR_LOG_KEY);
+        const r = repairHistory(histRaw ? JSON.parse(histRaw) : [], logRaw ? JSON.parse(logRaw) : []);
+        if (r.done.length) await kv.put(MOW_HISTORY_KEY, JSON.stringify(r.hist));
+        await kv.put(HIST_REPAIR_FLAG, JSON.stringify({ at: new Date().toISOString(), done: r.done, skipped: r.skipped }));
+      }
+    } catch (_) {}
+  }
+
   let prev = null;
   if (kv) {
     try {
@@ -1034,7 +1222,7 @@ export async function onRequestPost({ request, env }) {
       // merge-gap arithmetic below, which is all timestamp differences. Clamped to a
       // day so a garbage age can never date a record into the distant past.
       const ageS = Math.min(Math.max(num(body.age_s) || 0, 0), 86400);
-      const readAt = Date.now() - ageS * 1000;
+      let readAt = Date.now() - ageS * 1000;
       // Does this reading carry engine time the history has never recorded? For a
       // labelled mow_end that is irrelevant — it records either way. For an
       // unlabelled one it is the ONLY evidence that a mow happened, and it is what
@@ -1042,6 +1230,20 @@ export async function onRequestPost({ request, env }) {
       const lastEnd = last ? num(last.hours_end) : null;
       const unrecordedRun = (hoursEnd !== null && lastEnd !== null) ? hoursEnd - lastEnd : null;
       const recordThis = isMowEnd || (unrecordedRun !== null && unrecordedRun >= MIN_LOST_MOW_H);
+      // A recovered mow is dated by when its hours FIRST reached the server, not by the upload
+      // that noticed it. 2026-11-05: the 11-03 3:17 PM stretch arrived on 11-03, was missed, and
+      // was then recorded at 2:45 PM on 11-05 when the recovery went live: two days late, and
+      // too late for MERGE_GAP_MIN to see it was part of the 11-03 mow.
+      if (recordThis && !isMowEnd) {
+        try {
+          const logRaw = await kv.get(SENSOR_LOG_KEY);
+          const first = (logRaw ? JSON.parse(logRaw) : []).find((r) => typeof r.hours === 'number' && Math.abs(r.hours - hoursEnd) < 1e-6);
+          if (first) {
+            const t = Date.parse(first.date) - Math.min(Math.max(+first.age_s || 0, 0), 86400) * 1000;
+            if (isFinite(t) && t < readAt) readAt = t;
+          }
+        } catch (_) {}
+      }
       // 2026-09-24: the box's dist_session_m restarts whenever the engine restarts, so a
       // gas/water stop made "This Mow" report only the last stretch (376 m of a 1,477 m
       // mow). The lifetime odometer does not restart — the difference from the previous

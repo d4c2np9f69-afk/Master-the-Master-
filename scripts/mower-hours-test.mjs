@@ -823,5 +823,132 @@ console.log('\n-- the 1.5.0 tunables can be set --');
   console.log(`  note: ${big.length}-point file (~6 km mow), first request on a cold JIT: ${(performance.now() - t0).toFixed(1)} ms in Node, ${await nCells(kv)} cells`);
 }
 
+
+// ---- 2026-11-05: the meter Jeff reads, and the mow record the box actually made ----------
+// Jeff: "The hours say 14.5 instead of 15.5" / "Make sure the app all matches the box".
+// Fixtures are the real 11-05 records and sensor_log rows with every GPS point removed
+// (yard coordinates never go in this public repo); tracks are replaced by counts' worth of
+// dummy points far from any real place.
+const fakeTrk = (n) => Array.from({ length: n }, (_, i) => [10 + i * 1e-5, 20]);
+const REAL_HIST = () => [
+  { date: '2026-08-12T00:35:27.411Z', hours_end: 5.575, rpm_peak: 3740, rpm_avg: 3725, dist_session_m: 11, battery: 11.21, esp_temp_f: 141, shock_events: 0, track: fakeTrk(4) },
+  { date: '2026-09-24T20:53:41.813Z', hours_end: 6.65, rpm_peak: 3650, rpm_avg: 3555, dist_session_m: 376, battery: 12.66, esp_temp_f: 154, shock_events: 0, track: fakeTrk(11) },
+  { date: '2026-11-03T19:55:21.535Z', hours_end: 7.1583, hours_mow: 0.5083, rpm_peak: 3680, rpm_avg: 3630, dist_session_m: 135, dist_total_m: 8616, dist_mow_m: 135, battery: 12.43, esp_temp_f: 137, shock_events: 0, track: fakeTrk(9) },
+  { date: '2026-11-03T20:48:30.020Z', hours_end: 7.5333, hours_mow: 0.375, rpm_peak: 3620, rpm_avg: 3543, dist_session_m: 49, dist_total_m: 9195, dist_mow_m: 579, battery: 12.72, esp_temp_f: 154, shock_events: 0, track: fakeTrk(8) },
+  { date: '2026-11-05T20:45:07.929Z', hours_end: 7.7583, hours_mow: 0.225, rpm_peak: 3650, rpm_avg: 3561, dist_session_m: 346, dist_total_m: 9541, dist_mow_m: 346, battery: 13.45, esp_temp_f: 123, shock_events: 0, track: fakeTrk(1) },
+];
+const REAL_LOG = () => [
+  { date: '2026-09-17T13:19:44.514Z', hours: 5.575, source: 'heartbeat', dist_total_m: 6338 },
+  { date: '2026-09-24T20:53:42.006Z', hours: 6.65, source: 'mow_end', dist_total_m: 7815, dist_session_m: 376, rpm_peak: 3650, rpm_avg: 3555 },
+  { date: '2026-10-23T22:13:25.482Z', hours: 7.0833, source: 'buffered', age_s: 900, dist_total_m: 8481, dist_session_m: 666, rpm_peak: 3800, rpm_avg: 3590, battery: 12.49, esp_temp_f: 153, shock_events: 0 },
+  { date: '2026-10-23T22:13:26.000Z', hours: 7.0833, source: 'buffered', age_s: 840, dist_total_m: 8481 },
+  { date: '2026-11-03T19:55:21.985Z', hours: 7.1583, source: 'mow_end', dist_total_m: 8616, dist_session_m: 135 },
+  { date: '2026-11-03T20:48:30.456Z', hours: 7.5333, source: 'mow_end', dist_total_m: 9195, dist_session_m: 49 },
+  { date: '2026-11-03T21:32:07.143Z', hours: 7.7583, source: 'buffered', age_s: 900, dist_total_m: 9541, dist_session_m: 346, rpm_peak: 3650, rpm_avg: 3561 },
+  { date: '2026-11-05T20:30:00.000Z', hours: 7.7583, source: 'heartbeat', dist_total_m: 9541 },
+];
+const boxNow = { source: 'heartbeat', engine_running: false, fw: '1.4.0', hours: 7.7583, dist_total_m: 9541, battery: 13.4, track: [] };
+const near = (a, b, tol = 1e-3) => typeof a === 'number' && Math.abs(a - b) < tol;
+
+console.log('\n-- the hour meter: one number on every device (Jeff 11-05) --');
+{
+  let kv = mockKV({ hours_data: JSON.stringify(boxNow) });
+  let j = await (await get(kv)).json();
+  check('with no reading saved yet, the app gets Jeff\'s 11-05 reading: 15.5', j.meter_hours === 15.5, `meter_hours ${j.meter_hours}`);
+  kv = mockKV({ hours_data: JSON.stringify({ ...boxNow, hours: 8.2583 }) });
+  j = await (await get(kv)).json();
+  check('half an hour of box time later it reads 16.0', near(j.meter_hours, 16.0), `meter_hours ${j.meter_hours}`);
+  kv = mockKV({ hours_data: JSON.stringify({ ...boxNow, hours: 0.1 }) });
+  j = await (await get(kv)).json();
+  check('a box whose count restarted from 0 never takes hours off the meter', j.meter_hours === 15.5, `meter_hours ${j.meter_hours}`);
+
+  const CT = 'family-ctrl-token-abcdef0123456789';
+  kv = mockKV({ hours_data: JSON.stringify(boxNow), ctrl_token: CT });
+  let r = await post(kv, { __cmd: 'set_hours', meter: 16.2 });
+  check('setting hours with no login is refused', r.status === 401, `status ${r.status}`);
+  r = await post(kv, { __cmd: 'set_hours', meter: 16.2, ctrl_token: 'wrong-token-0000000000000' });
+  check('and with a wrong token', r.status === 401, `status ${r.status}`);
+  r = await post(kv, { __cmd: 'set_hours', meter: 'abc', ctrl_token: CT });
+  check('a reading that is not a number is refused', r.status === 400, `status ${r.status}`);
+  r = await post(kv, { __cmd: 'set_hours', meter: 16.2, ctrl_token: CT });
+  j = await r.json();
+  check('the app\'s family login can save a meter reading', r.status === 200 && j.ok && j.meter_hours === 16.2, JSON.stringify(j));
+  j = await (await get(kv)).json();
+  check('and every device then reads it', j.meter_hours === 16.2, `meter_hours ${j.meter_hours}`);
+  r = await post(kv, { __cmd: 'set_hours', meter: 15.9, ctrl_token: CT });
+  j = await (await get(kv)).json();
+  check('a LOWER reading is accepted too: the meter is the truth', j.meter_hours === 15.9, `meter_hours ${j.meter_hours}`);
+  check('set_hours never lands in the telemetry', !(await kv.get('sensor_log')) && JSON.parse(await kv.get('hours_data')).meter === undefined);
+  r = await post(mockKV({ ctrl_token: CT }), { __cmd: 'set_hours', meter: 16, ctrl_token: CT });
+  check('with no box reading to anchor it, nothing is saved', r.status === 409, `status ${r.status}`);
+  r = await post(mockKV({ hours_data: JSON.stringify(boxNow), mower_ctrl_token: TOKEN }), { __cmd: 'set_hours', meter: 16, token: TOKEN });
+  check('the maintenance token works as well', r.status === 200 && (await r.json()).meter_hours === 16);
+}
+
+console.log('\n-- one-time repair of the record the buffered bug left (11-05) --');
+{
+  const kv = mockKV({ hours_history: JSON.stringify(REAL_HIST()), sensor_log: JSON.stringify(REAL_LOG()), hours_data: JSON.stringify(boxNow) });
+  await post(kv, boxNow);
+  const h = await hist(kv);
+  const at = (x) => h.find((e) => near(e.hours_end, x, 1e-6));
+  check('five mows on record afterwards', h.length === 5, h.map((e) => e.hours_end).join(' '));
+  const m1023 = at(7.0833);
+  check('the lost 10-23 mow is back', !!m1023);
+  check('  dated when it ended, 10-23 21:58:25Z', m1023 && m1023.date === '2026-10-23T21:58:25.482Z', m1023 && m1023.date);
+  check('  26.0 minutes', m1023 && near(m1023.hours_mow, 0.4333, 1e-4), m1023 && m1023.hours_mow);
+  check('  666 m, measured from the 09-24 odometer', m1023 && m1023.dist_mow_m === 666, m1023 && m1023.dist_mow_m);
+  check('  in date order', h.indexOf(m1023) === 2);
+  const a = at(7.1583);
+  check('the 11-03 1:55 PM stretch is its own 4.5 min, not 30.5', a && near(a.hours_mow, 0.075, 1e-4), a && a.hours_mow);
+  check('the 11-03 stretch filed under 11-05 is gone from 11-05', !h.some((e) => e.date.startsWith('2026-11-05')));
+  const b = at(7.7583);
+  check('  and folded into the 11-03 afternoon mow it belongs to', b && near(b.hours_mow, 0.6, 1e-4) && b.segments === 2, b && JSON.stringify({ m: b.hours_mow, s: b.segments }));
+  check('  which now ends 11-03 21:17:07Z', b && b.date === '2026-11-03T21:17:07.143Z', b && b.date);
+  check('  925 m for that mow (579 + 346)', b && b.dist_mow_m === 925, b && b.dist_mow_m);
+  check('08-12 and 09-24 get their run times (0.05 h, 1.075 h)', near(at(5.575).hours_mow, 0.05, 1e-4) && near(at(6.65).hours_mow, 1.075, 1e-4),
+    `${at(5.575).hours_mow} / ${at(6.65).hours_mow}`);
+  const sum = h.reduce((t, e) => t + (e.hours_mow || 0), 0);
+  check('per-mow hours add up to everything the box counted since 08-11', near(sum, 7.7583 - 5.525, 1e-3), sum.toFixed(4));
+  const flag = JSON.parse((await kv.get('history_repair_2026_11_05')) || 'null');
+  check('what it did is kept under the flag', flag && flag.done.length >= 4 && Array.isArray(flag.skipped), JSON.stringify(flag).slice(0, 200));
+  const raw = await kv.get('hours_history');
+  await post(kv, boxNow);
+  check('it runs once: the next upload changes nothing', (await kv.get('hours_history')) === raw);
+}
+{
+  // The record no longer looks the way it did: touch nothing, say why.
+  const odd = REAL_HIST().filter((e) => e.hours_end !== 6.65 && e.hours_end !== 7.5333);
+  const kv = mockKV({ hours_history: JSON.stringify(odd), sensor_log: JSON.stringify(REAL_LOG()), hours_data: JSON.stringify(boxNow) });
+  await post(kv, boxNow);
+  const h = await hist(kv);
+  check('a record that has changed shape gets no insert and no fold', h.length === odd.length && !h.some((e) => near(e.hours_end, 7.0833, 1e-6)), h.map((e) => e.hours_end).join(' '));
+  const flag = JSON.parse(await kv.get('history_repair_2026_11_05'));
+  check('  and the flag says what was skipped', flag.skipped.length >= 2, JSON.stringify(flag.skipped));
+}
+
+console.log('\n-- a recovered mow is dated by when its hours first arrived (11-05) --');
+{
+  // The exact 11-05 failure, replayed with the repair already done: the 7.7583 reading came in
+  // on 11-03 and was missed, and a heartbeat recovers it later. It must land on 11-03.
+  const before = REAL_HIST().slice(0, 4);
+  before.splice(2, 0, { date: '2026-10-23T21:58:25.482Z', hours_end: 7.0833, hours_mow: 0.4333, dist_total_m: 8481 });
+  before[3].hours_mow = 0.075;
+  const kv = mockKV({ hours_history: JSON.stringify(before), sensor_log: JSON.stringify(REAL_LOG()),
+                      hours_data: JSON.stringify(boxNow), history_repair_2026_11_05: '{"done":[]}' });
+  await post(kv, boxNow);
+  const h = await hist(kv);
+  const last = h[h.length - 1];
+  check('no 11-05 record is made for an 11-03 stretch', !h.some((e) => e.date.startsWith('2026-11-05')), h.map((e) => e.date).join(' '));
+  check('  it folds into the 11-03 mow, ending 21:17:07Z', last.hours_end === 7.7583 && last.date === '2026-11-03T21:17:07.143Z' && last.segments === 2,
+    JSON.stringify({ d: last.date, s: last.segments }));
+}
+{
+  // Nothing in the log for that value: dated now, as before. A recovery is never dropped.
+  const kv = mockKV({ hours_history: JSON.stringify([{ date: '2026-10-01T00:00:00.000Z', hours_end: 7 }]), history_repair_2026_11_05: '{"done":[]}' });
+  await post(kv, { ...boxNow, hours: 7.3 });
+  const h = await hist(kv);
+  check('with no log row it is still recorded, dated now', h.length === 2 && Date.now() - Date.parse(h[1].date) < 60000, JSON.stringify(h[1]).slice(0, 120));
+}
+
 console.log(`\n${pass} passed, ${fail} failed\n`);
 process.exit(fail ? 1 : 0);
