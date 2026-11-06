@@ -40,6 +40,9 @@ if ! dkms status 2>/dev/null | grep -q 'nwfermi.*installed'; then
   # update built a module for the OLD kernel and filed it under the new one - touch died at the next
   # reboot (11-04) while dkms said "installed". Make DKMS pass the TARGET kernel's headers.
   sudo sed -i 's#^MAKE\[0\]="make module #MAKE[0]="make module KERNEL_SOURCE=$kernel_source_dir #' /usr/src/nwfermi-0.7.0.1/dkms.conf
+  # 2026-11-06 1:00 PM: 44 taps reached the kernel at the right spots, X gave 44 clicks and ZERO motion -
+  # the module's malformed type-A multitouch stream sends evdev down the mtdev path. Build single-touch.
+  sudo sed -i 's|^#define MULTITOUCH$|// #define MULTITOUCH  /* HCC 2026-11-06: OFF, see check-nwfermi-kernel test 5 */|' /usr/src/nwfermi-0.7.0.1/nw-fermi.c
   sudo dkms add -m nwfermi -v 0.7.0.1 >/dev/null 2>&1
   sudo dkms build -m nwfermi -v 0.7.0.1 >/dev/null 2>&1
   sudo dkms install -m nwfermi -v 0.7.0.1 >/dev/null 2>&1

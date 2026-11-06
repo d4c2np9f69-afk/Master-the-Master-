@@ -12,6 +12,12 @@
 # Checks: (1) every installed nw-fermi module's vermagic matches its kernel directory,
 #         (2) dkms.conf builds against the target kernel, not the running one,
 #         (3) the running kernel has it loaded.
+#         (4) the touch device exposes NO multitouch axes. 2026-11-06 1:00 PM: Jeff tapped 44 times, the
+#             kernel saw every finger at the right place, X delivered 44 clicks and ZERO motion - the pointer
+#             sat at x:212 y:169 while the last touch was at 157,210. The module reports a malformed type-A
+#             MT stream (no slots); evdev hands it to mtdev and the pointer never moves. Fix: the
+#             "#define MULTITOUCH" line in nw-fermi.c is commented out (kitchenpc-restore.sh does it), so
+#             the module publishes only ABS_X/ABS_Y + BTN_LEFT.
 # usage: bash check-nwfermi-kernel.sh      exit 0 = all pass
 ok=0; fail=0
 pass() { ok=$((ok+1)); echo "  ok    $*"; }
@@ -33,5 +39,10 @@ else bad "dkms.conf lets the Makefile use 'uname -r' (builds for the RUNNING ker
 
 if lsmod | grep -q '^nw_fermi'; then pass "loaded in running kernel $(uname -r)"
 else bad "not loaded in running kernel $(uname -r)"; fi
+
+abs=$(grep -A9 'Name="Nextwindow Fermi Touchscreen"' /proc/bus/input/devices | awk -F'ABS=' '/B: ABS=/{print $2}')
+if [ -z "$abs" ]; then bad "no Nextwindow Fermi input device"
+elif [ "$(python3 -c "import sys;w=sys.argv[1:];print((int(w[0]+''.join(x.zfill(16) for x in w[1:]),16)>>0x35)&1)" $abs)" = 0 ]; then pass "touch device is single-touch (no ABS_MT axes) - X moves the pointer"
+else bad "touch device exposes ABS_MT axes - evdev takes the mtdev path and the pointer never moves"; fi
 
 echo; echo "$ok passed, $fail failed"; [ $fail = 0 ]
