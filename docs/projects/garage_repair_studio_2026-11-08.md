@@ -176,6 +176,8 @@ more monitors."*
 - **Feature tests (run, not assumed):** `windows-scripts/garage-studio/Test-StudioAcer.ps1` (Kiyo records a real 10 s
   clip + saves a frame, mic hears sound) and `test-studio-lenovo.sh` (mic, external monitor, Deskflow). Dry run 11-08:
   Acer 4/5 (only fail = Kiyo not plugged in), Lenovo 2/4 (monitor + Deskflow not set up yet).
+- **Lenovo mic was clipping** (capture 31/31 = +30 dB; 251 samples at 0 dB in 3 s). Set to 22/31 (+16.5 dB) and saved
+  with `alsactl store`; re-measured peaks -18 / -33 dB, none at 0. Real voice check = Jeff talking at the bench.
 
 **Jeff's 10-minute block after cleaning:** Kiyo into a BLUE USB port on the Acer - monitors on both HDMI ports - open
 Deskflow on both (Acer = server, Lenovo = client -> `192.168.1.176`, click trust on each) - `/login` in Claude Code on
