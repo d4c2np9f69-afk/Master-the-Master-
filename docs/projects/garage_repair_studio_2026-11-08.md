@@ -129,7 +129,7 @@ the power the mic's capsule needs** - that part is hardware. Three $0 routes, in
    reach the house, the PCs or HA the way this session can.**
 2. **With hands on the house: Claude Code on the bench computer, `/voice` push-to-talk.** Speech in, answers on
    the garage TV (it does not talk back). Push-to-talk = hold a key - a **USB foot pedal** set to that key keeps
-   both hands on the work - **build the pedal, $0: Jeff OWNS an old SEWING-MACHINE foot pedal (told 11-08 9:41 AM) - expected to be a speed control, not a clean switch; plan = its housing + a salvage microswitch the rocker presses - use its switch contacts only, unplugged from the wall, wired across the spacebar of a donor USB keyboard (spacebar = Claude Code push-to-talk; a mouse cannot send it). First: continuity test - momentary on/off vs variable speed-control type.** **Untested on this hardware.**
+   both hands on the work - **build the pedal, $0: Jeff OWNS an old SEWING-MACHINE foot pedal (told 11-08 9:41 AM) - expected to be a speed control, not a clean switch; plan = its housing + a salvage microswitch the rocker presses. Donor keyboard: Jeff OWNS an old one (11-08 9:42 AM) - must be USB, not PS/2. ALL PEDAL PARTS OWNED - use its switch contacts only, unplugged from the wall, wired across the spacebar of a donor USB keyboard (spacebar = Claude Code push-to-talk; a mouse cannot send it). First: continuity test - momentary on/off vs variable speed-control type.** **Untested on this hardware.**
 
 Whichever is used: if Claude's voice is audible in the room it will be on the recording - which could be part of
 the show ("Jeff and Claude fix a ___") or kept off the track with AirPods. Jeff's call.
