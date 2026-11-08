@@ -50,10 +50,10 @@ say "power buttons on the taskbar" "actions plugin"
 xfconf-query -c xfwm4 -p /general/button_layout  -s '|HMC' 2>/dev/null
 xfconf-query -c xfwm4 -p /general/click_to_focus -s true   2>/dev/null
 xfconf-query -c xfwm4 -p /general/snap_to_border -s true   2>/dev/null
-xfconf-query -c xfwm4 -p /general/theme          -s Greybird 2>/dev/null
-xfconf-query -c xsettings -p /Net/ThemeName      -s Greybird 2>/dev/null
-xfconf-query -c xsettings -p /Net/IconThemeName  -s Papirus  2>/dev/null
-say "window buttons right + theme" "Greybird / Papirus"
+say "window buttons right" "|HMC, snap to edges"
+# THE LOOK lives in its own script: the Beast's light theme + its lighthouse slideshow.
+# Greybird (grey windows, black taskbar) was the standard until 2026-11-08 - Jeff: "so depressing".
+bash "$(dirname "$0")/hcc-desktop-theme.sh"
 
 # --- NEVER LOCK. A wall panel that asks for a password is a brick. --------
 xfconf-query -c xfce4-screensaver -p /saver/enabled -n -t bool -s false 2>/dev/null
