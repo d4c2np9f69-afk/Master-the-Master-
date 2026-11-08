@@ -9,7 +9,11 @@ your help getting it cleaned and organized."*
 Photos (5, taken 11-08, private - NOT in this public repo): `iCloudDrive\HCC-Photos\garage-studio-2026-11-08\`
 Tracked as OPEN_ITEMS **#282**.
 
-**The rule for this build: $0 first, test the footage, then buy only what the test proves is missing.**
+**THE RULE FOR THIS BUILD - Jeff, 11-08 9:32 AM:** *"I'm not going to spend a dime on this unless it is absolutely
+necessary!!! Look at all that shit I have out there we can build anything we need and I'm not spending $125 on a mic
+amp we can do it with software and or build it ... you are a project manager ... that $125 mic amp look at that as
+me going back to the Max plan if we can do all this with what I have."* **Build from what he owns. Buying is the last
+resort, not phase 5.** Claude's job = project manager: plan, design the builds, verify every step.
 
 ---
 
@@ -20,7 +24,7 @@ Tracked as OPEN_ITEMS **#282**.
 | Garage is **13 x 24 ft**, garage door on the north end, man door on the west wall ~2/3 of the way back | `docs/house-plan/plan-data.js` (taped) |
 | Bench computer = **Lenovo B570 "GarageLaptop"** (.173, Ubuntu, Pentium B960, 8 GB). **Offline when checked 11-08 9:12 AM** (SSH timed out) - so its ability to record video is UNTESTED | NETWORK_MAP + live check |
 | Garage TV / monitor above the bench, QFX PBX-BF120 Bluetooth speaker on the bench | plan-data.js, inventory |
-| **Delam XLR mic** - the boom arm with its shock mount is already on the corner bench (photo 1). The record (09-17) says it **needs 48 V phantom power + an audio interface**; generic XLR condenser kits confirm that by search 11-08. **Exact Delam model not found online - read the box/label before buying the interface.** | IDEAS_FROM_WHAT_WE_OWN, web 11-08 |
+| **Delam XLR mic** - the boom arm with its shock mount is already on the corner bench (photo 1). The record (09-17) says it **needs phantom power + an audio interface**; generic XLR condenser kits confirm that by search 11-08. **Exact Delam model not found online - read the box/label before buying the interface.** | IDEAS_FROM_WHAT_WE_OWN, web 11-08 |
 | **Razer Kiyo Pro** - 1080p60 (HDR at 30), USB 3.0 (falls back to compressed H.264 on USB 2), 3 field-of-view presets 80/90/103 deg, detachable stand. **Discontinued.** Last used on the Beast (08-15 test rig). **NOT plugged into the Beast now** (device list 11-08 9:12 AM). Using it in the garage touches nothing in the frozen house-camera stack - none of the six AI streams use it; leave its old Beast stream entry alone (CAMERAS_CLOSED). | razer.com specs, live check |
 | Already on hand for the bench: soldering station (kept 11-02), blue silicone repair mat, magnifier lamp, **two** boom arms, parts drawers, red wall cabinets with under-cabinet LED strip, pegboard, UPS | photos + RETURNS sheet |
 | **Microwave salvage blower (120 V)** is on the KEEP list *for solder-fume extraction* | inventory, Microwave salvage |
@@ -94,15 +98,21 @@ Recording: the iPhone records itself. The Kiyo needs a computer running OBS (fre
 (Pentium B960) and I have NOT tested whether it can record 1080p** - that is test #1 when it is back online. If it
 can't, the shoot is iPhone-led until a better bench machine is actually needed.
 
-## 6. Sound - the thing viewers forgive least
+## 6. Sound - BUILD it, don't buy it
 
-YouTube's own guidance: viewers tolerate imperfect light far more than bad sound. So sound gets the first dollar.
-- **The Delam XLR mic is already on the arm** - it only needs an interface with 48 V phantom power. The usual
-  budget one (Behringer UM2) showed **$35 to $129 across retailers on 11-08** - prices all over the place, so
-  **check the live price and the Delam's own spec before buying.** That one box serves BOTH jobs: the YouTube
-  voice track AND the mic for talking to Claude on the bench computer.
+The mic is a **Delam BM-800-class condenser** (BEEHIVE_REFERENCE spare-hardware list, 08-05). Software can clean
+up and level the sound (OBS has free noise-suppression, gain and compressor filters) but **software cannot make
+the power the mic's capsule needs** - that part is hardware. Three $0 routes, in order:
+1. **Read the mic first.** Some BM-800 variants carry their own AA battery and need no phantom power at all
+   (forum reports, 11-08). If ours has a battery bay, the power problem is already solved.
+2. **Build a phantom supply from salvage** - Jeff's trade. A DC source in the 12-48 V range fed to XLR pins 2 and 3
+   through a matched resistor pair, DC-blocking capacitors on the audio out, enough current for the mic. Design it
+   together once the mic is read; **the BM-800's exact voltage/current need was NOT found in a search 11-08 -
+   measure it, don't assume 48 V is safe for it** (one forum thread questions exactly that).
+3. **No-build fallback for the test shoot:** the Kiyo Pro's built-in mics and the iPhone's. The test shoot decides
+   whether the Delam is even needed.
 - **Garage noise:** fans off while filming; the fridge compressor cycles - note when it runs. Hard walls + concrete
-  = echo; a moving blanket behind the camera fixes most of it for little money.
+  = echo; a moving blanket (owned?) behind the camera fixes most of it.
 - Option the creators use: film the repair quietly, record the narration afterwards at the desk.
 
 ## 7. Light
@@ -119,7 +129,7 @@ YouTube's own guidance: viewers tolerate imperfect light far more than bad sound
    reach the house, the PCs or HA the way this session can.**
 2. **With hands on the house: Claude Code on the bench computer, `/voice` push-to-talk.** Speech in, answers on
    the garage TV (it does not talk back). Push-to-talk = hold a key - a **USB foot pedal** set to that key keeps
-   both hands on the work (single pedals **$16-35 seen 11-08**, unverified listings). **Untested on this hardware.**
+   both hands on the work - **build the pedal from a salvage switch + an old keyboard or mouse, $0.** **Untested on this hardware.**
 
 Whichever is used: if Claude's voice is audible in the room it will be on the recording - which could be part of
 the show ("Jeff and Claude fix a ___") or kept off the track with AirPods. Jeff's call.
@@ -142,12 +152,12 @@ the show ("Jeff and Claude fix a ___") or kept off the track with AirPods. Jeff'
 | **2** | Power + safety: close the door box, mount bench strips, route cords | Jeff | parts on hand? |
 | **3** | Set the three stations with what's owned (Sections 4-5) | Jeff + Claude | $0 |
 | **4** | **Test shoot - 2 minutes**, a real job, both cameras. Claude reviews the files frame by frame for sound, light, framing, flicker | both | $0 |
-| **5** | Buy only what #4 proved missing - each item priced live and approved by Jeff | Jeff decides | TBD |
-| **6** | Claude station: voice-mode stand, then the Claude Code + pedal trial | both | $0-35 |
+| **5** | Build what #4 proved missing, from owned parts. Buying = last resort, only if absolutely necessary, Jeff decides | both | $0 |
+| **6** | Claude station: voice-mode stand, then the Claude Code + built pedal trial | both | $0 |
 
 **Owed by Claude next:** the Phase 1 checklist as a printable sheet; test #1 (can the Lenovo record the Kiyo) as
 soon as the Lenovo is powered on; inventory rows for everything the clean-out turns up.
 
 Sources checked 11-08: razer.com/streaming-cameras/razer-kiyo-pro/specs, support.claude.com/en/articles/11101966,
-support.google.com/youtube/answer/11913513, jj5.net/wiki/Studio, Behringer UM2 listings (chucklevins.com,
+support.google.com/youtube/answer/11913513, jj5.net/wiki/Studio, BM-800 phantom-power reports (forum.allaboutcircuits.com, forums.tomsguide.com, amateurradio.com, prosoundweb.com); UM2 listings seen and REJECTED by Jeff (chucklevins.com,
 chicagomusicexchange.com, reach.dog), Claude Code voice-mode reports (claudefa.st, digitalapplied.com).
