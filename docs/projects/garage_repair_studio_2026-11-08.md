@@ -36,8 +36,6 @@ resort, not phase 5.** Claude's job = project manager: plan, design the builds, 
 
 1. ✅ **The onn 75" return parts - ALREADY SHIPPED.** Jeff, 11-08 9:19 AM: *"All the stuff has been returned"* (eBay,
    Amazon, ShopJimmy). Nothing to box. Refunds are tracked on OPEN_ITEMS #255.
-2. **The HV capacitor from the microwave** - if it is still in the garage, discharge, confirm 0 V, dispose (inventory
-   says so). Not something to have in a pile that gets sorted fast.
 
 ## 3. Safety built into the design
 
@@ -143,7 +141,6 @@ the show ("Jeff and Claude fix a ___") or kept off the track with AirPods. Jeff'
 
 | Phase | What | Who | $ |
 |---|---|---|---|
-| **0** | HV cap check (TV returns already shipped) | Jeff | $0 |
 | **1** | **Clean-out.** Four piles: STUDIO / YARD / SALVAGE STOCK / GO (trash, recycle, sell). Yard gear forward of the man door. One zone per session so the garage is never torn up all at once: (a) repair bench, (b) corner bench, (c) WKU desk, (d) floor + front | Jeff (Claude keeps the checklist + inventory updated as things turn up) | $0 |
 | **2** | Power: a mounted strip per bench, cords routed behind | Jeff | $0 |
 | **3** | Set the three stations with what's owned (Sections 4-5) | Jeff + Claude | $0 |
