@@ -28,12 +28,10 @@ Tracked as OPEN_ITEMS **#282**.
 
 ---
 
-## 2. Before anything moves - two things that cost money if they get lost
+## 2. Before anything moves
 
-1. 🔴 **The onn 75" return parts.** Four eBay returns **ship by Nov 17** (T-con, main board M21123-MT, 55" power
-   supply, LED strips) and the ShopJimmy power board **by Dec 2** - `docs/tv/RETURNS_2026-11-02.md`. (A memory
-   note says T-con Nov 15 / strips Nov 16 - **use Nov 15 as the safe date.**) The green board on the folding table in
-   photo 2 may be one of them. **Box and label all five FIRST**, before cleanup starts, so nothing gets tossed.
+1. ✅ **The onn 75" return parts - ALREADY SHIPPED.** Jeff, 11-08 9:19 AM: *"All the stuff has been returned"* (eBay,
+   Amazon, ShopJimmy). Nothing to box. Refunds are tracked on OPEN_ITEMS #255.
 2. **The HV capacitor from the microwave** - if it is still in the garage, discharge, confirm 0 V, dispose (inventory
    says so). Not something to have in a pile that gets sorted fast.
 
@@ -139,7 +137,7 @@ the show ("Jeff and Claude fix a ___") or kept off the track with AirPods. Jeff'
 
 | Phase | What | Who | $ |
 |---|---|---|---|
-| **0** | Box + label the 5 TV return parts; HV cap check | Jeff | $0 |
+| **0** | HV cap check (TV returns already shipped) | Jeff | $0 |
 | **1** | **Clean-out.** Four piles: STUDIO / YARD / SALVAGE STOCK / GO (trash, recycle, sell). Yard gear forward of the man door. One zone per session so the garage is never torn up all at once: (a) repair bench, (b) corner bench, (c) WKU desk, (d) floor + front | Jeff (Claude keeps the checklist + inventory updated as things turn up) | $0 |
 | **2** | Power + safety: close the door box, mount bench strips, route cords | Jeff | parts on hand? |
 | **3** | Set the three stations with what's owned (Sections 4-5) | Jeff + Claude | $0 |
