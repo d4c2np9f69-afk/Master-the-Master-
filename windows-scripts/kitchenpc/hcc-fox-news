@@ -1,0 +1,55 @@
+#!/bin/bash
+# hcc-fox-news start|watch|status - the kitchen TV: Fox News on at 6 AM, and it STAYS on until Jeff turns it off.
+# Jeff, 2026-11-08 8:43 AM: "set a automation to start Fox News at 6:00am every morning so it will already be
+# playing in the kitchen when I go in and also check to make sure it doesn't turn off till I turn it off. I don't
+# want it timing out or the app popping up killing it."
+#   start  (cron 06:00)   open Sling on Fox News full screen, get past "Who's Watching?"
+#   watch  (cron */2)     window open but no sound for 2 checks in a row -> clear any "still watching?" prompt,
+#                         then reload the channel; still silent -> retry every 10 min, never every 2. Window CLOSED = Jeff turned it off -> hands off until tomorrow.
+#   status                what it sees right now
+# "Playing" = an Edge audio stream that is not paused (pactl) - the same instrument that proved Sling on 10-24.
+# The channel link lives in ~/.config/hcc/fox-news-url (falls back to Sling home until it is set).
+export DISPLAY=:0 XAUTHORITY="$HOME/.Xauthority" XDG_RUNTIME_DIR="/run/user/$(id -u)" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
+URL=$(head -1 "$HOME/.config/hcc/fox-news-url" 2>/dev/null); URL=${URL:-https://watch.sling.com}
+ON="$HOME/.local/state/hcc-fox-news.on"; MISS="$HOME/.local/state/hcc-fox-news.miss"; LOG="$HOME/.local/state/hcc-fox-news.log"
+mkdir -p "$HOME/.local/state"
+log(){ echo "$(date '+%F %T') $*" >> "$LOG"; tail -n 500 "$LOG" > "$LOG.t" && mv "$LOG.t" "$LOG"; }
+win(){ wmctrl -l | grep -i 'microsoft' | grep -iE 'sling|fox news' | grep -v 'HCC KIOSK' | awk '{print $1}' | head -1; }
+playing(){ pactl -f json list sink-inputs 2>/dev/null | python3 -c '
+import json,sys
+try: s=json.load(sys.stdin)
+except Exception: sys.exit(2)
+sys.exit(0 if any(not i.get("corked") and "edge" in (i["properties"].get("application.name","")+i["properties"].get("application.process.binary","")).lower() for i in s) else 1)'; }
+prompts(){ for rx in "^(JEFF)$" "still watching|continue watching|^continue$|^yes$|i.m still here"; do hcc-sling-click "$rx" >/dev/null && { log "tapped prompt /$rx/"; sleep 4; }; done; }
+fullscreen(){ wmctrl -i -r "$1" -b add,fullscreen; wmctrl -i -a "$1"; }
+case "$1" in
+start)
+  W=$(win)
+  if [ -z "$W" ]; then
+    hcc-browser --new-window "$URL" >/dev/null 2>&1 &
+    for i in $(seq 60); do W=$(win); [ -n "$W" ] && break; sleep 1; done
+  fi
+  [ -z "$W" ] && { log "START FAILED - no Sling window after 60 s"; exit 1; }
+  sleep 15; prompts; fullscreen "$W"
+  pactl set-sink-mute @DEFAULT_SINK@ 0 2>/dev/null
+  touch "$ON"; rm -f "$MISS"
+  sleep 20; playing && log "started - playing ($W)" || log "started - window up but NO SOUND yet ($W); watch will retry"
+  ;;
+watch)
+  [ -f "$ON" ] || exit 0
+  W=$(win)
+  if [ -z "$W" ]; then rm -f "$ON" "$MISS"; log "window closed - Jeff turned it off; hands off until tomorrow 6 AM"; exit 0; fi
+  if playing; then rm -f "$MISS"; exit 0; fi
+  n=$(( $(cat "$MISS" 2>/dev/null || echo 0) + 1 )); echo $n > "$MISS"
+  # act at the 2nd silent check, then every 5th (10 min) - never hammer a Sling outage with reloads every 2 min
+  [ $n -eq 2 ] || [ $((n % 5)) -eq 0 ] || exit 0
+  log "no sound for $n checks - clearing prompts"; prompts; sleep 10
+  if ! playing; then log "still silent - reloading the channel"; wmctrl -i -a "$W"; xdotool key --window "$W" F5; sleep 25; prompts; fullscreen "$W"; fi
+  playing && { log "playing again"; rm -f "$MISS"; }
+  ;;
+status)
+  echo "url:     $URL"; echo "armed:   $([ -f "$ON" ] && echo yes || echo no)"; echo "window:  $(win)"
+  echo "playing: $(playing && echo yes || echo no)"; tail -5 "$LOG" 2>/dev/null
+  ;;
+*) echo "usage: hcc-fox-news start|watch|status"; exit 2;;
+esac

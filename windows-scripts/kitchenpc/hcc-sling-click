@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+# hcc-sling-click REGEX [WINDOW-TITLE-PART]  - tap the first visible button/link in the Sling window whose
+# accessible name matches REGEX (case-insensitive). exit 0 = tapped, 1 = nothing matched.
+# Used by hcc-fox-news to get past Sling's "Who's Watching?" and "Are you still watching?" screens.
+# Needs Edge started with --force-renderer-accessibility (hcc-browser does that, 2026-11-08).
+import re, subprocess, sys, gi
+gi.require_version('Atspi', '2.0'); from gi.repository import Atspi
+rx = re.compile(sys.argv[1], re.I); key = (sys.argv[2] if len(sys.argv) > 2 else 'Sling').lower()
+ROLES = ('link', 'push button', 'button', 'menu item', 'toggle button', 'list item', 'static', 'label', 'heading')  # Sling puts the words in a 'static' inside an unnamed button - tapping the words taps the button
+def walk(a, d=0):
+    if a is None or d > 60: return None
+    try:
+        st = a.get_state_set()
+        if a.get_role_name() in ROLES and st.contains(Atspi.StateType.SHOWING) and rx.search((a.get_name() or '').strip()):
+            e = a.get_extents(Atspi.CoordType.SCREEN)
+            if e.width > 0 and e.height > 0 and e.x >= 0 and e.y >= 0: return a
+        for i in range(a.get_child_count()):
+            r = walk(a.get_child_at_index(i), d + 1)
+            if r: return r
+    except Exception: pass
+    return None
+# only frames that are real, mapped X windows (Edge keeps closed windows in its tree for a while)
+live = subprocess.run(['wmctrl', '-l'], capture_output=True, text=True).stdout.lower()
+desk = Atspi.get_desktop(0)
+for i in range(desk.get_child_count()):
+    app = desk.get_child_at_index(i)
+    if not app or 'edge' not in (app.get_name() or '').lower(): continue
+    for j in range(app.get_child_count()):
+        fr = app.get_child_at_index(j); n = (fr.get_name() or '') if fr else ''
+        title = n.lower().replace(' - microsoft edge', '')
+        if key not in title or title[:30] not in live: continue
+        hit = walk(fr)
+        if hit:
+            e = hit.get_extents(Atspi.CoordType.SCREEN)
+            subprocess.run(['xdotool', 'mousemove', str(e.x + e.width // 2), str(e.y + e.height // 2), 'click', '1'])
+            print(f'tapped {hit.get_role_name()} {hit.get_name()!r}'); sys.exit(0)
+sys.exit(1)

@@ -1,0 +1,17 @@
+#!/bin/sh
+# KitchenPC browser launcher. 2026-11-02: Microsoft Edge, because Sling refused Brave on Linux and named
+# Chrome or Edge. GPU stays off by policy in /etc/opt/edge/policies/managed (#205).
+# --enable-unsafe-swiftshader: WebGL on the CPU. Without it the Windy radar on WEATHER throws a modal
+# "radar failed" box that blocks the whole panel, including the app's X.
+# --force-renderer-accessibility: 2026-11-08 Jeff: "Make sure the key board is popping up when I need to enter
+# text it wouldn't come up when I tryed to log in to sling". The on-screen keyboard (Onboard, auto-show) only
+# pops up when the browser ANNOUNCES the focused text box over AT-SPI; Edge does not reliably do that unless
+# forced. PROVEN on Sling's real sign-in page 11-08 ~8:42 AM, same fresh profile + window, only this flag
+# changed: WITHOUT it the tap put the cursor in the Email box (a typed 'z' landed there) and NO keyboard came
+# up at 1/2/4 s; WITH it the 1920x171 keyboard was up in 1 s. (A plain local test page popped the keyboard
+# even without the flag - that is why osk-test.sh also checks the running Edge carries the flag.)
+# Flags only count when THIS launcher starts the Edge process (the kiosk does, at login); later windows join
+# it. ~/.local/share/applications/microsoft-edge.desktop points the menu entry here too.
+# --autoplay-policy=no-user-gesture-required: 2026-11-08, Fox News at 6 AM (hcc-fox-news) must start WITH
+# sound and nobody standing there to tap.
+exec microsoft-edge --no-first-run --password-store=basic --enable-unsafe-swiftshader --force-renderer-accessibility --autoplay-policy=no-user-gesture-required "$@"
