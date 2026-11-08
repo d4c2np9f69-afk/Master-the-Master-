@@ -29,20 +29,35 @@ for f in /lib/modules/*/updates/dkms/nw-fermi.ko*; do
   k=$(echo "$f" | cut -d/ -f4)
   vm=$(modinfo -F vermagic "$f" 2>/dev/null | awk '{print $1}')
   if [ "$vm" = "$k" ]; then pass "$k: module built for $vm"
-  else bad "$k: module built for '$vm' (kernel will refuse it)"; fi
+  else bad "$k: module built for '$vm' (kernel will refuse it)  -> FIX A below"; fi
 done
 [ $found = 1 ] || bad "no nw-fermi module installed for any kernel"
 
 conf=/usr/src/nwfermi-0.7.0.1/dkms.conf
 if grep -q 'KERNEL_SOURCE=' "$conf" 2>/dev/null; then pass "dkms.conf passes KERNEL_SOURCE (builds for the target kernel)"
-else bad "dkms.conf lets the Makefile use 'uname -r' (builds for the RUNNING kernel)"; fi
+else bad "dkms.conf lets the Makefile use 'uname -r' (builds for the RUNNING kernel)  -> FIX A below"; fi
 
 if lsmod | grep -q '^nw_fermi'; then pass "loaded in running kernel $(uname -r)"
-else bad "not loaded in running kernel $(uname -r)"; fi
+else bad "not loaded in running kernel $(uname -r)  -> FIX A below"; fi
 
 abs=$(grep -A9 'Name="Nextwindow Fermi Touchscreen"' /proc/bus/input/devices | awk -F'ABS=' '/B: ABS=/{print $2}')
 if [ -z "$abs" ]; then bad "no Nextwindow Fermi input device"
 elif [ "$(python3 -c "import sys;w=sys.argv[1:];print((int(w[0]+''.join(x.zfill(16) for x in w[1:]),16)>>0x35)&1)" $abs)" = 0 ]; then pass "touch device is single-touch (no ABS_MT axes) - X moves the pointer"
-else bad "touch device exposes ABS_MT axes - evdev takes the mtdev path and the pointer never moves"; fi
+else bad "touch device exposes ABS_MT axes - evdev takes the mtdev path and the pointer never moves  -> FIX B below"; fi
 
-echo; echo "$ok passed, $fail failed"; [ $fail = 0 ]
+echo; echo "$ok passed, $fail failed"
+if [ $fail != 0 ]; then cat <<'FIX'
+
+HOW TO FIX IT (this is exactly what fixed it on 2026-11-06; Jeff confirmed touch working 11-08 8:18 AM)
+  S=/usr/src/nwfermi-0.7.0.1
+  FIX A - module built for the wrong kernel / not loaded:
+    grep -q KERNEL_SOURCE= $S/dkms.conf || sudo sed -i 's#^MAKE\[0\]="make module #MAKE[0]="make module KERNEL_SOURCE=$kernel_source_dir #' $S/dkms.conf
+  FIX B - pointer does not follow the finger (clicks only):
+    sudo sed -i 's|^#define MULTITOUCH$|// #define MULTITOUCH  /* HCC 2026-11-06: OFF */|' $S/nw-fermi.c
+  THEN, for EVERY kernel in /lib/modules (BUILD first - 'dkms install --force' alone silently reuses the old build):
+    for k in $(ls /lib/modules); do sudo dkms build --force nwfermi/0.7.0.1 -k $k && sudo dkms install --force nwfermi/0.7.0.1 -k $k; done
+    sudo reboot          # simplest way to get module + daemon + X all fresh
+  THEN re-run this check - it must say 0 failed - and touch the screen: the pointer must jump to your finger.
+FIX
+fi
+[ $fail = 0 ]
