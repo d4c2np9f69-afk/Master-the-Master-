@@ -154,3 +154,29 @@ soon as the Lenovo is powered on; inventory rows for everything the clean-out tu
 Sources checked 11-08: razer.com/streaming-cameras/razer-kiyo-pro/specs, support.claude.com/en/articles/11101966,
 support.google.com/youtube/answer/11913513, jj5.net/wiki/Studio, BM-800 phantom-power reports (forum.allaboutcircuits.com, forums.tomsguide.com, amateurradio.com, prosoundweb.com); UM2 listings seen and REJECTED by Jeff (chucklevins.com,
 chicagomusicexchange.com, reach.dog), Claude Code voice-mode reports (claudefa.st, digitalapplied.com).
+
+## 11. Software - BUILT 2026-11-08 (while Jeff cleans)
+
+Jeff 10:30 AM: *"build the software on the Acer and the garage Lenovo ... three screens the 2 computers and I have
+more monitors."*
+
+| Machine | Role | Measured 11-08 | Installed 11-08 (proof) |
+|---|---|---|---|
+| **Acer** Aspire E5-576 (`192.168.1.176`) | **Recording + Claude.** OBS records the Kiyo; Claude Code voice; Deskflow SERVER (Jeff's keyboard/mouse live here) | i3-8130U, 16 GB, UHD 620, **USB 3.0**, Win 11 Home, 0 crashes in 14 days | restore point #137 first; OBS 33.0.0, Git, Deskflow 1.27.0, Claude Code 2.1.317 (winget, `claude --version`). **Quick Sync proven:** 5 s 1080p60 H.264 encoded in hardware |
+| **Lenovo** B570 (`192.168.1.158`, wired) | **Reference screen.** Manuals, schematics, Claude chat; Deskflow CLIENT | Pentium B960, 7 GB, **USB 2.0 only**, Xubuntu X11 | Claude Code 2.1.311 (Anthropic apt repo, key fingerprint checked), Deskflow 1.26.0, v4l-utils |
+
+- **Screens:** Acer laptop + a monitor on the Acer's HDMI (Claude's big screen / OBS preview), Lenovo laptop + a monitor
+  on its HDMI or VGA (reference). Neither external monitor is connected yet (checked 11-08).
+- **Voice:** Claude Code voice is ON (`"voice": {"enabled": true, "mode": "hold"}`) on both. It is **dictation only** -
+  speech in, text out; it does not talk back (code.claude.com/docs/en/voice-dictation). Hold key = **Space**, which is
+  exactly what the sewing-machine pedal + donor keyboard sends. Needs a claude.ai sign-in (`/login`) and a LOCAL mic -
+  not over SSH. Talking back at the bench = the Claude iPhone app voice mode.
+- **Overhead iPhone:** records 4K on its own. Live into OBS for free was checked: the free tier found is 640x480 - not
+  worth it; revisit only if the test shoot shows a live overhead preview is needed.
+- **Feature tests (run, not assumed):** `windows-scripts/garage-studio/Test-StudioAcer.ps1` (Kiyo records a real 10 s
+  clip + saves a frame, mic hears sound) and `test-studio-lenovo.sh` (mic, external monitor, Deskflow). Dry run 11-08:
+  Acer 4/5 (only fail = Kiyo not plugged in), Lenovo 2/4 (monitor + Deskflow not set up yet).
+
+**Jeff's 10-minute block after cleaning:** Kiyo into a BLUE USB port on the Acer - monitors on both HDMI ports - open
+Deskflow on both (Acer = server, Lenovo = client -> `192.168.1.176`, click trust on each) - `/login` in Claude Code on
+both. Then Claude runs both tests and looks at the Kiyo frame.
