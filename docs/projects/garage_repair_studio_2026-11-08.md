@@ -39,13 +39,9 @@ resort, not phase 5.** Claude's job = project manager: plan, design the builds, 
 2. **The HV capacitor from the microwave** - if it is still in the garage, discharge, confirm 0 V, dispose (inventory
    says so). Not something to have in a pile that gets sorted fast.
 
-## 3. Safety items seen in the photos (Jeff's trade - flagged, not lectured)
+## 3. Safety built into the design
 
-- **Open electrical box beside the man door** (photo 4) - wires and a wire nut showing. That is the spot the
-  Ecoeler YM2108T switch was assigned to (08-17). Cover it or install it before the floor gets busy.
-- **Power hung from the shelf** - a yellow extension cord feeding a strip up at the light shelf, cords dangling
-  through the work area (photo 1). For a studio: one mounted strip along the back of each bench, cords run behind,
-  nothing hanging in the shot or in the iron's reach.
+- **One mounted power strip per bench**, cords run behind, nothing in the shot or in the iron's reach.
 - **Fuel + 2-stroke gear share the room with the soldering iron** - keep all gas cans at the garage-door end
   (they are there now, photo 5) and never move them toward the studio half.
 
@@ -149,7 +145,7 @@ the show ("Jeff and Claude fix a ___") or kept off the track with AirPods. Jeff'
 |---|---|---|---|
 | **0** | HV cap check (TV returns already shipped) | Jeff | $0 |
 | **1** | **Clean-out.** Four piles: STUDIO / YARD / SALVAGE STOCK / GO (trash, recycle, sell). Yard gear forward of the man door. One zone per session so the garage is never torn up all at once: (a) repair bench, (b) corner bench, (c) WKU desk, (d) floor + front | Jeff (Claude keeps the checklist + inventory updated as things turn up) | $0 |
-| **2** | Power + safety: close the door box, mount bench strips, route cords | Jeff | parts on hand? |
+| **2** | Power: a mounted strip per bench, cords routed behind | Jeff | $0 |
 | **3** | Set the three stations with what's owned (Sections 4-5) | Jeff + Claude | $0 |
 | **4** | **Test shoot - 2 minutes**, a real job, both cameras. Claude reviews the files frame by frame for sound, light, framing, flicker | both | $0 |
 | **5** | Build what #4 proved missing, from owned parts. Buying = last resort, only if absolutely necessary, Jeff decides | both | $0 |
