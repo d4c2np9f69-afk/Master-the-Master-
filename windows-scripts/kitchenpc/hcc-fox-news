@@ -14,7 +14,26 @@ URL=$(head -1 "$HOME/.config/hcc/fox-news-url" 2>/dev/null); URL=${URL:-https://
 ON="$HOME/.local/state/hcc-fox-news.on"; MISS="$HOME/.local/state/hcc-fox-news.miss"; LOG="$HOME/.local/state/hcc-fox-news.log"
 mkdir -p "$HOME/.local/state"
 log(){ echo "$(date '+%F %T') $*" >> "$LOG"; tail -n 500 "$LOG" > "$LOG.t" && mv "$LOG.t" "$LOG"; }
-win(){ wmctrl -l | grep -i 'microsoft' | grep -iE 'sling|fox news' | grep -v 'HCC KIOSK' | awk '{print $1}' | head -1; }
+# 2026-11-11: ASK THE BROWSER WHAT IT HAS OPEN - do not read the window title. Title matching
+# broke the keep-alive the moment it finally worked: once Sling starts a program it RETITLES the
+# window to the show ("Watch Special Report With Bret Baier - Profile 1 - Microsoft Edge"), which
+# contains neither "sling" nor "fox news". Logged at 17:14 while the show was playing on screen:
+# "window closed - Jeff turned it off; hands off until tomorrow 6 AM". It was not closed. That is
+# the "I don't want it timing out" case Jeff asked for, disarming itself silently.
+# Note: Edge writes a ZERO-WIDTH SPACE inside "Microsoft<U+200B> Edge", so only ever grep
+# 'microsoft', never the two words together.
+win(){
+  ids=$(wmctrl -l | grep -i 'microsoft' | grep -viE 'HCC KIOSK|Home Command Center' | awk '{print $1}')
+  [ -z "$ids" ] && return 0
+  # the browser's own tab list is the truth; fall back to the title only if CDP is unreachable
+  if curl -s --max-time 3 http://127.0.0.1:9222/json 2>/dev/null | grep -q 'watch\.sling\.com'; then
+    echo "$ids" | head -1; return 0
+  fi
+  # CDP unreachable: fall back to the OLD title test, deliberately. It under-reports (the bug above),
+  # but the alternative - assuming any Edge window is the Sling one - would let watch() press F5 on a
+  # window Jeff is using for something else. Under-reporting only costs a missed keep-alive.
+  wmctrl -l | grep -i 'microsoft' | grep -iE 'sling|fox news' | grep -viE 'HCC KIOSK|Home Command Center' | awk '{print $1}' | head -1
+}
 playing(){ pactl -f json list sink-inputs 2>/dev/null | python3 -c '
 import json,sys
 try: s=json.load(sys.stdin)

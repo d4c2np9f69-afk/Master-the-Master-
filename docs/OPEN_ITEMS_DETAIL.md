@@ -1019,3 +1019,34 @@ made it look as though the teardown had failed when it had already succeeded. Us
 All three scripts were verified byte-identical between the repo and `/usr/local/bin` by `md5sum`, and
 syntax-checked on KitchenPC before install (`sh -n`, `bash -n`, `py_compile`). **`node` is not installed on
 KitchenPC** — JS gets `node --check`ed on the Beast instead.
+
+### THE FOURTH BUG — the keep-alive disarmed itself the moment it finally worked (fixed 11-11 18:0x)
+
+Found by reading `~/.local/state/hcc-fox-news.log` after the player was already going:
+
+```
+2026-11-11 17:14:01 window closed - Jeff turned it off; hands off until tomorrow 6 AM
+```
+
+**The window was not closed** — the show was on screen and `pactl` showed an uncorked sink-input.
+`win()` grepped the window TITLE for `sling|fox news`, and once Sling starts a program it **retitles
+the window to the show**: `Watch Special Report With Bret Baier - Profile 1 - Microsoft Edge` —
+neither word present. So `watch` concluded Jeff had turned it off, deleted the armed-state file and
+stood down. That is precisely the *"I don't want it timing out"* case Jeff asked for on 11-08,
+failing silently, **and it only triggers once playback SUCCEEDS** — which is why it had never shown up.
+
+`win()` now asks the browser what it has open (`127.0.0.1:9222/json` contains `watch.sling.com`) and
+uses the title only as a fallback when CDP is unreachable. The fallback is deliberately the OLD,
+under-reporting test: assuming any Edge window is the Sling one would let `watch` press **F5 on a
+window Jeff is using for something else**, and a missed keep-alive is the cheaper failure.
+
+**Proven against the live window, both directions:**
+
+```
+OLD win() -> [EMPTY]        <-- the bug, reproduced on the window that was playing
+NEW win() -> [0x00400003]   <-- the real window
+hcc-fox-news status: window: 0x00400003   playing: yes
+```
+
+⚠️ `wmctrl` prints a **zero-width space** inside `Microsoft<U+200B> Edge`, so only ever grep
+`microsoft` — matching the two words together silently finds nothing.
