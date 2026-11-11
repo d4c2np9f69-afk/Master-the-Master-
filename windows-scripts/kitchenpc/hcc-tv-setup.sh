@@ -12,6 +12,15 @@ sudo install -m755 "$HERE/hcc-browser" "$HERE/hcc-fox-news" "$HERE/hcc-app" "$HE
 sudo install -m755 "$HERE/osk-test.sh" /usr/local/bin/osk-test
 say "scripts" "hcc-browser hcc-fox-news hcc-app hcc-sling-click osk-test -> /usr/local/bin"
 
+# Sling 7-403 fix (#281, 2026-11-11). Sling serves use-streamauth-qvt ON with use-stream-authoriser OFF,
+# so loadTimeline neither downloads the QVT nor puts one in the stream-auth reply, then calls
+# filterQvt(undefined) -> TypeError "...reading 'playback_info'" which Sling mislabels as 7-403.
+# Sling's own bundle ships the override: isStreamAuthEnabled(){ return getLDFlagStatus(...) || window.enableStreamAuth }.
+# Without this extension the kitchen screen CANNOT play Sling at all. hcc-browser --load-extension loads it.
+mkdir -p "$H/.local/share/hcc/sling-streamauth"
+install -m644 "$HERE/sling-streamauth/manifest.json" "$HERE/sling-streamauth/fix.js" "$H/.local/share/hcc/sling-streamauth/"
+say "Sling stream-auth fix" "-> ~/.local/share/hcc/sling-streamauth (#281)"
+
 # Edge's own menu entry goes through hcc-browser too, so Edge never starts without the keyboard/autoplay flags
 mkdir -p "$H/.local/share/applications"
 sed 's#/usr/bin/microsoft-edge-stable#/usr/local/bin/hcc-browser#' /usr/share/applications/microsoft-edge.desktop > "$H/.local/share/applications/microsoft-edge.desktop"

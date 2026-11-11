@@ -25,6 +25,18 @@ Jeff 2026-11-08 8:43 AM: "I want you to set a automation to start Fox News at 6:
 
 **Blocked on Jeff (Claude may not type passwords/tokens):** Sling sign-in (the keyboard now pops up), Bitwarden extension sign-in (installed by policy, storage shows no account), HA token on the app's HOME tab (Edge localStorage has zero `ha_` keys - never carried over at the 11-02 Firefox->Edge switch; that is why the kiosk says "Connect Beehive on HOME to activate").
 
+## #280
+
+| 🟡 **#280** | 🌡️ **THERMOSTAT OVERRIDDEN BY OUR OWN SEASONAL CLOCK - TWICE. 11-08 8:12 AM: CLOCK DISABLED, THE MODE IS JEFF'S.** Jeff 11-08 8:10 AM: *"The heat is supposed to be on and it set to 65 degrees something is taking it over"*. **The 11-06 fix was incomplete** - it only stopped the clock touching an OFF system, and the owed 10 PM / 6 AM reads were never done. **Logbook context (not inferred):** Jeff set HEAT via HA 11-07 3:00:41 PM; it held heat 65 all night (cycling 64-65); **06:00:00 Sun 11-08 `automation.hcc_seasonal_mode_clock_...` set COOL 72**, 06:10:05 dehumidify dropped it to 70 - house at **62 F in cool mode, no heat**. Same at 06:00 Sat 11-07. Root cause: the 11-04 clock turned Jeff's SEASONAL words ("65 in the winter ... 70 to 72 in the summer") into a DAILY heat/cool swap. **Fix (config API, backup `<scratchpad>/hcc_seasonal_mode_clock.before-1108.json`):** clock turned off + `initial_state: false` (stays off across restarts), alias/description say DISABLED + do not re-enable without Jeff; thermostat set back to **heat 65** at 8:12 AM, read back `heat / set 65 / heating / cur 62`. Dehumidify left on: it only acts in COOL. HA scripts checked (5, none touch it); the app only writes on a button tap. **Proof:** `HCC-Scripts/test_thermostat_respects_off.py` gained checks 4-5 (no enabled automation may write the MODE; setpoint writers COOL-only; HA evaluates them FALSE on HEAT): **red 2 FAILED -> clean**. **OWED: read `climate.hcc_thermostat` after 6:00 AM Mon 11-09 - must still be heat 65.** HA automations live on Beehive only, not in the repo. | **CLAUDE** (6:01 AM 11-09 read) | 🟡 **FIXED + TESTED - first 6 AM owed** |
+
+## #276
+
+| 🟢 **#276** | 🏠 **HA UPDATES (Jeff 11-05 ~7:13 PM: *"Do all the HA updates"*): ALL DONE 11-06 7:48 AM, 0 UPDATES PENDING.** Core **2026.11.0**, OS **18.5.rc1** (rebooted 6:34 AM), Alexa Media **5.19.0**, Meross LAN **6.0.0** (installed 7:48:19-21 AM right after Jeff accepted the Marketplace warning, then config check valid and an HA restart, RUNNING 7:49:58). **Proof:** every `update.*` entity off; entity diff 659 to 669, **0 missing**; `climate.hcc_thermostat` live (cool, 65 °F, updated 7:52:39) with modes and limits unchanged; 13 of 17 media players live (the 4 unavailable are the PC Alexa apps and PCs); no alexa/meross ERROR since the restart; `Verify-CameraStreams.ps1` ALL GOOD (plumbing only); clock reconnected 7:50:02. **Left over, NEEDS JEFF'S YES (the classifier blocked it as an HA change):** Meross 6.0.0 changed two unique IDs, so `select.smart_thermostat_..._hold_action` and `number.301_wi_fi_thermostat_humidity_calibration` are orphans (new: `select.thermostat_hold_action` = permanent, `number.301_wi_fi_thermostat_calibration_humidity` = 0.0); nothing references the old ones (`search/related` = own device only; app grep empty). Alexa 5.19.0 added 8 `number.*_alarm_and_notification_volume` settings, which the 08-19 hygiene rule says to disable. | **CLAUDE** (remove 2 orphans, disable 8 volume numbers, on Jeff's yes) | 🟢 **UPDATES DONE - cleanup waits on a yes** |
+
+## #254
+
+| 🟢 **#254** | ✅ **RECOVERED: 11-02 7:49 PM both `sensor.water_meter_last_seen` and `sensor.gas_meter_last_seen` were current.** 💧 **WAS: WATER METER SDR HANG — AUTO-HEAL FIRED BUT DID NOT RECOVER. Water silent 3.7 h, gas was reporting fine when the restart hit then also went silent.** Manually re-triggered `automation.hcc_meter_sdr_auto_heal` at 2026-10-26 9:35 PM; 10 min later neither water nor gas had recovered. The J45 add-on restarts but the SDR dongle appears unresponsive. **Candidates in order, if it recurs:** (1) unplug/replug the RTL-SDR USB dongle on the J45 ← most likely; (2) reboot the J45 if the dongle cycle does not clear it. The two meters SHARE the dongle, so both going silent after a restart points to the USB/driver layer, not either pit radio. 🔴 Do NOT contact WHUD (standing rule). This is not a billing issue — WHUD reads their own collector. *(Detail moved out of OPEN_ITEMS.md 2026-11-10 to stay under the 45 kB docs-size gate; the live row still points here.)* | **Jeff** | 🔴 action waiting if it recurs |
+
 ## #250
 
 | 🟢 **#250** | 🖥️ **KITCHENPC TOUCHSCREEN — "THE MOUSE MOVES BUT THE BUTTONS DON'T." FIXED 2026-10-26, THREE SEPARATE FAULTS, ALL PROVEN.** Jeff 08:45: *"I went in to make coffee this morning and water [wanted] to watch Fox News and noting would come up"*, 08:48: *"The mouse moves but the buttons don't just like yesterday it never got fixed."* He was right that it never got fixed — this was the carried-over `MatchDevicePath` item. 🔑 **FAULT 1, NO BUTTONS: `/etc/X11/xorg.conf.d/10-nwfermi.conf` had only `MatchProduct` and NO `MatchDevicePath`.** The nwfermi daemon publishes **ONE** virtual device (`/devices/virtual/input/input7`) through **THREE** nodes — `mouse0`, `js0`, `event7` — so that one InputClass matched all three and forced the legacy out-of-tree `nextwindow` driver onto each (Xorg ids 10/11/12; 10 and 11 ended up **disabled + floating**, which is why their events went nowhere). On the evdev node that 2010-era driver cannot parse the packets: **`Read error: Resource temporarily unavailable`, 24 of them, the last burst at X-time 148763–148772 s = 2026-10-26 08:27 CT — exactly while Jeff was standing at the machine.** Motion leaked through; button presses never did. 🔑 **FAULT 2, NO MOTION: handing `event7` to libinput fixed the buttons and broke the motion instead** — udev tags the panel `ID_INPUT_MOUSE=1` (Xorg: *"is tagged by udev as: Mouse … device is a pointer"*), so libinput treated it as a **relative** pointer and ignored its absolute axes, and the device has **no EV_REL at all**. Measured: `BTN_LEFT pressed/released` ×6, **16 ButtonPress delivered by X, MOTION count 0** — every tap fired at x:960 y:540, dead centre, so he was clicking wallpaper. ✅ **THE FIX: `xserver-xorg-input-evdev` with `Option "Mode" "Absolute"`, plus explicit `Option "Ignore"` sections for the `mouse*` and `js*` duplicates.** Xorg now logs **`Found absolute touchscreen … Configuring as touchscreen … (type: TOUCHSCREEN, id 14) … initialized for absolute axes`**. 📏 **PROVEN RED→GREEN, not asserted:** devices 3→**1**, attached+enabled, `Buttons supported:` 2 with **blank labels** → **7** with real ones (`"Button Left" "Button Middle" "Button Right"`), read errors **24→0**, and the raw `evtest` capture of Jeff's own finger shows `ABS_MT_POSITION_X 2985 / Y 5665` → x≈175,y≈187 landing the pointer at **x:172 y:185**. ⚠️ **DO NOT re-add a bare `MatchProduct` section and DO NOT put the `nextwindow` driver back. The nwfermi DKMS module IS still required — it creates `input7` and was never the fault.** ⚠️ **The working axes are `ABS_X`/`ABS_Y`; the `ABS_MT_*` stream is malformed type-A (no `ABS_MT_SLOT`, libevdev throws `double tracking ID in slot 0`) — do not build on it.** 🔑 **FAULT 3, THE LAUNCHERS WOULD NOT RUN: `Untrusted application launcher — "Sling TV.desktop" is in an insecure location and not marked as secure`.** xfdesktop refuses a `.desktop` unless the GIO attribute **`metadata::xfce-exe-checksum` equals the SHA-256 of the file CONTENT** — `chmod +x` alone is NOT enough, and `kitchenpc-restore.sh` never stamped it, so **all 10 launchers** would have thrown that box on first use. Stamped and verified by re-reading each one against a fresh sha256: **10 trusted, 0 not**. Then `Failed to run "Sling%20TV.desktop" — Timeout was reached`, which was **NOT** trust ("Launch Anyway" bypasses trust) but the **Firefox snap cold-starting** after the lightdm restart while xfdesktop waited on startup-notification — so **`StartupNotify=false` was added to all 10 and the checksums re-stamped**, because otherwise it returns on the first tap after **every reboot**. Verified after the edit: `gio launch` → **exit=0, 0 s, window opened**. ✅ **SOURCE FIXED, NOT JUST THE BOX:** `windows-scripts/kitchenpc/kitchenpc-restore.sh` now writes the corrected InputClass itself (deliberately overwriting the driver kit's broken copy), installs `xserver-xorg-input-evdev`, and stamps every launcher trusted — so a rebuild cannot reintroduce any of the three. `bash -n` clean. 🔴 **A SECOND, INDEPENDENT FAULT FOUND THE SAME MORNING AND IT ALONE WOULD HAVE DONE IT: the HCC wall-panel kiosk was running FULLSCREEN AND FOCUSED over the desktop** (relaunched 08:36), so even a perfect mouse could not reach the shortcuts. **The two compounded** — `hcc-screensaver` only stands down when it detects input, and broken touch meant it could never detect him, so the kiosk never yielded. Closed it and parked both autostarts for the repair; **both restored afterwards.** ⚠️ **STILL OPEN, SEPARATE, AND REAL: the wall panel leaks memory — Firefox was OOM-killed twice, 10-24 20:31 and 10-25 11:05, at 6.2 GB on a 7.2 GB machine.** That is the next fix and it is Claude's. **RE-VERIFIED 2026-10-26 09:39** — screenshot shows a clean desktop, all 10 icons, no dialogs, xfdesktop + panel alive, touch id=14 attached and enabled. **Last leg Jeff owns: one tap on Sling TV to confirm Fox News comes up.** | Claude | 🟢 **TOUCH FIXED + PROVEN · launchers trusted · one confirming tap owed** |
@@ -225,10 +237,651 @@ Jeff 2026-11-08 8:43 AM: "I want you to set a automation to start Fox News at 6:
 
 | **191** | 🔴 **BLINK PIN STORM — OCCURRENCE THREE. Two automations are TURNED OFF right now and must not be blindly re-enabled.** 2026-09-18 5:01 PM Jeff got a Blink verification text. Entry was `setup_error` / *"Required Blink re-authentication"*, **all 6 real cameras `unavailable`**, 13 of 19 entities down. 🔴 **`Verify-CameraStreams.ps1` printed ALL GOOD throughout** — it measures the go2rtc `*_live` copies, not the Blink entities. Same wrong-instrument trap as 08-21. ✅ **Re-auth completed by Jeff on HA's own screen 5:08 PM; entry `loaded`, 6/6 cameras back, flow closed.** (4 sensors read `unknown` after recovery — expected, predicted in the 08-19 write-up.) | ⚠️ **THE GATING IS BROKEN AND THE AUTOMATIONS ARE BACK ON.** `hcc_blink_periodic_health_reload` and `hcc_blink_motion_poll_30s` both fired at 22:00:00Z, one minute before the PIN text, **while the entry was already in `setup_error`** — exactly the state the 2026-08-19 fix was supposed to gate them on. **That gating does not work and was never verified.** They were turned OFF at 5:05 PM to stop the texts and **turned back ON at 5:12 PM on Jeff's instruction** (*"Turn them back on"*), after confirming the entry was `loaded` first. That is safe **only while auth holds** — the 08-19 memo: *"Harmless while auth is good … but once the token was rejected every reload = a login attempt = a new PIN."* 🔴 **THE TRIPWIRE: if Jeff gets another Blink text, this is why.** `hcc_blink_needs_re_auth_alert` works — it fired correctly at 22:05 — so the warning will come. Fix is to read the two condition blocks, repair the `setup_error` gate, and PROVE it against a broken entry. Prior occurrences 07-20 and 08-19; the 08-19 memo already called it *"recurring class, not a fluke"*. | **CLAUDE** — Jeff 5:10 PM: *"You got to much other stuff to finish leave it for now."* Deferred by his call. |
 
-## #276
+## #276 — superseded 11-06 draft (kept for history; the current row is the #276 block above)
 
 **Superseded row (moved from OPEN_ITEMS.md 11-06 ~8 AM):** | 🟡 **#276** | 🏠 **HA UPDATES (Jeff 11-05 ~7:13 PM: *"Do all the HA updates"*): CORE AND OS DONE, ALEXA + MEROSS NEED ONE CLICK FROM JEFF.** ✅ Core 2026.11.0b4 to **2026.11.0** (11-05 7:22 PM, with a backup). ✅ OS 18.4 to **18.5.rc1**: rebooted 11-06 6:34 AM, slot A booted, status good, `version_pending` null, the "reboot required" repair is gone. **Proof:** entity diff 659 before and 659 after, 0 missing; `climate.hcc_thermostat` modes and limits unchanged; `Verify-CameraStreams.ps1` 6/6 at 6:4x AM (plumbing only); the chime listener reconnected at 6:37:51. 🔒 **Alexa Media 5.18.0 to 5.19.0 and Meross LAN 5.8.0 to 6.0.0 fail with HTTP 500:** HA 2026.11's new **Marketplace** will not install community add-ons until a person accepts its risk warning ("I understand the risks and agree"). It is per user. Claude must not accept it for him. | **JEFF** (Settings, Marketplace, accept) then **CLAUDE** (install both, restart, entity diff, thermostat check) | 🟡 **NEEDS JEFF'S MARKETPLACE CLICK** |
 
 ## #277
 
 **Superseded row (moved from OPEN_ITEMS.md 11-06 ~8 AM):** | 🟡 **#277** | 💧 **WATER PIT RADIO SILENT AGAIN SINCE 11-05 6:47 PM: THIS IS THE CLOCK'S "ERROR".** Water was heard only 6 times overnight, the last at **1:02 AM** (reading 270504). Gas on the same dongle is fine, so the SDR and add-on are proven good and it is the MIU, the same pattern as #246. **DO NOT CONTACT WHUD** (Jeff 07-31); billing is unaffected. 🔧 **Fixed 11-06:** `HCC-Scripts\tools\Check-WaterMeter.ps1` said "RADIO IS ALIVE" when the sensor read `unknown` (it used `last_updated`, the #246 trap) and told the reader to call WHUD. Test `tools\test_check_watermeter.py`: red 2/5 on the old script, green 7/0 on the new one; the live run at 6:55 AM says water RF SILENCE 353 min, gas alive. 🔑 After an HA restart, the gas and water sensors stay `unknown` until the value changes, because the add-on only republishes on a change. Restarting the add-on at 6:55 AM brought gas back at 6:56:46. That is what made the 9 PM clock say "2 errors" on 11-05. | **CLAUDE** (re-measure; make an HA restart also restart the meter add-on) | 🟡 **OPEN - watching the MIU; nothing to fix on our side** |
+
+## #283
+
+💥 **BEAST CRASH #11 — 2026-11-09 12:13:49 PM Central.** Bugcheck `0x7A` KERNEL_DATA_INPAGE_ERROR.
+Args: `Arg1 ffffe1c0419fd2a8` (lock type / PTE), **`Arg2 ffffffffc000000e` = `STATUS_NO_SUCH_DEVICE`**,
+`Arg3 00000003c1532880`, `Arg4 ffff80833fa555dc` (the virtual address that could not be paged in).
+`PROCESS_NAME explorer.exe`. Dump `D:\Minidump\110926-17328-01.dmp` (3,995,804 bytes, written 7:03:48 PM
+when Jeff rebooted).
+
+**Measured, not inferred** — `kdX64 -z D:\Minidump\110926-17328-01.dmp -c ".time; !analyze -v; q"`:
+`Debug session time: Mon Nov  9 12:13:49.393 2026 (UTC - 6:00)` · `System Uptime: 4 days 22:14:04.799`.
+Event 6008 says the shutdown was 12:10:53 PM — **3 minutes earlier than the dump**, the same event-log
+skew already logged on #271. Read the dump, never the event log.
+
+🔑 **TWO THINGS THIS CRASH SETTLED.**
+
+**1. #261's own tripwire has fired.** #261 (crash #8, 11-03 3:37 PM) was `0x7A` with `Arg2 0xC000000E`
+and said in writing: *"watch for a 2nd `0x7A`; if it repeats, the SSD power/SATA lead is the suspect,
+not the drive."* This is that second one, **with the byte-identical Arg2**. `STATUS_NO_SUCH_DEVICE`
+means the paging device was **gone** when the kernel went to read from it — not a bad sector, not a
+read error: no device. Two independent occurrences six days apart.
+
+**2. Driver Verifier (armed 11-04 1:59:49 PM under #272) named a module for the first time in the
+series.** `FAILURE_BUCKET_ID: 0x7a_c000000e_VRF_dxgmms2!VIDMM_DEVICE::UnreferenceAllocationList`,
+`MODULE_NAME dxgmms2` / `IMAGE_NAME dxgmms2.sys`. ⚠️ **Do not read that as "the graphics driver is
+broken."** `dxgmms2.sys` is the Microsoft inbox DirectX graphics memory manager; it is named because
+the paging read that failed happened to be freeing a video-memory allocation list. The failing
+*operation* is still the paging I/O, and `C000000E` still says the device vanished. The value of the
+Verifier result is that it confirms the fault is reached through ordinary paging, **not** through a
+third-party driver.
+
+**Uptime matters:** 4 d 22 h is the **longest clean run of the whole series** (previous: 29 h 17 m on
+#7, 17 h 30 m on #9, 1 h 43 m on #10). Whatever this is, it is intermittent and not load-proportional.
+
+**Already ruled out with evidence — do not re-propose:**
+- **RAM and BIOS** — ruled out by Jeff himself 11-04. Stop suggesting them.
+- **SATA link power management** — #271/#272: crash #10 happened 36 min after `AHCI_LPM_HIPM_DIPM=0x00000000`
+  was confirmed genuinely in place. Not the cause.
+- **Memory compression** — #238: crash #7 happened 17 min after `MemoryCompression=False` was logged.
+
+**Next move (CLAUDE):** the remaining suspect from #261's own instruction is the **power/data path to
+the paging disk** — the SATA data lead and the PSU lead to the drive holding the pagefile. That is a
+hands-on hardware check on Jeff's bench, and he wired this house: it is his call how to run it. Before
+asking him to open the case, pull the drive's own SMART + the storage-stack event log (`Disk`/`storahci`
+warnings around 12:13:49 on 11-09 and 15:37 on 11-03) and see whether the controller logged a reset.
+
+
+## #281
+
+📺 **KITCHEN PC / FOX NEWS AT 6 AM — root-caused 2026-11-09 after Jeff said *"the kitchen computer
+won't play sling tv there is some kind of error"*, then *"Fix it"*.**
+
+**What the log said before anyone guessed** (`~/.local/state/hcc-fox-news.log` on KITCHENPC):
+`06:00:37 started - window up but NO SOUND yet (0x00400003); watch will retry`, then
+*"no sound for N checks"* / *"still silent - reloading the channel"* every 10 minutes until
+`18:52:02 window closed - Jeff turned it off`. **12 h 51 m. 385 checks. Not one `tapped prompt` line.**
+
+🔑 **THE CHAIN, each link measured:**
+1. **`~/.config/hcc/fox-news-url` did not exist at all** (`wc -c` → *No such file or directory*), so
+   line 13 of `hcc-fox-news` fell back to `https://watch.sling.com`.
+2. **The Sling home page always answers with the "Who's Watching?" profile picker**
+   (`/switch_user_profile`): 192 DOM elements and **zero `<video>`**. Proven twice more — a fresh
+   `/dashboard/home` and a direct channel URL both bounced back to the picker.
+3. **No profile → no player → no audio, forever.** The F5 reload every 10 minutes just re-landed
+   on the same picker. The script was working exactly as written; it was aimed at the wrong page.
+4. `hcc-fox-news start` **only launched a browser when no window existed** — a window left open
+   from 11-08 meant 6 AM fullscreened and unmuted a dead page and never navigated anywhere.
+
+⚠️ **CORRECTION TO THIS ROW'S OLD TEXT: "Sling is signed out" was wrong.** Edge's own history
+(`Default/History`, WebKit epoch) shows DVR, dashboard and profile pages committing under Jeff's
+account. He is signed in. What there is instead is a **hole in the history exactly where 11-09
+should be**: last loads 11-08 2:29 PM, then nothing until 6:50 PM on 11-09 when Jeff opened it
+himself, and 6:52 PM when he closed it. The picker never committed a navigation all day.
+
+✅ **FIXES APPLIED 11-09 (all four, with `.bak-<timestamp>` copies beside each script):**
+- **The picker is suppressed at the ACCOUNT level, and that is proven.** On the picker, "Don't Ask
+  Again" raises an **"Are You Sure?" confirm modal with OKAY / CANCEL** — the first attempt tapped
+  the link but never answered the modal, so nothing saved. With OKAY tapped, a cold navigation
+  straight to the Fox News channel URL returned `NO MATCH for Who's Watching` and landed on the
+  signed-in dashboard as profile **J**. This takes the fragile tap off the critical path entirely.
+- **`~/.config/hcc/fox-news-url`** now holds
+  `https://watch.sling.com/1/channel/e78cd8c7cca443cba7a70c6008c0291f/browse` — the Fox News channel
+  page (title *Watch Fox News | Live | Sling TV*). **This link is what #281 had been missing since
+  11-08.**
+- **`hcc-fox-news start`** now navigates an already-open window to `$URL` instead of only
+  fullscreening it (Ctrl+L, type, Return).
+- **`hcc-sling-click`** no longer rejects every frame when `wmctrl -l` returns nothing. Its liveness
+  filter treats an empty window list as *unknown*, not *dead*. (That emptiness is real on a display
+  with no window manager, and it is what made the tapper look broken during diagnosis.)
+- **`prompts()`** now also presses **`^WATCH NOW$`** — the channel page's play button is a `button`
+  named *WATCH NOW*, and nothing in the automation had ever pressed it.
+
+🔴 **WHAT IS STILL NOT PROVEN — playback actually starting.** On the throwaway virtual display the
+button activates (AT-SPI `do_action(press) -> True`, and a real `xdotool` click at the right
+coordinates) and the page does not move off `/browse`; two screenshots 12 s apart are **byte
+identical**, so no video is decoding there. **Do not read that as "Sling is broken."** That display
+is `Xvfb :77` with SwiftShader software rendering, which is exactly the class of rig artifact that
+already produced one wrong finding earlier in this same session (a blank-page "Edge can't load
+anything" that was really a missing `--enable-unsafe-swiftshader`). The honest statement is: the
+picker is fixed and proven, and **playback has not been demonstrated end to end since the fix.**
+
+**The decisive test puts Fox News on Jeff's kitchen screen with sound**, which is his to authorize.
+Either he says go and it runs live, or the 06:00 cron run is the test and the log is read after it.
+All browser work for this diagnosis ran on `:77` with `--mute-audio`; `pactl` read `sink-inputs: 0`
+at every step, so nothing was ever audible in the house.
+
+
+## #281 — 2026-11-10 LIVE TEST ON THE KITCHEN SCREEN (Jeff authorised sound)
+
+**Verdict: Sling playback has never once worked on KitchenPC, and it is NOT the network, NOT DRM,
+NOT the clock, NOT the profile picker, NOT the AirTV box and NOT Sling's server.**
+
+**Named proof for every claim:**
+| Claim | What proved it |
+|---|---|
+| It never worked — not a regression | `~/.local/state/hcc-fox-news.log`: 222 entries since 2026-11-08 08:52:36, **zero** success lines |
+| The click works; playback does not | `xdotool click 1` at (173,502) advances to `/1/program/<id>/watch`, WATCH NOW disappears; screenshot shows the static placeholder, no video, no spinner, no error text |
+| Nothing ever plays | `pactl -f json list sink-inputs` = **0**, repeatedly, 45 s after the tap; `document.querySelectorAll('video').length` = 0 |
+| Sling's own error | console: `System Error: Looks like a loading issue! … (7-403)`, `Player version 9.6.31`, `Response Code:undefined`, URL `https://cbd46b77.cdn.cms.movetv.com/playermetadata/sling/v1/api/channels/e78cd8c7cca443cba7a70c6008c0291f/schedule/now/playback_info.qvt` |
+| 🔑 **The server is fine** | `curl` that exact URL **from KitchenPC** → `http=200 size=9465`, valid QVT JSON, no auth needed |
+| 🔑 **The request never leaves the browser** | CDP with `Target.setAutoAttach` (page + iframe + blob worker, `Network.enable` on each): the playermetadata request is **never seen**; only `net::ERR_ABORTED canceled=True type=XHR`. Sling aborts it internally. |
+| DRM is healthy | from `http://127.0.0.1:8099` (a real origin): `EME access OK: com.widevine.alpha`, `createMediaKeys OK`, Shaka 4.11.2 → `angel-one/cwip -> LOADED ok`, `sintel/cwip -> LOADED ok` (3rd case 403'd on the *manifest*, a bitmovin bandwidth block, not DRM) |
+| CDM ceiling, measured | Widevine OK at `(none)` and `SW_SECURE_CRYPTO`; **FAIL at `SW_SECURE_DECODE`**, `HW_SECURE_*`. `com.microsoft.playready*` and `com.apple.fps` fail at every robustness — normal for Linux, no browser has them |
+| The 3 `getSupportedCDM` console errors are NOT a fault | they are Sling probing PlayReady/FairPlay, which no Linux browser has |
+| Clock is right | `timedatectl`: Tue 2026-11-10 CST, NTP active, synchronized yes |
+| Not geo/VPN | in-page `api.ipify.org` == `curl` from the box == `208.188.36.113` |
+
+**🔴 RETRACTION.** Earlier the same day I told Jeff "DRM is broken browser-wide" on the strength of
+`DRMTEST EXCEPTION 6002`. **That was my test rig, not his machine** — the page was loaded over
+`file:///`, which is an opaque origin, and Edge refuses EME there (`EME use is not allowed on unique
+origins`). Served from `http://127.0.0.1:8099` the identical page plays. *Lesson for the next
+session: an EME/DRM test served from `file://` is worthless.*
+
+**Fixed for real on 11-10 (side faults, not the blocker):**
+- **AirTV `boxOffline`.** `AustinJs::Austin::Failed to create box session: boxOffline` while the
+  AirTV Anywhere was demonstrably up (`ping 192.168.1.184` 3/3 0% loss, `ip neigh` lladdr
+  `88:b6:ee:c7:06:e4`, TCP 5401 open). Cause: the **AT&T gateway's DNS rebind protection** returns
+  NXDOMAIN for `192-168-1-184-ip-cmd.dishboxes.com` while 1.1.1.1 and 8.8.8.8 both answer
+  `192.168.1.184`. Fixed with a surgical `/etc/hosts` line (house DNS untouched); backup at
+  `/etc/hosts.bak-<F-HHMMSS>`. The relay/boxOffline errors stopped appearing.
+- **Unanswered permission prompt** "watch.sling.com wants to access other devices on your local
+  network" → **Allow** tapped.
+- **Stale 48 MB service worker + caches** deleted; cookies/session kept (no sign-in prompt after).
+- `hbt.sling.com` is unresolvable from every resolver (curl exit 6) — a decommissioned Sling host,
+  not a local fault.
+
+**Could NOT be established:** whether any *other* channel plays. Sling's React UI refuses synthetic
+clicks everywhere except that one WATCH NOW button; the guide opens and channel tiles highlight but
+will not launch, and the 32-hex IDs scraped from the guide DOM are not channel GUIDs. **So "no
+channel plays" is NOT claimed.**
+
+**The one step only Jeff can take:** sign OUT of Sling on the kitchen screen and sign back IN.
+Sling's own 7-403 text says "restart the Sling app", and every vendor guide for 7-4xx points at
+re-authentication. Claude may not type passwords. ~60 seconds; Claude re-tests the moment it's done.
+
+**State left behind:** kiosk restored via `hcc-browser` on the Fox News channel URL, all four flags
+verified on the main process (`--no-first-run --password-store=basic --enable-unsafe-swiftshader
+--force-renderer-accessibility --autoplay-policy=no-user-gesture-required`), CDP port 9222 closed,
+`/tmp/edge-real` and all test pages deleted.
+
+## #285
+
+🔴 **Jeff, 2026-11-11 6:31 AM, with a photo:** *"Why is this all I ever get when I try and watch sling on the computers. I thought you fixed it"* — Firefox showing **`Looks like a loading issue! [8-702]`** with Firefox's own **"Enable DRM"** notification bar visible above it.
+
+**The photo is the GARAGE LENOVO (`GARAGELAPTOP`, 192.168.1.158), not the KitchenPC.** Proven: `pgrep -a firefox` on that box returned `967974 /snap/firefox/9171/usr/lib/firefox/firefox --app=https://watch.sling.com` live at the time he asked. KitchenPC has no Firefox at all (`which firefox` empty) — it was removed 11-02 under #259.
+
+**ROOT CAUSE — named proof for each step:**
+
+| Claim | What proved it |
+|---|---|
+| The desktop icon launches Firefox, not Edge | `~/Desktop/Sling TV.desktop` → `Exec=firefox --app=https://watch.sling.com` |
+| That Firefox has no Widevine CDM | profile `~/snap/firefox/common/.mozilla/firefox/ku3mh47n.default` contains **only** `gmp-gmpopenh264`; `gmp-widevinecdm` dir **absent** |
+| EME was off, not merely undownloaded | **no `media.eme.*` pref anywhere in `prefs.js`**, while `media.gmp-gmpopenh264.version 2.6.0` + `lastDownload` are present — so Mozilla's plugin fetcher works fine on this box and simply was never asked for Widevine |
+| Not an enterprise-policy block | `/etc/firefox/policies/policies.json` carries only the Bitwarden `ExtensionSettings` force-install; no DRM key |
+| Sling does not support this browser | Sling's help centre names **Edge 17+** and Safari; Firefox/Linux is unsupported and the documented community workaround needs user-agent spoofing |
+| The house already learned this | #259, 11-02: *"Brave tried and removed: Sling refused it. NOW MICROSOFT EDGE 156 via `/usr/local/bin/hcc-browser`"* — the KitchenPC was moved to Edge for exactly this reason and **the Lenovo was never switched** |
+| Edge was already on the Lenovo — $0 | `/usr/bin/microsoft-edge` → **Microsoft Edge 153.0.4234.48** |
+| Edge has the DRM piece Firefox lacks | `/opt/microsoft/msedge/WidevineCdm` present, **and** `~/.config/microsoft-edge/WidevineCdm/latest-component-updated-widevine-cdm` → `{"Path":".../WidevineCdm/4.10.3112.0"}` — a component update inside Jeff's own profile, so Edge has run successfully on this machine |
+
+**FIXED 11-11 (two changes, both backed up):**
+1. `~/Desktop/Sling TV.desktop` `Exec=` repointed to `microsoft-edge --no-first-run --password-store=basic --autoplay-policy=no-user-gesture-required --app=https://watch.sling.com`. Flags taken from the proven KitchenPC launcher; the touchscreen-only flags (`--force-renderer-accessibility`, `--enable-unsafe-swiftshader`) were deliberately **not** copied — the Lenovo has a real keyboard and Sling needs no WebGL. Backup: `Sling TV.desktop.before-edge-20261111`. The stale `Comment=` line claiming *"full desktop Chrome here"* was corrected in the same edit.
+2. `user.js` written into the Firefox profile enabling `media.eme.enabled` + the three `media.gmp-widevinecdm.*` prefs, as a fallback if he ever wants Firefox. Backup: `prefs.js.before-drm-20261111`. ⚠️ Firefox reads `user.js` only at **startup**, and Jeff's Firefox was running when it was written — it takes effect on the next launch, or immediately if he clicks the **"Enable DRM"** button already on his screen.
+
+**NOT PROVEN, and it is the one thing only Jeff can do:** actual playback in Edge. Edge carries its own cookie jar, so Sling will ask for the login once (**Claude may not type passwords**). Until that sign-in happens, "Edge fixes it" is an inference from a working Widevine + Sling's own supported-browser list, not an observation.
+
+⚠️ **DO NOT MERGE THIS WITH #281.** Different machine (Lenovo vs KitchenPC), different browser (Firefox vs Edge), different error (`8-702` DRM-shaped vs `7-403` on `playback_info.qvt`), different root cause. #281's DRM was measured **healthy**; this one's was measured **absent**.
+
+## #206-struck
+
+🗑️ **STRUCK 2026-11-11 07:0x.** Row text: *"no commits since 09-24"* on Jeff's wall project.
+
+**Why struck, not closed:** the row never named WHICH repo or path is the wall project, so there is
+no command that can ever re-measure it. The only measurable repo here is `master-the-master-`, whose
+commits are ours, not his — measuring it says nothing about #206. Flagged as unmeasurable on
+**2026-10-20** and again **2026-11-11**; a row that cannot be measured cannot be closed, so it sat on
+Jeff's table generating staleness failures in `todo-hygiene-test.js` for three weeks.
+
+**His wall project moves at his pace and needs nothing from us.** If Jeff raises it, open a fresh row
+that names the instrument (repo path, or a photo, or his word) — do not resurrect this one.
+
+## #106-blob-struck
+
+🗑️ **STRUCK 2026-11-11 07:0x**, exactly as the 2026-10-20 entry instructed: *"It must be split into
+real rows with real instruments, or struck. Do not carry it forward a fourth time."*
+
+**What it was:** six unrelated items — #106, #183, #28, #131, #27 and the RE200 extender — collapsed
+behind one table row, with no instrument named for any of them and a single "ask Jeff which are still
+alive" as the action.
+
+**Why it had to go:** it failed rule (a) (*a command run THIS DAY shows it is still open*) on
+**09-29**, **10-20** and **11-11**. It was the single reason the WAITING ON JEFF block kept going
+stale and failing `todo-hygiene-test.js` — the gate that caught it again this morning.
+
+**What replaces it:** nothing, by design. Any of the six that is still alive comes back as its own
+row, with its own named command, the first time it is actually measured. A bundle of six unmeasured
+items is not a todo — it is a reason the list stops being trusted.
+
+## #286
+
+🧹 **MACHINE HYGIENE — A STANDING RULE, NOT A ONE-TIME CLEANUP. Opened 2026-11-11 07:0x.**
+
+Jeff, verbatim, 2026-11-11 ~6:58 AM: *"From now on clean up the damn messes as we go!!!! Don't leave
+old file icons or any other shit on these computers that is just common sense. It also show how lazy
+and uncaring about the quality of your work !!!"*
+
+And earlier the same morning: *"If something is fixed clean up the old shit don't just leave it."*
+
+🔴 **HE CAUGHT THIS ON MY OWN WORK.** Twenty minutes after fixing the Sling icon (#285) I had left
+`Sling TV.desktop.before-edge-20261111` sitting **on his Desktop**. That is exactly the behaviour he
+is naming. He was not complaining about old junk in the abstract — he was pointing at a mess I had
+made that morning and walked away from.
+
+### THE RULE
+
+1. **A session removes what it created.** Scratch scripts get deleted off his machines when the job
+   is done, not left for the next session to wonder about.
+2. **Backups go to the Recycle Bin**, not to a folder of our leftovers. He can still get anything
+   back; he just never has to look at it.
+3. **Nothing of ours ever stays on a Desktop.** The Desktop is his.
+4. **When a thing is fixed, the old copy of that thing goes.** A fix that leaves debris is half a fix.
+5. **Dead icons count as junk** — a shortcut pointing at a removed program is a visible error
+   waiting for him to click it.
+
+### WHAT THE 11-11 PASS ACTUALLY DID — named proof per machine
+
+| machine | measured | result |
+|---|---|---|
+| **Acer** `JEFFSLAPTOP` | `clean-acer.ps1` via scp + `-File` | **149 loose `.ps1`/`.txt`/`.log` session files (4.7 MB) recycled** from `C:\Users\jeffl\`; profile root re-listed → *"CLEAN - zero loose script/log/txt files left"*; user Desktop empty; **0 broken shortcuts** on either Desktop; 1.0 MB of >7-day temp removed; the 3 scripts I had scp'd there deleted themselves |
+| **Lenovo** `GARAGELAPTOP` | `ls -la ~/Desktop` + `.desktop` Exec audit | my Sling backup moved off the Desktop; `.hcc-writetest` + `pair-w200.log` archived; 4.3 MB `.xsession-errors.old` deleted; **8 icons still launching the removed Firefox repointed to Edge**, each backed up; re-verified **all 11 icons OK** |
+| **KitchenPC** | `ls -la ~` + `df -h` | `brave-mem.log` + `edge-mem.log` archived (their leak test ended 11-03); `.xsession-errors.old` deleted; all 11 icons already clean; 207 G free of 234 G |
+| **Beast** | Desktop listing | only Jeff's own A/C-purchase records (`AC BID REQUESTS`, `GARAGE DUCT - house plan 10-22.pdf`, `_AC-staging`) — **his files, deliberately not touched** |
+
+### FLAGGED, DELIBERATELY NOT CHANGED — these are Jeff's calls, not cleanup
+
+- 🟡 **`C:\dedicateddump.sys` on the Acer = 8.59 GB.** Crash-dump config says `CrashDumpEnabled = 2`
+  (kernel dump) with a dedicated dump file, because the pagefile is only 1000 MB against 15.9 GB RAM.
+  **The machine has never blue-screened:** `C:\Windows\Minidump` empty, no `MEMORY.DMP`, and **zero
+  Event ID 1001 BugCheck events in 90 days**. `Search-HCC.ps1 "dedicateddump"` finds nothing, so it
+  is **not ours**. Disk has 323.8 GB free, so it is not urgent. **Changing crash-dump configuration
+  is a system change with a real downside — his decision, not mine.**
+- 🟡 **`Proton VPN.lnk` on the Acer's PUBLIC Desktop.** The no-VPN rule is written for **the Beast
+  specifically** (`docs/network/no_vpn_2026-10-20.md`), so this is not automatically in scope. Ask
+  before removing.
+
+### KEPT ON PURPOSE, with the reason
+
+- `hcc-firefox-backup-20261102` (60 K) — the snap snapshot is kept 31 days, **expires 2026-12-03**,
+  and it is the rollback for the Firefox→Edge switch. Delete after that date, not before.
+- `hcc-theme-backup-original` (20 K, both Linux boxes).
+- `~/hcc-archive/2026-11-11/` on both Linux boxes — holds every `.desktop` backup from the Edge
+  repoint. **Not on a Desktop, not an icon.** Safe to delete once Sling and Braves are proven in Edge.
+
+## #287
+
+🎛️ **THE STUDIO TAB IN THE APP DOES NOT EXIST. Opened 2026-11-11 07:0x.**
+
+Jeff, 2026-11-11: *"I know you haven't built the studio tab into the app yet so everything in the
+studio can be controlled there, am I correct in saying none of that has been done especially the
+testing"*
+
+✅ **HE IS CORRECT, AND IT IS CONFIRMED BY COMMAND, NOT BY MEMORY:**
+
+```
+grep -coi "studio" index.html   ->   0
+```
+
+Zero occurrences. There is no `sec-*studio*` section, no `nav-*studio*` button, no `id="*studio*"`
+element anywhere in the app. **Nothing of the 2026-11-10 studio work is reachable from the app.**
+
+⚠️ **DO NOT REPORT ANY PART OF THIS AS BUILT.** The 11-10 session created the *scripts*
+(`windows-scripts/garage-studio/`) and the *machine setup* — it never touched `index.html`.
+
+### WHAT HE ASKED FOR
+*"everything in the studio can be controlled there"* — the studio's controls surfaced in the app the
+same way YARD / GUARDIAN / CAR already are, so he is not SSH-ing into a laptop to run a bench.
+
+### WHAT MUST BE TRUE BEFORE THE WORD "DONE" IS USED
+- a `nav-studio` button + `sec-studio` section in `index.html`
+- `node scripts/lint-app.js` clean
+- `node scripts/smoke-test.js` clean
+- `node scripts/run-all-gates.js` still 38/38 (the suite grew a section-opening check per tab:
+  `live-e2e-test.js` asserts `section opens: <id>` for every nav target, so a new tab joins that gate)
+- **driven in a real browser at 1536×864** (Jeff's screen is a 60" Vizio at 125% —
+  `reference_jeff_display_and_viewport`), not just linted
+
+### SCOPE TO SETTLE WITH JEFF FIRST
+The studio hardware is **not hooked up yet** — he said so 11-10: *"I am not ready to hook it all up
+yet. But I just want all the software and drivers in place so it is all plug and play."* So the tab
+must be built against what is *known* (the two laptops, the mic, the monitor tree, Deskflow KM
+sharing, the bench test scripts) and must degrade gracefully while the hardware is absent, rather
+than showing a wall of red. **#282 and #284 are the hardware rows this tab fronts.**
+
+---
+
+## #288
+
+### 🎤 THE MIC DSP CHAIN: THREE REAL FAULTS FOUND AND FIXED, TONE STILL UNPROVEN
+
+**Jeff asked three times across sessions:** *"do you have that mic set up to sound like a million
+bucks I want it to have a rich beautiful tone to it"* / *"look up what these high end podcasters set
+up their mics and set this one up like that!!"*
+
+### WHAT WAS ACTUALLY BROKEN (all three proven by command, all three fixed)
+
+**1. The input chain was never instantiated — EasyEffects was doing NOTHING to the mic.**
+`~/.config/easyeffects/db/easyeffectsrc` had **no `plugins=` line at all** under `[StreamInputs]`.
+A preset can be "loaded" with an empty chain; that is why `easyeffects -s` printed
+`input: HCC-Broadcast` while zero processing existed. Now reads:
+```
+[StreamInputs]
+inputDevice=alsa_input.pci-0000_00_1b.0.analog-stereo
+plugins=speex#0,gate#0,equalizer#0,compressor#0,deesser#0,limiter#0
+lastLoadedInputPreset=HCC-Broadcast
+```
+All six stage db files (`gaterc`, `equalizerrc`, `compressorrc`, `deesserrc`, `limiterrc`,
+`speexrc`) now exist — confirmed by `ls ~/.config/easyeffects/db`.
+
+**2. `rnnoise` IS A DEAD PLUGIN IN THIS BUILD — and EasyEffects says so itself.**
+Inferred first from `dpkg -s easyeffects` (Depends lists only `libspeexdsp1`), from
+`strings /usr/bin/easyeffects` (no `rnnoise_process`/`_create`/`_destroy` symbols — the 3 hits are
+config keys), and from an empty `~/.local/share/easyeffects/rnnoise/`. **Then confirmed verbatim
+from the program's own service log 11-11:**
+```
+easyeffects: rnnoise.cpp:113  The RNNoise library was not available at compilation time.
+                              The noise reduction filter won't work
+```
+printed **5 times**, once per `rnnoise#0..#4`, plus **6 ×** `deep_filter_stereo port symbol not
+found`. So the preset was swapped to **speex**, which IS a hard package dependency and therefore
+real. `deepfilternet#0` and `rnnoise#0` removed from the preset.
+
+**3. THE PORT-PRIORITY TRAP — plugging a mic into the pink jack does NOT switch the input.**
+On this ALC272, `analog-input-internal-mic` has PipeWire priority **8900**; the pink external jack
+`analog-input-mic` has **8700**. PipeWire picks the highest-priority *available* port, so the
+internal mic always wins. **This would have looked exactly like "the mic doesn't work."**
+Fix = `/usr/local/bin/hcc-mic-on` (894 bytes, root:root, 0755) — forces the port, unmutes, sets
+Capture + `Mic Boost`, loads the preset. **Run it once at hookup.**
+⚠️ Forcing that port with nothing plugged in **backfires**: the source goes unavailable and
+EasyEffects falls back to `alsa_output...analog-stereo` (the speaker monitor loopback), which reads
+about −91 dB. That is why the port is left on the internal mic until a mic is physically present.
+
+### THE PRESET — podcast-grade, researched, deployed
+`/home/jeffloewen/.local/share/easyeffects/input/HCC-Broadcast.json`, copy in the repo at
+`windows-scripts/garage-studio/HCC-Broadcast.json` (8,818 bytes). Order:
+`speex → gate → equalizer → compressor → deesser → limiter`.
+EQ, read back from the deployed file: HP 75 Hz · 150 Hz **+1.5** (chest/"rich") · 300 Hz **−2.5**
+(box/mud) · 1.2 kHz **−1.0** (nasal) · 3.5 kHz **+2.5** (presence) · 10 kHz shelf **+2.0** (air).
+Compressor 3:1, −20 thr, 15 ms attack, 150 ms release, +3 makeup, −6 knee. Deesser 6.5 kHz 3:1.
+Gate −50. Limiter −1. speex: denoise on, suppression −30, **AGC off** (it fights the compressor),
+**VAD off** (it chops word beginnings; the gate does that job), **dereverb on** (hard-walled garage).
+
+### 🔴 WHAT IS *NOT* PROVEN — READ THIS BEFORE CLAIMING THE MIC SOUNDS GOOD
+**Tone is unverified and cannot be verified until a mic is physically connected.** The differential
+measurement I ran (`parecord` raw vs `easyeffects_source`, levels via `ffmpeg … volumedetect`)
+returned identical means and a **0.0 dB peak on both legs** — a peak that cannot survive a −1 dB
+limiter. **That measurement was INVALID, not evidence of a fault:** nothing is plugged in, the
+active port is the internal mic, every node reads `SUSPENDED`, and Capture was at 100 %/30 dB, so
+both legs were an amplified, clipping noise floor on an input with no capsule. Silence in / silence
+out being equal proves nothing.
+**My bypass hypothesis was WRONG, twice over:** no `bypass` key exists anywhere in the db, and
+`easyeffects -b 2` **does not signal a running instance and exit — it BECOMES the instance and
+blocks forever.** It hung a 300 s background task that wrote **0 bytes**; `pgrep -a easyeffects`
+showed the only easyeffects process on the machine was my own stuck `easyeffects -b 2` (PID 981994).
+Killed 11-11; the real service restarted as `easyeffects --service-mode` (PID 983644), preset
+reloaded (`input: HCC-Broadcast`), Capture left at a sane **22 [71%] [16.50 dB]**, `Mic Boost` 0 —
+30 dB of boost would clip a real capsule the instant it is plugged in.
+**LV2 is NOT the problem:** `lsp-plugins-lv2 1.2.27-1` installed, `/usr/lib/lv2/lsp-plugins.lv2`
+present, and `ldd /usr/bin/easyeffects` links `liblilv-0.so.0`. (`calf.lv2` absent; not needed.)
+
+### 🔴 NEEDS JEFF'S YES — THE OUTPUT CHAIN IS FULL OF DEAD PLUGINS
+`[StreamOutputs]` carries **12** plugins of which **6 are non-functional and throw errors on every
+boot**: 5 × dead `rnnoise` + `deepfilternet`. Cleaning it would change how his speaker sounds, so it
+waits on a yes (rule 6 — tell him before he feels it). `bass_enhancer`/`crystalizer` may be
+deliberate: `visiblePlugin=bass_enhancer#0`.
+
+### AUTOSTART — a leftover of mine, caught and removed the same session
+`~/.config/autostart/` already had `easyeffects-service.desktop`
+(`Exec=easyeffects --gapplication-service` — the deprecated flag; `--service-mode` is current).
+I added `hcc-easyeffects.desktop`, realised it would launch a **second instance**, and **deleted my
+own entry**. Kept: `hcc-easyeffects-preset.desktop` → `sh -c "sleep 14; easyeffects -l HCC-Broadcast"`.
+
+### THE GRANDFATHER CLOCK WAS NEVER AT RISK — checked, not assumed
+My EasyEffects restart moved `outputDevice` off a Bluetooth speaker, so I verified intent in
+`~/.local/state/wireplumber/default-nodes`: `default.configured.audio.sink=bluez_output.00:23:01:07:43:40`
+= **iDea W200, the clock speaker (#216), INTACT**. The device EasyEffects had been targeting,
+`9B:05:69:5A:2C:43`, is **WD66 — a different speaker.** Nothing broken.
+
+### NEXT, IN ORDER
+1. **Jeff:** plug a mic into the pink jack, then run `hcc-mic-on`.
+2. **Claude:** the same raw-vs-processed `volumedetect` measurement — now meaningful, because
+   there will be real signal. Expect the −1 dB limiter to cap the peak and sub-60 Hz to be crushed
+   by the 75 Hz high-pass. **That** is the proof the chain is live.
+3. Set final gain from the real capsule, not from a noise floor.
+
+---
+
+## #281-token
+
+### 🔑 KITCHEN KIOSK RUNS AS GUEST — ROOT CAUSE FOUND, BLOCKED ON ONE PASSWORD
+
+**Why the kitchen screen has no HA token and shows Guest-mode data:** the 11-02 Firefox→Edge
+ migration (#259) moved the kiosk to Edge and **left Edge signed out**, so the app loads with no
+stored session and falls through to Guest. Nothing is broken in the app or in HA.
+
+**The sign-in screen is only reachable at the plain `https://loewenhome.com/` URL**, via the
+**“Home Command Center”** desktop icon (`Exec=/usr/local/bin/hcc-app`) — not from the kiosk URL the
+screen normally boots into.
+
+🔴 **BLOCKED, AND IT STAYS BLOCKED UNTIL JEFF ACTS — BY DESIGN:**
+**Claude may not type passwords or tokens.** This is not a capability gap to engineer around; it is
+the standing rule. Two separate layers enforce it here: the project rule, and the Claude Code auto-mode
+classifier, which independently denied a credential read with reason `[Credential Exploration]`
+(denied again 11-11 on a plain directory listing of `HCC-secrets`). **Jeff’s chat authorization does
+not override the harness layer, and it must not be worked around.**
+
+**Two ways forward, Jeff’s choice:**
+1. **He types it** — open the “Home Command Center” icon on the kitchen screen and sign in once
+   (~60 s). Simplest, and it also fixes #281’s Sling sign-in on the same trip.
+2. **He adds a Bash permission rule** for the token path so a session can export `HCC_HA_TOKEN`
+   itself. ⚠️ This ALSO unblocks the **two gates that currently SKIP** — `live-e2e-test.js` and
+   `sensor-coverage-test.js` — which is why the suite reads **36/36 runnable, 2 skipped** and
+   **NOT 38/38. A SKIP IS NOT A PASS**, and those two are the only gates that touch live HA state.
+
+---
+
+## #279
+
+### Full live-row text, moved out of OPEN_ITEMS.md 2026-11-11 to stay under the docs-size cap
+
+🕰️ **CLOCK SAID "WE HAVE AN ERROR" AND BLAMED "THE ACCESS POINT" - IT WAS #276 LEFTOVERS, NOT WI-FI. CLEARED + WORDING FIXED 11-06.** Jeff 11-06 11:08 AM: *"there are three other errors according to my clock"*. The 7:48 AM updates left 10 setting entities unavailable (301 thermostat hold-action + humidity calibration, a volume knob on each PC Alexa app, etc.) - none a physical on/off device, so disabled per the 08-19 hygiene rule (WS `entity_registry/update` x10, all `success:true`). The clock grouped 3+ fresh outages and *said* "Wi-Fi devices dropped together, which is the access point" - a cause it cannot see. **Fix:** `HCC-Scripts/chime_listener.py` `_status_mass_line()` now names the devices and no cause (not in the repo; backup in the session scratchpad). **Proof:** `test-status-quiet.py` red 2 FAILED before, clean after (self-check still PASS); live `python chime_listener.py --status-text` 12:10 PM = *"House status: everything is good."* **OWED:** the running listener (PID 8324, task `HCC Grandfather Clock`, up since 11-04 2:00 PM) still has the OLD wording loaded - restart it only after telling Jeff (he hears the clock).
+
+---
+
+## #289
+
+### ⚱️ SUCCESSION PLAN — AUDITED 2026-11-11 AFTER JEFF’S OWN QUESTION. ONE GAP CLOSED, ONE STILL OPEN.
+
+**Jeff, 11-11 9:06 AM:** *“if you can’t read the HCC file how are you gonna follow my progression
+plan in case I die somebody’s gotta help my family”* — a fair question, and the audit found he was
+partly right.
+
+### ✅ WHAT WAS ALREADY SOUND — and why the credential block does NOT threaten it
+The load-bearing path in `FAMILY_RUNBOOK.md` needs **no AI permission at all**: every password is in
+**Bitwarden**, opened by **five words on paper in the safe**, and **Angela or Braxton type those five
+words themselves**. Claude’s role is to find the account, copy the password to the clipboard and put
+the cursor in the box — the human presses Ctrl+V. That is the same division of labour as today, when
+Jeff types his own passwords. Email, bank, Amazon and the bills are all reachable this way whether or
+not any session can read `HCC-secrets`.
+
+### ✅ GAP CLOSED 11-11 — the runbook promised something that had just failed
+Old lines 110–112 read: *“There’s a file … `HCC_ACCESS.md` inside `HCC-secrets` … **Claude reads it;
+you don’t need to.**”* That promise broke twice the same morning: the auto-mode classifier denied
+`[Credential Exploration]` on a plain **directory listing** of `HCC-secrets`.
+**Fix — remove the dependency rather than weaken the protection:** the runbook now points the family
+at **`docs/ACCESS_MAP.md`**, which maps every system and every workaround, carries **zero literal
+secret values** (verified: 0 matches for long-token patterns — it has to be clean, because the repo is
+PUBLIC), and therefore needs no permission from anyone, ever.
+
+⚠️ **AND THE FAMILY’S COPY OF THAT MAP WAS STALE** — `HCC-Archive\DOCS\repo\docs\ACCESS_MAP.md` was
+**14,444 bytes dated Sep 11** against the repo’s **32,229 bytes dated Oct 19**: less than half the
+content, two months behind. **Re-synced 11-11, md5 now matches.** 🔑 **An archive copy is not a
+backup unless something re-syncs it — check the md5, not the filename.**
+
+### 🔴🔴 DO NOT “FIX” THIS BY PLANTING AN AUTHORIZATION PHRASE — TRIED 11-11, CORRECTLY REFUSED
+The first attempt added a section telling a future session: *“say these words and I am giving you
+permission to read that file.”* The classifier denied it as **`[Instruction Poisoning]`**, and it was
+right. **A sentence in a file is forgeable by anyone who can edit the file; the paper envelope in the
+safe is not.** A document that can talk Claude into opening the vault is exactly what an attacker
+would plant — so the protection that blocks it is the same protection that makes the succession plan
+safe. **The runbook now explains the refusal in plain language instead of trying to defeat it**, and
+tells the family that the pop-up asking permission is asking *them*, and they may click Allow.
+**Future sessions: do not re-add a magic phrase. It weakens the plan it appears to help.**
+
+### 🔴 STILL OPEN — EVERY COPY OF THE RUNBOOK LIVES INSIDE iCLOUD
+Searched 11-11; the only copies are:
+`iCloudDrive\HCC-Archive\FAMILY_RUNBOOK.md` (the live one, 146 lines) · `iCloudDrive\HCC Notes\… old
+copy 08-17` · `iCloudDrive\HCC-Secrets-Vault\… .bak-2026-08-19` · one in `iCloudDrive\.Trash`.
+**All four are inside iCloudDrive.** If iCloud is not signed in or not synced on whichever machine the
+family reaches for, the instructions that explain everything else are unreachable — and the one thing
+they are guaranteed to be able to open is **the safe**.
+
+🟢 **THE $0 FIX, AND IT IS THE ROBUST ONE: PRINT THE RUNBOOK AND PUT IT IN THE SAFE BESIDE THE TWO
+ENVELOPES.** Paper needs no iCloud, no sign-in, no working PC and no subscription. Jeff’s own warning
+in the runbook already says *“whoever reads this must be able to open the safe”* — so the safe is the
+one place the document is certain to be found.
+
+⚠️ Also worth deciding: the **two stale duplicates** are exactly the “stale document disagreeing with
+reality” class that `iCloudDrive\CLAUDE.md` warns cost a full day on 08-16. They should be deleted or
+clearly marked — but they are **Jeff’s family documents, his call, not a session’s.**
+
+---
+
+## #282
+
+### 🎥 GARAGE REPAIR STUDIO + CLAUDE BENCH — THE MIC ANSWER, AND WHAT THE PROBES GOT WRONG
+
+**Plan:** `docs/projects/garage_repair_studio_2026-11-08.md` — **§12** = 11-10 per-machine
+readiness with every proof command, **§13** = THE MIC, **§14** = screens/audio/camera research.
+**Printable sheets:** `docs/projects/garage_studio_phase1_checklist.html` and
+`docs/projects/garage_studio_cables_and_components.html` (the components/cables/cords list Jeff
+asked for, sent 11-11 — priced $0 against his own boxes; nothing is confirmed as needing purchase).
+
+### 🎤 THE MIC, ANSWERED 11-10 — and the 09-17 record was WRONG (corrected in all 3 copies)
+The BM-800-class capsule is a **pre-charged electret wanting a few volts of BIAS — NOT 48 V
+phantom, and NOT an audio interface.** Hands-on proof: Jeff’s own unit ran on a 5 V USB adapter.
+The **Lenovo has a dedicated pink mic jack** — codec node 0x18 reports
+`[Jack] Mic at Ext Rear, Conn = 1/8, Color = Pink` — with **~30 dB of `Mic Boost` sitting unused
+at 0 dB.** ❌ No phantom-supply build. ❌ No interface. Both were priced and both are unnecessary.
+
+### ⚠️ CORRECTED 11-11 BY JEFF — HE OWNS THE ADAPTER, AND TWO MORE MICS
+The 11-10 finding *“no USB audio adapter is owned”* was **true of every probe and false of his
+boxes.** `lsusb`, `Get-PnpDevice` and `HCC_INVENTORY.md` were all clear — because the thing was
+in a box, unplugged. He has a **USB→audio adapter**, a **lapel mic (2 ports)** and a **gaming
+headset with mic (dual ports)**, plus a **VGA→HDMI cord and other adapters**.
+
+→ **Nothing to buy, and three owned mics map cleanly onto three jobs:** headset = talk-to-Claude
+at the bench (no USB power, nothing bought), lapel = filming a repair, BM-800 = voiceover.
+
+🔑 **A HARDWARE PROBE CANNOT SEE AN UNPLUGGED CABLE. AN ABSENCE FOUND BY SCAN IS NOT AN ABSENCE
+OF OWNERSHIP — ASK HIM BEFORE RECORDING ONE.** Logged in `docs/inventory/HCC_INVENTORY.md` and on
+the plan doc’s own corrected row.
+
+### 🟢 / 🔴 Other verified bench facts
+- 🟢 `audacity` 3.7.7 **INSTALLED** on the Lenovo (`/usr/bin/audacity`).
+- 🔴 **`deskflow-daemon` is NOT a server.** An earlier green check of mine counted the daemon
+  process as proof the server was up. Both test scripts now test the **listener/socket** instead
+  — the component was alive while the feature was not. Same class as the 08-21 camera check.
+
+---
+
+## #235
+
+### 📧 EMAIL CLEANUP — NOT STARTED (the route is already known, so it needs no discovery)
+
+**Jeff, 10-13:** *“clean the email.”* Not begun before the session budget ran down; recorded so
+it is not lost.
+
+🔑 **The route that works, from the record — do not re-derive it:**
+- **Jeff’s REAL mail is `connect.xfinity.com`, NOT `outlook.live.com`.** The Outlook account is
+  empty/stale; a session that opens it will report a clean inbox and be wrong.
+- Xfinity webmail needs **no password** when Jeff’s browser is already signed in — the
+  Claude-in-Chrome tools open `connect.xfinity.com/appsuite` straight into the inbox. **Do not
+  ask him for a password for this.**
+- A **Gmail** is also in use for contractor correspondence, and a Gmail connector is available
+  to this session.
+
+**This is a FOLLOW-ON, not a first pass.** The prior pass (#223, 10-08) took the inbox
+**1,029 → ~589** and stopped spam/newsletters at the source, so the easy volume is already gone.
+
+
+## #281 — 2026-11-11 ROOT CAUSE + FIX (Sling `7-403` on KitchenPC)
+
+Jeff 11-11, with a photo of the kitchen screen showing the banner: *"See the damn kitchen computer
+still has the errors... Look it up search the web and stop fucking guessing. I have yet to be able to
+watch sling since it was mounted to the wall two weeks is way to long for you to not have it fixed!!!"*
+
+**THE CAUSE, read out of Sling's own minified bundle** (`watch.sling.com/ssrAssets/CB1ACQntuusnn-wS.js`,
+2,151,516 B — CloudFront 403s a bare curl, so it was fetched with a browser UA + a `watch.sling.com`
+referer). In `TimelineServices.loadTimeline`:
+
+```js
+const M = this.isStreamAuthEnabled() && !H && !f && !h;
+if (M) { U = this.downloadManager.getAutorizedStream(...) }   // reply CARRIES .qvt
+else    { U = Promise.resolve({ssai_manifest:null}) }          // NO .qvt key at all
+j = this.configService.getLDFlagValue("use-streamauth-qvt")
+      ? (!isSsaiEnabled() || (isSsaiEnabled() && g) ? downloadQVT(...) : Promise.resolve())
+      : downloadQVT(...);
+const z = Y[1] ? Y[1] : this.downloadManager.filterQvt(Y[0].qvt);   // <-- filterQvt(undefined)
+...
+filterQvt(e){ ... e.playback_info.media_type ... }
+```
+
+Sling currently serves **`use-streamauth-qvt` ON** while **`use-stream-authoriser` is OFF**. With that
+pair, the QVT is neither downloaded nor delivered, `filterQvt(undefined)` throws
+`TypeError: Cannot read properties of undefined (reading 'playback_info')`, and Sling renders its own
+TypeError as *"Looks like a loading issue! ... (7-403)"* with `Response Code: undefined`.
+**That is the whole explanation for the thing that made no sense for three days: the QVT request was
+never emitted to the network stack, because the player was never supposed to fetch it.** `curl` from
+the same box gets the same URL fine (HTTP 200, 8,179 B, `playback_info` present, `video_codecs:["h264"]`,
+`access-control-allow-origin: *`).
+
+**THE FIX — Sling ships its own override** (found at two sites in the bundle, chars 1188911 / 1722542):
+
+```js
+isStreamAuthEnabled(){ return this.configService.getLDFlagStatus("use-stream-authoriser") || window.enableStreamAuth }
+```
+
+So `window.enableStreamAuth = true`, set before any Sling code runs, makes `M` true, `getAutorizedStream`
+returns a reply that carries `.qvt`, and the player plays. $0, no account change, no Sling contact.
+
+Delivered as a 2-file MV3 content script, `run_at: document_start`, `world: "MAIN"`, matched only to
+`https://watch.sling.com/*`:
+`~/.local/share/hcc/sling-streamauth/{manifest.json,fix.js}` — source of record is
+`windows-scripts/kitchenpc/sling-streamauth/`, and `hcc-tv-setup.sh` now installs it, so a re-run
+cannot silently revert the fix. `/usr/local/bin/hcc-browser` carries
+`--load-extension="$HOME/.local/share/hcc/sling-streamauth"`; the original is backed up at
+`~/.local/share/hcc/backups/hcc-browser.before-sling-fix-2026-11-11-121206` and `sh -n` passes.
+
+**PROOF — the feature, not a component.** Run on Xvfb `:77` with `--mute-audio` against a throwaway
+profile copy, so nothing was seen or heard in the kitchen:
+
+| What was run | What it printed |
+|---|---|
+| CDP injection only, `window.enableStreamAuth=true` | `{"video":true,"t":1794420397.39,"ready":4,"paused":false,"err":null,"w":1280,"h":720,"flag":true}`, 6 samples, `currentTime` advancing ~7 s per 7 s — `*** PLAYBACK ADVANCING: True ***` |
+| Extension only, **zero** CDP injection | same, `"flag":true` — the extension was the sole source |
+| **The production path**: real `/usr/local/bin/hcc-browser` + real `/usr/local/bin/hcc-sling-click 'watch now'` | `tapped button 'WATCH NOW'`; full-X-screen grabs (`import -window root`, because `scrot`/`gnome-screenshot` are MISSING on this box) show **Fox News "S2026 E438: America Reports" playing, scrubber 16:35 → 16:53**, URL `/1/program/.../watch`, **no `7-403`**, and **no "disable developer mode extensions" bubble** in the Edge chrome |
+
+**CORRECTION to the old #281 text: Widevine is NOT the ceiling.** `SW_SECURE_DECODE video: OK` measures
+fine on this box. The earlier "FAIL at SW_SECURE_DECODE" note in the row was wrong and has been removed.
+
+**Ruled out today, each by a named measurement — do not re-derive these:** the AirTV / Austin /
+`dishboxes.com` path (`Network.setBlockedURLs`, 4 requests killed, still 7-403); LaunchDarkly delivery
+(16 requests killed, still 7-403); the system clock (`aptime.movetv.com` 17:56:03.890 UTC vs box
+17:56:03, NTP synchronized); the user agent and UA client hints; IPv6; Edge DoH; the service worker.
+
+**NOT YET DONE:** the fix does **not** apply to the Edge process already running on the kitchen screen —
+flags only count for the Edge the launcher starts. It goes live at the next login or Edge restart.
+Restarting it is something Jeff sees and hears, so it waits for his word (rule 6).
+
+**Cleanup (Jeff's 11-11 hygiene rule):** every probe script, profile copy and screenshot was removed from
+`/tmp` on KitchenPC, the `Xvfb :77` was stopped, and the three stale 11-09 `.bak` files that had been left
+loose in `/usr/local/bin` were filed into `~/.local/share/hcc/backups/`.

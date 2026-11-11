@@ -14,4 +14,14 @@
 # it. ~/.local/share/applications/microsoft-edge.desktop points the menu entry here too.
 # --autoplay-policy=no-user-gesture-required: 2026-11-08, Fox News at 6 AM (hcc-fox-news) must start WITH
 # sound and nobody standing there to tap.
-exec microsoft-edge --no-first-run --password-store=basic --enable-unsafe-swiftshader --force-renderer-accessibility --autoplay-policy=no-user-gesture-required "$@"
+# --load-extension=~/.local/share/hcc/sling-streamauth: 2026-11-11, THE FIX FOR SLING 7-403 (#281).
+# Read out of Sling's own bundle: isStreamAuthEnabled(){return getLDFlagStatus("use-stream-authoriser")||window.enableStreamAuth}
+# Sling ships use-streamauth-qvt ON (so loadTimeline SKIPS downloadQVT and expects the QVT inside the
+# stream-auth response) while use-stream-authoriser is OFF (so that response is {ssai_manifest:null} with
+# no .qvt at all). filterQvt(undefined) then throws "Cannot read properties of undefined (reading
+# 'playback_info')", which Sling mislabels as 7-403 - which is why NO qvt request ever left this box
+# while curl fetched the same URL fine. The extension sets that global before any Sling code runs.
+# PROVEN 11-11 12:09 on Xvfb :77: <video> 1280x720, readyState 4, currentTime advanced 35 s over 35 s,
+# zero 7-403 lines, Fox News 'America Reports' on screen. Flags only count for the Edge process THIS
+# launcher starts (the kiosk, at login) - later windows join it.
+exec microsoft-edge --no-first-run --password-store=basic --enable-unsafe-swiftshader --force-renderer-accessibility --autoplay-policy=no-user-gesture-required --load-extension="$HOME/.local/share/hcc/sling-streamauth" "$@"
