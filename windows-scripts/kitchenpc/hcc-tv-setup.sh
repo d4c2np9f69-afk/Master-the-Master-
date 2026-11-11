@@ -8,9 +8,33 @@ HERE=$(cd "$(dirname "$0")" && pwd); H=$HOME
 say(){ printf '  %-44s %s\n' "$1" "$2"; }
 export DISPLAY=:0 XAUTHORITY="$H/.Xauthority" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
 
-sudo install -m755 "$HERE/hcc-browser" "$HERE/hcc-fox-news" "$HERE/hcc-app" "$HERE/hcc-sling-click" /usr/local/bin/
+sudo install -m755 "$HERE/hcc-browser" "$HERE/hcc-fox-news" "$HERE/hcc-app" "$HERE/hcc-sling-click" "$HERE/hcc-cdp-click" /usr/local/bin/
 sudo install -m755 "$HERE/osk-test.sh" /usr/local/bin/osk-test
-say "scripts" "hcc-browser hcc-fox-news hcc-app hcc-sling-click osk-test -> /usr/local/bin"
+say "scripts" "hcc-browser hcc-fox-news hcc-app hcc-sling-click hcc-cdp-click osk-test -> /usr/local/bin"
+
+# THE KIOSK PROFILE (#281, 2026-11-11). hcc-browser runs Edge out of ~/.local/share/hcc/edge-kiosk
+# instead of the default profile, for one reason: Edge 136+ REFUSES --remote-debugging-port on the
+# default profile dir, and without that port the kiosk's buttons can only be pressed by tapping
+# screen pixels with xdotool. That tapping is what broke 11-11: hcc-fox-news measured WATCH NOW
+# before fullscreen was applied, fullscreen moved the window ~20 px, and the tap landed on the red
+# REC dot - it started a DVR recording while the log said it had tapped WATCH NOW. hcc-cdp-click
+# clicks the element's own viewport rect instead, so the window's screen position cannot make it miss.
+# Seed it from the default profile so the existing Sling sign-in carries over; on a FRESH machine
+# there is nothing to copy and JEFF MUST SIGN INTO SLING ONCE on the kitchen screen (Claude may not
+# type passwords). Never overwrite an existing kiosk profile - that is where the sign-in now lives.
+if [ ! -d "$H/.local/share/hcc/edge-kiosk" ]; then
+  mkdir -p "$H/.local/share/hcc"
+  if [ -d "$H/.config/microsoft-edge" ]; then
+    pgrep -x msedge >/dev/null && say "kiosk profile" "SKIPPED - close Edge first, then re-run" || {
+      cp -a "$H/.config/microsoft-edge" "$H/.local/share/hcc/edge-kiosk"
+      say "kiosk profile" "seeded from the default Edge profile (sign-in carried over)"
+    }
+  else
+    say "kiosk profile" "none to copy - JEFF must sign into Sling once on the kitchen screen"
+  fi
+else
+  say "kiosk profile" "already present (left alone - the Sling sign-in lives here)"
+fi
 
 # Sling 7-403 fix (#281, 2026-11-11). Sling serves use-streamauth-qvt ON with use-stream-authoriser OFF,
 # so loadTimeline neither downloads the QVT nor puts one in the stream-auth reply, then calls

@@ -20,7 +20,15 @@ import json,sys
 try: s=json.load(sys.stdin)
 except Exception: sys.exit(2)
 sys.exit(0 if any(not i.get("corked") and "edge" in (i["properties"].get("application.name","")+i["properties"].get("application.process.binary","")).lower() for i in s) else 1)'; }
-prompts(){ for rx in "^(JEFF)$" "still watching|continue watching|^continue$|^yes$|i.m still here"; do hcc-sling-click "$rx" >/dev/null && { log "tapped prompt /$rx/"; sleep 4; }; done; }
+# 2026-11-11: press buttons with a REAL mouse event inside the page (hcc-cdp-click) instead of an
+# xdotool tap at screen coordinates. hcc-sling-click measured AT-SPI extents before fullscreen was
+# applied; fullscreen moves the window ~20 px, so every tap landed 20 px off - and at 17:04 one of
+# them hit the red REC dot and started an unwanted DVR recording while this log said it had tapped
+# WATCH NOW. A CDP click uses the element's own viewport rect, so the window's position cannot make
+# it miss. hcc-cdp-click exits 2 when there is no debuggable Edge (an Edge not started by
+# hcc-browser), and only then do we fall back to the old tapper.
+click(){ hcc-cdp-click "$1" 2>/dev/null; rc=$?; [ $rc -eq 2 ] && { log "no CDP - falling back to hcc-sling-click"; hcc-sling-click "$1" >/dev/null; rc=$?; }; return $rc; }
+prompts(){ for rx in "^(JEFF)$" "still watching|continue watching|^continue$|^yes$|i.m still here" "^WATCH NOW$"; do click "$rx" && { log "pressed prompt /$rx/"; sleep 4; }; done; }
 fullscreen(){ wmctrl -i -r "$1" -b add,fullscreen; wmctrl -i -a "$1"; }
 case "$1" in
 start)
@@ -28,9 +36,20 @@ start)
   if [ -z "$W" ]; then
     hcc-browser --new-window "$URL" >/dev/null 2>&1 &
     for i in $(seq 60); do W=$(win); [ -n "$W" ] && break; sleep 1; done
+  else
+    # A window left over from yesterday still shows yesterday's page. 6 AM must LAND
+    # ON THE CHANNEL, not just fullscreen whatever was last open. 2026-11-09: a stale
+    # 11-08 window meant start() only fullscreened a dead page - 12.8 h of silence.
+    log "window already open ($W) - navigating it to the channel"
+    wmctrl -i -a "$W"; sleep 1
+    xdotool key --window "$W" ctrl+l; sleep 1
+    xdotool type --window "$W" --delay 25 "$URL"; sleep 1
+    xdotool key --window "$W" Return; sleep 25
   fi
   [ -z "$W" ] && { log "START FAILED - no Sling window after 60 s"; exit 1; }
-  sleep 15; prompts; fullscreen "$W"
+  # FULLSCREEN FIRST, THEN PRESS. The old order (prompts then fullscreen) is what made every tap
+  # land 20 px off - see the comment on click() above. Harmless with CDP, required for the fallback.
+  sleep 15; fullscreen "$W"; sleep 3; prompts
   pactl set-sink-mute @DEFAULT_SINK@ 0 2>/dev/null
   touch "$ON"; rm -f "$MISS"
   sleep 20; playing && log "started - playing ($W)" || log "started - window up but NO SOUND yet ($W); watch will retry"
@@ -44,7 +63,7 @@ watch)
   # act at the 2nd silent check, then every 5th (10 min) - never hammer a Sling outage with reloads every 2 min
   [ $n -eq 2 ] || [ $((n % 5)) -eq 0 ] || exit 0
   log "no sound for $n checks - clearing prompts"; prompts; sleep 10
-  if ! playing; then log "still silent - reloading the channel"; wmctrl -i -a "$W"; xdotool key --window "$W" F5; sleep 25; prompts; fullscreen "$W"; fi
+  if ! playing; then log "still silent - reloading the channel"; wmctrl -i -a "$W"; xdotool key --window "$W" F5; sleep 25; fullscreen "$W"; sleep 3; prompts; fi
   playing && { log "playing again"; rm -f "$MISS"; }
   ;;
 status)

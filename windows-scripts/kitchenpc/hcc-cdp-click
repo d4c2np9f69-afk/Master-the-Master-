@@ -1,0 +1,150 @@
+#!/usr/bin/env python3
+# hcc-cdp-click REGEX   - click the smallest VISIBLE element in the Sling tab whose text matches REGEX
+#                         (case-insensitive), using a real synthetic mouse event inside the page.
+# exit 0 = clicked, 1 = nothing matched, 2 = no debuggable Edge / no Sling tab.
+#
+# WHY THIS EXISTS, 2026-11-11 (#281). hcc-sling-click taps SCREEN pixels with xdotool, using
+# coordinates read from AT-SPI. hcc-fox-news ran prompts() BEFORE fullscreen(), and applying
+# fullscreen MOVES the window ~20 px, so every tap landed 20 px off what it had measured:
+# WATCH NOW sat at (192,521) un-maximized but (172,501) fullscreen. Measured consequence at
+# 17:04: a mis-landed tap hit the red REC dot and started an unwanted DVR recording of
+# Special Report, while the log happily printed "tapped prompt /^WATCH NOW$/" and the player
+# never started. Four more taps did the same, all reporting success, pactl sink-inputs: 0.
+# It LOOKED right on :77 only because a display with no window manager never moves the window.
+#
+# A CDP mouse event uses VIEWPORT coordinates from the element's own getBoundingClientRect(),
+# so where the window sits on screen is irrelevant and there is nothing to go stale.
+# PROVEN 11-11: "real mouse event on 'WATCH NOW' at (130,386)" -> video 1280x720, readyState 4,
+# currentTime 1794438791.73 -> 1794438797.74, one uncorked Edge sink-input. Also drove the
+# channel change (guide -> Watch live) and DVR recording playback the same way.
+#
+# Needs Edge started by hcc-browser (it carries --user-data-dir + --remote-debugging-port).
+import base64, json, os, re, socket, struct, sys, time, urllib.request
+
+PROFILE = os.path.expanduser("~/.local/share/hcc/edge-kiosk")
+FALLBACK_PORT = 9222
+
+
+def port():
+    # DevToolsActivePort is written by Edge itself, so it is right even if 9222 was taken.
+    try:
+        return int(open(os.path.join(PROFILE, "DevToolsActivePort")).readline().strip())
+    except Exception:
+        return FALLBACK_PORT
+
+
+class WS:
+    def __init__(self, url, timeout=20):
+        m = re.match(r"ws://([^:/]+):(\d+)(/.*)", url)
+        self.s = socket.create_connection((m.group(1), int(m.group(2))), timeout=timeout)
+        self.s.settimeout(timeout)
+        k = base64.b64encode(os.urandom(16)).decode()
+        self.s.sendall(("GET %s HTTP/1.1\r\nHost: %s:%s\r\nUpgrade: websocket\r\n"
+                        "Connection: Upgrade\r\nSec-WebSocket-Key: %s\r\n"
+                        "Sec-WebSocket-Version: 13\r\n\r\n"
+                        % (m.group(3), m.group(1), m.group(2), k)).encode())
+        b = b""
+        while b"\r\n\r\n" not in b:
+            b += self.s.recv(4096)
+        self.buf = b.split(b"\r\n\r\n", 1)[1]
+        self.id = 0
+
+    def _send(self, p):
+        d = p.encode(); n = len(d); h = b"\x81"
+        if n < 126:
+            h += bytes([0x80 | n])
+        elif n < 65536:
+            h += bytes([0x80 | 126]) + struct.pack(">H", n)
+        else:
+            h += bytes([0x80 | 127]) + struct.pack(">Q", n)
+        mk = os.urandom(4)
+        self.s.sendall(h + mk + bytes(x ^ mk[i % 4] for i, x in enumerate(d)))
+
+    def _ex(self, n):
+        while len(self.buf) < n:
+            c = self.s.recv(262144)
+            if not c:
+                raise ConnectionError
+            self.buf += c
+        o, self.buf = self.buf[:n], self.buf[n:]
+        return o
+
+    def recv(self):
+        while True:
+            h = self._ex(2); op = h[0] & 0x0F; n = h[1] & 0x7F
+            if n == 126:
+                n = struct.unpack(">H", self._ex(2))[0]
+            elif n == 127:
+                n = struct.unpack(">Q", self._ex(8))[0]
+            p = self._ex(n)
+            if op == 8:
+                raise ConnectionError
+            if op in (1, 2):
+                return p.decode("utf-8", "replace")
+
+    def call(self, m, p=None, timeout=25):
+        self.id += 1
+        mid = self.id
+        self._send(json.dumps({"id": mid, "method": m, "params": p or {}}))
+        end = time.time() + timeout
+        while time.time() < end:
+            msg = json.loads(self.recv())
+            if msg.get("id") == mid:
+                return msg
+        return {}
+
+    def ev(self, e, t=25):
+        try:
+            return self.call("Runtime.evaluate",
+                             {"expression": e, "returnByValue": True}, t)["result"]["result"]["value"]
+        except Exception:
+            return None
+
+
+FIND = r"""(()=>{const rx=new RegExp(%s,'i');let b=null;
+for(const e of document.querySelectorAll('*')){
+ const t=(e.textContent||'').replace(/\s+/g,' ').trim();
+ if(!t||t.length>60||!rx.test(t))continue;
+ const r=e.getBoundingClientRect();
+ if(r.width<8||r.height<8)continue;
+ if(r.y<0||r.x<0||r.y+r.height>innerHeight||r.x+r.width>innerWidth)continue;
+ const s=getComputedStyle(e);
+ if(s.visibility==='hidden'||s.display==='none'||parseFloat(s.opacity||'1')<0.1)continue;
+ const a=r.width*r.height;                       /* smallest match = the control, not its container */
+ if(!b||a<b.a)b={a:a,x:Math.round(r.x+r.width/2),y:Math.round(r.y+r.height/2),label:t};}
+return b?JSON.stringify(b):'none';})()"""
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("usage: hcc-cdp-click REGEX", file=sys.stderr)
+        return 2
+    try:
+        tabs = json.load(urllib.request.urlopen("http://127.0.0.1:%d/json" % port(), timeout=4))
+    except Exception as e:
+        print("no debuggable Edge on 127.0.0.1:%d (%s)" % (port(), e), file=sys.stderr)
+        return 2
+    pages = [t for t in tabs if t.get("type") == "page" and "sling" in (t.get("url") or "")]
+    if not pages:
+        print("no Sling tab open", file=sys.stderr)
+        return 2
+    try:
+        ws = WS(pages[0]["webSocketDebuggerUrl"])
+        ws.call("Runtime.enable")
+    except Exception as e:
+        print("cannot attach to the Sling tab (%s)" % e, file=sys.stderr)
+        return 2
+
+    v = ws.ev(FIND % json.dumps(sys.argv[1]))
+    if not v or v == "none":
+        return 1
+    p = json.loads(v)
+    for kind, cc in (("mouseMoved", 0), ("mousePressed", 1), ("mouseReleased", 1)):
+        ws.call("Input.dispatchMouseEvent",
+                {"type": kind, "x": p["x"], "y": p["y"], "button": "left", "clickCount": cc})
+        time.sleep(0.25)
+    print("clicked %r at (%d,%d)" % (p["label"][:40], p["x"], p["y"]))
+    return 0
+
+
+sys.exit(main())

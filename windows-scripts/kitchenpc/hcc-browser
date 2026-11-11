@@ -24,4 +24,16 @@
 # PROVEN 11-11 12:09 on Xvfb :77: <video> 1280x720, readyState 4, currentTime advanced 35 s over 35 s,
 # zero 7-403 lines, Fox News 'America Reports' on screen. Flags only count for the Edge process THIS
 # launcher starts (the kiosk, at login) - later windows join it.
-exec microsoft-edge --no-first-run --password-store=basic --enable-unsafe-swiftshader --force-renderer-accessibility --autoplay-policy=no-user-gesture-required --load-extension="$HOME/.local/share/hcc/sling-streamauth" "$@"
+# --user-data-dir + --remote-debugging-port: 2026-11-11, so the kiosk's buttons can be pressed with a
+# REAL mouse event inside the page (hcc-cdp-click) instead of an xdotool tap at screen coordinates.
+# WHY: hcc-fox-news tapped pixels whose position it had measured BEFORE fullscreen was applied, and
+# applying fullscreen moves the window ~20 px - WATCH NOW sat at (192,521) un-maximized but (172,501)
+# fullscreen. Measured 11-11 17:04: a mis-landed tap hit the red REC dot and started an unwanted DVR
+# recording while the log printed "tapped prompt /^WATCH NOW$/" and nothing played. A CDP event uses
+# the element's own viewport rect, so the window's position on screen cannot make it miss.
+# Edge 136+ REFUSES --remote-debugging-port on the DEFAULT profile dir, which is why this is its own
+# directory. It was copied from the default profile on 11-11 and carries Jeff's Sling sign-in; from
+# here on this IS the kiosk's profile, so anything signed into on the kitchen screen lives here.
+# The port listens on 127.0.0.1 only. PROVEN 11-11: Fox News playing, currentTime advancing, one
+# uncorked Edge sink-input, plus a channel change and a DVR recording played the same way.
+exec microsoft-edge --no-first-run --password-store=basic --enable-unsafe-swiftshader --force-renderer-accessibility --autoplay-policy=no-user-gesture-required --load-extension="$HOME/.local/share/hcc/sling-streamauth" --user-data-dir="$HOME/.local/share/hcc/edge-kiosk" --remote-debugging-port=9222 "$@"

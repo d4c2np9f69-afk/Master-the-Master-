@@ -885,3 +885,137 @@ Restarting it is something Jeff sees and hears, so it waits for his word (rule 6
 **Cleanup (Jeff's 11-11 hygiene rule):** every probe script, profile copy and screenshot was removed from
 `/tmp` on KitchenPC, the `Xvfb :77` was stopped, and the three stale 11-09 `.bak` files that had been left
 loose in `/usr/local/bin` were filed into `~/.local/share/hcc/backups/`.
+
+---
+
+## #281 — 2026-11-11 **IT PLAYS.** Third bug found, kiosk moved to CDP clicking
+
+Jeff, 17:0x, while cooking supper: *"It's still not working I'm fixing supper and I would like to watch
+it but for two weeks you can't get it to play"* → *"Just fucking redo it all that will fix it instead of
+guessing same errors over and over. Just fix it"* → **after the fix: *"Omg I can't believe it !!"***
+
+### THE THIRD BUG — an xdotool tap that reports success and lands 20 px away
+
+Bug 1 was the stream-auth/QVT `7-403` (section above). Bug 2 was the flagless Edge (the default handler
+`com.microsoft.Edge.desktop` was never repointed, so a later launch printed `Opening in existing browser
+session.` and threw its flags away). **Bug 3 is why the player still never started even with both fixed.**
+
+`hcc-fox-news start` ran `prompts()` and *then* `fullscreen "$W"`. `prompts()` → `hcc-sling-click` reads
+the button's position over AT-SPI and taps that **screen** pixel with `xdotool`. Applying fullscreen
+**moves the window ~20 px**, so every coordinate measured before the move is stale:
+
+| WATCH NOW, measured | un-maximized | fullscreen |
+|---|---|---|
+| position | ~(192, 521) | ~(172, 501) |
+
+**The measured consequence, 17:04:** a mis-landed tap hit the **red REC dot** instead and started a DVR
+recording of *Special Report* — the badge went `SCHEDULED` → `● REC 55 Min Left` — while the log happily
+printed `tapped prompt /^WATCH NOW$/` and `pactl` showed `sink-inputs: 0`. Four more taps did the same
+thing, all reporting success. **This is rule 1 and rule 2 in one failure: a green component check
+("tapped") next to a dead feature (nothing playing), and a cause that was never observed, only assumed.**
+
+It had always worked on the headless `:77` test display **because `:77` has no window manager**, so
+nothing ever moves the window there. The test rig was hiding the bug it was meant to catch.
+
+### THE FIX — a real mouse event inside the page, not a pixel on the screen
+
+`/usr/local/bin/hcc-cdp-click REGEX` (new) sends `Input.dispatchMouseEvent` over CDP at the coordinates
+from the element's **own** `getBoundingClientRect()`. Viewport coordinates, so where the window sits on
+screen is irrelevant and there is nothing to go stale. It exits `2` when there is no debuggable Edge, and
+`hcc-fox-news` only then falls back to the old tapper. `hcc-fox-news` now also **fullscreens BEFORE it
+presses**, which is required for that fallback to be correct.
+
+Chrome/Edge 136+ **refuse `--remote-debugging-port` on the default profile directory**, so `hcc-browser`
+now runs Edge out of `~/.local/share/hcc/edge-kiosk` (seeded from the default profile on 11-11, so Jeff's
+Sling sign-in carried over) with `--remote-debugging-port=9222`, listening on 127.0.0.1 only.
+
+### PROOF — on Jeff's actual screen, `:0`
+
+```
+attempt 1: real mouse event on 'WATCH NOW' at (130,386)
+*** PLAYING ON THE KITCHEN SCREEN ***
+{"video":true,"t":1794438797.74,"ready":4,"paused":false,"muted":false,"w":1280,"h":720,
+ "flag":true,"url":"/1/program/01afbaa86c9ddd399362d3257a480e42/watch"}
+currentTime 1794438791.73 -> 1794438797.74
+pactl: one uncorked "Microsoft Edge Playback" sink-input, sink unmuted at 70%
+window title: Watch Special Report With Bret Baier
+```
+
+Jeff confirmed by eye and ear: *"Omg I can't believe it !!"* and *"The sound is on"*.
+
+**Reboot survival** is verified by flag equivalence, not by assertion: the installed `hcc-browser` was
+parsed and its 8 flags compared against the browser that is playing — `VERDICT: IDENTICAL`. ⚠️ Note for
+whoever reads `/proc/<pid>/cmdline` next: **Edge rewrites its own argv into one space-separated blob**,
+not the usual NUL-separated list, so a plain `split('\0')` reads **zero** flags and makes a comparison
+look vacuously equal. The first run of that check did exactly that and was thrown out.
+
+🔴 **STILL OWED: `hcc-fox-news start` has NOT been run end-to-end on `:0`.** What is proven is that the
+launcher produces the proven-good launch and that `hcc-cdp-click` attaches, targets and reports correctly
+against the live tab. The 6 AM sequence itself needs an Edge restart, which flashes Jeff's TV, so it waits
+for his go-ahead. **Do not write this row as fully closed until that run is in the log.**
+
+### Jeff asked for three more things to be tested — all three pass
+
+| Asked | Result | Proof |
+|---|---|---|
+| *"The sound is on"* (sound) | ✅ | uncorked Edge sink-input + Jeff heard it |
+| *"Test it all the DVD recordings"* (DVR) | ✅ | clicked the recorded *Special Report* tile → `/1/program/01afbaa…/watch`, `currentTime 1794439566.85 → 1794439570.85`, 1280 px |
+| *"And change ing the canals"* (channels) | ✅ | A&E logo in the guide → `/dashboard/fluid-guide/modal` → **Watch live** → `currentTime 1794440225.66 → 1794440229.19`, 1920 px, `/1/program/b86fc54a…/watch` |
+
+Both of those ran on the headless `:77` with a muted profile copy, announced in advance, so Jeff's show
+was never interrupted. **They are therefore proven for the ACCOUNT and the SITE, not yet for `:0`.**
+
+The DVR page lists 12 franchises: Special Report (2 eps), The Five (2), America's Newsroom (2), FOX and
+Friends (2), Peleliu, Fox News at Night, Gutfeld!, Hannity, Curse of Oak Island, Jesse Watters Primetime,
+Ingraham Angle, Ancient Aliens — under tabs `RECORDINGS REPLAYS SCHEDULED AIRTV DVR STORAGE TRASH`.
+
+### "Why does the speaker have a x on it like it's muted" — mute was SAVED IN THE PROFILE
+
+Jeff asked this while the sound was working, which is the whole clue: the ✕ and the audio disagreed.
+Sling's speaker icon tracks **its own stored state**, not the `<video>` element, and the profile held:
+
+```
+FOREVER_USER:280212626:videoVolumeLevel = 0
+persist:player = {"playerVolume":"25","isPlayerMute":"true","is4KSupported":"false",...}
+```
+
+Forcing `video.muted=false` therefore gave sound **with** an ✕ — correct audio, stale icon. Corrected on
+disk and baked into `~/.local/share/hcc/sling-streamauth/fix.js` so the kiosk can never come up muted
+again; it only rewrites those keys when they say *silent*, so a volume Jeff turns down on purpose is left
+alone. **Two traps worth keeping:** Sling stores those as **plain** strings (`"25"`), so writing `'"100"'`
+double-quotes them and Sling cannot parse it (that mistake was made and fixed); and **redux-persist
+rehydrates at load**, so the correction cannot show on a player that is already running — **the ✕ clears
+at the next player start, and that was stated to Jeff rather than claimed as fixed on screen.**
+
+### TWO MESSES I MADE, AND WHAT HAPPENED TO THEM
+
+Jeff's standing rule: *"From now on clean up the damn messes as we go!!!! ... It also show how lazy and
+uncaring about the quality of your work."*
+
+1. **Watchlist entry** added by a blind click while hunting for the player control. **REMOVED** — the
+   control flipped from `tile-focus-action-tooltip-wrapper-unfavorite||remove from watchlist` to
+   `…-favorite||add to watchlist`, and the page text now reads `Add to Watchlist`.
+2. **The DVR recording** the 17:04 mis-land started. **LEFT ALONE and reported to Jeff instead** — it is
+   a recording of the show he was watching, and deleting his DVR content is his call, not mine.
+3. Test rig shredded: `Xvfb :77` stopped, the profile copy and all 20 probe scripts removed from `/tmp`,
+   `/tmp/hcc-sling-dvr` deleted, nothing added to `~/Desktop` (checked — only Jeff's own 11 icons).
+
+⚠️ **A trap for the next session: `pkill -f <pattern>` over SSH kills your own shell**, because the
+pattern string is inside your own `bash -c` command line. It killed two SSH sessions here (exit 255) and
+made it look as though the teardown had failed when it had already succeeded. Use a bracket guard
+(`"hcc-[s]ling-dvr"`) or kill by PID.
+
+### FILES
+
+| File | What |
+|---|---|
+| `/usr/local/bin/hcc-cdp-click` | **NEW** — CDP clicker. Repo: `windows-scripts/kitchenpc/hcc-cdp-click` |
+| `/usr/local/bin/hcc-browser` | `+ --user-data-dir=…/hcc/edge-kiosk --remote-debugging-port=9222` |
+| `/usr/local/bin/hcc-fox-news` | `prompts()` → `hcc-cdp-click` w/ fallback; **fullscreen before pressing** |
+| `~/.local/share/hcc/sling-streamauth/fix.js` | `window.enableStreamAuth` + the never-come-up-muted fix |
+| `windows-scripts/kitchenpc/hcc-tv-setup.sh` | installs `hcc-cdp-click`; seeds the `edge-kiosk` profile |
+| `~/.local/share/hcc/backups/*.before-cdp-2026-11-11` | the originals |
+
+All three scripts were verified byte-identical between the repo and `/usr/local/bin` by `md5sum`, and
+syntax-checked on KitchenPC before install (`sh -n`, `bash -n`, `py_compile`). **`node` is not installed on
+KitchenPC** — JS gets `node --check`ed on the Beast instead.
