@@ -1050,3 +1050,34 @@ hcc-fox-news status: window: 0x00400003   playing: yes
 
 ⚠️ `wmctrl` prints a **zero-width space** inside `Microsoft<U+200B> Edge`, so only ever grep
 `microsoft` — matching the two words together silently finds nothing.
+
+## #290
+
+**THE FIRE TV AT `192.168.1.215` IS OFF THE NETWORK AND AN AUTOMATION IS STILL FIRING AT IT.**
+
+Measured 2026-11-12 12:3x CT, every number from a named command:
+- `Test-Connection -ComputerName 192.168.1.215 -Count 2 -Quiet` -> **False** (NOT `ping`'s summary line, which counts an ICMP unreachable as a reply - see ACCESS_MAP S4).
+- Absent from `arp -a` entirely - it is not merely asleep, nothing has its MAC cached.
+- `androidtv` config entry = **`setup_retry`**, reason *"Could not connect to Fire TV device at 192.168.1.215:5555 using Python ADB implementation"*.
+- `media_player.fire_tv_viewing_room` = `unavailable`, `last_changed` **2026-11-11 03:22:49 CT** (33 h).
+- HA log, last 24 min: the on-screen alert automation errored **8x**, and `rest_command` failed **8x** with *"Cannot connect to host 192.168.1.215:7979"*.
+
+**Why the last line is the one that matters:** 8 failures in 24 minutes means motion IS being
+detected and the alert chain IS running - it is landing nowhere. This is the 2026-08-21 lesson
+in its original shape (a healthy-looking component while the FEATURE is dead), except this time
+the component is honest about it and nothing was watching the log.
+
+**TIMING, STATED AS OBSERVED NOT INFERRED:** it went dark at 03:22:49 on 11-11; the hallway
+smoke/CO detector (#243) went dark at **03:18:23** the same morning - 4 min 26 s earlier. Two
+WiFi clients inside five minutes invites a shared-cause theory. **No such cause was measured, so
+none is asserted.** Whoever picks this up should look for an AP/DHCP event in that window first.
+
+**DELIBERATELY NOT TOUCHED.** This alert chain is inside the FROZEN subsystem. The freeze hook
+blocked even a *read* - a `Search-HCC.ps1` lookup was refused on one of its patterns, which is
+the gate working as designed. Jeff's explicit go is needed, per the 2026-08-21 standing rule.
+**Do not "just restart" the androidtv integration to tidy this up** - the device is not on the
+network, so a reload cannot reach it and only churns the entry.
+
+**The cheapest first step when Jeff says go:** find out whether the stick has power at all
+(it shares the viewing-room Vizio with the Beast per `docs/beehive/media-center-setup.md`),
+because a 33 h absence from ARP looks far more like unpowered/unplugged than like a crash.

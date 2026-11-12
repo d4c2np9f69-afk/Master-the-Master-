@@ -119,6 +119,21 @@ try {
             'binary_sensor.mailbox_contact','binary_sensor.guest_bath_leak_water_leak',
             'binary_sensor.kitchen_refrigerator_leak_water_leak','binary_sensor.kitchen_sink_leak_water_leak',
             'sensor.water_meter_last_seen')
+  # ---- CORRECTED 2026-11-12. "MISSING" WAS FIRING ON A DEVICE JEFF DELIBERATELY DELETED. ----
+  # binary_sensor.mailbox_contact was REMOVED FROM HA ON 2026-09-24 at Jeff's own instruction
+  # (#196: "delete the mailbox and fix everything associated with the failure; when I get the
+  # mesh extender we can redo the mailbox"). #262 is PARKED BY JEFF - do not touch the device.
+  # So its absence is the DESIRED state, and the hook was calling it "1 CRITICAL SENSOR SILENT -
+  # DATA IS BEING LOST RIGHT NOW" on every session since, while the other six read healthy.
+  # 🔴 THE HARM WAS NOT JUST NOISE: the banner then says "Fix that FIRST. Usual cause: reload
+  # the mqtt config entry." Per #277 that reload DROPS the rtlamr utility sensors, and they do
+  # NOT come back until the ADD-ON is restarted - so the briefing was pointing every session at
+  # a destructive action to "fix" a device that is absent on purpose.
+  # SELF-RE-ARMING ON PURPOSE: the entity is exempt ONLY WHILE ABSENT. The moment Jeff re-pairs
+  # the mailbox the entity exists again and the 'unavailable' branch below covers it exactly as
+  # before - the same pattern doors-entity-test.js already uses. Deleting it from $crit outright
+  # would have silently dropped that coverage forever, which is the opposite of the fix.
+  $removedByDesign = @('binary_sensor.mailbox_contact')
   # ---- CORRECTED 2026-09-09. The old test flagged a 6h-old last_updated as "silent". ----
   # That is the CHANGE-DRIVEN SENSOR TRAP already in the record 3+ times. A dry leak
   # sensor, a closed door and a full battery never CHANGE, so HA never re-stamps them.
@@ -133,7 +148,11 @@ try {
   $silent = @()
   foreach ($e in $crit) {
     $o = $st | Where-Object { $_.entity_id -eq $e }
-    if (-not $o) { $silent += ($e + ' MISSING'); continue }
+    if (-not $o) {
+      # Absent AND on the removed-by-design list = the state Jeff asked for. Not a fault.
+      if ($removedByDesign -contains $e) { continue }
+      $silent += ($e + ' MISSING'); continue
+    }
     if ($e -like 'sensor.*_last_seen') {
       # A real timestamp sensor - age IS meaningful here.
       $ageH = [math]::Round(((Get-Date).ToUniversalTime() - [datetime]::Parse($o.last_updated).ToUniversalTime()).TotalHours,1)
