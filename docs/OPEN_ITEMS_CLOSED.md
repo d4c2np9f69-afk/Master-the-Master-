@@ -4630,3 +4630,68 @@ needs Jeff's go. A loaded integration is a healthy component, not a proven featu
 🔴 **#290 never had a row in `OPEN_ITEMS.md` at all** — it lived only in the DETAIL file. That is
 the "owed item handed off in prose" habit `CLAUDE.md` names as one of the two costly ones.
 **Write the row first, then the detail.**
+
+---
+
+## CLOSED 2026-11-12 LATE — THE SESSION BRIEFING WAS LYING TO EVERY NEW SESSION
+
+*Found at 10:18 PM by not trusting my own session-start banner. Fixed, tested both directions,
+and given a permanent gate the same hour. Not on the live list because nothing is owed.*
+
+**THE BRIEFING FILE FROZE AT 20:10 AND COULD NOT UNFREEZE UNTIL MORNING.**
+`Hook-SessionStart.ps1` briefs every new session from
+`C:\Users\jeffl\HCC-Scripts\HCC-Audit-for-session.json`. That file is written by
+`HCC-AuditRun.py` — and the write sat **inside `if fresh:`**, where `fresh` is what survives
+**both** the 12 h de-dup **and** the night filter (`NIGHT = not (7 <= now.hour < 21)`).
+So after 21:00 with no CRIT, `fresh` is always empty and **the file cannot be rewritten at all.**
+
+🔑 **MEASURED, NOT ARGUED:** the file was stamped **8:10:17 PM holding 9 findings** — captured at
+the **20:16:17 HA restart, the single worst minute of the day** — while the scheduled task ran
+on time at **21:10 and 22:10** (`rc=0`, both appended to `HCC-Audit.log`) and each of those runs
+found **3**. Six of the 9 had already healed: checked live at 10:18 PM, every light, the bed lamp
+(`switch.bed_lamp_socket_1`) and the garage fan socket (`switch.mini_smart_socket11_2_socket_1`)
+were reporting real `on`/`off` states, and **82 of the 87 unavailable entities in the whole house
+dated to that one restart.**
+
+⚠️ **AND IT WAS SELF-SEALING: no fix made during an evening could ever reach the next session.**
+I fixed the clock's false alarm at 9:25 PM and the briefing still said 9 findings an hour later.
+This is `CLAUDE.md` Rule 4 — *"a stale MEMORY.md line misled sessions for 5 days"* — in a new file.
+
+**THE FIX:** the session hand-off is now unconditional and fed the full finding set
+(`session_hits`, ACKNOWLEDGED still excluded). The de-dup and the night filter exist to protect
+**Jeff's phone** and are untouched: the push is still CRIT-only and still night-gated, which is
+the standing **NO HA NOTIFICATIONS 10 PM – 6 AM** rule. Writing `count=0` is correct and wanted —
+the hook renders nothing, which is what a clean house should look like. **Stale-but-nonzero was
+the failure mode; empty never was.**
+**PROVEN BY RUNNING IT, not by reading it:** session file **9 → 3 → 2** across two real
+`HCC-AuditRun.py` runs at 22:23 and 22:25, `written` timestamp live, and both runs printed
+`2 suppressed as already-known` — **zero phone pushes at 10:25 PM.**
+
+**ALSO CLOSED: THE MERCEDES WAS BEING REPORTED AS A FAULT ON EVERY HOURLY RUN.**
+The 4 entities killed when the complimentary remote services lapsed 2026-10-17 —
+`binary_sensor.gle_350_engine_state`, `..._remote_start_active`, `..._theft_system_armed`,
+`device_tracker.gle_350_device_tracker` — are now baselined. `CLAUDE.md` already settled this
+(Jeff 11-05: *"if we can't get it for free then we don't need it"* — never pitch the subscription,
+never report those entities as a fault), yet the audit printed them as a FAIL every hour at
+336.0 h and counting. That is precisely the noise that teaches him to stop reading the audit.
+Every `gle_350` entity was listed first; these 4 were the only unavailable ones not already
+covered, and they map **1:1** onto what that record says lapsed: GPS, engine, theft, remote-start.
+
+🔴 **THE OBVIOUS FIX WAS WRONG AND WOULD HAVE BEEN DANGEROUS.** A
+`binary_sensor.gle_350_` **prefix** (matching the `sensor.`/`button.` prefixes already there)
+would also have swallowed **9 healthy entities including `low_brake_fluid_warning`,
+`low_coolant_level_warning`, `engine_light_warning` and `tire_warning`** — real safety signals on
+a car Jeff drives. **Exact ids only. Never widen this to a prefix.**
+Safety proved by assertion, both directions: the 4 are baselined; `lock.gle_350_lock`, all 5
+`cover.gle_350_*`, both `switch.gle_350_*`, the 9 other `binary_sensor.gle_350_*`,
+`climate.hcc_thermostat`, `sensor.water_meter_last_seen` and `sensor.gas_meter_last_seen` all
+still fail. The `integrations` check (76 config entries, 0 not loaded) catches a dead mbapi2020
+independently of any entity.
+
+**THE TEST, SAME SESSION:** `scripts/audit-handoff-gate-test.js` — 6 assertions covering the
+unconditional hand-off, the full finding set, the surviving night guard, the CRIT-only push, the
+4 baselined ids and the 14 that must never be swallowed. **Red-proved against the pre-fix
+backup: exit 1 on the old code, exit 0 on the fixed code.** Full suite after: **40/40, nothing
+skipped.**
+⚠️ **Both python files live OUTSIDE this repo** (`C:\Users\jeffl\HCC-Scripts\`), which is why the
+gate reads absolute paths — and is the same split that makes **#297** worth settling.
