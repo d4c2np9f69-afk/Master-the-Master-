@@ -4598,3 +4598,35 @@ second integration inside the frozen subsystem. The freeze hook correctly refuse
 | 🔴 **#271** | 💥 **BEAST CRASH #9 — 2026-11-04 10:00:55 AM, `0x1E` KMODE_EXCEPTION_NOT_HANDLED, Arg1 `0xC0000006` STATUS_IN_PAGE_ERROR, uptime 17:30:49** (event 6008 said 09:57:56 — the event log is 3 min early, always read the dump). *(full: OPEN_ITEMS_DETAIL.md #271)* | — | 🟢 **CLOSED 11-04 — LINK POWER MANAGEMENT IS NOT THE CAUSE.** Crash #10 came 36 min after `AHCI_LPM_HIPM_DIPM=0x00000000` was logged genuinely in place. Settled, not suspected. |
 | 🟢 **#272** | 💥 **BEAST CRASH #10 — 2026-11-04 11:59:13, `0xEF` csrss.exe, uptime 1 h 43 m 40 s; dumps `D:\Minidump\110426-12468-01.dmp` + `D:\MEMORY.DMP`.** *(full: OPEN_ITEMS_DETAIL.md #272)* | — | 🟢 **DRIVER VERIFIER ARMED 11-04 1:59:49 PM — AND IT PAID OFF.** Crash #11 is the first bugcheck on this box to name a module (`dxgmms2.sys`). Continues as **#283**. |
 | 🟢 **#244** | 🌦️ **WEATHER STATION RECOVERED — CLOSED 2026-11-12.** Was 16/21 dark; now **21/21 reporting, 0 dark** (live `/api/states`): outdoor temp 55.9 F, wind 291, UV 3, dew point 44.3, all 0.2–0.5 h fresh. ⚠️ The 4 rain sensors at 149 h are change-driven, **not a fault** (`last_rain` 2026-11-04). | — | 🟢 **CLOSED** |
+
+---
+
+## CLOSED 2026-11-12 EVENING — #291 and #290
+
+*Both finished and proven this session, so they are recorded here rather than on the live list
+(`OPEN_ITEMS.md`: "Only things somebody is going to DO"). Full write-ups, including what was
+ruled out and the limits on each closure, are in `OPEN_ITEMS_DETAIL.md` under the same numbers.*
+
+**#291 — THE ACER'S WIRED LEG WAS DEAD: DHCP DUPLICATE-ADDRESS COLLISION. FIXED + PROVEN.**
+Jeff hardwired both garage-lab machines on 11-12. The BGW320 reserved `.158` to the Lenovo's
+**Wi-Fi** MAC and `.159` to the Acer's **wired** MAC, so the Lenovo's unreserved **Ethernet** NIC
+(`f0-de-f1-f2-77-52`) took `.158` as an ordinary lease and pushed the Lenovo's Wi-Fi onto `.159`
+— the Acer's address. **Proof: Windows event 4199, Tcpip, 11/12/2026 7:42:07 PM, "address
+conflict for IP address 192.168.1.159 with the system having network hardware address
+44-6D-57-A5-37-57"**, with `AddressState = Duplicate`. Fixed with `ipconfig /release Ethernet`
++ `/renew Ethernet`, run over the Wi-Fi leg so the box could not be lost.
+**Verified from the Beast:** `.159` replies to `Test-Connection -Count 2 -Quiet`, `arp -a` caches
+`d8-c4-97-be-3d-5d` (the Acer's own wired NIC), TCP 22 + 445 open, `AddressState = Preferred`.
+🔑 **The lesson: `AddressState = Duplicate` leaves the link Up at 1 Gbps and the IP listed while
+the stack answers nothing — not even to itself.** Link-and-IP checks pass on a dead host.
+⚠️ The durable fix is **#292** (re-key the reservations to the Ethernet MACs) and is Jeff's call.
+
+**#290 — THE FIRE TV AT `192.168.1.215` IS BACK ON THE NETWORK AND LOADED.**
+`Test-Connection` -> True (was False at 12:3x), MAC `20-be-b8-3a-8c-5d` now in `arp -a` (was
+absent), `androidtv` entry `loaded` (was `setup_retry`), `media_player.fire_tv_viewing_room`
+= `idle` (was `unavailable`). **Two limits stated honestly: what put it back is not measured,
+and the on-screen popup FEATURE was not fired** — that is inside the frozen camera stack and
+needs Jeff's go. A loaded integration is a healthy component, not a proven feature (08-21).
+🔴 **#290 never had a row in `OPEN_ITEMS.md` at all** — it lived only in the DETAIL file. That is
+the "owed item handed off in prose" habit `CLAUDE.md` names as one of the two costly ones.
+**Write the row first, then the detail.**
