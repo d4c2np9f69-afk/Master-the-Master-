@@ -579,6 +579,192 @@ than showing a wall of red. **#282 and #284 are the hardware rows this tab front
 
 ---
 
+
+### 🖵️ MONITOR + PORT MAP - MEASURED 2026-11-13, 8:44-8:57 AM
+
+Every line here came from the machine, not from a spec sheet. The spec-sheet lookups are cited
+where they were used to confirm a physical socket the driver could not see.
+
+#### The final layout - FIVE screens, ONE keyboard (Deskflow, feature-proven 8:33 AM)
+
+> 🔴 **SUPERSEDED 2026-11-13 10:30 by `OPEN_ITEMS.md` #298: THE STUDIO RUNS ON THE ACER ALONE.** 32in on the Acer's HDMI, Dell on the Acer's VGA, **24in Toshiba on a DisplayLink USB 3.0 adapter** (Wavlink WL-UG3501H, $39.99), plus the Acer's own panel = 4 screens, one computer, no Deskflow. The DisplayLink 12.3 driver is already installed on the Acer. The two-computer map below is kept only as history. **It was the wrong design:** the one-computer option was never priced against it (`COST_LEDGER.md` 2026-11-13).
+
+
+| Machine | Output | Screen | Evidence |
+|---|---|---|---|
+| Acer Aspire E5-576 (3 pipes) | internal | BOE 15.3in 1366x768 @125% | `WmiMonitorID` mfr=BOE 2015, 34x19 cm |
+| | HDMI | SZM **32.1in** 1920x1080 @**125%** | EDID 71x40 cm; `WmiMonitorConnectionParams` = HDMI |
+| | **VGA** | **the Dell - PLUG IT IN, $0** | 3rd pipe free; Dell recorded VGA-only 11-08 |
+| Lenovo B570 (2 CRTCs, both used) | HDMI-1 | **TOSHIBA-TV, 24in per Jeff** 1920x1080 | EDID `TSB` claims 89x50 cm. ❌ RETRACTED: my "40.2in" read; an EDID size is not proof, and Jeff is looking at it |
+| | LVDS-1 | LG `LP156WH4-TLN1` 15.3in | EDID `LGD` 34x19 cm |
+
+#### 🔑 Why the Acer's VGA socket is invisible to the driver
+
+Intel removed analog VGA from the display engine at Skylake (6th gen). This machine is 8th-gen
+UHD 620, so Acer kept the socket and fed it from an **onboard DisplayPort-to-VGA converter chip**.
+Consequence, straight out of `QueryDisplayConfig` with `QDC_ALL_PATHS` (which lists unattached
+targets too):
+
+```
+port=INTERNAL (built-in panel)              active=True  available=True  60Hz
+port=HDMI                                   active=True  available=True  59.9Hz  monitor="100012589"
+port=INDIRECT WIRED (USB/DisplayLink-class) active=False available=False   x3
+port=HDMI                                   active=False available=True    x2
+port=DisplayPort (external)                 active=False available=False   x3 conn#0, x3 conn#1, x3 conn#2
+```
+
+**Zero HD15/analog targets anywhere.** The VGA lane presents as one of those DisplayPort DDIs and
+will only flip to `available=True` once a monitor with a readable EDID is attached. So:
+
+- ❌ **RETRACTED: "the Acer has no VGA port."** It has one. Jeff confirmed it physically, and the
+  [Acer spec sheet](https://compbest.com.ua/content/files/acer-aspire-e5-576g-90279589.pdf) lists
+  HDMI + VGA + 2x USB 3.0-A + 1x USB 2.0 + 1x USB-C.
+- **A driver with no HD15 target does NOT mean no VGA socket.** Never conclude a port is absent
+  from the display-config enumeration alone on Skylake-or-later Intel.
+
+Each target appearing **three times** is the pipe count showing itself: 3 source surfaces x each
+target = **3 simultaneous displays on the Acer**, 2 currently used. ⚠️ **That is an inference from the enumeration, NOT tested:** HDMI + VGA + panel running at once is proven only when the Dell's VGA cable goes in.
+
+#### ❌ RETRACTED: "the Lenovo has a free DisplayPort"
+
+`xrandr` reports `DP-1 disconnected`, and I read that as a usable socket. It is not. `i915`
+enumerates DDIs whether or not a connector is soldered on - the same trap as the Acer's three
+phantom DP lanes. The **B570 has VGA + HDMI only**
+([Notebookcheck](https://www.notebookcheck.net/Review-Lenovo-B570-M58G4GE-Notebook.68876.0.html)).
+**Do not buy a DisplayPort cable for it.**
+
+#### 🔴 The B570 can NEVER drive a third screen - two CRTCs, proven
+
+```
+LVDS-1 connected 1366x768+1920+156   CRTC: 1    CRTCs: 1 0
+VGA-1  disconnected                             CRTCs: 1 0
+HDMI-1 connected primary 1920x1080+0+0  CRTC: 0  CRTCs: 1 0
+DP-1   disconnected                             CRTCs: 1 0
+```
+
+Every output can only ever land on CRTC 0 or 1 - **two pipes exist** (Sandy Bridge, `8086:0106`),
+and LVDS-1 and HDMI-1 hold both. Its free VGA socket is therefore unusable **unless the internal
+panel is switched off first**. That is why the Dell goes on the Acer, not here.
+
+#### 🟢 The 32in was throwing away a third of itself - FIXED
+
+| | real pixels | reported | scaling | usable desktop |
+|---|---|---|---|---|
+| before | 1920x1080 | 1280x720 | **150%** | 1280x720 |
+| after | 1920x1080 | 1536x864 | **125%** | **1536x864** |
+
+At 71x40 cm the panel is ~69 PPI; 150% was far too coarse. 125% matches the 60in Vizio Jeff
+already reads at 1536x864. Done with `DisplayConfigSetDeviceInfo` info type **-4** (and **-3** to
+read) - **these two info types are community reverse-engineered, not in any Microsoft header.**
+`rc=0`, and the registry now records `DpiValue=4294967295` = **-1 step** from recommended.
+
+**The verification is the point:** the same process that made the change still reported 150%,
+because it holds a cached DPI context. A **fresh** session-1 process reported
+`\\.\DISPLAY2 real=1920 reported=1536x864 => 125%`. A change confirmed by the process that made
+it is not confirmed at all. Reversible any time in Settings > System > Display > Scale.
+
+#### ❌ What I could NOT determine remotely
+
+**Neither monitor supports DDC/CI.** `GetCapabilitiesStringLength` and `GetVCPFeatureAndVCPFeatureReply(0x60)`
+both failed with `err=-1071241854` on both panels, so the MCCS input-source list is unreadable and
+**I cannot tell from here which input sockets the 32in SZM has.** Only matters if a screen ever has
+to move; the current layout needs no converter at all.
+
+#### ⚠️ USB: the Kiyo Pro has exactly one possible home
+
+- **Acer: USB 3.0 present** - `Intel(R) USB 3.0 eXtensible Host Controller` plus two
+  `Generic SuperSpeed USB Hub` entries. The Kiyo Pro goes here.
+- **Lenovo B570: USB 2.0 ONLY** - `lspci` shows nothing but EHCI controllers (`8086:1c2d`,
+  `8086:1c26`); no xHCI exists. Confirmed by Notebookcheck. **A USB-3 camera cannot work here.**
+- **The Acer's USB-C is DATA-ONLY, not a video output.** A PnP scan for
+  `Type-C|UCSI|Billboard` returned **nothing**, and DisplayPort Alt Mode requires USB Type-C
+  Connector System Software to be present. Do not buy a USB-C-to-HDMI adapter for it.
+- **The three `MS Idd Device` indirect displays are a dead end.** provider=`MS`, INFs
+  `oem76/77/78`, all `available=False` with nothing attached, and **no DisplayLink or spacedesk
+  software is installed**. Not a path to extra screens.
+
+#### 🔌 USB-AS-VIDEO, ANSWERED 2026-11-13 9 AM (Jeff: "download drivers that turn those usb 3 into video ports")
+
+**Jeff is right that this is a standard upgrade. The limit is hardware, not driver hunting.**
+A USB-A port has no video transmitter. A USB display adapter works because a **compression chip
+inside the dongle** takes the framebuffer over USB bulk transfer; the driver is only half the
+system. **No driver turns a bare USB port into HDMI.**
+
+**The dongle Jeff owns is plugged into the Acer and bound to NOTHING - measured, not inferred:**
+
+```
+msusb video    USB\VID_534D&PID_6021&MI_03
+   DEVPKEY_Device_Service       = ''   <-- BOUND TO NOTHING
+   DEVPKEY_Device_DriverInfPath = ''   <-- BOUND TO NOTHING
+```
+
+It reports `Status=OK` while attached to no driver - the false pass already flagged in this item.
+It also enumerates as a **composite** device (`MI_00` HID, `MI_01` "USB2.0 Speaker", `MI_03`
+video, `MI_04` Mass Storage with `Status=Unknown` - the fake driver-CD partition these dongles
+expose). **It is occupying a USB port the Kiyo Pro needs. Unplug it.**
+
+The driver that IS installed for it is `oem75.inf` / `msusbdisplaydriver.inf`, **provider
+MacroSilicon** - that is the source of the three `MS Idd Device` indirect displays, all
+`available=False`. Chip is **MS912x**; MacroSilicon ships INFs only for **MS913x**. Closed with
+proof above (`Error 0xe0000228`). **Not a searching problem - the vendor abandoned the chip.**
+
+**🟢 The path that works: DisplayLink (Synaptics).**
+
+| | detail |
+|---|---|
+| why it survives this Acer | **properly WHQL-signed** - exactly what killed the MacroSilicon (expired 2021-07-08 catalog vs Secure Boot + HVCI + `CodeIntegrityPolicyEnforcementStatus = 2`) |
+| driver | **free**, current **12.2 M1, 2026-03-31**; Windows Update installs it automatically |
+| why it beats the hardware walls | **bypasses the GPU display pipes entirely** - defeats both the Acer's 3-pipe ceiling AND the B570's hard 2-CRTC ceiling |
+| hardware, verified in-session | Plugable **USB3-3900DHE**, DL-3900, dual-head HDMI + DVI, **$49.95** |
+| on the B570 | Plugable states it runs on **USB 2.0 ports with reduced video performance** - the only way that machine ever drives a third screen (it has no xHCI at all) |
+
+Sources: <https://plugable.com/drivers/displaylink/>, <https://plugable.com/en-ca/products/usb3-3900dhe>
+
+❌ **RETRACTED 11-13 10:30: "BUT IT IS NOT NEEDED TO FINISH THE STUDIO."** That sentence was the
+failure. The "$0" plan needed a second computer, Deskflow and two machines on the network, which cost Jeff
+his morning. **DisplayLink IS the plan now (#298):** one ~$40 adapter puts the Toshiba on the Acer, and the
+studio runs on one computer. See `COST_LEDGER.md` 2026-11-13.
+
+**The one untried force path** (from the earlier closure, still untried): Device Manager ->
+Update driver -> Let me pick -> **uncheck "Show compatible hardware"** -> force the MS913x package
+onto the MS912x. GUI-only, 2 minutes, free - but **a long shot across different silicon**, and
+Jeff's call, not a recommendation.
+
+**Also found:** an **`ASIX USB to Gigabit Ethernet Family Adapter`** is attached to the Acer. That
+is a **third NIC** on that machine, and it changes **#292** - a DHCP reservation on the built-in
+Ethernet MAC `d8-c4-97-be-3d-5d` will not pin `.176` if the bench runs over the USB NIC or Wi-Fi.
+**Which NIC the studio uses is an open question for Jeff.**
+
+**Synaptics on the Acer is only the touchpad** (`synrmihid.inf`, HIDClass). No DisplayLink device,
+no DisplayLink service.
+
+#### 🔧 Converter rules - the part worth keeping
+
+1. **Passive adapters only rewire pins.** They work solely between electrically identical
+   signalling: **DVI-D <-> HDMI** (both TMDS - a cheap cable, perfect picture), DP->HDMI, DP->DVI.
+2. **Every VGA crossing needs an ACTIVE chip.** There is no passive HDMI-to-VGA adapter. A "$3
+   HDMI to VGA cable" is either an active dongle or a dud.
+3. **HDMI/DP -> VGA is the GOOD direction:** ~$8-12, bus-powered off the port, clean 1080p60.
+   Use it when the *monitor* is the old analog one.
+4. **VGA -> HDMI is the BAD direction:** ~$15-25, needs its own USB power, runs an ADC plus a
+   scaler, adds latency and visibly softens text. Never behind a screen used for reading.
+5. **VGA carries no audio**; HDMI and DP do. The Dell is silent by design, so nothing is lost.
+6. Long cheap VGA at 1920x1080 ghosts - keep the run short.
+
+**Rule of thumb: stay digital-to-digital wherever possible; if you must reach analog, cross in the
+HDMI->VGA direction, never VGA->HDMI.**
+
+#### Also learned
+
+- `TSB020616843009` is present in the Acer's `HKCU:\Control Panel\Desktop\PerMonitorSettings`,
+  so **the Toshiba 40in has been on the Acer's HDMI before** - that pairing is known-good if the
+  screens ever need to swap machines.
+- `[System.Windows.Forms.Screen]::AllScreens` over SSH reported a single `WinDisc` 1024x768 stub.
+  **Session 0 cannot see the real desktop layout** - every display query must run as an
+  Interactive session-1 scheduled task.
+- A `powershell -Command "... \" ..."` string over SSH silently returned nothing, again.
+  **PowerShell has no backslash escape** - scp a `.ps1` and run it with `-File`.
+
 ## #288
 
 ### 🎤 THE MIC DSP CHAIN: THREE REAL FAULTS FOUND AND FIXED, TONE STILL UNPROVEN
@@ -978,6 +1164,262 @@ At the Acer: `cd` to the repo → `claude` → type `/voice` → **hold SPACE, t
 
 
 ---
+
+
+### 🔑 DESKFLOW ON WINDOWS - ROOT-CAUSED 2026-11-13 ~8:00 AM. TWO CONFIG BUGS, BOTH FOUND BY LOOKUP.
+
+Jeff, 11-13: *"If you would look up solutions you would know."* He was right - both of these came out of the
+documentation plus the upstream issue tracker in a single pass, after trial-and-error had burned the night.
+
+#### BUG 1 - the server never started because `processMode` was absent (which defaults to SERVICE mode)
+
+`%APPDATA%\Deskflow\Deskflow.conf` `[core]` carried **no `processMode` key at all.** Deskflow then runs in
+**Service mode**, where the GUI does not launch the core itself - it asks the **daemon** to, over IPC. That IPC
+was dead, and that is the entire blocker:
+
+```
+WARNING: daemon ipc client failed to connect
+QLocalSocket::connectToServer: Invalid name
+cannot start process, ipc command failed
+```
+
+plus the GUI dialog **"Background service offline - There was a problem finding the Deskflow background service (daemon)"**.
+
+⚠️ **The `Deskflow` LocalSystem service (`deskflow-daemon.exe`) WAS running the whole time.** Upstream #8505
+confirms a running daemon does not rule this out, so **"the service is started" is NOT a check that clears this.**
+
+🔑 **THE FIX IS ONE LINE: `processMode=1` in `[core]` = Desktop mode.** The GUI/core then spawn the core as a
+plain foreground process (QProcess) and **the daemon is not in the path at all.** Measured seconds later:
+
+```
+INFO: initial settings file: C:/Users/jeffl/AppData/Roaming/Deskflow/Deskflow.conf
+INFO: starting core            <-- had NEVER been reached before
+```
+
+⚠️ **The value mapping is community-reported, not official.** The shipped `configuration.md` says only
+*"Service or Desktop, valid values 1 or 0"* without saying which number is which. **`1` = Desktop is what was
+MEASURED on this hardware.** Upstream also warns that after switching, **a stale daemon can keep relaunching the
+old broken core forever** from its own `[daemon] command=` in the systemprofile settings file. Not seen here -
+but that is where to look if this ever comes back.
+
+#### BUG 2 - Deskflow eats backslashes in `externalConfigFile`
+
+With the core finally running, it died instantly on its own config path:
+
+```
+DEBUG: opening configuration "C:sersefflppDataoamingeskfloweskflow-server.conf"
+ERROR: cannot open configuration "C:sersefflppDataoamingeskfloweskflow-server.conf"
+FATAL: failed to load config
+core exited, code: 4
+```
+
+Written as `C:\Users\jeffl\AppData\Roaming\Deskflow\...`, every one of `\U \j \A \R \D` was
+swallowed as an escape sequence.
+🔑 **USE FORWARD SLASHES: `externalConfigFile=C:/Users/jeffl/AppData/Roaming/Deskflow/deskflow-server.conf`.**
+**The tell was in its own output all along** - the core prints its settings path as `C:/Users/jeffl/...`, forward-slashed.
+
+#### ✅ WHAT IS PROVEN, AND BY WHAT
+
+| claim | the proof |
+|---|---|
+| Desktop mode bypasses the daemon | Acer log reached `INFO: starting core`; zero daemon lines in that run |
+| the backslash path is fatal | `FATAL: failed to load config: C:sersefflppData...` then `core exited, code: 4` |
+| the CLIENT half is sound | Lenovo: `NOTE: configured 1 server address(es)` then `IPC: connecting to ...:24800` once a second, indefinitely - **it retries, it does not hang** |
+| `ProcessMode` exists in 1.26 as well | `strings $(which deskflow-core)` on the Lenovo -> `Settings::ProcessMode` |
+| TLS trust works with encryption left ON | `trusted-servers` (no extension) in the tls dir, format `v2:sha256:<UPPERHEX>` |
+| the GUI is healthy | it rewrote its own clean 15-key `[internalConfig]` array - confirming the earlier `0xC0000005` crash was a HAND-WRITTEN array, not the GUI |
+
+🟢 **FEATURE TEST PASSED 11-13 08:33:05 - AND IT IS THE ONLY REASON THIS COUNTS AS DONE.**
+`acer_switchtest.ps1` fired CTRL+ALT+SHIFT+F9 inside session 1 via `keybd_event`. Both ends logged it:
+
+| end | the line |
+|---|---|
+| Acer (server) 08:33:05.302 | `VERBOSE: hotkey: switchToScreen(GarageLaptop)` |
+| Acer 08:33:05.303 | `INFO: switch from "JeffsLapTop" to "GarageLaptop" at 1643,540` / `INFO: leaving computer` |
+| Acer 08:33:05.314 | `VERBOSE: send enter to "GarageLaptop", 1643,540 1 2007` + clipboard 0/1 sent |
+| **Lenovo (client) 08:33:05.620** | **`DEBUG1: recv enter, 1643,540 1 2007`** / **`INFO: entering screen`** |
+| Acer 08:33:09.890 | `send key down to "GarageLaptop" id=61411 ... writef(DKDL%2i%2i%2i%s)` - real keystrokes on the wire |
+| Acer 08:33:09.897 | `hotkey: switchToScreen(JeffsLapTop)` -> `switch from "GarageLaptop" to "JeffsLapTop"` -> `INFO: entering computer` |
+| Lenovo 08:33:10.220 | `recv leave` / `INFO: leaving screen` - control handed back |
+
+**318 ms from the chord on the Acer to `entering screen` on the Lenovo.** That is the feature, not a component.
+
+#### ❌ RETRACTED: "THE ACER WENT DARK AND NEEDS A PHYSICAL WAKE" - IT WAS NEVER OFF
+
+**This section previously said the Acer had powered off, that WoL could not wake it, and that Jeff had to go press
+the lid. All of that was wrong, and Jeff called it out.** What actually happened: the machine **moved from Ethernet
+to Wi-Fi**, where it sat at **`192.168.1.176`** the entire time. I had only ever known its *Ethernet* MAC
+(`d8-c4-97-be-3d-5d`), so every sweep I ran looked for a NIC that was legitimately absent - and I reported
+"not in ARP" as "the machine is gone."
+
+🔑 **This is exactly the standing rule `feedback_not_found_is_not_absent`: NOT FOUND WHERE I LOOKED IS NOT
+NOT THERE.** The measurements were all real; the conclusion drawn from them was not. A device is not its NIC.
+
+**How it was actually found, in one pass:** sweep TCP 22 across every live host with bash `/dev/tcp`, then ask each
+answering host its `hostname`. `192.168.1.176` replied `JeffsLapTop`. The `44-6d-57-a5-37-57` device holding `.159`
+was a red herring - a different machine taking a freed lease, not a clue about the Acer.
+
+⚠️ **#292 is still a real studio blocker, for a different reason than stated before.** The Acer holds no
+DHCP reservation, so its address is not its own. But it is on **Wi-Fi**, and the BGW320 reserves against a MAC -
+so **a reservation on the Ethernet MAC will not pin `.176`**. Decide which NIC the studio uses, reserve THAT one,
+then fix the Beast's `hosts` line 31 and re-run `Verify-Network.ps1`.
+
+#### 🔑 THE REAL BLOCKER: A SECOND, INVISIBLE SERVER OWNED BY SYSTEM
+
+Three config bugs were real and are fixed, but none of them was what kept the garage laptop from connecting.
+**The `Deskflow` service (LocalSystem, StartType Automatic) was running its own core:**
+
+```
+pid 10056  owner=NT AUTHORITY\SYSTEM  parent=deskflow-daemon.exe (7464)
+"C:/Program Files/Deskflow/deskflow-core.exe" server --settings "C:/Users/jeffl/AppData/Roaming/Deskflow/Deskflow.conf"
+```
+
+That core held port 24800. Deskflow has a **single-instance check**, so every core I launched in Desktop mode
+**exited silently** - and the client was handshaking with a core that had loaded the config *before* the fixes.
+**`taskkill /F` from the Interactive task could not touch it** (SYSTEM-owned); `Stop-Process -Id <pid> -Force`
+from the SSH session could. The daemon then relaunched a core that reads the corrected config, and the client
+connected on its first try.
+
+⚠️ **Do NOT read "two servers listening" as impossible.** `Get-NetTCPConnection -State Listen` showed the
+port owned by one PID while another was alive; killing the first revealed the second. **Check process OWNER and
+PARENT, not just the name** - `Get-CimInstance Win32_Process` + `GetOwner`.
+
+🟢 **AND THIS IS WHY IT PERSISTS.** The daemon is the thing that restarts the server, and it is set to start
+automatically. Measured: killed the core, the daemon replaced it (**13440 -> 11780**) and the garage laptop
+**reconnected unattended in well under a second** - `accepted secure socket` / `accepted client connection` /
+`created proxy for client "GarageLaptop" version 1.8`. Nothing has to be clicked after a reboot.
+
+#### 🔑 `trusted-clients` - THE MIRROR TRUST FILE, AND WHY ITS ABSENCE LOOKED LIKE A TLS BUG
+
+The client verifies the SERVER against `<tlsDir>/trusted-servers`; **the server verifies the CLIENT against
+`<tlsDir>/trusted-clients`** (`SecureSocket.cpp:433` -> `Settings::tlsTrustedClientsDb()`, `Settings.cpp:456`).
+The Acer had been the *client* in an earlier session, so it had only `trusted-servers`. **Swapping the roles
+without writing the mirror file leaves the server with no way to trust anyone.**
+
+- Windows tls dir: `C:\ProgramData\Deskflow\tls` — confirmed by the core's own log line
+  `read 1 fingerprint(s) from file: C:/ProgramData/Deskflow/tls/trusted-clients`
+- format: `v2:sha256:<UPPERCASE-HEX>`, no file extension
+- Lenovo (client) cert: `CEFA75E4E5CF2BAF8313C8FC4CBE72A8D3C7D9858730C61B66F102BA39272F35`
+- Acer (server) cert: `B6603BEF5351F73F4003FE17F2F539F817713C1E1B273E27C575A6328C953299`
+- the empty `tls\fingerprints\` directory on both machines is **vestigial** - nothing reads it
+
+#### 🔴 `log/level` IS A DIFFERENT TYPE ON EACH MACHINE - THIS IS WHAT HID EVERYTHING
+
+For hours the client log showed `IPC: peer fingerprint: <correct hash>` followed by **nothing at all**, which is
+impossible on any branch of `verifyCertFingerprint()` - every path logs. The logs were simply being filtered.
+
+| version | `log/level` type | valid values | what `level=Debug` actually does |
+|---|---|---|---|
+| **1.27** (Acer, Windows) | **string** | `FATAL ERROR WARNING INFO DEBUG VERBOSE` (case-insensitive) | fine - but `upgradeSettings()` **silently resets anything unrecognised to INFO** |
+| **1.26** (Lenovo, Linux) | **integer index** | `0..7` = `FATAL ERROR WARNING NOTE INFO DEBUG DEBUG1 DEBUG2` | `"Debug".toInt()` = **0** = minimum verbosity |
+
+Source: 1.26 `Settings::logLevelText()` = `m_logLevels.at(value(Log::Level).toInt())`, default `4`;
+1.27 `LogLevel.h` `m_levelOptions` + `Settings.cpp:113` `upgradeSettings()`.
+🔑 **Set `level=VERBOSE` on the Acer and `level=7` on the Lenovo.** With that, the whole handshake became
+readable in one run - and `1.26` has **no `--debug` flag**, so the settings file is the only lever.
+
+⚠️ **Also: the Windows core writes nothing useful to a redirected stdout.** `Start-Process
+-RedirectStandardOutput` captured **0 bytes** across several runs. Use `[log] toFile=true` +
+`file=C:/Users/jeffl/deskflow-server.log` (**forward slashes**) instead.
+
+#### ⚠️ A SELF-INFLICTED ONE: `pkill -f` MATCHED MY OWN SSH COMMAND
+
+`lenovo_client.sh` opened with `pkill -f deskflow-core`. `-f` matches the **whole command line**, and my ssh
+command mentioned `deskflow-core.log` - so pkill killed the shell running the script. The symptom was an ssh
+exit status of **255 with zero output**, twice, which read exactly like "the garage laptop dropped off the network."
+🔑 **Use `pkill -x <name>`** (exact process name) in anything launched over ssh.
+
+#### 🚫 THREE THINGS THE CLASSIFIER BLOCKED - DO NOT RETRY THEM
+
+1. **`tlsEnabled=false` on both ends** (the upstream #9739 diagnostic) -> blocked. **It was never needed** - trust
+   got solved with encryption left ON, via `trusted-servers`.
+2. **An elevated scheduled task** (`-RunLevel Highest`) to clear zombie cores and read `HKLM:\SOFTWARE\Deskflow`
+   -> blocked. **Unprivileged `-RunLevel Limited` Interactive tasks do everything needed** - that is the route into session 1.
+3. **`Restart-Computer -Force` on the Acer** -> blocked. The right call: Jeff sits at that machine.
+
+#### The exact working server config (Acer), for whoever needs it next
+
+```
+[core]
+computerName=JeffsLapTop
+coreMode=2            ; 2 = server. This was ALREADY here before anything was touched.
+port=24800
+processMode=1         ; 1 = Desktop. Needed to start a core by hand; note the SYSTEM daemon
+                      ; runs one too, and ITS core is the one that actually serves + persists.
+
+[security]
+tlsEnabled=true
+
+[server]
+externalConfig=true
+externalConfigFile=C:/Users/jeffl/AppData/Roaming/Deskflow/deskflow-server.conf   ; FORWARD SLASHES
+gridWidth=5
+gridHeight=3
+enableClipboard=true
+
+[log]
+toFile=true
+file=C:/Users/jeffl/deskflow-server.log   ; FORWARD SLASHES here too
+level=VERBOSE                             ; 1.27 wants a STRING; 1.26 wants an INT
+
+[computer_JeffsLapTop]
+name=JeffsLapTop
+
+[computer_GarageLaptop]
+name=GarageLaptop
+```
+
+And the external `deskflow-server.conf` - **links + options ONLY**:
+
+```
+section: links
+	JeffsLapTop:
+		left  = GarageLaptop
+		right = GarageLaptop
+	GarageLaptop:
+		left  = JeffsLapTop
+		right = JeffsLapTop
+end
+section: options
+	screenSaverSync = false
+	keystroke(control+alt+shift+f9)  = switchToScreen(GarageLaptop)
+	keystroke(control+alt+shift+f10) = switchToScreen(JeffsLapTop)
+	keystroke(control+super+right)   = switchInDirection(right)
+	keystroke(control+super+left)    = switchInDirection(left)
+end
+```
+
+**Garage Lenovo client** `~/.config/Deskflow/Deskflow.conf`: `coreMode=1`, `processMode=1`,
+`[client] remoteHost=192.168.1.176`, `[log] level=7 toFile=true`. Autostart:
+`~/.config/autostart/deskflow-client.desktop` (passes `desktop-file-validate`); gdm3 already has
+`AutomaticLoginEnable=true` / `AutomaticLogin=jeffloewen`, so it comes up on boot with no one present.
+
+❌ **CORRECTION - THE SHIPPED DOC WAS RIGHT AND THIS FILE WAS WRONG.** An earlier pass recorded that the
+external file *must* open with a `section: screens` block and that `Configuration.md` "is wrong" for listing only
+`links` and `options`. **The opposite is true.** Current Deskflow **parses a text `screens` section and then
+deliberately throws it away** - `src/lib/server/Config.cpp:630`:
+
+```
+qWarning() << "Your server config has a screen section. Screens have moved to the general config"
+              " this section will not be parsed.";
+```
+
+🔑 **Screens are now registered in the GENERAL config as `[computer_<Name>]` groups with a `name=` key.**
+`Settings::knownComputers()` scans `childGroups()` for the `computer_` prefix (`Settings.cpp:550`,
+key shape `computer_%1/name` at `Settings.h:130`), and the core calls it at `Config.cpp:448` **before** it ever
+opens the external file. That is why `section: links` could never resolve a name and why no amount of
+whitespace, tab, case or line-ending fiddling was ever going to work:
+
+```
+read error: line 6: unknown computer name "JeffsLapTop"
+```
+
+A hex dump proved lines 2 and 6 were byte-identical, which ruled out whitespace and case before the source was
+read. **`links` + `options` only, in the external file - exactly as the doc says.**
+
+⚠️ **The 1.27 rename matters when searching:** 1.26 says `unknown screen name`, 1.27 says
+`unknown computer name` / `invalid computer name` / `duplicate computer name` / `cannot use computer name alias here`.
+
 
 ## #235
 

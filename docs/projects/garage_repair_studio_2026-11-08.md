@@ -330,6 +330,8 @@ for the kit contents.
 
 ## 14. THE MONITOR TREE, SOUND AND FACETIME — designed 2026-11-10 from measured limits
 
+> 🔴 **SUPERSEDED 2026-11-13 10:30 by `OPEN_ITEMS.md` #298: THE STUDIO RUNS ON THE ACER ALONE.** 32in on the Acer's HDMI, Dell on the Acer's VGA, **24in Toshiba on a DisplayLink USB 3.0 adapter** (Wavlink WL-UG3501H, $39.99), plus the Acer's own panel = 4 screens, one computer, no Deskflow. The DisplayLink 12.3 driver is already installed on the Acer. The two-computer map below is kept only as history. **It was the wrong design:** the one-computer option was never priced against it (`COST_LEDGER.md` 2026-11-13).
+
 Jeff, 11-10 1:09 PM: *"I just want all the software and drivers in place so it is all plug and play
 when we do hook it up… three monitor tree… we only have one hdmi jack in each computer so that has
 to be worked out… I want the sound quality to be top of the line and we will need to do use my
