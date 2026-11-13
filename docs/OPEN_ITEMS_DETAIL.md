@@ -825,6 +825,53 @@ and it is not a FaceTime workaround.
 
 ---
 
+
+### 🟢 RESOLVED 2026-11-13 12:00 AM — THE TOSHIBA IS LIVE, AND THE DONGLE IS CLOSED
+
+**Both owed looks are answered without Jeff walking to the garage.**
+
+| question | answer | what proved it |
+|---|---|---|
+| (b) does the Toshiba have HDMI? | **YES — and it is on it now** | Lenovo kernel: `card1-HDMI-A-1 = connected`, `card1-VGA-1 = disconnected`. EDID byte 20 = `0x80` (digital), HDMI IEEE OUI `03 0c 00` present |
+| which monitor is it? | `TSB0206` **“TOSHIBA-TV”**, made 2010 — the same unit in the Acer's topology history (`TSB020616843009_00_07DA_23`) | EDID read via `xrandr --verbose` on `HDMI-1` |
+| (a) VGA socket on the Acer? | **MOOT** — Jeff rejected VGA and the digital route is live. SMBIOS type-8 is empty on this Acer, so it cannot be answered remotely | `Win32_PortConnector` returned nothing |
+| how big is it? | ⚠️ EDID says **89 × 50 cm ≈ 40 inches**, not 24. Mode list is a TV's: `1920x1080i`, `1440x480i`, 24/23.98 Hz | EDID bytes 21–22 |
+
+#### What was actually wrong: it was CLONING, not dead
+
+`xrandr` showed **both** outputs at `+0+0` — `LVDS-1 1366x768+0+0` and `HDMI-1 1920x1080+0+0`. Applied:
+
+```
+xrandr --output HDMI-1 --mode 1920x1080 --rate 60 --pos 0x0 --primary --output LVDS-1 --mode 1366x768 --pos 1920x156
+```
+
+Verified after: `Screen 0: current 3286 x 1080`, `HDMI-1 connected primary 1920x1080+0+0`, `LVDS-1 connected 1366x768+1920+156`.
+Persisted in `~/.config/autostart/hcc-displays.desktop`. **If the laptop physically sits LEFT of the TV, swap the two `--pos` values, or drag it in `arandr`.**
+
+#### 🔴 THE MACROSILICON USB DONGLE — CLOSED, WITH THE PROOF. DO NOT SPEND ANOTHER HOUR ON IT.
+
+Jeff's adapter is `USB\VID_534D&PID_6021&MI_03` — an **MS912x**. Every path was walked:
+
+| attempt | result |
+|---|---|
+| the dongle's own driver, `MSUSBDisplay.inf` v1.0.0.18 | catalog signed by Ultrasemi, **expired 2021-07-08** → refused: “publisher ... not yet established as trusted”. Acer has Secure Boot + HVCI + `CodeIntegrityPolicyEnforcementStatus = 2` |
+| current vendor driver V4.2.16.26 (md5 matched the vendor's published hash; **attested by “Microsoft Windows Hardware Compatibility Publisher”**) | installs clean, exit 0 — but its INF claims **only** `VID_345F&PID_9133&MI_03` (**MS913x, a different chip**) |
+| all four Win10/11 builds 4.2.8.11 / 4.2.10.14 / 4.2.15.22 / 4.2.16.26 | one MS913x INF line. **No MS912x package exists** |
+| `devcon update <attested inf> "USB\VID_534D&PID_6021&MI_03"` | `exit=2`, twice (Jeff 23:47:40, Claude 23:48:42). `setupapi.dev.log`: *“No matching drivers found in single INF”*, **`Error 0xe0000228: There are no compatible drivers for this device.`** |
+| libusb-win32 1.4.0.2 (its `libusb0.sys` IS attestation-signed) | would need a **new INF → new catalog → a self-signed cert in the machine trust store**. **NOT DONE — that trades Secure Boot integrity for one monitor.** |
+
+🔑 **`devcon update` does NOT force a non-matching INF** — it still requires a hardware-ID match. The only force path is GUI-only: Device Manager → Update driver → Let me pick → **uncheck “Show compatible hardware”**. Untried; a long shot across different chips.
+
+⚠️ **`msusb video` reads `Status=OK, problem=0` while bound to NOTHING** (`service=''`, `inf=''`). That green status is a **FALSE PASS** — the real test is whether `Service`/`DriverInfPath` are non-empty.
+
+#### Deskflow — why it was never going to work, now fixed on the Lenovo side
+
+- Lenovo `Deskflow.conf` had **no `serverHostname` key at all**. Set to `192.168.1.159` (backup `Deskflow.conf.bak-20261113-000107`). Deskflow **1.26.0+dfsg-1**, `coreMode=1` (client).
+- Acer is `coreMode=2` (server), daemon running (pid 7920), firewall rules **Deskflow Server + Client = Allow, Any profile** — but **nothing listening on 24800**: the core was never started.
+- 🔑 From the Lenovo, **`.176` is `ping DEAD`** and `.159` answers — a second independent confirmation of **#292**. Anything still pointing at `.176` is pointing at the Acer's disconnected Wi-Fi leg.
+- **Remaining: one `Start` click per machine + accept the TLS fingerprint once.** The server core must be launched by the GUI/daemon into Jeff's interactive session — an SSH-spawned core lands in session 0 and cannot capture his real mouse.
+
+
 ## #282
 
 ### 🎥 GARAGE REPAIR STUDIO + CLAUDE BENCH — THE MIC ANSWER, AND WHAT THE PROBES GOT WRONG
