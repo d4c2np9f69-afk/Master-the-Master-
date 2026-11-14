@@ -45,7 +45,19 @@ present. So if the WAVLINK arrives, it should come up on the driver that is alre
 | 32in onn | **Miracast — wireless** | **0** |
 
 Intel UHD 620 caps at **3 physical pipes**, and that is exactly 3. **Four screens, no dongle, $0.**
-The WAVLINK only earns its keep if the Dell has no VGA input, or VGA looks too soft for board work.
+~~The WAVLINK only earns its keep if the Dell has no VGA input~~ — **settled 11-14: it HAS one.**
+
+### ✅ THE DELL IS IDENTIFIED — `P2012Ht` = Dell P2012H (Jeff photographed the label 11-14)
+
+| Spec | Value | Why it matters here |
+|---|---|---|
+| Panel | **TN**, 20 in | 🔑 **TN washes out worst viewed from ABOVE** — exactly the axis of a recessed bench monitor. **The recess must tilt by sinking the BACK edge ~1 in.** Not optional. |
+| Native | **1600 x 900 @ 60 Hz** | 🔑 **Run the OBS Source projector at 1600x900, NOT 1080p** — anything else makes the panel rescale fine traces. Note this is BELOW 1080p: a 1080p scope feed loses real detail on this screen. Free monitor, honest trade. |
+| Inputs | **DVI-D · VGA · USB-B** | **VGA confirmed → $0, no adapter, WAVLINK stays withdrawn.** 1600x900 over analog VGA is clean. DVI-D is a sharper digital path IF the Acer HDMI pipe ever frees — it has not, and this does **not** reopen the onn. |
+| Other | 5 ms · 250 cd/m² · 1000:1 · ~92 ppi · **built Oct 2011** · 11.9 W | 15 years of backlight on it. Build the recess as a **drop-in from above**, not a fixed frame, so swapping it is not demolition. |
+
+*Verified by search 11-14 against Dell’s own user manual (panel type + native resolution), no
+conflicting figure found; brightness/contrast/ppi from retailer and aggregator listings.*
 
 ---
 
@@ -383,12 +395,13 @@ changes a room switch, and nothing here re-opens a settled switch decision.
 
 ---
 
-## 7. THE THREE ANSWERS I STILL NEED — everything else proceeds without them
+## 7. THE ONE ANSWER I STILL NEED — everything else proceeds without them
 
 1. **The 25 ft of LED — what is it?** (addressable / 12 V / 24 V / 120 V rope; white or colour)
    A photo of the reel label settles it. **This picks the controller.**
 2. ~~The $17 microscope — USB or HDMI?~~ ✅ **ANSWERED 11-14: Jiusion 40-1000x, USB 2.0.**
-3. **The Dell — model, and does it have a VGA input?** (decides $0 VGA vs. the WAVLINK)
+3. ~~The Dell — model, and does it have a VGA input?~~ ✅ **ANSWERED 11-14: `P2012H`, 20in TN,
+   1600x900, VGA present → $0.** See the table in § 1 — the TN finding changes the recess.
 4. **Picture 4 never attached.**
 
 ---

@@ -205,6 +205,12 @@ root loose-file count **87 → 58**.
 
 | 🔴 **#257** | 🕰️ **CLOCK SILENT SINCE WED 10-28 10:50 AM: the QFX speaker dropped off Bluetooth (`chime.log`). Listener and HA automations are healthy; self-heal failed every 5 min. BACK 11-02 12:55 PM when Jeff powered the QFX; the 1:00 PM strike logged clean, 35.16 s for 35.47 s.** Also found 11-02: HA reports no Blink motion for 116.7 h as of noon, all 6 scanners idle while the AI itself passed a real detection test (person 90.6%), `binary_sensor.mailbox_contact` missing, HA core on beta 2026.11.0b2. Cameras stay frozen unless Jeff says otherwise. | **JEFF** walk-test decides the camera question | 🔴 **DROPPED AGAIN 11-02 8:02:04 PM, STILL OFF 11-03 11:10 AM (15 h). The reset + reconnect in `self_heal` failed every 5 min on this real drop, so it is not a fix for this state (`chime.log`). `qfx_volume_push.py` has not run; watcher waits up to 24 h from 11:12 AM.** QFX BACK 11-02 7:42:44 PM, 13 s after a reconnect request right behind a reset; spoken test 7:45 PM clean; request added to `self_heal` (not yet proven on a real drop). It had DROPPED 7:21:05 PM, 6 h 26 m after it came back, with a 24 s return at 7:32:45. Beast self-heal RESET at 7:22 did not return it; not on the Lenovo or KitchenPC. Why it leaves is still unknown (same open question as 09-29 and 10-28). Tried 7:31 PM: Windows' own Connect request (`HCC-Scripts\qfx_reconnect.py`, KSPROPERTY_ONESHOT_RECONNECT) accepted, no connection in 45 s. 14 s Bluetooth scans from Lenovo + KitchenPC saw the Acer and others, not the QFX. l2ping is NOT a valid test here: KitchenPC to Lenovo also says "Host is down". Needs Jeff at the speaker. CLAUDE OWES: when it is back, drop it and prove `qfx_reconnect.py` works, then add it to `self_heal`** |
 
+**✅ CLOSED 11-09 11:30 PM — five consecutive strikes proven after the dongle re-plug**
+(moved here from the todo row 11-14 to buy cap headroom; this is the proof, do not lose it):
+19:30 half · 20:01 hour ×8 (**68.07 s played for 68.30 s of audio**) · 20:30 half ·
+21:01 hour ×9 (**72.57 s for 72.90 s**) · 21:30 half — every one logged
+*"PC side clean (no underflow)"* in `chime.log`. **No drag: the 10-20 "horrible" symptom is absent.**
+
 ## #267
 
 **Superseded state text (moved from OPEN_ITEMS.md 11-06):** 🟡 **FIX WRITTEN + NOW TESTED, NOT DEPLOYED (11-04).** The fix was written 11-03 and had **NO test at all** until 11-04 — untested, this regresses silently, which is the 50-day hour-meter failure over again. 6 tests added to `scripts/mower-hours-test.mjs` (**80 passed, 0 failed**) covering the real 11-03 replay (7.0833 → 7.7583), **idempotency across a multi-slot ring-buffer flush** (identical hours resent records nothing), a heartbeat with no new runtime, and both sides of `MIN_LOST_MOW_H` (0.008 h rejected, 0.02 h accepted). **Red-proved against HEAD:** the 4 should-record assertions all FAIL on the pre-fix endpoint — the mow is lost — while the 2 must-not-record guards hold either way, so they are not tautologies. 🔵 **COMMITTED `ed78196` 11-04 3:10 PM - STILL NOT DEPLOYED.** The push is blocked by the harness as a **Production Deploy** (this branch auto-deploys to the live house app), so shipping it is **JEFF’S GO, one `git push`** - the code is finished and tested, nothing else is owed on it.
@@ -2460,10 +2466,31 @@ Flat-horizontal is the worst case for viewing angle — the eye sits 45-60° off
 **Make the recess ~1 in deeper at the BACK than the front.** The panel then tilts toward Jeff's face
 while its top edge stays flush with the bench: viewing angle **and** full clearance to the onn.
 
-➡️ **THIS IS A THIRD REASON THE DELL'S MODEL IS WANTED, and the most time-critical one.**
-A **TN** panel shifts colour and washes out badly when viewed from above — vertical off-axis is TN's
-worst case. **IPS** does not care. That changes how much tilt the recess needs, so it is worth
-knowing **before the hole is cut**, not after.
+➡️ ✅ **ANSWERED 11-14 9:5x — Jeff photographed the label and it is the worst case: `P2012Ht` =
+Dell P2012H, 20 in, *TN* panel, native 1600 x 900 @ 60 Hz, 5 ms, 250 cd/m², 1000:1, ~92 ppi.**
+Verified by search against Dell's own user manual (panel type + resolution) with no conflicting
+figure found; third-party listings supply the brightness/contrast numbers.
+**So the back-edge-deeper tilt is REQUIRED, not optional** — TN's worst viewing axis is vertical
+from above, which is exactly where Jeff's eyes sit over a recessed panel. Flat-mounting this
+particular monitor would grey out and colour-shift the microscope image at the angle he actually
+uses it. The hole gets cut once; cut it with the back edge ~1 in lower.
+
+**Three more things the label settles:**
+- 🖥️ **The OBS Source projector must run 1600 x 900, not 1080p.** Feeding it 1920x1080 makes the
+  panel rescale fine traces and solder joints — exactly the detail the scope exists to show.
+  1600x900 is also BELOW 1080p, so a 1080p scope feed loses real resolution here. That is a
+  property of a free 2011 monitor, not a fault, and it does not change the plan.
+- 🔌 **VGA is confirmed present on the panel (photo: DVI-D · VGA · USB-B).** 1600x900 over analog
+  VGA is well within what the cable does cleanly — no ghosting concern at this resolution. **The
+  panel ALSO has DVI-D**, which is digital: if the Acer's HDMI pipe ever frees up, a passive
+  HDMI→DVI-D cable would be a sharper path. Not needed, not now, and it does NOT reopen the onn.
+- 🔗 **That USB-B is the panel's built-in hub upstream port.** Tempting as a cable-tidy for the
+  scope — but if the Dell is recessed under plexi its downstream ports are buried too, so it only
+  helps if the recess leaves one side reachable. Decide at cut time, not before.
+
+⚠️ 2011 panel, 11.9 W: 15 years of backlight hours are already on it. Not a reason to avoid the
+build — it is a free monitor doing a job — but do not cut the hole in a way that makes replacing
+it a demolition job. A drop-in from above beats a fixed frame.
 
 ### Four build notes — raised once, not a checklist to manage
 1. 🔥 **HEAT.** A monitor in a closed cavity under acrylic has no convection path; the panel PSU
@@ -2606,7 +2633,13 @@ white-painted trough** (§ 3b) rather than down. Costs paint.
 side **opposite the soldering hand**, or the hand shadows the exact joint being worked. Free to fix
 before the arm is mounted, annoying after.
 
-## OWED FROM JEFF — 4 answers, everything else proceeds without them
+## OWED FROM JEFF — was 4 answers; **2 and 3 are now ANSWERED**, only the LED label still blocks
+
+🔎 **A partial answer to #1 came from the bench photos themselves, 11-14:** a strip is **already
+installed and lit along the back edge, and it is BLUE.** Blue output means it is **not** a
+single-colour white reel — so it is RGB, RGBW or addressable, and the cheapest "just dim it"
+controller path is off the table. **It does not tell us which of those three**, and that still
+decides the controller. The reel label (or a photo of the inline controller/connector) settles it.
 
 1. **What is the 25 ft of LED?** addressable WS2812/WS2815 · 12 V/24 V single-colour · RGB/RGBW ·
    120 V rope. **This picks the controller and nothing downstream can be finalised without it.**
@@ -2626,7 +2659,9 @@ before the arm is mounted, annoying after.
    scope IS that "later". ⚠️ **The only unproven leg is the iPhone:** iPhone-as-webcam on WINDOWS
    is not Continuity Camera (macOS only) and needs a helper app; none is in the record. Measure it —
    do not buy a camera. Until then OBS has two angles and the overhead is a gap.
-3. **The Dell — model, and does it have a VGA input?** (decides $0 VGA vs. the WAVLINK)
+3. ✅ **ANSWERED 11-14 — `P2012Ht` = Dell P2012H: 20 in, TN, 1600x900 native, and the port photo
+   shows DVI-D · VGA · USB-B.** VGA confirmed → **$0, no adapter, WAVLINK stays withdrawn.**
+   The TN finding drives the bench-recess tilt — see the recess block above.
 4. **"Picture 4" never attached to the 11-14 message.**
 
 *(One further finding — about a frozen subsystem — was blocked from this file by the session-freeze
