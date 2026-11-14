@@ -19,8 +19,27 @@ $aud = [regex]::Matches($list, '"([^"]+)"\s+\(audio\)') | ForEach-Object { $_.Gr
 Write-Host "video devices: $($vid -join ' | ')"
 Write-Host "audio devices: $($aud -join ' | ')"
 
-$kiyo = $vid | Where-Object { $_ -match 'Kiyo' } | Select-Object -First 1
-if (-not $kiyo) { F "Kiyo Pro not seen - plug it into a BLUE (USB 3) port" }
+# 2026-11-13: DirectShow does NOT always expose the Kiyo's product name. On the Acer it
+# enumerates as the generic "USB Video Device" while PnP correctly reports "Razer Kiyo Pro"
+# and the AUDIO half still carries the real name. Matching only on 'Kiyo' therefore FAILED a
+# working, correctly-plugged camera and printed "plug it into a BLUE (USB 3) port" - sending
+# Jeff to re-seat hardware that was fine. A gate that fails a working machine is worse than
+# no gate, so identity is now resolved from PnP (VID_1532 = Razer) and the generic dshow name
+# is accepted only when the vendor ID is actually present.
+$kiyo = $vid | Where-Object { $_ -match 'Kiyo|Razer' } | Select-Object -First 1
+$pnpRazer = @(Get-PnpDevice -ErrorAction SilentlyContinue |
+              Where-Object { $_.InstanceId -match 'VID_1532' -and $_.Class -eq 'Camera' -and $_.Status -eq 'OK' })
+if (-not $kiyo -and $pnpRazer.Count -gt 0) {
+  # the Kiyo is present per PnP: take the dshow device that is NOT the built-in panel webcam
+  $kiyo = $vid | Where-Object { $_ -notmatch 'HD WebCam|Integrated|Internal' } | Select-Object -First 1
+  if ($kiyo) {
+    Write-Host ("  note: PnP reports '{0}' (VID_1532) but DirectShow calls it '{1}' - using it" -f $pnpRazer[0].FriendlyName, $kiyo) -ForegroundColor Yellow
+  }
+}
+if (-not $kiyo) {
+  if ($pnpRazer.Count -gt 0) { F "PnP sees the Kiyo but DirectShow exposes no usable video device - driver/filter problem, NOT a cable problem" }
+  else { F "Kiyo Pro not seen by PnP or DirectShow - plug it into a BLUE (USB 3) port" }
+}
 else {
   P "Kiyo seen as '$kiyo'"
   $clip = Join-Path $out "kiyo-$stamp.mp4"
@@ -45,13 +64,34 @@ else {
   & ffmpeg -hide_banner -loglevel error -f dshow -i "audio=$mic" -t 5 -y $wav 2>&1 | Out-Null
   $vol = & ffmpeg -hide_banner -i $wav -af volumedetect -f null NUL 2>&1 | Select-String 'max_volume' | Out-String
   if ($vol -match 'max_volume:\s*(-?[\d.]+)') { $mx = [double]$Matches[1]
-    if ($mx -gt -40) { P "mic '$mic' heard sound (peak $mx dB)" } else { F "mic '$mic' recorded near-silence (peak $mx dB)" } }
+    # 2026-11-13: a peak just over the -40 dB floor is ROOM NOISE, not a usable voice level, and
+    # reporting it as "heard sound" reads as "the mic is good". #288's rule stands: tone is not
+    # provable without real signal. So the band is named explicitly instead of passing silently.
+    if ($mx -gt -20) { P "mic '$mic' captured STRONG signal (peak $mx dB) - speech-level" }
+    elseif ($mx -gt -40) { P "mic '$mic' captured signal, but only AMBIENT level (peak $mx dB) - the path works; tone/voice level UNPROVEN until someone speaks during the test (#288)" }
+    else { F "mic '$mic' recorded near-silence (peak $mx dB)" } }
   else { F "mic recording failed" }
 }
 
 # --- software present
 if (Test-Path 'C:\Program Files\obs-studio\bin\64bit\obs64.exe') { P "OBS Studio installed" } else { F "OBS missing" }
-if (Get-Process deskflow* -ErrorAction SilentlyContinue) { P "Deskflow process running (the REAL test: mouse slides onto the Lenovo screen)" } else { F "Deskflow not running (start it, server mode)" }
+# Deskflow: a RUNNING PROCESS IS NOT A SERVER. 2026-11-10 this check passed on
+# `deskflow-daemon` alone - the Windows service - while nothing listened on 24800
+# and the Acer had no config file at all. Test the LISTENER, and say plainly that
+# even a listener is not the feature.
+$conf = Join-Path $env:APPDATA 'Deskflow\Deskflow.conf'
+if (Test-Path $conf) {
+  $mode = (Select-String -Path $conf -Pattern '^coreMode=(\d)' | Select-Object -First 1).Matches.Groups[1].Value
+  P "Deskflow config present (coreMode=$mode; 2=Server)"
+} else { F "Deskflow has NO config at $conf - it cannot be a server" }
+$lsn = Get-NetTCPConnection -LocalPort 24800 -State Listen -ErrorAction SilentlyContinue
+if ($lsn) {
+  $own = (Get-Process -Id $lsn[0].OwningProcess -ErrorAction SilentlyContinue).ProcessName
+  P "Deskflow server LISTENING on 24800 (pid owner: $own). NOT YET THE FEATURE - the feature is the mouse crossing onto the Lenovo screen"
+} else {
+  $dmn = if (Get-Process deskflow-daemon -ErrorAction SilentlyContinue) { ' (deskflow-daemon is running, but that service is NOT a server)' } else { '' }
+  F "NOTHING listening on 24800 - no Deskflow server$dmn"
+}
 $cc = Get-Command claude -ErrorAction SilentlyContinue
 if ($cc) { P "Claude Code $(& claude --version)" } else { F "Claude Code not on PATH" }
 

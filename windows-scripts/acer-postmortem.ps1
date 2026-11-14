@@ -8,8 +8,8 @@
 # family - the drive is M3CR033), thermal (43.1 C CPU, 25 C drive, no throttle
 # events). Next suspect is RAM.
 #
-#   scp windows-scripts\acer-postmortem.ps1 jeffl@192.168.1.176:C:/Users/jeffl/
-#   ssh jeffl@192.168.1.176 "powershell -ExecutionPolicy Bypass -File C:\Users\jeffl\acer-postmortem.ps1"
+#   scp windows-scripts\acer-postmortem.ps1 jeffl@192.168.1.159:C:/Users/jeffl/
+#   ssh jeffl@192.168.1.159 "powershell -ExecutionPolicy Bypass -File C:\Users\jeffl\acer-postmortem.ps1"
 $ErrorActionPreference = 'SilentlyContinue'
 function L($a,$b){ Write-Output ("  {0,-40} {1}" -f $a,$b) }
 function H($t){ Write-Output ""; Write-Output "=== $t ===" }

@@ -35,18 +35,21 @@ Write-Output "================================================================"
 Write-Output "  HCC MESH REALITY AUDIT   $(Get-Date -Format 'ddd yyyy-MM-dd h:mm tt')"
 Write-Output "================================================================"
 
+# 2026-11-13 MEASURED: the Acer is DUAL-HOMED - 192.168.1.159 on a USB gigabit Ethernet
+# adapter (ASIX VID_0B95 PID_1790) and 192.168.1.176 on Wi-Fi. ONLY .159 answers; .176
+# returns 'Destination host unreachable'. The Lenovo moved .173 -> .158 on 29 Sep.
 # --- deploy the probes as FILES, never inline ---
-& scp -o StrictHostKeyChecking=no -o ConnectTimeout=10 "$here\audit-probe-acer.ps1" jeffl@192.168.1.176:C:/HCC-SETUP/audit-probe.ps1 2>$null | Out-Null
+& scp -o StrictHostKeyChecking=no -o ConnectTimeout=10 "$here\audit-probe-acer.ps1" jeffl@192.168.1.159:C:/HCC-SETUP/audit-probe.ps1 2>$null | Out-Null
 $tmp = [IO.Path]::GetTempFileName()
 [IO.File]::WriteAllText($tmp, ([IO.File]::ReadAllText("$here\audit-probe-lenovo.sh") -replace "`r",""))
-& scp -o StrictHostKeyChecking=no -o ConnectTimeout=10 $tmp jeffloewen@192.168.1.173:/tmp/audit-probe.sh 2>$null | Out-Null
+& scp -o StrictHostKeyChecking=no -o ConnectTimeout=10 $tmp jeffloewen@192.168.1.158:/tmp/audit-probe.sh 2>$null | Out-Null
 Remove-Item $tmp -Force
 
-$A = (& ssh -o ConnectTimeout=15 -o BatchMode=yes jeffl@192.168.1.176 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\HCC-SETUP\audit-probe.ps1' 2>$null) -split '\|'
-$L = (& ssh -o ConnectTimeout=15 -o BatchMode=yes jeffloewen@192.168.1.173 'bash /tmp/audit-probe.sh' 2>$null) -split '\|'
+$A = (& ssh -o ConnectTimeout=15 -o BatchMode=yes jeffl@192.168.1.159 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\HCC-SETUP\audit-probe.ps1' 2>$null) -split '\|'
+$L = (& ssh -o ConnectTimeout=15 -o BatchMode=yes jeffloewen@192.168.1.158 'bash /tmp/audit-probe.sh' 2>$null) -split '\|'
 
 Section 'NAME RESOLUTION - clicking a machine in Network uses the NAME'
-foreach ($m in @(@('301SERVER','192.168.1.194'), @('JeffsLapTop','192.168.1.176'), @('GarageLaptop','192.168.1.173'))) {
+foreach ($m in @(@('301SERVER','192.168.1.194'), @('JeffsLapTop','192.168.1.159'), @('GarageLaptop','192.168.1.158'))) {
     $ip = try { ([Net.Dns]::GetHostAddresses($m[0]) | Where-Object { $_.AddressFamily -eq 'InterNetwork' })[0].IPAddressToString } catch { $null }
     Res "resolve $($m[0])" ($ip -eq $m[1]) $(if($ip){"-> $ip"}else{'NOT RESOLVABLE'})
 }

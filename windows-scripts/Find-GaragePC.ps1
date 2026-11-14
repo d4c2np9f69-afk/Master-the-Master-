@@ -28,7 +28,8 @@ $KNOWN = @{
     '192.168.1.222' = 'NETGEAR NTV300'
     '192.168.1.254' = 'BGW320 gateway'
     '192.168.1.164' = "Angela's work computer"
-    '192.168.1.176' = 'JeffsLapTop'
+    '192.168.1.159' = 'JeffsLapTop (Acer - USB gigabit Ethernet, the LIVE address)'
+    '192.168.1.176' = 'JeffsLapTop Wi-Fi (same Acer, assigned but NOT answering 2026-11-13)'
     # Added from the 2026-09-16 02:04 baseline sweep, so the garage PC stands out when it lands:
     '192.168.1.186' = 'unidentified, reverse-DNS "none.local", no Windows services'
     '192.168.1.241' = 'Roku TV ("32onnRokuTV")'

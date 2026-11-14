@@ -180,7 +180,7 @@ which needs **both** Secure Boot (PCR7) **and** clean DMA — see OPEN_ITEMS #4.
 | Machine | Address | How Claude gets in | Proof it worked |
 |---|---|---|---|
 | **Beast** (this PC) | `192.168.1.194` | local | — |
-| **Acer** laptop (`JeffsLapTop`) | `192.168.1.176` ✅ **the NAME resolves now** (hosts entry) · user `jeffl` · Windows 11 Home, 1366x768 | **`ssh jeffl@JEFFSLAPTOP`** — key installed | 2026-10-08: `ssh … "powershell … -File C:\HCC-SETUP\x.ps1"` returned output |
+| **Acer** laptop (`JeffsLapTop`) | 🔴 **`192.168.1.159`** — MEASURED 2026-11-13. **DUAL-HOMED: `.159` = USB gigabit Ethernet (ASIX `VID_0B95 PID_1790`) and ANSWERS; `.176` = its Wi-Fi, still assigned but returns `Destination host unreachable`.** The name resolves (hosts entry, corrected to `.159` on the Beast AND the Lenovo) · user `jeffl` · Windows 11 Home, 1366x768 | **`ssh jeffl@JEFFSLAPTOP`** — key installed | 2026-10-08: `ssh … "powershell … -File C:\HCC-SETUP\x.ps1"` returned output |
 | **Lenovo** (garage, Linux) | `192.168.1.158` · name resolves · user **`jeffloewen`** · Ubuntu | **`ssh jeffloewen@GARAGELAPTOP`** — key installed | 2026-10-08: returned `GarageLaptop` + `/usr/bin/vlc` |
 | **KitchenPC** (the HP — **now on the network**) | `192.168.1.192` · name resolves · user **`jeffloewen`** · **Ubuntu 26.04.1 LTS** | **`ssh jeffloewen@KITCHENPC`** — key installed | 2026-10-08: returned `KitchenPC` + `Ubuntu 26.04.1 LTS` |
 
@@ -191,12 +191,26 @@ no access existed — it was the wrong user, not a missing key.
 ⚠️ **KitchenPC is LINUX, not Windows.** `powershell` over SSH there returns
 `bash: powershell: command not found`. The old "HP — not yet on WiFi" row was stale.
 
+🔴 **WALL: anything needing the CONSOLE SESSION returns `ACCESS_DENIED` over SSH — and there IS a way through.**
+`QueryDisplayConfig` (which monitor sits on which connector) returned **`rc=5`** over SSH, and
+`System.Windows.Forms.Screen` returned a fake `WinDisc 1024x768`. An SSH logon carries no interactive
+session token, so display/desktop APIs refuse. **The workaround, PROVEN 2026-11-13 18:23 on the Acer:
+run it as a scheduled task with an interactive token (`/it`) so it executes in Jeff's real logged-on
+session.** The same call then returned **`rc=0`, 22 paths** and the true monitor→adapter map.
+```powershell
+schtasks /create /tn HCC-Probe /f /sc once /st 23:59 /ru jeffl /it /tr "powershell -NoProfile -ExecutionPolicy Bypass -File C:\Users\jeffl\Wrap.ps1"
+schtasks /run /tn HCC-Probe      # read the file Wrap.ps1 wrote, then: schtasks /delete /tn HCC-Probe /f
+```
+⚠️ **The task action must NOT use shell redirection** (`> out.txt`): it is eaten by the quoting
+layers and the task silently produces nothing (`Last Result: 0`, no file). Make the script write its
+own file with `Out-File`. ⚠️ It also needs Jeff actually logged on at the console.
+
 🔴 **THE RULE THAT SAVES THE MOST TIME HERE: never inline a script over SSH.** Nested quoting
 between PowerShell → ssh → the remote shell broke **six separate times** in one session. **Always
 `scp` a script file, then run it by path.** That worked every single time:
 ```powershell
-scp -o StrictHostKeyChecking=no local.ps1 jeffl@192.168.1.176:C:/Users/jeffl/x.ps1
-ssh jeffl@192.168.1.176 "powershell -ExecutionPolicy Bypass -File C:\Users\jeffl\x.ps1"
+scp -o StrictHostKeyChecking=no local.ps1 jeffl@192.168.1.159:C:/Users/jeffl/x.ps1
+ssh jeffl@192.168.1.159 "powershell -ExecutionPolicy Bypass -File C:\Users\jeffl\x.ps1"
 ```
 ⚠️ **Guest SMB from the Beast is IMPOSSIBLE, not misconfigured** — Win11 24H2 mandates SMB signing
 and a guest session cannot be signed (`0xC05D0003`). That is why Beast→Acer runs **rclone over

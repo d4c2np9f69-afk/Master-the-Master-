@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Garage Studio - Phase 1 Clean-Out Sheet</title>
+<style>
+:root{--ink:#111;--mut:#666;--line:#bbb;--box:#333;--hi:#fff3cd;--ok:#1b7f3b;--no:#b3261e}
+*{box-sizing:border-box}
+body{font:13px/1.45 "Segoe UI",Arial,sans-serif;color:var(--ink);background:#fff;margin:0;padding:18px 22px;max-width:8.1in}
+h1{font-size:19px;margin:0 0 2px}
+h2{font-size:14px;margin:16px 0 6px;padding-bottom:3px;border-bottom:2px solid var(--box);text-transform:uppercase;letter-spacing:.04em}
+.sub{color:var(--mut);font-size:11.5px;margin:0 0 10px}
+.rule{background:var(--hi);border-left:4px solid #d39e00;padding:7px 10px;font-size:12px;margin:10px 0}
+table{width:100%;border-collapse:collapse;margin:6px 0 2px}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:left;vertical-align:top;font-size:12px}
+th{background:#eee;font-size:11px;text-transform:uppercase;letter-spacing:.03em}
+.cb{width:20px;text-align:center;font-size:15px;color:var(--box)}
+.z{width:17%}
+.piles th{width:25%}
+ul{margin:4px 0 4px 18px;padding:0}
+li{margin:2px 0;font-size:12px}
+.ok{color:var(--ok);font-weight:700}
+.no{color:var(--no);font-weight:700}
+.jeff{background:#eef5ff;border-left:4px solid #2b6cb0;padding:7px 10px;font-size:12px;margin:8px 0}
+.note{font-size:11px;color:var(--mut);margin-top:3px}
+.sig{margin-top:14px;border-top:1px solid var(--line);padding-top:8px;font-size:11.5px;color:var(--mut)}
+@media print{body{padding:0;font-size:12px}h2{margin-top:12px}}
+</style></head><body>
+
+<h1>Garage Electronics Repair Studio &mdash; Phase 1 Clean-Out Sheet</h1>
+<p class="sub">Garage is <strong>13 &times; 24 ft</strong> (taped, <code>docs/house-plan/plan-data.js</code>). Plan: <code>docs/projects/garage_repair_studio_2026-11-08.md</code> &middot; OPEN_ITEMS <strong>#282</strong> &middot; every status line below is a live measurement taken 2026-11-10 around 10:05 AM Central</p>
+
+<div class="rule"><strong>THE RULE FOR THIS BUILD &mdash; Jeff, 11-08 9:32 AM:</strong> build from what is already owned. <strong>Buying is the last resort, not phase 5.</strong> Nothing on this sheet costs a dime.</div>
+
+<h2>The four piles &mdash; decide once, per item</h2>
+<table class="piles"><tr>
+<th>STUDIO</th><th>YARD</th><th>SALVAGE STOCK</th><th>GO</th></tr><tr>
+<td>Stays in the shot or serves the bench: soldering station, repair mat, magnifier lamp, both boom arms, parts drawers, pegboard, UPS</td>
+<td>Yard and lawn gear &mdash; all of it <strong>forward of the man door</strong> (west wall, ~2/3 back), out of frame</td>
+<td>Parts worth keeping to build from: the microwave salvage blower, the sewing-machine pedal, the donor USB keyboard, salvage switches, wire, fasteners</td>
+<td>Trash / recycle / sell. If it has no job in one of the three columns to its left, it goes.</td>
+</tr></table>
+<p class="note">Anything that lands in SALVAGE STOCK and is not already in the record: tell me what it is and I add an inventory row the same session &mdash; that is how the pedal and the blower builds got costed at $0 instead of $125.</p>
+
+<h2>One zone per session &mdash; the garage is never torn up all at once</h2>
+<table>
+<tr><th class="cb">&#9633;</th><th class="z">Zone</th><th>Done when</th></tr>
+<tr><td class="cb">&#9633;</td><td><strong>(a) Repair bench</strong></td><td>Bare mat + soldering station + magnifier lamp only. Boom arm clear overhead. Nothing stored on the work surface.</td></tr>
+<tr><td class="cb">&#9633;</td><td><strong>(b) Corner bench</strong></td><td>Delam XLR mic + shock mount on its arm, cable dressed. Surface clear enough to be the second angle. <strong>Bring the mic and its box to the Lenovo</strong> &mdash; the 48&nbsp;V claim in the old record was <span class="no">wrong</span>; the Lenovo has a <strong>dedicated pink mic jack</strong> with 30&nbsp;dB of unused Mic Boost, so the free route is to plug the kit&rsquo;s XLR&rarr;3.5&nbsp;mm cable straight into it. In the box, look for that cable <em>and</em> a small <strong>USB sound card</strong> &mdash; these kits usually ship one.</td></tr>
+<tr><td class="cb">&#9633;</td><td><strong>(c) WKU desk</strong></td><td>Becomes the Claude station: Lenovo + external monitor + phone stand. No parts storage.</td></tr>
+<tr><td class="cb">&#9633;</td><td><strong>(d) Floor + front</strong></td><td>Clear walking path bench&rarr;door. Yard gear forward of the man door. Nothing on the floor inside the Kiyo&rsquo;s 103&deg; field.</td></tr>
+</table>
+
+<h2>Four hardware steps only you can do</h2>
+<div class="jeff">
+<table>
+<tr><th class="cb">&#9633;</th><th class="z">Step</th><th>Why it is yours, and what is already proven</th></tr>
+<tr><td class="cb">&#9633;</td><td><strong>Kiyo Pro &rarr; a blue USB&nbsp;3 port on the Acer</strong></td><td>The Kiyo is <span class="no">not seen</span> by the Acer right now &mdash; the only video device enumerated is the built-in &ldquo;HD WebCam&rdquo;. On a USB&nbsp;2 port the Kiyo silently drops to compressed H.264. <span class="ok">The recording chain itself is already proven</span> on the Acer with the built-in cam: 10.0 s captured in 11.1 s wall, h264 1280&times;720@30 through Quick Sync, 320 GB free of 464 GB.</td></tr>
+<tr><td class="cb">&#9633;</td><td><strong>External monitor &rarr; Lenovo (HDMI or VGA)</strong></td><td>Both outputs read <code>disconnected</code> in <code>/sys/class/drm/</code> &mdash; nothing is plugged in. The rest of the Lenovo passes: mic peaks at <strong>&minus;18.4 dB</strong> (no clipping, the gain change took) and Claude Code 2.1.311 runs.</td></tr>
+<tr><td class="cb">&#9633;</td><td><strong>Light on the bench before the test shoot</strong></td><td>The frame I pulled off the Acer today was <strong>black with sensor noise</strong> &mdash; a real capture with no light reaching the lens. Two soft lights at ~45&deg; left and right, same colour temperature on everything in the shot. Never one bulb straight overhead: that is hand shadows plus glare off every shiny part.</td></tr>
+<tr><td class="cb">&#9633;</td><td><strong>The mic &mdash; bring it and its box to the Lenovo, then one DMM read</strong></td><td>🔴 <strong>The old record was wrong and it is corrected:</strong> it said the mic needs <strong>48&nbsp;V phantom power and an audio interface</strong> and that no free path existed. It is a <strong>pre-charged electret</strong> &mdash; it wants a few volts of <em>bias</em>, not 48&nbsp;V. And the Lenovo has a <span class="ok">dedicated PINK mic jack</span>: codec node 0x18 reads <code>[Jack] Mic at Ext Rear, Conn = 1/8, Color = Pink</code>, with <strong>30&nbsp;dB of Mic Boost that was sitting unused at 0&nbsp;dB</strong>. <strong>Your step, and you are the expert for it:</strong> put the DMM on that pink jack, <strong>ring to sleeve, DC volts</strong>, machine awake. <strong>~2&ndash;5&nbsp;V = plug-in power is there</strong> and the kit&rsquo;s XLR&rarr;3.5&nbsp;mm cable goes straight in, $0. <strong>Near 0&nbsp;V</strong> = use the small <strong>USB sound card</strong> that these kits usually ship in the box. Then run the Lenovo test script and it measures the capture for real. <span class="no">Do not build a phantom supply and do not buy an interface</span> &mdash; neither is needed. Nothing is owed until both free routes fail (then $3.49&ndash;$12.95, priced 11-10).</td></tr>
+</table>
+</div>
+
+<h2>Deskflow &mdash; one keyboard and mouse across both machines</h2>
+<p class="note">I wrote and verified both config files on 2026-11-10. The Acer had <strong>no Deskflow config at all</strong> before today, and the <code>deskflow-daemon</code> service that was running is not a server &mdash; an earlier check of mine counted that process as a pass, which was a component check standing in for the feature. Corrected here.</p>
+<ul>
+<li><span class="ok">Lenovo = Client</span> pointed at <strong>192.168.1.159</strong> (corrected 2026-11-13 — it had been pointed at .176, the Acer's Wi-Fi address, which stopped answering when the Acer moved to a USB gigabit Ethernet adapter; the client sat in SYN-SENT and the test blamed TLS). Proven read, not assumed: the client log printed <code>configured 1 server address(es)</code> then <code>connecting to &lsquo;192.168.1.176&rsquo;: 192.168.1.176:24800</code>. The old config is backed up alongside it.</li>
+<li><span class="ok">Acer = Server</span>, <code>computerName=JeffsLapTop</code>, port 24800. Windows Firewall already allows <code>deskflow-core.exe</code> inbound, any port, any profile, enabled.</li>
+<li><span class="ok">LAN path good</span>: ping Lenovo&rarr;Acer 3 of 3 received, 4.6&ndash;7.4 ms, and a TCP connect from the Lenovo to the Acer&rsquo;s port 22 succeeded.</li>
+</ul>
+<table>
+<tr><th class="cb">&#9633;</th><th class="z">Your step</th><th>What to do</th></tr>
+<tr><td class="cb">&#9633;</td><td><strong>Acer: place the second screen</strong></td><td>Open Deskflow &mdash; it already comes up in <strong>Server</strong> mode. Put a screen in the grid next to <code>JeffsLapTop</code>, named exactly <code>GarageLaptop</code>, then Start. <em>I left this one for you deliberately:</em> the grid lives in <code>[internalConfig] screens\N\name</code> and the index&rarr;cell mapping is undocumented. Guessing it can land the two screens in non-adjacent cells, and then the mouse simply never crosses &mdash; with no error anywhere.</td></tr>
+<tr><td class="cb">&#9633;</td><td><strong>Lenovo: Start, accept once</strong></td><td>Open Deskflow &mdash; already <strong>Client</strong>, host already filled in. Press Start and accept the TLS fingerprint the first time. I left fingerprint checking <strong>on</strong>; switching it off would have been a silent security downgrade I am not making for you.</td></tr>
+<tr><td class="cb">&#9633;</td><td><strong>The feature test &mdash; the only one that counts</strong></td><td>Push the mouse off the edge of the Acer screen toward the Lenovo. If the pointer crosses and you can type into the Lenovo, it works. Tell me either way. A green process check is not this test, which is exactly the mistake above.</td></tr>
+</table>
+
+<h2>Then phases 2&ndash;4, in order</h2>
+<table>
+<tr><th class="cb">&#9633;</th><th class="z">Phase</th><th>What</th></tr>
+<tr><td class="cb">&#9633;</td><td><strong>2 &mdash; Power</strong></td><td>One mounted strip per bench, cords routed behind. Your wiring, your call.</td></tr>
+<tr><td class="cb">&#9633;</td><td><strong>3 &mdash; Set the stations</strong></td><td>Repair bench / corner bench / Claude station, from what is owned.</td></tr>
+<tr><td class="cb">&#9633;</td><td><strong>4 &mdash; Test shoot, 2 minutes</strong></td><td>A real job, both cameras. I review the files frame by frame for sound, light, framing and 60 fps flicker &mdash; then phase 5 builds only what that test proves is missing.</td></tr>
+</table>
+
+<div class="sig">Generated 2026-11-10 from live measurements on <code>JeffsLapTop</code> (192.168.1.176) and <code>GarageLaptop</code> (192.168.1.158). Test scripts: <code>windows-scripts/garage-studio/Test-StudioAcer.ps1</code> and <code>windows-scripts/garage-studio/test-studio-lenovo.sh</code>. Re-run both after the four hardware steps and the status lines on this sheet change.</div>
+
+</body></html>

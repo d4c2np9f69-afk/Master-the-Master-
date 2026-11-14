@@ -178,7 +178,7 @@ more monitors."*
 
 | Machine | Role | Measured 11-08 | Installed 11-08 (proof) |
 |---|---|---|---|
-| **Acer** Aspire E5-576 (`192.168.1.176`) | **Recording + Claude.** OBS records the Kiyo; Claude Code voice; Deskflow SERVER (Jeff's keyboard/mouse live here) | i3-8130U, 16 GB, UHD 620, **USB 3.0**, Win 11 Home, 0 crashes in 14 days | restore point #137 first; OBS 33.0.0, Git, Deskflow 1.27.0, Claude Code 2.1.317 (winget, `claude --version`). **Quick Sync proven:** 5 s 1080p60 H.264 encoded in hardware |
+| **Acer** Aspire E5-576 (`192.168.1.159`) | **Recording + Claude.** OBS records the Kiyo; Claude Code voice; Deskflow SERVER (Jeff's keyboard/mouse live here) | i3-8130U, 16 GB, UHD 620, **USB 3.0**, Win 11 Home, 0 crashes in 14 days | restore point #137 first; OBS 33.0.0, Git, Deskflow 1.27.0, Claude Code 2.1.317 (winget, `claude --version`). **Quick Sync proven:** 5 s 1080p60 H.264 encoded in hardware |
 | **Lenovo** B570 (`192.168.1.158`, wired) | **Reference screen.** Manuals, schematics, Claude chat; Deskflow CLIENT | Pentium B960, 7 GB, **USB 2.0 only**, Xubuntu X11 | Claude Code 2.1.311 (Anthropic apt repo, key fingerprint checked), Deskflow 1.26.0, v4l-utils |
 
 - **Screens:** Acer laptop + a monitor on the Acer's HDMI (Claude's big screen / OBS preview), Lenovo laptop + a monitor
@@ -196,7 +196,7 @@ more monitors."*
   with `alsactl store`; re-measured peaks -18 / -33 dB, none at 0. Real voice check = Jeff talking at the bench.
 
 **Jeff's 10-minute block after cleaning:** Kiyo into a BLUE USB port on the Acer - monitors on both HDMI ports - open
-Deskflow on both (Acer = server, Lenovo = client -> `192.168.1.176`, click trust on each) - `/login` in Claude Code on
+Deskflow on both (Acer = server, Lenovo = client -> `192.168.1.159` **corrected 11-13; .176 is the Acer's Wi-Fi and does not answer**, click trust on each) - `/login` in Claude Code on
 both. Then Claude runs both tests and looks at the Kiyo frame.
 
 ---
