@@ -11,11 +11,12 @@
  * happening, so at 5am with the A/C off and nothing watering, half the map was blank.
  *
  * Everything here is his house's real reported state EXCEPT these, set to a plausible
- * busy moment so the map demonstrates what it can do: switch.ac_relay on,
+ * busy moment so the map demonstrates what it can do: sensor.hcc_thermostat_cooling 1 (was switch.ac_relay, retired 10-26),
  * switch.z3_back_left on, the four machine links on, and the cans at their night levels.
  * The status bar says SHOWCASE / not live readings, so this can never be mistaken for
  * a reading. */
 window.HCC_PLAN_DEMO = {
+"sensor.hcc_thermostat_cooling":{"entity_id":"sensor.hcc_thermostat_cooling","state":"1","attributes":{"friendly_name":"301 Thermostat Cooling (SHOWCASE - set busy 2026-11-14; replaces the retired switch.ac_relay as the airflow trigger)"},"last_changed":"2026-11-14T16:00:00+00:00","last_updated":"2026-11-14T16:00:00+00:00"},
 "alarm_control_panel.blink_loewen301":{
 "entity_id":"alarm_control_panel.blink_loewen301",
 "state":"armed_away",

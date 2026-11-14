@@ -62,8 +62,12 @@
     34: { e: ['light.garage_repeater'], lqi: 'sensor.0xa4c1386f3deff62d_linkquality' },
     35: { e: ['light.floating_repeater'], lqi: 'sensor.0xa4c138140f3ce43d_linkquality' },
     36: { e: ['siren.301_alarm'], lqi: 'sensor.301_alarm_linkquality' },
-    37: { e: ['switch.ac_relay'], master: 'input_boolean.air_conditioner' },
-    40: { e: ['switch.ac_relay'], master: 'input_boolean.air_conditioner' },
+    // 2026-11-14: 37 + 40 watched switch.ac_relay, which left HA when the SONOFF was retired on 10-26 -
+    // so both drew RED on a healthy system (a false fault, against Jeff's colour law). HA sees the
+    // new A/C only through the Meross thermostat (39): its mode, and whether it is calling.
+    37: { none: 'The package unit does not report to Home Assistant itself - the thermostat (39) is what HA sees.' },
+    39: { e: ['climate.hcc_thermostat'], offOk: true, info: ['sensor.hcc_thermostat_cooling', 'sensor.hcc_thermostat_heating'] },
+    40: { none: 'Retired 26 Oct 2026 - switch.ac_relay no longer exists in Home Assistant.' },
     41: { e: ['cover.garage_door', 'switch.garage_garage_door_opener'] },
     42: { e: ['switch.z1_front_right', 'switch.z2_front_left', 'switch.z3_back_left', 'switch.z4_back_right', 'switch.z5_right_side_drive', 'switch.garden'], say: { off: 'All zones idle' } },
     43: { e: ['switch.z1_front_right'] },
@@ -81,6 +85,19 @@
     67: { e: ['sensor.my_weather_station_temperature'], quietMin: 60 },
     79: { e: ['input_boolean.grandfather_clock'], offOk: true, note: 'HA runs the chimes; the Beast plays them on the W200. The speaker itself does not report to HA.' },
     80: { mower: true },
+    // THE LAB (2026-11-14). 81 = the Acer itself: off is BLACK (Jeff's law - a laptop that is off is not broken).
+    81: { e: ['binary_sensor.hcc_machines_acer_laptop_online'], offOk: true, say: { on: 'Online (Machine Health, every 5 min)', off: 'Off / asleep' } },
+    // 87: the studio driver. Judged on its HEARTBEAT (a timestamp written every run), never on a
+    // change-driven value. Gated on the Acer: Acer off -> black, not red.
+    87: { host: 'binary_sensor.hcc_machines_acer_laptop_online', hostOff: 'The Acer is off, so the studio driver is not running - not a fault.',
+          beat: 'sensor.hcc_studio_studio_driver_heartbeat', beatWarnMin: 12, beatDownMin: 30,
+          info: ['sensor.hcc_studio_bench_meter_status', 'binary_sensor.hcc_studio_obs_control_channel'] },
+    // 88: the light meter. Lit = green, dark = BLACK (lights off is not broken). OBS holding the Kiyo
+    // = grey with the reason, never red.
+    88: { host: 'binary_sensor.hcc_machines_acer_laptop_online', hostOff: 'The Acer is off, so the bench is not being metered.',
+          status: 'sensor.hcc_studio_bench_meter_status',
+          e: ['sensor.hcc_studio_bench_light_level'], info: ['sensor.hcc_studio_bench_luma_yavg'],
+          lit: 'binary_sensor.hcc_studio_bench_lit_for_camera' },
   };
   /* THE COLOUR LAW - Jeff, 2026-10-08: "nothing needs to be lit red unless it's not working[;]
      one it's working it's green[,] if it's off it's black".
@@ -121,6 +138,8 @@
     if (m.mower) return judgeMower();
     if (!live.states) return { lvl: 'unknown', lines: ['Waiting for Home Assistant'] };
     const S = live.states, lines = []; let lvl = 'ok';
+    if (m.host) { const h = S[m.host]; if (!h || h.state !== 'on') return { lvl: 'off', lines: [m.hostOff || 'Host machine is off'] }; }
+    if (m.status && S[m.status] && S[m.status].state !== 'ok') return { lvl: 'unknown', lines: ['Meter paused: ' + S[m.status].state] };
     const bump = l => { if (RANK[l] > RANK[lvl]) lvl = l; };
     const many = (m.e || []).length > 1;
     (m.e || []).forEach(id => {
@@ -150,6 +169,13 @@
         lines.push('The meter only sends when its reading changes - gaps up to 3 h are normal.');
       }
     }
+    if (m.beat) {
+      const b = S[m.beat], t = b ? Date.parse(b.state) : NaN;
+      if (isNaN(t)) { bump('down'); lines.push('No heartbeat from the studio driver'); }
+      else { const age = Date.now() - t; lines.push('Last ran ' + ago(age)); if (age > (m.beatDownMin || 30) * 60000) bump('down'); else if (age > (m.beatWarnMin || 12) * 60000) bump('warn'); }
+    }
+    if (m.lit && S[m.lit]) { if (S[m.lit].state === 'on') lines.push('Lit enough for the camera'); else if (S[m.lit].state === 'off') { lines.push('Too dark for the camera (lights off or low)'); bump('off'); } }
+    (m.info || []).forEach(id => { if (S[id]) lines.push(fname(S[id], id) + ': ' + words(id, S[id])); });
     if (m.note) lines.push(m.note);
     return { lvl, lines };
   }
@@ -407,7 +433,7 @@
     Object.entries(ZONES).forEach(([n, id]) => { const d = dev(+n); if (!d || !on(id)) return; for (let i = 0; i < 3; i++) mk('circle', { cx: X(d.x), cy: Y(d.y), r: 1.2 * PF, fill: 'none', stroke: '#6fd3ff', 'stroke-width': 2, class: 'spray', style: `animation-delay:${i * 0.6}s` }, top); text(X(d.x), Y(d.y) + 26, 'watering', { 'font-size': 6.5, fill: '#9fe3ff' }, top); });
 
     // 5. A/C — cold air down every duct while the relay runs
-    if (on('switch.ac_relay')) {
+    { const c = st('sensor.hcc_thermostat_cooling'); if (c && +c.state > 0) {   // was on('switch.ac_relay') - retired 10-26, so the airflow never drew
       const du = P.duct, sy = Y(du.supplyY);
       du.trunk.forEach((t, ti) => {
         const x1 = X(t.from), x2 = X(t.to);
@@ -423,7 +449,7 @@
       });
       du.branches.forEach(b => { const gm = hp.branchGeom(b); const pts = gm.path.map(p => `${X(p[0])},${Y(p[1])}`).join(' '); mk('polyline', { points: pts, fill: 'none', stroke: '#8fe3ff', 'stroke-width': 2.4, 'stroke-dasharray': '3 9', 'stroke-linecap': 'round', class: 'air' }, top); mk('circle', { cx: X(gm.reg[0]), cy: Y(gm.reg[1]), r: 1.4 * PF, fill: 'url(#pool-cyan)', opacity: .55, class: 'pulse-soft' }, pools); });
       const u = du.unit; text(X(u.x + u.w / 2), Y(u.y) - 6, '❄ COOLING', { 'font-size': 8, fill: '#9fe9ff', 'font-weight': 700 }, top);
-    }
+    } }
 
     // 5b. THE MACHINE MESH — Jeff, 2026-10-08: "if the computers are all working together
     // the[n] show there is a network signal between them".

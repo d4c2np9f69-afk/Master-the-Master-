@@ -2668,6 +2668,24 @@ decides the controller. The reel label (or a photo of the inline controller/conn
 gate on 11-14 and was reported to Jeff in conversation instead. It needs his word before it can be
 written here or worked. Section 6 of the plan document carries it.)*
 
+
+## ✅ LIVE STATE — 2026-11-14 10:3x (step 3 of the build order is DONE)
+
+**The studio driver is running unattended and the lab is on the house map.**
+
+| What | Where | Proof |
+|---|---|---|
+| Driver code | `C:\Users\jeffl\HCC-Scripts\hcc-studio\hcc-studio.ps1` (Beast + Acer). **Outside the public repo on purpose** — it reads the HA token from `HCC-secrets`. | deployed by scp, run on the Acer |
+| Scheduler | task **HCC Studio Driver** on the Acer (`Install-StudioTask.ps1`): every 5 min + at logon, hidden via `Run-Hidden.vbs`, IgnoreNew, 10-min limit, runs on battery (it is a laptop) | **heartbeat advanced 10:25:08 → 10:30:08 CST with nobody running it** (read from `/api/states` at 10:32) |
+| HA entities (MQTT discovery, retained, `expire_after: 900`) | `sensor.hcc_studio_studio_driver_heartbeat` · `sensor.hcc_studio_bench_light_level` (%) · `sensor.hcc_studio_bench_luma_yavg` · `binary_sensor.hcc_studio_bench_lit_for_camera` (YAVG ≥ 100) · `sensor.hcc_studio_bench_meter_status` · `binary_sensor.hcc_studio_obs_control_channel` | all six read back live; bench = 19 % / YAVG 47.8 = DARK, as measured at 07:46 |
+| Camera choice | refuses the built-in `HD WebCam` (it lists FIRST); prefers Kiyo/Razer → `USB Video Device` | `Resolve-BenchCamera` |
+| OBS holding the Kiyo | heartbeat + `meter_status` still publish with the reason; the luma just pauses | by design — the heartbeat never depends on the camera |
+| **House map** (`docs/house-plan`, `?v=20261114a`) | **81 Acer moved to the bench** · **87** Studio Driver · **88** Kiyo + light meter · **89** Dell P2012H · **90** Jiusion scope · **91** 32in onn · **92** bench lights · new category **Lab & Studio**. 87/88 + 81 carry live lamps; 89-92 have no HA entity yet and show none (honest). | Playwright, 7 scenarios at 1536×864 against the real states dump: Acer off → 81/87/88 **black**; OBS recording → 88 grey "meter paused"; heartbeat 20 min → amber, 45 min → **red**; dark bench → 88 black, lit → green; 0 page errors |
+| Map fix found on the way | **#37/#40 drew RED on a healthy house** — they watched `switch.ac_relay`, which left HA when the SONOFF retired 10-26. Now 37 = no lamp (unit does not report), **39 = `climate.hcc_thermostat`** (off = black), 40 = retired note. The duct airflow keyed off the same dead switch and could never draw; it now keys off `sensor.hcc_thermostat_cooling`. | same harness: problems list went from 3 to just the stubbed mower |
+
+**Still owed (row #300):** obs-websocket on the Acer + the OBS scenes/projector · the light actuator
+(waits on the LED reel label) · bench spots on the map are provisional until the bench is taped.
+
 ## #299
 
 **Opened 2026-11-13 by the evening session, out of the studio measurement in #298.**

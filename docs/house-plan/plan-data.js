@@ -204,6 +204,7 @@ window.PLAN = (function () {
     { id: 'IRR', name: 'Irrigation', color: '#1a9c7a' },
     { id: 'MED', name: 'Media & Voice', color: '#c2185b' },
     { id: 'APP', name: 'Appliances', color: '#8d6e63' },
+    { id: 'LAB', name: 'Lab & Studio', color: '#4e7d0e' },
     { id: 'OTH', name: 'Other', color: '#455a64' },
   ];
 
@@ -262,7 +263,7 @@ window.PLAN = (function () {
     D(50, 'Fire TV Stick 4K Max', 'MED', H(28.0), 19.2),
     D(51, 'Apple TV', 'MED', H(18.3), 5.7),
     D(52, 'Master bedroom TV (Vizio)', 'MED', H(18.3), 4.3),
-    D(53, 'Garage TV', 'MED', 5.8, 33.6, 'above the workbench'),
+    D(53, 'Garage TV (24in Toshiba)', 'MED', 5.8, 33.6, 'above the workbench · studio screen on the Acer HDMI (reads TSB / TOSHIBA-TV, 11-14)'),
     D(54, 'Living room Echo Dot', 'MED', H(16.2), 22.8, 'on the half wall'),
     D(55, 'Master bedroom Echo', 'MED', H(1.4), 1.6),
     D(56, 'Vizio sound bar', 'MED', H(18.3), 7.1),
@@ -295,7 +296,7 @@ window.PLAN = (function () {
     // 81-83 added 1 Oct 2026: the three computers that got DHCP reservations on 30 Sep but had never
     // been drawn. POSITIONS ARE PROVISIONAL - each is placed in the room its own hostname names, not
     // from Jeff's markup like every other dot on this plan. Drag them in edit mode and they stick.
-    D(81, 'Acer laptop (JeffsLapTop)', 'NET', H(34.5), 24.0, 'Acer Aspire E5-576 · roams the house, so this dot is only where it usually sits - drag it'),
+    D(81, 'Acer laptop (JeffsLapTop) - studio brain', 'NET', 8.6, 33.1, 'Acer Aspire E5-576 · MOVED to the garage bench 11-13/14: runs the HCC Studio Driver, OBS, Kiyo, Dell + Toshiba. Wired on the USB gigabit adapter. Spot on the bench provisional - drag it'),
     D(82, 'Lenovo laptop (GarageLaptop)', 'NET', 4.0, 29.8, 'Lenovo B570 on Ubuntu · position provisional - drag it'),
     D(83, 'KitchenPC', 'NET', H(6.5), 31.5, 'position provisional - drag it'),
     // 84-85 added 7 Oct 2026 (Jeff): Angela's two work computers, BOTH IN THE OFFICE.
@@ -309,6 +310,16 @@ window.PLAN = (function () {
     // Jeff 7 Oct: '15ft from the dongle with direct line of sight'. Placed at exactly 15.0 ft
     // from the clock dot (43.5, 27). MEASURE BLUETOOTH RANGE FROM THIS DOT, NOT FROM DEVICE 2 -
     // the Beast is 27.7 ft away in the master bedroom and that number is misleading.
+    // 87-92 added 14 Nov 2026 (Jeff: "update the house map with all these additions ... I want them on
+    // there being monitored"). THE LAB at the garage bench - docs/projects/lab_studio_build_2026-11-14.md.
+    // Spots along the bench are PROVISIONAL (the bench layout is not taped yet) - drag them.
+    // 87 + 88 are LIVE in Home Assistant (hcc-studio.ps1 on the Acer, every 5 min). 89-92 have no HA entity.
+    D(87, 'HCC Studio Driver (on the Acer)', 'LAB', 9.4, 32.6, 'scheduled task on the Acer every 5 min: meters the bench light through the Kiyo and publishes to HA. Off when the Acer is off - that is black, not a fault.'),
+    D(88, 'Razer Kiyo Pro - overhead bench cam + LIGHT METER', 'LAB', 10.2, 32.6, 'on the overhead boom; the camera IS the light meter (ffmpeg luma). 100+ YAVG = lit enough for the camera. While OBS records, OBS owns it and the meter pauses.'),
+    D(89, 'Dell P2012H - microscope monitor', 'LAB', 7.4, 32.5, '20in TN on the Acer VGA, 1600x900, microscope-only (OBS projector). Recess tilts by sinking the BACK edge. No HA entity.'),
+    D(90, 'Jiusion USB microscope', 'LAB', 7.4, 33.5, 'lands week of 16 Nov 2026 · USB into the Acer -> OBS -> Dell. Test-Microscope.ps1 is waiting. No HA entity yet.'),
+    D(91, '32in onn TV (Miracast)', 'LAB', 3.6, 32.5, 'wireless screen from the Acer, on purpose - no HDMI cable. No HA entity.'),
+    D(92, 'Bench lights - 2x4 booms + ~25 ft LED strip', 'LAB', 9.0, 33.6, 'key / fill / rim overhead, task strip over the work. Not yet switched by HA - the actuator waits on the LED reel label (OPEN_ITEMS #300). Its level shows on 88.'),
     D(86, 'Bluetooth dongle (clock link)', 'NET', 43.5, 12.0, 'QGOO Class 1 BT 5.3, Actions ATS2851, on a USB extension in the hallway - 15 ft line-of-sight to the QFX by the clock. Range is measured from HERE, not from the Beast.'),
   ];
 
