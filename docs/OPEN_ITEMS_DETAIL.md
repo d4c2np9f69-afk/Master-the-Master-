@@ -2443,6 +2443,39 @@ is not finished (his own 08-10 rule).
 🔴 **Nothing in this build touches the frozen subsystem.** Separate namespace, separate service.
 🔴 **No light in the lab is fired to "test it" without telling Jeff first.**
 
+## 🔴 THE 32in onn IS ON MIRACAST **ON PURPOSE** — NEVER OFFER TO RUN IT A CABLE
+
+**Jeff, 2026-11-14 8:43 AM:** *"that is why I went with the wireless Onn is to free that port."*
+
+This was **engineered, not incidental.** Intel UHD 620 gives **3 physical pipes** and Jeff spent
+them deliberately:
+
+| Screen | Path | Pipes |
+|---|---|---|
+| Acer internal panel | built-in | 1 |
+| Toshiba | the Acer's own HDMI | 2 |
+| **Dell** | **VGA — microscope only** | **3** |
+| **32in onn** | **Miracast** | **0** ← this is what bought the VGA port |
+
+**Four screens on a three-pipe chip, $0.** ⚠️ **A future session that sees a TV on wireless and
+offers to "just run it an HDMI cable" would silently spend the pipe the microscope needs.**
+Do not propose it. The wireless link is the design.
+
+### ➡️ THEREFORE: the WAVLINK case made at 8:08 AM IS WITHDRAWN
+The render's small field monitor looked like a 4th display and was the first real justification for
+a USB display adapter. It is not needed, and the reason is a **$0 layout change, not a purchase**:
+
+🟢 **The field monitor only exists in the render because the Dell was placed off to the RIGHT.**
+The Dell is now microscope-dedicated, so **it should BE the eye-level screen directly behind the
+work** — the position the render gives the little monitor. One screen, both jobs, no 4th pipe, and
+a ~22in view of a board beats a 7in one for this work. The render put the small screen in the good
+position and the big screen in the bad one; swapping them closes the question.
+
+⚠️ **UNVERIFIED, stated as unverified:** whether Windows can drive **two** Miracast sinks at once.
+Microsoft's own page describes only single-receiver behaviour and never states a limit; a search on
+11-14 did not settle it. **Believed one-at-a-time, NOT proven.** It no longer matters for this
+build, and if it ever does it is a five-minute test at the machine, not a research task.
+
 ## 🖥️ JEFF'S SPEC 11-14 8:39 AM: THE DELL IS THE MICROSCOPE MONITOR, AND NOTHING ELSE
 
 **Jeff, verbatim:** *"the Dell will be the dedicated microscope monitor and it will be able to hook
