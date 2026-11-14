@@ -1,9 +1,9 @@
 {
-  "version": "20261114a",
+  "version": "20261114b",
   "assets": {
     "plan-demo.js": "70323f71bc16568b",
-    "plan-data.js": "ef104a9aca46f444",
-    "plan-live.js": "faf257db7020244f",
+    "plan-data.js": "e80eef4cb60fec65",
+    "plan-live.js": "63a108c75ecb1763",
     "plan-app.js": "d57dcc6a2d38b0a2"
   }
 }

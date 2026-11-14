@@ -62,12 +62,11 @@
     34: { e: ['light.garage_repeater'], lqi: 'sensor.0xa4c1386f3deff62d_linkquality' },
     35: { e: ['light.floating_repeater'], lqi: 'sensor.0xa4c138140f3ce43d_linkquality' },
     36: { e: ['siren.301_alarm'], lqi: 'sensor.301_alarm_linkquality' },
-    // 2026-11-14: 37 + 40 watched switch.ac_relay, which left HA when the SONOFF was retired on 10-26 -
+    // 2026-11-14: 37 + 40 watched switch.ac_relay, which left HA when the SONOFF was retired on 10-26 (40 now REMOVED from the map, Jeff 11-14) -
     // so both drew RED on a healthy system (a false fault, against Jeff's colour law). HA sees the
     // new A/C only through the Meross thermostat (39): its mode, and whether it is calling.
     37: { none: 'The package unit does not report to Home Assistant itself - the thermostat (39) is what HA sees.' },
     39: { e: ['climate.hcc_thermostat'], offOk: true, info: ['sensor.hcc_thermostat_cooling', 'sensor.hcc_thermostat_heating'] },
-    40: { none: 'Retired 26 Oct 2026 - switch.ac_relay no longer exists in Home Assistant.' },
     41: { e: ['cover.garage_door', 'switch.garage_garage_door_opener'] },
     42: { e: ['switch.z1_front_right', 'switch.z2_front_left', 'switch.z3_back_left', 'switch.z4_back_right', 'switch.z5_right_side_drive', 'switch.garden'], say: { off: 'All zones idle' } },
     43: { e: ['switch.z1_front_right'] },
@@ -393,7 +392,7 @@
       const x = X(r[0]), y = Y(r[1]), w = r[2] * PF, h = r[3] * PF, cx = x + w / 2, cy = y + h / 2;
       const s = e ? e.state : 'unavailable';
       if (s === 'off' || s === 'standby' || s === 'unavailable' || s === 'unknown') {
-        mk('circle', { cx: cx, cy: y + h + 3, r: 1.8, fill: '#ff3347', class: 'standby' }, top);     // the little red standby light
+        mk('circle', { cx: cx, cy: y + h + 3, r: 1.8, fill: '#3a4250' }, top);     // standby dot: steady + dim. Was a breathing RED dot - Jeff 11-14 "why are there blinking red lights"; colour law = red only when broken
         return;
       }
       const playing = s === 'playing', paused = s === 'paused';

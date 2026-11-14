@@ -250,7 +250,6 @@ window.PLAN = (function () {
     D(37, 'A/C package unit', 'HVA', H(42.2), 13.2),
     D(38, 'Return grille 20 × 25', 'HVA', H(27.6), 11.6),
     D(39, 'Thermostat · Meross MTS300 (LIVE 2026-10-26)', 'HVA', H(25.9), 11.6, 'climate.hcc_thermostat on the LUX plate landing (R brown-via-wire white/W, G=green, Y=yellow, Rc-Rh jumper kept). 192.168.1.122, UUID 2510...2244b2, port 80 open, Matter port 5540 closed (plain MTS300). Trim is retuned every 15 min by automation.hcc_thermostat_tracks_the_living_room_weather_station_calibration to match the living-room weather station - HA is NOT in the control path, so the stat keeps its own cycling and compressor protection.'),
-    D(40, 'A/C relay · SONOFF (RETIRED 2026-10-26)', 'HVA', H(25.9), 13.2, 'switch.ac_relay no longer exists in HA - the SONOFF stood in for a dead thermostat and its job ended when the Meross MTS300 (device 39) took over. App card self-hides when the relay is gone and a real stat is answering, and re-appears by itself if the switch ever comes back.'),
     D(41, 'Garage opener · SONOFF MINI-D', 'HVA', 7.5, 17.6),
     D(42, 'B-hyve timer', 'IRR', H(41.8), 24.5),
     D(43, 'Zone 1 · front right', 'IRR', H(7.5), -2.6),
