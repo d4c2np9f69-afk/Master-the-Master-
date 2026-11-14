@@ -2443,6 +2443,54 @@ is not finished (his own 08-10 rule).
 🔴 **Nothing in this build touches the frozen subsystem.** Separate namespace, separate service.
 🔴 **No light in the lab is fired to "test it" without telling Jeff first.**
 
+## 🖥️ JEFF'S SPEC 11-14 8:39 AM: THE DELL IS THE MICROSCOPE MONITOR, AND NOTHING ELSE
+
+**Jeff, verbatim:** *"the Dell will be the dedicated microscope monitor and it will be able to hook
+to the Acer with the vga cord into the open vga port on the Acer but it needs to be for the
+microscope only not anything else from the Acer but the microscope."*
+
+### Measured on the Acer 11-14 08:40 (`Probe-Outputs.ps1`, read-only)
+| Finding | Value |
+|---|---|
+| Displays attached | **2 only** — `BOE` internal panel (`VideoOutputTechnology` 0x80000000 = INTERNAL) + `TSB / TOSHIBA-TV` (reports DVI; HDMI is electrically DVI+audio) |
+| VGA pipe | **FREE** — nothing attached, so the Dell fills pipe 3. **No adapter needed for this.** |
+| OBS state | installed, **unconfigured**: scene collection still `Untitled.json`, `global.ini` has NO projector settings |
+| ⚠️ Desktop layout | the probe printed `WinDisc 1024x768 PRIMARY=True` — **INVALID, discard it.** That is the known SSH wall (`reference_ssh_cannot_prove_console_session`); a remote session cannot read the console's real display layout. **Primary must be confirmed AT the machine.** |
+
+### The mechanism — and the word that matters is SOURCE
+**OBS → right-click the microscope source → Fullscreen Projector (SOURCE) → the Dell.**
+
+🔴 **SOURCE projector, NOT Preview projector.** A *Preview* projector follows the active scene,
+so the moment a scene is switched to record a talking-head segment **the Dell would switch with it**
+— which violates the spec exactly. A *Source* projector locks to the scope feed and ignores every
+scene change OBS makes. This distinction IS the requirement.
+
+**Keeping Windows off that screen:**
+- 🔴 **The Dell must NOT be the primary display.** Primary receives the taskbar, notification
+  toasts and most newly-opened windows. Internal panel stays primary; the Dell stays clean.
+- **Settings → General → Projectors → "Save projectors on exit"** reopens it on next launch
+  (location verified by search 11-14, not recalled).
+
+### ⚠️ THE HONEST LIMIT — say it before anything is built on top of it
+The Jiusion is a **USB** camera, so its image must pass through Windows to reach any display.
+**"Microscope only" is therefore software discipline, not a hardware guarantee.** The mouse can
+still slide onto that display and a fullscreen app can still steal it. Only a scope with its own
+video output would make it physically impossible, and that is not what Jeff bought. Do not promise
+him a guarantee the hardware cannot give.
+
+**Known OBS gotchas (forums, 11-14):** the saved projector does **not** survive an unclean shutdown
+or power-off — only a normal OBS exit; and a **grey-screen regression is reported on 32.1.2 /
+Win 11**. The Acer runs **33.0.1**, so whether it applies is **UNKNOWN until tested** — do not claim
+either way.
+
+🟢 **THIS BECOMES A JOB FOR `hcc-studio`:** the driver verifies the projector is up and re-opens
+it when it is not. That converts a fragile setting into something self-healing, which is what Jeff's
+point 4 ("completely automated") actually asked for.
+
+📏 **Render at the Dell's NATIVE resolution.** Scaling softens a microscope image more than the
+analog VGA link will. **This is why the Dell's model number is still wanted** — not for the VGA
+question, which Jeff just answered, but so the projector runs 1:1 instead of resampling fine traces.
+
 ## 🚨 THE BENCH RENDER ADDS A 4th SCREEN — and the chip has 3 pipes (11-14 8:08 AM)
 
 Jeff's second render ("This is a better shot") introduces a **small field monitor mounted on the
