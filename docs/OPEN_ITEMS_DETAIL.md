@@ -2443,6 +2443,44 @@ is not finished (his own 08-10 rule).
 🔴 **Nothing in this build touches the frozen subsystem.** Separate namespace, separate service.
 🔴 **No light in the lab is fired to "test it" without telling Jeff first.**
 
+## 🪚 JEFF'S BENCH-RECESS IDEA FOR THE DELL (11-14 8:58 AM) — GOOD, with 4 build notes
+
+**Jeff, verbatim:** *"cut a hole in the bench behind the work area install the Dell in the bench
+with a piece of plexiglass covering it so it's sunk into the bench and doesn't take up room and
+block the Onn screen."*
+
+🟢 **This is a sound solve and a real pattern** — recessed/angled instrument displays are how test
+benches and machine consoles have always handled it: the screen you look DOWN at should not occupy
+the sightline of the screen you look UP at. It also protects the panel from flux and solder spatter
+and keeps dust out. **Nothing here argues against doing it.**
+
+### 🔑 THE ONE REFINEMENT THAT MATTERS: tilt it by sinking the BACK edge, not raising the front
+Flat-horizontal is the worst case for viewing angle — the eye sits 45-60° off-axis. But tilting the
+*normal* way (front edge up) spends exactly the sightline clearance the hole was cut to gain.
+**Make the recess ~1 in deeper at the BACK than the front.** The panel then tilts toward Jeff's face
+while its top edge stays flush with the bench: viewing angle **and** full clearance to the onn.
+
+➡️ **THIS IS A THIRD REASON THE DELL'S MODEL IS WANTED, and the most time-critical one.**
+A **TN** panel shifts colour and washes out badly when viewed from above — vertical off-axis is TN's
+worst case. **IPS** does not care. That changes how much tilt the recess needs, so it is worth
+knowing **before the hole is cut**, not after.
+
+### Four build notes — raised once, not a checklist to manage
+1. 🔥 **HEAT.** A monitor in a closed cavity under acrylic has no convection path; the panel PSU
+   board runs warm and trapped heat is what kills backlights and dries capacitors. **Free fix: do
+   not close the bottom** — let the cavity breathe down into the knee space.
+2. ⚡ **ESD — specific to THIS bench.** A large acrylic sheet is an excellent static generator,
+   especially with items sliding across it, and it would sit beside ESD-sensitive work. Keep it out
+   of the immediate work zone or treat it with antistatic. Obvious once said, invisible until it bites.
+3. 🔌 **Test the WAKE behaviour BEFORE sealing it in.** Once the plexi is down the power button
+   and OSD are unreachable. Confirm the Dell returns from standby on its own when the VGA signal
+   comes back. Cheap now, genuinely annoying later.
+4. 🪞 **Glare is already handled** by the § 3b trough fix — bare tubes overhead reflecting off
+   acrylic would have been ugly; tubes facing UP into a white trough will not be.
+
+*(Not raised as blockers: structural stiffness around the opening and VGA connector depth/bend
+radius — Jeff builds and wires; he will see both when he lays it out.)*
+
 ## 🔴 THE 32in onn IS ON MIRACAST **ON PURPOSE** — NEVER OFFER TO RUN IT A CABLE
 
 **Jeff, 2026-11-14 8:43 AM:** *"that is why I went with the wireless Onn is to free that port."*
