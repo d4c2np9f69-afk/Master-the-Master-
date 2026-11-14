@@ -772,6 +772,34 @@ HDMI->VGA direction, never VGA->HDMI.**
 
 ## #288
 
+**2026-11-13 19:05-19:09 — BOTH BENCH MICS MEASURED WITH NOBODY SPEAKING. The honest baseline.**
+Recording only; nothing was played through any speaker or headset (house rule).
+
+| device | peak | mean | file / 5 s |
+|---|---|---|---|
+| `Microphone (VTIN VNPA081AB)` | **-76.3 dB** | -91 dB | 857 KB |
+| `Microphone (Razer Kiyo Pro)` | **-45.4 dB** | -67.4 dB | 856 KB |
+
+Both wrote full-length files, so **both capture paths open and record** — neither mic is dead.
+**Neither voice level is proven, because no one spoke** — which is exactly what this row already says.
+**THE NEW FACT:** on the *same silence* the VTIN sits **31 dB BELOW** the Kiyo. That points at a mute
+switch or zero gain on the headset's inline control. It is NOT a measured fault — the headset has
+never been tested with that switch confirmed off.
+
+`Studio-Voice-Check.ps1` was run in the **REAL CONSOLE session** via `schtasks /it` (the wall +
+workaround is in ACCESS_MAP; the task was deleted afterwards). Result: **7 passed, 1 failed.**
+Passed: at the real keyboard (`local console`) · `claude` 2.1.317 on PATH · voice `enabled=True
+mode=hold autoSubmit=True` · mic `ConsentStore = Allow` · capture level **60 %** (85 %+ clips,
+measured 11-12) · `api.anthropic.com:443` reachable · `claude.ai:443` reachable.
+The only FAIL: *"your voice at 16 kHz — mean -69.9 dB peak -50.7 dB -> TOO QUIET"*, on device
+`Microphone (Razer Kiyo Pro)`, **measured while the room was empty.** That number is room noise,
+not a level fault.
+
+🔑 **OWED, and only Jeff can do it:** one re-run with him speaking at normal bench voice. That is
+the single thing that can turn the FAIL, and it also settles whether the VTIN's 31 dB gap is a mute
+switch. Command, at the Acer's own keyboard:
+`powershell -NoProfile -ExecutionPolicy Bypass -File C:\Users\jeffl\Studio-Voice-Check.ps1`
+
 ### 🎤 THE MIC DSP CHAIN: THREE REAL FAULTS FOUND AND FIXED, TONE STILL UNPROVEN
 
 **Jeff asked three times across sessions:** *"do you have that mic set up to sound like a million
