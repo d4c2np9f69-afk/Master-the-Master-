@@ -2443,6 +2443,50 @@ is not finished (his own 08-10 rule).
 🔴 **Nothing in this build touches the frozen subsystem.** Separate namespace, separate service.
 🔴 **No light in the lab is fired to "test it" without telling Jeff first.**
 
+## 🚨 THE BENCH RENDER ADDS A 4th SCREEN — and the chip has 3 pipes (11-14 8:08 AM)
+
+Jeff's second render ("This is a better shot") introduces a **small field monitor mounted on the
+scope column, at eye level above the work** — the position the AD409 puts its built-in screen.
+
+**Count what wants a display pipe:** Acer internal panel · Toshiba · Dell · the new field monitor =
+**four.** **Intel UHD 620 tops out at 3 physical pipes** (measured, #298). The 32in onn over
+Miracast still costs zero, so it is not the problem. **Four into three does not go.**
+
+🔁 **THIS REVERSES THE "HOLD THE WAVLINK" ADVICE — conditionally, and it must be said plainly.**
+#298 said hold it because 3 pipes covered everything that existed. This render adds a fourth thing.
+It is the **first real justification** for a USB display adapter on this bench. The **DisplayLink
+driver is ALREADY installed on the Acer (12.3.5011.0, measured 11-14 07:44)** with no hardware to
+drive, so that path is half-built at $0 already.
+
+**Three ways out, cheapest first — and two of them cost nothing:**
+1. **$0 — skip the field monitor.** The Dell sits ~18 in away showing the same scope image, larger.
+   Redundant **unless the eye-level position is itself the point**, which is a fair argument.
+2. **$0 — unplug the Toshiba while at the bench.** If it is not earning a pipe during repair work,
+   the field monitor takes it. No hardware, no money, reversible in one cable.
+3. **Buy the adapter.** #298 recorded $39.99 — **re-check live before ordering, do not quote that
+   from the record.** ⚠️ If bought: **put the SCOPE on the DisplayLink screen.** DisplayLink
+   compresses over USB and adds latency, which is poor for full motion but invisible on a
+   microscope view of a stationary board. Keep real-time sources on the native pipes.
+
+**Ergonomics is the real argument for keeping it:** head down over the mat with an iron in hand, a
+screen two feet in front beats one off to the right. That is exactly why the AD409 has its display
+on the column.
+
+## ✅ WHAT THE RENDER GETS RIGHT, AND ONE THING IT GETS WRONG
+
+✅ **The scope is on a SHORT VERTICAL POST standing on the bench, not hung off a boom.** That is
+the vibration fix — scope and board share one mass, so a tool set down moves both together instead
+of jumping the image. The overhead booms carry lights and the camera, which do not care.
+
+⚠️ **Two BARE linear fixtures aimed straight DOWN at a semi-gloss blue ESD mat, with the overhead
+camera sitting between them.** That puts two hard specular reflections in the middle of the overhead
+shot and flares solder joints. **Second independent reason to face the tubes UP into the
+white-painted trough** (§ 3b) rather than down. Costs paint.
+
+⚠️ **The task-light arm enters from the RIGHT, over the work.** Task light should arrive from the
+side **opposite the soldering hand**, or the hand shadows the exact joint being worked. Free to fix
+before the arm is mounted, annoying after.
+
 ## OWED FROM JEFF — 4 answers, everything else proceeds without them
 
 1. **What is the 25 ft of LED?** addressable WS2812/WS2815 · 12 V/24 V single-colour · RGB/RGBW ·
