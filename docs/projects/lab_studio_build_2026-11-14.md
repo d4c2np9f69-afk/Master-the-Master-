@@ -155,6 +155,92 @@ I will price the board and the power supply in-session rather than quoting a par
 
 ---
 
+---
+
+## 0b. 🖼️ JEFF'S POSTER IS THE GUIDE — with two corrections, both measured
+
+**Jeff, 2026-11-14 8:01 AM: "Us this as a guide."** The "JEFF ELECTRONICS REPAIR STUDIO — REUSE
+FIRST / ADD ONLY WHAT'S NEEDED" poster is now the target layout. Its zones: red cabinet workbench ·
+ESD mat as the primary repair surface · monitors + Acer · mic on the existing boom · scope on the
+Dell · Razer on a boom overhead. **Its philosophy matches this project's: reuse first, buy last.**
+
+### ❌ CORRECTION 1 — the poster's scope is NOT the scope Jeff bought. DO NOT BUY THE CONVERTER.
+
+Poster items 5 & 6 read **"Andonstar AD409 SA — HDMI Out → Dell Monitor"**, and its buy-list offers
+an **"Active HDMI-to-VGA converter."** The AD409 was only ever Jeff's *example* (picture 2 of his
+11-14 message). What he actually bought, for $17, is the **Jiusion 40-1000x, USB 2.0**.
+
+**There is no HDMI anywhere in the scope path.** That buy-list line is dead, and any future session
+that acts on the poster literally will send Jeff after a converter he cannot use. The real path:
+
+```
+  Jiusion ──USB──> Acer ──OBS──> Fullscreen Projector ──VGA──> Dell
+```
+
+### ✅ CORRECTION 2 — the poster moves the Kiyo OVERHEAD, and that is the better call
+
+The poster labels the Razer **"on boom, Overhead Bench View"**, which contradicts the earlier record
+(*"Overhead 'mat cam': iPhone on the spare boom arm. Wide/face cam: Kiyo Pro at 103°"*). **The
+poster is newer and it wins.** 103° is genuinely excellent top-down, and it dissolves the iPhone
+problem — iPhone-as-webcam on *Windows* is not Continuity Camera (macOS only) and needs a helper app
+that is not in the record. Talking head becomes **the Acer's own built-in `HD WebCam`**, measured
+present 11-14. ⚠️ Honest limit: a lid camera is visibly softer than the Kiyo — fine as a cutaway,
+weak as a primary face shot. **$0 either way, and nothing is bought to find out.**
+
+| Poster zone | Camera | Status 11-14 |
+|---|---|---|
+| Overhead / bench view | **Razer Kiyo Pro on the boom** | ✅ measured working on the Acer (`VID_1532`) |
+| Talking head | **Acer built-in `HD WebCam`** | ✅ present; quality unproven on camera |
+| Detail / close-up | **Jiusion USB scope** | 📦 **lands week of 2026-11-16**; `Test-Microscope.ps1` waiting |
+
+### ⚠️ CORRECTION 3 — "use existing lighting" was measured, and it is not enough
+
+The poster's Lighting Plan says *"Use existing overhead & bench lights"* and treats the 4 ft task
+light as optional *"if dim."* **It is dim — measured, not guessed: `YAVG 48.9 / 255 = 19 %`** against
+a lit-studio band of 100-140. So that optional line resolves to YES.
+
+🟢 **The poster's "5000K, CRI 90+" is the most important spec on it, and it is correct.** For
+electronics specifically: low-CRI LEDs collapse brown, red and orange into near-identical shades —
+which is exactly the 4-band resistor problem. CRI 90+ here is not videography fussiness, it is
+whether Jeff can read a resistor under his own bench light.
+
+---
+
+## 3b. 💡 DIFFUSERS — priced 11-14, because Jeff is ordering before the scope lands
+
+**Jeff, 11-14: "I will need to order some cheap studio light defusers or make some."**
+
+### The principle that saves the most money
+**Softness = the APPARENT SIZE of the source relative to the subject — not the material.** A 4 ft
+strip 18 in from the board is soft; the same strip with the same diffuser at 6 ft is hard. Doubling
+the distance halves apparent size. **The cheapest softness upgrade is moving the light closer, $0.**
+Material is the last 20 %.
+
+### 🟢 The $0 answers, and they use the carpentry Jeff is already doing
+1. **Trough + white paint, in the boom itself.** Build a shallow trough in the black 2x4, paint the
+   INSIDE white, aim the strip UP into it. Nothing ever sees a diode. That is *indirect*, which is
+   softer than any purchased diffuser, for the price of paint on hand. It is the fix for "bare strip
+   reads cheap on video" — the camera is seeing a row of hot dots, and this removes them entirely.
+2. **Bounce the FILL, do not diffuse it.** White poster board or a white-painted scrap, light aimed
+   into it. Softest light available, $0, and it lands near the 30 %-of-key target without dimming.
+
+### Verified retail, 2026-11-14 (searched this session — not recalled)
+| Item | Price found | Verdict |
+|---|---|---|
+| Aluminum channel **+ frosted cover** | **$2.50-$3.70 / ft** | 24 ft = **$60-89.** Too much for all 4 zones |
+| **Frosted cover only** (Lee Valley 36 in $4.60 · 72 in $8.60) | **$1.20-$1.43 / ft** | the smart buy |
+| Diffusion fabric, 2 yd x 60 in (Neewer, Best Buy) | **$22.99** | one piece covers every zone |
+| White shower-curtain liner | a few dollars | a DIY guide names it among the best options |
+
+**Recommendation: buy channel + cover for the BENCH TASK zone only** — that is the one in frame over
+the work and it should look clean. Key, fill and rim live overhead on black booms where nobody sees
+them: trough + paint, or fabric on a scrap frame.
+
+### ⚠️ Budget for the light diffusion EATS
+Diffusion typically passes only a third to a half of the output. The bench is **already at 19 %**, so
+plan to run the strips harder after diffusing. **This does not have to be guessed** — the luma check
+that produced 48.9 can be re-run before and after, and give a number.
+
 ## 4. THE LIGHT METER — the imagination answer, and it is already proven
 
 You asked for *"some kind of either diy or cheap light meter to fire the lights when needed."*
