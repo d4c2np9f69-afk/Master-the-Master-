@@ -1,0 +1,12 @@
+#!/bin/sh
+# hcc-app - the "Home Command Center" desktop icon on the kitchen PC: bring the app up full screen.
+# Jeff, 2026-11-08: "I don't want ... the app popping up killing it [Fox News]. In fact I need a shortcut on the
+# desktop to go to the app". So the app no longer pops up by itself (xautolock autostart is Hidden), it opens
+# when Jeff taps this. Same kiosk URL as hcc-kiosk-start, so it rotates and its own X closes it.
+export DISPLAY="${DISPLAY:-:0}"
+W=$(wmctrl -l | grep 'HCC KIOSK' | awk '{print $1}' | head -1)
+if [ -z "$W" ]; then
+  hcc-browser --app='https://loewenhome.com/?kiosk=1&rot=60' >/dev/null 2>&1 &
+  for i in $(seq 30); do W=$(wmctrl -l | grep 'HCC KIOSK' | awk '{print $1}' | head -1); [ -n "$W" ] && break; sleep 1; done
+fi
+[ -n "$W" ] && { wmctrl -i -r "$W" -b add,fullscreen; wmctrl -i -a "$W"; }

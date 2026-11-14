@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "HCC Sling stream-auth fix",
+  "version": "1.0",
+  "description": "Sets window.enableStreamAuth=true on watch.sling.com. Sling's player skips the QVT download when use-streamauth-qvt is on while use-stream-authoriser is off, then reads playback_info off undefined and reports it as 7-403. Sling's own code honours this global.",
+  "content_scripts": [
+    {
+      "matches": ["https://watch.sling.com/*"],
+      "js": ["fix.js"],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "all_frames": true
+    }
+  ]
+}

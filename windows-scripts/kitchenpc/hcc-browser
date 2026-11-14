@@ -1,0 +1,39 @@
+#!/bin/sh
+# KitchenPC browser launcher. 2026-11-02: Microsoft Edge, because Sling refused Brave on Linux and named
+# Chrome or Edge. GPU stays off by policy in /etc/opt/edge/policies/managed (#205).
+# --enable-unsafe-swiftshader: WebGL on the CPU. Without it the Windy radar on WEATHER throws a modal
+# "radar failed" box that blocks the whole panel, including the app's X.
+# --force-renderer-accessibility: 2026-11-08 Jeff: "Make sure the key board is popping up when I need to enter
+# text it wouldn't come up when I tryed to log in to sling". The on-screen keyboard (Onboard, auto-show) only
+# pops up when the browser ANNOUNCES the focused text box over AT-SPI; Edge does not reliably do that unless
+# forced. PROVEN on Sling's real sign-in page 11-08 ~8:42 AM, same fresh profile + window, only this flag
+# changed: WITHOUT it the tap put the cursor in the Email box (a typed 'z' landed there) and NO keyboard came
+# up at 1/2/4 s; WITH it the 1920x171 keyboard was up in 1 s. (A plain local test page popped the keyboard
+# even without the flag - that is why osk-test.sh also checks the running Edge carries the flag.)
+# Flags only count when THIS launcher starts the Edge process (the kiosk does, at login); later windows join
+# it. ~/.local/share/applications/microsoft-edge.desktop points the menu entry here too.
+# --autoplay-policy=no-user-gesture-required: 2026-11-08, Fox News at 6 AM (hcc-fox-news) must start WITH
+# sound and nobody standing there to tap.
+# --load-extension=~/.local/share/hcc/sling-streamauth: 2026-11-11, THE FIX FOR SLING 7-403 (#281).
+# Read out of Sling's own bundle: isStreamAuthEnabled(){return getLDFlagStatus("use-stream-authoriser")||window.enableStreamAuth}
+# Sling ships use-streamauth-qvt ON (so loadTimeline SKIPS downloadQVT and expects the QVT inside the
+# stream-auth response) while use-stream-authoriser is OFF (so that response is {ssai_manifest:null} with
+# no .qvt at all). filterQvt(undefined) then throws "Cannot read properties of undefined (reading
+# 'playback_info')", which Sling mislabels as 7-403 - which is why NO qvt request ever left this box
+# while curl fetched the same URL fine. The extension sets that global before any Sling code runs.
+# PROVEN 11-11 12:09 on Xvfb :77: <video> 1280x720, readyState 4, currentTime advanced 35 s over 35 s,
+# zero 7-403 lines, Fox News 'America Reports' on screen. Flags only count for the Edge process THIS
+# launcher starts (the kiosk, at login) - later windows join it.
+# --user-data-dir + --remote-debugging-port: 2026-11-11, so the kiosk's buttons can be pressed with a
+# REAL mouse event inside the page (hcc-cdp-click) instead of an xdotool tap at screen coordinates.
+# WHY: hcc-fox-news tapped pixels whose position it had measured BEFORE fullscreen was applied, and
+# applying fullscreen moves the window ~20 px - WATCH NOW sat at (192,521) un-maximized but (172,501)
+# fullscreen. Measured 11-11 17:04: a mis-landed tap hit the red REC dot and started an unwanted DVR
+# recording while the log printed "tapped prompt /^WATCH NOW$/" and nothing played. A CDP event uses
+# the element's own viewport rect, so the window's position on screen cannot make it miss.
+# Edge 136+ REFUSES --remote-debugging-port on the DEFAULT profile dir, which is why this is its own
+# directory. It was copied from the default profile on 11-11 and carries Jeff's Sling sign-in; from
+# here on this IS the kiosk's profile, so anything signed into on the kitchen screen lives here.
+# The port listens on 127.0.0.1 only. PROVEN 11-11: Fox News playing, currentTime advancing, one
+# uncorked Edge sink-input, plus a channel change and a DVR recording played the same way.
+exec microsoft-edge --no-first-run --password-store=basic --enable-unsafe-swiftshader --force-renderer-accessibility --autoplay-policy=no-user-gesture-required --load-extension="$HOME/.local/share/hcc/sling-streamauth" --user-data-dir="$HOME/.local/share/hcc/edge-kiosk" --remote-debugging-port=9222 "$@"

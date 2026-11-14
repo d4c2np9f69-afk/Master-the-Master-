@@ -1,0 +1,93 @@
+#!/bin/bash
+# hcc-fox-news start|watch|status - the kitchen TV: Fox News on at 6 AM, and it STAYS on until Jeff turns it off.
+# Jeff, 2026-11-08 8:43 AM: "set a automation to start Fox News at 6:00am every morning so it will already be
+# playing in the kitchen when I go in and also check to make sure it doesn't turn off till I turn it off. I don't
+# want it timing out or the app popping up killing it."
+#   start  (cron 06:00)   open Sling on Fox News full screen, get past "Who's Watching?"
+#   watch  (cron */2)     window open but no sound for 2 checks in a row -> clear any "still watching?" prompt,
+#                         then reload the channel; still silent -> retry every 10 min, never every 2. Window CLOSED = Jeff turned it off -> hands off until tomorrow.
+#   status                what it sees right now
+# "Playing" = an Edge audio stream that is not paused (pactl) - the same instrument that proved Sling on 10-24.
+# The channel link lives in ~/.config/hcc/fox-news-url (falls back to Sling home until it is set).
+export DISPLAY=:0 XAUTHORITY="$HOME/.Xauthority" XDG_RUNTIME_DIR="/run/user/$(id -u)" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
+URL=$(head -1 "$HOME/.config/hcc/fox-news-url" 2>/dev/null); URL=${URL:-https://watch.sling.com}
+ON="$HOME/.local/state/hcc-fox-news.on"; MISS="$HOME/.local/state/hcc-fox-news.miss"; LOG="$HOME/.local/state/hcc-fox-news.log"
+mkdir -p "$HOME/.local/state"
+log(){ echo "$(date '+%F %T') $*" >> "$LOG"; tail -n 500 "$LOG" > "$LOG.t" && mv "$LOG.t" "$LOG"; }
+# 2026-11-11: ASK THE BROWSER WHAT IT HAS OPEN - do not read the window title. Title matching
+# broke the keep-alive the moment it finally worked: once Sling starts a program it RETITLES the
+# window to the show ("Watch Special Report With Bret Baier - Profile 1 - Microsoft Edge"), which
+# contains neither "sling" nor "fox news". Logged at 17:14 while the show was playing on screen:
+# "window closed - Jeff turned it off; hands off until tomorrow 6 AM". It was not closed. That is
+# the "I don't want it timing out" case Jeff asked for, disarming itself silently.
+# Note: Edge writes a ZERO-WIDTH SPACE inside "Microsoft<U+200B> Edge", so only ever grep
+# 'microsoft', never the two words together.
+win(){
+  ids=$(wmctrl -l | grep -i 'microsoft' | grep -viE 'HCC KIOSK|Home Command Center' | awk '{print $1}')
+  [ -z "$ids" ] && return 0
+  # the browser's own tab list is the truth; fall back to the title only if CDP is unreachable
+  if curl -s --max-time 3 http://127.0.0.1:9222/json 2>/dev/null | grep -q 'watch\.sling\.com'; then
+    echo "$ids" | head -1; return 0
+  fi
+  # CDP unreachable: fall back to the OLD title test, deliberately. It under-reports (the bug above),
+  # but the alternative - assuming any Edge window is the Sling one - would let watch() press F5 on a
+  # window Jeff is using for something else. Under-reporting only costs a missed keep-alive.
+  wmctrl -l | grep -i 'microsoft' | grep -iE 'sling|fox news' | grep -viE 'HCC KIOSK|Home Command Center' | awk '{print $1}' | head -1
+}
+playing(){ pactl -f json list sink-inputs 2>/dev/null | python3 -c '
+import json,sys
+try: s=json.load(sys.stdin)
+except Exception: sys.exit(2)
+sys.exit(0 if any(not i.get("corked") and "edge" in (i["properties"].get("application.name","")+i["properties"].get("application.process.binary","")).lower() for i in s) else 1)'; }
+# 2026-11-11: press buttons with a REAL mouse event inside the page (hcc-cdp-click) instead of an
+# xdotool tap at screen coordinates. hcc-sling-click measured AT-SPI extents before fullscreen was
+# applied; fullscreen moves the window ~20 px, so every tap landed 20 px off - and at 17:04 one of
+# them hit the red REC dot and started an unwanted DVR recording while this log said it had tapped
+# WATCH NOW. A CDP click uses the element's own viewport rect, so the window's position cannot make
+# it miss. hcc-cdp-click exits 2 when there is no debuggable Edge (an Edge not started by
+# hcc-browser), and only then do we fall back to the old tapper.
+click(){ hcc-cdp-click "$1" 2>/dev/null; rc=$?; [ $rc -eq 2 ] && { log "no CDP - falling back to hcc-sling-click"; hcc-sling-click "$1" >/dev/null; rc=$?; }; return $rc; }
+prompts(){ for rx in "^(JEFF)$" "still watching|continue watching|^continue$|^yes$|i.m still here" "^WATCH NOW$"; do click "$rx" && { log "pressed prompt /$rx/"; sleep 4; }; done; }
+fullscreen(){ wmctrl -i -r "$1" -b add,fullscreen; wmctrl -i -a "$1"; }
+case "$1" in
+start)
+  W=$(win)
+  if [ -z "$W" ]; then
+    hcc-browser --new-window "$URL" >/dev/null 2>&1 &
+    for i in $(seq 60); do W=$(win); [ -n "$W" ] && break; sleep 1; done
+  else
+    # A window left over from yesterday still shows yesterday's page. 6 AM must LAND
+    # ON THE CHANNEL, not just fullscreen whatever was last open. 2026-11-09: a stale
+    # 11-08 window meant start() only fullscreened a dead page - 12.8 h of silence.
+    log "window already open ($W) - navigating it to the channel"
+    wmctrl -i -a "$W"; sleep 1
+    xdotool key --window "$W" ctrl+l; sleep 1
+    xdotool type --window "$W" --delay 25 "$URL"; sleep 1
+    xdotool key --window "$W" Return; sleep 25
+  fi
+  [ -z "$W" ] && { log "START FAILED - no Sling window after 60 s"; exit 1; }
+  # FULLSCREEN FIRST, THEN PRESS. The old order (prompts then fullscreen) is what made every tap
+  # land 20 px off - see the comment on click() above. Harmless with CDP, required for the fallback.
+  sleep 15; fullscreen "$W"; sleep 3; prompts
+  pactl set-sink-mute @DEFAULT_SINK@ 0 2>/dev/null
+  touch "$ON"; rm -f "$MISS"
+  sleep 20; playing && log "started - playing ($W)" || log "started - window up but NO SOUND yet ($W); watch will retry"
+  ;;
+watch)
+  [ -f "$ON" ] || exit 0
+  W=$(win)
+  if [ -z "$W" ]; then rm -f "$ON" "$MISS"; log "window closed - Jeff turned it off; hands off until tomorrow 6 AM"; exit 0; fi
+  if playing; then rm -f "$MISS"; exit 0; fi
+  n=$(( $(cat "$MISS" 2>/dev/null || echo 0) + 1 )); echo $n > "$MISS"
+  # act at the 2nd silent check, then every 5th (10 min) - never hammer a Sling outage with reloads every 2 min
+  [ $n -eq 2 ] || [ $((n % 5)) -eq 0 ] || exit 0
+  log "no sound for $n checks - clearing prompts"; prompts; sleep 10
+  if ! playing; then log "still silent - reloading the channel"; wmctrl -i -a "$W"; xdotool key --window "$W" F5; sleep 25; fullscreen "$W"; sleep 3; prompts; fi
+  playing && { log "playing again"; rm -f "$MISS"; }
+  ;;
+status)
+  echo "url:     $URL"; echo "armed:   $([ -f "$ON" ] && echo yes || echo no)"; echo "window:  $(win)"
+  echo "playing: $(playing && echo yes || echo no)"; tail -5 "$LOG" 2>/dev/null
+  ;;
+*) echo "usage: hcc-fox-news start|watch|status"; exit 2;;
+esac

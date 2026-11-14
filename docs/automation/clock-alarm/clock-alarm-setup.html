@@ -1,0 +1,275 @@
+<title>Clock Alarm Wiring</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#f2f4f6; --panel:#ffffff; --ink:#15212e; --muted:#586676; --rule:#c9d1da;
+  --grid:#e2e7ec; --room:#eef1f4; --roomline:#8a97a6;
+  --audio:#1f6fd1; --v12:#d23a2c; --gnd:#1d2530; --mains:#8a5a1c; --wifi:#7a4fc7;
+  --owned:#2f7d4f; --buy:#b86a0c; --accent:#1f6fd1;
+  --font:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --disp:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0f151c; --panel:#161e27; --ink:#e3e9ef; --muted:#93a1b0; --rule:#2c3845;
+    --grid:#1b2530; --room:#1a232d; --roomline:#5d6b7a;
+    --audio:#5fa3ff; --v12:#ff6b5c; --gnd:#c9d3dd; --mains:#d79b4e; --wifi:#b393ff;
+    --owned:#5cc38a; --buy:#f0a64a; --accent:#5fa3ff; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0f151c; --panel:#161e27; --ink:#e3e9ef; --muted:#93a1b0; --rule:#2c3845;
+  --grid:#1b2530; --room:#1a232d; --roomline:#5d6b7a;
+  --audio:#5fa3ff; --v12:#ff6b5c; --gnd:#c9d3dd; --mains:#d79b4e; --wifi:#b393ff;
+  --owned:#5cc38a; --buy:#f0a64a; --accent:#5fa3ff; color-scheme:dark;
+}
+body{background:var(--paper);color:var(--ink);font:15px/1.55 var(--font);margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:24px 48px;display:grid;gap:28px}
+h1{font:700 2.4rem/1.05 var(--disp);letter-spacing:.01em;margin:0;text-wrap:balance}
+h2{font:600 1.35rem/1.2 var(--disp);letter-spacing:.04em;text-transform:uppercase;margin:0 0 10px}
+.lede{color:var(--muted);max-width:68ch;margin:6px 0 0}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:18px}
+.fig{overflow-x:auto}
+.fig svg{display:block;min-width:720px;width:100%;height:auto}
+.fig.sm svg{min-width:520px}
+svg text{font-family:var(--font);fill:var(--ink)}
+svg .lab{font-size:13px;font-weight:600}
+svg .sub{font-size:11.5px;fill:var(--muted)}
+svg .mono{font-family:var(--mono);font-size:11px;fill:var(--muted)}
+svg .zone{font:600 12px var(--disp);letter-spacing:.12em;fill:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:12px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:22px;height:0;border-top:3px solid}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font:600 .8rem var(--disp);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill{display:inline-block;font:600 11px var(--font);padding:2px 8px;border-radius:99px;border:1px solid;white-space:nowrap}
+.pill.own{color:var(--owned);border-color:var(--owned)}
+.pill.buy{color:var(--buy);border-color:var(--buy)}
+.tbl{overflow-x:auto}
+ol.steps{margin:0;padding-left:22px;display:grid;gap:8px}
+ol.steps li::marker{font-weight:600;color:var(--accent)}
+.who{font:600 11px var(--font);color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-right:6px}
+.two{display:grid;gap:28px;grid-template-columns:1fr}
+@media (min-width:900px){.two{grid-template-columns:1.1fr .9fr}}
+.note{font-size:13px;color:var(--muted);margin:10px 0 0}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Grandfather Clock Alarm Setup</h1>
+    <p class="lede">Home Assistant plays the chimes, voice and alarms straight out of its own audio jack into the QFX speaker behind the clock, over one cable run under the floor. A Tuya plug switches the two 12&nbsp;V sirens. No Beast, no Bluetooth, no extra board.</p>
+  </header>
+
+  <!-- ============ 1. THE CHAIN ============ -->
+  <section class="card">
+    <h2>1 · Signal &amp; power chain</h2>
+    <div class="fig">
+      <svg viewBox="0 0 1000 470" role="img" aria-label="Wiring diagram: HA box audio out to the QFX speaker over a 50 foot cable through the crawl space; wall outlet to Tuya smart plug to 12 volt adapter to screw terminal to two sirens in parallel.">
+        <!-- zones -->
+        <rect x="10" y="10" width="250" height="450" rx="6" fill="none" stroke="var(--rule)" stroke-dasharray="4 4"/>
+        <text x="24" y="32" class="zone">MASTER BEDROOM · NE CORNER</text>
+        <rect x="290" y="330" width="330" height="130" rx="6" fill="none" stroke="var(--rule)" stroke-dasharray="4 4"/>
+        <text x="304" y="352" class="zone">CRAWL SPACE · UNDER THE FLOOR</text>
+        <rect x="650" y="10" width="340" height="450" rx="6" fill="none" stroke="var(--rule)" stroke-dasharray="4 4"/>
+        <text x="664" y="32" class="zone">BEHIND THE CLOCK · CENTER OF HOUSE</text>
+
+        <!-- HA box -->
+        <rect x="36" y="60" width="210" height="112" rx="5" fill="var(--room)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="50" y="84" class="lab">Beehive · Home Assistant</text>
+        <text x="50" y="102" class="sub">Beelink J45, beside the gateway</text>
+        <text x="50" y="122" class="mono">audio out: set to Analog</text>
+        <text x="50" y="138" class="mono">VLC add-on plays it</text>
+        <circle cx="246" cy="156" r="6" fill="var(--panel)" stroke="var(--audio)" stroke-width="2.5"/>
+        <text x="166" y="160" class="sub">3.5 mm out</text>
+
+        <!-- Wi-Fi to Tuya -->
+        <path d="M120 172 C 120 300, 250 300, 318 262" fill="none" stroke="var(--wifi)" stroke-width="2" stroke-dasharray="3 5"/>
+        <text x="40" y="318" class="sub" style="fill:var(--wifi)">Wi-Fi: HA switches the plug</text>
+
+        <!-- Audio cable -->
+        <path d="M252 156 H 272 V 400 H 642 V 110 H 694" fill="none" stroke="var(--audio)" stroke-width="3.5" stroke-linejoin="round"/>
+        <text x="306" y="392" class="lab" style="fill:var(--audio)">Monoprice 50 ft 3.5 mm M–M</text>
+        <text x="306" y="410" class="sub">down through the floor · ~37 ft · up at the clock</text>
+        <text x="306" y="428" class="mono">≈ 45 ft used, incl. 2 drops</text>
+
+        <!-- QFX -->
+        <rect x="700" y="56" width="270" height="136" rx="5" fill="var(--room)" stroke="var(--ink)" stroke-width="1.5"/>
+        <circle cx="700" cy="110" r="6" fill="var(--panel)" stroke="var(--audio)" stroke-width="2.5"/>
+        <text x="716" y="80" class="lab">QFX PBX-BF120 speaker</text>
+        <text x="716" y="98" class="sub">12 in woofer · AUX IN ← cable</text>
+        <text x="716" y="116" class="mono">knob near max, leave it there</text>
+        <text x="716" y="134" class="mono">charger plugged in 24/7</text>
+        <text x="716" y="152" class="mono">aim: front door, tilt up</text>
+        <text x="716" y="170" class="mono">→ bounces off the tray ceiling</text>
+
+        <!-- Mains / Tuya / adapter -->
+        <rect x="318" y="228" width="118" height="46" rx="5" fill="var(--room)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="328" y="248" class="lab">Tuya smart plug</text>
+        <text x="328" y="264" class="sub">siren switch</text>
+        <rect x="318" y="160" width="118" height="40" rx="5" fill="none" stroke="var(--mains)" stroke-width="1.5"/>
+        <text x="328" y="185" class="lab" style="fill:var(--mains)">Wall outlet 120 V</text>
+        <line x1="377" y1="200" x2="377" y2="228" stroke="var(--mains)" stroke-width="3"/>
+
+        <rect x="462" y="228" width="170" height="62" rx="5" fill="var(--room)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="474" y="248" class="lab">12 V adapter (owned)</text>
+        <text x="474" y="265" class="mono">TDC SA1A-120-0420</text>
+        <text x="474" y="281" class="mono">12 V ⎓ 0.42 A, center +</text>
+        <line x1="436" y1="251" x2="462" y2="251" stroke="var(--mains)" stroke-width="3"/>
+
+        <!-- 12V run to terminal -->
+        <path d="M632 252 H 690" fill="none" stroke="var(--v12)" stroke-width="3"/>
+        <path d="M632 262 H 690" fill="none" stroke="var(--gnd)" stroke-width="3"/>
+        <text x="636" y="240" class="sub">plug</text>
+
+        <!-- screw terminal -->
+        <rect x="690" y="238" width="110" height="54" rx="4" fill="var(--room)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="700" y="258" class="lab">Screw terminal</text>
+        <text x="714" y="282" class="mono">+</text><text x="752" y="282" class="mono">−</text>
+        <circle cx="722" cy="300" r="5" fill="var(--v12)"/>
+        <circle cx="758" cy="300" r="5" fill="var(--gnd)"/>
+
+        <!-- sirens -->
+        <path d="M722 305 V 336 H 812" fill="none" stroke="var(--v12)" stroke-width="2.5"/>
+        <path d="M758 305 V 326 H 812" fill="none" stroke="var(--gnd)" stroke-width="2.5"/>
+        <path d="M722 336 V 406 H 812" fill="none" stroke="var(--v12)" stroke-width="2.5"/>
+        <path d="M758 326 V 396 H 812" fill="none" stroke="var(--gnd)" stroke-width="2.5"/>
+        <rect x="812" y="312" width="170" height="40" rx="5" fill="var(--room)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="822" y="330" class="lab">Siren A → front door</text>
+        <text x="822" y="345" class="mono">12 V 120 dB piezo</text>
+        <rect x="812" y="382" width="170" height="40" rx="5" fill="var(--room)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="822" y="400" class="lab">Siren B → opposite way</text>
+        <text x="822" y="415" class="mono">parallel, same screws</text>
+        <text x="664" y="446" class="sub">2 × 0.10–0.15 A ≈ 0.3 A · adapter gives 0.42 A</text>
+      </svg>
+    </div>
+    <div class="legend">
+      <span><i class="sw" style="border-color:var(--audio)"></i>Audio (3.5 mm)</span>
+      <span><i class="sw" style="border-color:var(--mains)"></i>120 V mains</span>
+      <span><i class="sw" style="border-color:var(--v12)"></i>+12 V (red wire)</span>
+      <span><i class="sw" style="border-color:var(--gnd)"></i>− / ground (black wire)</span>
+      <span><i class="sw" style="border-color:var(--wifi);border-top-style:dashed"></i>Wi-Fi control</span>
+    </div>
+  </section>
+
+  <div class="two">
+    <!-- ============ 2. FLOOR PLAN ============ -->
+    <section class="card">
+      <h2>2 · Where it all goes</h2>
+      <div class="fig sm">
+        <svg viewBox="0 0 520 430" role="img" aria-label="Simplified floor plan showing the HA box in the master bedroom northeast corner, the cable route through the crawl space, and the clock at the living room southeast corner with the speaker aimed at the front door.">
+          <!-- scale: 1 ft = 11 px, origin x=40,y=30 ; north up -->
+          <g transform="translate(40,30)">
+            <rect x="0" y="0" width="216" height="121" fill="var(--room)" stroke="var(--roomline)"/>
+            <text x="12" y="22" class="lab">Master bedroom</text>
+            <rect x="216" y="40" width="61" height="81" fill="var(--room)" stroke="var(--roomline)"/>
+            <text x="224" y="62" class="sub">Foyer</text>
+            <rect x="277" y="0" width="110" height="121" fill="var(--room)" stroke="var(--roomline)"/>
+            <text x="285" y="22" class="sub">Guest bed</text>
+            <rect x="387" y="38" width="47" height="127" fill="var(--room)" stroke="var(--roomline)"/>
+            <text x="391" y="58" class="sub">Bath</text>
+            <rect x="165" y="121" width="222" height="44" fill="var(--room)" stroke="var(--roomline)"/>
+            <text x="210" y="147" class="sub">Hall</text>
+            <rect x="165" y="165" width="159" height="157" fill="var(--room)" stroke="var(--roomline)"/>
+            <text x="205" y="188" class="lab">Living room</text>
+            <text x="205" y="204" class="sub">10 ft tray ceiling</text>
+            <rect x="324" y="165" width="110" height="157" fill="var(--room)" stroke="var(--roomline)"/>
+            <text x="332" y="188" class="sub">Office</text>
+            <rect x="0" y="165" width="165" height="157" fill="var(--room)" stroke="var(--roomline)"/>
+            <text x="10" y="188" class="sub">Kitchen · dining</text>
+            <!-- front door on foyer north wall -->
+            <line x1="232" y1="40" x2="262" y2="40" stroke="var(--ink)" stroke-width="5"/>
+            <text x="222" y="32" class="sub">front door</text>
+            <!-- HA box -->
+            <rect x="185" y="6" width="16" height="12" fill="var(--audio)"/>
+            <text x="120" y="42" class="mono">HA box</text>
+            <!-- cable route (crawl space) -->
+            <path d="M193 18 V 297 H 315" fill="none" stroke="var(--audio)" stroke-width="3" stroke-dasharray="7 5"/>
+            <text x="200" y="262" class="mono" style="fill:var(--audio)">cable under floor</text>
+            <!-- clock -->
+            <circle cx="315" cy="297" r="9" fill="var(--panel)" stroke="var(--ink)" stroke-width="2"/>
+            <text x="253" y="318" class="lab" style="font-size:12px">Clock</text>
+            <!-- speaker + siren A aim to front door -->
+            <path d="M309 289 L 252 56" fill="none" stroke="var(--v12)" stroke-width="2"/>
+            <path d="M252 56 l -4 14 l 11 -4 z" fill="var(--v12)"/>
+            <text x="276" y="236" class="sub">speaker + siren A</text>
+            <!-- siren B opposite -->
+            <path d="M321 305 L 341 322" fill="none" stroke="var(--v12)" stroke-width="2"/>
+            <path d="M345 326 l -12 -2 l 7 -9 z" fill="var(--v12)"/>
+            <text x="336" y="344" class="sub">siren B</text>
+            <!-- north arrow -->
+            <text x="455" y="12" class="lab">N ↑</text>
+          </g>
+        </svg>
+      </div>
+      <p class="note">Simplified from the house plan; distances from it: clock to guest bed ~22 ft, kitchen ~23 ft, master bed ~28–29 ft. The front-door aim sends the sound down the foyer, where both bedroom doors open.</p>
+    </section>
+
+    <!-- ============ 3. SIREN TERMINAL ============ -->
+    <section class="card">
+      <h2>3 · Siren terminal close-up</h2>
+      <div class="fig sm">
+        <svg viewBox="0 0 440 300" role="img" aria-label="Close-up: the 12 volt adapter barrel plug pushed into the female screw-terminal connector; both red siren wires under the plus screw, both black under the minus screw.">
+          <rect x="20" y="118" width="80" height="44" rx="6" fill="var(--room)" stroke="var(--ink)" stroke-width="1.5"/>
+          <text x="30" y="144" class="lab">12 V plug</text>
+          <line x1="100" y1="140" x2="140" y2="140" stroke="var(--ink)" stroke-width="6"/>
+          <rect x="140" y="104" width="150" height="72" rx="6" fill="var(--room)" stroke="var(--ink)" stroke-width="1.5"/>
+          <text x="152" y="126" class="lab">Female barrel</text>
+          <text x="152" y="142" class="sub">green screw block</text>
+          <circle cx="190" cy="162" r="9" fill="var(--panel)" stroke="var(--v12)" stroke-width="2.5"/>
+          <text x="186" y="167" class="lab" style="fill:var(--v12)">+</text>
+          <circle cx="248" cy="162" r="9" fill="var(--panel)" stroke="var(--gnd)" stroke-width="2.5"/>
+          <text x="244" y="166" class="lab">−</text>
+          <path d="M190 171 V 230 H 330" fill="none" stroke="var(--v12)" stroke-width="3"/>
+          <path d="M190 200 H 330" fill="none" stroke="var(--v12)" stroke-width="3"/>
+          <path d="M248 171 V 215 H 330" fill="none" stroke="var(--gnd)" stroke-width="3"/>
+          <path d="M248 186 H 330" fill="none" stroke="var(--gnd)" stroke-width="3"/>
+          <rect x="330" y="178" width="92" height="30" rx="5" fill="var(--room)" stroke="var(--ink)"/>
+          <text x="340" y="198" class="lab">Siren A</text>
+          <rect x="330" y="212" width="92" height="30" rx="5" fill="var(--room)" stroke="var(--ink)"/>
+          <text x="340" y="232" class="lab">Siren B</text>
+          <text x="20" y="258" class="sub" style="fill:var(--v12)">Cut the 3.5 mm plug off each siren lead first; strip ¼ in.</text><text x="20" y="276" class="sub">Both reds under +, both blacks under −.</text>
+          <text x="20" y="293" class="sub">Backwards = silent, not damaged. Push the plug in until it stops.</text>
+          <text x="20" y="40" class="mono">center-positive adapter → the + screw is +</text>
+        </svg>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ PARTS ============ -->
+  <section class="card">
+    <h2>Parts</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Part</th><th>Job</th><th>Status</th><th>Cost</th></tr></thead>
+        <tbody>
+          <tr><td>Beehive HA box (Beelink J45) + VLC add-on</td><td>Plays chimes, voice, alarms out its 3.5 mm jack</td><td><span class="pill own">Owned</span></td><td class="num">$0</td></tr>
+          <tr><td>QFX PBX-BF120 + its charger</td><td>Speaker behind the clock</td><td><span class="pill own">Owned</span></td><td class="num">$0</td></tr>
+          <tr><td>Tuya smart plug</td><td>Switches the sirens from HA</td><td><span class="pill own">Owned</span></td><td class="num">$0</td></tr>
+          <tr><td>TDC 12 V 0.42 A adapter</td><td>Powers both sirens</td><td><span class="pill own">Owned</span></td><td class="num">$0</td></tr>
+          <tr><td>Female barrel screw-terminal connector</td><td>Joins adapter to siren wires</td><td><span class="pill own">Owned</span></td><td class="num">$0</td></tr>
+          <tr><td>Xnrtop 12 V 120 dB piezo siren, 2-pack</td><td>Siren A + Siren B · leads end in a 3.5 mm plug: cut it off</td><td><span class="pill buy">In cart</span></td><td class="num">$9.16</td></tr>
+          <tr><td>Monoprice 50 ft 3.5 mm M–M cable</td><td>HA box → QFX AUX IN</td><td><span class="pill buy">In cart</span></td><td class="num">$4.99</td></tr>
+          <tr><td colspan="3" style="text-align:right;font-weight:600">To buy</td><td class="num" style="font-weight:600">$14.15</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ STEPS ============ -->
+  <section class="card">
+    <h2>Install order</h2>
+    <ol class="steps">
+      <li><span class="who">Jeff</span>Run the 50 ft cable: HA box jack → down through the floor → crawl space → up behind the clock → QFX AUX IN.</li>
+      <li><span class="who">Jeff</span>Snip the 3.5 mm plug off each siren lead and strip ¼ in (so nothing 12 V can ever be plugged into the speaker's AUX jack). Wire both to the screw terminal (reds +, blacks −), plug in the 12 V adapter, plug the adapter into the Tuya plug.</li>
+      <li><span class="who">Jeff</span>Add the Tuya plug in the Smart Life app so it shows up in HA.</li>
+      <li><span class="who">Claude</span>Switch HA's audio from HDMI to Analog, set up VLC playback, and move the chimes, voice and alarms from the Beast to HA.</li>
+      <li><span class="who">Claude</span>Make the Tuya plug the siren switch; tornado and break-in turn it on, everything else stays voice-only.</li>
+      <li><span class="who">Both</span>Loudness test when Angela isn't resting: knob at max, Apple Watch Noise app at your pillow, door shut. Target is 75 dB or more.</li>
+    </ol>
+    <p class="note">The Beast keeps playing the clock over Bluetooth until the new path is proven.</p>
+  </section>
+</div>
