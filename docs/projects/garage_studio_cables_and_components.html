@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Studio Parts Sheet</title>
+<style>
+  :root{
+    --ink:#14181d; --mute:#5b6775; --line:#c9d2dc; --bg:#fff;
+    --good:#0a7d3c; --warn:#9a5b00; --bad:#a11628; --box:#f4f7fa; --accent:#14467a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:16px/1.55 "Segoe UI",system-ui,-apple-system,sans-serif;
+       padding:28px 16px 60px}
+  .wrap{max-width:1000px;margin:0 auto}
+  h1{font-size:26px;line-height:1.2;margin:0 0 4px;letter-spacing:-.2px}
+  .sub{color:var(--mute);font-size:14px;margin:0 0 22px}
+  h2{font-size:18px;margin:30px 0 8px;padding-bottom:6px;
+     border-bottom:2px solid var(--accent);color:var(--accent)}
+  p{margin:8px 0}
+  table{width:100%;border-collapse:collapse;margin:10px 0 14px;font-size:14px}
+  th,td{text-align:left;padding:7px 9px;border:1px solid var(--line);vertical-align:top}
+  th{background:var(--box);font-weight:600}
+  code{background:var(--box);padding:1px 5px;border-radius:3px;font-size:13px;
+       font-family:Consolas,"Courier New",monospace}
+  .g{color:var(--good);font-weight:600}
+  .w{color:var(--warn);font-weight:600}
+  .b{color:var(--bad);font-weight:600}
+  .note{background:var(--box);border-left:4px solid var(--accent);padding:10px 14px;margin:12px 0}
+  .warnbox{background:#fff6e8;border-left:4px solid var(--warn);padding:10px 14px;margin:12px 0}
+  .stop{background:#fdecef;border-left:4px solid var(--bad);padding:10px 14px;margin:12px 0}
+  ul{margin:8px 0 8px 22px;padding:0}
+  li{margin:4px 0}
+  ul.ck{list-style:none;margin-left:0}
+  ul.ck li{padding-left:28px;position:relative;margin:8px 0}
+  ul.ck li:before{content:"";position:absolute;left:0;top:3px;width:15px;height:15px;
+                  border:2px solid var(--ink);border-radius:2px}
+  .qty{display:inline-block;min-width:36px;font-weight:700}
+  footer{margin-top:40px;padding-top:12px;border-top:1px solid var(--line);
+         color:var(--mute);font-size:13px}
+  @media print{
+    body{padding:0;font-size:11.5pt}
+    h2{page-break-after:avoid}
+    table,.stop,.warnbox{page-break-inside:avoid}
+    .wrap{max-width:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Garage Repair Studio — Components, Cables &amp; Cords</h1>
+<p class="sub">Written 2026-11-11, 8:05 AM Central · companion to §13/§14 of
+<code>docs/projects/garage_repair_studio_2026-11-08.md</code> ·
+<strong>everything here is $0 out of Jeff's own boxes unless a line says otherwise</strong></p>
+
+<div class="note">
+<strong>How to use this:</strong> it is a shopping list against <em>your own boxes</em>, not a store
+order. Tick what you find. Whatever is still unticked at the end is the only thing worth pricing —
+and as of right now <strong>nothing on this sheet is confirmed as needing to be bought.</strong>
+</div>
+
+<h2>0 · New inventory you told me today (11-11) — and what it corrects</h2>
+<table>
+<tr><th>What you have</th><th>What it changes</th></tr>
+<tr>
+  <td><strong>USB → audio adapter</strong> (can feed the Bluetooth speaker by wire)</td>
+  <td><span class="g">Corrects §13</span>, which recorded <em>"No USB audio adapter or sound card is
+  owned anywhere in HCC_INVENTORY.md."</em> It removes the only item §13's step&nbsp;3 thought might
+  need buying — and wiring the speaker kills the Bluetooth penalty outright (§3).</td>
+</tr>
+<tr>
+  <td><strong>Lapel / lavalier mic</strong>, two ports</td>
+  <td>Becomes the <strong>filming</strong> mic — holds a steady level while you move around the
+  bench, which a fixed boom mic cannot do.</td>
+</tr>
+<tr>
+  <td><strong>Gaming headset with mic</strong>, dual plugs</td>
+  <td>Becomes the <strong>talk-to-Claude-at-the-bench</strong> mic. Close-miked, hands-free,
+  wired monitoring in the earcup — and it needs <strong>nothing bought and no USB power</strong>.</td>
+</tr>
+</table>
+
+<h2>1 · The three-mic plan — you already own the right mic for each job</h2>
+<p>These are three different jobs with three different best answers. Using one mic for all three is
+what makes a studio sound amateur.</p>
+<table>
+<tr><th>Job</th><th>Mic</th><th>Plugs into</th><th>Why this one wins</th></tr>
+<tr>
+  <td><strong>Talking to Claude while you work</strong></td>
+  <td>Gaming headset</td>
+  <td>Lenovo <strong>pink mic jack</strong> (+ green for the earcups)</td>
+  <td>2–3 cm from your mouth, so the garage loses and your voice wins. Hands stay on the work.
+  Monitoring is wired, so there is no Bluetooth lag to fight.</td>
+</tr>
+<tr>
+  <td><strong>Filming a repair</strong></td>
+  <td>Lapel / lavalier</td>
+  <td>Pink jack, or the USB adapter</td>
+  <td>Clipped to your shirt, the level stays constant as you lean over the bench and turn your
+  head. This is what repair channels actually use.</td>
+</tr>
+<tr>
+  <td><strong>Intro / voiceover / narration</strong></td>
+  <td>BM-800-class on a boom</td>
+  <td>Pink jack via its XLR→3.5&nbsp;mm kit cable, 5&nbsp;V USB for bias (§13)</td>
+  <td>Richest, fullest tone of the three — but only while you sit still in front of it.</td>
+</tr>
+</table>
+<div class="warnbox">
+<strong>Start with the headset.</strong> It is the only one of the three needing nothing at all — no
+adapter, no USB power, no boom, no meter reading. Plug it in and run <code>hcc-mic-on</code> on the
+Lenovo (installed 11-11; it forces the pink jack, unmutes, sets gain and loads the voice preset).
+</div>
+
+<h2>2 · Monitor tree — cables to pull</h2>
+<p>The map is §14's. It costs $0 and respects both measured GPU ceilings:
+<strong>Acer UHD 620 = 3 screens including its own panel; Lenovo Sandy Bridge = 2.</strong>
+3 + 2 = exactly the five screens you asked for.</p>
+<ul class="ck">
+<li><span class="qty">1 ×</span> <strong>HDMI male–male</strong> — Acer → <strong>32" onn Roku TV</strong>.
+    <strong>This cable also carries your audio</strong>, so size it to reach the top of the tree.</li>
+<li><span class="qty">1 ×</span> <strong>VGA male–male, 15-pin, with thumbscrews</strong> —
+    Acer → <strong>old Dell</strong>. The Dell is VGA-only and silent by design, so nothing is lost.</li>
+<li><span class="qty">1 ×</span> <strong>HDMI male–male</strong> — Lenovo → <strong>24" Toshiba</strong>.</li>
+<li><span class="qty">3 ×</span> <strong>monitor power cords</strong> — one per external screen. Check
+    whether the onn TV's cord is captive or detachable before you need it.</li>
+<li><span class="qty">1 ×</span> <strong>surge-protected power strip, 6+ outlets</strong> — you need
+    <strong>5 minimum</strong>: three screens plus two laptop chargers.</li>
+</ul>
+<div class="warnbox">
+<strong>Two things only your eyes can settle</strong> (from §14, still open):
+<strong>(a)</strong> is there a blue 15-pin VGA socket on the Acer?
+<strong>(b)</strong> does the 24" Toshiba have an HDMI input? If the Toshiba is VGA-only it simply
+swaps places with the Dell and the map still works.
+</div>
+
+<h2>3 · Audio — your wired-speaker idea is the right call</h2>
+<p>Wiring the Bluetooth speaker is <em>better</em> than what §14 originally recommended. §14 measured
+the Bluetooth penalty: <strong>A2DP adds roughly 100–300&nbsp;ms of latency</strong> — fine for music,
+ruinous for hearing yourself while recording, and it shows up as lip-sync drift on video — and
+Windows <strong>silently drops to narrowband</strong> the moment a call app grabs the speaker. A wire
+has neither problem.</p>
+<ul class="ck">
+<li><span class="qty">1 ×</span> <strong>USB → audio adapter</strong> — the one you have. Feeds the
+    speaker by wire, and if it has a pink socket too it gives a far cleaner mic input than the
+    Lenovo's onboard codec.</li>
+<li><span class="qty">1 ×</span> <strong>3.5&nbsp;mm male–male aux cable</strong> — adapter's green jack
+    → the speaker's <strong>AUX IN</strong>.</li>
+<li><span class="qty">1 ×</span> <strong>3.5&nbsp;mm combo splitter</strong> (one TRRS plug → separate
+    green + pink sockets) — <strong>only needed on the Acer</strong>, if it has a single combo headset
+    jack rather than two. This is the adapter that makes a dual-plug headset work on a modern laptop.</li>
+<li><span class="qty">1 ×</span> <strong>USB-A extension</strong> — if the adapter won't reach the bench.</li>
+</ul>
+<div class="note">
+<strong>Check on the speaker:</strong> it needs an <strong>AUX IN</strong> jack for this to work. Most
+speakers of that class have one, but confirm — and note many only switch to AUX once a cable is
+physically inserted.
+</div>
+
+<h2>4 · Camera — one conflict to settle before anything moves</h2>
+<div class="stop">
+<strong>🔴 DO NOT move the Razer Kiyo Pro to the garage until you confirm this.</strong>
+The 08-21 incident record states the Beast's streaming service carries a
+<strong>pre-existing front-yard webcam feed</strong> built 08-15 from that Kiyo, explicitly marked
+<em>"do not remove that one."</em> If the Kiyo is currently serving that feed, taking it to the bench
+<strong>silently kills a house camera stream.</strong>
+<br><br>
+<strong>I could not verify where that camera physically is.</strong> The camera subsystem is frozen for
+this session and the freeze blocks reads as well as writes, so I did not look — and I am not
+overriding it. <strong>This is your call, and it is a one-minute check:</strong> is the Kiyo plugged
+into the Beast right now, or loose?
+</div>
+<ul class="ck">
+<li><span class="qty">1 ×</span> <strong>filming camera.</strong> If the Kiyo is spoken for, §14 already
+    verified the Acer's built-in <strong>HD WebCam</strong> is present and healthy — that is the $0
+    fallback, and your phone on a clamp is the other.</li>
+<li><span class="qty">1 ×</span> <strong>Kiyo → a BLUE USB 3 port, on the Acer only.</strong>
+    <span class="b">Not the Lenovo</span> — measured 11-11, the Lenovo has <strong>no USB 3 at all</strong>
+    (both buses enumerate as <code>480M</code> EHCI). The Kiyo is a USB 3 device.</li>
+<li><span class="qty">1 ×</span> <strong>USB 3 extension — ACTIVE/powered if over ~10 ft.</strong>
+    A long passive run will drop the camera intermittently.</li>
+<li><span class="qty">1 ×</span> tripod, clamp or arm to aim it at the bench.</li>
+</ul>
+
+<h2>5 · Keyboard, mouse and network</h2>
+<p>One keyboard and mouse across all five screens is <strong>already built</strong> — Deskflow,
+configured and verified 11-10 (§12). It maps <em>machines, not monitors</em>, so adding screens adds
+no work.</p>
+<ul class="ck">
+<li><span class="qty">0 ×</span> <strong>KVM switch — do NOT buy one.</strong> Deskflow already does this
+    over the network.</li>
+<li><span class="qty">2 ×</span> <strong>Cat5e/Cat6 patch cables</strong> — optional but recommended.
+    Wired is steadier than Wi-Fi for Deskflow and for streaming.</li>
+<li><span class="qty">1 ×</span> keyboard + mouse at the bench (the Rapoo 2.4&nbsp;GHz receiver is
+    already on the Lenovo).</li>
+</ul>
+<div class="warnbox">
+<strong>Layout gotcha (§14):</strong> put the <code>GarageLaptop</code> cell on the side the Lenovo
+<em>physically</em> sits on, or the mouse will cross the wrong screen edge.
+</div>
+
+<h2>6 · Power and cable management</h2>
+<ul class="ck">
+<li><span class="qty">1 ×</span> surge-protected strip, 6+ outlets (counted in §2).</li>
+<li><span class="qty">2 ×</span> laptop chargers, left permanently at the bench — one per machine.</li>
+<li><span class="qty">1 ×</span> <strong>5&nbsp;V USB wall adapter</strong> — for the BM-800's bias power
+    (§13), if you go that route.</li>
+<li>Velcro straps or zip ties, split loom or raceway, and
+    <strong>labels on both ends of every cable.</strong> With five screens behind a tree, one unlabeled
+    HDMI costs you twenty minutes every single time.</li>
+</ul>
+
+<h2>7 · Adapters — the direction traps that waste an afternoon</h2>
+<table>
+<tr><th>Adapter</th><th>Verdict</th><th>Why</th></tr>
+<tr>
+  <td><strong>Your VGA→HDMI cord</strong></td>
+  <td><span class="w">Keep as a spare — not needed in the §14 map</span></td>
+  <td>VGA is analog and HDMI is digital, so a <strong>passive cable cannot convert</strong>; it only
+  works as an <strong>active, powered</strong> converter. And it is <strong>direction-specific</strong> —
+  a VGA-source→HDMI-display box is a different unit from an HDMI-source→VGA-display box. The §14 map
+  avoids conversion altogether by sending the Dell to a native VGA port.</td>
+</tr>
+<tr>
+  <td><strong>3.5 mm combo splitter</strong></td>
+  <td><span class="g">Probably needed — on the Acer</span></td>
+  <td>Lets a dual-plug headset or lapel mic work on a laptop with only one combo TRRS jack.</td>
+</tr>
+<tr>
+  <td><strong>USB DisplayLink video adapter</strong></td>
+  <td><span class="b">Only for a 6th screen — and only on the Acer</span></td>
+  <td>Both GPUs are at their ceiling at five screens. <span class="b">This corrects §14</span>, which
+  said "one machine": it has to be the <strong>Acer</strong>, because the Lenovo has no USB 3.</td>
+</tr>
+<tr>
+  <td><strong>Audio interface / 48 V phantom supply</strong></td>
+  <td><span class="b">Do not buy. Settled in §13.</span></td>
+  <td>The capsule is a pre-charged electret wanting a few volts of bias, not 48 V phantom. The 09-17
+  note claiming otherwise was wrong and has been corrected.</td>
+</tr>
+</table>
+
+<h2>8 · What to actually buy</h2>
+<p class="g" style="font-size:17px">Nothing is confirmed as needed yet.</p>
+<p>Every line above is expected to come out of your boxes. The only three that could become a
+purchase, and each only after you look:</p>
+<ul>
+<li>A <strong>3.5 mm combo splitter</strong>, if the Acer has a single combo jack and you own no splitter.</li>
+<li>A <strong>VGA cable</strong>, if none is in the boxes and the Acer does have a VGA socket.</li>
+<li>A <strong>USB DisplayLink adapter</strong>, only for a 6th screen — or if the Acer has no VGA socket
+<em>and</em> the Toshiba turns out to be VGA-only.</li>
+</ul>
+<p><em>No prices are quoted here on purpose — nothing gets a price from memory. Ask and I will check
+live before you order anything.</em></p>
+
+<h2>9 · The look-at-it list — the only things software cannot answer</h2>
+<ol>
+<li><strong>Is the Razer Kiyo plugged into the Beast right now?</strong> This is the blocking one — see §4.</li>
+<li><strong>Does the Acer have a blue 15-pin VGA socket?</strong> Decides $0 versus an adapter.</li>
+<li><strong>Does the 24" Toshiba have an HDMI input?</strong> If not, it swaps with the Dell.</li>
+<li><strong>Does the USB audio adapter have one jack or two</strong> (green only, or green + pink)?
+Two makes it a mic input as well as a speaker output.</li>
+<li><strong>Does the Bluetooth speaker have an AUX IN jack?</strong> Required for the wired plan in §3.</li>
+<li><strong>Does the Lenovo have a separate green headphone jack</strong> beside the pink one? §13
+confirmed the pink mic jack from the codec dump; the green one has not been confirmed.</li>
+</ol>
+
+<footer>
+Garage Repair Studio · parts sheet v1 · 2026-11-11 · HCC<br>
+Measured facts carry their command in §13/§14 of the plan. Unknowns are marked as unknowns on
+purpose — nothing on this sheet is a guess dressed up as a fact.
+</footer>
+
+</div>
+</body>
+</html>

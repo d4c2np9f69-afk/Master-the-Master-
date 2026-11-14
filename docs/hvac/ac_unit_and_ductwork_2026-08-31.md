@@ -1893,6 +1893,7 @@ iCloud root now holds no loose A/C files except the one below.
 list).** It is a **cloud-only placeholder** and iCloud for Windows timed out twice trying to hydrate it
 (*"The cloud operation was not completed before the time-out period expired"*). It is still in the iCloud root,
 not lost. Fix it from the Finder/iPhone, or right-click ▸ *Always keep on this device* in Explorer and then move it.
+**Resolved 2026-11-02:** now in `HCC AC Quotes`. The stale root `AC - Duct layout - scope of work.pdf` is in `HCC AC Quotes\Superseded`, and `pdf.pdf` is `HCC AC Quotes\Petitt - upload 09-11 (was pdf.pdf).pdf`.
 
 ## Still to do
 - Confirm the colour→function map on the unit's own diagram at install time.

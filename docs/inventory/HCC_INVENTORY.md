@@ -124,6 +124,25 @@ TouchSmart 520
 
 ---
 
+## 🎤 AUDIO / STUDIO — ON HAND (added 2026-11-11, from Jeff directly)
+
+🔑 **Why this section exists:** on 11-10 a hardware sweep (`lsusb`, `arecord -l`,
+`Get-PnpDevice -Class AudioEndpoint,MEDIA,USB`) found no USB audio on any machine, and the record was
+updated to say **none is owned**. That was **wrong** — Jeff said so on 11-11. **A probe can only see
+what is plugged in; a cable in a box is invisible to every scan.** Ask before recording an absence.
+
+| Item | Ports | The job it does in the studio |
+|---|---|---|
+| **USB → audio adapter** | TBD — one jack or two? | Feeds the Bluetooth speaker **by wire**, defeating both A2DP’s 100–300 ms latency and Windows’ silent drop to narrowband HFP on calls. If it has a pink socket too, it is also a cleaner mic input than the Lenovo’s onboard ALC272. |
+| **Lapel / lavalier mic** | 2 | **Filming.** Clipped to his shirt it holds a constant level while he moves around the bench — which a fixed boom mic cannot do. |
+| **Gaming headset w/ mic** | 2 (dual plug) | **Talking to Claude while working.** Close-miked so the garage loses; hands-free; wired monitoring, so no Bluetooth lag. **Needs nothing bought and no USB power** — the best starting point of the three. |
+| **BM-800-class XLR mic** (the “Delam XLR mic” above) | XLR + kit 3.5 mm cable | **Voiceover / narration.** Richest tone, but only while seated still. Pre-charged electret wanting a few volts of BIAS — **not 48 V phantom, no audio interface.** See §13 of `docs/projects/garage_repair_studio_2026-11-08.md`. |
+| **VGA → HDMI cord** | — | Spare. ⚠️ **Direction-specific, and must be ACTIVE/powered** (VGA is analog, HDMI digital — a passive cable cannot convert). Not needed in the §14 monitor map, which uses native ports only. |
+
+**Parts sheet built from this:** `docs/projects/garage_studio_cables_and_components.html` (sent 11-11).
+
+---
+
 ## 🔴 BLINK CAMERA HARDWARE — READ BEFORE REPORTING A CAMERA "FAULT" (added 2026-08-19)
 
 **Models, straight from HA's device registry — not inferred:**

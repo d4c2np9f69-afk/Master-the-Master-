@@ -32,7 +32,7 @@ Verified live in Jeff's own SmartHub session (`cemc.smarthub.coop`, acct 4501007
 on the AC so that's going to be flaw data but everything since then should be correct."*
 
 **CONFIRMED 2026-08-31: the duct repair is dated 2026-07-25.** Jeff pointed to
-`iCloudDrive/duct-repair-home-depot-list.pdf` — his Home Depot parts list for the job — whose
+`iCloudDrive/duct-repair-home-depot-list.pdf` (filed to `HCC AC Quotes` 2026-11-02) — his Home Depot parts list for the job — whose
 CreationTime and LastWriteTime are both **7/25/2026 6:06:35 PM**.
 
 **Two independent sources agree to within one day.** Before knowing that file existed, a change-point

@@ -171,9 +171,22 @@ own instruction is just "match the strips shown to the originals in your TV befo
    buying anything.** (Reasoning from the series topology, not a cited repair report.)
 3. **Reseat CON301 / CON302** and check for browned or burnt pins — $0.
 4. **Power board**, if the tester shows BOTH strands healthy: ShopJimmy `514C7001M17` **$59.99 new**;
-   Discount Merchant sells a pulled/tested one (TV7001-ZC02-01 / 514C7001M17 / E021M509-**D1**) with a
-   30-day warranty, cheaper. `M17` and `M27` are interchangeable; Jeff's board is the **-B2** revision
+   ~~Discount Merchant sells a pulled/tested one (TV7001-ZC02-01 / 514C7001M17 / E021M509-**D1**) with a
+   30-day warranty, cheaper.~~ `M17` and `M27` are interchangeable; Jeff's board is the **-B2** revision
    of the same `E021M509`.
+   🔄 **PRICES RE-VERIFIED 2026-10-26 12:17 — THE CHEAP ROUTE IS GONE, AND STOCK IS THIN:**
+   **ShopJimmy `514C7001M17` still $59.99, IN STOCK but only 1 AVAILABLE, 180-day warranty** (schema
+   `InStock`, checked live — not read off an Add-to-Cart button, per this file's own 10-13 lesson).
+   **tvpartstoday $58.99 is SOLD OUT** ("Unavailable"). **Discount Merchant no longer lists it at all** —
+   its own site search returns *"No results could be found for 514C7001M17"*, so the pulled/tested
+   option recorded on 10-11 is dead. **$59.99 is the floor; there is no cheaper source.** The eBay
+   `134967221758` figure of ~$101.05 carried in OPEN_ITEMS #226 is therefore the EXPENSIVE option,
+   not the reference price.
+   ✅ **Jeff re-photographed the label 2026-10-26 12:16 and it reads `M17/2010088806/13` `20210527`,
+   confirming line 195 exactly.** 🔴 **AND THAT PHOTO WAS ALREADY IN THIS FILE — I asked him to go read
+   a label this document had recorded on 10-11, and separately re-derived the $59.99 price that was
+   already written here. That is the 10-13 failure repeating: GREP THIS FILE FOR A LABEL, PART NUMBER
+   OR PRICE BEFORE ASKING JEFF FOR IT OR SEARCHING THE WEB FOR IT.**
 5. **Single LED bead swap** — only if exactly one bead is dead. ⚠️ **Check the bead rating:** this set
    runs **~750 mA per strand**, so each bead dissipates ~2.25 W. The common generic replacement beads
    sold for TV repair are **3 V 350 mA** — roughly HALF the current this TV needs. Under-rated beads
@@ -1923,12 +1936,27 @@ Jeff has a **box of new capacitors incl. 450 V on hand ⇒ no purchase.**
 4. **Measure the old cap out of circuit after removal** to confirm it had actually failed — evidence, not
    assumption.
 
-### ⚠️ THE ONE THING THE TESTER CANNOT SEE
-**A cold / high-resistance solder joint passes a backlight tester and still trips the board under load.**
-The TD2B sources a few mA; the board drives **710–790 mA** (silkscreen: `LED:100-126V 710MA--790MA`).
-Jeff soldered 12 bare-pad strips reusing the old jumper harness. **While the board is out: tug-test every
-joint he made and reflow anything dull or balled rather than shiny and wetted.** If the cap swap does not
-clear the loop, this is the next suspect — ahead of buying any board.
+### ⛔ STRUCK 2026-10-26 10:15 AM BY JEFF — THERE ARE NO SOLDER JOINTS. THIS WHOLE SUSPECT IS DEAD.
+**Jeff, verbatim:** *"The lights all light up on 301 lead and the 302 lead at 113v so the lights are fine
+and none of them were soldered they all plug into a strip that the two 301 and 302 wires plug into. So
+stop guessing and get the facts straight and don't keep going over the shit the is already proven."*
+
+🔴 **PRIMARY EVIDENCE FROM THE HARDWARE IN HIS HANDS. It outranks everything inferred below, and this
+file's own standing rule says so.** Two facts, settled, **do not re-open either:**
+1. **NOTHING IS SOLDERED.** Every strip **plugs in**; the 301 and 302 wires plug into the same strip.
+   There are no joints to tug-test, reflow or suspect. The "12 bare-pad strips + reused jumper harness"
+   claim that used to sit here was WRONG and generated two dead-end hunts.
+2. **BOTH RUNS LIGHT AT 113 V** off the 301 lead and the 302 lead — the full series path, harness and
+   all. **The backlight assembly is PROVEN GOOD.** The 10-12 "CON302 string is OPEN" fault is CLOSED.
+
+⚠️ The cold-joint failure mode below was real in principle but is **inapplicable to this set** — it
+requires solder joints, and there are none. The only thing the tester still cannot prove is the
+assembly at the full **710–790 mA** the board drives vs the few mA a TD2B sources; with push-fit tabs
+and no joints, that risk is small and there is **nothing to pre-emptively fix.**
+
+🔑 **WHAT THIS ACTUALLY NARROWS:** the load is good and the board does not light it. Combined with the
+10-18 observation that the static/retry happens with **LEDs unplugged, T-con off, CON301/302 off and
+only the main-board harness connected**, the backlight is eliminated as a cause of the loop entirely.
 
 ### 💵 STILL NOT BOUGHT, AND SHOULD NOT BE UNTIL THE ABOVE IS DONE
 Power board `514C7001M27` eBay `134967221758` ~$65.95 · Main board `M21123-MT` tvpartstoday $39.99.
@@ -1963,10 +1991,10 @@ loop BEFORE the new T-con went in?* The sequencing was never established. If the
 is the answer and no further testing is needed.
 
 ### ▶ IF THE T-CON IS INNOCENT — ORDER OF WORK, STILL $0 BEFORE ANY PURCHASE
-1. 🔴 **Reflow / tug-test every strip joint.** The failure the tester **structurally cannot see**: a cold or
-   high-resistance joint passes at the few mA a TD2B sources and fails at the **710–790 MA** the board drives
-   (board silkscreen `LED:100-126V 710MA--790MA`). 12 bare-pad strips + reused jumper harness = many joints.
-   Reflow anything dull, grainy or balled rather than shiny and wetted.
+1. ⛔ **STRUCK 2026-10-26 — "reflow / tug-test every strip joint" IS NOT A STEP. THERE ARE NO JOINTS.**
+   Jeff, from the hardware: *"none of them were soldered they all plug into a strip that the two 301 and
+   302 wires plug into."* The strips are push-fit. **And both runs light at 113 V off the 301 and 302
+   leads, so the backlight assembly is PROVEN GOOD — do not send him back to it.**
 2. **Power-board driver side** — boost transformer `MSC ZY-T0204` (date code `2051`), backlight MOSFET,
    current-sense resistors near `CON301`/`CON302`, and the driver IC. **Jeff photographs that area + the
    driver IC part number; Claude pulls the datasheet and names the measurements.** (Same method already
@@ -2375,6 +2403,36 @@ Model 100044717 shipped with several different power boards. These came up cheap
 
 **The listing must say `TV7001-ZC02-01` or `514C7001M17/M27`.**
 
+🔴🔴 **CORRECTED AND TIGHTENED 2026-10-26 12:19 — "`TV7001-ZC02-01`" IS NOT ENOUGH, AND NEITHER IS
+THE PCB FAB NUMBER. THE SUFFIX IS THE ONLY DISCRIMINATOR.**
+Jeff brought a YouTube repairman's claim: *"any Onn or other TVs power board with a 301 and 302
+outlet will work."* **He is RIGHT that this board is shared very widely** — JVC, RCA, Element,
+Westinghouse, Hisense and onn all use it. **He is WRONG that any of them will work**, and the
+evidence is the part catalogue itself:
+
+| Part number | Size | Models |
+|---|---|---|
+| `514C7001M04` | **70"** | JVC LT-70MAW795, RCA RTRU7027-US, Element E4AA70R, onn 100012588 |
+| `514C7001M21` | **70"** | onn 100068378, Westinghouse WR70UT4210 / WR70UX4200 |
+| **`514C7001M17`** | **75"** | Element E4FAA75R, **onn 100044717**, Westinghouse WR75UT4210 ← **JEFF'S** |
+| `514C7001M27` | **75"** | onn 100044717 (interchangeable with M17) |
+
+**All four carry the silkscreen `TV7001-ZC02-01` and all four have `CON301`/`CON302`.**
+
+🔴 **THE TRAP, AND IT WOULD HAVE CAUGHT US: Jeff's board is PCB fab `E021M509-B2`, and the 70-inch
+`514C7001M21` ALSO carries `E021M509-B2`** (tvpartstoday listing for onn 100068378). So a 70" board
+and the 75" board share the silkscreen, the fab revision AND the connector designations. **Matching
+on `TV7001-ZC02-01`, on `E021M509-B2`, or on "it has a 301 and 302" will buy a 70" board.**
+
+⚡ **WHY IT MATTERS PHYSICALLY:** this board's own silkscreen reads **`LED:100-126V 710MA--790MA`**.
+A 70" panel has a different LED string count, so a 70" board drives a different voltage/current —
+too little and the strips never light, too much and it cooks the strips Jeff just bought.
+
+✅ **BUY RULE: the listing must say `514C7001M17` or `514C7001M27`. Ignore the silkscreen and ignore
+the fab number.** (`514C7002M05` is already catalogued as wrong — note that is **7002**, a different
+series.) At $59.99 with a 180-day warranty for the verified part, chasing a cheaper mismatched board
+risks the new strips — a bad trade on a ~$20 saving.
+
 ### Price contrast put to Jeff plainly
 - Power board: **$101.05**
 - Main board: **$23.80** (`920016212943`)
@@ -2442,3 +2500,127 @@ to spend another $101 is a real one, not a formality.
 - The **wrong power boards** that list under model `100044717` are catalogued at 4:30 PM above
   (`260132008850` / `HKL-750206C1`, `K-P300-FM1`, `514C7002M05`). **The listing must say
   `TV7001-ZC02-01` or `514C7001M17/M27`.**
+
+---
+
+## 2026-10-26 11:33 AM — 🔵 A NEW INSTRUMENT, AND THE "BEFORE" READING IS NOW ON RECORD
+
+Jeff ran the garage ethernet to the set and asked what could be checked over it. **This TV is a
+Roku TV (`onn.` 100044717), so it runs a real network stack and an HTTP control interface on
+port 8060** — which gives a boot/no-boot signal that is completely independent of a dark screen.
+
+### ✅ CONFIRMED BY PROBING REAL HARDWARE, NOT BY READING DOCS
+Probed the **32" onn Roku TV** already on the LAN (192.168.1.241) — same brand, same Roku OS
+family. **READ-ONLY: only GET on `/` and `/query/*`. No `/keypress`, no `/launch`** — those change
+state on a TV inside the house and Jeff's standing rule forbids making a device act unannounced.
+
+| Endpoint | Result |
+|---|---|
+| `/query/device-info` | **HTTP 200, 75 fields** incl. `serial-number`, `model-name`, `screen-size`, `power-mode`, **`uptime`**, `network-type`, `supports-ethernet`, `software-version`, `panel-id`, `developer-enabled` |
+| `/query/apps`, `/query/active-app`, `/query/media-player`, `/query/audio-device` | HTTP 200 |
+| `/query/tv-channels`, `/query/tv-active-channel` | HTTP 200, with physical channel + frequency |
+| Ports | **only 8060 open** (80/443/8080/8085/8089/9080 closed; `developer-enabled false`) |
+
+🔑 **`uptime` IS THE NEW INSTRUMENT FOR THIS FAULT.** If the set boots and then resets, uptime
+falls back toward zero. That turns the static/retry loop from a noise Jeff listens for into a
+logged number — **but only if it boots far enough to serve ECP.**
+
+🔑 **The AT&T gateway device table reads with NO access code** (`/cgi-bin/devices.ha`) and reports
+per device `Connection Type` (e.g. `Ethernet LAN-1`) and **`Connection Speed` (e.g.
+`1000Mbps fullduplex`)** — so the new ~80 ft garage run can be verified as having negotiated
+gigabit rather than dropping to 100 Mb.
+
+### 📏 THE CONTROL LEG — MEASURED 11:26–11:33 WITH **THE OLD MAIN BOARD STILL IN**
+Jeff powered the set with the ethernet connected. Baseline taken 10:22 held exactly one Roku
+(the 32" at `.241`, wifi). After power-up: **NO new Roku on SSDP, none on a full 8060 sweep of
+192.168.1.0/24, and no new host in ARP** that is not already accounted for (`.171` = Angela's
+lamp; `.132` = a locally-administered/randomised MAC with every port closed, i.e. a phone).
+Jeff also reported *"a pause in the blinks"*, then **timed it at 11:34**: *"It blinks about 40
+seconds and stays solid for 3 seconds the blinks again."*
+
+### ✅ THE 40 s / 3 s LOOP IS NOW MEASURED, NOT INFERRED — UPGRADE THE 10-18 CAVEAT
+The 2:06 PM 10-18 entry warned that *"the 40 s / 3 s blink decode is an INFERENCE, not a
+measurement"* and said not to lean on it. **The TIMING is now observed and confirmed by Jeff.**
+What each phase MEANS is still inferred — do not promote that part. The "pause" he first reported
+is simply the 3 s solid; **the fault is stable and reproducible, unchanged since 10-18.**
+
+🔑 **WHAT THE TIMING DOES BUY: the set COMPLETES A FULL BOOT EVERY CYCLE.** 40 s is a processor
+running, not a supply that cannot start — then it fails at a *specific, repeatable* point. That is
+the signature of a load stepping up at a predictable moment, which is consistent with the
+`+12V = 3 Ω vs +5VSB = 34 Ω` inversion and the main board being what sits on that rail.
+
+⚠️ **IT STILL DOES NOT DISCRIMINATE between the two boards** — a power board whose rail sags under
+increased demand produces the same 40/3 signature as a main board drawing too much. Do not report
+this as a verdict. The swap remains the test.
+
+❌ **AND IT IS DEFINITIVELY NOT THE BACKLIGHT:** the 10-18 run produced this same loop with LEDs
+unplugged, T-con off and `CON301`/`CON302` off, and on 2026-10-26 both runs lit at 113 V on the
+tester. The backlight is out of the picture entirely.
+
+⛔ **RETRACTED 11:47 — I WROTE THAT IT "NEVER REACHES THE NETWORK" AND THAT APPEARING ON THE
+NETWORK WOULD BE AN UNAMBIGUOUS PASS FOR THE NEW BOARD. BOTH ARE FALSE.** That was written off a
+scan window during which the set simply was not powered yet. See the 11:34 entry below: **the OLD
+main board boots fully, brings up the IP stack and serves ECP.** Do not reason from the retracted
+claim; it was mine and it was wrong.
+
+⚠️ **THIS DOES NOT CONDEMN ANYTHING, AND MUST NOT BE READ AS DOING SO.** With the old board in,
+the set never boots far enough to bring networking up — so silence is the *expected* reading. It
+also **does not discriminate between the two boards**: a sick main board and a power board failing
+to hold the rails both stop the boot, so absence from the network is consistent with either.
+
+✅ **What it DOES buy: a clean before-reading on the exact cable, switch and subnet that will be
+in place for the after-reading.** When the new `M21123-MT` goes in, the only variable that changes
+is the board. Re-run `scratchpad/roku_scan.py after` and diff against `roku_scan_baseline.json`.
+
+---
+
+## 2026-10-26 11:34–11:47 — 🔴🔴 THE OLD MAIN BOARD **BOOTS FULLY AND REACHES THE NETWORK.** THIS OVERTURNS THE PREMISE THE MAIN-BOARD PURCHASE WAS MADE ON.
+
+🔴 **JEFF, 11:47: *"I'm don't have the new board in it !!!!"* — EVERYTHING BELOW IS THE **OLD**
+BOARD.** I had misread his 11:36 note about the optical light as meaning the new board was fitted.
+It is not. **Measured on the OLD board, over ethernet:**
+
+```
+192.168.1.98   friendly-device-name  75" onn. Roku TV
+               model-name  100044717     screen-size  75      panel-id  26
+               serial-number  YN00GK978475   device-id  BH818G978475
+               software-version  15.1.4   power-mode  PowerOn
+               network-type  ethernet      ethernet-mac  54:67:e6:4f:fd:b0
+```
+Ping 2–10 ms. **It pulled a DHCP lease and served HTTP.**
+
+### 📏 THE CYCLE, MEASURED (not inferred)
+```
+11:42:22–11:43:30  not answering        (~70 s dark)
+11:43:47  uptime=49  sw=15.1.4  PowerOn
+11:44:02  uptime=64  sw=15.1.4  PowerOn
+11:44:17–11:45:25  not answering
+```
+**Boots → on the network by ~49 s → runs ~20–30 s → resets. Cycle ≈ 90 s.** That lines up with
+the LED pattern Jeff timed (40 s blinking = booting, 3 s solid = backlight commanded, then reset).
+
+### 🔑 WHY THIS MATTERS MORE THAN ANYTHING ELSE IN THIS FILE
+**A main board that completes a ~50 s boot, runs the OS, brings up a network stack and serves HTTP
+is NOT a board that is collapsing the 12 V rail.** The purchase decision on 10-18 rested on
+`+12 V = 3 Ω vs +5VSB = 34 Ω` being read as "the main board is dragging the 12 V rail down."
+**That reading is now contradicted by the board's own behaviour.**
+
+And this file already recorded, at 10-18 4:09 PM, the two reasons that 3 Ω was never conclusive:
+**(1) which side was never isolated** — a mated harness measures both boards in parallel; and
+**(2) polarity was never checked** — 3 Ω one way and high reversed is a **diode junction, not a
+fault.** Those caveats were written and then quietly outweighed. They should not have been.
+
+⚠️ **The set dies at the moment the backlight is commanded.** That is the load step, and it points
+at the backlight driver section rather than at the processor board — but it does **not** fully
+exonerate the main board either, since the main board generates the backlight-enable. **Do not
+convert this into a new verdict. It converts a verdict back into a question.**
+
+### ▶ THE FREE TEST THAT SPLITS IT — DO THIS BEFORE FITTING THE NEW BOARD
+Mains unplugged, **disconnect `CON301` and `CON302`**, power up, and watch the network:
+| Result | Meaning |
+|---|---|
+| **Reset loop STOPS, stays up past ~2 min** | The trip is in the backlight path — driver side or the strips under real load (713–790 mA, which the 30 mA TD2B cannot test) |
+| **Still resets every ~90 s** | Backlight innocent; the fault is in the power board's main rails |
+
+**Instrument: poll `http://192.168.1.98:8060/query/device-info` and watch `uptime`.** Climbing past
+~120 s = it held. Falling back = it reset. No screen required, no meter required.

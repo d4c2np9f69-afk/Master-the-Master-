@@ -561,3 +561,118 @@ is back before doing anything about them. `.214` Blink shows 96 disassoc / 189 d
 - 🔴 **Kidde `.134`** — gateway last activity **10:33:20**, `Status off`, **absent from ARP entirely**; 26 HA entities `unavailable` ~5 h. **Tested and disproven tonight: it is NOT part of a network event** — a scan of every client whose last activity is today shows the Kidde is the *only* device that dropped at 10:33. The RE200 cannot be the cause either (down 2 weeks).
 - 🔴 **`light.garage_repeater`** — `unavailable` 6.8 h. Zigbee, so unaffected by any of tonight's Ethernet work. Its 10:33 coincidence with the Kidde is **a coincidence, not a shared cause** — different radios, and no other client dropped then.
 - 🟡 **Weather station outdoor array** — 16 of 21 entities `unavailable` ~8 h while the **indoor** ones are live and fresh (inside temp 68.2 °F, humidity 52, pressure 29.42 at 0.9 min old). **The console is fine; the outdoor unit is not reporting** — consistent with the standing lithium-AA + solar-panel item, not with anything rewired today.
+
+
+---
+
+# 2026-10-24 - THE CABLE RUNS ARE IN. Jeff's report, Sat 9:0x AM.
+
+**Source: Jeff, verbatim, 2026-10-24.** *"all the ethernet cable has been run one line to the
+garage another line to the clock the new line to the office and the Rw 200 in there also the line
+to the kitchen HP computer there is also a five port switch being added to the garage. We've got
+the new 10 port switch right at the modem and there's also a port switch there as well that
+everything's being fed from with all cat8 cable runs."*
+
+CLEARLY MARKED: the table below is **Jeff's account of the physical work**, not a gateway reading.
+The 10-20 entry above IS gateway-verified. A port-by-port re-verification is owed once the garage
+5-port switch is actually in and everything has been up long enough to show in `devices.ha`.
+
+## The runs, as built
+
+| Run | Lands on | Status | Notes |
+|---|---|---|---|
+| **Garage** | 5-port switch in the garage | 🟡 **switch BEING ADDED** | Feeds GaragePC + whatever else goes out there. The Zigbee **Garage Repeater is Zigbee, not Ethernet** - this run does nothing for it |
+| **Clock** | the J45 / grandfather clock corner | ✅ run | Pairs with the 50 ft analog audio run - see the clock section below |
+| **Office** | RE200 (`RW 200` = the **RE200**) | ✅ run | Replaces the 10-20 run; the RE200 had been down 2 weeks before that |
+| **Kitchen HP** (`KitchenPC`, Ubuntu 26.04, `jeffloewen@KITCHENPC`) | gateway / switch | ✅ run | Was `.192`. Takes it off 2.4 GHz |
+| **Core at the modem** | **new 10-port switch** + a second switch | ✅ in | Jeff: *"everything's being fed from"* the pair |
+
+**Cable: Cat8 throughout.** ⚠️ **Do not re-litigate the Cat8-vs-Cat6 question** - it was settled in
+`docs/network/structured_wiring_plan_2026-10-17.md` section 1 (*"Cat6 was not a mistake, and Cat8
+buys you nothing here"*). The cable is bought and pulled. The plan document's conclusion stands as
+**advice that was not taken, and that is fine** - Cat8 is not worse, only dearer. Nothing to fix.
+
+## What this changes, and what it does NOT
+
+- 🟢 **Every wired client leaves the 2.4 GHz radio.** That radio had **27 active clients** on 10-20
+  and two measured weak ones dragging airtime (`.109` android -75 dBm / 8,774 TX errors, `.209`
+  TY_WR -78 dBm). Moving the KitchenPC and the garage machines off it is a direct, measurable win
+  for everything *else* still on 2.4 GHz - the Zigbee-adjacent IoT clients especially.
+- 🔴 **It does NOT help Zigbee.** The Garage Repeater, the leak sensors, the contact sensors and
+  the siren are 802.15.4. No Ethernet run touches them. If the Garage Repeater is unavailable,
+  that is still a Zigbee question - see `docs/zigbee/zigbee_mesh_routers_2026-08-27.md`.
+- 🔴 **It does NOT help the Kidde.** That is Wi-Fi + its own cloud, and the cloud is the recurring
+  failure (OPEN_ITEMS #240).
+- 🟡 **The RE200's dedicated gateway port.** On 10-20 the office cable landed on **LAN-3 directly,
+  not through the switch**, and that was deliberate. If the new office run has been moved onto a
+  switch, re-check it - a dedicated port was better for the B-Hyve's sake
+  (`DECISION 2026-09-22 - THE RE200 IS DEDICATED TO THE B-HYVE`, above).
+
+## ✅ RE-VERIFIED 11:1x AM - the 09:0x parse above was a PARSER BUG, not a network fault
+
+**The morning pull found only 28 of the page's 75 `MAC Address` rows** because the parser paired
+fields as one flat alternating list across the whole page; a device with a different field count
+desynced every row after it. Fixed by splitting the page into per-device chunks anchored on each
+`MAC Address` label first, **then** pairing within each chunk. Recovered **75/75 - matches the raw
+label count in the page exactly**, so this parse is trustworthy where the morning one was not.
+
+**41 on / 34 off.** Live connections: **32 on Wi-Fi 2.4 GHz · 2 on Wi-Fi 5 GHz Radio-2 · 1 on Wi-Fi
+5 GHz Radio-1 · 6 wired** (4× LAN-1, 1× LAN-2, 1× LAN-3).
+
+**This confirms the 10-20 port map, it does not contradict it:**
+
+| Port | Live now |
+|---|---|
+| LAN-1 (5 Gbps, the 10-port switch) | `.66` Beehive · `.104` Main-Bedroom-2 · `.184` AirTV3 · one unnamed device (Wistron-made, OUI only, no hostname) |
+| LAN-2 | `.194` the Beast - still direct to the gateway, not through the switch, as decided 10-20 |
+| LAN-3 | `.164` WS-SD00PJBA - the RE200-bridged client, same port the RE200's own uplink uses |
+
+🔴 **ONE REAL REGRESSION FOUND, not assumed:** NETGEAR NTV300 has **two MAC addresses on file**
+(wired NIC vs Wi-Fi radio, same pattern as the AirTV). Its **Ethernet LAN-1 entry went `off` Fri
+10-23 13:51:23** and it is now back on as a **Wi-Fi 2.4 GHz mesh client** instead. The 10-20 win
+(*"three devices migrated WiFi → gigabit Ethernet"*) has partly reverted for this one device
+sometime Friday afternoon - worth a look if whatever cable/switch port it was on got bumped.
+
+Not yet re-run: `lanstatistics.ha` (returned a connection failure this pull, status 000) and
+`broadbandstatistics.ha` - the WAN-health and interface-count cross-check from 10-20. Re-pull both
+before trusting a port *count* claim; the device-level census above is solid on its own.
+
+---
+
+# 2026-10-24 - CAMERA MOVED AND RENAMED: `back_left` is now **"Roof cam"**
+
+**Jeff:** *"The back yard left camera is now on the weather station mast and working great"* /
+*"The camera is now named Roof cam"*.
+
+| | |
+|---|---|
+| **entity_id** | **`camera.back_left` - UNCHANGED.** HA does not rename entity_ids on a device rename |
+| **friendly_name** | **`Roof cam`** (also `Roof cam Battery`, `Roof cam Motion`, `Roof cam Temperature`, `Roof cam Wi-Fi signal strength`, `Roof cam Camera motion detection`) |
+| **Wi-Fi** | **-37 dBm** on the mast. For scale, the backyard Blink reads **-74**. This is now one of the strongest clients in the house |
+| **New field of view** | **THE FRONT.** Elevated, looking down the driveway and out over the street - road junction, mailbox, neighbours' houses, the street light. It is **not** a back-yard camera any more |
+
+🔴 **THE RENAME DID NOT REACH HA ON ITS OWN.** Before a config-entry reload, HA still held the old
+device and go2rtc served a **byte-identical cached still** (`md5 fda13cb67111861a2f2cda6348a7b1d9`)
+on three consecutive pulls - **including one taken after `blink.trigger_camera`**. That is the
+documented Blink stale-device shape, and it is exactly why a frame must be **md5-compared before
+being called current**. `homeassistant.reload_config_entry` on the blink entry fixed it; that is
+the same call `hcc_blink_auto_heal` already uses, so it is a known-safe lever on this box.
+
+## 🔴 STILL OWED ON THIS CAMERA - do not assume any of it is done
+
+1. **`back_left` is now a lying name** in the entity_id, the **go2rtc stream name**, the HomeKit
+   target `camera.ai_back_left_live`, the app, and `switch.z3_back_left`. Renaming reaches into
+   the frozen camera stack, and **pointing HomeKit at the wrong entity is the single fastest way
+   to destroy the popups** (`docs/incidents/camera_fixes_2026-08-21.md`). **Needs Jeff's explicit
+   go-ahead and a `Verify-CameraStreams.ps1` before and after.**
+2. 🔴 **ALERT FATIGUE IS THE REAL RISK, AND IT IS A SECURITY FAILURE, NOT AN ANNOYANCE.** This
+   camera used to watch a private back yard. It now watches a **public street**. Cars, walkers and
+   neighbours will trip it all day, and `hcc_ai_notify_v2` is the *"person never muted"* path. The
+   10-24 quiet-hours work stops it waking the house, **but says nothing about the daytime.** The
+   AI zones/masks were tuned for the old view and are now meaningless. Re-zone before the volume
+   teaches Jeff to ignore the alerts - that is the Aug 10-14 failure mode, 48 h of dead security
+   with no error anywhere.
+3. **House plan / `plan-data.js` camera positions** still show it at the back left.
+
+**Baseline for any of that work:** `Verify-CameraStreams.ps1` ran **exit 0, all 6 RTSP streams
+served real frames**, at 09:04 on 2026-10-24, *before* anything was touched.

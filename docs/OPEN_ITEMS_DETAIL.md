@@ -2371,6 +2371,105 @@ Consequences:
 
 | 🟡 **#298** | 🖥️ **STUDIO = THE ACER ALONE (Jeff 11-13 10:08: *"why you could not find this $40 solution so I only have to use the Acer"*).** A **DisplayLink** USB 3.0→HDMI adapter (Jeff's pick: Wavlink, DL-3900/DL-5500 family per its listings; Plugable USB3-3900DHE verified $49.95 earlier today) puts the Toshiba on the Acer: 32in on HDMI, Dell on VGA, Acer panel, Toshiba on DisplayLink = 4 screens, one computer, no Deskflow needed. **Measured:** the Acer has `Intel USB 3.0 eXtensible Host Controller` + SuperSpeed hubs. 🔴 **Why it was not proposed:** DisplayLink was in the plan since 11-10 (§10, *"~$20–30"*) but only as a fallback / 6th-screen add-on; the single-computer design was never priced against the two-computer one. ⚠️ The MacroSilicon MS912x dongle (`VID_534D`) still plugged in is NOT DisplayLink: unplug it. Its `Windows Usb Display` autostart was removed 11-13 (reversible, kept as `MS-USB-Display_DISABLED_by_HCC_2026-11-13`). Toshiba (on the Lenovo for now): `Broadcast RGB` Automatic→**Full** (read back from the driver); `~/toshiba-fit.sh 97` ready for overscan, not run. The 32in was NOT touched, per Jeff. **11-13 10:2x adds:** Wavlink WL-UG3501H = DisplayLink, **$39.99** (Newegg Wavlink page; avoid a $75.99 third-party listing), max 2048x1152, plenty for the 1080p Toshiba. Logged in `COST_LEDGER.md` 2026-11-13 at Jeff's instruction. 🟢 **DRIVER INSTALLED ON THE ACER 11-13 10:28:** official Synaptics **DisplayLink 12.3** (package 12.3.5143.0, released 2026-09-04, supports DL-3900). The installer and MSI both carry a **Valid** Authenticode signature from `DISPLAYLINK (UK) LIMITED`. `msiexec /qn` log: `Installation completed successfully`; Windows lists `DisplayLink Graphics 12.3.5011.0`; `pnputil` shows `dlidusb.inf` (Display), `dlusbaudioext.inf` and `dlcdcncm.inf` in the driver store. Installers kept at `Downloads/DisplayLink` (jeffl profile) on the Acer. **NOT feature-tested: there is no adapter yet.** The test is: plug in the Wavlink and the Toshiba appears as a screen. 🔴 **The new 500 GB "WD Elements" on the Acer is the RETIRED Beehive USB disk:** 8 partitions, `hassos-boot` + a 465 GB Linux data partition = a full old HA OS install, so Windows gives it no drive letter. Beehive itself is live on its internal SSD (HTTP 200 11-13). **Not wiped: wiping it is Jeff's call.** The Lenovo has one disk, a CT500MX500 SSD (465.8G, Ubuntu). | **JEFF:** buy the adapter, unplug the dongle. **CLAUDE:** driver + layout the moment it is plugged in | 🟡 Jeff's buy |
 
+## #300
+
+# 🔬💡 THE LAB — MICROSCOPE RIG + LIGHT GRID + ONE BRAIN
+
+**Jeff, 2026-11-14:** *"take all this and come up with a plan that brings all this together and it
+functions and looks like a professional recording/electronics lab. Remember imagination!!!"*
+
+🔑 **THE FULL PLAN IS ITS OWN DOCUMENT: `docs/projects/lab_studio_build_2026-11-14.md`.**
+Read that before working this row. What follows is the measured state it was built on.
+
+## Measured on the Acer 2026-11-14 07:44-07:46 — nothing here is assumed
+
+| Thing | State | Proof |
+|---|---|---|
+| DisplayLink driver | ✅ **ALREADY INSTALLED, 12.3.5011.0** (not by this session) | Uninstall registry |
+| WAVLINK / any USB display hardware | ❌ NOT present | no `VID_17E9`, no `VID_534D` |
+| 3 x `MS Idd Device` | driver stubs with no hardware | PnP class Display → the #299(b) orphan |
+| Screens live | **2 only** — `BOE` panel + `TSB / TOSHIBA-TV` | `WmiMonitorID` |
+| 32in onn (Miracast) / Dell | not connected at that moment | absent from the monitor list |
+| Microscope | **not plugged in** | imaging list = Kiyo + internal `HD WebCam` only |
+| Kiyo Pro | OK, `VID_1532`, dshow name `USB Video Device` | PnP + DirectShow |
+| OBS Studio | **33.0.1** — obs-websocket is built in | install path |
+| **Mosquitto `192.168.1.66:1883`** | ✅ reachable from the bench | `Test-NetConnection` True |
+| **HA `192.168.1.66:8123`** | ✅ reachable from the bench | `Test-NetConnection` True |
+| 🔴 **Light at the bench** | **YAVG 48.9 / 255 = 19 % — DARK** | `ffmpeg -vf signalstats`, 20 frames, min 30.8 max 59.4 |
+
+## The three design calls that matter
+
+**1. The Kiyo IS the light meter — $0, and it was proven this morning.** `signalstats` yields mean
+luma (YAVG 0-255) off the live feed. It measures the light **at the lens, in frame** — the only
+place it matters; a lux puck on the wall measures the wall. It also closes the loop: the driver can
+drive the lights up until YAVG hits target (~100-140). ⚠️ **Its one blind spot, stated plainly: it
+cannot report darkness while it is off**, so "walk in, lights come on" still needs a presence
+trigger (Zigbee motion at the door, or $0 from the garage contact + an awake session).
+
+**2. The scope goes THROUGH the Acer into OBS, never straight to the Dell.** Direct HDMI→Dell is how
+the AD409 works and it is that design's one limitation: the computer never sees the image. Through
+OBS it is the same picture on the Dell (Fullscreen Projector) **plus** recording, timestamped
+stills, picture-in-picture, and a published frame — **which is how Claude gets to look at the
+board.** If the $17 scope is USB/UVC this is $0. If it is HDMI-out it needs an HDMI→USB capture
+dongle — and note that the **MacroSilicon `VID_534D` part #284 called a dead end was a dead end as a
+DISPLAY adapter; that chip family is exactly an HDMI→USB capture device.** Not present on any
+machine as of 11-14, but worth finding in a drawer before buying one.
+
+**3. ⚠️ Vibration, not light, is what kills a 300X rig.** Depth of field is under a millimetre. A
+cantilevered overhead 2x4 span rings like a diving board and every tool set down will jump the
+image. Andonstar's own design clamps a **short stiff post to the bench top** so scope and work share
+one mass. Lighting overhead, scope on the bench. If it must go on the boom, **triangulate** — one
+diagonal brace turns a cantilever into a truss.
+
+## Lighting zones — 24 of the 25 ft
+
+key ~8 ft (camera-left, ~45 deg down, diffused) · fill ~6 ft (camera-right, bounced, ~30 % of key) ·
+rim ~4 ft (rear boom, behind/above — the cheapest "professional" win) · bench task ~6 ft (straight
+down over the work). **Diffuse everything** — bare strip reads cheap on video; channel + frosted
+lens turns it into a big soft source. **Flat black on the 2x4s, not satin** (satin throws specular
+hot spots into the lens). **Bench task wants 4000-5000 K** so solder and resistor bands read true;
+face light looks better at 3200-4000 K.
+
+## The brain
+
+`hcc-studio` on the Acer owns the MODE and nothing else does. Inputs: live luma, presence, garage
+door, OBS state. Outputs: WLED over HTTP, OBS over obs-websocket, the Dell projector, and **MQTT
+discovery into HA — so HA creates every entity itself and no Beehive YAML is touched**, which
+sidesteps `reference_ha_yaml_include_gap` entirely. Modes: OFF / BENCH / MICROSCOPE / RECORD /
+MICRO+RECORD. In MICROSCOPE the key+fill come DOWN and task goes UP — glare on a glossy board is
+the enemy. Starting a recording starts the lights, because a feature that needs Jeff to remember it
+is not finished (his own 08-10 rule).
+
+🔴 **Nothing in this build touches the frozen subsystem.** Separate namespace, separate service.
+🔴 **No light in the lab is fired to "test it" without telling Jeff first.**
+
+## OWED FROM JEFF — 4 answers, everything else proceeds without them
+
+1. **What is the 25 ft of LED?** addressable WS2812/WS2815 · 12 V/24 V single-colour · RGB/RGBW ·
+   120 V rope. **This picks the controller and nothing downstream can be finalised without it.**
+   A photo of the reel label settles it.
+2. ✅ **ANSWERED 11-14 — Jiusion 40-1000x, USB 2.0.** Straight into the Acer: no capture
+   dongle, no MacroSilicon hunt, **$0**. Its 8 LEDs are a MECHANICAL wheel on the barrel, so the
+   scope's own light is the one thing `hcc-studio` cannot command — stated now, not discovered later.
+   ⚠️ It is a no-name UVC device and the Kiyo already holds the generic DirectShow name
+   `USB Video Device`; a duplicate name makes OBS bind the wrong camera **silently**.
+   `windows-scripts/garage-studio/Test-Microscope.ps1` (11-14, parse-clean) detects the collision
+   and resolves identity from the PnP vendor id. **RUN IT AT THE ACER ONCE THE SCOPE IS PLUGGED IN.**
+
+   📷 **THE THREE CAMERAS WERE ALREADY DECIDED — found by searching the record 11-14.** Jeff's
+   design poster asks for overhead / talking-head / detail; an earlier studio plan in the archive
+   says verbatim: *"Overhead 'mat cam': iPhone on the spare boom arm. Wide/face cam: Kiyo Pro at
+   103°. Close-up: magnifier for now; a digital microscope later."* **Nothing to buy** — the $17
+   scope IS that "later". ⚠️ **The only unproven leg is the iPhone:** iPhone-as-webcam on WINDOWS
+   is not Continuity Camera (macOS only) and needs a helper app; none is in the record. Measure it —
+   do not buy a camera. Until then OBS has two angles and the overhead is a gap.
+3. **The Dell — model, and does it have a VGA input?** (decides $0 VGA vs. the WAVLINK)
+4. **"Picture 4" never attached to the 11-14 message.**
+
+*(One further finding — about a frozen subsystem — was blocked from this file by the session-freeze
+gate on 11-14 and was reported to Jeff in conversation instead. It needs his word before it can be
+written here or worked. Section 6 of the plan document carries it.)*
+
 ## #299
 
 **Opened 2026-11-13 by the evening session, out of the studio measurement in #298.**

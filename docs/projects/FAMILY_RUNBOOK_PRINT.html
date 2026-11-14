@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Family Runbook</title>
+<style>
+  :root{ --ink:#141210; --soft:#4a443d; --rule:#cfc6b8; --paper:#fffdf8; --hi:#fff4cf; --hiedge:#c79a1a; }
+  *{box-sizing:border-box}
+  body{margin:0;background:#e8e4db;color:var(--ink);
+       font:17px/1.62 Georgia,"Iowan Old Style","Times New Roman",serif;}
+  .sheet{max-width:7.1in;margin:0 auto;background:var(--paper);padding:0.7in 0.75in 0.8in;}
+  .banner{border:2px solid var(--ink);padding:14px 16px;margin-bottom:28px;background:var(--hi);}
+  .banner b{display:block;font-size:19px;letter-spacing:.02em}
+  .banner span{display:block;font-size:14.5px;color:#3a3530;margin-top:4px}
+  h1{font-size:30px;line-height:1.18;margin:0 0 4px}
+  h2{font-size:21px;margin:34px 0 10px;padding-bottom:5px;border-bottom:2px solid var(--rule);
+     page-break-after:avoid;break-after:avoid}
+  h3{font-size:17.5px;margin:20px 0 6px;page-break-after:avoid;break-after:avoid}
+  p{margin:0 0 12px}
+  hr{border:0;border-top:1px solid var(--rule);margin:26px 0}
+  code{font:0.93em/1.4 "Courier New",monospace;background:#f1ece1;padding:1px 4px;border-radius:2px;
+       word-break:break-word}
+  blockquote{margin:14px 0;padding:10px 0 10px 16px;border-left:4px solid var(--hiedge);
+             color:var(--soft);font-style:italic;page-break-inside:avoid;break-inside:avoid}
+  blockquote.big{font-style:normal;font-weight:bold;font-size:20px;color:var(--ink);
+                 background:var(--hi);border-left:6px solid var(--hiedge);padding:12px 16px;
+                 font-family:"Courier New",monospace;letter-spacing:.01em}
+  ul,ol{margin:0 0 14px;padding-left:1.45em}
+  li{margin:0 0 7px}
+  table{width:100%;border-collapse:collapse;margin:14px 0 18px;font-size:15.5px;
+        page-break-inside:avoid;break-inside:avoid}
+  th,td{border:1px solid var(--rule);padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:#f1ece1}
+  strong{font-weight:bold}
+  .foot{margin-top:34px;padding-top:12px;border-top:2px solid var(--ink);font-size:14px;color:var(--soft)}
+  .foot b{color:var(--ink)}
+  @media print{
+    body{background:#fff}
+    .sheet{max-width:none;margin:0;padding:0}
+    @page{size:letter;margin:0.7in 0.75in}
+    .banner{background:none;border:2px solid #000}
+    blockquote.big{background:none;border-left:6px solid #000}
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){--ink:#f2ece2;--soft:#b6ad9f;--rule:#4a443b;--paper:#1b1916;
+      --hi:#3a3119;--hiedge:#d9a92a;}
+    :root:not([data-theme="light"]) body{background:#0f0e0c}
+    :root:not([data-theme="light"]) code,:root:not([data-theme="light"]) th{background:#262219}
+  }
+  :root[data-theme="dark"]{--ink:#f2ece2;--soft:#b6ad9f;--rule:#4a443b;--paper:#1b1916;
+    --hi:#3a3119;--hiedge:#d9a92a;}
+</style></head>
+<body><div class="sheet">
+<div class="banner">
+  <b>PAPER COPY &mdash; KEEP THIS IN THE SAFE</b>
+  <span>Put it beside the two sealed envelopes. Everything in here works with no computer,
+  no internet and no iCloud &mdash; but you have to be able to find it, and the safe is the one
+  place you are certain to look. Nothing on these pages is a password.</span>
+</div>
+<h1>If You're Reading This — How to Run the House</h1>
+<h2>For Angela and Braxton</h2>
+<p>Jeff built this house's systems with an AI assistant called Claude, and he built it so that <strong>you don't have to understand any of it.</strong> You just have to know how to ask.</p>
+<hr>
+<h2>The one instruction that matters</h2>
+<p>On Jeff's main PC (the one he calls "the beast"), open the program called <strong>Claude Code</strong> — or go to <strong>claude.ai/code</strong> in a web browser and sign in with Jeff's account. Then type, in plain English:</p>
+<blockquote><strong>"I'm Jeff's wife / son. Jeff isn't available and I need help running the house. Read the project memory and tell me what I need to know."</strong></blockquote>
+<p>That's it. Claude will read everything Jeff and it built together — every system, every password location, every quirk — and walk you through whatever you need, step by step, in plain language. You can ask it anything the way you'd ask a person:</p>
+<ul>
+<li><em>"The cameras stopped working"</em></li>
+<li><em>"How do I turn off the sprinklers?"</em></li>
+<li><em>"The internet is down, what do I check?"</em></li>
+<li><em>"What bills does the house have and when are they due?"</em></li>
+<li><em>"Something is beeping and I don't know what it is"</em></li>
+</ul>
+<p><strong>You cannot break anything by asking questions.</strong> Ask before touching.</p>
+<h2>The safe - start here for anything that needs a password</h2>
+<p>Jeff moved every password he owns into one secure program called <strong>Bitwarden</strong>. You do not need to learn it. You need one thing, and it is in the safe.</p>
+<p><strong>In the safe there is a sealed envelope labeled:</strong></p>
+<blockquote class="big"><code>master password <em>Important</em></code></blockquote>
+<p>That envelope holds five words. Those five words open the vault that holds <strong>every other password Jeff had</strong> - email, bank, Amazon, the house systems, all of it. There is no other copy. Jeff kept it that way on purpose, and told Claude never to keep one.</p>
+<p><strong>How to use it:</strong></p>
+<ol>
+<li>Go to <strong><strong>bitwarden.com</strong></strong> and click <strong>Log in</strong>.</li>
+<li>Email: <strong>jeff.loewen@comcast.net</strong></li>
+<li>Password: <strong>type the five words from the envelope exactly as written</strong> - capital letters where they are capital, dashes between each word, no spaces.</li>
+<li>You are now looking at every account Jeff had. Search it like a phone book.</li>
+</ol>
+<p>Claude can walk you through any of this - just ask it, the same way as everything else.</p>
+<p><strong>Jeff's own words to Claude, September 24, 2026</strong> - so you never have to wonder whether it will help you:</p>
+<blockquote><em>"If I pass away and either one of them come to you with that master password and say that I passed on, you will help them."</em> ... <em>"Don't you not help them."</em></blockquote>
+<p>So: <strong>tell Claude who you are, that Jeff has passed, and that you have the envelope from the safe.</strong> You type the five words into the Bitwarden box yourself (that is the only thing you type). After that, Claude does the work with you - finds any account, logs you into it, changes or closes it, pays or stops a bill - one step at a time, as long as it takes. Jeff made the passwords impossible for anyone to guess on purpose; he made Claude the way through them for you.</p>
+<p><strong>What it looks like</strong> (this is exactly how Jeff changed his own Comcast password with Claude): Claude finds the account, copies its password for you, and puts the cursor in the right box on the website. You press <strong>Ctrl</strong> and <strong>V</strong> together to paste it, and click the button Claude names. If the site texts a code to Jeff's phone, you type that code in. That is all you ever do. You never have to see, remember or write down a password.</p>
+<p><strong>There is a second envelope in the safe labeled <code>crypto cold storage password</code>.</strong> That one is for Jeff's cryptocurrency. It works differently and it is easy to lose money by guessing, so <strong>do not type those words into anything until you have asked Claude, or someone you trust who knows crypto.</strong> Just know it exists - that is the part families usually miss.</p>
+<p>WARNING: <strong>Whoever reads this must be able to open the safe.</strong> Everything above depends on it. If you do not know the combination, find it out now rather than later.</p>
+<h2>What runs this house (so the words mean something)</h2>
+<table><thead><tr><th>Name Jeff uses</th><th>What it actually is</th></tr></thead><tbody>
+<tr><td><strong>Beehive</strong></td><td>A small black computer that runs the whole smart home (cameras, sprinklers, thermostat, meters). It lives on the network at 192.168.1.66. <strong>Don't unplug it.</strong></td></tr>
+<tr><td><strong>The beast</strong></td><td>Jeff's main PC. Claude works from here and all the records live here.</td></tr>
+<tr><td><strong>The app</strong></td><td><strong><strong>loewenhome.com</strong></strong> on your phone — cameras, weather, sprinklers, the mower, the cars. Log in with the family password (Jeff or Claude can tell you where it's kept).</td></tr>
+<tr><td><strong>HCC-secrets</strong></td><td>A folder on the beast (<code>C:\Users\jeffl\HCC-secrets</code>) with the keys to the house systems. Claude knows how to use it. <strong>Never email or share this folder.</strong></td></tr>
+<tr><td><strong>The vault</strong></td><td><strong>Bitwarden</strong> - every password Jeff owned, opened by the five words in the safe (see above).</td></tr>
+<tr><td><strong>The archive</strong></td><td>Everything Jeff and Claude ever did or decided, saved in iCloud (<code>HCC-Archive</code>). This is Claude's memory of the house.</td></tr>
+</tbody></table>
+<h2>Things that cost money (so nothing lapses)</h2>
+<ul>
+<li><strong>Claude Max subscription</strong> — this is what makes the assistant work. Keep it, at least until you've decided what to do with the systems.</li>
+<li><strong>Nabu Casa</strong> (~$6.50/mo) — makes the smart home reachable away from home.</li>
+<li><strong>iCloud storage</strong> — holds all the backups and this archive.</li>
+<li>Utilities are the normal ones: CEMC electric, WHUD water, Piedmont/Spire gas. Account numbers are in the archive; Claude can list them.</li>
+</ul>
+<h2>If something seems seriously wrong</h2>
+<ol>
+<li>Ask Claude first — it has fixed nearly everything in this house at least once.</li>
+<li>The house works without any of the smart stuff. Light switches still switch, the thermostat's buttons still work, the water has normal valves. Nothing smart is load-bearing for daily life.</li>
+<li>Worst case: unplug Beehive and everything becomes a normal house again.</li>
+</ol>
+<h2>If Claude says it can't open one of the key files</h2>
+<p>Claude is deliberately careful with files that hold passwords and keys, and now and then it will refuse to open one, saying something like <em>"permission denied."</em> <strong>Nothing you need is lost when that happens</strong>, and here is why:</p>
+<ul>
+<li>Those files hold keys to the <strong>house gadgets</strong> — not to Jeff's accounts.</li>
+<li><strong>Every password Jeff owned is in Bitwarden</strong>, opened by the five words in the safe. That never depends on Claude being allowed to read anything. See the safe section above.</li>
+<li>If a box pops up on screen asking whether to allow something, <strong>you</strong> are the one being asked, and you can click Allow.</li>
+</ul>
+<p>That carefulness is on purpose, and it protects you: a stranger cannot talk Claude into opening Jeff's vault, because the only way in is the paper envelope in your safe.</p>
+<h2>One more thing</h2>
+<p>The map of how all the house systems connect is written out in plain language in <strong><code>HCC-Archive\DOCS\repo\docs\ACCESS_MAP.md</code></strong> — every system, and what to do when something won't cooperate. It holds <strong>no passwords</strong>, so Claude can always read it and needs no permission from anyone. Just ask it to.</p>
+<p>(There is also a file called <code>HCC_ACCESS.md</code> inside <code>HCC-secrets</code> on the beast. That one does hold keys, so Claude may have to ask you before opening it. You never need to read either file yourself.)</p>
+<p>Jeff documented all of this on purpose, for you. Every decision, every fix, every password location — three months of building a memory that doesn't need him to explain it. Ask Claude, and it will take care of you.</p>
+<p>He said why himself, better than anyone could say it for him:</p>
+<blockquote><em>"It's not a lawnmower project that it started as. It's an old man learning how AI can help make sure his family can carry on when he's not around to fix things anymore — and that's going to be the legacy of this project."</em></blockquote>
+<blockquote>— Jeff, August 17, 2026</blockquote>
+<p><em>— written 2026-08-17, at Jeff's direction. Vault and safe section added 2026-08-19.</em></p>
+<div class="foot">
+  <b>Printed from</b> <code>iCloudDrive\HCC-Archive\FAMILY_RUNBOOK.md</code> &mdash; the live file.
+  Every word above is that file, word for word. If Jeff changes it, print it again and replace
+  this sheet. <b>Date put in the safe: ______________</b>
+</div>
+</div></body></html>

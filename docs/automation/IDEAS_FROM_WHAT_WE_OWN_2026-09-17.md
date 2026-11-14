@@ -455,8 +455,16 @@ that takes a basic station and derives **170+ sensors**, **fully local, no API k
 4. **DS18B20 multi-probe node** — one ESP32 carries several probes on one 1-Wire bus at ~$1/probe:
    dryer vent, freezer, crawlspace, attic.
 
-⚠️ **Your Delam XLR mic is the wrong tool** — it needs 48 V phantom power and an audio interface.
-Don't let "we own a microphone" suggest a free path; there isn't one.
+🔴 **CORRECTED 2026-11-10 — the line that used to sit here was WRONG.** It read: *"Your Delam XLR
+mic is the wrong tool — it needs 48 V phantom power and an audio interface. Don't let 'we own a
+microphone' suggest a free path; there isn't one."* **There IS a free path.** A BM-800-class capsule
+is a **pre-charged electret**: it wants a few volts of bias ("plug-in power"), NOT true 48 V phantom.
+A hands-on test of the same class of mic (Podcastage, Excelvan BM-800) ran it on a USB adapter
+supplying **at most 5 V** and it worked. And the **GarageLaptop has a DEDICATED PINK MIC JACK** —
+`/proc/asound/card0/codec#0` node 0x18 reads `Pin Default 0x01a19820: [Jack] Mic at Ext Rear,
+Conn = 1/8, Color = Pink`, with a `Mic Boost` control of 0–3 steps (~30 dB) sitting at 0 dB today.
+Measured 2026-11-10 over SSH. The ladder, cheapest first, is in
+`docs/projects/garage_repair_studio_2026-11-08.md` §13. **Do not re-pitch an audio interface.**
 
 ### ❌ The ELM327 / F-250 — skip it
 No first-party HA integration exists; every path is hand-rolled per-vehicle PID work. The dongle

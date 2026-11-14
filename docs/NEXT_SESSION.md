@@ -65,12 +65,24 @@ node scripts/run-all-gates.js --live --states=<states.json>
 
 ## Still owed — NOT done, do not report these as finished
 
-- **Deploy the three fixes already written in `functions/api/hours.js`** (uncommitted): #266 span
-  gate + `clear_coverage` on the 56 hot cells, #267 lost-mow recovery, #270 `clampCfgForDevice`
-  + clear the ghost `cfg` field. Gates green; owner **CLAUDE**. The 08-11 firmware findings are
-  the contract to code against: the box sends `hours` (not `hours_seconds`),
-  `source: mow_end|heartbeat|buffered` with `age_s`, and `track[]` as array-of-arrays.
-- Nothing from this session is committed or pushed. **Push auto-deploys to the live house app.**
+- **ONE `git push` is all that is left on the mower work.** It is written, tested and COMMITTED
+  (`ed78196`; `34193c0` holds the gates/hook/docs work) and deliberately **NOT pushed** - this
+  branch auto-deploys to the live house app, and the harness classifies the push as a
+  **Production Deploy** and blocks it. **That push is JEFF’S GO, nobody else’s.** What ships:
+  #266 span gate (`COVERAGE_MIN_SPAN_M = 15`), #267 lost-mow recovery, #270 ghost `cfg` eviction.
+  **80 passed / 0 failed**, full suite **34/34 with nothing skipped**.
+  Then VERIFY rather than assume: the live GET must stop serving `cfg`, and the STORED copy must
+  be gone within ~15 min (the box posts about every 900 s). #270 self-heals - no KV dashboard trip.
+  The 08-11 firmware findings stay the contract for any further server work: the box sends `hours`
+  (not `hours_seconds`), `source: mow_end|heartbeat|buffered` with `age_s`, `track[]` as arrays.
+- **`clear_coverage` was DECIDED AGAINST 11-04 - do not re-propose it.** It writes `{}`, so it
+  removes **all 819 cells, the 724 real-grass ones included**, to clean up 56. The span gate stops
+  the poisoning **at the source**, so the wipe buys nothing a mow or two will not. A verified
+  pre-wipe backup is held OUTSIDE this public repo (it has the yard’s GPS):
+  `C:\Users\jeffl\HCC-Scripts\backups\yard_coverage-PRE-WIPE-20261104-1452.json`.
+- The **11-02 batch is still uncommitted** in the working tree (CLAUDE.md, docs/SESSION_START.md,
+  docs/FINDINGS_AND_STOPS.md, scripts/docs-size-gate-test.js, several `windows-scripts/`). Left
+  alone on purpose - not swept into either commit, and not mine to describe in a commit message.
 - Awaiting Jeff: #269 (a/b/c), #268 MINI-D announced step, #252/#253/#254 physical,
   #255 ship/refunds, HA core 2026.11.0b4 → b5. #262 mailbox is **PARKED BY JEFF** — do not touch.
 - Noted, not chased: `HCC-HandoffWatcher` LastTaskResult 2147946720; `HCC-WatchAcer` stale since 9/19.
